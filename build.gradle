@@ -1,0 +1,103 @@
+group = 'com.webank.webase.node.mgr'
+version = '0.0.1-SNAPSHOT'
+
+apply plugin: 'maven'
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    maven {
+        url "http://maven.aliyun.com/nexus/content/groups/public/"
+    }
+    mavenLocal()
+    mavenCentral()
+}
+
+def springboot_version="2.1.2.RELEASE"
+List springboot = [
+         "org.springframework.boot:spring-boot-starter-web:$springboot_version",
+         "org.springframework.boot:spring-boot-starter-log4j2:$springboot_version",
+         "org.springframework.boot:spring-boot-starter-security:$springboot_version",
+         "org.springframework.boot:spring-boot-starter-test:$springboot_version"
+]
+
+
+
+dependencies {
+    compile springboot
+    compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.0"
+    compile "org.projectlombok:lombok:1.16.20"
+    compile "org.apache.commons:commons-lang3:3.8.1"
+    compile "com.alibaba:fastjson:1.2.54"
+    compile "mysql:mysql-connector-java:8.0.13"
+    compile "com.zaxxer:HikariCP:3.2.0"
+    compile "com.github.sgroschupf:zkclient:0.1"
+
+    compile files('lib/web3sdk-1.2.4.jar')
+    compile 'org.bouncycastle:bcprov-jdk15on:1.54'
+
+    testCompile springboot
+}
+
+configurations {
+    all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    all*.exclude group: 'log4j', module: 'log4j'
+    all*.exclude group: 'org.ow2.asm', module: 'asm'
+    all*.exclude group: 'jline', module: 'jline'
+    all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
+    all*.exclude group: 'org.hamcrest', module: 'hamcrest-library'
+    all*.exclude group: 'org.hamcrest', module: 'hamcrest-core'
+    all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+}
+
+clean {
+    delete '/usr/local/app/webase-node-mgr'
+    delete 'build'
+}
+
+jar {
+    destinationDir file('/usr/local/app/webase-node-mgr/apps')
+    archiveName project.name + '.jar'
+    exclude '**/*.xml'
+    exclude '**/*.yml'
+    exclude '**/*.properties'
+
+    doLast {
+        copy {
+            from file('src/main/resources/')
+            into '/usr/local/app/webase-node-mgr/conf'
+        }
+        copy {
+            from file('script/')
+            into '/usr/local/app/webase-node-mgr/script'
+        }
+        copy {
+            from configurations.runtime
+            into '/usr/local/app/webase-node-mgr/lib'
+        }
+        copy {
+            from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
+            into '/usr/local/app/webase-node-mgr'
+        }
+    }
+}
