@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.role.RoleMapper">
+  <resultMap id="roleMap" type="com.webank.webase.node.mgr.role.TbRole">
+    <id column="role_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="roleId"/>
+    <result column="role_name" javaType="java.lang.String" jdbcType="VARCHAR" property="roleName"/>
+    <result column="role_name_zh" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="roleNameZh"/>
+    <result column="role_status" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="roleStatus"/>
+    <result column="description" javaType="java.lang.String" jdbcType="INTEGER"
+      property="description"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
+
+  <sql id="QUERY_ROW_COLUMN">
+		role_id roleId,role_name roleName,role_name_zh roleNameZh,role_status roleStatus,
+		description description,create_time createTime,modify_time modifyTime
+	</sql>
+
+  <select id="queryRoleById" resultType="com.webank.webase.node.mgr.role.TbRole">
+    select
+    <include refid="QUERY_ROW_COLUMN"/>
+    from tb_role where role_id = #{roleId}
+    limit 1
+  </select>
+
+  <select id="countOfRole" parameterType="com.webank.webase.node.mgr.role.RoleListParam"
+    resultType="java.lang.Integer">
+    select count(1) from tb_role where role_status=1
+    <if test="param.roleId != null and param.roleId != ''">
+      and role_id = #{param.roleId}
+    </if>
+    <if test="param.roleName != null and param.roleName != ''">
+      and role_name = #{param.roleName}
+    </if>
+    <if test="param.roleNameZh != null and param.roleNameZh != ''">
+      and role_name_zh = #{param.roleNameZh}
+    </if>
+  </select>
+
+
+  <select id="listOfRole" parameterType="com.webank.webase.node.mgr.role.RoleListParam"
+    resultMap="roleMap">
+    select * from tb_role where role_status=1
+    <if test="param.roleId != null and param.roleId != ''">
+      and role_id = #{param.roleId}
+    </if>
+    <if test="param.roleName != null and param.roleName != ''">
+      and role_name = #{param.roleName}
+    </if>
+    <if test="param.roleNameZh != null and param.roleNameZh != ''">
+      and role_name_zh = #{param.roleNameZh}
+    </if>
+    <if test="param.start != null and param.pageSize != null">
+      limit #{param.start},#{param.pageSize}
+    </if>
+  </select>
+
+</mapper>
+
+
