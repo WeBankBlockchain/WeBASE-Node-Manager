@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.monitor.MonitorMapper">
+  <resultMap id="monitorMap" type="com.webank.webase.node.mgr.monitor.TbMonitor">
+    <result column="user_name" javaType="java.lang.String" jdbcType="VARCHAR" property="userName"/>
+    <result column="user_type" javaType="java.lang.Integer" jdbcType="INTEGER" property="userType"/>
+    <result column="network_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="networkId"/>
+    <result column="contract_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractName"/>
+    <result column="contract_address" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractAddress"/>
+    <result column="interface_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="interfaceName"/>
+    <result column="trans_type" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="transType"/>
+    <result column="trans_unusual_type" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="transUnusualType"/>
+    <result column="trans_count" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="transCount"/>
+    <result column="trans_hashs" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="transHashs"/>
+    <result column="trans_hash_lastest" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="transHashLastest"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
+  <!-- <insert id="addRow" parameterType="TbMonitor">
+        insert into tb_user_transaction_monitor(user_name,user_type,network_id,contract_name,contract_address,interface_name,trans_type,trans_unusual_type,trans_count,trans_hashs,trans_hash_lastest,create_time,modify_time)
+        values(#{userName},#{userType},#{networkId},#{contractName},#{contractAddress},#{interfaceName},#{transType},#{transUnusualType},#{transCount},#{transHashs},#{transHashLastest},NOW(),NOW())
+        on DUPLICATE key 
+    update
+      trans_count = trans_count + 1,
+      trans_hashs = values(trans_hashs),
+      trans_hash_lastest = values(trans_hash_lastest),
+      modify_time = values(modify_time)
+    </insert> -->
+  <insert id="addRow" parameterType="com.webank.webase.node.mgr.monitor.TbMonitor">
+        insert into tb_user_transaction_monitor(user_name,user_type,network_id,contract_name,contract_address,interface_name,trans_type,trans_unusual_type,trans_count,trans_hashs,trans_hash_lastest,create_time,modify_time)
+        values(#{userName},#{userType},#{networkId},#{contractName},#{contractAddress},#{interfaceName},#{transType},#{transUnusualType},#{transCount},#{transHashs},#{transHashLastest},#{createTime},#{modifyTime})
+    </insert>
+
+  <update id="updateRow" parameterType="com.webank.webase.node.mgr.monitor.TbMonitor">
+        update tb_user_transaction_monitor 
+        set trans_count = trans_count + 1,
+            trans_hashs = #{transHashs},
+            trans_hash_lastest = #{transHashLastest},
+            modify_time = #{modifyTime}
+        where user_name = #{userName}
+          and network_id = #{networkId}
+          and contract_name = #{contractName}
+          and DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') = DATE_FORMAT(#{createTime},'%Y-%m-%d %H:%i:%s')
+          and user_type = #{userType}
+          and contract_address = #{contractAddress}
+          and interface_name = #{interfaceName}
+          and trans_type = #{transType}
+          and trans_unusual_type = #{transUnusualType}
+    </update>
+
+  <update id="updateUnusualUser">
+        update tb_user_transaction_monitor 
+        set user_name = #{userName},
+            user_type = 0
+        where user_name = #{address}
+          and network_id = #{networkId}
+          and user_type = 1
+    </update>
+
+  <update id="updateUnusualContract">
+        update tb_user_transaction_monitor 
+        set contract_name = #{contractName},
+            interface_name = #{interfaceName},
+            trans_unusual_type = #{transUnusualType}
+        where contract_name = #{contractBin}
+          and network_id = #{networkId}
+          and (trans_unusual_type = 1 or trans_unusual_type = 2)
+    </update>
+
+  <select id="queryTbMonitor" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
+		select trans_count as transCount,
+		       trans_hashs as transHashs
+		from tb_user_transaction_monitor 
+		where user_name = #{userName}
+		  and network_id = #{networkId}
+		  and contract_name = #{contractName}
+		  and DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') = DATE_FORMAT(#{createTime},'%Y-%m-%d %H:%i:%s')
+		  and user_type = #{userType}
+		  and contract_address = #{contractAddress}
+		  and interface_name = #{interfaceName}
+		  and trans_type = #{transType}
+		  and trans_unusual_type = #{transUnusualType}
+	</select>
+
+  <select id="monitorUserList" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
+    select distinct user_name as userName,
+    user_type as userType
+    from tb_user_transaction_monitor
+    where 1=1
+    <if test="networkId != null and networkId != ''">
+      and network_id = #{networkId}
+    </if>
+    order by modify_time
+  </select>
+
+  <select id="monitorInterfaceList" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
+    select distinct interface_name as interfaceName,
+    trans_unusual_type as transUnusualType
+    from tb_user_transaction_monitor
+    where 1=1
+    <if test="networkId != null and networkId != ''">
+      and network_id = #{networkId}
+    </if>
+    <if test="userName != null and userName != ''">
+      and user_name = #{userName}
+    </if>
+    order by modify_time
+  </select>
+
+  <select id="countOfMonitorTrans" parameterType="Map" resultType="java.lang.Integer">
+    select IFNULL(sum(trans_count),0) from tb_user_transaction_monitor where 1=1
+    <if test="networkId != null and networkId != ''">
+      and network_id = #{networkId}
+    </if>
+    <if test="userName != null and userName != ''">
+      and user_name = #{userName}
+    </if>
+    <if test="startDate != null and startDate != ''">
+      <![CDATA[ and DATE_FORMAT(modify_time,'%Y-%m-%d') >= STR_TO_DATE(#{startDate},'%Y-%m-%d') ]]>
+    </if>
+    <if test="endDate != null and endDate != ''">
+      <![CDATA[ and DATE_FORMAT(modify_time,'%Y-%m-%d') <= STR_TO_DATE(#{endDate},'%Y-%m-%d') ]]>
+    </if>
+    <if test="interfaceName != null and interfaceName != ''">
+      and interface_name = #{interfaceName}
+    </if>
+  </select>
+
+  <select id="qureyTransCountList" parameterType="Map"
+    resultType="com.webank.webase.node.mgr.monitor.PageTransInfo">
+    select
+    trans_count as transCount,
+    modify_time as time
+    from tb_user_transaction_monitor
+    where 1=1
+    <if test="networkId != null and networkId != ''">
+      and network_id = #{networkId}
+    </if>
+    <if test="userName != null and userName != ''">
+      and user_name = #{userName}
+    </if>
+    <if test="startDate != null and startDate != ''">
+      <![CDATA[ and DATE_FORMAT(modify_time,'%Y-%m-%d') >= STR_TO_DATE(#{startDate},'%Y-%m-%d') ]]>
+    </if>
+    <if test="endDate != null and endDate != ''">
+      <![CDATA[ and DATE_FORMAT(modify_time,'%Y-%m-%d') <= STR_TO_DATE(#{endDate},'%Y-%m-%d') ]]>
+    </if>
+    <if test="interfaceName != null and interfaceName != ''">
+      and interface_name = #{interfaceName}
+    </if>
+    order by modify_time
+  </select>
+
+  <select id="countOfUnusualUser" resultType="java.lang.Integer">
+    select count(distinct user_name)
+    from tb_user_transaction_monitor
+    where user_type=1
+    <if test="networkId != null and networkId != ''">
+      and network_id = #{networkId}
+    </if>
+    <if test="userName != null and userName != ''">
+      and user_name like CONCAT('%',#{userName},'%')
+    </if>
+  </select>
+
+  <select id="listOfUnusualUser" parameterType="Map"
+    resultType="com.webank.webase.node.mgr.monitor.UnusualUserInfo">
+    select
+    t.user_name as userName,
+    sum(t.trans_count) as transCount,
+    t.trans_hashs as hashs,
+    t.modify_time as time
+    from
+    (
+    select user_name, trans_count, trans_hashs, modify_time
+    from tb_user_transaction_monitor
+    where user_type=1
+    <if test="networkId != null and networkId != ''">
+      and network_id = #{networkId}
+    </if>
+    <if test="userName != null and userName != ''">
+      and user_name like CONCAT('%',#{userName},'%')
+    </if>
+    order by user_name, modify_time desc
+    ) t
+    group by t.user_name
+    <if test="start != null and pageSize != null">
+      limit #{start},#{pageSize}
+    </if>
+  </select>
+
+  <select id="countOfUnusualContract" resultType="java.lang.Integer">
+    select count(distinct contract_address)
+    from tb_user_transaction_monitor
+    where trans_unusual_type=1
+    <if test="networkId != null and networkId != ''">
+      and network_id = #{networkId}
+    </if>
+    <if test="contractAddress != null and contractAddress != ''">
+      and contract_address like CONCAT('%',#{contractAddress},'%')
+    </if>
+  </select>
+
+  <select id="listOfUnusualContract" parameterType="Map"
+    resultType="com.webank.webase.node.mgr.monitor.UnusualContractInfo">
+    select
+    t.contract_name as contractName,
+    t.contract_address as contractAddress,
+    sum(t.trans_count) as transCount,
+    t.trans_hashs as hashs,
+    t.modify_time as time
+    from
+    (
+    select contract_name, contract_address, trans_count, trans_hashs, modify_time
+    from tb_user_transaction_monitor
+    where trans_unusual_type=1
+    <if test="networkId != null and networkId != ''">
+      and network_id = #{networkId}
+    </if>
+    <if test="contractAddress != null and contractAddress != ''">
+      and contract_address like CONCAT('%',#{contractAddress},'%')
+    </if>
+    order by contract_address, modify_time desc
+    ) t
+    group by t.contract_address
+    <if test="start != null and pageSize != null">
+      limit #{start},#{pageSize}
+    </if>
+  </select>
+
+  <select id="queryUnusualTxhash" resultType="java.lang.String">
+        select trans_hash_lastest
+        from tb_user_transaction_monitor 
+        where contract_name = #{contractBin}
+          and network_id = #{networkId}
+          and (trans_unusual_type = 1 or trans_unusual_type = 2)
+        group by contract_name
+    </select>
+
+</mapper>
