@@ -21,7 +21,7 @@
 ## 3.1 拉取代码
 执行命令：
 ```
-git clone https://github.com/WeBankFinTech/webase-node-mgr
+git clone https://github.com/WeBankFinTech/webase-node-mgr.git
 ```
 ## 3.2 编译代码
 在代码的根目录webase-node-mgr执行构建命令：
