@@ -29,10 +29,13 @@ List springboot = [
          "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
+List web3jsdk = [
+        "org.fisco-bcos:web3sdk:1.2.5"
+]
 
 
 dependencies {
-    compile springboot
+    compile springboot,web3jsdk
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.0"
     compile "org.projectlombok:lombok:1.16.20"
     compile "org.apache.commons:commons-lang3:3.8.1"
