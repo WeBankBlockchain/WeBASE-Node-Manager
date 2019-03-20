@@ -29,10 +29,13 @@ List springboot = [
          "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
+List web3jsdk = [
+        "org.fisco-bcos:web3sdk:1.2.5"
+]
 
 
 dependencies {
-    compile springboot
+    compile springboot,web3jsdk
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.0"
     compile "org.projectlombok:lombok:1.16.20"
     compile "org.apache.commons:commons-lang3:3.8.1"
@@ -40,8 +43,6 @@ dependencies {
     compile "mysql:mysql-connector-java:8.0.13"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
-
-    compile files('lib/web3sdk-1.2.4.jar')
     compile 'org.bouncycastle:bcprov-jdk15on:1.54'
 
     testCompile springboot
