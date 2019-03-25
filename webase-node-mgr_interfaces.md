@@ -1,13 +1,62 @@
 # 区块链平台节点管理接口设计
 
+## 1 <span id="1">目录</span>
+- [2.节点数据上报接口](#2)
+  - [2.1.获取浏览器当前块高](#2.1)
+  - [2.2.区块信息上报](#2.2)
+  - [2.3.获取最新已上报的错入日志](#2.3)
+  - [2.4.节点错入日志上报](#2.4)
+- [3.交易信息模块](#3)
+  - [3.1.查询交易信息列表](#3.1)
+- [4.帐号管理模块](#4)
+  - [4.1.新增帐号](#4.1)
+  - [4.2.修改帐号](#4.2)
+  - [4.3.删除帐号](#4.3)
+  - [4.4.查询帐号列表](#4.4)
+  - [4.5.更改当前密码](#4.5)
+- [5.区块管理模块](#5)
+  - [5.1.查询区块列表](#5.1)
+- [6.合约管理模块](#6)
+  - [6.1.新增合约](#6.1)
+  - [6.2.修改合约](#6.2)
+  - [6.3.删除合约](#6.3)
+  - [6.4.查询合约列表](#6.4)
+  - [6.5.查询合约信息](#6.5)
+  - [6.6.部署合约](#6.6)
+  - [6.7.发送交易](#6.6)
+- [7.服务器监控相关](#7)
+  - [7.1.获取节点监控信息](#7.1)
+  - [7.2.获取服务器监控信息](#7.2)
+- [8.节点日志模块](#8)
+  - [8.1.获取节点日志列表](#8.1)
+- [9.审计相关模块](#9)
+  - [9.1.获取节点日志列表](#9.1)
+  - [9.2.获取合约方法监管信息列表](#9.2)
+  - [9.3.获取交易hash监管信息列表](#9.3)
+  - [9.4.获取异常用户信息列表](#9.4)
+  - [9.5.获取异常合约信息列表](#9.5)
+- [10.网络信息相关模块](#10)
+  - [10.1.获取网络概况](#10.1)
+  - [10.2.获取所有网络列表](#10.2)
+  - [10.3.查询每日交易数据](#10.3)
+- [11.节点管理模块](#11)
+  - [11.1.查询节点列表](#11.1)
+  - [11.2.查询节点信息](#11.2)
+  - [11.3.新增节点](#11.3)
+- [12.角色管理模块](#12)
+  - [12.1.查询角色列表](#12.1)
+- [13.用户管理模块](#13)
+  - [13.1.新增私钥用户](#13.1)
+  - [13.2.绑定公钥用户](#13.2)
+  - [13.3.修改用户备注](#13.3)
+  - [13.4.查询私钥](#13.4)
+  - [13.5.查询用户列表](#13.5)
 
 
-## 1 目录
-[TOC]
 
-## 2 节点数据上报接口
+##  <span id="2">2 节点数据上报接口</span>  [top](#1)
 
-### 2.1 获取浏览器当前块高
+### <span id="2.1">2.1 获取浏览器当前块高</span>  [top](#1)
 
 #### 2.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -56,7 +105,7 @@
 }
 ```
 
-### 2.2 区块信息上报
+### <span id="2.2">2.2 区块信息上报</span>  [top](#1)
 
 #### 2.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -137,7 +186,7 @@
 ```
 
 
-### 2.3 获取最新已上报的错误日志
+### <span id="2.3">2.3 获取最新已上报的错误日志</span>  [top](#1)
 
 #### 2.3.1 传输协议规范
 
@@ -191,7 +240,7 @@
 ```
 ｝
 
-### 2.4 节点错误日志上报
+### <span id="2.4">2.4 节点错误日志上报</span>  [top](#1)
 
 #### 2.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -268,9 +317,9 @@
 ```
 
 
-##3 交易信息模块
+## <span id="3">3 交易信息模块</span>  [top](#1)
 
-### 3.1 查询交易信息列表
+### <span id="3.1">3.1 查询交易信息列表</span>  [top](#1)
 
 
 #### 3.1.1 传输协议规范
@@ -339,9 +388,9 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-##4 帐号管理模块
+## <span id="4">4 帐号管理模块</span>  [top](#1)
 
-### 4.1 新增帐号
+### <span id="4.1">4.1 新增帐号</span>  [top](#1)
 
 #### 4.1.1 传输协议规范
 
@@ -416,7 +465,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 ```
 
 
-### 4.2 修改帐号
+### <span id="4.2">4.2 修改帐号</span>  [top](#1)
 
 #### 4.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -488,7 +537,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 4.3 删除帐号
+### <span id="4.3">4.3 删除帐号</span>  [top](#1)
 
 #### 4.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -528,7 +577,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 4.4 查询帐号列表
+###  <span id="4.4">4.4 查询帐号列表</span>  [top](#1)
 
 #### 4.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -605,7 +654,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 4.5 更新当前密码
+### <span id="4.5">4.5 更新当前密码</span>  [top](#1)
 
 #### 4.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -652,9 +701,9 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-## 5 区块管理模块
+## <span id="5">5 区块管理模块</span>  [top](#1)
 
-### 5.1 查询区块列表
+### <span id="5.1">5.1 查询区块列表</span>  [top](#1)
 
 #### 5.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -730,9 +779,9 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-## 6 合约管理模块
+## <span id="6">6 合约管理模块</span>  [top](#1)
 
-### 6.1 新增合约
+### <span id="6.1">6.1 新增合约</span>  [top](#1)
 
 #### 6.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -819,7 +868,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 6.2 修改合约
+### <span id="6.2">6.2 修改合约</span>  [top](#1)
 
 #### 6.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -902,7 +951,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 6.3 删除合约
+### <span id="6.3">6.3 删除合约</span>  [top](#1)
 
 #### 6.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -945,7 +994,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 6.4 查询合约列表
+### <span id="6.4">6.4 查询合约列表</span>  [top](#1)
 
 #### 6.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1027,7 +1076,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 6.5 查询合约信息
+### <span id="6.5">6.5 查询合约信息</span>  [top](#1)
 
 #### 6.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1098,7 +1147,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 6.6 部署合约
+### <span id="6.6">6.6 部署合约</span>  [top](#1)
 
 #### 6.6.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1178,7 +1227,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 6.7 发送交易
+### <span id="6.7">6.7 发送交易</span>  [top](#1)
 
 #### 6.7.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1238,79 +1287,12 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-## 7 区块管理模块
 
-### 7.1 查询区块列表
+## <span id="7">7 服务器监控相关</span>  [top](#1)
+
+### <span id="7.1">7.1 获取节点监控信息</span>  [top](#1)
 
 #### 7.1.1 传输协议规范
-* 网络传输协议：使用HTTP协议
-* 请求地址： `/block/blockList/{networkId}/{pageNumber}/{pageSize}?pkHash=hashVal?blockNumber=blockValue1`
-* 请求方式：GET
-* 返回格式：JSON
-
-#### 7.1.2 参数信息详情
-
-| 序号  | 输入参数       | 类型   | 可为空 | 备注         |
-|-------|----------------|--------|--------|--------------|
-| 1     | networkId      | int    | 否     | 网络id       |
-| 2     | pageSize       | int    | 否     | 每页记录数   |
-| 3     | pageNumber     | int    | 否     | 当前页码     |
-| 4     | pkHash         | String | 是     | 区块hash     |
-| 5     | blockNumber    | Int    | 是     | 块高         |
-| 序号  | 输出参数       | 类型   |        | 备注         |
-| 1     | code           | int    | 否     | 返回码       |
-| 2     | message        | String | 否     | 描述信息     |
-| 3     | totalCount     | int    | 否     | 总记录数     |
-| 4     | data           | Array  | 否     | 返回信息列表 |
-| 4.1   |                | Oject  |        | 返回信息实体 |
-| 4.1.1 | blockNumber    | int    | 否     | 块高         |
-| 4.1.2 | pkHash         | String | 否     | 区块hash     |
-| 4.1.3 | blockTimestamp | String | 否     | 生成时间     |
-| 4.1.4 | transCount     | int    | 否     | 块包含交易数 |
-| 4.1.5 | networkId      | int    | 否     | 网络id       |
-| 4.1.6 | miner          | String | 否     | 矿工         |
-| 4.1.7 | createTime     | String | 否     | 创建时间     |
-| 4.1.8 | modifyTime     | String | 否     | 修改时间     |
-
-#### 7.1.3 入参示例
-`http://localhost:8080/webase-node-mgr/block/blockList/300001/1/4`
-
-#### 7.1.4 出参示例
-* 成功：
-```
-{
-    "code": 0,
-    "message": "success",
-    "totalCount": 1,
-    "data": [
-        {
-            "pkHash": "0x22a6535dcdef14cf1e4b8427fe4c7d585faaff76c9257bf184f701e04583fc28",
-            "networkId": 300001,
-            "blockNumber": 747309,
-            "miner": "b3b574d098120fa1e63a3a947cf",
-            "blockTimestamp": "2019-03-11 14:43:43",
-            "transCount": 1,
-            "createTime": "2019-03-11 14:43:45",
-            "modifyTime": "2019-03-11 14:43:45"
-        }
-    ]
-}
-```
-
-* 失败：
-```
-{
-    "code": 102000,
-    "message": "system exception",
-    "data": {}
-}
-```
-
-## 8 服务器监控相关
-
-### 8.1 获取节点监控信息
-
-#### 8.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/chain/mointorInfo/{nodeId}?beginDate={beginDate}&endDate={endDate}&contrastBeginDate={contrastBeginDate}&contrastEndDate={contrastEndDate}&gap={gap}`
 * 请求方式：GET
@@ -1340,10 +1322,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.1.2.2.1 | timestampList     | List\<String\>  | 否     | 时间戳列表                                                     |
 | 3.1.2.2.2 | valueList         | List\<Integer\> | 否     | 值列表                                                         |
 
-#### 8.1.3 入参示例
+#### 7.1.3 入参示例
 `http://127.0.0.1:4001/mgr/webcaf-node-mgr/chain/mointorInfo/500001?gap=60&beginDate=2019-03-13T00:00:00&endDate=2019-03-13T14:34:22&contrastBeginDate=2019-03-13T00:00:00&contrastEndDate=2019-03-13T14:34:22`
 
-#### 8.1.4 出参示例
+#### 7.1.4 出参示例
 
 * 成功：
 ```
@@ -1409,9 +1391,9 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 8.2 获取服务器监控信息
+### <span id="7.2">7.2 获取服务器监控信息</span>  [top](#1)
 
-#### 8.2.1 传输协议规范
+#### 7.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`performance/ratio/{nodeId}?gap={gap}&beginDate={beginDate}&endDate={endDate}&contrastBeginDate={contrastBeginDate}&contrastEndDate={contrastEndDate}`
 * 请求方式：GET
@@ -1441,10 +1423,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.1.2.2.1 | timestampList     | List\<String\>  | 否     | 时间戳列表                                                     |
 | 3.1.2.2.2 | valueList         | List\<Integer\> | 否     | 值列表                                                         |
 
-#### 8.2.3 入参示例
+#### 7.2.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/performance/ratio/500001?gap=1&beginDate=2019-03-15T00:00:00&endDate=2019-03-15T15:26:55&contrastBeginDate=2019-03-15T00:00:00&contrastEndDate=2019-03-15T15:26:55`
 
-#### 8.2.4 出参示例
+#### 7.2.4 出参示例
 * 成功：
 ```
 {
@@ -1509,17 +1491,17 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-## 9 节点日志模块
+## <span id="8">8 节点日志模块</span>  [top](#1)
 
-### 9.1 获取节点日志列表
+### <span id="8.1">8.1 获取节点日志列表</span>  [top](#1)
 
-#### 9.1.1 传输协议规范
+#### 8.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/nodeLog/nodeLogList/{networkId}/{nodeId}/{pageNumber}/{pageSize}?startTime={startTime}&endTime={endTime}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 9.1.2 参数信息详情
+#### 8.1.2 参数信息详情
 
 | 序号  | 输入参数   | 类型          | 可为空 | 备注                       |
 |-------|------------|---------------|--------|----------------------------|
@@ -1545,10 +1527,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.8 | createTime | LocalDateTime | 否     | 插入数据库表时间           |
 | 4.1.9 | modifyTime | LocalDateTime | 否     | 记录更改时间               |
 
-#### 9.1.3 入参示例
+#### 8.1.3 入参示例
 `http://10.107.105.18:4001/mgr/webcaf-node-mgr/nodeLog/nodeLogList/300001/500001/1/10?startTime=2019-03-12+00:00:00&endTime=2019-03-13+00:00:00`
 
-#### 9.1.4 出参示例
+#### 8.1.4 出参示例
 * 成功：
 ```
 {
@@ -1581,11 +1563,11 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 ```
 
 
-## 10 审计相关模块
+## <span id="9">9 审计相关模块</span>  [top](#1)
 
-### 10.1 获取用户交易监管信息列表
+### <span id="9.1">9.1 获取用户交易监管信息列表</span>  [top](#1)
 
-#### 10.1.1 传输协议规范
+#### 9.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址： `/monitor/userList/{networkId}`
 * 请求方式：GET
@@ -1615,10 +1597,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.1.12 | createTime       | LocalDateTime | 是     | 落库时间                                      |
 | 3.1.13 | modifyTime       | LocalDateTime | 是     | 修改时间                                      |
 
-#### 10.1.3 入参示例
+#### 9.1.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/userList/300001`
 
-#### 10.1.4 出参示例
+#### 9.1.4 出参示例
 * 成功：
 ```
 {
@@ -1668,15 +1650,15 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 10.2 获取合约方法监管信息列表
+### <span id="9.2">9.2 获取合约方法监管信息列表</span>  [top](#1)
 
-#### 10.2.1 传输协议规范
+#### 9.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/monitor/interfaceList/{networkId}?userName={userName}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 10.2.2 参数信息详情
+#### 9.2.2 参数信息详情
 
 | 序号   | 输入参数         | 类型          | 可为空 | 备注                                          |
 |--------|------------------|---------------|--------|-----------------------------------------------|
@@ -1701,10 +1683,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.1.12 | createTime       | LocalDateTime | 是     | 落库时间                                      |
 | 3.1.13 | modifyTime       | LocalDateTime | 是     | 修改时间                                      |
 
-#### 10.2.3 入参示例
+#### 9.2.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/interfaceList/300001`
 
-#### 10.2.4 出参示例
+#### 9.2.4 出参示例
 * 成功：
 ```
 {
@@ -1755,15 +1737,15 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 10.3 获取交易hash监管信息列表
+### <span id="9.3">9.3 获取交易hash监管信息列表</span>  [top](#1)
 
-#### 10.3.1 传输协议规范
+#### 9.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址： `/monitor/interfaceList/{networkId}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 10.3.2 参数信息详情
+#### 9.3.2 参数信息详情
 
 | 序号    | 输入参数      | 类型           | 可为空 | 备注                       |
 |---------|---------------|----------------|--------|----------------------------|
@@ -1785,10 +1767,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.5.1.1 | transCount    | Int            | 是     | 交易记录数                 |
 | 3.5.1.2 | time          | LcalDateTime   | 是     | 时间                       |
 
-#### 10.3.3 入参示例
+#### 9.3.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/transList/300001?userName=0x5d97f8d41638a7b1b669b70b307bab6d49df8e2c&interfaceName=0x4ed3885e`
 
-#### 10.3.4 出参示例
+#### 9.3.4 出参示例
 * 成功：
 ```
 {
@@ -1819,15 +1801,15 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 10.4 获取异常用户信息列表
+### <span id="9.4">9.4 获取异常用户信息列表</span>  [top](#1)
 
-#### 10.4.1 传输协议规范
+#### 9.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/unusualUserList/{networkId}/{pageNumber}/{pageSize}?userName={userName}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 10.4.2 参数信息详情
+#### 9.4.2 参数信息详情
 
 | 序号  | 输入参数   | 类型          | 可为空 | 备注                       |
 |-------|------------|---------------|--------|----------------------------|
@@ -1846,10 +1828,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.3 | hashs      | String        | 是     | 交易hash                   |
 | 4.1.4 | time       | LocalDateTime | 是     | 时间                       |
 
-#### 10.4.3 入参示例
+#### 9.4.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/unusualUserList/300001/1/10?userName=`
 
-#### 10.4.4 出参示例
+#### 9.4.4 出参示例
 * 成功：
 ```
 {
@@ -1876,15 +1858,15 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 10.5 获取异常合约信息列表
+### <span id="9.5">9.5 获取异常合约信息列表</span>  [top](#1)
 
-#### 10.5.1 传输协议规范
+#### 9.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/unusualContractList/{networkId}/{pageNumber}/{pageSize}?contractAddress={contractAddress}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 10.5.2 参数信息详情
+#### 9.5.2 参数信息详情
 
 | 序号  | 输入参数        | 类型          | 可为空 | 备注                       |
 |-------|-----------------|---------------|--------|----------------------------|
@@ -1904,10 +1886,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.4 | hashs           | String        | 是     | 交易hash                   |
 | 4.1.5 | time            | LocalDateTime | 是     | 时间                       |
 
-#### 10.5.3 入参示例
+#### 9.5.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/unusualContractList/300001/1/10?contractAddress=`
 
-#### 10.5.4 出参示例
+#### 9.5.4 出参示例
 ```
 
 ```
@@ -1938,17 +1920,17 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-## 11 网络信息相关模块
+## <span id="10">10 网络信息相关模块</span>  [top](#1)
 
-### 11.1 获取网络概况
+### <span id="10.1">10.1 获取网络概况</span>  [top](#1)
 
-#### 11.1.1 传输协议规范
+#### 10.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址： `/network/general/{networkId}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 11.1.2 参数信息详情
+#### 10.1.2 参数信息详情
 
 | 序号 | 输入参数         | 类型   | 可为空 | 备注                       |
 |------|------------------|--------|--------|----------------------------|
@@ -1964,10 +1946,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.5  | transactionCount | int    | 否     | 交易数量                   |
 | 3.6  | latestBlock      | int    | 否     | 当前块高                   |
 
-#### 11.1.3 入参示例
+#### 10.1.3 入参示例
 `http://localhost:8080/webase-node-mgr/network/300001`
 
-#### 11.1.4 出参示例
+#### 10.1.4 出参示例
 * 成功：
 ```
 {
@@ -1994,15 +1976,15 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 11.2 获取所有网络列表
+### <span id="10.2">10.2 获取所有网络列表</span>  [top](#1)
 
-#### 11.2.1 传输协议规范
+#### 10.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址： `/network/all`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 11.2.2 参数信息详情
+#### 10.2.2 参数信息详情
 
 | 序号  | 输入参数      | 类型          | 可为空 | 备注                       |
 |-------|---------------|---------------|--------|----------------------------|
@@ -2021,10 +2003,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.6 | createTime    | LocalDateTime | 否     | 落库时间                   |
 | 4.1.7 | modifyTime    | LocalDateTime | 否     | 修改时间                   |
 
-#### 11.2.3 入参示例
+#### 10.2.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/network/all`
 
-#### 11.2.4 出参示例
+#### 10.2.4 出参示例
 * 成功：
 ```
 {
@@ -2054,15 +2036,15 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 11.3 查询每日交易数据
+### <span id="10.3">10.3 查询每日交易数据</span>  [top](#1)
 
-#### 11.3.1 传输协议规范
+#### 10.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/network/transDaily/{networkId}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 11.3.2 参数信息详情
+#### 10.3.2 参数信息详情
 
 | 序号 | 输入参数   | 类型   | 可为空 | 备注                       |
 |------|------------|--------|--------|----------------------------|
@@ -2076,10 +2058,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.2  | networkId  | int    | 否     | 网络编号                   |
 | 4.3  | transCount | int    | 否     | 交易数量                   |
 
-#### 11.3.3 入参示例
+#### 10.3.3 入参示例
 `http://localhost:8080/webase-node-mgr/network/transDaily/300001`
 
-#### 11.3.4 出参示例
+#### 10.3.4 出参示例
 
 * 成功：
 ```
@@ -2111,17 +2093,17 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-## 12 节点管理模块
+## <span id="11">11 节点管理模块</span>  [top](#1)
 
-### 12.1 查询节点列表
+### <span id="11.1">11.1 查询节点列表</span>  [top](#1)
 
-#### 12.1.1 传输协议规范
+#### 11.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址:`/node/nodeList/{networkId}/{pageNumber}/{pageSize}?nodeName={nodeName}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 12.1.2 参数信息详情
+#### 11.1.2 参数信息详情
 
 | 序号   | 输入参数    | 类型          | 可为空 | 备注                                       |
 |--------|-------------|---------------|--------|--------------------------------------------|
@@ -2154,10 +2136,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.17 | createTime  | LocalDateTime | 否     | 落库时间                                   |
 | 4.1.18 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
-#### 12.1.3 入参示例
+#### 11.1.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/node/nodeList/300001/1/10?nodeName=`
 
-#### 12.1.4 出参示例
+#### 11.1.4 出参示例
 * 成功：
 ```
 {
@@ -2198,15 +2180,15 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 12.2 查询节点信息(未使用)
+### <span id="511.2">11.2 查询节点信息</span>  [top](#1)
 
-#### 12.2.1 传输协议规范
+#### 11.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址: `/node/nodeInfo/{networkId}?nodeType={nodeType}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 12.2.2 参数信息详情
+#### 11.2.2 参数信息详情
 
 | 序号 | 输入参数    | 类型          | 可为空 | 备注                                       |
 |------|-------------|---------------|--------|--------------------------------------------|
@@ -2235,10 +2217,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.17 | createTime  | LocalDateTime | 否     | 落库时间                                   |
 | 3.18 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
-#### 12.2.3 入参示例
+#### 11.2.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/node/nodeInfo/{networkId}?nodeType=1`
 
-#### 12.2.4 出参示例
+#### 11.2.4 出参示例
 * 成功：
 ```
 {
@@ -2276,16 +2258,16 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 12.3 新增节点
+### <span id="11.3">11.3 新增节点</span>  [top](#1)
 
-#### 12.3.1 传输协议规范
+#### 11.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址： `/node/nodeInfo`
 * 请求方式：POST
 * 请求头：Content-type: application/json
 * 返回格式：JSON
 
-#### 12.3.2 参数信息详情
+#### 11.3.2 参数信息详情
 
 | 序号 | 输入参数    | 类型          | 可为空 | 备注                                       |
 |------|-------------|---------------|--------|--------------------------------------------|
@@ -2316,7 +2298,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.17 | createTime  | LocalDateTime | 否     | 落库时间                                   |
 | 3.18 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
-#### 12.3.3 入参示例
+#### 11.3.3 入参示例
 `http://localhost:8080/webase-node-mgr/node`
 ```
 {
@@ -2328,7 +2310,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 ```
 
 
-#### 12.3.4 出参示例
+#### 11.3.4 出参示例
 * 成功：
 ```
 {
@@ -2368,17 +2350,17 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 ```
 
 
-## 13 角色管理模块
+## <span id="12">12 角色管理模块</span>  [top](#1)
 
-### 13.1 查询角色列表
+### <span id="12.1">12.1 查询角色列表</span>  [top](#1)
 
-### 13.1.1 传输协议规范
+### 12.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`role/roleList`
 * 请求方式：GET
 * 返回格式：JSON
 
-### 13.1.2 参数信息详情
+### 12.1.2 参数信息详情
 
 | 序号  | 输入参数    | 类型          | 可为空 | 备注                       |
 |-------|-------------|---------------|--------|----------------------------|
@@ -2400,10 +2382,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.6 | createTime  | LocalDateTime | 否     | 创建时间                   |
 | 4.1.7 | modifyTime  | LocalDateTime | 否     | 修改时间                   |
 
-### 13.1.3 入参示例
+### 12.1.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/role/roleList?networkId=300001&pageNumber=&pageSize=&roleId=&roleName=`
 
-### 13.1.4 出参示例
+### 12.1.4 出参示例
 
 * 成功：
 ```
@@ -2444,18 +2426,18 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-## 14 用户管理模块
+## <span id="13">13 用户管理模块</span>  [top](#1)
 
-### 14.1 新增私钥用户
+### <span id="13.1">13.1 新增私钥用户</span>  [top](#1)
 
-#### 14.1.1 传输协议规范
+#### 13.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址： `/user/userInfo`
 * 请求方式：POST
 * 请求头：Content-type: application/json
 * 返回格式：JSON
 
-#### 14.1.2 参数信息详情
+#### 13.1.2 参数信息详情
 
 | 序号 | 输入参数    | 类型          | 可为空 | 备注                               |
 |------|-------------|---------------|--------|------------------------------------|
@@ -2480,7 +2462,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 |      | createTime  | LocalDateTime | 否     | 创建时间                           |
 |      | modifyTime  | LocalDateTime | 否     | 修改时间                           |
 
-#### 14.1.3 入参示例
+#### 13.1.3 入参示例
 `http://localhost:8080/webase-node-mgr/user/userInfo`
 
 ```
@@ -2492,7 +2474,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 ```
 
 
-#### 14.1.4 出参示例
+#### 13.1.4 出参示例
 * 成功：
 ```
 {
@@ -2526,16 +2508,16 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 14.2 绑定公钥用户
+### <span id="13.2">13.2 绑定公钥用户</span>  [top](#1)
 
-#### 14.2.1 传输协议规范
+#### 13.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址： `/user/bind`
 * 请求方式：POST
 * 请求头：Content-type: application/json
 * 返回格式：JSON
 
-#### 14.2.2 参数信息详情
+#### 13.2.2 参数信息详情
 
 | 序号 | 输入参数    | 类型          | 可为空 | 备注                               |
 |------|-------------|---------------|--------|------------------------------------|
@@ -2561,7 +2543,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.12 | createTime  | LocalDateTime | 否     | 创建时间                           |
 | 3.13 | modifyTime  | LocalDateTime | 否     | 修改时间                           |
 
-#### 14.2.3 入参示例
+#### 13.2.3 入参示例
 `http://localhost:8080/webase-node-mgr/user/userInfo`
 
 ```
@@ -2573,7 +2555,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-#### 14.2.4 出参示例
+#### 13.2.4 出参示例
 * 成功：
 ```
 {
@@ -2607,16 +2589,16 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 14.3 修改用户备注
+### <span id="13.3">13.3 修改用户备注</span>  [top](#1)
 
-#### 14.3.1 传输协议规范
+#### 13.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/user/userInfo`
 * 请求方式：PUT
 * 请求头：Content-type: application/json
 * 返回格式：JSON
 
-#### 14.3.2 参数信息详情
+#### 13.3.2 参数信息详情
 
 | 序号 | 输入参数    | 类型          | 可为空 | 备注                               |
 |------|-------------|---------------|--------|------------------------------------|
@@ -2640,7 +2622,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.12 | createTime  | LocalDateTime | 否     | 创建时间                           |
 | 3.13 | modifyTime  | LocalDateTime | 否     | 修改时间                           |
 
-#### 14.3.3 入参示例
+#### 13.3.3 入参示例
 `http://localhost:8080/webase-node-mgr/user/userInfo`
 
 ```
@@ -2650,7 +2632,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-#### 14.3.4 出参示例
+#### 13.3.4 出参示例
 
 * 成功：
 ```
@@ -2685,15 +2667,15 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 14.4 查询私钥
+### <span id="13.4">13.4 查询私钥</span>  [top](#1)
 
-#### 14.4.1 传输协议规范
+#### 13.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/user/privateKey/{userId}`
 * 请求方式：GET
 * 返回格式：json
 
-#### 14.4.2 参数信息详情
+#### 13.4.2 参数信息详情
 
 | 序号 | 输入参数   | 类型   | 可为空 | 备注                       |
 |------|------------|--------|--------|----------------------------|
@@ -2705,10 +2687,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.1  | privateKey | String | 否     | 私钥                       |
 | 3.2  | address    | String | 否     | 用户链上地址               |
 
-#### 14.4.3 入参示例
+#### 13.4.3 入参示例
 `http://localhost:8080/webase-node-mgr/user/privateKey/4585`
 
-#### 14.4.4 出参示例
+#### 13.4.4 出参示例
 
 * 成功：
 ```
@@ -2732,15 +2714,15 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 }
 ```
 
-### 14.5 查询用户列表
+### <span id="13.5">13.5 查询用户列表</span>  [top](#1)
 
-#### 14.5.1 传输协议规范
+#### 13.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
 * 请求地址:`/user/userList/{networkId}/{orgId}/{pageNumber}/{pageSize}?userName=nameValue`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 14.5.2 参数信息详情
+#### 13.5.2 参数信息详情
 
 | 序号   | 输入参数    | 类型          | 可为空 | 备注                               |
 |--------|-------------|---------------|--------|------------------------------------|
@@ -2768,10 +2750,10 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.12 | createTime  | LocalDateTime | 否     | 创建时间                           |
 | 4.1.13 | modifyTime  | LocalDateTime | 否     | 修改时间                           |
 
-#### 14.5.3 入参示例
+#### 13.5.3 入参示例
 `http://10.107.105.18:3001/mgr/webase-node-mgr/user/userList/300001/1/10?userParam=asdfvw`
 
-#### 14.5.4 出参示例
+#### 13.5.4 出参示例
 
 * 成功：
 ```
