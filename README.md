@@ -9,12 +9,11 @@
 节点管理服务是fisco-bcos配套的一个子系统，可以通过本系统维护合约信息、私钥用户、查看区块信息、以及链上异常数据监管。
 
 # 2. <a id="chapter-2"></a>前提条件
-2.1. fisco-bcos底层代码已经安装；  
-2.2. 前置和fisco-bcos同机部署；  
-2.3. 当前用户有sudo权限；  
-2.4. mysql5.5或5.6版本  
-2.5. java1.8.0_181或更高版本  
-2.6. 安装gradle4.9以上版本
+* fisco-bcos底层代码已经安装；
+* 前置和fisco-bcos同机部署；
+* mysql5.5或5.6版本
+* java1.8.0_181或更高版本
+* 安装gradle4.9以上版本
 
 
 # 3. <a id="chapter-3"></a>部署说明
@@ -24,17 +23,21 @@
 git clone https://github.com/WeBankFinTech/webase-node-mgr.git
 ```
 ## 3.2 编译代码
+进入代码根目录：
+```
+cd webase-node-mgr
+```
 在代码的根目录webase-node-mgr执行构建命令：
 ```
 gradle build
 ```
-构建完成后，会在/usr/local/app/webase-node-mgr目录生成已编译的代码。
+构建完成后，会在根目录webase-node-mgr下生成已编译的代码目录dist。
 ## 3.3 数据库初始化
 
 ### 3.3.1 修改脚本配置
 进入数据库脚本目录
 ```
-cd  /usr/local/app/webase-node-mgr/conf/script
+cd  dist/conf/script
 ```
 修改数据库连接信息：
 ```
@@ -56,9 +59,9 @@ sh  fisco-bcos.sh  123.207.235.12 3306
 
 ## 3.4 节点服务的配置及启动
 ### 3.4.1 服务配置修改
-进入到已编译的代码根目录：
+进入到已编译的代码配置文件目录：
 ```
-cd /usr/local/app/webase-node-mgr/conf
+cd dist/conf
 ```
 修改服务配置：
 ```
@@ -72,7 +75,7 @@ cd /usr/local/app/webase-node-mgr/conf
 ### 3.4.2 服务启停
 进入到已编译的代码根目录：
 ```
-cd /usr/local/app/webase-node-mgr
+cd dist
 ```
 启动：
 ```
@@ -87,30 +90,29 @@ sh stop.sh
 sh serverStatus.sh
 ```
 ## 3.4.3 查看日志
-全量日志：
+进入到日志目录：
 ```
-/usr/local/app/logs/webase-node-mgr/node-mgr.log
+cd dist/logs
 ```
-错误日志：
-```
-/usr/local/app/logs/webase-node-mgr/node-mgr-error.log
-```
+全量日志：node-mgr.log
+错误日志：node-mgr-error.log
+
 
 ## 3.5 初始化基础合约
 ### 3.5.1 前提条件
-节点正常运行
-节点管理服务正常运行
-节点前置正常运行
+* 节点正常运行
+* 节点管理服务正常运行
+* 节点前置正常运行
 
 ### 3.5.2 修改脚本配置
 进入合约脚本目录：
 ```
-cd /usr/local/app/webase-node-mgr/conf/contract
+cd dist/conf/contract
 ```
 修改配置中的前置服务信息：
 ```
-修改前置服务IP：sed -i "s/defaultFrontIp /${your_front_ip}/g"  contract-init.sh
-修改前置服务的端口：sed -i "s/defaultFrontPort /${your_front_port}/g"  contract-init.sh
+修改前置服务IP：sed -i "s/defaultFrontIp/${your_front_ip}/g"  contract-init.sh
+修改前置服务的端口：sed -i "s/defaultFrontPort/${your_front_port}/g"  contract-init.sh
 ```
 ### 3.5.3 运行脚本
 执行命令：
