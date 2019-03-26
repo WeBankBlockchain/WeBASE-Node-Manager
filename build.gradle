@@ -78,12 +78,12 @@ sourceSets {
 }
 
 clean {
-    delete '/usr/local/app/webase-node-mgr'
+    delete 'dist'
     delete 'build'
 }
 
 jar {
-    destinationDir file('/usr/local/app/webase-node-mgr/apps')
+    destinationDir file('dist/apps')
     archiveName project.name + '.jar'
     exclude '**/*.xml'
     exclude '**/*.yml'
@@ -92,19 +92,19 @@ jar {
     doLast {
         copy {
             from file('src/main/resources/')
-            into '/usr/local/app/webase-node-mgr/conf'
+            into 'dist/conf'
         }
         copy {
             from file('script/')
-            into '/usr/local/app/webase-node-mgr/script'
+            into 'dist/script'
         }
         copy {
             from configurations.runtime
-            into '/usr/local/app/webase-node-mgr/lib'
+            into 'dist/lib'
         }
         copy {
-            from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
-            into '/usr/local/app/webase-node-mgr'
+            from file('.').listFiles().findAll{File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env'))}
+            into 'dist'
         }
     }
 }
