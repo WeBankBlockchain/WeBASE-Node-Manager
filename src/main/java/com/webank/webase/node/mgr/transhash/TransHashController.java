@@ -74,17 +74,11 @@ public class TransHashController {
             pageResponse.setData(transList);
             pageResponse.setTotalCount(count);
         } else {
-            TbTransHash obj = null;
-            if (transHash != null) {
-                log.info(
-                    "info queryTransList. did not find transaction from DataBase, request"
-                        + " node front for transaction. transhash:{}",transHash);
-                obj = frontService.getTransFromFrontByHash(networkId, transHash);
-            }
-            if (obj != null) {
-                obj.setNetworkId(networkId);
-                pageResponse.setData(new TbTransHash[]{obj});
-                pageResponse.setTotalCount(1);
+            List<TbTransHash> transList = transHashService.getTransListFromChain(networkId,transHash,blockNumber);
+            //result
+            if (transList.size() > 0) {
+                pageResponse.setData(transList);
+                pageResponse.setTotalCount(transList.size());
             }
         }
 

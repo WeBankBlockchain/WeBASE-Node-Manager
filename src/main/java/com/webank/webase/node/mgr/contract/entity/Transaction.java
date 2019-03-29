@@ -13,30 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.contract;
+package com.webank.webase.node.mgr.contract.entity;
 
-import java.util.List;
+import com.webank.webase.node.mgr.front.TransactionParam;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-/**
- * receive contract info entity.
- */
 @Data
-public class Contract {
+@NoArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class Transaction extends TransactionParam {
 
-    private Integer contractId;
     private Integer networkId;
-    private String contractName;
-    private String contractVersion;
-    private String contractSource;
-    private int contractStatus;
-    private String contractAbi;
-    private String contractBin;
-    private String bytecodeBin;
-    private String contractAddress;
-    private String deployTime;
-    private String description;
-    private Integer userId;
-    private List<Object> constructorParams;
-
 }
