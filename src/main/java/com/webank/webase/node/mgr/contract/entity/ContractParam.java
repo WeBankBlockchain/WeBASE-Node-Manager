@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.contract;
+package com.webank.webase.node.mgr.contract.entity;
 
-import com.webank.webase.node.mgr.front.TransactionParam;
+import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -25,7 +25,20 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class Transaction extends TransactionParam {
+public class ContractParam extends BaseQueryParam {
 
-    private Integer networkId;
+    private Integer contractId;
+    private String contractName;
+    private String contractVersion;
+    private Integer contractType;
+
+    /**
+     * init by contractName、contractVersion.
+     */
+    public ContractParam(String contractName, String contractVersion) {
+        super();
+        this.contractName = contractName;
+        this.contractVersion = contractVersion;
+    }
+
 }

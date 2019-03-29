@@ -25,7 +25,7 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.AesTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.ContractService;
-import com.webank.webase.node.mgr.contract.TbContract;
+import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.TransactionParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;

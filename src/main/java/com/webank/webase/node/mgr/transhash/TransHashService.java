@@ -19,7 +19,10 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.block.MinMaxBlock;
+import com.webank.webase.node.mgr.transhash.entity.TransactionInfo;
+import com.webank.webase.node.mgr.web3.Web3Service;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
@@ -35,6 +38,8 @@ public class TransHashService {
 
     @Autowired
     private TransHashMapper transHashMapper;
+    @Autowired
+    private Web3Service web3Service;
 
     /**
      * add trans hash info.
@@ -145,5 +150,51 @@ public class TransHashService {
      */
     public void updateTransStatFlag(String transHash) {
         transHashMapper.updateTransStatFlag(transHash);
+    }
+
+    /**
+     * request front for transaction by hash.
+     */
+    public TbTransHash getTbTransFromFrontByHash(Integer networkId, String transHash)
+        throws NodeMgrException {
+        log.info("start getTransFromFrontByHash. networkId:{}  transhash:{}", networkId,
+            transHash);
+        TransactionInfo transactionInfo = web3Service.getTransaction(networkId, transHash);
+        TbTransHash tbTransHash = null;
+        if (transactionInfo != null) {
+            tbTransHash = new TbTransHash(transHash, networkId, transactionInfo.getBlockNumber(),
+                null);
+        }
+        log.info("end getTransFromFrontByHash. tbTransHash:{}", JSON.toJSONString(tbTransHash));
+        return tbTransHash;
+    }
+
+    /**
+     * get tbTransInfo from chain
+     */
+    public List<TbTransHash> getTransListFromChain(Integer networkId, String transHash,
+        BigInteger blockNumber) {
+        log.debug("start getTransListFromChain.");
+        List<TbTransHash> transList = new ArrayList<>();
+        //find by transHash
+        if (transHash != null) {
+            TbTransHash tbTransHash = getTbTransFromFrontByHash(networkId, transHash);
+            if (tbTransHash != null) {
+                tbTransHash.setNetworkId(networkId);
+                transList.add(tbTransHash);
+            }
+        }
+        //find trans by block number
+        if (transList.size() == 0 && blockNumber != null) {
+            List<TransactionInfo> transInBlock = web3Service
+                .getTransByBlockNumber(networkId, blockNumber);
+            transInBlock.stream().forEach(tran -> {
+                TbTransHash tbTransHash = new TbTransHash(tran.getHash(), networkId,
+                    tran.getBlockNumber(), null);
+                transList.add(tbTransHash);
+            });
+        }
+        log.debug("end getTransListFromChain.");
+        return transList;
     }
 }
