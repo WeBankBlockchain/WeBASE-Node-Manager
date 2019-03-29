@@ -4,7 +4,7 @@
 
 <!--对应mapper接口 -->
 <mapper namespace="com.webank.webase.node.mgr.contract.ContractMapper">
-  <resultMap id="contractMap" type="com.webank.webase.node.mgr.contract.TbContract">
+  <resultMap id="contractMap" type="com.webank.webase.node.mgr.contract.entity.TbContract">
     <id column="contract_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="contractId"/>
     <result column="contract_name" javaType="java.lang.String" jdbcType="VARCHAR"
       property="contractName"/>
@@ -39,7 +39,7 @@
   </resultMap>
 
 
-  <insert id="addContractRow" parameterType="com.webank.webase.node.mgr.contract.TbContract">
+  <insert id="addContractRow" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     insert into
     tb_contract(chain_index,network_id,contract_version,contract_name,contract_source,contract_status,contract_abi,contract_bin,bytecodeBin,description,deploy_time,create_time,modify_time)
     values(#{chainIndex},#{networkId},#{contractVersion},#{contractName},#{contractSource},#{contractStatus},#{contractAbi},#{contractBin},#{bytecodeBin},#{description},#{deployTime},NOW(),NOW())
@@ -53,7 +53,7 @@
 	</delete>
 
 
-  <update id="updateContract" parameterType="com.webank.webase.node.mgr.contract.TbContract">
+  <update id="updateContract" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     update tb_contract set modify_time = now()
     <if test="contractSource != null and contractSource != ''">
       ,contract_source = #{contractSource}
@@ -94,7 +94,7 @@
 	</update>
 
 
-  <select id="countOfContract" parameterType="com.webank.webase.node.mgr.contract.ContractParam"
+  <select id="countOfContract" parameterType="com.webank.webase.node.mgr.contract.entity.ContractParam"
     resultType="java.lang.Integer">
     select count(1) from tb_contract where 1=1
     <if test="contractId != null and contractId != ''">
@@ -115,7 +115,7 @@
   </select>
 
 
-  <select id="listOfContract" parameterType="com.webank.webase.node.mgr.contract.ContractParam"
+  <select id="listOfContract" parameterType="com.webank.webase.node.mgr.contract.entity.ContractParam"
     resultMap="contractMap">
     select * from tb_contract where 1=1
     <if test="contractId != null and contractId != ''">
@@ -139,7 +139,7 @@
 		select * from tb_contract where contract_id = #{contractId}
 	</select>
 
-  <select id="queryContract" parameterType="com.webank.webase.node.mgr.contract.ContractParam"
+  <select id="queryContract" parameterType="com.webank.webase.node.mgr.contract.entity.ContractParam"
     resultMap="contractMap">
     select * from tb_contract where 1=1
     <if test="contractId != null">

@@ -24,7 +24,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.TbBlock;
-import com.webank.webase.node.mgr.contract.RspSystemProxy;
+import com.webank.webase.node.mgr.contract.entity.RspSystemProxy;
 import com.webank.webase.node.mgr.monitor.ChainTransInfo;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
