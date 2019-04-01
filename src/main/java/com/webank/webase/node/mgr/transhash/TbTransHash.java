@@ -26,7 +26,7 @@ import lombok.Data;
 public class TbTransHash {
 
     private String transHash;
-    private Integer networkId;
+    private Integer groupId;
     private BigInteger blockNumber;
     private LocalDateTime blockTimestamp;
     private Integer statisticsFlag;
@@ -38,13 +38,13 @@ public class TbTransHash {
     }
 
     /**
-     * init by transhash、networkId、blockNumber、blockTimestamp.
+     * init by transhash、groupId、blockNumber、blockTimestamp.
      */
-    public TbTransHash(String transHash, Integer networkId, BigInteger blockNumber,
+    public TbTransHash(String transHash, Integer groupId, BigInteger blockNumber,
         LocalDateTime blockTimestamp) {
         super();
         this.transHash = transHash;
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.blockNumber = blockNumber;
         this.blockTimestamp = blockTimestamp;
     }

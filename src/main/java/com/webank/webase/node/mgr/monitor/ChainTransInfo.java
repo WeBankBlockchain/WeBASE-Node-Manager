@@ -15,11 +15,14 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChainTransInfo {
-
     private String from;
     private String to;
     private String input;

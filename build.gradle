@@ -15,7 +15,7 @@ targetCompatibility = 1.8
 // In this section you declare where to find the dependencies of your project
 repositories {
     maven {
-        url "http://maven.aliyun.com/nexus/content/groups/public/"
+         url "http://maven.aliyun.com/nexus/content/groups/public/"s
     }
     mavenLocal()
     mavenCentral()
@@ -25,18 +25,22 @@ def springboot_version="2.1.2.RELEASE"
 List springboot = [
          "org.springframework.boot:spring-boot-starter-web:$springboot_version",
          "org.springframework.boot:spring-boot-starter-log4j2:$springboot_version",
-         "org.springframework.boot:spring-boot-starter-security:$springboot_version",
-         "org.springframework.boot:spring-boot-starter-test:$springboot_version"
+         "org.springframework.boot:spring-boot-starter-security:$springboot_version"
 ]
 
 List web3jsdk = [
-        "org.fisco-bcos:web3sdk:1.2.5"
+        "org.fisco-bcos:web3sdk:2.0.2"
 ]
 
 List lombok = [
         "org.projectlombok:lombok:1.18.2"
 ]
 
+List test = [
+       "org.springframework.boot:spring-boot-starter-test:$springboot_version"
+  //     "org.hamcrest:hamcrest-library:2.1",
+   //    "org.hamcrest:hamcrest-core:2.1"
+]
 
 dependencies {
     compile springboot,web3jsdk
@@ -51,7 +55,7 @@ dependencies {
     annotationProcessor lombok
     compileOnly lombok
 
-    testCompile springboot
+    testCompile test
 }
 
 configurations {
@@ -61,8 +65,6 @@ configurations {
     all*.exclude group: 'org.ow2.asm', module: 'asm'
     all*.exclude group: 'jline', module: 'jline'
     all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
-    all*.exclude group: 'org.hamcrest', module: 'hamcrest-library'
-    all*.exclude group: 'org.hamcrest', module: 'hamcrest-core'
     all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
 }
 

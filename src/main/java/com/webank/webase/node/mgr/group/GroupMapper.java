@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.network;
+package com.webank.webase.node.mgr.group;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -21,39 +21,39 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * mapper for table tb_network.
+ * mapper for table tb_group.
  */
 @Repository
-public interface NetworkMapper {
+public interface GroupMapper {
 
     /**
-     * update network info.
+     * update group info.
      */
-    Integer updateNetworkInfo(@Param("networkId") Integer networkId,
+    Integer updateNetworkInfo(@Param("groupId") Integer groupId,
         @Param("latestBlock") BigInteger latestBlock);
 
     /**
-     * query network count.
+     * query group count.
      */
-    Integer countOfNetwork(@Param("networkId") Integer networkId);
+    Integer countOfNetwork(@Param("groupId") Integer groupId);
 
     /**
-     * get all network.
+     * get all group.
      */
-    List<TbNetwork> listAllNetwork();
+    List<TbGroup> listAllNetwork();
 
     /**
-     * query the latest statistics trans on all networks.
+     * query the latest statistics trans on all groups.
      */
-    List<StatisticalNetworkTransInfo> queryLatestStatisticalTrans();
+    List<StatisticalGroupTransInfo> queryLatestStatisticalTrans();
 
     /**
      * query general info.
      */
-    NetworkGeneral queryNetworkGeneral(@Param("networkId") Integer networkId);
+    GroupGeneral queryNetworkGeneral(@Param("groupId") Integer groupId);
 
     /**
-     * reset all trans count of network.
+     * reset all trans count of group.
      */
-    Integer resetTransCount(@Param("networkId") Integer networkId);
+    Integer resetTransCount(@Param("groupId") Integer groupId);
 }

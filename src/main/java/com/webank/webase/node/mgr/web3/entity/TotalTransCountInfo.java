@@ -13,20 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.network;
+package com.webank.webase.node.mgr.web3.entity;
 
-import java.math.BigInteger;
-import java.time.LocalDate;
 import lombok.Data;
 
-/**
- * The latest statistics trans on all networks.
- */
 @Data
-public class StatisticalNetworkTransInfo {
-
-    private Integer networkId;
-    private LocalDate maxDay;
-    private BigInteger blockNumber = BigInteger.ZERO;
-    private BigInteger transCount = BigInteger.ZERO;
+public class TotalTransCountInfo {
+   private String  txSum;
+   private String  blockNumber;
 }

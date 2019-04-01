@@ -17,7 +17,11 @@ package com.webank.webase.node.mgr.web3;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.transhash.entity.TransReceipt;
+import com.webank.webase.node.mgr.transhash.entity.TransactionInfo;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.log4j.Log4j2;
@@ -41,15 +45,16 @@ public class Web3Controller {
     /**
      * get contract code.
      */
-    @GetMapping("/code/{networkId}/{address}/{blockNumber}")
-    public BaseResponse getContractCode(@PathVariable("networkId") Integer networkId,
+    @GetMapping("/code/{groupId}/{address}/{blockNumber}")
+    public BaseResponse getContractCode(@PathVariable("groupId") Integer groupId,
         @PathVariable("address") String address,
-        @PathVariable("blockNumber") Integer blockNumber) throws NodeMgrException {
+        @PathVariable("blockNumber") BigInteger blockNumber) throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start getContractCode startTime:{} networkId:{} address:{} blockNumber:{}",
-            startTime.toEpochMilli(), networkId, address,
-            blockNumber);
-        BaseResponse baseResponse = web3Service.getContractCode(networkId, address, blockNumber);
+        log.info("start getContractCode startTime:{} groupId:{} address:{} blockNumber:{}",
+            startTime.toEpochMilli(), groupId, address,blockNumber);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        String contractCode = web3Service.getContractCode(groupId, address, blockNumber);
+        baseResponse.setData(contractCode);
         log.info("end getContractCode useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
@@ -58,14 +63,16 @@ public class Web3Controller {
     /**
      * get transaction receipt.
      */
-    @GetMapping("/transactionReceipt/{networkId}/{transHash}")
-    public BaseResponse getTransReceipt(@PathVariable("networkId") Integer networkId,
+    @GetMapping("/transactionReceipt/{groupId}/{transHash}")
+    public BaseResponse getTransReceipt(@PathVariable("groupId") Integer groupId,
         @PathVariable("transHash") String transHash)
         throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start getTransReceipt startTime:{} networkId:{} transhash:{}",
-            startTime.toEpochMilli(), networkId, transHash);
-        BaseResponse baseResponse = web3Service.getTransReceipt(networkId, transHash);
+        log.info("start getTransReceipt startTime:{} groupId:{} transhash:{}",
+            startTime.toEpochMilli(), groupId, transHash);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        TransReceipt transReceipt =  web3Service.getTransReceipt(groupId, transHash);
+        baseResponse.setData(transReceipt);
         log.info("end getTransReceipt useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
@@ -74,14 +81,16 @@ public class Web3Controller {
     /**
      * get transaction by hash.
      */
-    @GetMapping("/transaction/{networkId}/{transHash}")
-    public BaseResponse getTransaction(@PathVariable("networkId") Integer networkId,
+    @GetMapping("/transaction/{groupId}/{transHash}")
+    public BaseResponse getTransaction(@PathVariable("groupId") Integer groupId,
         @PathVariable("transHash") String transHash)
         throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start getTransaction startTime:{} networkId:{} transhash:{}",
-            startTime.toEpochMilli(), networkId, transHash);
-        BaseResponse baseResponse = web3Service.getTransaction(networkId, transHash);
+        log.info("start getTransaction startTime:{} groupId:{} transhash:{}",
+            startTime.toEpochMilli(), groupId, transHash);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        TransactionInfo transInfo = web3Service.getTransaction(groupId, transHash);
+        baseResponse.setData(transInfo);
         log.info("end getTransaction useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
@@ -90,14 +99,16 @@ public class Web3Controller {
     /**
      * get block by number.
      */
-    @GetMapping("/blockByNumber/{networkId}/{blockNumber}")
-    public BaseResponse getBlockByNumber(@PathVariable("networkId") Integer networkId,
-        @PathVariable("blockNumber") Integer blockNumber)
+    @GetMapping("/blockByNumber/{groupId}/{blockNumber}")
+    public BaseResponse getBlockByNumber(@PathVariable("groupId") Integer groupId,
+        @PathVariable("blockNumber") BigInteger blockNumber)
         throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start getBlockByNumber startTime:{} networkId:{} blockNumber:{}",
-            startTime.toEpochMilli(), networkId, blockNumber);
-        BaseResponse baseResponse = web3Service.getBlockByNumber(networkId, blockNumber);
+        log.info("start getBlockByNumber startTime:{} groupId:{} blockNumber:{}",
+            startTime.toEpochMilli(), groupId, blockNumber);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Object blockInfo = web3Service.getBlockByNumber(groupId, blockNumber);
+        baseResponse.setData(blockInfo);
         log.info("end getBlockByNumber useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;

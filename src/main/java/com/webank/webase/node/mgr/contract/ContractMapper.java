@@ -39,15 +39,13 @@ public interface ContractMapper {
 
     TbContract queryContract(ContractParam queryParam);
 
-    List<TbContract> queryContractByBin(@Param("networkId") Integer networkId,
+    List<TbContract> queryContractByBin(@Param("groupId") Integer groupId,
         @Param("contractBin") String contractBin);
 
-    Integer queryMaxChainIndex(Integer networkId);
-
-    String querySystemContractBin(@Param("networkId") Integer networkId,
+    String querySystemContractBin(@Param("groupId") Integer groupId,
         @Param("contractName") String contractName);
 
-    void updateSystemContract(@Param("networkId") Integer networkId,
+    void updateSystemContract(@Param("groupId") Integer groupId,
         @Param("contractName") String contractName, @Param("contractBin") String contractBin,
         @Param("contractAddress") String contractAddress);
 }

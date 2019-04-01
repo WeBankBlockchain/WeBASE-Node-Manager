@@ -30,7 +30,7 @@ public interface TbTransDailyMapper {
     /**
      * query Trading within seven days.
      */
-    List<SeventDaysTrans> listSeventDayOfTransDaily(@Param("networkId") Integer networkId);
+    List<SeventDaysTrans> listSeventDayOfTransDaily(@Param("groupId") Integer groupId);
 
     /**
      * update tb_trans_daily.
@@ -43,7 +43,7 @@ public interface TbTransDailyMapper {
     Integer addTransDailyRow(TbTransDaily tbTransDaily);
 
     /**
-     * query max block number by network id.
+     * query max block number by group id.
      */
-    BigInteger queryMaxBlockByNetwork(@Param("networkId") Integer networkId);
+    BigInteger queryMaxBlockByNetwork(@Param("groupId") Integer groupId);
 }

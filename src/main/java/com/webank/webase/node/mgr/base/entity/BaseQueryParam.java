@@ -24,22 +24,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BaseQueryParam {
 
-    private Integer networkId;
+    private Integer groupId;
     private Integer start;
     private Integer pageSize;
     private String flagSortedByTime;
 
-    public BaseQueryParam(Integer networkId) {
+    public BaseQueryParam(Integer groupId) {
         super();
-        this.networkId = networkId;
+        this.groupId = groupId;
     }
 
     /**
-     * init BaseQueryParam by networkId、start、pageSize.
+     * init BaseQueryParam by groupId、start、pageSize.
      */
-    public BaseQueryParam(Integer networkId, Integer start, Integer pageSize) {
+    public BaseQueryParam(Integer groupId, Integer start, Integer pageSize) {
         super();
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.start = start;
         this.pageSize = pageSize;
     }

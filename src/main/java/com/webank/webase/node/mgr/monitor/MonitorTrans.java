@@ -21,7 +21,7 @@ import lombok.Data;
 @Data
 public class MonitorTrans {
 
-    private Integer networkId;
+    private Integer groupId;
     private String userName;
     private String interfaceName;
     private Integer totalCount;
@@ -32,13 +32,13 @@ public class MonitorTrans {
     }
 
     /**
-     * init by networkId、userName、interfaceName、totalCount、transInfoList.
+     * init by groupId、userName、interfaceName、totalCount、transInfoList.
      */
-    public MonitorTrans(Integer networkId, String userName, String interfaceName,
+    public MonitorTrans(Integer groupId, String userName, String interfaceName,
         Integer totalCount,
         List<PageTransInfo> transInfoList) {
         super();
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.userName = userName;
         this.interfaceName = interfaceName;
         this.totalCount = totalCount;

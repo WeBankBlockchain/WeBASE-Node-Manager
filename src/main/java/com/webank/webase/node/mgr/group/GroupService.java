@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.network;
+package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
@@ -25,46 +25,46 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * services for network data.
+ * services for group data.
  */
 @Log4j2
 @Service
-public class NetworkService {
+public class GroupService {
 
     @Autowired
-    private NetworkMapper networkMapper;
+    private GroupMapper groupMapper;
 
     /**
-     * update network latest block number.
+     * update group latest block number.
      */
-    public void updateNetworkInfo(Integer networkId, BigInteger latestBlock)
+    public void updateNetworkInfo(Integer groupId, BigInteger latestBlock)
         throws NodeMgrException {
-        log.debug("start updateNetworkInfo networkId:{} latestBlock:{} ", networkId,
+        log.debug("start updateNetworkInfo groupId:{} latestBlock:{} ", groupId,
             latestBlock);
         try {
-            Integer affectRow = networkMapper.updateNetworkInfo(networkId, latestBlock);
+            Integer affectRow = groupMapper.updateNetworkInfo(groupId, latestBlock);
             if (affectRow == 0) {
                 log.info(
-                    "fail updateNetworkInfo. networkId:{}  latestBlock:{}. affect 0 rows"
-                        + " of tb_network",
-                    networkId, latestBlock);
+                    "fail updateNetworkInfo. groupId:{}  latestBlock:{}. affect 0 rows"
+                        + " of tb_group",
+                    groupId, latestBlock);
                 throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
             }
         } catch (RuntimeException ex) {
-            log.debug("fail updateNetworkInfo networkId:{} latestBlock:{}", networkId,
+            log.debug("fail updateNetworkInfo groupId:{} latestBlock:{}", groupId,
                 latestBlock, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
 
     /**
-     * query count of network.
+     * query count of group.
      */
-    public Integer countOfNetwork(Integer networkId) throws NodeMgrException {
-        log.debug("start countOfNetwork networkId:{}", networkId);
+    public Integer countOfNetwork(Integer groupId) throws NodeMgrException {
+        log.debug("start countOfNetwork groupId:{}", groupId);
         try {
-            Integer count = networkMapper.countOfNetwork(networkId);
-            log.debug("end countOfNetwork networkId:{} count:{}", networkId, count);
+            Integer count = groupMapper.countOfNetwork(groupId);
+            log.debug("end countOfNetwork groupId:{} count:{}", groupId, count);
             return count;
         } catch (RuntimeException ex) {
             log.error("fail countOfNetwork", ex);
@@ -73,18 +73,18 @@ public class NetworkService {
     }
 
     /**
-     * query all network info.
+     * query all group info.
      */
-    public List<TbNetwork> getAllNetwork() throws NodeMgrException {
+    public List<TbGroup> getAllNetwork() throws NodeMgrException {
         log.debug("start getAllNetwork");
-        // query network count
+        // query group count
         Integer count = countOfNetwork(null);
 
-        List<TbNetwork> listOfNetwork = null;
+        List<TbGroup> listOfNetwork = null;
         if (count != null && count > 0) {
             try {
-                // qurey network list
-                listOfNetwork = networkMapper.listAllNetwork();
+                // qurey group list
+                listOfNetwork = groupMapper.listAllNetwork();
             } catch (RuntimeException ex) {
                 log.error("fail countOfNetwork", ex);
                 throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
@@ -95,32 +95,32 @@ public class NetworkService {
     }
 
     /**
-     * Check the validity of the networkId.
+     * Check the validity of the groupId.
      */
-    public void checkNetworkId(Integer networkId) throws NodeMgrException {
-        log.debug("start checkNetworkId networkId:{}", networkId);
+    public void checkgroupId(Integer groupId) throws NodeMgrException {
+        log.debug("start checkgroupId groupId:{}", groupId);
 
-        if (networkId == null) {
-            log.error("fail checkNetworkId networkId is null");
-            throw new NodeMgrException(ConstantCode.NETWORK_ID_NULL);
+        if (groupId == null) {
+            log.error("fail checkgroupId groupId is null");
+            throw new NodeMgrException(ConstantCode.GROUP_ID_NULL);
         }
 
-        Integer networkCount = countOfNetwork(networkId);
-        log.debug("checkNetworkId networkId:{} networkCount:{}", networkId, networkCount);
-        if (networkCount == null || networkCount == 0) {
-            throw new NodeMgrException(ConstantCode.INVALID_NETWORK_ID);
+        Integer groupCount = countOfNetwork(groupId);
+        log.debug("checkgroupId groupId:{} groupCount:{}", groupId, groupCount);
+        if (groupCount == null || groupCount == 0) {
+            throw new NodeMgrException(ConstantCode.INVALID_GROUP_ID);
         }
-        log.debug("end checkNetworkId");
+        log.debug("end checkgroupId");
     }
 
     /**
      * query latest statistical trans.
      */
-    public List<StatisticalNetworkTransInfo> queryLatestStatisticalTrans() throws NodeMgrException {
+    public List<StatisticalGroupTransInfo> queryLatestStatisticalTrans() throws NodeMgrException {
         log.debug("start queryLatestStatisticalTrans");
         try {
             // qurey list
-            List<StatisticalNetworkTransInfo> listStatisticalTrans = networkMapper
+            List<StatisticalGroupTransInfo> listStatisticalTrans = groupMapper
                 .queryLatestStatisticalTrans();
             log.debug("end queryLatestStatisticalTrans listStatisticalTrans:{}",
                 JSON.toJSONString(listStatisticalTrans));
@@ -132,13 +132,13 @@ public class NetworkService {
     }
 
     /**
-     * query network overview information.
+     * query group overview information.
      */
-    public NetworkGeneral queryNetworkGeneral(Integer networkId) throws NodeMgrException {
-        log.debug("start queryNetworkGeneral networkId:{}", networkId);
+    public GroupGeneral queryNetworkGeneral(Integer groupId) throws NodeMgrException {
+        log.debug("start queryNetworkGeneral groupId:{}", groupId);
         try {
-            // qurey general info from tb_network
-            NetworkGeneral generalInfo = networkMapper.queryNetworkGeneral(networkId);
+            // qurey general info from tb_group
+            GroupGeneral generalInfo = groupMapper.queryNetworkGeneral(groupId);
             log.debug("end queryNetworkGeneral generalInfo:{}",
                 JSON.toJSONString(generalInfo));
             return generalInfo;
@@ -149,12 +149,12 @@ public class NetworkService {
     }
 
     /**
-     * reset trans count of network.
+     * reset trans count of group.
      */
-    public void resetTransCount(Integer networkId) throws NodeMgrException {
-        log.debug("start resetTransCount networkId:{}", networkId);
+    public void resetTransCount(Integer groupId) throws NodeMgrException {
+        log.debug("start resetTransCount groupId:{}", groupId);
         try {
-            networkMapper.resetTransCount(networkId);
+            groupMapper.resetTransCount(groupId);
         } catch (RuntimeException ex) {
             log.error("fail resetTransCount", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);

@@ -30,34 +30,34 @@ public interface MonitorMapper {
 
     void updateRow(TbMonitor tbMonitor);
 
-    void updateUnusualUser(@Param("networkId") Integer networkId,
+    void updateUnusualUser(@Param("groupId") Integer groupId,
         @Param("userName") String userName, @Param("address") String address);
 
-    void updateUnusualContract(@Param("networkId") Integer networkId,
+    void updateUnusualContract(@Param("groupId") Integer groupId,
         @Param("contractName") String contractName,
         @Param("contractBin") String contractBin, @Param("interfaceName") String interfaceName,
         @Param("transUnusualType") int transUnusualType);
 
-    String queryUnusualTxhash(@Param("networkId") Integer networkId,
+    String queryUnusualTxhash(@Param("groupId") Integer groupId,
         @Param("contractBin") String contractBin);
 
     TbMonitor queryTbMonitor(TbMonitor tbMonitor);
 
-    List<TbMonitor> monitorUserList(@Param("networkId") Integer networkId);
+    List<TbMonitor> monitorUserList(@Param("groupId") Integer groupId);
 
-    List<TbMonitor> monitorInterfaceList(@Param("networkId") Integer networkId,
+    List<TbMonitor> monitorInterfaceList(@Param("groupId") Integer groupId,
         @Param("userName") String userName);
 
     Integer countOfMonitorTrans(Map<String, Object> queryParam);
 
     List<PageTransInfo> qureyTransCountList(Map<String, Object> queryParam);
 
-    Integer countOfUnusualUser(@Param("networkId") Integer networkId,
+    Integer countOfUnusualUser(@Param("groupId") Integer groupId,
         @Param("userName") String userName);
 
     List<UnusualUserInfo> listOfUnusualUser(Map<String, Object> queryParam);
 
-    Integer countOfUnusualContract(@Param("networkId") Integer networkId,
+    Integer countOfUnusualContract(@Param("groupId") Integer groupId,
         @Param("contractAddress") String contractAddress);
 
     List<UnusualContractInfo> listOfUnusualContract(Map<String, Object> queryParam);

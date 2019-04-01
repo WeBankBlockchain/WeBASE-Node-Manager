@@ -37,13 +37,9 @@ public class SchedulerService implements SchedulingConfigurer {
     @Autowired
     private DeleteBlockTask deleteBlockTask;
     @Autowired
-    private DeleteNodeLogTask deleteNodeLogTask;
-    @Autowired
     private DeleteTransHashTask deleteTransHashTask;
     @Autowired
     private TransMonitorTask transMonitorTask;
-    @Autowired
-    private SharedChainInfoTask sharedChainInfoTask;
     @Autowired
     private ConstantProperties constants;
 
@@ -61,10 +57,6 @@ public class SchedulerService implements SchedulingConfigurer {
             (context) -> new CronTrigger(constants.getDeleteInfoCron())
                 .nextExecutionTime(context));
 
-        taskRegistrar.addTriggerTask(() -> deleteNodeLogTask.deleteNodeLogInfo(),
-            (context) -> new CronTrigger(constants.getDeleteInfoCron())
-                .nextExecutionTime(context));
-
         taskRegistrar.addTriggerTask(() -> deleteTransHashTask.deleteTransHash(),
             (context) -> new CronTrigger(constants.getDeleteInfoCron())
                 .nextExecutionTime(context));
@@ -72,11 +64,5 @@ public class SchedulerService implements SchedulingConfigurer {
         taskRegistrar.addTriggerTask(() -> transMonitorTask.monitorInfoHandle(),
             (context) -> new CronTrigger(constants.getInsertTransMonitorCron())
                 .nextExecutionTime(context));
-
-        if (constants.getSupportTransaction()) {
-            taskRegistrar.addTriggerTask(() -> sharedChainInfoTask.shareAllNetworkInfo(),
-                (context) -> new CronTrigger(constants.getSharedChainInfoCron())
-                    .nextExecutionTime(context));
-        }
     }
 }

@@ -23,7 +23,7 @@ public class TbMonitor {
 
     private String userName;
     private Integer userType;
-    private Integer networkId;
+    private Integer groupId;
     private String contractName;
     private String contractAddress;
     private String interfaceName;

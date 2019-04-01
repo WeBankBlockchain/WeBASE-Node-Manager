@@ -3,13 +3,13 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.network.NetworkMapper">
-  <resultMap id="networkMap" type="com.webank.webase.node.mgr.network.TbNetwork">
-    <id column="network_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="networkId"/>
-    <result column="network_name" javaType="java.lang.String" jdbcType="VARCHAR"
-      property="networkName"/>
-    <result column="network_status" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="networkStatus"/>
+<mapper namespace="com.webank.webase.node.mgr.group.GroupMapper">
+  <resultMap id="groupMap" type="com.webank.webase.node.mgr.group.TbGroup">
+    <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
+    <result column="group_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="groupName"/>
+    <result column="group_status" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupStatus"/>
     <result column="latest_block" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="latestBlock"/>
     <result column="trans_count" javaType="java.math.BigInteger" jdbcType="INTEGER"
@@ -22,9 +22,9 @@
 
 
   <resultMap id="statisticalTransMap"
-    type="com.webank.webase.node.mgr.network.StatisticalNetworkTransInfo">
-    <result column="network_id" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="networkId"/>
+    type="com.webank.webase.node.mgr.group.StatisticalGroupTransInfo">
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId"/>
     <result column="maxDay" javaType="java.time.LocalDate" jdbcType="TIMESTAMP" property="maxDay"/>
     <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="blockNumber"/>
@@ -34,55 +34,55 @@
 
 
   <select id="countOfNetwork" parameterType="java.lang.Integer" resultType="java.lang.Integer">
-    select count(1) from tb_network where network_status = 1
-    <if test="networkId != null and networkId !=''">
-      and network_id = #{networkId}
+    select count(1) from tb_group where group_status = 1
+    <if test="groupId != null and groupId !=''">
+      and group_id = #{groupId}
     </if>
   </select>
 
-  <select id="listAllNetwork" resultMap="networkMap">
-		select * from tb_network where network_status = 1 order by network_id desc
+  <select id="listAllNetwork" resultMap="groupMap">
+		select * from tb_group where group_status = 1 order by group_id desc
 	</select>
 
   <update id="updateNetworkInfo">
-		update tb_network set modify_time=now(),latest_block = #{latestBlock} where network_id = #{networkId}
+		update tb_group set modify_time=now(),latest_block = #{latestBlock} where group_id = #{groupId}
 	</update>
 
   <select id="queryLatestStatisticalTrans" resultMap="statisticalTransMap">
-		select a.network_id,b.maxDay,c.block_number,c.trans_count from tb_network a 
+		select a.group_id,b.maxDay,c.block_number,c.trans_count from tb_group a
 		LEFT JOIN
-		(select network_id,max(trans_day) as maxDay from tb_trans_daily GROUP BY network_id)b
-		on (a.network_id = b.network_id)
+		(select group_id,max(trans_day) as maxDay from tb_trans_daily GROUP BY group_id)b
+		on (a.group_id = b.group_id)
 		LEFT JOIN
-		tb_trans_daily c on(b.network_id = c.network_id and b.maxDay = c.trans_day);
+		tb_trans_daily c on(b.group_id = c.group_id and b.maxDay = c.trans_day);
 	</select>
 
-  <select id="queryNetworkGeneral" resultType="com.webank.webase.node.mgr.network.NetworkGeneral">
-		SELECT a.network_id networkId,a.latest_block latestBlock,a.trans_count transactionCount,b.contractCount,c.orgCount,d.nodeCount
-		FROM tb_network a
+  <select id="queryNetworkGeneral" resultType="com.webank.webase.node.mgr.group.GroupGeneral">
+		SELECT a.group_id groupId,a.latest_block latestBlock,a.trans_count transactionCount,b.contractCount,c.orgCount,d.nodeCount
+		FROM tb_group a
 		LEFT
 		JOIN
 		(
-		select network_id,count(1)
-		contractCount from tb_contract where contract_status=2 and contract_type=0 GROUP BY network_id
-		)b on(a.network_id = b.network_id)
+		select group_id,count(1)
+		contractCount from tb_contract where contract_status=2 and contract_type=0 GROUP BY group_id
+		)b on(a.group_id = b.group_id)
 		LEFT JOIN
 		(
-		select network_id,count(1) orgCount from
-		tb_network_org_map where map_status=1
-		GROUP BY network_id
-		)c on(a.network_id = c.network_id)
+		select group_id,count(1) orgCount from
+		tb_group_org_map where map_status=1
+		GROUP BY group_id
+		)c on(a.group_id = c.group_id)
 		LEFT JOIN
 		(
-		select network_id,count(1) nodeCount from tb_node GROUP BY network_id
-		)d on(a.network_id =
-		d.network_id)
-		where a.network_status = 1 and a.network_id = #{networkId}
+		select group_id,count(1) nodeCount from tb_node GROUP BY group_id
+		)d on(a.group_id =
+		d.group_id)
+		where a.group_status = 1 and a.group_id = #{groupId}
 	</select>
 
   <update id="resetTransCount" parameterType="java.lang.Integer">
-		update tb_network t set t.trans_count =
-		(select sum(trans_count) from tb_trans_daily where network_id=#{networkId})
-		where t.network_id=#{networkId}
+		update tb_group t set t.trans_count =
+		(select sum(trans_count) from tb_trans_daily where group_id=#{groupId})
+		where t.group_id=#{groupId}
 	</update>
 </mapper>

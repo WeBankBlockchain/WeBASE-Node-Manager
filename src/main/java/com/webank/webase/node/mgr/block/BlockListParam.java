@@ -39,23 +39,23 @@ public class BlockListParam extends BaseQueryParam {
     private String flagSortedByBlock;
 
     /**
-     * init by networkId、start、pageSize、pkHash、blockNumber.
+     * init by groupId、start、pageSize、pkHash、blockNumber.
      */
-    public BlockListParam(Integer networkId, Integer start, Integer pageSize, String pkHash,
+    public BlockListParam(Integer groupId, Integer start, Integer pageSize, String pkHash,
         BigInteger blockNumber,
         String flagSortedByBlock) {
-        super(networkId, start, pageSize);
+        super(groupId, start, pageSize);
         this.pkHash = pkHash;
         this.blockNumber = blockNumber;
         this.flagSortedByBlock = flagSortedByBlock;
     }
 
     /**
-     * init by networkId、minBlockNumber、minDay、flagSortedByBlock.
+     * init by groupId、minBlockNumber、minDay、flagSortedByBlock.
      */
-    public BlockListParam(Integer networkId, BigInteger minBlockNumber, LocalDate minDay,
+    public BlockListParam(Integer groupId, BigInteger minBlockNumber, LocalDate minDay,
         String flagSortedByBlock) {
-        super(networkId);
+        super(groupId);
         this.minBlockNumber = minBlockNumber;
         this.minDay = minDay;
         this.flagSortedByBlock = flagSortedByBlock;

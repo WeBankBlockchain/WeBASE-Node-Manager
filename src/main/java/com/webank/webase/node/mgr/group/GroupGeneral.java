@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.report;
+package com.webank.webase.node.mgr.group;
 
+import java.math.BigInteger;
 import lombok.Data;
 
 @Data
-public class MetricData {
-    private String hostIp;
-    private Integer nodeP2PPort;
-    private String attr;
-    private Object metricValue;
+public class GroupGeneral {
+
+    private Integer groupId;
+    private int orgCount;
+    private int nodeCount;
+    private int contractCount;
+    private BigInteger transactionCount = BigInteger.ZERO;
+    private BigInteger latestBlock = BigInteger.ZERO;
+
 }

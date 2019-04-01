@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.networkorgmap;
+package com.webank.webase.node.mgr.grouporgmap;
 
 import java.time.LocalDateTime;
 import lombok.Data;
 
 /**
- * Entity class of table tb_network_org_map.
+ * Entity class of table tb_group_org_map.
  */
 @Data
 public class TbNetworkOrgMap {
 
     private Integer mapId;
-    private Integer networkId;
+    private Integer groupId;
     private Integer orgId;
     private Integer mapStatus;
     private LocalDateTime createTime;
@@ -36,11 +36,11 @@ public class TbNetworkOrgMap {
     }
 
     /**
-     * init by networkId、orgId.
+     * init by groupId、orgId.
      */
-    public TbNetworkOrgMap(Integer networkId, Integer orgId) {
+    public TbNetworkOrgMap(Integer groupId, Integer orgId) {
         super();
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.orgId = orgId;
     }
 

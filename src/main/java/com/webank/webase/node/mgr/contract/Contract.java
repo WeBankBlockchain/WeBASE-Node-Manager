@@ -25,7 +25,7 @@ import lombok.Data;
 public class Contract {
 
     private Integer contractId;
-    private Integer networkId;
+    private Integer groupId;
     private String contractName;
     private String contractVersion;
     private String contractSource;

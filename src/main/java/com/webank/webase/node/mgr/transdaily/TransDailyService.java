@@ -19,7 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.network.NetworkService;
+import com.webank.webase.node.mgr.group.GroupService;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -34,23 +34,23 @@ import org.springframework.stereotype.Service;
 public class TransDailyService {
 
     @Autowired
-    private NetworkService networkService;
+    private GroupService groupService;
     @Autowired
     private TbTransDailyMapper tbTransDailyMapper;
 
     /**
      * query Trading within seven days.
      */
-    public List<SeventDaysTrans> listSeventDayOfTrans(Integer networkId) throws NodeMgrException {
-        log.debug("start listSeventDayOfTrans networkId:{}", networkId);
+    public List<SeventDaysTrans> listSeventDayOfTrans(Integer groupId) throws NodeMgrException {
+        log.debug("start listSeventDayOfTrans groupId:{}", groupId);
         try {
             // qurey
             List<SeventDaysTrans> transList = tbTransDailyMapper
-                .listSeventDayOfTransDaily(networkId);
+                .listSeventDayOfTransDaily(groupId);
             log.debug("end listSeventDayOfTrans transList:{}", JSON.toJSONString(transList));
             return transList;
         } catch (RuntimeException ex) {
-            log.debug("fail listSeventDayOfTrans networkId:{}", networkId, ex);
+            log.debug("fail listSeventDayOfTrans groupId:{}", groupId, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -58,15 +58,15 @@ public class TransDailyService {
     /**
      * update trans daily info.
      */
-    public void updateTransDaily(Integer networkId, LocalDate transDay, BigInteger oldBlockNumber,
+    public void updateTransDaily(Integer groupId, LocalDate transDay, BigInteger oldBlockNumber,
         BigInteger latestBlockNumber, BigInteger transCount)
         throws NodeMgrException {
         log.debug(
-            "start updateTransDaily networkId:{} transDay:{} oldBlockNumber:{} "
-                + "latestBlockNumber:{} transCount:{}",networkId, JSON.toJSONString(transDay),
+            "start updateTransDaily groupId:{} transDay:{} oldBlockNumber:{} "
+                + "latestBlockNumber:{} transCount:{}",groupId, JSON.toJSONString(transDay),
             oldBlockNumber, latestBlockNumber, transCount);
         Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("networkId", networkId);
+        paramMap.put("groupId", groupId);
         paramMap.put("oldBlockNumber", oldBlockNumber);
         paramMap.put("transDay", transDay);
         paramMap.put("latestBlockNumber", latestBlockNumber);
@@ -76,9 +76,9 @@ public class TransDailyService {
             affectRow = tbTransDailyMapper.updateTransDaily(paramMap);
         } catch (RuntimeException ex) {
             log.error(
-                "fail updateTransDaily networkId:{} transDay:{} oldBlockNumber:{}"
+                "fail updateTransDaily groupId:{} transDay:{} oldBlockNumber:{}"
                     + " latestBlockNumber:{} transCount:{}",
-                networkId,transDay, oldBlockNumber, latestBlockNumber, transCount, ex);
+                groupId,transDay, oldBlockNumber, latestBlockNumber, transCount, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
@@ -88,23 +88,23 @@ public class TransDailyService {
     /**
      * add trans daily info.
      */
-    public void addTbTransDailyInfo(Integer networkId, LocalDate transDay, Integer transCount,
+    public void addTbTransDailyInfo(Integer groupId, LocalDate transDay, Integer transCount,
         BigInteger blockNumber) throws NodeMgrException {
-        log.debug("start addTbTransDailyInfo networkId:{} transDay:{} transCount:{} blockNumber:{}",
-            networkId, JSON.toJSONString(transDay),
+        log.debug("start addTbTransDailyInfo groupId:{} transDay:{} transCount:{} blockNumber:{}",
+            groupId, JSON.toJSONString(transDay),
             transCount, blockNumber);
 
-        // check network id
-        networkService.checkNetworkId(networkId);
+        // check group id
+        groupService.checkgroupId(groupId);
 
         // add row
-        TbTransDaily rowParam = new TbTransDaily(networkId, transDay, transCount, blockNumber);
+        TbTransDaily rowParam = new TbTransDaily(groupId, transDay, transCount, blockNumber);
         try {
             tbTransDailyMapper.addTransDailyRow(rowParam);
         } catch (RuntimeException ex) {
             log.error(
-                "start addTbTransDailyInfo networkId:{} transDay:{} transCount:{} blockNumber:{}",
-                networkId, JSON.toJSONString(transDay),
+                "start addTbTransDailyInfo groupId:{} transDay:{} transCount:{} blockNumber:{}",
+                groupId, JSON.toJSONString(transDay),
                 transCount, blockNumber, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
@@ -115,17 +115,17 @@ public class TransDailyService {
     /**
      * query max block number.
      */
-    public BigInteger queryMaxBlockByNetwork(Integer networkId)
+    public BigInteger queryMaxBlockByNetwork(Integer groupId)
         throws NodeMgrException, JsonProcessingException {
-        log.debug("start queryMaxBlockByNetwork networkId:{}", networkId);
+        log.debug("start queryMaxBlockByNetwork groupId:{}", groupId);
 
         try {
-            BigInteger maxBlockNumber = tbTransDailyMapper.queryMaxBlockByNetwork(networkId);
-            log.debug("start queryMaxBlockByNetwork networkId:{} maxBlockNumber:{}",
+            BigInteger maxBlockNumber = tbTransDailyMapper.queryMaxBlockByNetwork(groupId);
+            log.debug("start queryMaxBlockByNetwork groupId:{} maxBlockNumber:{}",
                 maxBlockNumber);
             return maxBlockNumber;
         } catch (RuntimeException ex) {
-            log.error("start queryMaxBlockByNetwork networkId:{}", networkId, ex);
+            log.error("start queryMaxBlockByNetwork groupId:{}", groupId, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 

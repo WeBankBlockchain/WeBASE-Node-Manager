@@ -27,5 +27,5 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class Transaction extends TransactionParam {
 
-    private Integer networkId;
+    private Integer groupId;
 }

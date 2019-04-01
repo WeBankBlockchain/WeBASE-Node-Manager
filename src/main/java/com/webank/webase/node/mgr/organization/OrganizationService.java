@@ -18,8 +18,8 @@ package com.webank.webase.node.mgr.organization;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.network.NetworkService;
-import com.webank.webase.node.mgr.networkorgmap.NetworkOrgMapService;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.grouporgmap.NetworkOrgMapService;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
@@ -39,9 +39,9 @@ public class OrganizationService {
     @Autowired
     private OrganizationMapper organizationMapper;
     @Autowired
-    private NetworkService networkService;
+    private GroupService groupService;
     @Autowired
-    private NetworkOrgMapService networkOrgMapService;
+    private NetworkOrgMapService groupOrgMapService;
 
     /**
      * add new organization data.
@@ -50,11 +50,11 @@ public class OrganizationService {
     public Integer addOrganizationInfo(TbOrganization org) throws NodeMgrException {
         log.debug("start addOrganizationInfo TbOrganization:{}", JSON.toJSONString(org));
 
-        // check network id
-        networkService.checkNetworkId(org.getNetworkId());
+        // check group id
+        groupService.checkgroupId(org.getGroupId());
 
         // check name of organization
-        TbOrganization dbRow = queryByOrgName(org.getNetworkId(), org.getOrgName());
+        TbOrganization dbRow = queryByOrgName(org.getGroupId(), org.getOrgName());
         if (dbRow != null) {
             log.info(
                 "fail addOrganizationInfo:organization name already exists. orgId:{} qureyParam:{}",
@@ -78,10 +78,10 @@ public class OrganizationService {
 
         Integer orgId = org.getOrgId();
 
-        // add network_organization_mapping
+        // add group_organization_mapping
         Integer mapId = 0;
         try {
-            mapId = networkOrgMapService.addNetworkOrgMap(org.getNetworkId(), orgId);
+            mapId = groupOrgMapService.addNetworkOrgMap(org.getGroupId(), orgId);
         } catch (RuntimeException ex) {
             log.error("fail addNetworkOrgMap", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
@@ -97,25 +97,25 @@ public class OrganizationService {
     /**
      * query organization list by page.
      */
-    public List<TbOrganization> qureyOrganizationList(Integer networkId, Integer pageNumber,
+    public List<TbOrganization> qureyOrganizationList(Integer groupId, Integer pageNumber,
         Integer pageSize, String orgName)
         throws NodeMgrException {
-        log.debug("start qureyOrganizationList networkId:{} pageNumber:{} pageSize:{} orgName:{}",
-            networkId, pageNumber, pageSize, orgName);
+        log.debug("start qureyOrganizationList groupId:{} pageNumber:{} pageSize:{} orgName:{}",
+            groupId, pageNumber, pageSize, orgName);
 
         try {
             // qurey organization list
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
             List<TbOrganization> listOfOrganization = organizationMapper
-                .listOfOrganization(networkId, start, pageSize, orgName);
+                .listOfOrganization(groupId, start, pageSize, orgName);
             log.debug("end qureyOrganizationList listOfOrganization:{}",
                 JSON.toJSONString(listOfOrganization));
             return listOfOrganization;
         } catch (RuntimeException ex) {
             log.error(
-                "fail qureyOrganizationList. networkId:{} pageNumber:{} pageSize:{} orgName:{}",
-                networkId, pageNumber, pageSize, orgName, ex);
+                "fail qureyOrganizationList. groupId:{} pageNumber:{} pageSize:{} orgName:{}",
+                groupId, pageNumber, pageSize, orgName, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -154,23 +154,23 @@ public class OrganizationService {
     /**
      * qurey count of organization.
      */
-    public Integer countOfOrganization(Integer networkId, Integer orgId, String orgName,
+    public Integer countOfOrganization(Integer groupId, Integer orgId, String orgName,
         Integer orgType) throws NodeMgrException {
-        log.debug("start countOfOrganization networkId:{} orgId:{} orgName:{} orgType:{}",
-            networkId, orgId, orgName, orgType);
+        log.debug("start countOfOrganization groupId:{} orgId:{} orgName:{} orgType:{}",
+            groupId, orgId, orgName, orgType);
         try {
             Integer organizationCount = organizationMapper
-                .countOfOrganization(networkId, orgId, orgName, orgType);
+                .countOfOrganization(groupId, orgId, orgName, orgType);
             log.debug(
-                "end countOfOrganization networkId:{} orgId:{} orgName:{} orgType:{}"
+                "end countOfOrganization groupId:{} orgId:{} orgName:{} orgType:{}"
                     + " organizationCount:{}",
-                networkId, orgId, orgName, orgType,
+                groupId, orgId, orgName, orgType,
                 organizationCount);
             return organizationCount;
         } catch (RuntimeException ex) {
-            log.error("fail countOfOrganization . networkId:{} orgId:{} orgName:{} "
+            log.error("fail countOfOrganization . groupId:{} orgId:{} orgName:{} "
                     + "orgType:{}",
-                networkId, orgId, orgName, orgType, ex);
+                groupId, orgId, orgName, orgType, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -178,15 +178,15 @@ public class OrganizationService {
     /**
      * count by orgName.
      */
-    public Integer countOfOrganization(Integer networkId, String orgName) throws NodeMgrException {
-        return countOfOrganization(networkId, null, orgName, null);
+    public Integer countOfOrganization(Integer groupId, String orgName) throws NodeMgrException {
+        return countOfOrganization(groupId, null, orgName, null);
     }
 
     /**
      * count by orgType.
      */
-    public Integer countOfOrganization(Integer networkId, Integer orgType) throws NodeMgrException {
-        return countOfOrganization(networkId, null, null, orgType);
+    public Integer countOfOrganization(Integer groupId, Integer orgType) throws NodeMgrException {
+        return countOfOrganization(groupId, null, null, orgType);
     }
 
     /**
@@ -211,36 +211,36 @@ public class OrganizationService {
     /**
      * qurey organization info.
      */
-    public TbOrganization queryOrganization(Integer networkId, Integer orgType, Integer orgId,
+    public TbOrganization queryOrganization(Integer groupId, Integer orgType, Integer orgId,
         String orgName) throws NodeMgrException {
-        log.debug("start queryOrganization networkId:{} orgType:{} orgId:{} orgName:{}",
-            networkId, orgType, orgId, orgName);
+        log.debug("start queryOrganization groupId:{} orgType:{} orgId:{} orgName:{}",
+            groupId, orgType, orgId, orgName);
         try {
             TbOrganization organizationRow = organizationMapper
-                .queryOrganization(networkId, orgType, orgId, orgName);
+                .queryOrganization(groupId, orgType, orgId, orgName);
             log.debug(
-                "end queryOrganization networkId:{} orgType:{} orgId:{} TbOrganization:{} "
-                    + "orgName:{}",networkId, orgType, orgId, orgName,
+                "end queryOrganization groupId:{} orgType:{} orgId:{} TbOrganization:{} "
+                    + "orgName:{}",groupId, orgType, orgId, orgName,
                 JSON.toJSONString(organizationRow));
             return organizationRow;
         } catch (RuntimeException ex) {
-            log.error("fail queryOrganization . networkId:{} orgType:{} orgId:{} orgName:{}",
-                networkId, orgType, orgId, orgName, ex);
+            log.error("fail queryOrganization . groupId:{} orgType:{} orgId:{} orgName:{}",
+                groupId, orgType, orgId, orgName, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
 
     /**
-     * query organization by networkId、orgType.
+     * query organization by groupId、orgType.
      */
-    public TbOrganization queryOrganization(Integer networkId, Integer orgType)
+    public TbOrganization queryOrganization(Integer groupId, Integer orgType)
         throws NodeMgrException {
-        return queryOrganization(networkId, orgType, null, null);
+        return queryOrganization(groupId, orgType, null, null);
     }
 
-    public TbOrganization queryByOrgName(Integer networkId, String orgName)
+    public TbOrganization queryByOrgName(Integer groupId, String orgName)
         throws NodeMgrException {
-        return queryOrganization(networkId, null, null, orgName);
+        return queryOrganization(groupId, null, null, orgName);
     }
 
     /**

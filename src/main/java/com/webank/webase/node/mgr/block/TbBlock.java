@@ -26,7 +26,7 @@ import lombok.Data;
 public class TbBlock {
 
     private String pkHash;
-    private Integer networkId;
+    private Integer groupId;
     private BigInteger blockNumber = BigInteger.ZERO;
     private String miner;
     private LocalDateTime blockTimestamp;
@@ -39,13 +39,13 @@ public class TbBlock {
     }
 
     /**
-     * init by  pkHash、 networkId、blockNumber、miner、blockTimestamp、transCount.
+     * init by  pkHash、 groupId、blockNumber、miner、blockTimestamp、transCount.
      */
-    public TbBlock(String pkHash, Integer networkId, BigInteger blockNumber, String miner,
+    public TbBlock(String pkHash, Integer groupId, BigInteger blockNumber, String miner,
         LocalDateTime blockTimestamp, Integer transCount) {
         super();
         this.pkHash = pkHash;
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.blockNumber = blockNumber;
         this.miner = miner;
         this.blockTimestamp = blockTimestamp;

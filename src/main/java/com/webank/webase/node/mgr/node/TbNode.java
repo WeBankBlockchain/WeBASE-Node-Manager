@@ -27,7 +27,7 @@ public class TbNode {
 
     private Integer nodeId;
     private String nodeName;
-    private Integer networkId;
+    private Integer groupId;
     private Integer orgId;
     private String orgName;
     private String nodeIp;
@@ -49,12 +49,12 @@ public class TbNode {
     }
 
     /**
-     * init by networkId、nodeName.
+     * init by groupId、nodeName.
      */
-    public TbNode(Integer networkId, String nodeName) {
+    public TbNode(Integer groupId, String nodeName) {
         super();
         this.nodeName = nodeName;
-        this.networkId = networkId;
+        this.groupId = groupId;
     }
 
     /**
@@ -68,13 +68,13 @@ public class TbNode {
     }
 
     /**
-     * init by nodeName、networkId、orgId、nodeIp、p2pPort、rpcPort.
+     * init by nodeName、groupId、orgId、nodeIp、p2pPort、rpcPort.
      */
-    public TbNode(String nodeName, Integer networkId, Integer orgId, String nodeIp, Integer p2pPort,
+    public TbNode(String nodeName, Integer groupId, Integer orgId, String nodeIp, Integer p2pPort,
         Integer rpcPort) {
         super();
         this.nodeName = nodeName;
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.orgId = orgId;
         this.nodeIp = nodeIp;
         this.p2pPort = p2pPort;

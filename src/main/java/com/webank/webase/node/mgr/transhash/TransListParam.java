@@ -38,8 +38,8 @@ public class TransListParam extends BaseQueryParam {
     /**
      * init TransListParam.
      */
-    public TransListParam(Integer networkId, String transHash, BigInteger blockNumber) {
-        super(networkId);
+    public TransListParam(Integer groupId, String transHash, BigInteger blockNumber) {
+        super(groupId);
         this.transHash = transHash;
         this.blockNumber = blockNumber;
     }

@@ -28,7 +28,7 @@ public class User {
     public String userName;
     public String publicKey;
     public String description;
-    public Integer networkId;
+    public Integer groupId;
     public Integer userType = UserType.GENERALUSER.getValue();
 
     public User() {

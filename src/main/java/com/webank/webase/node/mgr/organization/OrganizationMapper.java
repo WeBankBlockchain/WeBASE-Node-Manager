@@ -33,14 +33,14 @@ public interface OrganizationMapper {
     /**
      * Query the number of organization according to some conditions.
      */
-    Integer countOfOrganization(@Param("networkId") Integer networkId,
+    Integer countOfOrganization(@Param("groupId") Integer groupId,
         @Param("orgId") Integer orgId, @Param("orgName") String orgName,
         @Param("orgType") Integer orgType);
 
     /**
      * Query organization list according to some conditions.
      */
-    List<TbOrganization> listOfOrganization(@Param("networkId") Integer networkId,
+    List<TbOrganization> listOfOrganization(@Param("groupId") Integer groupId,
         @Param("start") Integer start, @Param("pageSize") Integer pageSize,
         @Param("orgName") String orgName);
 
@@ -52,7 +52,7 @@ public interface OrganizationMapper {
     /**
      * query organization row.
      */
-    TbOrganization queryOrganization(@Param("networkId") Integer networkId,
+    TbOrganization queryOrganization(@Param("groupId") Integer groupId,
         @Param("orgType") Integer orgType, @Param("orgId") Integer orgId,
         @Param("orgName") String orgName);
 

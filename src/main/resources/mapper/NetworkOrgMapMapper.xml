@@ -3,24 +3,24 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.networkorgmap.NetworkOrgMapMapper">
+<mapper namespace="com.webank.webase.node.mgr.grouporgmap.NetworkOrgMapMapper">
 
   <insert id="addNetworkOrgMapRow"
-    parameterType="com.webank.webase.node.mgr.networkorgmap.TbNetworkOrgMap">
-    insert into tb_network_org_map
-    (network_id,org_id,create_time,modify_time)values(#{networkId},#{orgId},NOW(),NOW())
+    parameterType="com.webank.webase.node.mgr.grouporgmap.TbNetworkOrgMap">
+    insert into tb_group_org_map
+    (group_id,org_id,create_time,modify_time)values(#{groupId},#{orgId},NOW(),NOW())
     <selectKey keyProperty="mapId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
   </insert>
 
   <select id="countOfNetworkOrgMap" resultType="java.lang.Integer">
-    select count(1) from tb_network_org_map where map_status=1
+    select count(1) from tb_group_org_map where map_status=1
     <if test="mapId != null and mapId != ''">
       and map_id = #{mapId}
     </if>
-    <if test="networkId != null and networkId != ''">
-      and network_id = #{networkId}
+    <if test="groupId != null and groupId != ''">
+      and group_id = #{groupId}
     </if>
     <if test="orgId != null and orgId != ''">
       and org_id = #{orgId}
@@ -28,6 +28,6 @@
   </select>
 
   <delete id="deleteByOrgID" parameterType="java.lang.Integer">
-		delete from tb_network_org_map where org_id = #{orgId}
+		delete from tb_group_org_map where org_id = #{orgId}
 	</delete>
 </mapper>

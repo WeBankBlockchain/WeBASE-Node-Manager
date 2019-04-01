@@ -22,7 +22,6 @@ import lombok.Data;
  */
 @Data
 public class RspSystemProxy {
-
     private String name;
     private String address;
     private String cache;

@@ -25,7 +25,7 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.network.NetworkService;
+import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.organization.OrganizationService;
 import com.webank.webase.node.mgr.organization.TbOrganization;
 import com.webank.webase.node.mgr.user.UserService;
@@ -48,7 +48,7 @@ public class NodeService {
     @Autowired
     private NodeMapper nodeMapper;
     @Autowired
-    private NetworkService networkService;
+    private GroupService groupService;
     @Autowired
     private OrganizationService organizationService;
     @Qualifier(value = "genericRestTemplate")
@@ -95,7 +95,7 @@ public class NodeService {
     public Integer addNodeInfo(Node node) throws NodeMgrException {
         log.debug("start addNodeInfo Node:{}", JSON.toJSONString(node));
 
-        Integer networkId = node.getNetworkId();
+        Integer groupId = node.getGroupId();
         String nodeIp = node.getNodeIp();
         Integer frontPort = node.getFrontPort();
         if (StringUtils.isBlank(nodeIp) || null == frontPort) {
@@ -103,12 +103,12 @@ public class NodeService {
             throw new NodeMgrException(ConstantCode.IP_PORT_EMPTY);
         }
 
-        // check network id
-        networkService.checkNetworkId(networkId);
+        // check group id
+        groupService.checkgroupId(groupId);
 
         // param
         NodeParam queryParam = new NodeParam();
-        queryParam.setNetworkId(networkId);
+        queryParam.setGroupId(groupId);
         queryParam.setNodeIp(nodeIp);
         queryParam.setFrontPort(frontPort);
 
@@ -141,7 +141,7 @@ public class NodeService {
 
         // add organization info
         TbOrganization organization = new TbOrganization();
-        organization.setNetworkId(networkId);
+        organization.setGroupId(groupId);
         organization.setOrgName(nodeInfo.getOrgName());
         organization.setOrgType(orgType);
         Integer orgId = organizationService.addOrganizationInfo(organization);
@@ -150,7 +150,7 @@ public class NodeService {
 
         // add row
         TbNode dbParam = new TbNode();
-        dbParam.setNetworkId(networkId);
+        dbParam.setGroupId(groupId);
         dbParam.setNodeIp(nodeIp);
         dbParam.setNodeName(nodeName);
         dbParam.setOrgId(orgId);
@@ -178,7 +178,7 @@ public class NodeService {
 
         // query system contract:node
         TbContract systemContract = contractService
-            .querySystemContract(networkId, cp.getSysContractNodeName());
+            .querySystemContract(groupId, cp.getSysContractNodeName());
         if (systemContract == null) {
             log.error("not found contract:node");
             new NodeMgrException(ConstantCode.NOT_FOUND_NODECONTRACT);
@@ -192,19 +192,19 @@ public class NodeService {
         funcParam.add(
             nodeName + ns + nodeInfo.getRpcport() + ns + nodeInfo.getP2pport() + ns + nodeInfo
                 .getChannelPort());
-        funcParam.add(networkId);
+        funcParam.add(groupId);
         funcParam.add(nodeInfo.getOrgName());
         funcParam.add(nodeIp);
 
         // get systemUserId
-        Integer systemUserId = userService.queryIdOfSystemUser(networkId);
+        Integer systemUserId = userService.queryIdOfSystemUser(groupId);
 
         // http post param
         TransactionParam postParam = new TransactionParam(systemUserId, systemContractV,
             cp.getSysContractNodeName(), "insertnode", funcParam);
 
         // request node front
-        frontService.sendTransaction(networkId, postParam);*/
+        frontService.sendTransaction(groupId, postParam);*/
 
         Integer nodeId = dbParam.getNodeId();
         log.debug("end addNodeInfo nodeId:{}", nodeId);
@@ -258,9 +258,9 @@ public class NodeService {
     /**
      * query current node list.
      */
-    public List<TbNode> queryCurrentNodeList(Integer networkId) throws NodeMgrException {
+    public List<TbNode> queryCurrentNodeList(Integer groupId) throws NodeMgrException {
         NodeParam queryParam = new NodeParam();
-        queryParam.setNetworkId(networkId);
+        queryParam.setGroupId(groupId);
         queryParam.setNodeType(NodeType.CURRENT.getValue());
         return qureyNodeList(queryParam);
     }
@@ -293,11 +293,11 @@ public class NodeService {
         log.debug("start queryNodeByIpAndP2pPort nodeIp:{} p2pPort:{}", nodeIp, p2pPort);
 
         if (StringUtils.isBlank(nodeIp)) {
-            log.error("fail getNetworkIdByNode. nodeIp blank");
+            log.error("fail getGroupIdByNode. nodeIp blank");
             throw new NodeMgrException(ConstantCode.NODE_IP_EMPTY);
         }
         if (p2pPort == null) {
-            log.error("fail getNetworkIdByNode. p2pPort null");
+            log.error("fail getGroupIdByNode. p2pPort null");
             throw new NodeMgrException(ConstantCode.NODE_P2P_PORT_EMPTY);
         }
         TbNode tbNode = null;

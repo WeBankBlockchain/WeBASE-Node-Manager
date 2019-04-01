@@ -27,9 +27,9 @@ import org.springframework.stereotype.Repository;
 public interface BlockMapper {
 
     /**
-     * query latest block number by networkId.
+     * query latest block number by groupId.
      */
-    BigInteger queryLatestBlockNumber(@Param("networkId") Integer networkId);
+    BigInteger queryLatestBlockNumber(@Param("groupId") Integer groupId);
 
     /**
      * Add new block data.
@@ -44,7 +44,7 @@ public interface BlockMapper {
     /**
      * query block count.
      */
-    Integer countOfBlock(@Param("networkId") Integer networkId, @Param("pkHash") String pkHash,
+    Integer countOfBlock(@Param("groupId") Integer groupId, @Param("pkHash") String pkHash,
         @Param("blockNumber") BigInteger blockNumber);
 
     /**
@@ -55,6 +55,6 @@ public interface BlockMapper {
     /**
      * Delete block height.
      */
-    Integer deleteSomeBlocks(@Param("networkId") Integer networkId,
+    Integer deleteSomeBlocks(@Param("groupId") Integer groupId,
         @Param("deleteNumber") BigInteger deleteNumber);
 }

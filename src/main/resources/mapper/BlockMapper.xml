@@ -6,8 +6,8 @@
 <mapper namespace="com.webank.webase.node.mgr.block.BlockMapper">
   <resultMap id="blockMap" type="com.webank.webase.node.mgr.block.TbBlock">
     <id column="pk_hash" javaType="java.lang.String" jdbcType="VARCHAR" property="pkHash"/>
-    <result column="network_id" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="networkId"/>
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId"/>
     <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="blockNumber"/>
     <result column="miner" javaType="java.lang.String" jdbcType="VARCHAR" property="miner"/>
@@ -22,24 +22,24 @@
   </resultMap>
 
   <sql id="NEW_ROW_COLUMN">
-		(pk_hash,network_id,block_number,miner,block_timestamp,trans_count,create_time,modify_time)
+		(pk_hash,group_id,block_number,miner,block_timestamp,trans_count,create_time,modify_time)
 	</sql>
 
   <select id="queryLatestBlockNumber" resultType="java.math.BigInteger">
-		select max(block_number) from tb_block where network_id=#{networkId}
+		select max(block_number) from tb_block where group_id=#{groupId}
 	</select>
 
   <insert id="addBlockRow" parameterType="com.webank.webase.node.mgr.block.TbBlock">
     insert ignore into tb_block
     <include refid="NEW_ROW_COLUMN"/>
-    values(#{pkHash},#{networkId},#{blockNumber},#{miner},#{blockTimestamp},#{transCount},NOW(),NOW())
+    values(#{pkHash},#{groupId},#{blockNumber},#{miner},#{blockTimestamp},#{transCount},NOW(),NOW())
   </insert>
 
   <select id="listOfBlock" parameterType="com.webank.webase.node.mgr.block.BlockListParam"
     resultMap="blockMap">
     select * from tb_block where 1=1
-    <if test="param.networkId != null">
-      and network_id = #{param.networkId}
+    <if test="param.groupId != null">
+      and group_id = #{param.groupId}
     </if>
     <if test="param.pkHash != null and param.pkHash != ''">
       and pk_hash = #{param.pkHash}
@@ -65,8 +65,8 @@
 
   <select id="countOfBlock" resultType="java.lang.Integer">
     select count(1) from tb_block where 1=1
-    <if test="networkId != null">
-      and network_id = #{networkId}
+    <if test="groupId != null">
+      and group_id = #{groupId}
     </if>
     <if test="pkHash != null and pkHash != ''">
       and pk_hash = #{pkHash}
@@ -77,11 +77,11 @@
   </select>
 
   <select id="queryMinMaxBlock" resultType="com.webank.webase.node.mgr.block.MinMaxBlock">
-		select network_id as networkId,max(block_number) maxBlockNumber,min(block_number) minBLockNumber
-		from tb_block group by network_id
+		select group_id as groupId,max(block_number) maxBlockNumber,min(block_number) minBLockNumber
+		from tb_block group by group_id
 	</select>
 
   <delete id="deleteSomeBlocks">
-		delete from tb_block where network_id = #{networkId} and block_number &lt; #{deleteNumber}
+		delete from tb_block where group_id = #{groupId} and block_number &lt; #{deleteNumber}
 	</delete>
 </mapper>

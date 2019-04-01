@@ -23,7 +23,6 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.NodeType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.scheduler.CheckNodeTask;
-import com.webank.webase.node.mgr.scheduler.SharedChainInfoTask;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -50,15 +49,13 @@ public class NodeController {
     @Autowired
     private NodeService nodeService;
     @Autowired
-    private SharedChainInfoTask sharedChainInfoTask;
-    @Autowired
     private CheckNodeTask checkNodeTask;
 
     /**
      * qurey node info list.
      */
-    @GetMapping(value = "/nodeList/{networkId}/{pageNumber}/{pageSize}")
-    public BasePageResponse queryNodeList(@PathVariable("networkId") Integer networkId,
+    @GetMapping(value = "/nodeList/{groupId}/{pageNumber}/{pageSize}")
+    public BasePageResponse queryNodeList(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "nodeName", required = false) String nodeName)
@@ -66,16 +63,16 @@ public class NodeController {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info(
-            "start queryNodeList startTime:{} networkId:{}  pageNumber:{} pageSize:{} nodeName:{}",
-            startTime.toEpochMilli(), networkId, pageNumber,
+            "start queryNodeList startTime:{} groupId:{}  pageNumber:{} pageSize:{} nodeName:{}",
+            startTime.toEpochMilli(), groupId, pageNumber,
             pageSize, nodeName);
 
         // share from chain
-        //sharedChainInfoTask.asyncShareFromChain(networkId, ShareType.NODE);
+        //sharedChainInfoTask.asyncShareFromChain(groupId, ShareType.NODE);
 
         // param
         NodeParam queryParam = new NodeParam();
-        queryParam.setNetworkId(networkId);
+        queryParam.setGroupId(groupId);
         queryParam.setPageSize(pageSize);
         queryParam.setNodeName(nodeName);
 
@@ -112,18 +109,18 @@ public class NodeController {
     /**
      * get node info.
      */
-    @GetMapping(value = "/nodeInfo/{networkId}")
-    public BaseResponse getNodeInfo(@PathVariable("networkId") Integer networkId,
+    @GetMapping(value = "/nodeInfo/{groupId}")
+    public BaseResponse getNodeInfo(@PathVariable("groupId") Integer groupId,
         @RequestParam(value = "nodeType", required = true) Integer nodeType)
         throws NodeMgrException {
 
         Instant startTime = Instant.now();
-        log.info("start addNodeInfo startTime:{} networkId:{} nodeType:{}",
-            startTime.toEpochMilli(), networkId, nodeType);
+        log.info("start addNodeInfo startTime:{} groupId:{} nodeType:{}",
+            startTime.toEpochMilli(), groupId, nodeType);
 
         // param
         NodeParam param = new NodeParam();
-        param.setNetworkId(networkId);
+        param.setGroupId(groupId);
         param.setNodeType(nodeType);
 
         // query node row

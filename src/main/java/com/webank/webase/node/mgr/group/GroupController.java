@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.network;
+package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -36,37 +36,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for processing network information.
+ * Controller for processing group information.
  */
 @Log4j2
 @RestController
-@RequestMapping("network")
-public class NetworkController {
+@RequestMapping("group")
+public class GroupController {
 
     @Autowired
-    private NetworkService networkService;
+    private GroupService groupService;
     @Autowired
     private TransDailyService transDailyService;
     @Autowired
     private StatisticsTransdailyTask statisticsTask;
 
     /**
-     * get network general.
+     * get group general.
      */
-    @GetMapping("/general/{networkId}")
-    public BaseResponse getNetworkGeneral(@PathVariable("networkId") Integer networkId)
+    @GetMapping("/general/{groupId}")
+    public BaseResponse getNetworkGeneral(@PathVariable("groupId") Integer groupId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        log.info("start getNetworkGeneral startTime:{} networkId:{}", startTime.toEpochMilli(),
-            networkId);
-        NetworkGeneral networkGeneral = null;
+        log.info("start getNetworkGeneral startTime:{} groupId:{}", startTime.toEpochMilli(),
+            groupId);
+        GroupGeneral groupGeneral = null;
 
         int statisticTimes = 0;// if transCount less than blockNumber,statistics again
         while (true) {
-            networkGeneral = networkService.queryNetworkGeneral(networkId);
-            BigInteger transactionCount = networkGeneral.getTransactionCount();
-            BigInteger latestBlock = networkGeneral.getLatestBlock();
+            groupGeneral = groupService.queryNetworkGeneral(groupId);
+            BigInteger transactionCount = groupGeneral.getTransactionCount();
+            BigInteger latestBlock = groupGeneral.getLatestBlock();
             if (transactionCount.compareTo(latestBlock) < 0 && statisticTimes == 0) {
                 statisticTimes += 1;
                 statisticsTask.updateTransdailyData();
@@ -76,14 +76,14 @@ public class NetworkController {
             }
         }
 
-        baseResponse.setData(networkGeneral);
+        baseResponse.setData(groupGeneral);
         log.info("end getNetworkGeneral useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
     }
 
     /**
-     * query all network.
+     * query all group.
      */
     @GetMapping("/all")
     public BasePageResponse getAllNetwork() throws NodeMgrException {
@@ -91,11 +91,11 @@ public class NetworkController {
         Instant startTime = Instant.now();
         log.info("start getAllNetwork startTime:{}", startTime.toEpochMilli());
 
-        // get all network list
-        List<TbNetwork> networkList = networkService.getAllNetwork();
-        Integer totalCount = Optional.ofNullable(networkList).map(list -> list.size()).orElse(0);
+        // get all group list
+        List<TbGroup> groupList = groupService.getAllNetwork();
+        Integer totalCount = Optional.ofNullable(groupList).map(list -> list.size()).orElse(0);
         pagesponse.setTotalCount(totalCount);
-        pagesponse.setData(networkList);
+        pagesponse.setData(groupList);
 
         log.info("end getAllNetwork useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
@@ -105,16 +105,16 @@ public class NetworkController {
     /**
      * get trans daily.
      */
-    @GetMapping("/transDaily/{networkId}")
-    public BaseResponse getTransDaily(@PathVariable("networkId") Integer networkId)
+    @GetMapping("/transDaily/{groupId}")
+    public BaseResponse getTransDaily(@PathVariable("groupId") Integer groupId)
         throws Exception {
         BaseResponse pagesponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start getTransDaily startTime:{} networkId:{}", startTime.toEpochMilli(),
-            networkId);
+        log.info("start getTransDaily startTime:{} groupId:{}", startTime.toEpochMilli(),
+            groupId);
 
         // query trans daily
-        List<SeventDaysTrans> listTrans = transDailyService.listSeventDayOfTrans(networkId);
+        List<SeventDaysTrans> listTrans = transDailyService.listSeventDayOfTrans(groupId);
         pagesponse.setData(listTrans);
 
         log.info("end getAllNetwork useTime:{} result:{}",

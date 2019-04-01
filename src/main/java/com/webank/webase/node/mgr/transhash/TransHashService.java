@@ -19,7 +19,10 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.block.MinMaxBlock;
+import com.webank.webase.node.mgr.transhash.entity.TransactionInfo;
+import com.webank.webase.node.mgr.web3.Web3Service;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
@@ -35,6 +38,8 @@ public class TransHashService {
 
     @Autowired
     private TransHashMapper transHashMapper;
+    @Autowired
+    private Web3Service web3Service;
 
     /**
      * add trans hash info.
@@ -103,21 +108,21 @@ public class TransHashService {
     /**
      * Remove some trans info.
      */
-    public Integer deleteSomeTrans(Integer networkId, BigInteger deleteBlockNumber)
+    public Integer deleteSomeTrans(Integer groupId, BigInteger deleteBlockNumber)
         throws NodeMgrException {
-        log.debug("start deleteSomeTrans. networkId:{} deleteBlockNumber:{}", networkId,
+        log.debug("start deleteSomeTrans. groupId:{} deleteBlockNumber:{}", groupId,
             deleteBlockNumber);
 
         Integer affectRow = 0;
         try {
-            affectRow = transHashMapper.deleteSomeTrans(networkId, deleteBlockNumber);
+            affectRow = transHashMapper.deleteSomeTrans(groupId, deleteBlockNumber);
         } catch (RuntimeException ex) {
-            log.error("fail deleteSomeTrans. networkId:{} deleteBlockNumber:{}", networkId,
+            log.error("fail deleteSomeTrans. groupId:{} deleteBlockNumber:{}", groupId,
                 deleteBlockNumber, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
-        log.debug("end deleteSomeTrans. networkId:{} deleteBlockNumber:{} affectRow:{}", networkId,
+        log.debug("end deleteSomeTrans. groupId:{} deleteBlockNumber:{} affectRow:{}", groupId,
             deleteBlockNumber, affectRow);
         return affectRow;
     }
@@ -145,5 +150,52 @@ public class TransHashService {
      */
     public void updateTransStatFlag(String transHash) {
         transHashMapper.updateTransStatFlag(transHash);
+    }
+
+    /**
+     * get tbTransInfo from chain
+     */
+    public List<TbTransHash> getTransListFromChain(Integer groupId, String transHash,
+        BigInteger blockNumber) {
+        log.debug("start getTransListFromChain.");
+        List<TbTransHash> transList = new ArrayList<>();
+        //find by transHash
+        if (transHash != null) {
+            TbTransHash tbTransHash = getTbTransFromFrontByHash(groupId, transHash);
+            if (tbTransHash != null) {
+                tbTransHash.setGroupId(groupId);
+                transList.add(tbTransHash);
+            }
+        }
+        //find trans by block number
+        if (transList.size() == 0 && blockNumber != null) {
+            List<TransactionInfo> transInBlock = web3Service
+                .getTransByBlockNumber(groupId, blockNumber);
+            transInBlock.stream().forEach(tran -> {
+                TbTransHash tbTransHash = new TbTransHash(tran.getHash(), groupId,
+                    tran.getBlockNumber(), null);
+                transList.add(tbTransHash);
+            });
+        }
+        log.debug("end getTransListFromChain.");
+        return transList;
+    }
+
+
+    /**
+     * request front for transaction by hash.
+     */
+    public TbTransHash getTbTransFromFrontByHash(Integer groupId, String transHash)
+        throws NodeMgrException {
+        log.info("start getTransFromFrontByHash. groupId:{}  transhash:{}", groupId,
+            transHash);
+        TransactionInfo transactionInfo = web3Service.getTransaction(groupId, transHash);
+        TbTransHash tbTransHash = null;
+        if (transactionInfo != null) {
+            tbTransHash = new TbTransHash(transHash, groupId, transactionInfo.getBlockNumber(),
+                null);
+        }
+        log.info("end getTransFromFrontByHash. tbTransHash:{}", JSON.toJSONString(tbTransHash));
+        return tbTransHash;
     }
 }

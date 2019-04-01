@@ -25,7 +25,7 @@ import lombok.Data;
 public class TbOrganization {
 
     private Integer orgId;
-    private Integer networkId;
+    private Integer groupId;
     private String orgName;
     private Integer orgStatus;
     private Integer orgType;

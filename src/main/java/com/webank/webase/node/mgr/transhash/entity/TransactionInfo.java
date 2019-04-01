@@ -13,17 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.logs;
+package com.webank.webase.node.mgr.transhash.entity;
 
+import java.math.BigInteger;
 import lombok.Data;
 
-/**
- * result of query min max row number.
- */
 @Data
-public class MinMaxRowNumber {
-
-    private Integer nodeId;
-    private int minRowNumber;
-    private int maxRowNumber;
+public class TransactionInfo {
+    private String hash;
+    private String nonce;
+    private String blockHash;
+    private BigInteger blockNumber;
+    private int transactionIndex;
+    private String from;
+    private String to;
+    private int value;
+    private Long gasPrice;
+    private Long gas;
+    private String input;
+    private int v;
+    private String nonceRaw;
+    private String blockNumberRaw;
+    private String transactionIndexRaw;
+    private String gasPriceRaw;
+    private String gasRaw;
 }

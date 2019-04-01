@@ -26,6 +26,6 @@ public class Organization {
     private Integer orgId;
     private String orgName;
     private String description;
-    private Integer networkId;
+    private Integer groupId;
     private Integer orgType;
 }

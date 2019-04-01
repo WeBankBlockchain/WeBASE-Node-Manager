@@ -13,17 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.report;
+package com.webank.webase.node.mgr.group;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 import lombok.Data;
 
 /**
- * Entity class for receive block info.
+ * Entity class of table tb_group.
  */
 @Data
-public class BlockInfo {
+public class TbGroup {
 
-    private Integer id;
-    private String jsonrpc;
-    private BlockRpcResultInfo result;
+    private Integer groupId;
+    private String groupName;
+    private int groupStatus;
+    private BigInteger latestBlock = BigInteger.ZERO;
+    private BigInteger transCount = BigInteger.ZERO;
+    private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
 }

@@ -21,7 +21,6 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ShareType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.scheduler.SharedChainInfoTask;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -44,8 +43,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private SharedChainInfoTask sharedChainInfoTask;
 
     /**
      * add new user info.
@@ -129,23 +126,20 @@ public class UserController {
     /**
      * qurey user info list.
      */
-    @GetMapping(value = "/userList/{networkId}/{pageNumber}/{pageSize}")
-    public BasePageResponse userList(@PathVariable("networkId") Integer networkId,
+    @GetMapping(value = "/userList/{groupId}/{pageNumber}/{pageSize}")
+    public BasePageResponse userList(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "userParam", required = false) String commParam)
         throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start userList startTime:{} networkId:{} pageNumber:{} pageSize:{} commParam:{}",
-            startTime.toEpochMilli(), networkId, pageNumber, pageSize,
+        log.info("start userList startTime:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
+            startTime.toEpochMilli(), groupId, pageNumber, pageSize,
             commParam);
 
-        // share from chain
-        sharedChainInfoTask.asyncShareFromChain(networkId, ShareType.USER);
-
         UserParam param = new UserParam();
-        param.setNetworkId(networkId);
+        param.setGroupId(groupId);
         param.setCommParam(commParam);
         param.setPageSize(pageSize);
 

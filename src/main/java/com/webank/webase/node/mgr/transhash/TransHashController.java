@@ -20,7 +20,6 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.front.FrontService;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
@@ -41,14 +40,13 @@ public class TransHashController {
 
     @Autowired
     private TransHashService transHashService;
-    @Autowired
-    private FrontService frontService;
+
 
     /**
      * query trans list.
      */
-    @GetMapping(value = "/transList/{networkId}/{pageNumber}/{pageSize}")
-    public BasePageResponse queryTransList(@PathVariable("networkId") Integer networkId,
+    @GetMapping(value = "/transList/{groupId}/{pageNumber}/{pageSize}")
+    public BasePageResponse queryTransList(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "transactionHash", required = false) String transHash,
@@ -57,11 +55,11 @@ public class TransHashController {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info(
-            "start queryTransList. startTime:{} networkId:{} pageNumber:{} pageSize:{} "
+            "start queryTransList. startTime:{} groupId:{} pageNumber:{} pageSize:{} "
                 + "transhash:{}",
-            startTime.toEpochMilli(), networkId,pageNumber, pageSize, transHash);
+            startTime.toEpochMilli(), groupId, pageNumber, pageSize, transHash);
 
-        TransListParam queryParam = new TransListParam(networkId, transHash, blockNumber);
+        TransListParam queryParam = new TransListParam(groupId, transHash, blockNumber);
 
         Integer count = transHashService.queryCountOfTran(queryParam);
         if (count != null && count > 0) {
@@ -74,17 +72,11 @@ public class TransHashController {
             pageResponse.setData(transList);
             pageResponse.setTotalCount(count);
         } else {
-            TbTransHash obj = null;
-            if (transHash != null) {
-                log.info(
-                    "info queryTransList. did not find transaction from DataBase, request"
-                        + " node front for transaction. transhash:{}",transHash);
-                obj = frontService.getTransFromFrontByHash(networkId, transHash);
-            }
-            if (obj != null) {
-                obj.setNetworkId(networkId);
-                pageResponse.setData(new TbTransHash[]{obj});
-                pageResponse.setTotalCount(1);
+            List<TbTransHash> transList = transHashService.getTransListFromChain(groupId,transHash,blockNumber);
+            //result
+            if (transList.size() > 0) {
+                pageResponse.setData(transList);
+                pageResponse.setTotalCount(transList.size());
             }
         }
 

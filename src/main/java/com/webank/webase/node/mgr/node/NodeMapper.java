@@ -35,11 +35,6 @@ public interface NodeMapper {
      */
     Integer countOfNode(NodeParam nodeParam);
 
-    /**
-     * query number of node by nodeIp、p2pPort、rpcPort.
-     */
-    Integer countByIpP2pRpc(@Param("nodeIp") String nodeIp, @Param("p2pPort") Integer p2pPort,
-        @Param("rpcPort") Integer rpcPort);
 
     /**
      * Query node list according to some conditions.
@@ -61,11 +56,6 @@ public interface NodeMapper {
      * update node info.
      */
     Integer updateNodeInfo(TbNode dbNode);
-
-    /**
-     * query max chainIndex of node.
-     */
-    Integer queryMaxChainIndex(Integer networkId);
 
     /**
      * query node info.

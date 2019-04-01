@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.report;
+package com.webank.webase.node.mgr.group;
 
-import java.time.LocalDateTime;
+import java.math.BigInteger;
+import java.time.LocalDate;
 import lombok.Data;
 
 /**
- * Entity class for receive node log.
+ * The latest statistics trans on all groups.
  */
 @Data
-public class NodeLogInfo {
+public class StatisticalGroupTransInfo {
 
-    private LocalDateTime logTime;
-    private String fileName;
-    private Integer rowNumber;
-    private String logMsg;
-
+    private Integer groupId;
+    private LocalDate maxDay;
+    private BigInteger blockNumber = BigInteger.ZERO;
+    private BigInteger transCount = BigInteger.ZERO;
 }

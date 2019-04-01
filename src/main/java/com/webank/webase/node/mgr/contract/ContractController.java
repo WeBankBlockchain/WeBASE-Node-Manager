@@ -22,7 +22,6 @@ import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ShareType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.scheduler.SharedChainInfoTask;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -45,8 +44,6 @@ public class ContractController {
 
     @Autowired
     private ContractService contractService;
-    @Autowired
-    private SharedChainInfoTask sharedChainInfoTask;
 
     /**
      * add new contract info.
@@ -95,20 +92,18 @@ public class ContractController {
     /**
      * qurey contract info list.
      */
-    @GetMapping(value = "/contractList/{networkId}/{pageNumber}/{pageSize}")
-    public BasePageResponse queryContractList(@PathVariable("networkId") Integer networkId,
+    @GetMapping(value = "/contractList/{groupId}/{pageNumber}/{pageSize}")
+    public BasePageResponse queryContractList(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize) throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start contractList. startTime:{} networkId:{} pageNumber:{} pageSize:{}",
-            startTime.toEpochMilli(), networkId, pageNumber, pageSize);
+        log.info("start contractList. startTime:{} groupId:{} pageNumber:{} pageSize:{}",
+            startTime.toEpochMilli(), groupId, pageNumber, pageSize);
 
-        // share from chain
-        sharedChainInfoTask.asyncShareFromChain(networkId, ShareType.CONTRACT);
 
         ContractParam param = new ContractParam();
-        param.setNetworkId(networkId);
+        param.setGroupId(groupId);
         // param.setContractType(ContractType.GENERALCONTRACT.getValue());
 
         Integer count = contractService.countOfContract(param);
@@ -194,12 +189,12 @@ public class ContractController {
         Instant startTime = Instant.now();
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
             JSON.toJSONString(param));
-
-        BaseResponse transRsp = contractService.sendTransaction(param);
-
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Object transRsp = contractService.sendTransaction(param);
+        baseResponse.setData(transRsp);
         log.info("end sendTransaction useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(transRsp));
+            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
 
-        return transRsp;
+        return baseResponse;
     }
 }

@@ -18,20 +18,14 @@ package com.webank.webase.node.mgr.block;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.network.NetworkService;
+import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
-import com.webank.webase.node.mgr.report.BlockInfo;
-import com.webank.webase.node.mgr.report.BlockRpcResultInfo;
-import com.webank.webase.node.mgr.transhash.TbTransHash;
 import com.webank.webase.node.mgr.transhash.TransHashService;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,15 +43,15 @@ public class BlockService {
     @Autowired
     private BlockMapper blockmapper;
     @Autowired
-    private NetworkService networkService;
+    private GroupService groupService;
     @Autowired
     private TransHashService transHashService;
 
     /**
      * save report block info.
      */
-    @Transactional
-    public void saveBLockInfo(BlockInfo blockInfo, Integer networkId) throws NodeMgrException {
+    /*@Transactional
+    public void saveBLockInfo(BlockInfo blockInfo, Integer groupId) throws NodeMgrException {
         if (blockInfo == null) {
             log.debug("fail saveBlockInfo. blockInfo null");
             return;
@@ -71,20 +65,20 @@ public class BlockService {
         List<String> transList = brri.getTransactions();
 
         // save block info
-        TbBlock tbBlock = new TbBlock(brri.getHash(), networkId, bigIntegerNumber,
+        TbBlock tbBlock = new TbBlock(brri.getHash(), groupId, bigIntegerNumber,
             brri.getMinerNodeId(), localDateTime, transList.size());
         addBlockInfo(tbBlock);
 
         // update latest block number
-        networkService.updateNetworkInfo(networkId, bigIntegerNumber);
+        groupService.updateNetworkInfo(groupId, bigIntegerNumber);
 
         // save trans hashfor
         for (String hashStr : transList) {
-            TbTransHash tbTransHash = new TbTransHash(hashStr, networkId, bigIntegerNumber,
+            TbTransHash tbTransHash = new TbTransHash(hashStr, groupId, bigIntegerNumber,
                 localDateTime);
             transHashService.addTransInfo(tbTransHash);
         }
-    }
+    }*/
 
 
     /**
@@ -94,7 +88,7 @@ public class BlockService {
     public void addBlockInfo(TbBlock tbBlock) throws NodeMgrException {
         log.debug("start addBlockInfo tbBlock:{}", JSON.toJSONString(tbBlock));
         // check reportBLock == dbMaxBLock +1
-        BigInteger dbMaxBLock = blockmapper.queryLatestBlockNumber(tbBlock.getNetworkId());
+        BigInteger dbMaxBLock = blockmapper.queryLatestBlockNumber(tbBlock.getGroupId());
 
         BigInteger reportBlock = tbBlock.getBlockNumber();
         if (dbMaxBLock != null && !(reportBlock.compareTo(dbMaxBLock.add(numberOne)) == 0)) {
@@ -117,11 +111,11 @@ public class BlockService {
         throws NodeMgrException {
         log.debug("start getLatestBlockNumber nodeIp:{} nodeP2PPort:{}", nodeIp, nodeP2PPort);
         TbNode nodeRow = nodeService.queryNodeByIpAndP2pPort(nodeIp, nodeP2PPort);
-        Integer networkId = Optional.ofNullable(nodeRow).map(node -> node.getNetworkId())
+        Integer groupId = Optional.ofNullable(nodeRow).map(node -> node.getGroupId())
             .orElseThrow(() -> new NodeMgrException(ConstantCode.INVALID_NODE_INFO));
 
         try {
-            BigInteger latestBlock = blockmapper.queryLatestBlockNumber(networkId);
+            BigInteger latestBlock = blockmapper.queryLatestBlockNumber(groupId);
             log.debug("end getLatestBlockNumber nodeIp:{} nodeP2PPort:{} latestBlock:{}", nodeIp,
                 nodeP2PPort, latestBlock);
             return latestBlock;
@@ -152,16 +146,16 @@ public class BlockService {
     /**
      * query count of block.
      */
-    public Integer queryCountOfBlock(Integer networkId, String pkHash, BigInteger blockNumber)
+    public Integer queryCountOfBlock(Integer groupId, String pkHash, BigInteger blockNumber)
         throws NodeMgrException {
-        log.debug("start countOfBlock networkId:{} pkHash:{} blockNumber:{}", networkId, pkHash,
+        log.debug("start countOfBlock groupId:{} pkHash:{} blockNumber:{}", groupId, pkHash,
             blockNumber);
         try {
-            Integer count = blockmapper.countOfBlock(networkId, pkHash, blockNumber);
-            log.info("end countOfBlock networkId:{} pkHash:{} count:{}", networkId, pkHash, count);
+            Integer count = blockmapper.countOfBlock(groupId, pkHash, blockNumber);
+            log.info("end countOfBlock groupId:{} pkHash:{} count:{}", groupId, pkHash, count);
             return count;
         } catch (RuntimeException ex) {
-            log.error("fail countOfBlock networkId:{} pkHash:{}", networkId, pkHash, ex);
+            log.error("fail countOfBlock groupId:{} pkHash:{}", groupId, pkHash, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -185,21 +179,21 @@ public class BlockService {
     /**
      * Remove all block heights less than inputValue.
      */
-    public Integer deleteSomeBlocks(Integer networkId, BigInteger deleteBlockNumber)
+    public Integer deleteSomeBlocks(Integer groupId, BigInteger deleteBlockNumber)
         throws NodeMgrException {
-        log.debug("start deleteSomeBlocks. networkId:{} deleteBlockNumber:{}", networkId,
+        log.debug("start deleteSomeBlocks. groupId:{} deleteBlockNumber:{}", groupId,
             deleteBlockNumber);
 
         Integer affectRow = 0;
         try {
-            affectRow = blockmapper.deleteSomeBlocks(networkId, deleteBlockNumber);
+            affectRow = blockmapper.deleteSomeBlocks(groupId, deleteBlockNumber);
         } catch (RuntimeException ex) {
-            log.error("fail deleteSomeBlocks. networkId:{} deleteBlockNumber:{}", networkId,
+            log.error("fail deleteSomeBlocks. groupId:{} deleteBlockNumber:{}", groupId,
                 deleteBlockNumber, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
-        log.debug("end deleteSomeBlocks. networkId:{} deleteBlockNumber:{} affectRow:{}", networkId,
+        log.debug("end deleteSomeBlocks. groupId:{} deleteBlockNumber:{} affectRow:{}", groupId,
             deleteBlockNumber, affectRow);
         return affectRow;
     }

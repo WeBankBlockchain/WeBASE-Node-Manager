@@ -27,6 +27,7 @@ import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.transhash.TbTransHash;
 import com.webank.webase.node.mgr.transhash.TransHashService;
 import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.web3.Web3Service;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -36,7 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +61,8 @@ public class MonitorService {
     private UserService userService;
     @Autowired
     private TransHashService transHashService;
+    @Autowired
+    private Web3Service web3Service;
 
     public void addRow(TbMonitor tbMonitor) {
         monitorMapper.addRow(tbMonitor);
@@ -69,26 +72,25 @@ public class MonitorService {
         monitorMapper.updateRow(tbMonitor);
     }
 
-    public void updateUnusualUser(Integer networkId, String userName, String address) {
+    public void updateUnusualUser(Integer groupId, String userName, String address) {
         log.info("start updateUnusualUser address:{}", address);
-        monitorMapper.updateUnusualUser(networkId, userName, address);
+        monitorMapper.updateUnusualUser(groupId, userName, address);
     }
 
     /**
      * update unusual contract.
      */
-    public void updateUnusualContract(Integer networkId, String contractName, String contractBin)
+    public void updateUnusualContract(Integer groupId, String contractName, String contractBin)
         throws NodeMgrException {
         try {
-            log.info("start updateUnusualContract networkId:{} contractName:{} contractBin:{}",
-                networkId, contractName, contractBin);
+            log.info("start updateUnusualContract groupId:{} contractName:{} contractBin:{}",
+                groupId, contractName, contractBin);
             String txHash = monitorMapper
-                .queryUnusualTxhash(networkId, contractBin.substring(contractBin.length() - 10));
+                .queryUnusualTxhash(groupId, contractBin.substring(contractBin.length() - 10));
             if (StringUtils.isBlank(txHash)) {
                 return;
             }
-            ChainTransInfo chainTransInfo = frontService
-                .getTransInfoFromFrontByHash(networkId, txHash);
+            ChainTransInfo chainTransInfo = web3Service.getTransInfoFromFrontByHash(groupId, txHash);
             if (chainTransInfo == null) {
                 return;
             }
@@ -97,7 +99,7 @@ public class MonitorService {
             // contract deploy
             if (StringUtils.isBlank(chainTransInfo.getTo())) {
                 List<TbContract> contractRow = contractService
-                    .queryContractByBin(networkId, contractBin.substring(2));
+                    .queryContractByBin(groupId, contractBin.substring(2));
                 if (contractRow != null && contractRow.size() > 0) {
                     interfaceName = contractRow.get(0).getContractName();
                 } else {
@@ -107,7 +109,7 @@ public class MonitorService {
             } else {    // function call
                 String methodId = chainTransInfo.getInput().substring(0, 10);
                 List<TbContract> contractRow = contractService
-                    .queryContractByBin(networkId, contractBin.substring(2));
+                    .queryContractByBin(groupId, contractBin.substring(2));
                 if (contractRow != null && contractRow.size() > 0) {
                     List<AbiDefinition> abiList = Web3Tools
                         .loadContractDefinition(contractRow.get(0).getContractAbi());
@@ -129,7 +131,7 @@ public class MonitorService {
                     transUnusualType = 1;
                 }
             }
-            monitorMapper.updateUnusualContract(networkId, contractName,
+            monitorMapper.updateUnusualContract(groupId, contractName,
                 contractBin.substring(contractBin.length() - 10), interfaceName, transUnusualType);
         } catch (Exception ex) {
             log.error("fail updateUnusualContract", ex);
@@ -147,9 +149,9 @@ public class MonitorService {
     /**
      * query monitor user list.
      */
-    public List<TbMonitor> qureyMonitorUserList(Integer networkId) throws NodeMgrException {
+    public List<TbMonitor> qureyMonitorUserList(Integer groupId) throws NodeMgrException {
 
-        List<TbMonitor> monitorUserList = monitorMapper.monitorUserList(networkId);
+        List<TbMonitor> monitorUserList = monitorMapper.monitorUserList(groupId);
 
         log.debug("end qureyMonitorUserList monitorUserList:{}",
             JSON.toJSONString(monitorUserList));
@@ -159,11 +161,11 @@ public class MonitorService {
     /**
      * query monitor interface list.
      */
-    public List<TbMonitor> qureyMonitorInterfaceList(Integer networkId, String userName)
+    public List<TbMonitor> qureyMonitorInterfaceList(Integer groupId, String userName)
         throws NodeMgrException {
 
         List<TbMonitor> monitorInterfaceList = monitorMapper
-            .monitorInterfaceList(networkId, userName);
+            .monitorInterfaceList(groupId, userName);
 
         log.debug("end qureyMonitorInterfaceList monitorInterfaceList:{}",
             JSON.toJSONString(monitorInterfaceList));
@@ -173,16 +175,16 @@ public class MonitorService {
     /**
      * query monitor trans list.
      */
-    public BaseResponse qureyMonitorTransList(Integer networkId, String userName, String startDate,
+    public BaseResponse qureyMonitorTransList(Integer groupId, String userName, String startDate,
         String endDate, String interfaceName)
         throws NodeMgrException {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
 
-        Integer count = countOfMonitorTrans(networkId, userName, startDate, endDate, interfaceName);
-        List<PageTransInfo> transInfoList = qureyTransCountList(networkId, userName, startDate,
+        Integer count = countOfMonitorTrans(groupId, userName, startDate, endDate, interfaceName);
+        List<PageTransInfo> transInfoList = qureyTransCountList(groupId, userName, startDate,
             endDate, interfaceName);
 
-        MonitorTrans monitorTrans = new MonitorTrans(networkId, userName, interfaceName, count,
+        MonitorTrans monitorTrans = new MonitorTrans(groupId, userName, interfaceName, count,
             transInfoList);
         response.setData(monitorTrans);
         return response;
@@ -191,18 +193,18 @@ public class MonitorService {
     /**
      * query count of monitor trans.
      */
-    public Integer countOfMonitorTrans(Integer networkId, String userName, String startDate,
+    public Integer countOfMonitorTrans(Integer groupId, String userName, String startDate,
         String endDate, String interfaceName) throws NodeMgrException {
 
         Map<String, Object> queryParam = new HashMap<>();
-        queryParam.put("networkId", networkId);
+        queryParam.put("groupId", groupId);
         queryParam.put("userName", userName);
         queryParam.put("startDate", startDate);
         queryParam.put("endDate", endDate);
         queryParam.put("interfaceName", interfaceName);
 
         Integer count = monitorMapper.countOfMonitorTrans(queryParam);
-        log.debug("end countOfMonitorTrans networkId:{} userName:{} count:{}", networkId, userName,
+        log.debug("end countOfMonitorTrans groupId:{} userName:{} count:{}", groupId, userName,
             count);
         return count;
     }
@@ -210,18 +212,18 @@ public class MonitorService {
     /**
      * query trans count list.
      */
-    public List<PageTransInfo> qureyTransCountList(Integer networkId, String userName,
+    public List<PageTransInfo> qureyTransCountList(Integer groupId, String userName,
         String startDate, String endDate, String interfaceName) throws NodeMgrException {
 
         Map<String, Object> queryParam = new HashMap<>();
-        queryParam.put("networkId", networkId);
+        queryParam.put("groupId", groupId);
         queryParam.put("userName", userName);
         queryParam.put("startDate", startDate);
         queryParam.put("endDate", endDate);
         queryParam.put("interfaceName", interfaceName);
 
         List<PageTransInfo> list = monitorMapper.qureyTransCountList(queryParam);
-        log.debug("end qureyMonitorTransList networkId:{} userName:{} list:{}", networkId, userName,
+        log.debug("end qureyMonitorTransList groupId:{} userName:{} list:{}", groupId, userName,
             list.toString());
         return list;
     }
@@ -229,24 +231,24 @@ public class MonitorService {
     /**
      * query count of unusual user.
      */
-    public Integer countOfUnusualUser(Integer networkId, String userName) {
-        return monitorMapper.countOfUnusualUser(networkId, userName);
+    public Integer countOfUnusualUser(Integer groupId, String userName) {
+        return monitorMapper.countOfUnusualUser(groupId, userName);
     }
 
     /**
      * query unusual user list.
      */
-    public List<UnusualUserInfo> qureyUnusualUserList(Integer networkId, String userName,
+    public List<UnusualUserInfo> qureyUnusualUserList(Integer groupId, String userName,
         Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
-        log.debug("start qureyUnusualUserList networkId:{} userName:{} pageNumber:{} pageSize:{}",
-            networkId, userName, pageNumber,
+        log.debug("start qureyUnusualUserList groupId:{} userName:{} pageNumber:{} pageSize:{}",
+            groupId, userName, pageNumber,
             pageSize);
 
         Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
             .orElse(null);
         Map<String, Object> queryParam = new HashMap<>();
-        queryParam.put("networkId", networkId);
+        queryParam.put("groupId", groupId);
         queryParam.put("userName", userName);
         queryParam.put("start", start);
         queryParam.put("pageSize", pageSize);
@@ -261,25 +263,25 @@ public class MonitorService {
     /**
      * query count of unusual contract.
      */
-    public Integer countOfUnusualContract(Integer networkId, String contractAddress) {
-        return monitorMapper.countOfUnusualContract(networkId, contractAddress);
+    public Integer countOfUnusualContract(Integer groupId, String contractAddress) {
+        return monitorMapper.countOfUnusualContract(groupId, contractAddress);
     }
 
     /**
      * query unusual contract list.
      */
-    public List<UnusualContractInfo> qureyUnusualContractList(Integer networkId,
+    public List<UnusualContractInfo> qureyUnusualContractList(Integer groupId,
         String contractAddress, Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
         log.debug(
-            "start qureyUnusualContractList networkId:{} userName:{} pageNumber:{} pageSize:{}",
-            networkId, contractAddress, pageNumber,
+            "start qureyUnusualContractList groupId:{} userName:{} pageNumber:{} pageSize:{}",
+            groupId, contractAddress, pageNumber,
             pageSize);
 
         Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
             .orElse(null);
         Map<String, Object> queryParam = new HashMap<>();
-        queryParam.put("networkId", networkId);
+        queryParam.put("groupId", groupId);
         queryParam.put("contractAddress", contractAddress);
         queryParam.put("start", start);
         queryParam.put("pageSize", pageSize);
@@ -317,15 +319,15 @@ public class MonitorService {
                 // transUnusualType(0:normal, 1:abnormal contract, 2:abnormal function)
                 int transUnusualType = 0;
 
-                ChainTransInfo chainTransInfo = frontService
-                    .getTransInfoFromFrontByHash(transHashList.get(i).getNetworkId(),
+                ChainTransInfo chainTransInfo = web3Service
+                    .getTransInfoFromFrontByHash(transHashList.get(i).getGroupId(),
                         transHashList.get(i).getTransHash());
                 if (chainTransInfo == null) {
                     continue;
                 }
 
                 String userName = userService
-                    .queryUserNameByAddress(transHashList.get(i).getNetworkId(),
+                    .queryUserNameByAddress(transHashList.get(i).getGroupId(),
                         chainTransInfo.getFrom());
                 if (StringUtils.isBlank(userName)) {
                     userName = chainTransInfo.getFrom();
@@ -335,14 +337,14 @@ public class MonitorService {
                 String contractBin = "";
                 // contract deploy
                 if (StringUtils.isBlank(chainTransInfo.getTo())) {
-                    contractAddress = frontService
-                        .getAddressFromFrontByHash(transHashList.get(i).getNetworkId(),
+                    contractAddress = web3Service
+                        .getAddressFromFrontByHash(transHashList.get(i).getGroupId(),
                             transHashList.get(i).getTransHash());
-                    contractBin = frontService
-                        .getCodeFromFront(transHashList.get(i).getNetworkId(), contractAddress,
+                    contractBin = web3Service
+                        .getCodeFromFront(transHashList.get(i).getGroupId(), contractAddress,
                             transHashList.get(i).getBlockNumber());
                     List<TbContract> contractRow = contractService
-                        .queryContractByBin(transHashList.get(i).getNetworkId(), contractBin);
+                        .queryContractByBin(transHashList.get(i).getGroupId(), contractBin);
                     if (contractRow != null && contractRow.size() > 0) {
                         contractName = contractRow.get(0).getContractName();
                         interfaceName = contractRow.get(0).getContractName();
@@ -358,13 +360,13 @@ public class MonitorService {
                 } else {    // function call
                     String methodId = chainTransInfo.getInput().substring(0, 10);
                     contractAddress = chainTransInfo.getTo();
-                    contractBin = frontService
-                        .getCodeFromFront(transHashList.get(i).getNetworkId(), contractAddress,
+                    contractBin = web3Service
+                        .getCodeFromFront(transHashList.get(i).getGroupId(), contractAddress,
                             transHashList.get(i).getBlockNumber());
                     transType = 1;
 
                     List<TbContract> contractRow = contractService
-                        .queryContractByBin(transHashList.get(i).getNetworkId(), contractBin);
+                        .queryContractByBin(transHashList.get(i).getGroupId(), contractBin);
                     if (contractRow != null && contractRow.size() > 0) {
                         contractName = contractRow.get(0).getContractName();
                         List<AbiDefinition> abiList = Web3Tools
@@ -396,7 +398,7 @@ public class MonitorService {
                 TbMonitor tbMonitor = new TbMonitor();
                 tbMonitor.setUserName(userName);
                 tbMonitor.setUserType(userType);
-                tbMonitor.setNetworkId(transHashList.get(i).getNetworkId());
+                tbMonitor.setGroupId(transHashList.get(i).getGroupId());
                 tbMonitor.setContractName(contractName);
                 tbMonitor.setContractAddress(contractAddress);
                 tbMonitor.setInterfaceName(interfaceName);

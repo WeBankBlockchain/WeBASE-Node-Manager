@@ -23,7 +23,7 @@ public class TbUser {
 
     private Integer userId;
     private String userName;
-    private Integer networkId;
+    private Integer groupId;
     private Integer orgId;
     private String publicKey;
     private Integer userStatus;
@@ -43,14 +43,14 @@ public class TbUser {
      * init TbUser.
      */
     public TbUser(Integer chainIndex, Integer hasPk, Integer userType, String userName,
-        Integer networkId, Integer orgId, String address,
+        Integer groupId, Integer orgId, String address,
         String publicKey, String description) {
         super();
         this.chainIndex = chainIndex;
         this.hasPk = hasPk;
         this.userType = userType;
         this.userName = userName;
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.orgId = orgId;
         this.publicKey = publicKey;
         this.description = description;
@@ -60,14 +60,14 @@ public class TbUser {
     /**
      * init TbUser.
      */
-    public TbUser(Integer hasPk, Integer userType, String userName, Integer networkId,
+    public TbUser(Integer hasPk, Integer userType, String userName, Integer groupId,
         Integer orgId, String address, String publicKey,
         String description) {
         super();
         this.hasPk = hasPk;
         this.userType = userType;
         this.userName = userName;
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.orgId = orgId;
         this.publicKey = publicKey;
         this.description = description;

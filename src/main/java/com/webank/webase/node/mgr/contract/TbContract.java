@@ -26,7 +26,7 @@ public class TbContract {
 
     private Integer contractId;
     private String contractName;
-    private Integer networkId;
+    private Integer groupId;
     private Integer chainIndex;
     private Integer contractType;
     private String contractSource;
@@ -46,14 +46,14 @@ public class TbContract {
     }
 
     /**
-     * init by contractId、contractName、networkId、contractVersion.
+     * init by contractId、contractName、groupId、contractVersion.
      */
-    public TbContract(Integer contractId, String contractName, Integer networkId,
+    public TbContract(Integer contractId, String contractName, Integer groupId,
         String contractVersion) {
         super();
         this.contractId = contractId;
         this.contractName = contractName;
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.contractVersion = contractVersion;
     }
 }

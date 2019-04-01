@@ -13,23 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.network;
+package com.webank.webase.node.mgr.transhash.entity;
+
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Data;
 
-/**
- * Entity class of table tb_network.
- */
 @Data
-public class TbNetwork {
+public class TransReceipt {
 
-    private Integer networkId;
-    private String networkName;
-    private int networkStatus;
-    private BigInteger latestBlock = BigInteger.ZERO;
-    private BigInteger transCount = BigInteger.ZERO;
-    private LocalDateTime createTime;
-    private LocalDateTime modifyTime;
+    private String transactionHash;
+    private int transactionIndex;
+    private String blockHash;
+    private BigInteger blockNumber;
+    private int cumulativeGasUsed;
+    private int gasUsed;
+    private String contractAddress;
+    private String status;
+    private String from;
+    private String to;
+    private String output;
+    private List<Object> logs;
+    private String logsBloom;
+    private String blockNumberRaw;
+    private String transactionIndexRaw;
+    private boolean statusOK;
+    private String gasUsedRaw;
 }

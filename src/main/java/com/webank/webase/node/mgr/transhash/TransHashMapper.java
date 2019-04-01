@@ -35,7 +35,7 @@ public interface TransHashMapper {
 
     List<MinMaxBlock> queryMinMaxBlock();
 
-    Integer deleteSomeTrans(@Param("networkId") Integer networkId,
+    Integer deleteSomeTrans(@Param("groupId") Integer groupId,
         @Param("deleteNumber") BigInteger deleteNumber);
 
     List<TbTransHash> listOfUnStatTransHash();

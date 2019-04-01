@@ -18,22 +18,18 @@ package com.webank.webase.node.mgr.contract;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
-import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.front.TransactionParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
-import com.webank.webase.node.mgr.network.NetworkService;
+import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.user.UserService;
-import java.math.BigInteger;
+import com.webank.webase.node.mgr.web3.Web3Service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,14 +40,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- *  services for contract data.
+ * services for contract data.
  */
 @Log4j2
 @Service
 public class ContractService {
 
     @Autowired
-    private NetworkService networkService;
+    private GroupService groupService;
     @Autowired
     private ContractMapper contractMapper;
     @Autowired
@@ -62,17 +58,19 @@ public class ContractService {
     private MonitorService monitorService;
     @Autowired
     private ConstantProperties cp;
+    @Autowired
+    private Web3Service web3Service;
 
     /**
      * add new contract data.
      */
     public Integer addContractInfo(Contract contract) throws NodeMgrException {
         log.debug("start addContractInfo Contract:{}", JSON.toJSONString(contract));
-        Integer networkId = Optional.ofNullable(contract).map(c -> c.getNetworkId())
+        Integer groupId = Optional.ofNullable(contract).map(c -> c.getGroupId())
             .orElseThrow(() -> new NodeMgrException(ConstantCode.INVALID_PARAM_INFO));
 
-        // check network id
-        networkService.checkNetworkId(networkId);
+        // check group id
+        groupService.checkgroupId(groupId);
 
         // check netowrkid銆乧ontractName銆乧ontractVersion
         ContractParam param = new ContractParam(contract.getContractName(),
@@ -85,7 +83,7 @@ public class ContractService {
 
         // add row
         TbContract tbContract = new TbContract();
-        tbContract.setNetworkId(contract.getNetworkId());
+        tbContract.setGroupId(contract.getGroupId());
         tbContract.setContractName(contract.getContractName());
         tbContract.setContractVersion(contract.getContractVersion());
         tbContract.setContractSource(contract.getContractSource());
@@ -238,7 +236,7 @@ public class ContractService {
 
         if (contractFrom != null) {
             contractTo.setContractId(contractFrom.getContractId());
-            contractTo.setNetworkId(contractFrom.getNetworkId());
+            contractTo.setGroupId(contractFrom.getGroupId());
             contractTo.setContractName(contractFrom.getContractName());
             contractTo.setContractVersion(contractFrom.getContractVersion());
             contractTo.setContractSource(contractFrom.getContractSource());
@@ -263,11 +261,11 @@ public class ContractService {
     /**
      * query Contract By Address.
      */
-    public List<TbContract> queryContractByBin(Integer networkId, String contractBin)
+    public List<TbContract> queryContractByBin(Integer groupId, String contractBin)
         throws NodeMgrException {
         try {
             List<TbContract> contractRow = contractMapper
-                .queryContractByBin(networkId, contractBin);
+                .queryContractByBin(groupId, contractBin);
             log.debug("start queryContractByBin:{}", contractBin, JSON.toJSONString(contractRow));
             return contractRow;
         } catch (RuntimeException ex) {
@@ -283,7 +281,7 @@ public class ContractService {
     @Transactional
     public TbContract deployContract(Contract contract) throws NodeMgrException {
         log.info("start deployContract. contract:{}", JSON.toJSONString(contract));
-        Integer networkId = contract.getNetworkId();
+        Integer groupId = contract.getGroupId();
         Integer contractId = contract.getContractId();
         String contractSource = contract.getContractSource();
         String contractBin = contract.getContractBin();
@@ -293,9 +291,6 @@ public class ContractService {
         if (StringUtils.isAnyBlank(contractSource, contractBin, contractAbi, bytecodeBin)) {
             throw new NodeMgrException(ConstantCode.CONTRACT_HAS_NOT_COMPILE);
         }
-
-        // get systemUserId
-        Integer systemUserId = userService.queryIdOfSystemUser(networkId);
 
         if (contractId == null) {
             log.info("contract had not save. save contract now");
@@ -323,60 +318,31 @@ public class ContractService {
         tbc.setContractAbi(contractAbi);
         tbc.setBytecodeBin(bytecodeBin);
 
-        BaseResponse rsp = frontService
-            .postNodeFront(networkId, FrontService.FRONT_CONTRACT_DEPLOY, params);
-        if (rsp.getCode() != 0) {
+        String contractAddress = null;
+        try {
+            contractAddress = frontService
+                .postFrontForEntity(groupId, FrontService.FRONT_CONTRACT_DEPLOY, params,
+                    String.class);
+        } catch (Exception ex) {
             // deploy fail
             tbc.setContractStatus(ContractStatus.DEPLOYMENTFAILED.getValue());
-            tbc.setDescription(rsp.getMessage());
+            tbc.setDescription(ex.getMessage());
             contractMapper.updateContract(tbc);
-            throw new NodeMgrException(rsp.getCode(), rsp.getMessage());
-        } else {
-            // deploy success
-            String address = (String) rsp.getData();
-            log.info("deploy contract success. address:{}", address);
-            tbc.setContractStatus(ContractStatus.DEPLOYED.getValue());
-            tbc.setContractAddress(address);
-            contractMapper.updateContract(tbc);
-
-            // update monitor unusual contract's info
-            monitorService.updateUnusualContract(networkId, tbc.getContractName(), contractBin);
-
-            if (!cp.getSupportTransaction()) {
-                log.info("current config is not support transaction");
-                return tbc;
-            }
-
-            // query system contract:contractDetail
-            TbContract systemContract = querySystemContract(networkId,
-                cp.getSysContractContractdetailName());
-            if (systemContract == null) {
-                log.error("not found contract:contractdetail");
-                new NodeMgrException(ConstantCode.NOT_FOUND_CONTRACTDETAIL);
-            }
-            String systemContractV = systemContract.getContractVersion();
-
-            // contract func param
-            List<Object> funcParam = new LinkedList<>();
-            funcParam.add(address);
-            funcParam.add(
-                tbc.getContractName() + ConstantProperties.NAME_SPRIT + tbc.getContractVersion());
-            funcParam.add(contractAbi);
-            funcParam.add(contractBin);
-            funcParam.add(networkId);
-            funcParam.add(tbc.getDeployTime());
-            funcParam.add(contractSource);
-
-            // http post param
-            TransactionParam postParam = new TransactionParam(systemUserId, systemContractV,
-                cp.getSysContractContractdetailName(), "insertContract",
-                funcParam);
-
-            // request node front
-            frontService.sendTransaction(networkId, postParam);
+            throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL.getCode(),
+                ex.getMessage());
         }
-        log.debug("end deployContract. contractId:{} networkId:{} accress:{}", contractId,
-            networkId, tbc.getContractAddress());
+
+        // deploy success
+        log.info("deploy contract success. address:{}", contractAddress);
+        tbc.setContractStatus(ContractStatus.DEPLOYED.getValue());
+        tbc.setContractAddress(contractAddress);
+        contractMapper.updateContract(tbc);
+
+        // update monitor unusual contract's info
+        monitorService.updateUnusualContract(groupId, tbc.getContractName(), contractBin);
+
+        log.debug("end deployContract. contractId:{} groupId:{} accress:{}", contractId,
+            groupId, tbc.getContractAddress());
         return tbc;
     }
 
@@ -391,42 +357,12 @@ public class ContractService {
         return tbContract;
     }
 
-    /**
-     * query system contract.
-     */
-    public TbContract querySystemContract(Integer networkId, String contractName) {
-        log.debug("start querySystemContract. networkId:{} contractName:{}", networkId,
-            contractName);
-        if (networkId == null) {
-            log.info("fail querySystemContract. networkId is null");
-            new NodeMgrException(ConstantCode.NETWORK_ID_NULL);
-        }
-        if (StringUtils.isBlank(contractName)) {
-            log.info("fail querySystemContract. contractName is null");
-            new NodeMgrException(ConstantCode.CONTRACT_NAME_EMPTY);
-        }
-
-        // param
-        ContractParam queryParam = new ContractParam();
-        queryParam.setNetworkId(networkId);
-        queryParam.setContractName(contractName);
-        queryParam.setContractType(ContractType.SYSTEMCONTRACT.getValue());
-
-        TbContract contractInfo = contractMapper.queryContract(queryParam);
-        log.debug("end querySystemContract");
-        return contractInfo;
-    }
 
     /**
      * send transaction.
      */
-    public BaseResponse sendTransaction(Transaction param) throws NodeMgrException {
+    public Object sendTransaction(Transaction param) throws NodeMgrException {
         log.debug("start sendTransaction. param:{}", JSON.toJSONString(param));
-
-        if (!cp.getSupportTransaction()) {
-            log.error("current config is not support transaction");
-            throw new NodeMgrException(ConstantCode.NOT_SUPPORT_TRANS);
-        }
 
         if (param == null) {
             log.info("fail sendTransaction. request param is null");
@@ -434,7 +370,7 @@ public class ContractService {
         }
         // query param
         ContractParam queryParam = new ContractParam();
-        queryParam.setNetworkId(param.getNetworkId());
+        queryParam.setGroupId(param.getGroupId());
         queryParam.setContractName(param.getContractName());
         queryParam.setContractVersion(param.getVersion());
 
@@ -451,8 +387,8 @@ public class ContractService {
         }
 
         // request send transaction
-        BaseResponse frontRsp = frontService
-            .postNodeFront(param.getNetworkId(), FrontService.FRONT_SEND_TRANSACTION, param);
+        Object frontRsp = frontService
+            .postFrontForEntity(param.getGroupId(), FrontService.FRONT_SEND_TRANSACTION, param,Object.class);
         log.debug("end sendTransaction. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
@@ -460,23 +396,23 @@ public class ContractService {
     /**
      * update system contract.
      */
-    public void updateSystemContract(Contract contract) throws NodeMgrException {
+   /* public void updateSystemContract(Contract contract) throws NodeMgrException {
         log.debug("start updateSystemContract.");
-        Integer networkId = contract.getNetworkId();
-        List<RspSystemProxy> rspList = frontService.getSystemProxy(networkId, contract.getUserId());
+        Integer groupId = contract.getGroupId();
+        List<RspSystemProxy> rspList = web3Service.getSystemProxy(groupId, contract.getUserId());
 
         for (RspSystemProxy rspSystemProxy : rspList) {
             String systemContractBin = contractMapper
-                .querySystemContractBin(networkId, rspSystemProxy.getName());
+                .querySystemContractBin(groupId, rspSystemProxy.getName());
             if (!StringUtils.isBlank(systemContractBin)) {
                 break;
             }
             String address = rspSystemProxy.getAddress();
-            String contractBin = frontService
-                .getCodeFromFront(networkId, address, BigInteger.valueOf(0));
+            String contractBin = web3Service
+                .getCodeFromFront(groupId, address, BigInteger.valueOf(0));
             contractMapper
-                .updateSystemContract(networkId, rspSystemProxy.getName(), contractBin, address);
+                .updateSystemContract(groupId, rspSystemProxy.getName(), contractBin, address);
         }
         log.debug("end updateSystemContract.");
-    }
+    }*/
 }

@@ -87,7 +87,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .logoutSuccessHandler(jsonLogoutSuccessHandler)
             .permitAll();
 
-            //http.authorizeRequests().anyRequest().permitAll();  //TODO
+            //http.authorizeRequests().anyRequest().permitAll();
 
     }
 

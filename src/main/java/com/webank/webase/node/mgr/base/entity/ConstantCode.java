@@ -44,10 +44,10 @@ public class ConstantCode {
 
     public static final RetCode NODE_EXISTS = RetCode.mark(202004, "node already exists");
 
-    public static final RetCode NETWORK_ID_NULL = RetCode
-        .mark(202005, "network id cannot be empty");
+    public static final RetCode GROUP_ID_NULL = RetCode
+        .mark(202005, "group id cannot be empty");
 
-    public static final RetCode INVALID_NETWORK_ID = RetCode.mark(202006, "invalid network id");
+    public static final RetCode INVALID_GROUP_ID = RetCode.mark(202006, "invalid group id");
 
     public static final RetCode ORG_ID_NULL = RetCode
         .mark(202007, "organization id cannot be empty");
@@ -55,10 +55,10 @@ public class ConstantCode {
     public static final RetCode INVALID_ORG_ID = RetCode.mark(202008, "invalid organization id");
 
     public static final RetCode NET_ORG_MAP_EXISTS = RetCode
-        .mark(202009, "network_organization_mapping already exists");
+        .mark(202009, "group_organization_mapping already exists");
 
     public static final RetCode NET_ORG_MAP_NOT_EXISTS = RetCode
-        .mark(202010, "network_organization_mapping not exists");
+        .mark(202010, "group_organization_mapping not exists");
 
     public static final RetCode CURRENT_ORG_NOT_EXISTS = RetCode
         .mark(202011, "did not find the current organization");

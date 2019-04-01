@@ -6,8 +6,8 @@
 <mapper namespace="com.webank.webase.node.mgr.transhash.TransHashMapper">
   <resultMap id="transHashMap" type="com.webank.webase.node.mgr.transhash.TbTransHash">
     <id column="trans_hash" javaType="java.lang.String" jdbcType="VARCHAR" property="transHash"/>
-    <result column="network_id" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="networkId"/>
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId"/>
     <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="blockNumber"/>
     <result column="statistics_flag" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -21,22 +21,22 @@
   </resultMap>
 
   <sql id="NEW_ROW_COLUMN">
-		(trans_hash,network_id,block_number,block_timestamp,create_time,modify_time)
+		(trans_hash,group_id,block_number,block_timestamp,create_time,modify_time)
 	</sql>
 
 
   <insert id="addTransRow" parameterType="com.webank.webase.node.mgr.transhash.TbTransHash">
     insert ignore into tb_trans_hash
     <include refid="NEW_ROW_COLUMN"/>
-    values(#{transHash},#{networkId},#{blockNumber},#{blockTimestamp},NOW(),NOW())
+    values(#{transHash},#{groupId},#{blockNumber},#{blockTimestamp},NOW(),NOW())
   </insert>
 
 
   <select id="countOfTransHash" parameterType="com.webank.webase.node.mgr.transhash.TransListParam"
     resultType="java.lang.Integer">
     select count(1) from tb_trans_hash where 1=1
-    <if test="param.networkId != null">
-      and network_id = #{param.networkId}
+    <if test="param.groupId != null">
+      and group_id = #{param.groupId}
     </if>
     <if test="param.transHash != null and param.transHash != ''">
       and trans_hash = #{param.transHash}
@@ -50,8 +50,8 @@
   <select id="listOfTransHash" parameterType="com.webank.webase.node.mgr.transhash.TransListParam"
     resultMap="transHashMap">
     select * from tb_trans_hash where 1=1
-    <if test="param.networkId != null">
-      and network_id = #{param.networkId}
+    <if test="param.groupId != null">
+      and group_id = #{param.groupId}
     </if>
     <if test="param.transHash != null and param.transHash != ''">
       and trans_hash = #{param.transHash}
@@ -85,12 +85,12 @@
     </select>
 
   <select id="queryMinMaxBlock" resultType="com.webank.webase.node.mgr.block.MinMaxBlock">
-		select network_id as networkId,max(block_number) as maxBlockNumber,min(block_number) as minBLockNumber
-		from tb_trans_hash group by network_id
+		select group_id as groupId,max(block_number) as maxBlockNumber,min(block_number) as minBLockNumber
+		from tb_trans_hash group by group_id
 	</select>
 
   <delete id="deleteSomeTrans">
-		delete from tb_trans_hash where network_id = #{networkId} and statistics_flag=2 and block_number &lt; #{deleteNumber}
+		delete from tb_trans_hash where group_id = #{groupId} and statistics_flag=2 and block_number &lt; #{deleteNumber}
 	</delete>
 
   <update id="updateTransStatFlag">

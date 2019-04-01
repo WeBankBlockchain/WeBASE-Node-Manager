@@ -20,7 +20,6 @@ import lombok.Data;
 
 @Data
 public class NodeHeartBeat {
-
     private BigInteger blockNumber;
     private BigInteger pbftView;
 }

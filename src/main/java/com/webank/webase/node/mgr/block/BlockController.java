@@ -20,7 +20,9 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.block.entity.BlockInfo;
+import com.webank.webase.node.mgr.web3.Web3Service;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
@@ -43,13 +45,13 @@ public class BlockController {
     @Autowired
     private BlockService blockService;
     @Autowired
-    private FrontService frontService;
+    private Web3Service web3Service;
 
     /**
      * query block list.
      */
-    @GetMapping(value = "/blockList/{networkId}/{pageNumber}/{pageSize}")
-    public BasePageResponse queryBlockList(@PathVariable("networkId") Integer networkId,
+    @GetMapping(value = "/blockList/{groupId}/{pageNumber}/{pageSize}")
+    public BasePageResponse queryBlockList(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "pkHash", required = false) String pkHash,
@@ -58,36 +60,36 @@ public class BlockController {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info(
-            "start queryBlockList startTime:{} networkId:{} pageNumber:{} pageSize:{} "
+            "start queryBlockList startTime:{} groupId:{} pageNumber:{} pageSize:{} "
                 + "pkHash:{} blockNumber:{}",
-            startTime.toEpochMilli(), networkId,
+            startTime.toEpochMilli(), groupId,
             pageNumber, pageSize, pkHash, blockNumber);
 
-        Integer count = blockService.queryCountOfBlock(networkId, pkHash, blockNumber);
+        Integer count = blockService.queryCountOfBlock(groupId, pkHash, blockNumber);
         if (count != null && count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
-            BlockListParam queryParam = new BlockListParam(networkId, start, pageSize, pkHash,
+            BlockListParam queryParam = new BlockListParam(groupId, start, pageSize, pkHash,
                 blockNumber, SqlSortType.DESC.getValue());
             List<TbBlock> blockList = blockService.queryBlockList(queryParam);
             pageResponse.setData(blockList);
             pageResponse.setTotalCount(count);
         } else {
-            TbBlock obj = null;
+            BlockInfo blockInfo = null;
             if (blockNumber != null) {
-                log.debug(
-                    "did not find block, request from front. blockNumber:{} networkId:{}",
-                    blockNumber, networkId);
-                obj = frontService.getblockFromFrontByNumber(networkId, blockNumber);
+                log.debug("did not find block, request from front. blockNumber:{} groupId:{}",
+                    blockNumber, groupId);
+                 blockInfo = web3Service.getBlockByNumber(groupId, blockNumber);
             } else if (StringUtils.isNotBlank(pkHash)) {
                 log.debug(
-                    "did not find block,request from front. pkHash:{} networkId:{}",
-                    pkHash, networkId);
-                obj = frontService.getblockFromFrontByHash(networkId, pkHash);
+                    "did not find block,request from front. pkHash:{} groupId:{}",
+                    pkHash, groupId);
+                blockInfo = web3Service.getblockFromFrontByHash(groupId, pkHash);
             }
-            if (obj != null) {
-                obj.setNetworkId(networkId);
-                pageResponse.setData(new TbBlock[]{obj});
+            if (blockInfo != null) {
+                TbBlock tbBlock = NodeMgrTools.object2JavaBean(blockInfo,TbBlock.class);
+                tbBlock.setGroupId(groupId);
+                pageResponse.setData(new TbBlock[]{tbBlock});
                 pageResponse.setTotalCount(1);
             }
         }

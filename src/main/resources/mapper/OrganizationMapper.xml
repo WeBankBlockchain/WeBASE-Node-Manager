@@ -6,8 +6,8 @@
 <mapper namespace="com.webank.webase.node.mgr.organization.OrganizationMapper">
   <resultMap id="organizationMap" type="com.webank.webase.node.mgr.organization.TbOrganization">
     <id column="org_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="orgId"/>
-    <result column="network_id" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="networkId"/>
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId"/>
     <result column="org_name" javaType="java.lang.String" jdbcType="VARCHAR" property="orgName"/>
     <result column="org_type" javaType="java.lang.Integer" jdbcType="INTEGER" property="orgType"/>
     <result column="nodeCount" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -22,7 +22,7 @@
       property="modifyTime"/>
   </resultMap>
   <sql id="QUERY_ORG_COLUMN">
-		a.org_id,b.network_id,c.nodeCount,a.org_name,a.org_type,a.org_status,a.description,a.create_time,a.modify_time
+		a.org_id,b.group_id,c.nodeCount,a.org_name,a.org_type,a.org_status,a.description,a.create_time,a.modify_time
 	</sql>
 
   <insert id="addOrganizationRow"
@@ -36,11 +36,11 @@
 
   <select id="countOfOrganization" resultType="java.lang.Integer">
     select count(1) from tb_organization a
-    left join (select network_id,org_id from tb_network_org_map group by org_id) b
+    left join (select group_id,org_id from tb_group_org_map group by org_id) b
     on(a.org_id=b.org_id)
     where a.org_status=1
-    <if test="networkId != null">
-      and b.network_id = #{networkId}
+    <if test="groupId != null">
+      and b.group_id = #{groupId}
     </if>
     <if test="orgId != null">
       and a.org_id = #{orgId}
@@ -57,13 +57,13 @@
     select
     <include refid="QUERY_ORG_COLUMN"/>
     from tb_organization a
-    left join (select network_id,org_id from tb_network_org_map group by org_id) b
+    left join (select group_id,org_id from tb_group_org_map group by org_id) b
     on(a.org_id=b.org_id)
     left join (select count(1) nodeCount,org_id from tb_node group by org_id) c
     on(a.org_id=c.org_id)
     where a.org_status=1
-    <if test="networkId != null and networkId != ''">
-      and b.network_id = #{networkId}
+    <if test="groupId != null and groupId != ''">
+      and b.group_id = #{groupId}
     </if>
     <if test="orgName != null and orgName != ''">
       and a.org_name like CONCAT(#{orgName},'%')
@@ -78,13 +78,13 @@
     select
     <include refid="QUERY_ORG_COLUMN"/>
     from tb_organization a
-    left join (select network_id,org_id from tb_network_org_map group by org_id) b
+    left join (select group_id,org_id from tb_group_org_map group by org_id) b
     on(a.org_id=b.org_id)
     left join (select count(1) nodeCount,org_id from tb_node group by org_id) c
     on(a.org_id=c.org_id)
     where a.org_status=1
-    <if test="networkId != null">
-      and b.network_id = #{networkId}
+    <if test="groupId != null">
+      and b.group_id = #{groupId}
     </if>
     <if test="orgType != null">
       and a.org_type = #{orgType}

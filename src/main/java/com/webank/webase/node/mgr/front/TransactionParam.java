@@ -23,12 +23,12 @@ import lombok.Data;
  */
 @Data
 public class TransactionParam {
-
     private List<Object> abiInfo;
     private Integer userId;
     private String version;
     private String contractName;
     private String funcName;
+    private String contractAddress;
     private List<Object> funcParam;
 
     /**

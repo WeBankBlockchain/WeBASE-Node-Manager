@@ -24,7 +24,7 @@ import lombok.Data;
 @Data
 public class MinMaxBlock {
 
-    private Integer networkId;
+    private Integer groupId;
     private BigInteger maxBlockNumber;
     private BigInteger minBLockNumber;
 }

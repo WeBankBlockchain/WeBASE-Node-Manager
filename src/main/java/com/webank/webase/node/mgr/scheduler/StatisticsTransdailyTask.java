@@ -20,8 +20,8 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.block.BlockListParam;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.TbBlock;
-import com.webank.webase.node.mgr.network.NetworkService;
-import com.webank.webase.node.mgr.network.StatisticalNetworkTransInfo;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 public class StatisticsTransdailyTask {
 
     @Autowired
-    private NetworkService networkService;
+    private GroupService groupService;
     @Autowired
     private BlockService blockService;
     @Autowired
@@ -55,12 +55,12 @@ public class StatisticsTransdailyTask {
         log.info("start updateTransdailyData startTime:{}", startTime.toEpochMilli());
         try {
 
-            // query all network statistical info
-            List<StatisticalNetworkTransInfo> networkStatisticalList = networkService
+            // query all group statistical info
+            List<StatisticalGroupTransInfo> groupStatisticalList = groupService
                 .queryLatestStatisticalTrans();
 
-            // traverse network list
-            traverseNetList(networkStatisticalList);
+            // traverse group list
+            traverseNetList(groupStatisticalList);
 
         } catch (Exception ex) {
             log.error("fail updateTransdailyData", ex);
@@ -70,34 +70,34 @@ public class StatisticsTransdailyTask {
     }
 
     /**
-     * traverse network list.
+     * traverse group list.
      */
-    private void traverseNetList(List<StatisticalNetworkTransInfo> networkStatisticalList)
+    private void traverseNetList(List<StatisticalGroupTransInfo> groupStatisticalList)
         throws NodeMgrException {
-        if (networkStatisticalList == null | networkStatisticalList.size() == 0) {
-            log.error("fail updateTransdailyData. no network information exists");
+        if (groupStatisticalList == null | groupStatisticalList.size() == 0) {
+            log.error("fail updateTransdailyData. no group information exists");
             return;
         }
 
-        // traverse network list
-        for (StatisticalNetworkTransInfo statisticalInfo : networkStatisticalList) {
+        // traverse group list
+        for (StatisticalGroupTransInfo statisticalInfo : groupStatisticalList) {
             LocalDate latestSaveDay = statisticalInfo.getMaxDay();
             BigInteger latestSaveBlockNumber = Optional.ofNullable(statisticalInfo.getBlockNumber())
                 .orElse(BigInteger.ZERO);
             BigInteger netTransCount = Optional.ofNullable(statisticalInfo.getTransCount())
                 .orElse(BigInteger.ZERO);
             BigInteger maxBlockNumber = latestSaveBlockNumber;
-            Integer networkId = statisticalInfo.getNetworkId();
+            Integer groupId = statisticalInfo.getGroupId();
 
             // query block list
-            BlockListParam queryParam = new BlockListParam(networkId, maxBlockNumber, latestSaveDay,
+            BlockListParam queryParam = new BlockListParam(groupId, maxBlockNumber, latestSaveDay,
                 SqlSortType.ASC.getValue());
             List<TbBlock> blockList = blockService.queryBlockList(queryParam);
 
             // Traversing block list
             if (blockList == null | blockList.size() == 0) {
                 log.info("updateTransdailyData jump over .This chain [{}] did not find new block",
-                    networkId);
+                    groupId);
                 return;
             }
             for (int i = 0; i < blockList.size(); i++) {
@@ -117,12 +117,12 @@ public class StatisticsTransdailyTask {
                 } else {
                     if (netTransCount.intValue() > 0 && latestSaveDay != null) {
                         transDailyService
-                            .updateTransDaily(networkId, latestSaveDay, latestSaveBlockNumber,
+                            .updateTransDaily(groupId, latestSaveDay, latestSaveBlockNumber,
                                 maxBlockNumber, netTransCount);
                     }
 
                     transDailyService
-                        .addTbTransDailyInfo(networkId, blockDate, tbBlock.getTransCount(),
+                        .addTbTransDailyInfo(groupId, blockDate, tbBlock.getTransCount(),
                             tbBlock.getBlockNumber());
 
                     latestSaveBlockNumber = tbBlock.getBlockNumber();
@@ -134,12 +134,12 @@ public class StatisticsTransdailyTask {
                 //latest block of list
                 if (i == (blockList.size() - 1)) {
                     transDailyService
-                        .updateTransDaily(networkId, latestSaveDay, latestSaveBlockNumber,
+                        .updateTransDaily(groupId, latestSaveDay, latestSaveBlockNumber,
                             maxBlockNumber, netTransCount);
                 }
             }
 
-            networkService.resetTransCount(networkId);
+            groupService.resetTransCount(groupId);
         }
     }
 }

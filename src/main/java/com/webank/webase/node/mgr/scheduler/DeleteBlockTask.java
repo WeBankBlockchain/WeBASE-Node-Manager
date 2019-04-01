@@ -55,14 +55,14 @@ public class DeleteBlockTask {
             }
 
             for (MinMaxBlock minMaxBlock : listOfBlock) {
-                Integer networkId = minMaxBlock.getNetworkId();
+                Integer groupId = minMaxBlock.getGroupId();
                 BigInteger maxBlockNumber = minMaxBlock.getMaxBlockNumber();
                 BigInteger minBLockNumber = minMaxBlock.getMinBLockNumber();
-                if (networkId == null || maxBlockNumber == null || minBLockNumber == null) {
+                if (groupId == null || maxBlockNumber == null || minBLockNumber == null) {
                     log.warn(
-                        "deleteBlockInfo jump over .networkId[{}],maxBlockNumber[{}],"
+                        "deleteBlockInfo jump over .groupId[{}],maxBlockNumber[{}],"
                             + "minBLockNumber[{}]",
-                        networkId, maxBlockNumber,
+                        groupId, maxBlockNumber,
                         minBLockNumber);
                     continue;
                 }
@@ -70,7 +70,7 @@ public class DeleteBlockTask {
                 BigInteger subBlockNumber = maxBlockNumber
                     .subtract(constantsProperties.getBlockRetainMax());
                 BigInteger transDailyBlockNumber = transDailyService
-                    .queryMaxBlockByNetwork(networkId);
+                    .queryMaxBlockByNetwork(groupId);
 
                 if (minBLockNumber.compareTo(subBlockNumber) > 0
                     || subBlockNumber.compareTo(transDailyBlockNumber) > 0) {
@@ -82,9 +82,9 @@ public class DeleteBlockTask {
                     continue;
                 }
 
-                Integer effectRows = blockService.deleteSomeBlocks(networkId, subBlockNumber);
-                log.info("period deleteBlockInfo.  networkId[{}] effectRows:[{}]",
-                    networkId,effectRows);
+                Integer effectRows = blockService.deleteSomeBlocks(groupId, subBlockNumber);
+                log.info("period deleteBlockInfo.  groupId[{}] effectRows:[{}]",
+                    groupId,effectRows);
             }
 
         } catch (Exception ex) {

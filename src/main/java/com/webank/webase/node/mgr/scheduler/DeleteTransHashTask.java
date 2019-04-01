@@ -49,14 +49,14 @@ public class DeleteTransHashTask {
             }
 
             for (MinMaxBlock minMaxBlock : listOfTrans) {
-                Integer networkId = minMaxBlock.getNetworkId();
+                Integer groupId = minMaxBlock.getGroupId();
                 BigInteger maxBlockNumber = minMaxBlock.getMaxBlockNumber();
                 BigInteger minBLockNumber = minMaxBlock.getMinBLockNumber();
-                if (networkId == null || maxBlockNumber == null || minBLockNumber == null) {
+                if (groupId == null || maxBlockNumber == null || minBLockNumber == null) {
                     log.warn(
-                        "deleteTransHash jump over .networkId[{}],maxBlockNumber[{}],"
+                        "deleteTransHash jump over .groupId[{}],maxBlockNumber[{}],"
                             + "minBLockNumber[{}]",
-                        networkId, maxBlockNumber,
+                        groupId, maxBlockNumber,
                         minBLockNumber);
                     continue;
                 }
@@ -72,8 +72,8 @@ public class DeleteTransHashTask {
                     continue;
                 }
 
-                Integer effectRows = transHashService.deleteSomeTrans(networkId, subBlockNumber);
-                log.info("period deleteTransHash.  networkId[{}] effectRows:[{}]", networkId,
+                Integer effectRows = transHashService.deleteSomeTrans(groupId, subBlockNumber);
+                log.info("period deleteTransHash.  groupId[{}] effectRows:[{}]", groupId,
                     effectRows);
             }
 
