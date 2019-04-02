@@ -17,7 +17,10 @@ package com.webank.webase.node.mgr.web3;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.transhash.entity.TransactionInfo;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.log4j.Log4j2;
@@ -79,9 +82,11 @@ public class Web3Controller {
         @PathVariable("transHash") String transHash)
         throws NodeMgrException {
         Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         log.info("start getTransaction startTime:{} networkId:{} transhash:{}",
             startTime.toEpochMilli(), networkId, transHash);
-        BaseResponse baseResponse = web3Service.getTransaction(networkId, transHash);
+        TransactionInfo transactionInfo = web3Service.getTransaction(networkId, transHash);
+        baseResponse.setData(transactionInfo);
         log.info("end getTransaction useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
@@ -92,7 +97,7 @@ public class Web3Controller {
      */
     @GetMapping("/blockByNumber/{networkId}/{blockNumber}")
     public BaseResponse getBlockByNumber(@PathVariable("networkId") Integer networkId,
-        @PathVariable("blockNumber") Integer blockNumber)
+        @PathVariable("blockNumber") BigInteger blockNumber)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start getBlockByNumber startTime:{} networkId:{} blockNumber:{}",
