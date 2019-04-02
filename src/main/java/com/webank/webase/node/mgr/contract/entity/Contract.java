@@ -13,18 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.contract;
+package com.webank.webase.node.mgr.contract.entity;
 
+import java.util.List;
 import lombok.Data;
 
 /**
- * deploy interface parameter.
+ * receive contract info entity.
  */
 @Data
-public class RspSystemProxy {
+public class Contract {
 
-    private String name;
-    private String address;
-    private String cache;
-    private Integer blockNumber;
+    private Integer contractId;
+    private Integer networkId;
+    private String contractName;
+    private String contractVersion;
+    private String contractSource;
+    private int contractStatus;
+    private String contractAbi;
+    private String contractBin;
+    private String bytecodeBin;
+    private String contractAddress;
+    private String deployTime;
+    private String description;
+    private Integer userId;
+    private List<Object> constructorParams;
+
 }
