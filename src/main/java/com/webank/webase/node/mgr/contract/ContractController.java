@@ -22,6 +22,11 @@ import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ShareType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.contract.entity.Contract;
+import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
+import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.contract.entity.Transaction;
 import com.webank.webase.node.mgr.scheduler.SharedChainInfoTask;
 import java.time.Duration;
 import java.time.Instant;
@@ -95,14 +100,16 @@ public class ContractController {
     /**
      * qurey contract info list.
      */
-    @GetMapping(value = "/contractList/{networkId}/{pageNumber}/{pageSize}")
-    public BasePageResponse queryContractList(@PathVariable("networkId") Integer networkId,
-        @PathVariable("pageNumber") Integer pageNumber,
-        @PathVariable("pageSize") Integer pageSize) throws NodeMgrException {
+    @PostMapping(value = "/contractList")
+    public BasePageResponse queryContractList(@RequestBody QueryContractParam queryParam) throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start contractList. startTime:{} networkId:{} pageNumber:{} pageSize:{}",
-            startTime.toEpochMilli(), networkId, pageNumber, pageSize);
+        log.info("start contractList. startTime:{} queryParam:{}",
+            startTime.toEpochMilli(), JSON.toJSONString(queryParam));
+        Integer networkId = queryParam.getNetworkId();
+        Integer pageNumber = queryParam.getPageNumber();
+        Integer pageSize = queryParam.getPageSize();
+
 
         // share from chain
         sharedChainInfoTask.asyncShareFromChain(networkId, ShareType.CONTRACT);
