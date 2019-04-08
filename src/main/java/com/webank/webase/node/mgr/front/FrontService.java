@@ -65,6 +65,7 @@ public class FrontService {
     public static final String FRONT_CHAIN = "chain";
     private static final String FRONT_BLOCK_BY_HASH_URI = "web3/blockByHash/%1s";
     private static final String FRONT_SYSTEM_PROXY_BY_ID_URI = "web3/systemProxy/%s";
+    public static final String FRONT_BLOCK_NUMBER_URI = "/web3/blockNumber";
     @Autowired
     private NodeService nodeService;
     @Qualifier(value = "genericRestTemplate")
