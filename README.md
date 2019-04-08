@@ -9,11 +9,13 @@
 节点管理服务是fisco-bcos配套的一个子系统，可以通过本系统维护合约信息、私钥用户、查看区块信息、以及链上异常数据监管。
 
 # 2. <a id="chapter-2">前提条件</a>
-* fisco-bcos底层代码已经安装；
-* 前置和fisco-bcos同机部署；
-* mysql5.5或5.6版本
-* java1.8.0_181或更高版本
-* 安装gradle4.9以上版本
+| 序号  | 输入参数                                          | 
+|-------|---------------------------------------------------|
+| 1     | fisco-bcos底层代码已经安装                        |
+| 2     | 前置和fisco-bcos同机部署                          |
+| 3     | mysql5.5或5.6版本【更高版本需要更改mysql配置，可参考《install_FAQ.md》】    |
+| 4     | java1.8.0_181或更高版本                           |
+| 5     | 安装gradle4.9以上版本                             |
 
 
 # 3. <a id="chapter-3">部署说明</a>
@@ -33,8 +35,13 @@ gradle build
 ```
 构建完成后，会在根目录webase-node-mgr下生成已编译的代码目录dist。
 ## 3.3 数据库初始化
+### 3.3.1 新建数据库
+命令：
+```
+CREATE DATABASE IF NOT EXISTS {your_db_name} DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+```
 
-### 3.3.1 修改脚本配置
+### 3.3.2 修改脚本配置
 进入数据库脚本目录
 ```shell
 cd  dist/conf/script
@@ -50,7 +57,7 @@ cd  dist/conf/script
 sed -i "s/defaultAccount/root/g" fisco-bcos.sh
 ```
 
-### 3.3.2 运行数据库脚本
+### 3.3.3 运行数据库脚本
 执行命令：sh  fisco-bcos.sh  ${dbIP}  ${dbPort}
 如：
 ```shell
@@ -94,8 +101,8 @@ sh serverStatus.sh
 ```shell
 cd dist/logs
 ```
-全量日志：node-mgr.log
-错误日志：node-mgr-error.log
+全量日志：tail -f node-mgr.log
+错误日志：tail -f node-mgr-error.log
 
 
 ## 3.5 初始化基础合约

@@ -45,6 +45,7 @@ constant:
   insertTransMonitorCron: "0 0/10 * * * ?"
   sharedChainInfoCron: "0 0/10 * * * ?"
   contractDeployTimeOut: 30000
+  isBlockPullFromZero: false
   httpTimeOut: 5000
   aesKey: ERTadb83f9ege39k
   cookieMaxAge: 1800

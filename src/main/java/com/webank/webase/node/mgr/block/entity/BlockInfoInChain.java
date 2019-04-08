@@ -35,8 +35,8 @@ public class BlockInfoInChain {
     private int totalDifficulty;
     private List<Object> extraData;
     private int size;
-    private int gasLimit;
-    private int gasUsed;
+    private Long gasLimit;
+    private Long gasUsed;
     private Long timestamp;
     private String gasLimitRaw;
     private String timestampRaw;
