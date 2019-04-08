@@ -48,6 +48,7 @@ public class ConstantProperties {
     private String checkNodeStatusCron = "30 0/1 * * * ?";
     private String insertTransMonitorCron = "0 0/10 * * * ?";
     private String sharedChainInfoCron = "0 0/10 * * * ?";// Execute once every ten minute
+    private Boolean isBlockPullFromZero = false;
 
     // http
     private Integer contractDeployTimeOut = 30000;
