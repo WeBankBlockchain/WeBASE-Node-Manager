@@ -20,8 +20,10 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.BlockService;
+import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.logs.LatestLog;
 import com.webank.webase.node.mgr.logs.NodeLogService;
 import com.webank.webase.node.mgr.logs.TbNodeLog;
@@ -64,6 +66,11 @@ public class ReportService {
     private NodeLogService nodeLogService;
     @Autowired
     private BlockService blockService;
+    @Autowired
+    private FrontService frontService;
+    @Autowired
+    private ConstantProperties cProperties;
+
 
     /**
      * handler report block info.
@@ -98,11 +105,17 @@ public class ReportService {
             throw new NodeMgrException(ConstantCode.INVALID_ATTR);
         }
 
+        // query node info
+        TbNode tbNode = nodeService.queryNodeByIpAndP2pPort(nodeIp, nodeP2PPort);
+        if (tbNode == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_NODE_INFO);
+        }
+
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
 
         switch (attr) {
             case LATEST_BLOCK_ATTR:
-                getLatestBlockNumber(nodeIp, nodeP2PPort, baseResponse);
+                getLatestBlockNumber(tbNode.getNetworkId(), nodeIp, nodeP2PPort, baseResponse);
                 break;
             case LATEST_NODE_LOG_ATTR:
                 getLatestNodeLog(nodeIp, nodeP2PPort, baseResponse);
@@ -117,16 +130,28 @@ public class ReportService {
     /**
      * query latest block.
      */
-    public void getLatestBlockNumber(String nodeIp, Integer nodeP2PPort, BaseResponse baseResponse)
+    public void getLatestBlockNumber(Integer networkId, String nodeIp, Integer nodeP2PPort,
+        BaseResponse baseResponse)
         throws NodeMgrException {
         log.debug("start getLatestBlockNumber.  nodeIp:{} nodeP2PPort:{} ", nodeIp, nodeP2PPort);
 
         // quer latest block
         BigInteger latestBlock = blockService.getLatestBlockNumber(nodeIp, nodeP2PPort);
-        int latestBlockInt = Optional.ofNullable(latestBlock).map(i -> i.intValue())
-            .orElse(BigInteger.ZERO.intValue());
-        Map<String, Integer> map = new HashMap<>();
-        map.put("latestBlock", latestBlockInt);
+        if (latestBlock == null && cProperties.getIsBlockPullFromZero()) {
+            //report from 0
+            latestBlock = BigInteger.ZERO;
+        } else if (latestBlock == null) {
+            //get latest blockNumber
+            Map<String, String> rspRsp = frontService
+                .getFrontForEntity(networkId, FrontService.FRONT_BLOCK_NUMBER_URI, HashMap.class);
+            latestBlock = new BigInteger(String.valueOf(rspRsp.get("blockNumber")));
+            if (BigInteger.ZERO != latestBlock) {
+                latestBlock = latestBlock.subtract(BigInteger.ONE);
+            }
+        }
+
+        Map<String, BigInteger> map = new HashMap<>();
+        map.put("latestBlock", latestBlock);
 
         baseResponse.setData(map);
         log.debug("end getLatestBlockNumber.  baseResponse:{} ", JSON.toJSONString(baseResponse));
