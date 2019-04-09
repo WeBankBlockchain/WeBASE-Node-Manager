@@ -1,33 +1,28 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.user;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HasPk;
-import com.webank.webase.node.mgr.base.enums.OrgType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.AesTools;
+import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.organization.OrganizationService;
-import com.webank.webase.node.mgr.organization.TbOrganization;
+import com.webank.webase.node.mgr.monitor.MonitorService;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
@@ -48,11 +43,9 @@ public class UserService {
     @Autowired
     private GroupService groupService;
     @Autowired
-    private OrganizationService organizationService;
-    @Autowired
     private AesTools aesTools;
     @Autowired
-    private FrontService frontService;
+    private FrontRestTools frontRestTools;
     @Autowired
     private MonitorService monitorService;
 
@@ -69,10 +62,9 @@ public class UserService {
         groupService.checkgroupId(groupId);
 
         // get org id
-        TbOrganization orgRow = organizationService
-            .queryOrganization(groupId, OrgType.CURRENT.getValue());
-        Integer orgId = Optional.ofNullable(orgRow).map(org -> org.getOrgId())
-            .orElseThrow(() -> new NodeMgrException(ConstantCode.CURRENT_ORG_NOT_EXISTS));
+        //   TbOrganization orgRow = organizationService.queryOrganization(groupId, OrgType.CURRENT.getValue());
+        //  Integer orgId = Optional.ofNullable(orgRow).map(org -> org.getOrgId())
+        //       .orElseThrow(() -> new NodeMgrException(ConstantCode.CURRENT_ORG_NOT_EXISTS));
 
         // check userName
         TbUser userRow = queryByName(user.getUserName());
@@ -81,8 +73,8 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
 
-        KeyPair keyPair = frontService
-            .getFrontForEntity(groupId, FrontService.FRONT_KEY_PAIR_URI, KeyPair.class);
+        KeyPair keyPair = frontRestTools
+            .getFrontForEntity(groupId, FrontRestTools.FRONT_KEY_PAIR_URI, KeyPair.class);
         String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
         String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
         String address = Optional.ofNullable(keyPair).map(k -> k.getAddress()).orElse(null);
@@ -95,7 +87,7 @@ public class UserService {
 
         // add row
         TbUser newUserRow = new TbUser(HasPk.HAS.getValue(), user.getUserType(), user.getUserName(),
-            groupId, orgId, address, publicKey,
+            groupId, null, address, publicKey, // TODO NULL
             user.getDescription());
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {
@@ -161,14 +153,14 @@ public class UserService {
         }
 
         // get org id
-        TbOrganization orgRow = organizationService
-            .queryOrganization(user.getGroupId(), OrgType.CURRENT.getValue());
-        Integer orgId = Optional.ofNullable(orgRow).map(org -> org.getOrgId())
-            .orElseThrow(() -> new NodeMgrException(ConstantCode.CURRENT_ORG_NOT_EXISTS));
+        //   TbOrganization orgRow = organizationService
+        //       .queryOrganization(user.getGroupId(), OrgType.CURRENT.getValue());
+        //  Integer orgId = Optional.ofNullable(orgRow).map(org -> org.getOrgId())
+        //      .orElseThrow(() -> new NodeMgrException(ConstantCode.CURRENT_ORG_NOT_EXISTS));
 
         // add row
         TbUser newUserRow = new TbUser(HasPk.NONE.getValue(), user.getUserType(),
-            user.getUserName(), user.getGroupId(), orgId, address, publicKey,
+            user.getUserName(), user.getGroupId(), null, address, publicKey,  //TODO null
             user.getDescription());
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {

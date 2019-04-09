@@ -32,10 +32,10 @@
   - [8.1.获取群组概况](#8.1)
   - [8.2.获取所有群组列表](#8.2)
   - [8.3.查询每日交易数据](#8.3)
+  - [8.4.修改群组名称](#8.4)
 - [9.节点管理模块](#9)
   - [9.1.查询节点列表](#9.1)
   - [9.2.查询节点信息](#9.2)
-  - [9.3.新增节点](#9.3)
 - [10.角色管理模块](#10)
   - [10.1.查询角色列表](#10.1)
 - [11.用户管理模块](#11)
@@ -46,7 +46,10 @@
   - [11.5.查询用户列表](#11.5)
 - [12.文件管理模块](#12)
   - [12.1.文件上传](#12.1)
-
+- [13.前置管理模块](#13) 
+  - [13.1.新增节点前置信息](#13.1)
+  - [13.2.获取所有前置列表](#13.2)
+  - [13.3.删除前置信息](#13.3)  
 
 
 ## <span id="2">2 交易信息模块</span>  [top](#1)
@@ -459,11 +462,10 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 4.1.1 | pkHash         | String        | 否     | 块hash                     |
 | 4.1.2 | groupId        | int           | 否     | 所属群组编号               |
 | 4.1.3 | blockNumber    | BigInteger    | 否     | 块高                       |
-| 4.1.4 | miner          | String        | 否     | 矿工                       |
-| 4.1.5 | blockTimestamp | LocalDateTime | 否     | 出块时间                   |
-| 4.1.6 | transCount     | int           | 否     | 交易数                     |
-| 4.1.7 | createTime     | LocalDateTime | 否     | 创建时间                   |
-| 4.1.8 | modifyTime     | LocalDateTime | 否     | 修改时间                   |
+| 4.1.4 | blockTimestamp | LocalDateTime | 否     | 出块时间                   |
+| 4.1.5 | transCount     | int           | 否     | 交易数                     |
+| 4.1.6 | createTime     | LocalDateTime | 否     | 创建时间                   |
+| 4.1.7 | modifyTime     | LocalDateTime | 否     | 修改时间                   |
 
 #### 4.1.3 入参示例
 `http://127.0.0.1:8080/webase-node-mgr/block/blockList/300001/1/10?pkHash=`
@@ -480,7 +482,6 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
             "pkHash": "0xe6438646633542e26d053f75931d74a258a607464207e1343344c100da89e661",
             "groupId": 300001,
             "blockNumber": 1442,
-            "miner": "",
             "blockTimestamp": "2019-02-27 19:18:23",
             "transCount": 1,
             "createTime": "2019-03-04 10:29:07",
@@ -490,7 +491,6 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
             "pkHash": "0x2e036eba6d1581a280712276e06517987c7be40f0f252fca34303eef157d8c3d",
             "groupId": 300001,
             "blockNumber": 1441,
-            "miner": "",
             "blockTimestamp": "2019-02-27 19:18:22",
             "transCount": 1,
             "createTime": "2019-03-04 10:29:07",
@@ -1742,6 +1742,56 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
+
+
+### <span id="8.4">8.4 修改群组名称</span>  [top](#1)
+
+#### 8.4.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址：`/group/update`
+* 请求方式：put
+* 请求头：Content-type: application/json
+* 返回格式：JSON
+
+#### 8.4.2 参数信息详情
+
+| 序号 | 输入参数      | 类型   | 可为空 | 备注                        |
+|------|---------------|--------|--------|---------------------------|
+| 1    | groupId      | int     | 否     | 群组编号                   |
+| 2    | groupName    | String | 否      | 群组新名称                  |
+| 序号 | 输出参数      | 类型   |        | 备注                        |
+| 1    | code          | Int    | 否     | 返回码，0：成功 其它：失败  |
+| 2    | message       | String | 否     | 描述                       |
+
+### 8.4.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/group/update`
+```
+{
+    "groupId": 12541,
+    "groupName": "groupNew"
+}
+```
+
+
+#### 8.4.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success"
+}
+```
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
 ## <span id="9">9 节点管理模块</span>  [top](#1)
 
 ### <span id="9.1">9.1 查询节点列表</span>  [top](#1)
@@ -1772,15 +1822,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 4.1.4  | nodeActive  | int           | 否     | 状态                                       |
 | 4.1.5  | nodeIp      | string        | 否     | 节点ip                                     |
 | 4.1.6  | P2pPort     | int           | 否     | 节点p2p端口                                |
-| 4.1.7  | rpcPort     | int           | 否     | 节点rpc端口                                |
-| 4.1.8  | channelPort | int           | 否     | 链上链下端口                               |
-| 4.1.9  | frontPort   | int           | 否     | 前置端口                                   |
-| 4.1.10 | nodeType    | int           | 否     | 节点类型（1-手动配置的节点 2-自动同步的节点）|
-| 4.1.11 | description | String        | 否     | 备注                                       |
-| 4.1.12 | blockNumber | BigInteger    | 否     | 节点块高                                   |
-| 4.1.13 | pbftView    | BigInteger    | 否     | Pbft view                                  |
-| 4.1.14 | createTime  | LocalDateTime | 否     | 落库时间                                   |
-| 4.1.15 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
+| 4.1.7 | description | String        | 否     | 备注                                       |
+| 4.1.8 | blockNumber | BigInteger    | 否     | 节点块高                                   |
+| 4.1.9 | pbftView    | BigInteger    | 否     | Pbft view                                  |
+| 4.1.10 | createTime  | LocalDateTime | 否     | 落库时间                                   |
+| 4.1.11 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
 #### 9.1.3 入参示例
 `http://127.0.0.1:8080/webase-node-mgr/node/nodeList/300001/1/10?nodeName=`
@@ -1799,10 +1845,6 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
             "groupId": 300001,
             "nodeIp": "127.0.0.1",
             "p2pPort": 10303,
-            "rpcPort": 1545,
-            "channelPort": 1821,
-            "frontPort": 8181,
-            "nodeType": 1,
             "description": null,
             "blockNumber": 133,
             "pbftView": 5852,
@@ -1836,7 +1878,6 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 序号 | 输入参数    | 类型          | 可为空 | 备注                                       |
 |------|-------------|---------------|--------|--------------------------------------------|
 | 1    | groupId     | int           | 否     | 群组id                                     |
-| 2    | nodeType    | Int           | 是     | 节点类型（1-手动配置的节点 2-自动同步的节点）|
 |      | 输出参数    | 类型          |        | 备注                                       |
 | 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败                 |
 | 2    | message     | String        | 否     | 描述                                       |
@@ -1847,18 +1888,14 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 3.4  | nodeActive  | int           | 否     | 状态                                       |
 | 3.5  | nodeIp      | string        | 否     | 节点ip                                     |
 | 3.6  | P2pPort     | int           | 否     | 节点p2p端口                                |
-| 3.7  | rpcPort     | int           | 否     | 节点rpc端口                                |
-| 3.8  | channelPort | int           | 否     | 链上链下端口                               |
-| 3.9  | frontPort   | int           | 否     | 前置端口                                   |
-| 3.11 | nodeType    | int           | 否     | 节点类型（1-手动配置的节点 2-自动同步的节点） |
-| 3.12 | description | String        | 否     | 备注                                       |
-| 3.13 | blockNumber | BigInteger    | 否     | 节点块高                                   |
-| 3.14 | pbftView    | BigInteger    | 否     | Pbft view                                  |
-| 3.15 | createTime  | LocalDateTime | 否     | 落库时间                                   |
-| 3.16 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
+| 3.7 | description | String        | 否     | 备注                                       |
+| 3.8 | blockNumber | BigInteger    | 否     | 节点块高                                   |
+| 3.9 | pbftView    | BigInteger    | 否     | Pbft view                                  |
+| 3.10 | createTime  | LocalDateTime | 否     | 落库时间                                   |
+| 3.11 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
 #### 9.2.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/node/nodeInfo/{groupId}?nodeType=1`
+`http://127.0.0.1:8080/webase-node-mgr/node/nodeInfo/{groupId}
 
 #### 9.2.4 出参示例
 * 成功：
@@ -1872,10 +1909,6 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
         "groupId": 300001,
         "nodeIp": "127.0.0.1",
         "p2pPort": 10303,
-        "rpcPort": 1545,
-        "channelPort": 1821,
-        "frontPort": 8181,
-        "nodeType": 1,
         "description": null,
         "blockNumber": 133,
         "pbftView": 5852,
@@ -1894,91 +1927,6 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
     "data": {}
 }
 ```
-
-### <span id="9.3">9.3 新增节点前置信息</span>  [top](#1)
-
-#### 9.3.1 传输协议规范
-* 网络传输协议：使用HTTP协议
-* 请求地址： `/node/nodeFrontInfo`
-* 请求方式：POST
-* 请求头：Content-type: application/json
-* 返回格式：JSON
-
-#### 9.3.2 参数信息详情
-
-| 序号 | 输入参数    | 类型          | 可为空 | 备注                                       |
-|------|-------------|---------------|--------|--------------------------------------------|
-| 1    | groupId     | int           | 否     | 所属群组编号                               |
-| 2    | frontIp     | string        | 否     | 前置ip                                     |
-| 4    | frontPort   | int           | 否     | 前置服务端口                               |
-| 序号 | 输出参数    | 类型          |        | 备注                                       |
-| 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败                 |
-| 2    | message     | String        | 否     | 描述                                       |
-| 3    |             | Object        |        | 节点信息对象                               |
-| 3.1  | nodeId      | int           | 否     | 节点编号                                   |
-| 3.2  | nodeName    | string        | 否     | 节点名称                                   |
-| 3.3  | groupId     | int           | 否     | 所属群组编号                               |
-| 3.4  | nodeActive  | int           | 否     | 状态                                       |
-| 3.5  | nodeIp      | string        | 否     | 节点ip                                     |
-| 3.6  | P2pPort     | int           | 否     | 节点p2p端口                                |
-| 3.7  | rpcPort     | int           | 否     | 节点rpc端口                                |
-| 3.8  | channelPort | int           | 否     | 链上链下端口                               |
-| 3.9  | frontPort   | int           | 否     | 前置端口                                   |
-| 3.10 | nodeType    | int           | 否     | 节点类型（1-手动配置的节点 2-自动同步的节点） |
-| 3.11 | description | String        | 否     | 备注                                       |
-| 3.12 | blockNumber | BigInteger    | 否     | 节点块高                                   |
-| 3.13 | pbftView    | BigInteger    | 否     | Pbft view                                  |
-| 3.14 | createTime  | LocalDateTime | 否     | 落库时间                                   |
-| 3.15 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
-
-#### 9.3.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/node`
-```
-{
-    "groupId": "300001",
-    "nodeIp": "127.0.0.1",
-    "nodeType": "1",
-    "frontPort": "8081"
-}
-```
-
-
-#### 9.3.4 出参示例
-* 成功：
-```
-{
-    "code": 0,
-    "message": "success",
-    "data": {
-        "nodeId": 500001,
-        "nodeName": "127.0.0.1_10303",
-        "groupId": 300001,
-        "nodeIp": "127.0.0.1",
-        "p2pPort": 10303,
-        "rpcPort": 1545,
-        "channelPort": 1821,
-        "frontPort": 8181,
-        "nodeType": 1,
-        "description": null,
-        "blockNumber": 133,
-        "pbftView": 5852,
-        "nodeActive": 1,
-        "createTime": "2019-02-14 17:47:00",
-        "modifyTime": "2019-03-15 11:14:29"
-    }
-}
-```
-
-
-* 失败：
-```
-{
-    "code": 102000,
-    "message": "system exception",
-    "data": {}
-}
-```
-
 
 ## <span id="10">10 角色管理模块</span>  [top](#1)
 
@@ -2447,6 +2395,172 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
     "data": {}
 }
 ```
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+
+## <span id="13">13 前置管理模块</span>  [top](#1)
+### <span id="13.1">13.1 新增节点前置信息</span>  [top](#1)
+
+#### 13.1.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址： `/front/new`
+* 请求方式：POST
+* 请求头：Content-type: application/json
+* 返回格式：JSON
+
+#### 13.1.2 参数信息详情
+
+| 序号 | 输入参数    | 类型          | 可为空 | 备注                                       |
+|------|-------------|---------------|--------|--------------------------------------------|                          |
+| 1    | frontIp     | string        | 否     | 前置ip                                     |
+| 2    | frontPort   | int           | 否     | 前置服务端口                               |
+| 序号 | 输出参数    | 类型          |        | 备注                                       |
+| 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败                 |
+| 2    | message     | String        | 否     | 描述                                       |
+| 3    |             | Object        |        | 节点信息对象                               |
+| 3.1  | frontId     | int           | 否     | 前置编号                                                         |
+| 3.2  | frontIp     | string        | 否     | 前置ip                                           |
+| 3.3  | frontPort   | int           | 否     | 前置端口                                   |                               |
+| 3.4  | createTime  | LocalDateTime | 否     | 落库时间                                   |
+| 3.5  | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
+
+#### 13.1.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/node`
+```
+{
+    "frontIp": "127.0.0.1",
+    "frontPort": "8081"
+}
+```
+
+
+#### 13.1.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "data": {
+        "frontId": 500001,
+        "frontIp": "127.0.0.1",
+        "frontPort": 8181,
+        "createTime": "2019-02-14 17:47:00",
+        "modifyTime": "2019-03-15 11:14:29"
+    }
+}
+```
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+### <span id="13.2">13.2 获取所有前置列表</span>  [top](#1)
+
+#### 13.2.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址： `/front/find?frontId={frontId}`
+* 请求方式：GET
+* 返回格式：JSON
+
+#### 13.2.2 参数信息详情
+
+| 序号  | 输入参数      | 类型          | 可为空 | 备注                       |
+|-------|---------------|---------------|--------|----------------------------|
+| 1     | frontId       | Int           | 是     | 前置编号                  |
+| 序号  | 输出参数      | 类型           |        | 备注                       |
+| 1     | code          | Int           | 否     | 返回码，0：成功 其它：失败 |
+| 2     | message       | String        | 否     | 描述                       |
+| 3     | totalCount    | Int           | 否     | 总记录数                   |
+| 4     | data          | List          | 否     | 组织列表                   |
+| 4.1   |               | Object        |        | 节点信息对象               |
+| 4.1.1 | frontId       | int           | 否     | 前置编号                   |
+| 4.1.2 | frontIp       | string        | 否     | 前置ip                     |
+| 4.1.3 | frontPort     | int           | 否     | 前置端口                   |                               |
+| 4.1.4 | createTime    | LocalDateTime | 否     | 落库时间                   |
+| 4.1.5 | modifyTime    | LocalDateTime | 否     | 修改时间                   |
+
+
+#### 13.2.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/front/find`
+
+#### 13.2.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "totalCount": 1,
+    "data": [
+        {
+        "frontId": 500001,
+        "frontIp": "127.0.0.1",
+        "frontPort": 8181,
+        "createTime": "2019-02-14 17:47:00",
+        "modifyTime": "2019-03-15 11:14:29"
+        }
+    ]
+}
+```
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+
+### <span id="13.3">13.3 删除前置信息</span>  [top](#1)
+
+#### 13.3.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址：`/front/{frontId}`
+* 请求方式：DELETE
+* 请求头：Content-type: application/json
+* 返回格式：JSON
+
+#### 13.3.2 参数信息详情
+
+| 序号 | 输入参数   | 类型   | 可为空 | 备注                       |
+|------|------------|--------|--------|----------------------------|
+| 1    | frontId    | int    | 否     | 前置编号                   |
+| 序号 | 输出参数   | 类型   |        | 备注                       |
+| 1    | code       | Int    | 否     | 返回码，0：成功 其它：失败 |
+| 2    | message    | String | 否     | 描述                       |
+| 3    | data       | object | 是     | 返回信息实体（空）         |
+
+#### 13.3.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/front/{frontId}`
+
+#### 13.3.4 出参示例
+
+* 成功：
+```
+{
+    "code": 0,
+    "data": {},
+    "message": "Success"
+}
+```
+
 
 * 失败：
 ```

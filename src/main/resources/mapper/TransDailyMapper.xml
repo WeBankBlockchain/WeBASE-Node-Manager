@@ -25,7 +25,7 @@
 		values(#{groupId},#{transDay},#{transCount},#{blockNumber},NOW(),NOW())
 	</insert>
 
-  <select id="queryMaxBlockByNetwork" parameterType="java.lang.Integer"
+  <select id="queryMaxBlockByGroup" parameterType="java.lang.Integer"
     resultType="java.math.BigInteger">
 		select max(block_number) from tb_trans_daily where group_id = #{groupId}
 	</select>

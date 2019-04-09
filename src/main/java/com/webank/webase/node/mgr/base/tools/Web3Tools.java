@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package com.webank.webase.node.mgr.base.tools;
+
+import static org.fisco.bcos.web3j.crypto.Keys.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -48,7 +50,7 @@ public class Web3Tools {
     }*/
 
     public static String getAddressByPublicKey(String publicKey) {
-        String address = "0x" + Keys.getAddress(publicKey);
+        String address = "0x" + getAddress(publicKey);
         return address;
     }
 

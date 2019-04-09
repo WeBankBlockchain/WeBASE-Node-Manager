@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,12 @@ public class ConstantProperties {
     private String deleteInfoCron = "0 0/2 * * * ?";// Execute once every two minute
     private String checkNodeStatusCron = "30 0/1 * * * ?";
     private String insertTransMonitorCron = "0 0/10 * * * ?";
+    private Long resetGroupListCycle = 60000L; //1 min
+    private Long pullBlockSleepTime = 20L; //20 mill
+    private Boolean isBlockPullFromZero = false;
+    private Integer maxRequestFail = 3;
+    private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
+
 
     // http
     private Integer contractDeployTimeOut = 30000;

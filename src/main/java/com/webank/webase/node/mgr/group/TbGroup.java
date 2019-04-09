@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,18 +18,27 @@ package com.webank.webase.node.mgr.group;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Entity class of table tb_group.
  */
 @Data
+@NoArgsConstructor
 public class TbGroup {
 
     private Integer groupId;
     private String groupName;
     private int groupStatus;
+    private Integer nodeCount;
     private BigInteger latestBlock = BigInteger.ZERO;
     private BigInteger transCount = BigInteger.ZERO;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+
+    public TbGroup(Integer groupId, String groupName,Integer nodeCount){
+        this.groupId = groupId;
+        this.groupName = groupName;
+        this.nodeCount = nodeCount;
+    }
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +16,8 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.monitor.MonitorService;
-import com.webank.webase.node.mgr.transhash.TbTransHash;
-import com.webank.webase.node.mgr.transhash.TransHashService;
+import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
+import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,7 +34,7 @@ public class TransMonitorTask {
      * init monitorInfoHandle.
      */
     public void monitorInfoHandle() {
-        List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList();
+        List<TbTransHash> transHashList = null;// transHashService.qureyUnStatTransHashList(); TODO
         if (transHashList != null && transHashList.size() > 0) {
             monitorService.insertTransMonitorInfo(transHashList);
         }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,11 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
+import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.block.BlockListParam;
+import com.webank.webase.node.mgr.block.entity.BlockListParam;
 import com.webank.webase.node.mgr.block.BlockService;
-import com.webank.webase.node.mgr.block.TbBlock;
+import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
@@ -90,9 +91,9 @@ public class StatisticsTransdailyTask {
             Integer groupId = statisticalInfo.getGroupId();
 
             // query block list
-            BlockListParam queryParam = new BlockListParam(groupId, maxBlockNumber, latestSaveDay,
+            BlockListParam queryParam = new BlockListParam(maxBlockNumber, latestSaveDay,
                 SqlSortType.ASC.getValue());
-            List<TbBlock> blockList = blockService.queryBlockList(queryParam);
+            List<TbBlock> blockList = blockService.queryBlockList(groupId,queryParam);
 
             // Traversing block list
             if (blockList == null | blockList.size() == 0) {
@@ -138,8 +139,6 @@ public class StatisticsTransdailyTask {
                             maxBlockNumber, netTransCount);
                 }
             }
-
-            groupService.resetTransCount(groupId);
         }
     }
 }

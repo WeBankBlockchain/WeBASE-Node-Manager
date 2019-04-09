@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,11 +23,12 @@ import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.user.UserService;
-import com.webank.webase.node.mgr.web3.Web3Service;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +52,7 @@ public class ContractService {
     @Autowired
     private ContractMapper contractMapper;
     @Autowired
-    private FrontService frontService;
+    private FrontRestTools frontRestTools;
     @Autowired
     private UserService userService;
     @Autowired
@@ -59,7 +60,7 @@ public class ContractService {
     @Autowired
     private ConstantProperties cp;
     @Autowired
-    private Web3Service web3Service;
+    private FrontInterfaceService frontInterface;
 
     /**
      * add new contract data.
@@ -320,8 +321,8 @@ public class ContractService {
 
         String contractAddress = null;
         try {
-            contractAddress = frontService
-                .postFrontForEntity(groupId, FrontService.FRONT_CONTRACT_DEPLOY, params,
+            contractAddress = frontRestTools
+                .postFrontForEntity(groupId, FrontRestTools.FRONT_CONTRACT_DEPLOY, params,
                     String.class);
         } catch (Exception ex) {
             // deploy fail
@@ -370,7 +371,6 @@ public class ContractService {
         }
         // query param
         ContractParam queryParam = new ContractParam();
-        queryParam.setGroupId(param.getGroupId());
         queryParam.setContractName(param.getContractName());
         queryParam.setContractVersion(param.getVersion());
 
@@ -387,8 +387,8 @@ public class ContractService {
         }
 
         // request send transaction
-        Object frontRsp = frontService
-            .postFrontForEntity(param.getGroupId(), FrontService.FRONT_SEND_TRANSACTION, param,Object.class);
+        Object frontRsp = frontRestTools
+            .postFrontForEntity(param.getGroupId(), FrontRestTools.FRONT_SEND_TRANSACTION, param,Object.class);
         log.debug("end sendTransaction. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
@@ -415,4 +415,11 @@ public class ContractService {
         }
         log.debug("end updateSystemContract.");
     }*/
+
+    /**
+     * get contract code
+     */
+   public String getContractCode(int groupId, String address, BigInteger blockNumber){
+       return frontInterface.getContractCode(groupId, address, blockNumber);
+   }
 }

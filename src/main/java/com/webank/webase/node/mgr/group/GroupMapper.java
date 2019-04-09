@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,20 +27,25 @@ import org.springframework.stereotype.Repository;
 public interface GroupMapper {
 
     /**
+     * add group info
+     */
+    int add(TbGroup tbGroup);
+
+    /**
      * update group info.
      */
-    Integer updateNetworkInfo(@Param("groupId") Integer groupId,
+    int update(@Param("groupId") Integer groupId,
         @Param("latestBlock") BigInteger latestBlock);
 
     /**
      * query group count.
      */
-    Integer countOfNetwork(@Param("groupId") Integer groupId);
+    int getCount(@Param("groupId") Integer groupId);
 
     /**
      * get all group.
      */
-    List<TbGroup> listAllNetwork();
+    List<TbGroup> getList();
 
     /**
      * query the latest statistics trans on all groups.
@@ -50,10 +55,6 @@ public interface GroupMapper {
     /**
      * query general info.
      */
-    GroupGeneral queryNetworkGeneral(@Param("groupId") Integer groupId);
+    GroupGeneral getGeneral(@Param("groupId") Integer groupId);
 
-    /**
-     * reset all trans count of group.
-     */
-    Integer resetTransCount(@Param("groupId") Integer groupId);
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,17 +54,17 @@ public class GroupController {
      * get group general.
      */
     @GetMapping("/general/{groupId}")
-    public BaseResponse getNetworkGeneral(@PathVariable("groupId") Integer groupId)
+    public BaseResponse getGroupGeneral(@PathVariable("groupId") Integer groupId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        log.info("start getNetworkGeneral startTime:{} groupId:{}", startTime.toEpochMilli(),
+        log.info("start getGroupGeneral startTime:{} groupId:{}", startTime.toEpochMilli(),
             groupId);
         GroupGeneral groupGeneral = null;
 
         int statisticTimes = 0;// if transCount less than blockNumber,statistics again
         while (true) {
-            groupGeneral = groupService.queryNetworkGeneral(groupId);
+            groupGeneral = groupService.queryGroupGeneral(groupId);
             BigInteger transactionCount = groupGeneral.getTransactionCount();
             BigInteger latestBlock = groupGeneral.getLatestBlock();
             if (transactionCount.compareTo(latestBlock) < 0 && statisticTimes == 0) {
@@ -77,7 +77,7 @@ public class GroupController {
         }
 
         baseResponse.setData(groupGeneral);
-        log.info("end getNetworkGeneral useTime:{} result:{}",
+        log.info("end getGroupGeneral useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
     }
@@ -86,18 +86,18 @@ public class GroupController {
      * query all group.
      */
     @GetMapping("/all")
-    public BasePageResponse getAllNetwork() throws NodeMgrException {
+    public BasePageResponse getAllGroup() throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start getAllNetwork startTime:{}", startTime.toEpochMilli());
+        log.info("start getAllGroup startTime:{}", startTime.toEpochMilli());
 
         // get all group list
-        List<TbGroup> groupList = groupService.getAllNetwork();
+        List<TbGroup> groupList = groupService.getAllGroup();
         Integer totalCount = Optional.ofNullable(groupList).map(list -> list.size()).orElse(0);
         pagesponse.setTotalCount(totalCount);
         pagesponse.setData(groupList);
 
-        log.info("end getAllNetwork useTime:{} result:{}",
+        log.info("end getAllGroup useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
         return pagesponse;
     }
@@ -117,7 +117,7 @@ public class GroupController {
         List<SeventDaysTrans> listTrans = transDailyService.listSeventDayOfTrans(groupId);
         pagesponse.setData(listTrans);
 
-        log.info("end getAllNetwork useTime:{} result:{}",
+        log.info("end getAllGroup useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
         return pagesponse;
     }

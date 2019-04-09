@@ -1,23 +1,24 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.node.NodeService;
+import com.webank.webase.node.mgr.table.TableService;
 import java.math.BigInteger;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
@@ -33,25 +34,48 @@ public class GroupService {
 
     @Autowired
     private GroupMapper groupMapper;
+    @Autowired
+    private FrontService frontService;
+    @Autowired
+    private NodeService nodeService;
+    @Autowired
+    private TableService tableService;
+
+
+    /**
+     * save group id
+     */
+    public void saveGroupId(int groupId, int nodeCount) {
+        if (groupId == 0) {
+            return;
+        }
+        //save group id
+        String groupName = "group" + groupId;
+        TbGroup tbGroup = new TbGroup(groupId, groupName, nodeCount);
+        groupMapper.add(tbGroup);
+
+        //create table by group id
+        tableService.newTableByGroupId(groupId);
+    }
 
     /**
      * update group latest block number.
      */
-    public void updateNetworkInfo(Integer groupId, BigInteger latestBlock)
+    public void updateGroupInfo(Integer groupId, BigInteger latestBlock)
         throws NodeMgrException {
-        log.debug("start updateNetworkInfo groupId:{} latestBlock:{} ", groupId,
+        log.debug("start updateGroupInfo groupId:{} latestBlock:{} ", groupId,
             latestBlock);
         try {
-            Integer affectRow = groupMapper.updateNetworkInfo(groupId, latestBlock);
+            Integer affectRow = groupMapper.update(groupId, latestBlock);
             if (affectRow == 0) {
                 log.info(
-                    "fail updateNetworkInfo. groupId:{}  latestBlock:{}. affect 0 rows"
+                    "fail updateGroupInfo. groupId:{}  latestBlock:{}. affect 0 rows"
                         + " of tb_group",
                     groupId, latestBlock);
                 throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
             }
         } catch (RuntimeException ex) {
-            log.debug("fail updateNetworkInfo groupId:{} latestBlock:{}", groupId,
+            log.debug("fail updateGroupInfo groupId:{} latestBlock:{}", groupId,
                 latestBlock, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
@@ -60,14 +84,14 @@ public class GroupService {
     /**
      * query count of group.
      */
-    public Integer countOfNetwork(Integer groupId) throws NodeMgrException {
-        log.debug("start countOfNetwork groupId:{}", groupId);
+    public Integer countOfGroup(Integer groupId) throws NodeMgrException {
+        log.debug("start countOfGroup groupId:{}", groupId);
         try {
-            Integer count = groupMapper.countOfNetwork(groupId);
-            log.debug("end countOfNetwork groupId:{} count:{}", groupId, count);
+            Integer count = groupMapper.getCount(groupId);
+            log.debug("end countOfGroup groupId:{} count:{}", groupId, count);
             return count;
         } catch (RuntimeException ex) {
-            log.error("fail countOfNetwork", ex);
+            log.error("fail countOfGroup", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -75,23 +99,22 @@ public class GroupService {
     /**
      * query all group info.
      */
-    public List<TbGroup> getAllNetwork() throws NodeMgrException {
-        log.debug("start getAllNetwork");
+    public List<TbGroup> getAllGroup() throws NodeMgrException {
+        log.debug("start getAllGroup");
         // query group count
-        Integer count = countOfNetwork(null);
-
-        List<TbGroup> listOfNetwork = null;
-        if (count != null && count > 0) {
-            try {
-                // qurey group list
-                listOfNetwork = groupMapper.listAllNetwork();
-            } catch (RuntimeException ex) {
-                log.error("fail countOfNetwork", ex);
-                throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-            }
+        int count = countOfGroup(null);
+        if (count == 0) {
+            return null;
         }
-        log.debug("end getAllNetwork listOfNetwork:{}", JSON.toJSONString(listOfNetwork));
-        return listOfNetwork;
+
+        try {
+            List<TbGroup> groupList = groupMapper.getList();
+            log.debug("end getAllGroup groupList:{}", JSON.toJSONString(groupList));
+            return groupList;
+        } catch (RuntimeException ex) {
+            log.error("fail getAllGroup", ex);
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
     }
 
     /**
@@ -105,7 +128,7 @@ public class GroupService {
             throw new NodeMgrException(ConstantCode.GROUP_ID_NULL);
         }
 
-        Integer groupCount = countOfNetwork(groupId);
+        Integer groupCount = countOfGroup(groupId);
         log.debug("checkgroupId groupId:{} groupCount:{}", groupId, groupCount);
         if (groupCount == null || groupCount == 0) {
             throw new NodeMgrException(ConstantCode.INVALID_GROUP_ID);
@@ -134,30 +157,19 @@ public class GroupService {
     /**
      * query group overview information.
      */
-    public GroupGeneral queryNetworkGeneral(Integer groupId) throws NodeMgrException {
-        log.debug("start queryNetworkGeneral groupId:{}", groupId);
+    public GroupGeneral queryGroupGeneral(Integer groupId) throws NodeMgrException {
+        log.debug("start queryGroupGeneral groupId:{}", groupId);
         try {
             // qurey general info from tb_group
-            GroupGeneral generalInfo = groupMapper.queryNetworkGeneral(groupId);
-            log.debug("end queryNetworkGeneral generalInfo:{}",
+            GroupGeneral generalInfo = groupMapper.getGeneral(groupId);
+            log.debug("end queryGroupGeneral generalInfo:{}",
                 JSON.toJSONString(generalInfo));
             return generalInfo;
         } catch (RuntimeException ex) {
-            log.error("fail queryNetworkGeneral", ex);
+            log.error("fail queryGroupGeneral", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
 
-    /**
-     * reset trans count of group.
-     */
-    public void resetTransCount(Integer groupId) throws NodeMgrException {
-        log.debug("start resetTransCount groupId:{}", groupId);
-        try {
-            groupMapper.resetTransCount(groupId);
-        } catch (RuntimeException ex) {
-            log.error("fail resetTransCount", ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-    }
+
 }

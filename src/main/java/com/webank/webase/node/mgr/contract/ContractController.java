@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,9 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.ShareType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -103,7 +103,7 @@ public class ContractController {
 
 
         ContractParam param = new ContractParam();
-        param.setGroupId(groupId);
+       // param.setGroupId(groupId);  TODO
         // param.setContractType(ContractType.GENERALCONTRACT.getValue());
 
         Integer count = contractService.countOfContract(param);
@@ -195,6 +195,24 @@ public class ContractController {
         log.info("end sendTransaction useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
 
+        return baseResponse;
+    }
+
+    /**
+     * get contract code.
+     */
+    @GetMapping("/code/{groupId}/{address}/{blockNumber}")
+    public BaseResponse getContractCode(@PathVariable("groupId") Integer groupId,
+        @PathVariable("address") String address,
+        @PathVariable("blockNumber") BigInteger blockNumber) throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getContractCode startTime:{} groupId:{} address:{} blockNumber:{}",
+            startTime.toEpochMilli(), groupId, address, blockNumber);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        String contractCode = contractService.getContractCode(groupId, address, blockNumber);
+        baseResponse.setData(contractCode);
+        log.info("end getContractCode useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
     }
 }

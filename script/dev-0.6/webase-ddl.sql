@@ -12,7 +12,35 @@ CREATE TABLE IF NOT EXISTS tb_group (
         create_time datetime DEFAULT NULL COMMENT '创建时间',
         modify_time datetime DEFAULT NULL COMMENT '修改时间',
         PRIMARY KEY (group_id)
-    ) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8
+    ) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for tb_front
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_front (
+  front_id int(11) NOT NULL AUTO_INCREMENT COMMENT '前置服务编号',
+  front_ip varchar(16) NOT NULL COMMENT '前置服务ip',
+  front_port int(11) DEFAULT NULL COMMENT '前置服务端口',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (front_id),
+  UNIQUE KEY unique_node_base (front_ip,front_port)
+) ENGINE=InnoDB AUTO_INCREMENT=500001 DEFAULT CHARSET=utf8 COMMENT='前置服务信息表';
+
+
+-- ----------------------------
+-- Table structure for tb_user_key_mapping
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_front_group_map (
+  map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  front_id int(11) NOT NULL COMMENT '前置服务编号',
+  group_id int(11) NOT NULL COMMENT '群组编号',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (map_id),
+  unique  unique_front_group (front_id,group_id)
+) ENGINE=InnoDB AUTO_INCREMENT=600001 DEFAULT CHARSET=utf8 COMMENT='前置群组映射表';
 
 
 -- ----------------------------
@@ -20,38 +48,20 @@ CREATE TABLE IF NOT EXISTS tb_group (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_node (
   node_id varchar(64) NOT NULL  COMMENT '节点编号',
+  group_id int(11) NOT NULL COMMENT '所属群组编号',
   node_name varchar(120) NOT NULL COMMENT '节点名称',
   node_ip varchar(16) NOT NULL COMMENT '节点ip',
   p2p_port int(11) DEFAULT NULL COMMENT '节点p2p端口',
-  rpc_port int(11) DEFAULT NULL,
-  channel_port int(11) DEFAULT NULL COMMENT '链上链下端口',
-  front_port int(11) DEFAULT NULL COMMENT '节点前置服务端口',
   block_number bigint(20) DEFAULT '0' COMMENT '节点块高',
   pbft_view bigint(20) DEFAULT NULL COMMENT 'pbft_view',
   node_active int(1) NOT NULL DEFAULT '2' COMMENT '节点存活标识(1存活，2不存活)',
-  node_type int(1) DEFAULT '2' COMMENT '节点类型（1-手动配置的节点 2-自动同步的节点）',
-  description text COMMENT '描述',
+  description text DEFAULT NULL COMMENT '描述',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (node_id),
-  UNIQUE KEY unique_node_base (node_ip,p2p_port,rpc_port)
+  PRIMARY KEY (node_id,group_id),
+  UNIQUE KEY unique_node_base (group_id,node_ip,p2p_port)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='节点表';
 
-
-
-
--- ----------------------------
--- Table structure for tb_node
--- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_group_node_map (
-  map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '映射id',
-  group_id int(11) NOT NULL COMMENT '群组编号',
-  node_id varchar(64) NOT NULL AUTO_INCREMENT COMMENT '节点编号',
-  create_time datetime DEFAULT NULL COMMENT '创建时间',
-  modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (map_id),
-  UNIQUE KEY unique_name (group_id,node_id)
-) ENGINE=InnoDB AUTO_INCREMENT=600001 DEFAULT CHARSET=utf8 COMMENT='群组节点映射表';
 
 
 
@@ -177,70 +187,3 @@ CREATE TABLE IF NOT EXISTS tb_role (
 
 
 
-
--- ----------------------------
--- Table structure for tb_block-------------------------------------------------------------------------根据群组编号分表
--- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_block(
-  pk_hash varchar(128) NOT NULL COMMENT '块hash值',
-  miner varchar(256) NOT NULL COMMENT '矿工',
-  block_timestamp datetime NOT NULL COMMENT '出块时间',
-  block_number bigint(20) NOT NULL COMMENT '快高',
-  trans_count bigint(20) DEFAULT '0' COMMENT '块包含的交易数',
-  create_time datetime DEFAULT NULL COMMENT '创建时间',
-  modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (pk_hash),
-  KEY index_number (block_number)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区块信息表';
-
-
-
-
--- ----------------------------
--- Table structure for tb_trans_hash--------------------------------------------------------------------根据群组编号分表
--- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_trans_hash (
-  trans_hash varchar(128) NOT NULL COMMENT '交易hash',
-  block_number bigint(25) NOT NULL COMMENT '所属区块',
---  block_timestamp datetime NOT NULL COMMENT '出块时间',
-  statistics_flag int(1) DEFAULT '1' COMMENT '是否已统计（1-未统计，2-已统计）',
-  create_time datetime DEFAULT NULL COMMENT '创建时间',
-  modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (trans_hash)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交易hash信息表';
-
-
-
--- ----------------------------
--- Table structure for tb_user_transaction_monitor--------------------------------------------------------------------根据群组编号分表
--- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_user_transaction_monitor (
-  user_name varchar(128) NOT NULL COMMENT '用户名称',
-  user_type tinyint(4) DEFAULT '0' COMMENT '用户类型(0-正常，1-异常)',
-  contract_name varchar(128) NOT NULL COMMENT '合约名称',
-  contract_address varchar(64) COMMENT '合约地址',
-  interface_name varchar(32) COMMENT '合约接口名',
-  trans_type tinyint(4) DEFAULT '0' COMMENT '交易类型(0-合约部署，1-接口调用)',
-  trans_unusual_type tinyint(4) DEFAULT '0' COMMENT '交易异常类型 (0-正常，1-异常合约，2-异常接口)',
-  trans_count int(11) NOT NULL COMMENT '交易量',
-  trans_hashs varchar(1024) COMMENT '交易hashs(最多5个)',
-  trans_hash_lastest varchar(128) COMMENT '最新交易hash',
-  create_time datetime DEFAULT NULL COMMENT '创建时间',
-  modify_time datetime DEFAULT NULL COMMENT '修改时间',
-    INDEX idx_un (user_name),
-    INDEX idx_cn (contract_name),
-    INDEX idx_ct (create_time),
-    INDEX idx_mt (modify_time)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户交易监管统计表'
-PARTITION BY RANGE (TO_DAYS(create_time)) (
-    PARTITION p1 VALUES LESS THAN (TO_DAYS('2019-07-01')),
-    PARTITION p2 VALUES LESS THAN (TO_DAYS('2020-01-01')),
-    PARTITION p3 VALUES LESS THAN (TO_DAYS('2020-07-01')),
-    PARTITION p4 VALUES LESS THAN (TO_DAYS('2021-01-01')),
-    PARTITION p5 VALUES LESS THAN (TO_DAYS('2021-07-01')),
-    PARTITION p6 VALUES LESS THAN (TO_DAYS('2022-01-01')),
-    PARTITION p7 VALUES LESS THAN (TO_DAYS('2022-07-01')),
-    PARTITION p8 VALUES LESS THAN (TO_DAYS('2023-01-01')),
-    PARTITION p9 VALUES LESS THAN (TO_DAYS('2023-07-01')),
-    PARTITION p99 VALUES LESS THAN (MAXVALUE)
-);

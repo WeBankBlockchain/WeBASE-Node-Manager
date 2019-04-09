@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
 import java.time.LocalDateTime;
@@ -65,9 +64,9 @@ public class ChainService {
         }
 
         // request url
-        String url = String
-            .format(FrontService.FRONT_URL, tbNode.getNodeIp(), tbNode.getFrontPort(),
-                FrontService.FRONT_CHAIN);
+       // String url = String.format(RestTools.FRONT_URL, tbNode.getNodeIp(), tbNode.getFrontPort(),
+  //              RestTools.FRONT_CHAIN);  TODO
+        String url = null;
         url = url + "?" + chainUrlParam;
         log.info("getChainMonitorInfo request url:{}", url);
 

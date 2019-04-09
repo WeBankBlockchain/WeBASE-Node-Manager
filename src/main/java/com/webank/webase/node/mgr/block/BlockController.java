@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,16 @@ package com.webank.webase.node.mgr.block;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
+import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
-import com.webank.webase.node.mgr.web3.Web3Service;
+import com.webank.webase.node.mgr.block.entity.BlockListParam;
+import com.webank.webase.node.mgr.block.entity.TbBlock;
+import com.webank.webase.node.mgr.front.FrontService;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
@@ -45,7 +49,7 @@ public class BlockController {
     @Autowired
     private BlockService blockService;
     @Autowired
-    private Web3Service web3Service;
+    private FrontService frontService;
 
     /**
      * query block list.
@@ -69,9 +73,9 @@ public class BlockController {
         if (count != null && count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
-            BlockListParam queryParam = new BlockListParam(groupId, start, pageSize, pkHash,
+            BlockListParam queryParam = new BlockListParam(start, pageSize, pkHash,
                 blockNumber, SqlSortType.DESC.getValue());
-            List<TbBlock> blockList = blockService.queryBlockList(queryParam);
+            List<TbBlock> blockList = blockService.queryBlockList(groupId,queryParam);
             pageResponse.setData(blockList);
             pageResponse.setTotalCount(count);
         } else {
@@ -79,16 +83,16 @@ public class BlockController {
             if (blockNumber != null) {
                 log.debug("did not find block, request from front. blockNumber:{} groupId:{}",
                     blockNumber, groupId);
-                 blockInfo = web3Service.getBlockByNumber(groupId, blockNumber);
+                 blockInfo = blockService.getBlockFromFrontByNumber(groupId, blockNumber);
             } else if (StringUtils.isNotBlank(pkHash)) {
                 log.debug(
                     "did not find block,request from front. pkHash:{} groupId:{}",
                     pkHash, groupId);
-                blockInfo = web3Service.getblockFromFrontByHash(groupId, pkHash);
+                blockInfo = blockService.getblockFromFrontByHash(groupId, pkHash);
             }
             if (blockInfo != null) {
                 TbBlock tbBlock = NodeMgrTools.object2JavaBean(blockInfo,TbBlock.class);
-                tbBlock.setGroupId(groupId);
+               // tbBlock.setGroupId(groupId);  TODO
                 pageResponse.setData(new TbBlock[]{tbBlock});
                 pageResponse.setTotalCount(1);
             }
@@ -97,5 +101,24 @@ public class BlockController {
         log.info("end queryBlockList useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pageResponse));
         return pageResponse;
+    }
+
+
+    /**
+     * get block by number.
+     */
+    @GetMapping("/blockByNumber/{groupId}/{blockNumber}")
+    public BaseResponse getBlockByNumber(@PathVariable("groupId") Integer groupId,
+        @PathVariable("blockNumber") BigInteger blockNumber)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getBlockByNumber startTime:{} groupId:{} blockNumber:{}",
+            startTime.toEpochMilli(), groupId, blockNumber);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Object blockInfo = blockService.getBlockFromFrontByNumber(groupId, blockNumber);
+        baseResponse.setData(blockInfo);
+        log.info("end getBlockByNumber useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+        return baseResponse;
     }
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ public class TbMonitor {
 
     private String userName;
     private Integer userType;
-    private Integer groupId;
     private String contractName;
     private String contractAddress;
     private String interfaceName;

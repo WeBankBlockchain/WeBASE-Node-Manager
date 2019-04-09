@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,18 +28,18 @@ public interface NodeMapper {
     /**
      * Add new node data.
      */
-    Integer addNodeRow(TbNode tbNode);
+    Integer add(TbNode tbNode);
 
     /**
      * Query the number of node according to some conditions.
      */
-    Integer countOfNode(NodeParam nodeParam);
+    Integer getCount(NodeParam nodeParam);
 
 
     /**
      * Query node list according to some conditions.
      */
-    List<TbNode> listOfNode(NodeParam nodeParam);
+    List<TbNode> getList(NodeParam nodeParam);
 
     /**
      * query tb_node by nodeip and p2pport.

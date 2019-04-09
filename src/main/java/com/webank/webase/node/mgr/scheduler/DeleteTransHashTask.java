@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +16,10 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.block.MinMaxBlock;
-import com.webank.webase.node.mgr.transhash.TransHashService;
+import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.TbGroup;
+import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,28 +33,48 @@ import org.springframework.stereotype.Component;
 public class DeleteTransHashTask {
 
     @Autowired
+    private GroupService groupService;
+    @Autowired
     private TransHashService transHashService;
     @Autowired
     private ConstantProperties constantsProperties;
 
     /**
+     * start to delete block
+     */
+    public void deleteTransStart(){
+        Instant startTime = Instant.now();
+        log.info("start deleteTransStart startTime:{}", startTime.toEpochMilli());
+        //get group list
+        List<TbGroup> groupList = groupService.getAllGroup();
+        if (groupList == null || groupList.size() == 0) {
+            log.info("deleteTransStart jump over .not found any group");
+            return;
+        }
+
+        //delete trans by groupId
+        groupList.stream().forEach(group -> deleteTransByGroupId(group.getGroupId()));
+        log.info("end deleteTransStart useTime:{} ",
+            Duration.between(startTime, Instant.now()).toMillis());
+    }
+
+    /**
      * delete some transaction info.
      */
-    public void deleteTransHash() {
+    public void deleteTransByGroupId(int groupId) {
         Instant startTime = Instant.now();
         log.info("start deleteTransHash startTime:{}", startTime.toEpochMilli());
         try {
-            List<MinMaxBlock> listOfTrans = transHashService.queryMinMaxBlock();
+            List<MinMaxBlock> listOfTrans =null;// transHashService.queryMinMaxBlock();  TODO
             if (listOfTrans == null || listOfTrans.size() == 0) {
                 log.warn("fail deleteTransHash:Did not find any trans");
                 return;
             }
 
             for (MinMaxBlock minMaxBlock : listOfTrans) {
-                Integer groupId = minMaxBlock.getGroupId();
                 BigInteger maxBlockNumber = minMaxBlock.getMaxBlockNumber();
                 BigInteger minBLockNumber = minMaxBlock.getMinBLockNumber();
-                if (groupId == null || maxBlockNumber == null || minBLockNumber == null) {
+                if ( maxBlockNumber == null || minBLockNumber == null) {
                     log.warn(
                         "deleteTransHash jump over .groupId[{}],maxBlockNumber[{}],"
                             + "minBLockNumber[{}]",

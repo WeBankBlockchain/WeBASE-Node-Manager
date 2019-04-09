@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ public class RoleListParam extends BaseQueryParam {
      * init by start、pateSize、roleId、roleName.
      */
     public RoleListParam(Integer start, Integer pageSize, Integer roleId, String roleName) {
-        super(start, pageSize);
+        super(start, pageSize,null);
         this.roleId = roleId;
         this.roleName = roleName;
     }

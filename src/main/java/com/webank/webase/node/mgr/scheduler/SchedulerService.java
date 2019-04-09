@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,6 +41,8 @@ public class SchedulerService implements SchedulingConfigurer {
     @Autowired
     private TransMonitorTask transMonitorTask;
     @Autowired
+    private PullBlockInfoTask pullBlockInfoTask;
+    @Autowired
     private ConstantProperties constants;
 
     @Override
@@ -49,20 +51,23 @@ public class SchedulerService implements SchedulingConfigurer {
             (context) -> new CronTrigger(constants.getStatisticsTransDailyCron())
                 .nextExecutionTime(context));
 
-        taskRegistrar.addTriggerTask(() -> checkNodeTask.checkNodeStatus(),
+        taskRegistrar.addTriggerTask(() -> checkNodeTask.checkStart(),
             (context) -> new CronTrigger(constants.getCheckNodeStatusCron())
                 .nextExecutionTime(context));
 
-        taskRegistrar.addTriggerTask(() -> deleteBlockTask.deleteBlockInfo(),
+        taskRegistrar.addTriggerTask(() -> deleteBlockTask.deleteBlockStart(),
             (context) -> new CronTrigger(constants.getDeleteInfoCron())
                 .nextExecutionTime(context));
 
-        taskRegistrar.addTriggerTask(() -> deleteTransHashTask.deleteTransHash(),
+        taskRegistrar.addTriggerTask(() -> deleteTransHashTask.deleteTransStart(),
             (context) -> new CronTrigger(constants.getDeleteInfoCron())
                 .nextExecutionTime(context));
 
         taskRegistrar.addTriggerTask(() -> transMonitorTask.monitorInfoHandle(),
             (context) -> new CronTrigger(constants.getInsertTransMonitorCron())
                 .nextExecutionTime(context));
+
+        taskRegistrar.addFixedDelayTask(() -> pullBlockInfoTask.startPull(),
+            constants.getResetGroupListCycle());
     }
 }

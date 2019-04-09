@@ -3,41 +3,29 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.transhash.TransHashMapper">
-  <resultMap id="transHashMap" type="com.webank.webase.node.mgr.transhash.TbTransHash">
+<mapper namespace="com.webank.webase.node.mgr.transaction.TransHashMapper">
+  <resultMap id="transHashMap" type="com.webank.webase.node.mgr.transaction.entity.TbTransHash">
     <id column="trans_hash" javaType="java.lang.String" jdbcType="VARCHAR" property="transHash"/>
-    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="groupId"/>
     <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="blockNumber"/>
     <result column="statistics_flag" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="statisticsFlag"/>
-    <result column="block_timestamp" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
-      property="blockTimestamp"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
   </resultMap>
 
-  <sql id="NEW_ROW_COLUMN">
-		(trans_hash,group_id,block_number,block_timestamp,create_time,modify_time)
-	</sql>
 
-
-  <insert id="addTransRow" parameterType="com.webank.webase.node.mgr.transhash.TbTransHash">
-    insert ignore into tb_trans_hash
-    <include refid="NEW_ROW_COLUMN"/>
-    values(#{transHash},#{groupId},#{blockNumber},#{blockTimestamp},NOW(),NOW())
+  <insert id="add">
+    insert ignore into ${tableName} (trans_hash,block_number,create_time,modify_time)
+    values(#{trans.transHash},#{trans.blockNumber},NOW(),NOW())
   </insert>
 
 
-  <select id="countOfTransHash" parameterType="com.webank.webase.node.mgr.transhash.TransListParam"
+  <select id="getCount" parameterType="com.webank.webase.node.mgr.transaction.entity.TransListParam"
     resultType="java.lang.Integer">
-    select count(1) from tb_trans_hash where 1=1
-    <if test="param.groupId != null">
-      and group_id = #{param.groupId}
-    </if>
+    select count(1) from ${tableName} where 1=1
     <if test="param.transHash != null and param.transHash != ''">
       and trans_hash = #{param.transHash}
     </if>
@@ -47,12 +35,9 @@
   </select>
 
 
-  <select id="listOfTransHash" parameterType="com.webank.webase.node.mgr.transhash.TransListParam"
+  <select id="getList" parameterType="com.webank.webase.node.mgr.transaction.entity.TransListParam"
     resultMap="transHashMap">
-    select * from tb_trans_hash where 1=1
-    <if test="param.groupId != null">
-      and group_id = #{param.groupId}
-    </if>
+    select * from ${tableName} where 1=1
     <if test="param.transHash != null and param.transHash != ''">
       and trans_hash = #{param.transHash}
     </if>
@@ -69,32 +54,30 @@
 
   <select id="listOfUnStatTransHash" resultMap="transHashMap">
         select *
-        from tb_trans_hash 
+        from ${tableName}
         where statistics_flag=1
         order by block_number
         limit 0,10000
     </select>
 
   <select id="listOfUnStatTransHashByJob" resultMap="transHashMap">
-        select *
-        from tb_trans_hash 
-        where statistics_flag=1
-          and MOD(block_number,#{shardingTotalCount}) = #{shardingItem}
+        select * from ${tableName}
+        where statistics_flag=1 and MOD(block_number,#{shardingTotalCount}) = #{shardingItem}
         order by block_number
         limit 0,10000
     </select>
 
-  <select id="queryMinMaxBlock" resultType="com.webank.webase.node.mgr.block.MinMaxBlock">
-		select group_id as groupId,max(block_number) as maxBlockNumber,min(block_number) as minBLockNumber
-		from tb_trans_hash group by group_id
+  <select id="queryMinMaxBlock" resultType="com.webank.webase.node.mgr.block.entity.MinMaxBlock">
+		select max(block_number) as maxBlockNumber,min(block_number) as minBLockNumber
+		from ${tableName}
 	</select>
 
-  <delete id="deleteSomeTrans">
-		delete from tb_trans_hash where group_id = #{groupId} and statistics_flag=2 and block_number &lt; #{deleteNumber}
+  <delete id="remove">
+		delete from ${tableName} where statistics_flag=2 and block_number &lt; #{deleteNumber}
 	</delete>
 
   <update id="updateTransStatFlag">
-        update tb_trans_hash 
+        update ${tableName}
         set statistics_flag = 2
         where trans_hash = #{transHash}
     </update>

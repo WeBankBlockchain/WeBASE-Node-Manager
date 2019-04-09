@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,6 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.NodeType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.scheduler.CheckNodeTask;
 import java.time.Duration;
@@ -86,12 +85,13 @@ public class NodeController {
             List<TbNode> listOfnode = null;
             while (true) {
                 listOfnode = nodeService.qureyNodeList(queryParam);
-                long countOfInvalid = listOfnode.parallelStream()
-                    .filter(node -> (NodeType.CURRENT.getValue() == node.getNodeType()
-                        && DataStatus.NORMAL.getValue() != node.getNodeActive())).count();
+               /* long countOfInvalid = listOfnode.parallelStream()
+                    .filter(node -> (NodeType.CURRENT.getValue() == node.getNodeType() TODO
+                        && DataStatus.NORMAL.getValue() != node.getNodeActive())).count();*/
+               long countOfInvalid =0L;//TODO
                 if (countOfInvalid > 0 && queryTimes == 0) {
                     queryTimes += 1;
-                    checkNodeTask.checkNodeStatus();
+                 //   checkNodeTask.checkNodeStatus();
                     continue;
                 } else {
                     break;
@@ -110,18 +110,16 @@ public class NodeController {
      * get node info.
      */
     @GetMapping(value = "/nodeInfo/{groupId}")
-    public BaseResponse getNodeInfo(@PathVariable("groupId") Integer groupId,
-        @RequestParam(value = "nodeType", required = true) Integer nodeType)
+    public BaseResponse getNodeInfo(@PathVariable("groupId") Integer groupId)
         throws NodeMgrException {
 
         Instant startTime = Instant.now();
-        log.info("start addNodeInfo startTime:{} groupId:{} nodeType:{}",
-            startTime.toEpochMilli(), groupId, nodeType);
+        log.info("start addNodeInfo startTime:{} groupId:{}",
+            startTime.toEpochMilli(), groupId);
 
         // param
         NodeParam param = new NodeParam();
         param.setGroupId(groupId);
-        param.setNodeType(nodeType);
 
         // query node row
         TbNode tbNode = nodeService.queryNodeInfo(param);
@@ -145,7 +143,7 @@ public class NodeController {
             JSON.toJSONString(node));
 
         // add node ip
-        Integer nodeId = nodeService.addNodeInfo(node);
+        Integer nodeId = null;//nodeService.addNodeInfo(node);
         // query node row
         TbNode tbNode = nodeService.queryByNodeId(nodeId);
         baseResponse.setData(tbNode);

@@ -1,28 +1,33 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.block;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.TbNode;
-import com.webank.webase.node.mgr.transhash.TransHashService;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.block.entity.BlockInfo;
+import com.webank.webase.node.mgr.block.entity.BlockListParam;
+import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
+import com.webank.webase.node.mgr.block.entity.TbBlock;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.transaction.TransHashService;
+import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
+import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
@@ -39,101 +44,68 @@ public class BlockService {
 
     BigInteger numberOne = new BigInteger("1");
     @Autowired
-    private NodeService nodeService;
+    private FrontInterfaceService frontInterface;
     @Autowired
     private BlockMapper blockmapper;
-    @Autowired
-    private GroupService groupService;
     @Autowired
     private TransHashService transHashService;
 
     /**
      * save report block info.
      */
-    /*@Transactional
+    @Transactional
     public void saveBLockInfo(BlockInfo blockInfo, Integer groupId) throws NodeMgrException {
-        if (blockInfo == null) {
-            log.debug("fail saveBlockInfo. blockInfo null");
-            return;
+        BigInteger bigIntegerNumber = blockInfo.getNumber();
+        LocalDateTime blockTimestamp = LocalDateTime.MIN;
+        if(bigIntegerNumber!=BigInteger.ZERO){
+            blockTimestamp = NodeMgrTools
+                .timestamp2LocalDateTime(Long.valueOf(blockInfo.getTimestamp()));
         }
-        BlockRpcResultInfo brri = blockInfo.getResult();
-        Integer number = Integer.parseInt(StringUtils.removeStart(brri.getNumber(), "0x"), 16);
-        BigInteger bigIntegerNumber = new BigInteger(number.toString());
-        LocalDateTime localDateTime = NodeMgrTools
-            .hex2LocalDateTime(StringUtils.removeStart(brri.getTimestamp(), "0x"));
-
-        List<String> transList = brri.getTransactions();
+        List<TransactionInfo> transList = blockInfo.getTransactions();
 
         // save block info
-        TbBlock tbBlock = new TbBlock(brri.getHash(), groupId, bigIntegerNumber,
-            brri.getMinerNodeId(), localDateTime, transList.size());
-        addBlockInfo(tbBlock);
+        TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
+            transList.size());
+        addBlockInfo(tbBlock,groupId);
 
-        // update latest block number
-        groupService.updateNetworkInfo(groupId, bigIntegerNumber);
-
-        // save trans hashfor
-        for (String hashStr : transList) {
-            TbTransHash tbTransHash = new TbTransHash(hashStr, groupId, bigIntegerNumber,
-                localDateTime);
-            transHashService.addTransInfo(tbTransHash);
+        // save trans hash
+        for (TransactionInfo transaction : transList) {
+            TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), groupId,
+                bigIntegerNumber,blockTimestamp);
+            transHashService.addTransInfo(groupId,tbTransHash);
         }
-    }*/
-
+    }
 
     /**
      * add block info to db.
      */
     @Transactional
-    public void addBlockInfo(TbBlock tbBlock) throws NodeMgrException {
+    public void addBlockInfo(TbBlock tbBlock,int groupId) throws NodeMgrException {
         log.debug("start addBlockInfo tbBlock:{}", JSON.toJSONString(tbBlock));
-        // check reportBLock == dbMaxBLock +1
-        BigInteger dbMaxBLock = blockmapper.queryLatestBlockNumber(tbBlock.getGroupId());
-
-        BigInteger reportBlock = tbBlock.getBlockNumber();
-        if (dbMaxBLock != null && !(reportBlock.compareTo(dbMaxBLock.add(numberOne)) == 0)) {
-            log.info("fail addBlockInfo.  dbMaxBLock:{} reportBlock:{}", dbMaxBLock, reportBlock);
+        String tableName = TableName.BLOCK.getTableName(groupId);
+         //check newBLock == dbMaxBLock +1
+          BigInteger dbMaxBLock = blockmapper.getLatestBlockNumber(tableName);
+        BigInteger pullBlockNumber = tbBlock.getBlockNumber();
+        if (dbMaxBLock != null && !(pullBlockNumber.compareTo(dbMaxBLock.add(numberOne)) == 0)) {
+            log.info("fail addBlockInfo.  dbMaxBLock:{} pullBlockNumber:{}", dbMaxBLock, pullBlockNumber);
             throw new NodeMgrException(ConstantCode.NOT_SAVE_BLOCK);
         }
 
-        // add row
-        Integer affectRow = blockmapper.addBlockRow(tbBlock);
-        if (affectRow == 0) {
-            log.info("fail addBlockInfo. block:{} affect 0 rows of tb_block", reportBlock);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-    }
-
-    /**
-     * query latest block number.
-     */
-    public BigInteger getLatestBlockNumber(String nodeIp, Integer nodeP2PPort)
-        throws NodeMgrException {
-        log.debug("start getLatestBlockNumber nodeIp:{} nodeP2PPort:{}", nodeIp, nodeP2PPort);
-        TbNode nodeRow = nodeService.queryNodeByIpAndP2pPort(nodeIp, nodeP2PPort);
-        Integer groupId = Optional.ofNullable(nodeRow).map(node -> node.getGroupId())
-            .orElseThrow(() -> new NodeMgrException(ConstantCode.INVALID_NODE_INFO));
-
-        try {
-            BigInteger latestBlock = blockmapper.queryLatestBlockNumber(groupId);
-            log.debug("end getLatestBlockNumber nodeIp:{} nodeP2PPort:{} latestBlock:{}", nodeIp,
-                nodeP2PPort, latestBlock);
-            return latestBlock;
-        } catch (RuntimeException ex) {
-            log.error("add row exception", ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
+        // save block info
+           blockmapper.add(tableName,tbBlock);
     }
 
     /**
      * query block info list.
      */
-    public List<TbBlock> queryBlockList(BlockListParam queryParam) throws NodeMgrException {
-        log.debug("start queryBlockList queryParam:{}", JSON.toJSONString(queryParam));
+    public List<TbBlock> queryBlockList(int groupId, BlockListParam queryParam)
+        throws NodeMgrException {
+        log.debug("start queryBlockList groupId:{},queryParam:{}", groupId,
+            JSON.toJSONString(queryParam));
 
         List<TbBlock> listOfBlock = null;
         try {
-            listOfBlock = blockmapper.listOfBlock(queryParam);
+            listOfBlock = blockmapper.getList(TableName.BLOCK.getTableName(groupId), queryParam);
         } catch (RuntimeException ex) {
             log.error("fail queryBlockList. queryParam:{}", JSON.toJSONString(queryParam), ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
@@ -151,7 +123,8 @@ public class BlockService {
         log.debug("start countOfBlock groupId:{} pkHash:{} blockNumber:{}", groupId, pkHash,
             blockNumber);
         try {
-            Integer count = blockmapper.countOfBlock(groupId, pkHash, blockNumber);
+            Integer count = blockmapper
+                .getCount(TableName.BLOCK.getTableName(groupId), pkHash, blockNumber);
             log.info("end countOfBlock groupId:{} pkHash:{} count:{}", groupId, pkHash, count);
             return count;
         } catch (RuntimeException ex) {
@@ -163,10 +136,10 @@ public class BlockService {
     /**
      * query the min and max block number of tb_block.
      */
-    public List<MinMaxBlock> queryMinMaxBlock() throws NodeMgrException {
+    public List<MinMaxBlock> queryMinMaxBlock(int groupId) throws NodeMgrException {
         log.debug("start queryMinMaxBlock");
         try {
-            List<MinMaxBlock> listMinMaxBlock = blockmapper.queryMinMaxBlock();
+            List<MinMaxBlock> listMinMaxBlock = blockmapper.queryMinMaxBlock(TableName.BLOCK.getTableName(groupId));
             int listSize = Optional.ofNullable(listMinMaxBlock).map(list -> list.size()).orElse(0);
             log.info("end queryMinMaxBlock listMinMaxBlockSize:{}", listSize);
             return listMinMaxBlock;
@@ -175,6 +148,7 @@ public class BlockService {
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
+
 
     /**
      * Remove all block heights less than inputValue.
@@ -186,7 +160,8 @@ public class BlockService {
 
         Integer affectRow = 0;
         try {
-            affectRow = blockmapper.deleteSomeBlocks(groupId, deleteBlockNumber);
+            affectRow = blockmapper
+                .remove(TableName.BLOCK.getTableName(groupId), deleteBlockNumber);
         } catch (RuntimeException ex) {
             log.error("fail deleteSomeBlocks. groupId:{} deleteBlockNumber:{}", groupId,
                 deleteBlockNumber, ex);
@@ -198,4 +173,24 @@ public class BlockService {
         return affectRow;
     }
 
+    /**
+     * get latest block number
+     */
+    public BigInteger getLatestBlockNumber(int groupId) {
+        return blockmapper.getLatestBlockNumber(TableName.BLOCK.getTableName(groupId));
+    }
+
+    /**
+     * get block by block from front server
+     */
+    public BlockInfo getBlockFromFrontByNumber(int groupId, BigInteger blockNumber) {
+        return frontInterface.getBlockByNumber(groupId, blockNumber);
+    }
+
+    /**
+     * get block by block from front server
+     */
+    public BlockInfo getblockFromFrontByHash(int groupId, String pkHash) {
+        return frontInterface.getblockFromFrontByHash(groupId, pkHash);
+    }
 }

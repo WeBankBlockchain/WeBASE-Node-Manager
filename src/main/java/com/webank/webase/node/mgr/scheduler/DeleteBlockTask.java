@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,16 @@ package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.block.BlockService;
-import com.webank.webase.node.mgr.block.MinMaxBlock;
+import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.TbGroup;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import javax.swing.text.html.Option;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,6 +39,8 @@ import org.springframework.stereotype.Component;
 public class DeleteBlockTask {
 
     @Autowired
+    private GroupService groupService;
+    @Autowired
     private BlockService blockService;
     @Autowired
     private TransDailyService transDailyService;
@@ -42,25 +48,41 @@ public class DeleteBlockTask {
     private ConstantProperties constantsProperties;
 
     /**
+     * start to delete block
+     */
+    public void deleteBlockStart(){
+        Instant startTime = Instant.now();
+        log.info("start deleteBlockStart startTime:{}", startTime.toEpochMilli());
+        //get group list
+        List<TbGroup> groupList = groupService.getAllGroup();
+        if (groupList == null || groupList.size() == 0) {
+            log.info("deleteBlockStart jump over .not found any group");
+            return;
+        }
+
+        //delete block by groupId
+        groupList.stream().forEach(group -> deleteBlockByGroupId(group.getGroupId()));
+        log.info("end deleteBlockStart useTime:{} ",
+            Duration.between(startTime, Instant.now()).toMillis());
+    }
+
+    /**
      * delete some block information.
      */
-    public void deleteBlockInfo() {
-        Instant startTime = Instant.now();
-        log.info("start deleteBlockInfo startTime:{}", startTime.toEpochMilli());
+    public void deleteBlockByGroupId(int groupId) {
         try {
-            List<MinMaxBlock> listOfBlock = blockService.queryMinMaxBlock();
+            List<MinMaxBlock> listOfBlock = blockService.queryMinMaxBlock(groupId);
             if (listOfBlock == null || listOfBlock.size() == 0) {
-                log.warn("fail deleteBlockInfo:Did not find any blocks");
+                log.warn("fail deleteBlockByGroupId:Did not find any blocks");
                 return;
             }
 
             for (MinMaxBlock minMaxBlock : listOfBlock) {
-                Integer groupId = minMaxBlock.getGroupId();
                 BigInteger maxBlockNumber = minMaxBlock.getMaxBlockNumber();
                 BigInteger minBLockNumber = minMaxBlock.getMinBLockNumber();
-                if (groupId == null || maxBlockNumber == null || minBLockNumber == null) {
+                if (maxBlockNumber == null || minBLockNumber == null) {
                     log.warn(
-                        "deleteBlockInfo jump over .groupId[{}],maxBlockNumber[{}],"
+                        "deleteBlockByGroupId jump over .groupId[{}],maxBlockNumber[{}],"
                             + "minBLockNumber[{}]",
                         groupId, maxBlockNumber,
                         minBLockNumber);
@@ -70,12 +92,12 @@ public class DeleteBlockTask {
                 BigInteger subBlockNumber = maxBlockNumber
                     .subtract(constantsProperties.getBlockRetainMax());
                 BigInteger transDailyBlockNumber = transDailyService
-                    .queryMaxBlockByNetwork(groupId);
+                    .queryMaxBlockByGroup(groupId);
 
                 if (minBLockNumber.compareTo(subBlockNumber) > 0
                     || subBlockNumber.compareTo(transDailyBlockNumber) > 0) {
                     log.info(
-                        "deleteBlockInfo jump over .maxBlockNumber[{}],"
+                        "deleteBlockByGroupId jump over .maxBlockNumber[{}],"
                             + "minBLockNumber[{}],transDailyBlockNumber[{}]",
                         maxBlockNumber,
                         minBLockNumber, transDailyBlockNumber);
@@ -83,14 +105,11 @@ public class DeleteBlockTask {
                 }
 
                 Integer effectRows = blockService.deleteSomeBlocks(groupId, subBlockNumber);
-                log.info("period deleteBlockInfo.  groupId[{}] effectRows:[{}]",
+                log.info("period deleteBlockByGroupId.  groupId[{}] effectRows:[{}]",
                     groupId,effectRows);
             }
-
         } catch (Exception ex) {
-            log.error("deleteBlockInfo jump over", ex);
+            log.error("deleteBlockByGroupId jump over", ex);
         }
-        log.info("end deleteBlockInfo useTime:{}",
-            Duration.between(startTime, Instant.now()).toMillis());
     }
 }

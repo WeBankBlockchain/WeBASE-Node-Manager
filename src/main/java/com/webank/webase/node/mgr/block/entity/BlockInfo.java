@@ -1,11 +1,11 @@
 package com.webank.webase.node.mgr.block.entity;
 
-import com.webank.webase.node.mgr.transhash.entity.TransactionInfo;
+import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.util.List;
 import lombok.Data;
 
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,14 +29,13 @@ public class BlockInfo {
     private String logsBloom;
     private String transactionsRoot;
     private String stateRoot;
-    private String sealer;
     private int difficulty;
     private int totalDifficulty;
     private List<Object> extraData;
     private int size;
-    private int gasLimit;
-    private int gasUsed;
-    private Long timestamp;
+    private Long gasLimit;
+    private Long gasUsed;
+    private String timestamp;
     private String gasLimitRaw;
     private String timestampRaw;
     private String gasUsedRaw;

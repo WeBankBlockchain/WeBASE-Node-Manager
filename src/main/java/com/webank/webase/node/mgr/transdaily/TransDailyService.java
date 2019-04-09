@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.group.GroupService;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -37,6 +38,7 @@ public class TransDailyService {
     private GroupService groupService;
     @Autowired
     private TbTransDailyMapper tbTransDailyMapper;
+
 
     /**
      * query Trading within seven days.
@@ -115,17 +117,17 @@ public class TransDailyService {
     /**
      * query max block number.
      */
-    public BigInteger queryMaxBlockByNetwork(Integer groupId)
+    public BigInteger queryMaxBlockByGroup(Integer groupId)
         throws NodeMgrException, JsonProcessingException {
-        log.debug("start queryMaxBlockByNetwork groupId:{}", groupId);
+        log.debug("start queryMaxBlockByGroup groupId:{}", groupId);
 
         try {
-            BigInteger maxBlockNumber = tbTransDailyMapper.queryMaxBlockByNetwork(groupId);
-            log.debug("start queryMaxBlockByNetwork groupId:{} maxBlockNumber:{}",
+            BigInteger maxBlockNumber = tbTransDailyMapper.queryMaxBlockByGroup(groupId);
+            log.debug("start queryMaxBlockByGroup groupId:{} maxBlockNumber:{}",
                 maxBlockNumber);
             return maxBlockNumber;
         } catch (RuntimeException ex) {
-            log.error("start queryMaxBlockByNetwork groupId:{}", groupId, ex);
+            log.error("start queryMaxBlockByGroup groupId:{}", groupId, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 

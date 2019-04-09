@@ -1,6 +1,6 @@
 #server config
 server:
-  port: 8080
+  port: 8083
   servlet:
     context-path: /webase-node-mgr
 
@@ -15,7 +15,7 @@ mybatis:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/webase-mgr-dev?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+    url: jdbc:mysql://127.0.0.1:3306/webase_mgr_dev?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
     username: root
     password: 123456
 
@@ -25,14 +25,6 @@ logging:
   level:
     com.webank.webase.node.mgr: debug
 
-# executor config
-executor:
-  corePoolSize: 5
-  maxPoolSize: 10
-  queueSize: 800
-  threadNamePrefix: "node-mgr-async-"
-
-
 #constants
 constant:
   blockRetainMax: 10000
@@ -41,7 +33,12 @@ constant:
   statisticsTransDailyCron: "0 0/1 * * * ?"
   checkNodeStatusCron: "30 0/1 * * * ?"
   insertTransMonitorCron: "0 0/10 * * * ?"
+  pullBlockSleepTime: 2000
+  resetGroupListCycle: 60000
+  isBlockPullFromZero: false
   contractDeployTimeOut: 30000
-  httpTimeOut: 50000
+  httpTimeOut: 5000
   aesKey: ERTadb83f9ege39k
   cookieMaxAge: 1800
+  maxRequestFail: 3
+  sleepWhenHttpMaxFail: 60000
