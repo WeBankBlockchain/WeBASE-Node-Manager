@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.contract;
+package com.webank.webase.node.mgr.contract.entity;
 
 import java.time.LocalDateTime;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Entity class of table tb_contract.
  */
 @Data
+@NoArgsConstructor
 public class TbContract {
 
     private Integer contractId;
@@ -30,7 +32,6 @@ public class TbContract {
     private Integer chainIndex;
     private Integer contractType;
     private String contractSource;
-    private int contractStatus;
     private String contractAbi;
     private String contractBin;
     private String bytecodeBin;
@@ -40,10 +41,6 @@ public class TbContract {
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
-
-    public TbContract() {
-        super();
-    }
 
     /**
      * init by contractId、contractName、groupId、contractVersion.

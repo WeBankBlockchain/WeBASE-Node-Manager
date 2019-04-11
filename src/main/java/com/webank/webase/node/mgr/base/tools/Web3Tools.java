@@ -15,19 +15,19 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
-import static org.fisco.bcos.web3j.crypto.Keys.*;
+
+import static org.bcos.web3j.crypto.Keys.getAddress;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.fisco.bcos.web3j.crypto.Hash;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.bcos.web3j.crypto.Hash;
+import org.bcos.web3j.protocol.ObjectMapperFactory;
+import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
+import org.bcos.web3j.utils.Numeric;
 
 public class Web3Tools {
 

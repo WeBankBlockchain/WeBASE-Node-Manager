@@ -52,7 +52,7 @@ public class DeleteBlockTask {
      */
     public void deleteBlockStart(){
         Instant startTime = Instant.now();
-        log.info("start deleteBlockStart startTime:{}", startTime.toEpochMilli());
+        log.info("start deleteBlockStart. startTime:{}", startTime.toEpochMilli());
         //get group list
         List<TbGroup> groupList = groupService.getAllGroup();
         if (groupList == null || groupList.size() == 0) {
@@ -62,7 +62,7 @@ public class DeleteBlockTask {
 
         //delete block by groupId
         groupList.stream().forEach(group -> deleteBlockByGroupId(group.getGroupId()));
-        log.info("end deleteBlockStart useTime:{} ",
+        log.info("end deleteBlockStart. useTime:{} ",
             Duration.between(startTime, Instant.now()).toMillis());
     }
 

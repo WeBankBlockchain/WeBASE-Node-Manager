@@ -57,7 +57,7 @@ public class BlockService {
     public void saveBLockInfo(BlockInfo blockInfo, Integer groupId) throws NodeMgrException {
         BigInteger bigIntegerNumber = blockInfo.getNumber();
         LocalDateTime blockTimestamp = LocalDateTime.MIN;
-        if(bigIntegerNumber!=BigInteger.ZERO){
+        if (bigIntegerNumber != BigInteger.ZERO) {
             blockTimestamp = NodeMgrTools
                 .timestamp2LocalDateTime(Long.valueOf(blockInfo.getTimestamp()));
         }
@@ -66,13 +66,13 @@ public class BlockService {
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
             transList.size());
-        addBlockInfo(tbBlock,groupId);
+        addBlockInfo(tbBlock, groupId);
 
         // save trans hash
         for (TransactionInfo transaction : transList) {
-            TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), groupId,
-                bigIntegerNumber,blockTimestamp);
-            transHashService.addTransInfo(groupId,tbTransHash);
+            TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), bigIntegerNumber,
+                blockTimestamp);
+            transHashService.addTransInfo(groupId, tbTransHash);
         }
     }
 
@@ -80,19 +80,20 @@ public class BlockService {
      * add block info to db.
      */
     @Transactional
-    public void addBlockInfo(TbBlock tbBlock,int groupId) throws NodeMgrException {
+    public void addBlockInfo(TbBlock tbBlock, int groupId) throws NodeMgrException {
         log.debug("start addBlockInfo tbBlock:{}", JSON.toJSONString(tbBlock));
         String tableName = TableName.BLOCK.getTableName(groupId);
-         //check newBLock == dbMaxBLock +1
-          BigInteger dbMaxBLock = blockmapper.getLatestBlockNumber(tableName);
+        //check newBLock == dbMaxBLock +1
+        BigInteger dbMaxBLock = blockmapper.getLatestBlockNumber(tableName);
         BigInteger pullBlockNumber = tbBlock.getBlockNumber();
         if (dbMaxBLock != null && !(pullBlockNumber.compareTo(dbMaxBLock.add(numberOne)) == 0)) {
-            log.info("fail addBlockInfo.  dbMaxBLock:{} pullBlockNumber:{}", dbMaxBLock, pullBlockNumber);
-            throw new NodeMgrException(ConstantCode.NOT_SAVE_BLOCK);
+            log.info("fail addBlockInfo.  dbMaxBLock:{} pullBlockNumber:{}", dbMaxBLock,
+                pullBlockNumber);
+            return;
         }
 
         // save block info
-           blockmapper.add(tableName,tbBlock);
+        blockmapper.add(tableName, tbBlock);
     }
 
     /**
@@ -139,7 +140,8 @@ public class BlockService {
     public List<MinMaxBlock> queryMinMaxBlock(int groupId) throws NodeMgrException {
         log.debug("start queryMinMaxBlock");
         try {
-            List<MinMaxBlock> listMinMaxBlock = blockmapper.queryMinMaxBlock(TableName.BLOCK.getTableName(groupId));
+            List<MinMaxBlock> listMinMaxBlock = blockmapper
+                .queryMinMaxBlock(TableName.BLOCK.getTableName(groupId));
             int listSize = Optional.ofNullable(listMinMaxBlock).map(list -> list.size()).orElse(0);
             log.info("end queryMinMaxBlock listMinMaxBlockSize:{}", listSize);
             return listMinMaxBlock;
@@ -191,6 +193,6 @@ public class BlockService {
      * get block by block from front server
      */
     public BlockInfo getblockFromFrontByHash(int groupId, String pkHash) {
-        return frontInterface.getblockFromFrontByHash(groupId, pkHash);
+        return frontInterface.getblockByHash(groupId, pkHash);
     }
 }

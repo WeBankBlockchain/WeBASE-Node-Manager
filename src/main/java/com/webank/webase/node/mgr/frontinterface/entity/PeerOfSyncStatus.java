@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.contract;
+package com.webank.webase.node.mgr.frontinterface.entity;
 
-import com.webank.webase.node.mgr.front.entity.TransactionParam;
+import java.math.BigInteger;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
-@NoArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class Transaction extends TransactionParam {
-
-    private Integer groupId;
+public class PeerOfSyncStatus {
+    private BigInteger blockNumber;
+    private String genesisHash;
+    private String latestHash;
+    private String nodeId;
 }

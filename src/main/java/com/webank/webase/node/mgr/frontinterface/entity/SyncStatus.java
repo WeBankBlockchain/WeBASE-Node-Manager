@@ -11,34 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.transaction.entity;
+package com.webank.webase.node.mgr.frontinterface.entity;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-/**
- * Entity class of table tb_trans_hash.
- */
 @Data
-@NoArgsConstructor
-public class TbTransHash {
+public class SyncStatus {
 
-    private String transHash;
     private BigInteger blockNumber;
-    private LocalDateTime blockTimestamp;
-    private Integer statisticsFlag;
-    private LocalDateTime createTime;
-    private LocalDateTime modifyTime;
-
-    /**
-     * init by transaction、blockNumber、blockTimestamp.
-     */
-    public TbTransHash(String transHash, BigInteger blockNumber, LocalDateTime blockTimestamp) {
-        this.transHash = transHash;
-        this.blockNumber = blockNumber;
-        this.blockTimestamp = blockTimestamp;
-    }
-
+    private String genesisHash;
+    private Boolean isSyncing;
+    private String latestHash;
+    private String nodeId;
+    private Integer protocolId;
+    private String txPoolSize;
+    private List<PeerOfSyncStatus> peers;
 }

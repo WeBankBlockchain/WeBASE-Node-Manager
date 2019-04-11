@@ -41,7 +41,7 @@ public interface MonitorMapper {
     String queryUnusualTxhash(@Param("tableName")String tableName,
         @Param("contractBin") String contractBin);
 
-    TbMonitor queryTbMonitor(@Param("tableName")String tableName, TbMonitor tbMonitor);
+    TbMonitor queryTbMonitor(@Param("tableName")String tableName, @Param("monitor") TbMonitor tbMonitor);
 
     List<TbMonitor> monitorUserList(@Param("tableName")String tableName);
 

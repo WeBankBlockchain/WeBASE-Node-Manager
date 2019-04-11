@@ -8,6 +8,8 @@
     <id column="trans_hash" javaType="java.lang.String" jdbcType="VARCHAR" property="transHash"/>
     <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="blockNumber"/>
+    <result column="block_timestamp" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="blockTimestamp"/>
     <result column="statistics_flag" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="statisticsFlag"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
@@ -18,8 +20,8 @@
 
 
   <insert id="add">
-    insert ignore into ${tableName} (trans_hash,block_number,create_time,modify_time)
-    values(#{trans.transHash},#{trans.blockNumber},NOW(),NOW())
+    insert ignore into ${tableName} (trans_hash,block_number,block_timestamp,create_time,modify_time)
+    values(#{trans.transHash},#{trans.blockNumber},#{trans.blockTimestamp},NOW(),NOW())
   </insert>
 
 
@@ -53,8 +55,7 @@
   </select>
 
   <select id="listOfUnStatTransHash" resultMap="transHashMap">
-        select *
-        from ${tableName}
+        select * from ${tableName}
         where statistics_flag=1
         order by block_number
         limit 0,10000

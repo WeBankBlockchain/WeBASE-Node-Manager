@@ -1,17 +1,15 @@
 /**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.transaction;
 
@@ -48,22 +46,24 @@ public class TransHashService {
     /**
      * add trans hash info.
      */
-    public void addTransInfo(int groupId,TbTransHash tbTransHash) throws NodeMgrException {
-        log.debug("start addTransInfo groupId:{} tbTransHash:{}",groupId, JSON.toJSONString(tbTransHash));
+    public void addTransInfo(int groupId, TbTransHash tbTransHash) throws NodeMgrException {
+        log.debug("start addTransInfo groupId:{} tbTransHash:{}", groupId,
+            JSON.toJSONString(tbTransHash));
         String tableName = TableName.TRANS.getTableName(groupId);
-        transHashMapper.add(tableName,tbTransHash);
+        transHashMapper.add(tableName, tbTransHash);
         log.debug("end addTransInfo");
     }
 
     /**
      * query trans list.
      */
-    public List<TbTransHash> queryTransList(int groupId,TransListParam param) throws NodeMgrException {
+    public List<TbTransHash> queryTransList(int groupId, TransListParam param)
+        throws NodeMgrException {
         log.debug("start queryTransList. TransListParam:{}", JSON.toJSONString(param));
         String tableName = TableName.TRANS.getTableName(groupId);
         List<TbTransHash> listOfTran = null;
         try {
-            listOfTran = transHashMapper.getList(tableName,param);
+            listOfTran = transHashMapper.getList(tableName, param);
         } catch (RuntimeException ex) {
             log.error("fail queryBlockList. TransListParam:{} ", JSON.toJSONString(param), ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
@@ -76,11 +76,12 @@ public class TransHashService {
     /**
      * query count of trans hash.
      */
-    public Integer queryCountOfTran(int groupId,TransListParam queryParam) throws NodeMgrException {
+    public Integer queryCountOfTran(int groupId, TransListParam queryParam)
+        throws NodeMgrException {
         log.debug("start queryCountOfTran. queryParam:{}", JSON.toJSONString(queryParam));
         String tableName = TableName.TRANS.getTableName(groupId);
         try {
-            Integer count = transHashMapper.getCount(tableName,queryParam);
+            Integer count = transHashMapper.getCount(tableName, queryParam);
             log.info("end queryCountOfTran. queryParam:{} count:{}", JSON.toJSONString(queryParam),
                 count);
             return count;
@@ -133,28 +134,28 @@ public class TransHashService {
      * query un statistics transaction list.
      */
     public List<TbTransHash> qureyUnStatTransHashList(int groupId) {
-        String tableName = TableName.TRANS.getTableName(groupId);
-        List<TbTransHash> list = transHashMapper.listOfUnStatTransHash(tableName);
+        List<TbTransHash> list = transHashMapper
+            .listOfUnStatTransHash(TableName.TRANS.getTableName(groupId));
         return list;
     }
 
     /**
      * query un statistic transaction list by job.
      */
-    public List<TbTransHash> qureyUnStatTransHashListByJob(int groupId,Integer shardingTotalCount,
+    public List<TbTransHash> qureyUnStatTransHashListByJob(int groupId, Integer shardingTotalCount,
         Integer shardingItem) {
         String tableName = TableName.TRANS.getTableName(groupId);
         List<TbTransHash> list = transHashMapper
-            .listOfUnStatTransHashByJob(tableName,shardingTotalCount, shardingItem);
+            .listOfUnStatTransHashByJob(tableName, shardingTotalCount, shardingItem);
         return list;
     }
 
     /**
      * update trans statistic flag.
      */
-    public void updateTransStatFlag(int groupId,String transHash) {
+    public void updateTransStatFlag(int groupId, String transHash) {
         String tableName = TableName.TRANS.getTableName(groupId);
-        transHashMapper.updateTransStatFlag(tableName,transHash);
+        transHashMapper.updateTransStatFlag(tableName, transHash);
     }
 
     /**
@@ -168,7 +169,6 @@ public class TransHashService {
         if (transHash != null) {
             TbTransHash tbTransHash = getTbTransFromFrontByHash(groupId, transHash);
             if (tbTransHash != null) {
-                tbTransHash.setGroupId(groupId);
                 transList.add(tbTransHash);
             }
         }
@@ -177,8 +177,8 @@ public class TransHashService {
             List<TransactionInfo> transInBlock = frontInterface
                 .getTransByBlockNumber(groupId, blockNumber);
             transInBlock.stream().forEach(tran -> {
-                TbTransHash tbTransHash = new TbTransHash(tran.getHash(), groupId,
-                    tran.getBlockNumber(), null);
+                TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getBlockNumber(),
+                    null);
                 transList.add(tbTransHash);
             });
         }
@@ -197,8 +197,7 @@ public class TransHashService {
         TransactionInfo transactionInfo = frontInterface.getTransaction(groupId, transHash);
         TbTransHash tbTransHash = null;
         if (transactionInfo != null) {
-            tbTransHash = new TbTransHash(transHash, groupId, transactionInfo.getBlockNumber(),
-                null);
+            tbTransHash = new TbTransHash(transHash, transactionInfo.getBlockNumber(), null);
         }
         log.info("end getTransFromFrontByHash. tbTransHash:{}", JSON.toJSONString(tbTransHash));
         return tbTransHash;
@@ -207,7 +206,7 @@ public class TransHashService {
     /**
      * get transaction receipt
      */
-    public TransReceipt getTransReceipt(int groupId,String transHash){
+    public TransReceipt getTransReceipt(int groupId, String transHash) {
         return frontInterface.getTransReceipt(groupId, transHash);
     }
 
@@ -215,7 +214,7 @@ public class TransHashService {
     /**
      * get transaction info
      */
-    public TransactionInfo getTransaction(int groupId, String transHash){
+    public TransactionInfo getTransaction(int groupId, String transHash) {
         return frontInterface.getTransaction(groupId, transHash);
     }
 }

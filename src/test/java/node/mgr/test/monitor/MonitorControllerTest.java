@@ -42,12 +42,51 @@ public class MonitorControllerTest {
     public void setUp() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
+
+
     @Test
-    public void testNewFront() throws Exception {
+    public void testUserList() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/userList/1"));
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testInterfaceList() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/interfaceList/1?userName=abc"));
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testUnusualUserList() throws Exception {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/unusualUserList/1/1/15"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
         System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
+
+    @Test
+    public void testTransList() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/transList/1?userName=safas&interfaceName=fasdf"));
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testUnusualContractList() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/unusualContractList/1/1/15"));
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
 }

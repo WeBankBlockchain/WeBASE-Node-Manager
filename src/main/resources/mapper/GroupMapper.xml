@@ -37,7 +37,7 @@
 		front_id frontId,front_ip frontIp,front_port frontPort,create_time createTime,modify_time modifyTime
 	</sql>
 
-	<insert id="add" parameterType="com.webank.webase.node.mgr.group.TbGroup">
+	<insert id="save" parameterType="com.webank.webase.node.mgr.group.TbGroup">
 		insert ignore into tb_group
 		(group_id,group_name,latest_block,trans_count,node_count,create_time,modify_time)
 		values(#{groupId},#{groupName},#{latestBlock},#{transCount},#{nodeCount},NOW(),NOW())
@@ -75,7 +75,7 @@
 		LEFT 	JOIN
 		(
 		select group_id,count(1)
-		contractCount from tb_contract where contract_status=2 and contract_type=0 GROUP BY group_id
+		contractCount from tb_contract where contract_type=0 GROUP BY group_id
 		)b on(a.group_id = b.group_id)
 		where a.group_id = #{groupId}
 	</select>

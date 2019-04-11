@@ -55,7 +55,7 @@ public interface NodeMapper {
     /**
      * update node info.
      */
-    Integer updateNodeInfo(TbNode dbNode);
+    Integer update(TbNode dbNode);
 
     /**
      * query node info.

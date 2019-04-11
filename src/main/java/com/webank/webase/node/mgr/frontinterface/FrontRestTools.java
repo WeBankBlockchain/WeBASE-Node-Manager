@@ -19,16 +19,19 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -42,28 +45,30 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class FrontRestTools {
 
-    public static final String FRONT_URL = "http://%1s:%2d/webase-front/%3d/%4s";
+    public static final String FRONT_URL = "http://%1s:%2d/webase-front/%3s";
     public static final String FRONT_TRANS_RECEIPT_BY_HASH_URI = "web3/transactionReceipt/%1s";
-    public static final String FRONT_BLOCK_BY_NUMBER_URI = "web3/blockByNumber/%1d";
-    public static final String FRONT_BLOCK_BY_HASH_URI = "web3/blockByHash/%1s";
-    public static final String FRONT_TRANS_TOTAL_URI = "web3/transaction-total";
-    public static final String FRONT_TRANS_BY_HASH_URI = "web3/transaction/%1s";
-   // public static final String FRONT_NODE_HEARTBEAT = "web3/nodeHeartBeat";
-    public static final String FRONT_GROUP_PEERS = "web3/groupPeers";
-    public static final String FRONT_GROUP_PLIST = "web3/groupList";
-    public static final String FRONT_PEERS = "web3/peers";
-    public static final String FRONT_CONSENSUS_STATUS = "web3/consensusStatus";
-    public static final String FRONT_CSYNC_STATUS = "web3/syncStatus";
-    public static final String FRONT_SYSTEMCONFIG_BY_KEY = "web3/systemConfigByKey/%1s";
-    public static final String FRONT_CODE_URI = "web3/code/%1s/%2s";
+    public static final String URI_BLOCK_BY_NUMBER = "web3/blockByNumber/%1d";
+    public static final String URI_BLOCK_BY_HASH = "web3/blockByHash/%1s";
+    public static final String URI_TRANS_TOTAL = "web3/transaction-total";
+    public static final String URI_TRANS_BY_HASH = "web3/transaction/%1s";
+    public static final String URI_GROUP_PEERS = "web3/groupPeers";
+    public static final String URI_GROUP_PLIST = "web3/groupList";
+    public static final String URI_PEERS = "web3/peers";
+    public static final String URI_CONSENSUS_STATUS = "web3/consensusStatus";
+    public static final String URI_CSYNC_STATUS = "web3/syncStatus";
+    public static final String URI_SYSTEMCONFIG_BY_KEY = "web3/systemConfigByKey/%1s";
+    public static final String URI_CODE = "web3/code/%1s/%2s";
     public static final String FRONT_NODE_INFO = "web3/nodeInfo";
-    public static final String FRONT_BLOCK_NUMBER = "web3/blockNumber";
+    public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
-    public static final String FRONT_KEY_PAIR_URI = "contract/privateKey";
-    public static final String FRONT_CONTRACT_DEPLOY = "contract/deploy";
-    public static final String FRONT_SEND_TRANSACTION = "trans/handle";
-    public static final String FRONT_CHAIN = "chain";
+    public static final String URI_KEY_PAIR = "privateKey";
+    public static final String URI_CONTRACT_DEPLOY = "contract/deploy";
+    public static final String URI_SEND_TRANSACTION = "trans/handle";
+    public static final String URI_CHAIN = "chain";
+
+    private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
+        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION);
 
 
     @Autowired
@@ -118,14 +123,16 @@ public class FrontRestTools {
             FrontGroup frontGroup = mapList.get(index);
             indexList.add(index);// save the index of nodeList
 
-            String url = String.format(FRONT_URL, frontGroup.getFrontIp(), frontGroup.getFrontPort(), groupId, uri);
-            url = url.replaceAll(" ","");
+            String url = String
+                .format(FRONT_URL, frontGroup.getFrontIp(), frontGroup.getFrontPort(), uri);
+            url = url.replaceAll(" ", "");
             if (httpType == null) {
                 log.info("httpType is empty.use default:get");
                 httpType = RequestMethod.GET;
             }
             if (isServiceSleep(url, httpType.toString())) {
-                log.info("front url[{}] is sleep,jump over", frontGroup.getFrontIp(), frontGroup.getFrontPort());
+                log.info("front url[{}] is sleep,jump over", frontGroup.getFrontIp(),
+                    frontGroup.getFrontPort());
                 continue;
             }
             log.info("requestFront url: {}", url);
@@ -137,7 +144,7 @@ public class FrontRestTools {
                 }
                 // post
                 if (httpType.equals(RequestMethod.POST)) {
-                    if (url.contains(FRONT_CONTRACT_DEPLOY)) {
+                    if (url.contains(URI_CONTRACT_DEPLOY)) {
                         //is deploy contract
                         frontRsp = deployRestTemplate.postForObject(url, params, clazz);
                     } else {
@@ -165,6 +172,7 @@ public class FrontRestTools {
      */
     public <T> T getFrontForEntity(Integer groupId, String uri, Class<T> clazz)
         throws NodeMgrException {
+        uri = uriAddGroupId(groupId, uri);
         return randomRequestFront(groupId, uri, RequestMethod.GET, null, clazz);
     }
 
@@ -173,9 +181,19 @@ public class FrontRestTools {
      */
     public <T> T postFrontForEntity(Integer groupId, String uri, Object params, Class<T> clazz)
         throws NodeMgrException {
+        uri = uriAddGroupId(groupId, uri);
         return randomRequestFront(groupId, uri, RequestMethod.POST, params, clazz);
     }
 
+    private String uriAddGroupId(Integer groupId, String uri) {
+        if (groupId == null || StringUtils.isBlank(uri)) {
+            return null;
+        }
+        if (URI_NOT_CONTAIN_GROUP_ID.contains(uri)) {
+            return uri;
+        }
+        return groupId + "/" + uri;
+    }
 
     /**
      *
@@ -194,9 +212,9 @@ public class FrontRestTools {
         if (failCount > cproperties.getMaxRequestFail() && subTime < cproperties
             .getSleepWhenHttpMaxFail()) {
             return true;
-        }else if(subTime>cproperties.getSleepWhenHttpMaxFail()){
+        } else if (subTime > cproperties.getSleepWhenHttpMaxFail()) {
             //service is sleep
-            deleteKeyOfMap(failRequestMap,key);
+            deleteKeyOfMap(failRequestMap, key);
         }
         return false;
 
@@ -219,9 +237,7 @@ public class FrontRestTools {
 
 
     /**
-     * build key
-     * description: frontIp$frontPort
-     * example: 2651654951545$8081
+     * build key description: frontIp$frontPort example: 2651654951545$8081
      */
     private String buildKey(String url, String methodType) {
         return url.hashCode() + "$" + methodType;
@@ -243,4 +259,4 @@ public class FrontRestTools {
         log.info("end deleteKeyOfMap. rkey:{} map:{}", rkey, JSON.toJSONString(map));
     }
 
-    }
+}

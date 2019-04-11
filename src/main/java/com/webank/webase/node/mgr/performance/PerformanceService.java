@@ -65,7 +65,7 @@ public class PerformanceService {
 
         // request url
        // String url = String.format(RestTools.FRONT_URL, tbNode.getNodeIp(), tbNode.getFrontPort(),
-      //          RestTools.FRONT_PERFORMANCE_RATIO); TODO
+      //          RestTools.FRONT_PERFORMANCE_RATIO);
         String url = null;
         url = url + "?" + urlParam;
         log.info("getPerformanceRatio request url:{}", url);

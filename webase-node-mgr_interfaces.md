@@ -515,7 +515,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 #### 5.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/contract/contractInfo`
+* 请求地址：`/deployIncoming/contractInfo`
 * 请求方式：POST
 * 请求头：Content-type: application/json
 * 返回格式：JSON
@@ -550,7 +550,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 #### 5.1.3 入参示例
 
-`http://127.0.0.1:8080/webase-node-mgr/contract`
+`http://127.0.0.1:8080/webase-node-mgr/deployIncoming`
 ```
 {
     "groupId": "300001",
@@ -602,7 +602,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 #### 5.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/contract/contractInfo`
+* 请求地址：`/deployIncoming/contractInfo`
 * 请求方式：PUT
 * 请求头：Content-type: application/json
 * 返回格式：JSON
@@ -630,7 +630,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 3    | data            | object        | 是     | 返回信息实体（空）                              |
 
 #### 5.2.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/contract/contractInfo`
+`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/contractInfo`
 ```
 {
     "groupId": "300001",
@@ -683,7 +683,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 #### 5.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/contract/{contractId}`
+* 请求地址：`/deployIncoming/{contractId}`
 * 请求方式：DELETE
 * 请求头：Content-type: application/json
 * 返回格式：JSON
@@ -699,7 +699,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 3    | data       | object | 是     | 返回信息实体（空）         |
 
 #### 5.3.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/contract/{contractId}`
+`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/{contractId}`
 
 #### 5.3.4 出参示例
 
@@ -726,7 +726,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 #### 5.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址： `/contract/contractList/{groupId}/{pageNumber}/{pageSize}`
+* 请求地址： `/deployIncoming/contractList/{groupId}/{pageNumber}/{pageSize}`
 * 请求方式：GET
 * 返回格式：JSON
 
@@ -761,7 +761,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 5.1.15 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
 
 #### 5.4.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/*contract/contractList/300001/1/15`
+`http://127.0.0.1:8080/webase-node-mgr/*deployIncoming/contractList/300001/1/15`
 
 #### 5.4.4 出参示例
 
@@ -806,7 +806,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 #### 5.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址： `/contract/{contractId}`
+* 请求地址： `/deployIncoming/{contractId}`
 * 请求方式：GET
 * 返回格式：JSON
 
@@ -836,7 +836,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 3.15 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
 
 #### 5.5.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/contract/200001`
+`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/200001`
 
 #### 5.5.4 出参示例
 
@@ -876,7 +876,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 #### 5.6.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/contract/deploy`
+* 请求地址：`/deployIncoming/deploy`
 * 请求方式：POST
 * 请求头：Content-type: application/json
 * 返回格式：JSON
@@ -900,7 +900,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 3    | data              | object         | 是     | 返回信息实体（空）         |
 
 #### 5.6.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/contract/deploy`
+`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/deploy`
 ```
 {
     "groupId": "300001",
@@ -955,7 +955,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 #### 5.7.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/contract/transaction`
+* 请求地址：`/deployIncoming/transaction`
 * 请求方式：POST
 * 请求头：Content-type: application/json
 * 返回格式：JSON
@@ -977,7 +977,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 3    | data         | object         | 是     | 返回信息实体（空）         |
 
 #### 5.7.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/contract/deploy`
+`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/deploy`
 ```
 {
     "groupId": "300001",

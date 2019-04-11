@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.base.enums;
+package com.webank.webase.node.mgr.contract.entity;
+
+import lombok.Data;
 
 /**
- * Enumeration of contract status.
+ * deploy interface parameter.
  */
-public enum ContractStatus {
-
-    NOTDEPLOYED(1), DEPLOYED(2), DEPLOYMENTFAILED(3);
-
-    private int value;
-
-    private ContractStatus(Integer dataStatus) {
-        this.value = dataStatus;
-    }
-
-    public int getValue() {
-        return this.value;
-    }
+@Data
+public class RspSystemProxy {
+    private String name;
+    private String address;
+    private String cache;
+    private Integer blockNumber;
 }

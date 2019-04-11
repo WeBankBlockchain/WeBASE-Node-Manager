@@ -42,10 +42,9 @@ public class ConstantProperties {
     private BigInteger transRetainMax = new BigInteger("10000");
     private String statisticsTransDailyCron = "0 0/1 * * * ?";// Execute once every minute
     private String deleteInfoCron = "0 0/2 * * * ?";// Execute once every two minute
-    private String checkNodeStatusCron = "30 0/1 * * * ?";
     private String insertTransMonitorCron = "0 0/10 * * * ?";
-    private Long resetGroupListCycle = 60000L; //1 min
-    private Long pullBlockSleepTime = 20L; //20 mill
+    private Long resetGroupListCycle = 600000L; //10 min
+    private Long pullBlockSleepTime = 20L; //20 mills
     private Boolean isBlockPullFromZero = false;
     private Integer maxRequestFail = 3;
     private Long sleepWhenHttpMaxFail = 60000L;  //default 1min

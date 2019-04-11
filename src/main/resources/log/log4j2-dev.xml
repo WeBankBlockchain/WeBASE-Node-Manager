@@ -4,7 +4,7 @@
   <!-- 定义日志文件 输入位置 -->
   <Properties>
     <!-- <Property name="logPath">/data/app/logs/ws-web</Property> -->
-    <Property name="logPath">H:\temp\log\webase-node-mgr</Property>
+    <Property name="logPath">E:\temp\log\webase-node-mgr</Property>
   </Properties>
   <Appenders>
     <Console name="console" target="SYSTEM_OUT">

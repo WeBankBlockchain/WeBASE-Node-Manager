@@ -1,43 +1,45 @@
 /**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.monitor;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.MonitorUserType;
 import com.webank.webase.node.mgr.base.enums.TableName;
+import com.webank.webase.node.mgr.base.enums.TransType;
+import com.webank.webase.node.mgr.base.enums.TransUnusualType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.ContractService;
-import com.webank.webase.node.mgr.contract.TbContract;
+import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.TransHashService;
+import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.user.UserService;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,17 +64,17 @@ public class MonitorService {
     @Autowired
     private FrontInterfaceService frontInterfacee;
 
-    public void addRow(TbMonitor tbMonitor) {
-       // monitorMapper.add(tbMonitor);  TODO
+    public void addRow(int groupId, TbMonitor tbMonitor) {
+        monitorMapper.add(TableName.MONITOR.getTableName(groupId), tbMonitor);
     }
 
-    public void updateRow(TbMonitor tbMonitor) {
-        //monitorMapper.update(tbMonitor); TODO
+    public void updateRow(int groupId, TbMonitor tbMonitor) {
+        monitorMapper.update(TableName.MONITOR.getTableName(groupId), tbMonitor);
     }
 
     public void updateUnusualUser(Integer groupId, String userName, String address) {
         log.info("start updateUnusualUser address:{}", address);
-        monitorMapper.updateUnusualUser( TableName.MONITOR.getTableName(groupId), userName, address);
+        monitorMapper.updateUnusualUser(TableName.MONITOR.getTableName(groupId), userName, address);
     }
 
     /**
@@ -84,11 +86,13 @@ public class MonitorService {
             log.info("start updateUnusualContract groupId:{} contractName:{} contractBin:{}",
                 groupId, contractName, contractBin);
             String txHash = monitorMapper
-                .queryUnusualTxhash(TableName.MONITOR.getTableName(groupId), contractBin.substring(contractBin.length() - 10));
+                .queryUnusualTxhash(TableName.MONITOR.getTableName(groupId),
+                    contractBin.substring(contractBin.length() - 10));
             if (StringUtils.isBlank(txHash)) {
                 return;
             }
-            ChainTransInfo chainTransInfo = frontInterfacee.getTransInfoFromFrontByHash(groupId, txHash);
+            ChainTransInfo chainTransInfo = frontInterfacee
+                .getTransInfoByHash(groupId, txHash);
             if (chainTransInfo == null) {
                 return;
             }
@@ -129,8 +133,10 @@ public class MonitorService {
                     transUnusualType = 1;
                 }
             }
-            monitorMapper.updateUnusualContract(TableName.MONITOR.getTableName(groupId), contractName,
-                contractBin.substring(contractBin.length() - 10), interfaceName, transUnusualType);
+            monitorMapper
+                .updateUnusualContract(TableName.MONITOR.getTableName(groupId), contractName,
+                    contractBin.substring(contractBin.length() - 10), interfaceName,
+                    transUnusualType);
         } catch (Exception ex) {
             log.error("fail updateUnusualContract", ex);
             throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
@@ -140,9 +146,8 @@ public class MonitorService {
     /**
      * query monitor info.
      */
-    public TbMonitor queryTbMonitor(TbMonitor tbMonitor) {
-       // return monitorMapper.queryTbMonitor(tbMonitor);  TODO
-        return null;
+    public TbMonitor queryTbMonitor(int groupId, TbMonitor tbMonitor) {
+        return monitorMapper.queryTbMonitor(TableName.MONITOR.getTableName(groupId), tbMonitor);
     }
 
     /**
@@ -150,7 +155,8 @@ public class MonitorService {
      */
     public List<TbMonitor> qureyMonitorUserList(Integer groupId) throws NodeMgrException {
 
-        List<TbMonitor> monitorUserList = monitorMapper.monitorUserList(TableName.MONITOR.getTableName(groupId));
+        List<TbMonitor> monitorUserList = monitorMapper
+            .monitorUserList(TableName.MONITOR.getTableName(groupId));
 
         log.debug("end qureyMonitorUserList monitorUserList:{}",
             JSON.toJSONString(monitorUserList));
@@ -179,52 +185,21 @@ public class MonitorService {
         throws NodeMgrException {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
 
-        Integer count = countOfMonitorTrans(groupId, userName, startDate, endDate, interfaceName);
-        List<PageTransInfo> transInfoList = qureyTransCountList(groupId, userName, startDate,
-            endDate, interfaceName);
+        //param
+        String tableName = TableName.MONITOR.getTableName(groupId);
+        List<String> nameList = Arrays
+            .asList("tableName", "groupId", "userName", "startDate", "endDate", "interfaceName");
+        List<Object> valueList = Arrays
+            .asList(tableName, groupId, userName, startDate, endDate, interfaceName);
+        Map<String, Object> param = NodeMgrTools.buidMap(nameList, valueList);
+
+        Integer count = monitorMapper.countOfMonitorTrans(param);
+        List<PageTransInfo> transInfoList = monitorMapper.qureyTransCountList(param);
 
         MonitorTrans monitorTrans = new MonitorTrans(groupId, userName, interfaceName, count,
             transInfoList);
         response.setData(monitorTrans);
         return response;
-    }
-
-    /**
-     * query count of monitor trans.
-     */
-    public Integer countOfMonitorTrans(Integer groupId, String userName, String startDate,
-        String endDate, String interfaceName) throws NodeMgrException {
-
-        Map<String, Object> queryParam = new HashMap<>();
-        queryParam.put("groupId", groupId);
-        queryParam.put("userName", userName);
-        queryParam.put("startDate", startDate);
-        queryParam.put("endDate", endDate);
-        queryParam.put("interfaceName", interfaceName);
-
-        Integer count = monitorMapper.countOfMonitorTrans(queryParam);
-        log.debug("end countOfMonitorTrans groupId:{} userName:{} count:{}", groupId, userName,
-            count);
-        return count;
-    }
-
-    /**
-     * query trans count list.
-     */
-    public List<PageTransInfo> qureyTransCountList(Integer groupId, String userName,
-        String startDate, String endDate, String interfaceName) throws NodeMgrException {
-
-        Map<String, Object> queryParam = new HashMap<>();
-        queryParam.put("groupId", groupId);
-        queryParam.put("userName", userName);
-        queryParam.put("startDate", startDate);
-        queryParam.put("endDate", endDate);
-        queryParam.put("interfaceName", interfaceName);
-
-        List<PageTransInfo> list = monitorMapper.qureyTransCountList(queryParam);
-        log.debug("end qureyMonitorTransList groupId:{} userName:{} list:{}", groupId, userName,
-            list.toString());
-        return list;
     }
 
     /**
@@ -246,13 +221,13 @@ public class MonitorService {
 
         Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
             .orElse(null);
-        Map<String, Object> queryParam = new HashMap<>();
-        queryParam.put("groupId", groupId);
-        queryParam.put("userName", userName);
-        queryParam.put("start", start);
-        queryParam.put("pageSize", pageSize);
+        String tableName = TableName.MONITOR.getTableName(groupId);
+        List<String> nameList = Arrays
+            .asList("tableName", "groupId", "userName", "start", "pageSize");
+        List<Object> valueList = Arrays.asList(tableName, groupId, userName, start, pageSize);
+        Map<String, Object> param = NodeMgrTools.buidMap(nameList, valueList);
 
-        List<UnusualUserInfo> listOfUnusualUser = monitorMapper.listOfUnusualUser(queryParam);
+        List<UnusualUserInfo> listOfUnusualUser = monitorMapper.listOfUnusualUser(param);
 
         log.debug("end qureyUnusualUserList listOfUnusualUser:{}",
             JSON.toJSONString(listOfUnusualUser));
@@ -263,7 +238,8 @@ public class MonitorService {
      * query count of unusual contract.
      */
     public Integer countOfUnusualContract(Integer groupId, String contractAddress) {
-        return monitorMapper.countOfUnusualContract(TableName.MONITOR.getTableName(groupId), contractAddress);
+        return monitorMapper
+            .countOfUnusualContract(TableName.MONITOR.getTableName(groupId), contractAddress);
     }
 
     /**
@@ -274,19 +250,20 @@ public class MonitorService {
         throws NodeMgrException {
         log.debug(
             "start qureyUnusualContractList groupId:{} userName:{} pageNumber:{} pageSize:{}",
-            groupId, contractAddress, pageNumber,
-            pageSize);
+            groupId, contractAddress, pageNumber, pageSize);
 
+        String tableName = TableName.MONITOR.getTableName(groupId);
         Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
             .orElse(null);
-        Map<String, Object> queryParam = new HashMap<>();
-        queryParam.put("groupId", groupId);
-        queryParam.put("contractAddress", contractAddress);
-        queryParam.put("start", start);
-        queryParam.put("pageSize", pageSize);
+
+        List<String> nameList = Arrays
+            .asList("tableName", "groupId", "contractAddress", "start", "pageSize");
+        List<Object> valueList = Arrays
+            .asList(tableName, groupId, contractAddress, start, pageSize);
+        Map<String, Object> param = NodeMgrTools.buidMap(nameList, valueList);
 
         List<UnusualContractInfo> listOfUnusualContract = monitorMapper
-            .listOfUnusualContract(queryParam);
+            .listOfUnusualContract(param);
 
         log.debug("end qureyUnusualContractList listOfUnusualContract:{}",
             JSON.toJSONString(listOfUnusualContract));
@@ -296,54 +273,47 @@ public class MonitorService {
     /**
      * add trans monitor info.
      */
-    public void insertTransMonitorInfo(List<TbTransHash> transHashList) {
+    public void insertTransMonitorInfo(int groupId, List<TbTransHash> transList) {
         Instant startTime = Instant.now();
         log.info("start insertTransMonitorInfo startTime:{}", startTime.toEpochMilli());
 
-        LocalDateTime createTime = transHashList.get(0).getBlockTimestamp();
+        LocalDateTime createTime = transList.get(0).getBlockTimestamp();
         // query untreated TxHash
-        for (int i = 0; i < transHashList.size(); i++) {
+        for (TbTransHash trans : transList) {
             try {
-                if (createTime.getDayOfYear() != transHashList.get(i).getBlockTimestamp()
-                    .getDayOfYear()) {
-                    createTime = transHashList.get(i).getBlockTimestamp();
+                if (createTime.getDayOfYear() != trans.getBlockTimestamp().getDayOfYear()) {
+                    createTime = trans.getBlockTimestamp();
                 }
-                // userType(0:normal, 1:abnormal)
-                int userType = 0;
                 String contractName = "";
                 String interfaceName = "";
                 String contractAddress = "";
-                // transType(0:contract deploy, 1:function call)
-                int transType = 0;
-                // transUnusualType(0:normal, 1:abnormal contract, 2:abnormal function)
-                int transUnusualType = 0;
+
+                int userType = MonitorUserType.NORMAL.getValue();
+                int transType = TransType.DEPLOY.getValue();
+                int transUnusualType = TransUnusualType.NORMAL.getValue();
 
                 ChainTransInfo chainTransInfo = frontInterfacee
-                    .getTransInfoFromFrontByHash(transHashList.get(i).getGroupId(),
-                        transHashList.get(i).getTransHash());
+                    .getTransInfoByHash(groupId, trans.getTransHash());
                 if (chainTransInfo == null) {
                     continue;
                 }
 
                 String userName = userService
-                    .queryUserNameByAddress(transHashList.get(i).getGroupId(),
-                        chainTransInfo.getFrom());
+                    .queryUserNameByAddress(groupId, chainTransInfo.getFrom());
                 if (StringUtils.isBlank(userName)) {
                     userName = chainTransInfo.getFrom();
-                    userType = 1;
+                    userType = MonitorUserType.ABNORMAL.getValue();
                 }
 
                 String contractBin = "";
                 // contract deploy
                 if (StringUtils.isBlank(chainTransInfo.getTo())) {
                     contractAddress = frontInterfacee
-                        .getAddressFromFrontByHash(transHashList.get(i).getGroupId(),
-                            transHashList.get(i).getTransHash());
-                    contractBin = frontInterfacee
-                        .getCodeFromFront(transHashList.get(i).getGroupId(), contractAddress,
-                            transHashList.get(i).getBlockNumber());
+                        .getAddressByHash(groupId, trans.getTransHash());
+                    contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress,
+                        trans.getBlockNumber());
                     List<TbContract> contractRow = contractService
-                        .queryContractByBin(transHashList.get(i).getGroupId(), contractBin);
+                        .queryContractByBin(groupId, contractBin);
                     if (contractRow != null && contractRow.size() > 0) {
                         contractName = contractRow.get(0).getContractName();
                         interfaceName = contractRow.get(0).getContractName();
@@ -354,18 +324,17 @@ public class MonitorService {
                             contractName = contractBin.substring(contractBin.length() - 10);
                         }
                         interfaceName = chainTransInfo.getInput().substring(0, 10);
-                        transUnusualType = 1;
+                        transUnusualType = TransUnusualType.CONTRACT.getValue();
                     }
                 } else {    // function call
                     String methodId = chainTransInfo.getInput().substring(0, 10);
                     contractAddress = chainTransInfo.getTo();
                     contractBin = frontInterfacee
-                        .getCodeFromFront(transHashList.get(i).getGroupId(), contractAddress,
-                            transHashList.get(i).getBlockNumber());
-                    transType = 1;
+                        .getCodeFromFront(groupId, contractAddress, trans.getBlockNumber());
+                    transType = TransType.CALL.getValue();
 
                     List<TbContract> contractRow = contractService
-                        .queryContractByBin(transHashList.get(i).getGroupId(), contractBin);
+                        .queryContractByBin(groupId, contractBin);
                     if (contractRow != null && contractRow.size() > 0) {
                         contractName = contractRow.get(0).getContractName();
                         List<AbiDefinition> abiList = Web3Tools
@@ -381,7 +350,7 @@ public class MonitorService {
                         }
                         if (StringUtils.isBlank(interfaceName)) {
                             interfaceName = chainTransInfo.getInput().substring(0, 10);
-                            transUnusualType = 2;
+                            transUnusualType = TransUnusualType.FUNCTION.getValue();
                         }
                     } else {
                         if (contractBin.length() < 10) {
@@ -390,42 +359,43 @@ public class MonitorService {
                             contractName = contractBin.substring(contractBin.length() - 10);
                         }
                         interfaceName = chainTransInfo.getInput().substring(0, 10);
-                        transUnusualType = 1;
+                        transUnusualType = TransUnusualType.CONTRACT.getValue();
                     }
                 }
 
                 TbMonitor tbMonitor = new TbMonitor();
                 tbMonitor.setUserName(userName);
                 tbMonitor.setUserType(userType);
-               // tbMonitor.setGroupId(transHashList.get(i).getGroupId());
                 tbMonitor.setContractName(contractName);
                 tbMonitor.setContractAddress(contractAddress);
                 tbMonitor.setInterfaceName(interfaceName);
                 tbMonitor.setTransType(transType);
                 tbMonitor.setTransUnusualType(transUnusualType);
-                tbMonitor.setTransHashs(transHashList.get(i).getTransHash());
-                tbMonitor.setTransHashLastest(transHashList.get(i).getTransHash());
+                tbMonitor.setTransHashs(trans.getTransHash());
+                tbMonitor.setTransHashLastest(trans.getTransHash());
                 tbMonitor.setTransCount(1);
                 tbMonitor.setCreateTime(createTime);
-                tbMonitor.setModifyTime(transHashList.get(i).getBlockTimestamp());
+                tbMonitor.setModifyTime(trans.getBlockTimestamp());
 
-                monitorService.dataAddAndUpdate(tbMonitor);
+                monitorService.dataAddAndUpdate(groupId, tbMonitor);
             } catch (Exception ex) {
-                log.error("transaction:{} analysis fail...", transHashList.get(i).getTransHash(), ex);
+                log.error("transaction:{} analysis fail...", trans.getTransHash(),
+                    ex);
             }
         }
         log.info("end insertTransMonitorInfo useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
     }
 
+
     /**
      * insert and update.
      */
     @Transactional
-    public void dataAddAndUpdate(TbMonitor tbMonitor) {
-        TbMonitor dbInfo = monitorService.queryTbMonitor(tbMonitor);
+    public void dataAddAndUpdate(int groupId, TbMonitor tbMonitor) {
+        TbMonitor dbInfo = monitorService.queryTbMonitor(groupId, tbMonitor);
         if (dbInfo == null) {
-            monitorService.addRow(tbMonitor);
+            monitorService.addRow(groupId, tbMonitor);
         } else {
             String[] txHashsArr = dbInfo.getTransHashs().split(",");
             if (txHashsArr.length < 5) {
@@ -435,9 +405,9 @@ public class MonitorService {
             } else {
                 tbMonitor.setTransHashs(dbInfo.getTransHashs());
             }
-            monitorService.updateRow(tbMonitor);
+            monitorService.updateRow(groupId, tbMonitor);
         }
 
-       // transHashService.updateTransStatFlag(tbMonitor.getTransHashLastest());  TODO groupId
+        transHashService.updateTransStatFlag(groupId, tbMonitor.getTransHashLastest());
     }
 }

@@ -47,13 +47,13 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
 -- Table structure for tb_node
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_node (
-  node_id varchar(64) NOT NULL  COMMENT '节点编号',
+  node_id varchar(250) NOT NULL  COMMENT '节点编号',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   node_name varchar(120) NOT NULL COMMENT '节点名称',
   node_ip varchar(16) NOT NULL COMMENT '节点ip',
   p2p_port int(11) DEFAULT NULL COMMENT '节点p2p端口',
   block_number bigint(20) DEFAULT '0' COMMENT '节点块高',
-  pbft_view bigint(20) DEFAULT NULL COMMENT 'pbft_view',
+  pbft_view bigint(20) DEFAULT '0' COMMENT 'pbft_view',
   node_active int(1) NOT NULL DEFAULT '2' COMMENT '节点存活标识(1存活，2不存活)',
   description text DEFAULT NULL COMMENT '描述',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
@@ -74,7 +74,6 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   contract_name varchar(120) DEFAULT NULL COMMENT '合约名称',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   contract_source text COMMENT '合约源码',
-  contract_status int(1) DEFAULT '1' COMMENT '部署状态（1：未部署，2：部署成功，3：部署失败）',
   contract_abi text COMMENT '编译合约生成的abi文件内容',
   contract_bin text COMMENT '合约binary',
   bytecodeBin text COMMENT '合约bin',

@@ -88,7 +88,7 @@
 		select * from tb_node where node_id = #{nodeId}
 	</select>
 
-  <update id="updateNodeInfo" parameterType="com.webank.webase.node.mgr.node.TbNode">
+  <update id="update" parameterType="com.webank.webase.node.mgr.node.TbNode">
     update tb_node set modify_time=NOW()
     <if test="blockNumber != null">
       ,block_number = #{blockNumber}
@@ -102,7 +102,7 @@
     <if test="nodeActive != null">
       ,node_active = #{nodeActive}
     </if>
-    where node_id=#{nodeId}
+    where node_id=#{nodeId} and group_id=#{groupId}
   </update>
 
   <select id="queryNodeInfo" parameterType="com.webank.webase.node.mgr.node.NodeParam"

@@ -19,9 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.scheduler.CheckNodeTask;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -47,8 +45,6 @@ public class NodeController {
 
     @Autowired
     private NodeService nodeService;
-    @Autowired
-    private CheckNodeTask checkNodeTask;
 
     /**
      * qurey node info list.

@@ -60,7 +60,7 @@ public class FrontService {
         //check front ip and port
         checkFrontNotExist(frontIp,frontPort);
         //query group list
-        List<String> groupIdList = frontInterfaceService.getGroupList(frontIp, frontPort);
+        List<String> groupIdList = frontInterfaceService.getGroupListFromSpecificFront(frontIp, frontPort);
         //copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         //save front info
@@ -68,7 +68,7 @@ public class FrontService {
         for(String groupId:groupIdList){
             Integer group = Integer.valueOf(groupId);
             //peer in group
-            List<PeerInfo>  peerList = frontInterfaceService.getPeers(frontIp,frontPort,group);
+            List<PeerInfo>  peerList = frontInterfaceService.getPeersFromSpecificFront(frontIp,frontPort,group);
             //add groupId
             groupService.saveGroupId(group,peerList.size());
             //save front group map

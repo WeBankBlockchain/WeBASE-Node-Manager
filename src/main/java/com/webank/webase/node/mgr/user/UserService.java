@@ -61,11 +61,6 @@ public class UserService {
         // check group id
         groupService.checkgroupId(groupId);
 
-        // get org id
-        //   TbOrganization orgRow = organizationService.queryOrganization(groupId, OrgType.CURRENT.getValue());
-        //  Integer orgId = Optional.ofNullable(orgRow).map(org -> org.getOrgId())
-        //       .orElseThrow(() -> new NodeMgrException(ConstantCode.CURRENT_ORG_NOT_EXISTS));
-
         // check userName
         TbUser userRow = queryByName(user.getUserName());
         if (userRow != null) {
@@ -74,7 +69,7 @@ public class UserService {
         }
 
         KeyPair keyPair = frontRestTools
-            .getFrontForEntity(groupId, FrontRestTools.FRONT_KEY_PAIR_URI, KeyPair.class);
+            .getFrontForEntity(groupId, FrontRestTools.URI_KEY_PAIR, KeyPair.class);
         String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
         String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
         String address = Optional.ofNullable(keyPair).map(k -> k.getAddress()).orElse(null);

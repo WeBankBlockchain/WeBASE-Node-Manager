@@ -29,7 +29,7 @@ public interface GroupMapper {
     /**
      * add group info
      */
-    int add(TbGroup tbGroup);
+    int save(TbGroup tbGroup);
 
     /**
      * update group info.

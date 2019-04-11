@@ -92,6 +92,22 @@ public class NodeService {
     }
 
     /**
+     * query node by groupId
+     */
+    public List<TbNode> queryByGroupId(int groupId){
+        NodeParam nodeParam = new NodeParam();
+        nodeParam.setGroupId(groupId);
+        return qureyNodeList(nodeParam);
+    }
+
+    /**
+     * query all node list
+     */
+    public List<TbNode> getAll(){
+        return qureyNodeList(new NodeParam());
+    }
+
+    /**
      * query node info.
      */
     public TbNode queryByNodeId(Integer nodeId) throws NodeMgrException {
@@ -110,12 +126,12 @@ public class NodeService {
     /**
      * update node info.
      */
-    public void updateNodeInfo(TbNode tbNode) throws NodeMgrException {
+    public void updateNode(TbNode tbNode) throws NodeMgrException {
         log.debug("start updateNodeInfo  param:{}", JSON.toJSONString(tbNode));
         Integer affectRow = 0;
         try {
 
-            affectRow = nodeMapper.updateNodeInfo(tbNode);
+            affectRow = nodeMapper.update(tbNode);
         } catch (RuntimeException ex) {
             log.error("updateNodeInfo exception", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);

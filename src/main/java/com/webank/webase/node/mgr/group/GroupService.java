@@ -52,7 +52,7 @@ public class GroupService {
         //save group id
         String groupName = "group" + groupId;
         TbGroup tbGroup = new TbGroup(groupId, groupName, nodeCount);
-        groupMapper.add(tbGroup);
+        groupMapper.save(tbGroup);
 
         //create table by group id
         tableService.newTableByGroupId(groupId);

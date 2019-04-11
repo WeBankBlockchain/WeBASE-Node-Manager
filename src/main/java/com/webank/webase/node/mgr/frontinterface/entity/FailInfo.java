@@ -13,17 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.contract;
+package com.webank.webase.node.mgr.frontinterface.entity;
 
+import java.time.LocalDateTime;
 import lombok.Data;
 
-/**
- * deploy interface parameter.
- */
 @Data
-public class RspSystemProxy {
-    private String name;
-    private String address;
-    private String cache;
-    private Integer blockNumber;
+public class FailInfo {
+    private LocalDateTime latestTime;
+    private int failCount;
 }

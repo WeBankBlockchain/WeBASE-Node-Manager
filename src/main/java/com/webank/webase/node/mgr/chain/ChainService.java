@@ -65,7 +65,7 @@ public class ChainService {
 
         // request url
        // String url = String.format(RestTools.FRONT_URL, tbNode.getNodeIp(), tbNode.getFrontPort(),
-  //              RestTools.FRONT_CHAIN);  TODO
+  //              RestTools.URI_CHAIN);  TODO
         String url = null;
         url = url + "?" + chainUrlParam;
         log.info("getChainMonitorInfo request url:{}", url);

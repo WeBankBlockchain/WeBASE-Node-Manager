@@ -13,13 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.frontinterface;
+package com.webank.webase.node.mgr.contract.entity;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * receive contract info entity.
+ */
 @Data
-public class FailInfo {
-    private LocalDateTime latestTime;
-    private int failCount;
+public class DeployIncoming {
+    @NotNull
+    private Integer groupId;
+    @NotBlank
+    private String contractName;
+    @NotBlank
+    private String contractVersion;
+    @NotBlank
+    private String contractSource;
+    @NotBlank
+    private String contractAbi;
+    @NotBlank
+    private String contractBin;
+    @NotBlank
+    private String bytecodeBin;
+    @NotNull
+    private Integer userId;
+    private List<Object> constructorParams;
 }
+

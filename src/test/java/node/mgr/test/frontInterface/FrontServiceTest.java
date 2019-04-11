@@ -1,29 +1,28 @@
 /**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package node.mgr.test.frontInterface;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
+import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.monitor.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
-import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import java.math.BigInteger;
 import java.util.List;
 import org.junit.Test;
@@ -77,7 +76,7 @@ public class FrontServiceTest {
 
     @Test
     public void getblockFromFrontByHashTest() {
-        BlockInfo blockInfo = frontInterface.getblockFromFrontByHash(groupId, blockHash);
+        BlockInfo blockInfo = frontInterface.getblockByHash(groupId, blockHash);
         assert (blockInfo != null);
         System.out.println(JSON.toJSONString(blockInfo));
     }
@@ -85,14 +84,14 @@ public class FrontServiceTest {
     @Test
     public void getTransFromFrontByHashTest() {
         ChainTransInfo chainTransInfo = frontInterface
-            .getTransInfoFromFrontByHash(groupId, transHash);
+            .getTransInfoByHash(groupId, transHash);
         assert (chainTransInfo != null);
         System.out.println(JSON.toJSONString(chainTransInfo));
     }
 
     @Test
     public void getAddressFromFrontByHashTest() {
-        String contractAddress = frontInterface.getAddressFromFrontByHash(groupId, transHash);
+        String contractAddress = frontInterface.getAddressByHash(groupId, transHash);
         assert (contractAddress != null);
         System.out.println(contractAddress);
     }
@@ -116,14 +115,14 @@ public class FrontServiceTest {
 
     @Test
     public void getTransByBlockNumberTest() {
-        List<TransactionInfo>  list = frontInterface.getTransByBlockNumber( groupId,  blockNumber);
+        List<TransactionInfo> list = frontInterface.getTransByBlockNumber(groupId, blockNumber);
         assert (list != null && list.size() > 0);
         System.out.println(JSON.toJSONString(list));
     }
 
     @Test
     public void getGroupPeersTest() {
-        List<String>  list = frontInterface.getGroupPeers( groupId);
+        List<String> list = frontInterface.getGroupPeers(groupId);
         assert (list != null && list.size() > 0);
         System.out.println(JSON.toJSONString(list));
     }
@@ -131,37 +130,37 @@ public class FrontServiceTest {
 
     @Test
     public void getGroupListTest() {
-        List<String>  list = frontInterface.getGroupList(frontIp,frontPort);
+        List<String> list = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
         assert (list != null && list.size() > 0);
-        System.out.println(JSON.toJSONString(list));
+        System.out.println("=====================list:" + JSON.toJSONString(list));
     }
 
     @Test
     public void getPeersTest() {
-        List<PeerInfo> list = frontInterface.getPeers(frontIp,frontPort,groupId);
+        List<PeerInfo> list = frontInterface.getPeers(groupId);
         assert (list != null && list.size() > 0);
-        System.out.println(JSON.toJSONString(list));
+        System.out.println("=====================list:" + JSON.toJSONString(list));
     }
 
     @Test
     public void getConsensusStatusTest() {
-        String consensunsStatus = frontInterface.getConsensusStatus( groupId);
+        String consensunsStatus = frontInterface.getConsensusStatus(groupId);
         assert (consensunsStatus != null);
-        System.out.println(consensunsStatus);
+        System.out.println("=====================consensunsStatus:" + consensunsStatus);
     }
 
     @Test
     public void syncStatusTest() {
-        String status = frontInterface.syncStatus(groupId);
+        SyncStatus status = frontInterface.getSyncStatus(groupId);
         assert (status != null);
-        System.out.println(status);
+        System.out.println("=====================status:" + JSON.toJSONString(status));
     }
 
     @Test
     public void getSystemConfigByKeyTest() {
         //tx_count_limit和tx_gas_limit
         String key = "tx_count_limit";
-        String config = frontInterface.getSystemConfigByKey( groupId,key);
+        String config = frontInterface.getSystemConfigByKey(groupId, key);
         assert (config != null);
         System.out.println(config);
     }

@@ -84,12 +84,11 @@
     </update>
 
   <select id="queryTbMonitor" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
-		select trans_count as transCount,
-		       trans_hashs as transHashs
+		select trans_count as transCount,trans_hashs as transHashs
 		from ${tableName}
 		where user_name = #{monitor.userName}
 		  and contract_name = #{monitor.contractName}
-		  and DATE_FORMAT(monitor.create_time,'%Y-%m-%d %H:%i:%s') = DATE_FORMAT(#{monitor.createTime},'%Y-%m-%d %H:%i:%s')
+		  and DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') = DATE_FORMAT(#{monitor.createTime},'%Y-%m-%d %H:%i:%s')
 		  and user_type = #{monitor.userType}
 		  and contract_address = #{monitor.contractAddress}
 		  and interface_name = #{monitor.interfaceName}
