@@ -9,7 +9,6 @@
     <result column="user_name" javaType="java.lang.String" jdbcType="VARCHAR" property="userName"/>
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="groupId"/>
-    <result column="org_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="orgId"/>
     <result column="user_status" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="userStatus"/>
     <result column="has_pk" javaType="java.lang.Integer" jdbcType="INTEGER" property="hasPk"/>
@@ -27,8 +26,8 @@
 
   <insert id="addUserRow" parameterType="com.webank.webase.node.mgr.user.TbUser">
     insert into
-    tb_user(user_name,group_id,org_id,has_pk,user_type,public_key,address,description,create_time,modify_time)
-    values(#{userName},#{groupId},#{orgId},#{hasPk},#{userType},#{publicKey},#{address},#{description},NOW(),NOW())
+    tb_user(user_name,group_id,has_pk,user_type,public_key,address,description,create_time,modify_time)
+    values(#{userName},#{groupId},#{hasPk},#{userType},#{publicKey},#{address},#{description},NOW(),NOW())
     <selectKey keyProperty="userId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -40,9 +39,6 @@
     select count(1) from tb_user where 1=1
     <if test="groupId != null and groupId != ''">
       and group_id = #{groupId}
-    </if>
-    <if test="orgId != null and orgId != ''">
-      and org_id = #{orgId}
     </if>
     <if test="userId != null and userId != ''">
       and user_id = #{userId}
@@ -65,9 +61,6 @@
     select * from tb_user where 1=1
     <if test="groupId != null and groupId != ''">
       and group_id = #{groupId}
-    </if>
-    <if test="orgId != null and orgId != ''">
-      and org_id = #{orgId}
     </if>
     <if test="userId != null and userId != ''">
       and user_id = #{userId}
@@ -95,9 +88,6 @@
     </if>
     <if test="userName != null and userName != ''">
       and user_name = #{userName}
-    </if>
-    <if test="orgId != null">
-      and org_id = #{orgId}
     </if>
     <if test="address != null and address != ''">
       and address = #{address}

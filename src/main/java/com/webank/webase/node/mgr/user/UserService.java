@@ -19,8 +19,8 @@ import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.AesTools;
-import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
+import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import java.util.List;
@@ -82,7 +82,7 @@ public class UserService {
 
         // add row
         TbUser newUserRow = new TbUser(HasPk.HAS.getValue(), user.getUserType(), user.getUserName(),
-            groupId, null, address, publicKey, // TODO NULL
+            groupId, address, publicKey,
             user.getDescription());
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {
@@ -155,8 +155,7 @@ public class UserService {
 
         // add row
         TbUser newUserRow = new TbUser(HasPk.NONE.getValue(), user.getUserType(),
-            user.getUserName(), user.getGroupId(), null, address, publicKey,  //TODO null
-            user.getDescription());
+            user.getUserName(), user.getGroupId(), address, publicKey, user.getDescription());
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {
             log.warn("bindUserInfo affect 0 rows of tb_user");
@@ -211,57 +210,57 @@ public class UserService {
     /**
      * query user row.
      */
-    public TbUser queryUser(Integer userId, Integer groupId, String userName, Integer orgId,
-        String address) throws NodeMgrException {
-        log.debug("start queryUser userId:{} groupId:{} userName:{} orgId:{} address:{}", userId,
-            groupId, userName, orgId, address);
+    public TbUser queryUser(Integer userId, Integer groupId, String userName, String address)
+        throws NodeMgrException {
+        log.debug("start queryUser userId:{} groupId:{} userName:{} address:{}", userId,
+            groupId, userName, address);
         try {
-            TbUser userRow = userMapper.queryUser(userId, groupId, userName, orgId, address);
+            TbUser userRow = userMapper.queryUser(userId, groupId, userName, address);
             log.debug(
-                "end queryUser userId:{} groupId:{} userName:{} orgId:{} address:{} TbUser:{}",
-                userId, groupId, userName, orgId, address, JSON.toJSONString(userRow));
+                "end queryUser userId:{} groupId:{} userName:{}  address:{} TbUser:{}",
+                userId, groupId, userName, address, JSON.toJSONString(userRow));
             return userRow;
         } catch (RuntimeException ex) {
-            log.error("fail queryUser userId:{} groupId:{} userName:{} orgId:{} address:{}",
-                userId, groupId, userName, orgId, address, ex);
+            log.error("fail queryUser userId:{} groupId:{} userName:{}  address:{}",
+                userId, groupId, userName, address, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
 
     /**
-     * query by groupId、userName、orgId.
+     * query by groupId、userName.
      */
-    public TbUser queryUser(Integer groupId, String userName, Integer orgId)
+    public TbUser queryUser(Integer groupId, String userName)
         throws NodeMgrException {
-        return queryUser(null, groupId, userName, orgId, null);
+        return queryUser(null, groupId, userName, null);
     }
 
     /**
      * query by groupId.
      */
     public TbUser queryBygroupId(Integer groupId) throws NodeMgrException {
-        return queryUser(null, groupId, null, null, null);
+        return queryUser(null, groupId, null, null);
     }
 
     /**
      * query by userName.
      */
     public TbUser queryByName(String userName) throws NodeMgrException {
-        return queryUser(null, null, userName, null, null);
+        return queryUser(null, null, userName, null);
     }
 
     /**
      * query by address.
      */
     public TbUser queryByAddress(String address) throws NodeMgrException {
-        return queryUser(null, null, null, null, address);
+        return queryUser(null, null, null, address);
     }
 
     /**
      * query by userId.
      */
     public TbUser queryByUserId(Integer userId) throws NodeMgrException {
-        return queryUser(userId, null, null, null, null);
+        return queryUser(userId, null, null, null);
     }
 
     /**

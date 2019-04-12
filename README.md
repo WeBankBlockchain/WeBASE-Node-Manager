@@ -36,8 +36,10 @@ gradle build -x test
 构建完成后，会在根目录webase-node-mgr下生成已编译的代码目录dist。
 ## 3.3 数据库初始化
 ### 3.3.1 新建数据库
-命令：
 ```
+#登录mysql:
+mysql  -u ${your_db_account}  -p${your_db_password}  例如：mysql  -u root  -p123456
+#新建数据库：
 CREATE DATABASE IF NOT EXISTS {your_db_name} DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 ```
 
@@ -103,27 +105,3 @@ cd dist/logs
 ```
 全量日志：tail -f node-mgr.log
 错误日志：tail -f node-mgr-error.log
-
-
-## 3.5 初始化基础合约
-### 3.5.1 前提条件
-* 区块链节点正常运行
-* webase-node-mgr正常运行
-* webase-front正常运行
-
-### 3.5.2 修改脚本配置
-进入合约脚本目录：
-```shell
-cd dist/conf/contract
-```
-修改配置中的前置服务信息：
-```shell
-修改前置服务IP：sed -i "s/defaultFrontIp/${your_front_ip}/g"  contract-init.sh
-修改前置服务的端口：sed -i "s/defaultFrontPort/${your_front_port}/g"  contract-init.sh
-```
-### 3.5.3 运行脚本
-执行命令：
-```shell
-sh contract-init.sh
-```
-如果脚本中三个合约部署返回结果的code都是0,则表示所有合约都部署成功

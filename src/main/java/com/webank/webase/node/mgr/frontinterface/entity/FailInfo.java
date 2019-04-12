@@ -22,4 +22,5 @@ import lombok.Data;
 public class FailInfo {
     private LocalDateTime latestTime;
     private int failCount;
+    private String failUrl;
 }

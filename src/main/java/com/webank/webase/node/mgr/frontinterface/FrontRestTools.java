@@ -68,7 +68,7 @@ public class FrontRestTools {
     public static final String URI_CHAIN = "chain";
 
     private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
-        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION);
+        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR);
 
 
     @Autowired
@@ -196,7 +196,7 @@ public class FrontRestTools {
     }
 
     /**
-     *
+     * check url status.
      */
     private boolean isServiceSleep(String url, String methType) {
         //get failInfo
@@ -227,12 +227,16 @@ public class FrontRestTools {
         //get failInfo
         String key = buildKey(url, methodType);
         FailInfo failInfo = failRequestMap.get(key);
-        int newFailCount = failInfo == null ? 1 : failInfo.getFailCount() + 1;
+        if (failInfo == null) {
+            failInfo = new FailInfo();
+            failInfo.setFailUrl(url);
+        }
 
         //reset failInfo
         failInfo.setLatestTime(LocalDateTime.now());
-        failInfo.setFailCount(newFailCount);
+        failInfo.setFailCount(failInfo.getFailCount() + 1);
         failRequestMap.put(key, failInfo);
+        log.info("the latest failInfo:{}",JSON.toJSONString(failRequestMap));
     }
 
 

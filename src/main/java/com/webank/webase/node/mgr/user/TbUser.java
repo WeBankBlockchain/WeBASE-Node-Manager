@@ -17,14 +17,15 @@ package com.webank.webase.node.mgr.user;
 
 import java.time.LocalDateTime;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class TbUser {
 
     private Integer userId;
     private String userName;
     private Integer groupId;
-    private Integer orgId;
     private String publicKey;
     private Integer userStatus;
     private Integer chainIndex;
@@ -35,15 +36,12 @@ public class TbUser {
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
-    public TbUser() {
-        super();
-    }
 
     /**
      * init TbUser.
      */
     public TbUser(Integer chainIndex, Integer hasPk, Integer userType, String userName,
-        Integer groupId, Integer orgId, String address,
+        Integer groupId, String address,
         String publicKey, String description) {
         super();
         this.chainIndex = chainIndex;
@@ -51,7 +49,6 @@ public class TbUser {
         this.userType = userType;
         this.userName = userName;
         this.groupId = groupId;
-        this.orgId = orgId;
         this.publicKey = publicKey;
         this.description = description;
         this.address = address;
@@ -60,15 +57,13 @@ public class TbUser {
     /**
      * init TbUser.
      */
-    public TbUser(Integer hasPk, Integer userType, String userName, Integer groupId,
-        Integer orgId, String address, String publicKey,
+    public TbUser(Integer hasPk, Integer userType, String userName, Integer groupId, String address, String publicKey,
         String description) {
         super();
         this.hasPk = hasPk;
         this.userType = userType;
         this.userName = userName;
         this.groupId = groupId;
-        this.orgId = orgId;
         this.publicKey = publicKey;
         this.description = description;
         this.address = address;

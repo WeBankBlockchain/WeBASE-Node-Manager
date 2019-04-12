@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+
 @Log4j2
 @Service
 public class FrontInterfaceService {
@@ -66,7 +67,7 @@ public class FrontInterfaceService {
     }
 
     /**
-     * get group list from specific front
+     * get group list from specific front.
      */
     public List<String> getGroupListFromSpecificFront(String nodeIp, Integer frontPort) {
         Integer groupId = Integer.MAX_VALUE;
@@ -74,7 +75,7 @@ public class FrontInterfaceService {
     }
 
     /**
-     * get peers from specific front
+     * get peers from specific front.
      */
     public List<PeerInfo> getPeersFromSpecificFront(String frontIp, Integer frontPort,
         Integer groupId) {
@@ -82,7 +83,7 @@ public class FrontInterfaceService {
     }
 
     /**
-     * get peers
+     * get peers.
      */
     public List<PeerInfo> getPeers(Integer groupId) {
         return frontRestTools.getFrontForEntity(groupId, URI_PEERS, List.class);

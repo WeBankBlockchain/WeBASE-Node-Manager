@@ -44,8 +44,7 @@ public interface UserMapper {
      * Query user list according to some conditions.
      */
     TbUser queryUser(@Param("userId") Integer userId, @Param("groupId") Integer groupId,
-        @Param("userName") String userName,
-        @Param("orgId") Integer orgId, @Param("address") String address);
+        @Param("userName") String userName, @Param("address") String address);
 
     /**
      * update user row.

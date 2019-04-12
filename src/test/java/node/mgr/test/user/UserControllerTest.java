@@ -1,23 +1,21 @@
 /**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package node.mgr.test.user;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.front.entity.FrontInfo;
+import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.user.User;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +37,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
 public class UserControllerTest {
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -50,12 +49,10 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testNewFront() throws Exception {
+    public void testNewUser() throws Exception {
         User newUser = new User();
         newUser.setUserName("testUser");
         newUser.setGroupId(1);
-
-
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/userInfo").
             content(JSON.toJSONString(newUser)).
@@ -64,6 +61,43 @@ public class UserControllerTest {
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
-        System.out.println("response:"+resultActions.andReturn().getResponse().getContentAsString());
+        System.out
+            .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testBindUser() throws Exception {
+        User newUser = new User();
+        newUser.setUserName("testPublic");
+        newUser.setGroupId(1);
+        newUser.setPublicKey("tettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweew");
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/bind").
+            content(JSON.toJSONString(newUser)).
+            contentType(MediaType.APPLICATION_JSON)
+        );
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out
+            .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testGetPrivateKey() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/user/privateKey/700001"));
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testGetUserList() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/user/userList/1/1/15"));
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
 }
