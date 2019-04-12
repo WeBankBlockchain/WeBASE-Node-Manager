@@ -36,14 +36,16 @@ gradle build
 构建完成后，会在根目录webase-node-mgr下生成已编译的代码目录dist。
 ## 3.3 数据库初始化
 ### 3.3.1 新建数据库
-命令：
 ```
+#登录mysql:
+mysql  -u ${your_db_account}  -p${your_db_password}  例如：mysql  -u root  -p123456
+#新建数据库：
 CREATE DATABASE IF NOT EXISTS {your_db_name} DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 ```
 
 ### 3.3.2 修改脚本配置
 进入数据库脚本目录
-```shell
+shellshell
 cd  dist/conf/script
 ```
 修改数据库连接信息：
