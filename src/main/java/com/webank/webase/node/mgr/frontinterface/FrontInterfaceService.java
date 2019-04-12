@@ -138,7 +138,12 @@ public class FrontInterfaceService {
         throws NodeMgrException {
         log.debug("start getBlockByNumber groupId:{} blockNumber:{}", groupId, blockNumber);
         String uri = String.format(FrontRestTools.URI_BLOCK_BY_NUMBER, blockNumber);
-        BlockInfo blockInfo = frontRestTools.getFrontForEntity(groupId, uri, BlockInfo.class);
+        BlockInfo blockInfo = null;
+        try {
+            blockInfo = frontRestTools.getFrontForEntity(groupId, uri, BlockInfo.class);
+        } catch (Exception ex) {
+            log.error("fail getBlockByNumber,exception:{}", ex);
+        }
         log.debug("end getBlockByNumber");
         return blockInfo;
     }

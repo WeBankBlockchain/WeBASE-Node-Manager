@@ -30,10 +30,12 @@ import com.webank.webase.node.mgr.front.FrontService;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -69,8 +71,8 @@ public class BlockController {
             startTime.toEpochMilli(), groupId,
             pageNumber, pageSize, pkHash, blockNumber);
 
-        Integer count = blockService.queryCountOfBlock(groupId, pkHash, blockNumber);
-        if (count != null && count > 0) {
+        int count = blockService.queryCountOfBlock(groupId, pkHash, blockNumber);
+        if (count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
             BlockListParam queryParam = new BlockListParam(start, pageSize, pkHash,
@@ -91,8 +93,7 @@ public class BlockController {
                 blockInfo = blockService.getblockFromFrontByHash(groupId, pkHash);
             }
             if (blockInfo != null) {
-                TbBlock tbBlock = NodeMgrTools.object2JavaBean(blockInfo,TbBlock.class);
-               // tbBlock.setGroupId(groupId);  TODO
+                TbBlock tbBlock = BlockService.chainBlock2TbBlock(blockInfo);
                 pageResponse.setData(new TbBlock[]{tbBlock});
                 pageResponse.setTotalCount(1);
             }

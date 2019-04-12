@@ -47,7 +47,7 @@ public interface BlockMapper {
     /**
      * query block count.
      */
-    Integer getCount(@Param("tableName") String tableName, @Param("pkHash") String pkHash,
+    int getCount(@Param("tableName") String tableName, @Param("pkHash") String pkHash,
         @Param("blockNumber") BigInteger blockNumber);
 
     /**

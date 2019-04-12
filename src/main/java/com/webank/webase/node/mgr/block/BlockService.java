@@ -51,10 +51,12 @@ public class BlockService {
     private TransHashService transHashService;
 
     /**
-     * save report block info.
+     * copy chainBlock properties;
      */
-    @Transactional
-    public void saveBLockInfo(BlockInfo blockInfo, Integer groupId) throws NodeMgrException {
+    public static TbBlock chainBlock2TbBlock(BlockInfo blockInfo) {
+        if (blockInfo == null) {
+            return null;
+        }
         BigInteger bigIntegerNumber = blockInfo.getNumber();
         LocalDateTime blockTimestamp = LocalDateTime.MIN;
         if (bigIntegerNumber != BigInteger.ZERO) {
@@ -66,12 +68,24 @@ public class BlockService {
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
             transList.size());
+        return tbBlock;
+    }
+
+    /**
+     * save report block info.
+     */
+    @Transactional
+    public void saveBLockInfo(BlockInfo blockInfo, Integer groupId) throws NodeMgrException {
+        List<TransactionInfo> transList = blockInfo.getTransactions();
+
+        // save block info
+        TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
         addBlockInfo(tbBlock, groupId);
 
         // save trans hash
         for (TransactionInfo transaction : transList) {
-            TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), bigIntegerNumber,
-                blockTimestamp);
+            TbTransHash tbTransHash = new TbTransHash(transaction.getHash(),
+                tbBlock.getBlockNumber(),tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
         }
     }
@@ -119,12 +133,12 @@ public class BlockService {
     /**
      * query count of block.
      */
-    public Integer queryCountOfBlock(Integer groupId, String pkHash, BigInteger blockNumber)
+    public int queryCountOfBlock(Integer groupId, String pkHash, BigInteger blockNumber)
         throws NodeMgrException {
         log.debug("start countOfBlock groupId:{} pkHash:{} blockNumber:{}", groupId, pkHash,
             blockNumber);
         try {
-            Integer count = blockmapper
+            int count = blockmapper
                 .getCount(TableName.BLOCK.getTableName(groupId), pkHash, blockNumber);
             log.info("end countOfBlock groupId:{} pkHash:{} count:{}", groupId, pkHash, count);
             return count;

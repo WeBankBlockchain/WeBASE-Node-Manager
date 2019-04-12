@@ -15,7 +15,6 @@ package node.mgr.test.user;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.user.User;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +69,8 @@ public class UserControllerTest {
         User newUser = new User();
         newUser.setUserName("testPublic");
         newUser.setGroupId(1);
-        newUser.setPublicKey("tettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweew");
+        newUser.setPublicKey(
+            "tettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweew");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/bind").
             content(JSON.toJSONString(newUser)).
@@ -85,19 +85,25 @@ public class UserControllerTest {
 
     @Test
     public void testGetPrivateKey() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/user/privateKey/700001"));
+        ResultActions resultActions = mockMvc
+            .perform(MockMvcRequestBuilders.get("/user/privateKey/700001"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
-        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+        System.out.println(
+            "======================response:" + resultActions.andReturn().getResponse()
+                .getContentAsString());
     }
 
     @Test
     public void testGetUserList() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/user/userList/1/1/15"));
+        ResultActions resultActions = mockMvc
+            .perform(MockMvcRequestBuilders.get("/user/userList/1/1/15"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
-        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+        System.out.println(
+            "======================response:" + resultActions.andReturn().getResponse()
+                .getContentAsString());
     }
 }
