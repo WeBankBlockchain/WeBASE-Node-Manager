@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.contract.entity;
 
-import com.webank.webase.node.mgr.front.TransactionParam;
+import com.webank.webase.node.mgr.front.entity.TransactionParam;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -27,5 +27,5 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class Transaction extends TransactionParam {
 
-    private Integer networkId;
+    private Integer groupId;
 }

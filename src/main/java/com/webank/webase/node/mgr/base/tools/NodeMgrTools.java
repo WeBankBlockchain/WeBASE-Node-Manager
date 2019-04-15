@@ -1,21 +1,20 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.base.tools;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.time.Instant;
@@ -23,7 +22,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
@@ -104,6 +105,16 @@ public class NodeMgrTools {
         String jsonStr = JSON.toJSONString(obj);
 
         return JSON.parseObject(jsonStr, clazz);
+    }
+
+
+    public static JSONObject Object2JSONObject(Object obj) {
+        if (obj == null) {
+            log.warn("obj is null");
+            return null;
+        }
+        String objJson = JSON.toJSONString(obj);
+        return JSONObject.parseObject(objJson);
     }
 
     /**
@@ -192,5 +203,20 @@ public class NodeMgrTools {
         String urlParam = urlParamB.toString();
         return urlParam.substring(1);
 
+    }
+
+    /**
+     * convert list to map.
+     */
+    public static Map<String, Object> buidMap(List<String> nameList, List<Object> valueList) {
+        if (nameList == null || valueList == null || nameList.size() != valueList.size()) {
+            log.error("fail buidMap. nameList or valuesList is error");
+            return null;
+        }
+        Map<String, Object> map = new HashMap<>();
+        for (int i = 0; i < nameList.size(); i++) {
+            map.put(nameList.get(i), valueList.get(i));
+        }
+        return map;
     }
 }

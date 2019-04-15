@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,14 +17,15 @@ package com.webank.webase.node.mgr.user;
 
 import java.time.LocalDateTime;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class TbUser {
 
     private Integer userId;
     private String userName;
-    private Integer networkId;
-    private Integer orgId;
+    private Integer groupId;
     private String publicKey;
     private Integer userStatus;
     private Integer chainIndex;
@@ -35,23 +36,19 @@ public class TbUser {
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
-    public TbUser() {
-        super();
-    }
 
     /**
      * init TbUser.
      */
     public TbUser(Integer chainIndex, Integer hasPk, Integer userType, String userName,
-        Integer networkId, Integer orgId, String address,
+        Integer groupId, String address,
         String publicKey, String description) {
         super();
         this.chainIndex = chainIndex;
         this.hasPk = hasPk;
         this.userType = userType;
         this.userName = userName;
-        this.networkId = networkId;
-        this.orgId = orgId;
+        this.groupId = groupId;
         this.publicKey = publicKey;
         this.description = description;
         this.address = address;
@@ -60,15 +57,13 @@ public class TbUser {
     /**
      * init TbUser.
      */
-    public TbUser(Integer hasPk, Integer userType, String userName, Integer networkId,
-        Integer orgId, String address, String publicKey,
+    public TbUser(Integer hasPk, Integer userType, String userName, Integer groupId, String address, String publicKey,
         String description) {
         super();
         this.hasPk = hasPk;
         this.userType = userType;
         this.userName = userName;
-        this.networkId = networkId;
-        this.orgId = orgId;
+        this.groupId = groupId;
         this.publicKey = publicKey;
         this.description = description;
         this.address = address;

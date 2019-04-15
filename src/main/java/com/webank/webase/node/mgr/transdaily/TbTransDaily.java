@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,7 @@ import lombok.Data;
 @Data
 public class TbTransDaily {
 
-    private Integer networkId;
+    private Integer groupId;
     private LocalDate transDay;
     private Integer transCount;
     private BigInteger blockNumber;
@@ -38,12 +38,12 @@ public class TbTransDaily {
     }
 
     /**
-     * init by networkId、transDay、transCount、blockNumber.
+     * init by groupId、transDay、transCount、blockNumber.
      */
-    public TbTransDaily(Integer networkId, LocalDate transDay, Integer transCount,
+    public TbTransDaily(Integer groupId, LocalDate transDay, Integer transCount,
         BigInteger blockNumber) {
         super();
-        this.networkId = networkId;
+        this.groupId = groupId;
         this.transDay = transDay;
         this.transCount = transCount;
         this.blockNumber = blockNumber;
