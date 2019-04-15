@@ -88,8 +88,6 @@ public class PullBlockInfoTask {
                 }
                 //save block info
                 blockService.saveBLockInfo(blockInfo, groupId);
-                //update latest block
-                groupService.updateGroupInfo(groupId, nextBlock);
             } catch (Exception ex) {
                 log.error("fail pullBlockByGroupId. groupId:{} ",groupId, ex);
                 break;

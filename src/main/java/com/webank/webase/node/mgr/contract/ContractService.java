@@ -153,18 +153,21 @@ public class ContractService {
         params.put("funcParam", deployIncoming.getConstructorParams());
 
         //deploy
-        String contractAddress = frontRestTools.postFrontForEntity(groupId,
-            FrontRestTools.URI_CONTRACT_DEPLOY, params,String.class);
+        String contractAddress = frontRestTools.postForEntity(groupId,
+            FrontRestTools.URI_CONTRACT_DEPLOY, params, String.class);
 
-       //save contract
+        //save contract
         TbContract tbContract = new TbContract();
-        BeanUtils.copyProperties(deployIncoming,tbContract);
+        BeanUtils.copyProperties(deployIncoming, tbContract);
         tbContract.setContractAddress(contractAddress);
+        contractMapper.addContractRow(tbContract);
 
         // update monitor unusual deployIncoming's info
-        monitorService.updateUnusualContract(groupId, contractName,  deployIncoming.getContractBin());
+        monitorService
+            .updateUnusualContract(groupId, contractName, deployIncoming.getContractBin());
 
-        log.debug("end deployContract. contractId:{} groupId:{} contractAddress:{}", tbContract.getContractId(),
+        log.debug("end deployContract. contractId:{} groupId:{} contractAddress:{}",
+            tbContract.getContractId(),
             groupId, contractAddress);
         return tbContract;
     }
@@ -205,7 +208,7 @@ public class ContractService {
 
         // request send transaction
         Object frontRsp = frontRestTools
-            .postFrontForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, param,
+            .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, param,
                 Object.class);
         log.debug("end sendTransaction. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;

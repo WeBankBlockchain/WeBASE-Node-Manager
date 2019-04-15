@@ -1,17 +1,15 @@
 /**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.node;
 
@@ -62,39 +60,24 @@ public class NodeController {
             startTime.toEpochMilli(), groupId, pageNumber,
             pageSize, nodeName);
 
-        // share from chain
-        //sharedChainInfoTask.asyncShareFromChain(groupId, ShareType.NODE);
-
         // param
         NodeParam queryParam = new NodeParam();
         queryParam.setGroupId(groupId);
         queryParam.setPageSize(pageSize);
         queryParam.setNodeName(nodeName);
 
+        //check node status before query
+        nodeService.checkNodeStatus(groupId);
         Integer count = nodeService.countOfNode(queryParam);
         if (count != null && count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
             queryParam.setStart(start);
 
-            int queryTimes = 0;// if current node is invalid, try again
-            List<TbNode> listOfnode = null;
-            while (true) {
-                listOfnode = nodeService.qureyNodeList(queryParam);
-               /* long countOfInvalid = listOfnode.parallelStream()
-                    .filter(node -> (NodeType.CURRENT.getValue() == node.getNodeType() TODO
-                        && DataStatus.NORMAL.getValue() != node.getNodeActive())).count();*/
-               long countOfInvalid =0L;//TODO
-                if (countOfInvalid > 0 && queryTimes == 0) {
-                    queryTimes += 1;
-                 //   checkNodeTask.checkNodeStatus();
-                    continue;
-                } else {
-                    break;
-                }
-            }
+            List<TbNode> listOfnode = nodeService.qureyNodeList(queryParam);
             pagesponse.setData(listOfnode);
             pagesponse.setTotalCount(count);
+
         }
 
         log.info("end queryNodeList useTime:{} result:{}",

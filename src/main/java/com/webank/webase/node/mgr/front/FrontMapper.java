@@ -29,4 +29,6 @@ public interface FrontMapper {
     int getCount(FrontParam param);
 
     List<TbFront> getList(FrontParam param);
+
+    TbFront getById(@Param("frontId") int frontId);
 }

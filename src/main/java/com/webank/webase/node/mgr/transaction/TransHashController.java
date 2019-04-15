@@ -113,7 +113,7 @@ public class TransHashController {
     /**
      * get transaction by hash.
      */
-    @GetMapping("/transaction/{groupId}/{transHash}")
+    @GetMapping("/transInfo/{groupId}/{transHash}")
     public BaseResponse getTransaction(@PathVariable("groupId") Integer groupId,
         @PathVariable("transHash") String transHash)
         throws NodeMgrException {

@@ -15,10 +15,11 @@
  */
 package com.webank.webase.node.mgr.front.entity;
 
+import java.math.BigInteger;
 import lombok.Data;
 
 @Data
 public class TotalTransCountInfo {
-   private String  txSum;
-   private String  blockNumber;
+   private BigInteger txSum;
+   private BigInteger  blockNumber;
 }

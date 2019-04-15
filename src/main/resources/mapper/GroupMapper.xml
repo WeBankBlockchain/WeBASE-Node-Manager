@@ -8,18 +8,13 @@
     <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
     <result column="group_name" javaType="java.lang.String" jdbcType="VARCHAR"
       property="groupName"/>
-    <result column="latest_block" javaType="java.math.BigInteger" jdbcType="INTEGER"
-      property="latestBlock"/>
-    <result column="trans_count" javaType="java.math.BigInteger" jdbcType="INTEGER"
-      property="transCount"/>
-		<result column="node_count" javaType="java.lang.Integer" jdbcType="INTEGER"
-			property="nodeCount"/>
+    <result column="node_count" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="nodeCount"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
   </resultMap>
-
 
 
   <resultMap id="statisticalTransMap"
@@ -33,18 +28,19 @@
       property="transCount"/>
   </resultMap>
 
-	<sql id="QUERY_ROW_COLUMN">
+  <sql id="QUERY_ROW_COLUMN">
 		front_id frontId,front_ip frontIp,front_port frontPort,create_time createTime,modify_time modifyTime
 	</sql>
 
-	<insert id="save" parameterType="com.webank.webase.node.mgr.group.TbGroup">
+  <insert id="save" parameterType="com.webank.webase.node.mgr.group.TbGroup">
 		insert ignore into tb_group
-		(group_id,group_name,latest_block,trans_count,node_count,create_time,modify_time)
-		values(#{groupId},#{groupName},#{latestBlock},#{transCount},#{nodeCount},NOW(),NOW())
+		(group_id,group_name,node_count,create_time,modify_time)
+		values(#{groupId},#{groupName},#{nodeCount},NOW(),NOW())
+		ON DUPLICATE KEY UPDATE node_count=#{nodeCount};
 	</insert>
 
 
-	<select id="getCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+  <select id="getCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
     select count(1) from tb_group where 1 = 1
     <if test="groupId != null and groupId !=''">
       and group_id = #{groupId}
@@ -55,9 +51,6 @@
 		select * from tb_group order by group_id asc
 	</select>
 
-  <update id="update">
-		update tb_group set modify_time=now(),latest_block = #{latestBlock} where group_id = #{groupId}
-	</update>
 
   <select id="queryLatestStatisticalTrans" resultMap="statisticalTransMap">
 		select a.group_id,b.maxDay,c.block_number,c.trans_count from tb_group a
@@ -69,8 +62,7 @@
 	</select>
 
   <select id="getGeneral" resultType="com.webank.webase.node.mgr.group.GroupGeneral">
-		SELECT a.group_id groupId,a.latest_block latestBlock,a.trans_count transactionCount,
-		a.node_count nodeCount,b.contractCount
+		SELECT a.group_id groupId,a.node_count nodeCount,b.contractCount
 		FROM tb_group a
 		LEFT 	JOIN
 		(

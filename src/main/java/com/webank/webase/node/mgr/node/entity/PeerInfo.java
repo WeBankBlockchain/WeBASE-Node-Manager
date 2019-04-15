@@ -13,13 +13,21 @@
  */
 package com.webank.webase.node.mgr.node.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class PeerInfo {
 
     private String IPAndPort;
+    @JsonProperty("NodeID")
     private String nodeId;
     private List<Object> Topic;
+
+    public PeerInfo(String nodeId) {
+        this.nodeId = nodeId;
+    }
 }

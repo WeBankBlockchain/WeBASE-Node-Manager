@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.frontinterface;
 
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PEERS;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PLIST;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_PEERS;
 
@@ -54,7 +55,7 @@ public class FrontInterfaceService {
         log.debug("start getFromSpecificFront. groupId:{} frontIp:{} frontPort:{} uri:{}", groupId,
             frontIp, frontPort, uri);
 
-        uri = groupId + "/" + uri;
+        uri = FrontRestTools.uriAddGroupId(groupId,uri);
 
         String url = String.format(FrontRestTools.FRONT_URL, frontIp, frontPort, uri);
         log.info("getFromSpecificFront. url:{}", url);
@@ -75,18 +76,26 @@ public class FrontInterfaceService {
     }
 
     /**
+     * get groupPeers from specific front.
+     */
+    public List<String> getGroupPeersFromSpecificFront(String frontIp, Integer frontPort,
+        Integer groupId) {
+        return getFromSpecificFront(groupId, frontIp, frontPort, URI_GROUP_PEERS, List.class);
+    }
+
+    /**
      * get peers from specific front.
      */
-    public List<PeerInfo> getPeersFromSpecificFront(String frontIp, Integer frontPort,
+    public PeerInfo[] getPeersFromSpecificFront(String frontIp, Integer frontPort,
         Integer groupId) {
-        return getFromSpecificFront(groupId, frontIp, frontPort, URI_PEERS, List.class);
+        return getFromSpecificFront(groupId, frontIp, frontPort, URI_PEERS, PeerInfo[].class);
     }
 
     /**
      * get peers.
      */
-    public List<PeerInfo> getPeers(Integer groupId) {
-        return frontRestTools.getFrontForEntity(groupId, URI_PEERS, List.class);
+    public PeerInfo[] getPeers(Integer groupId) {
+        return frontRestTools.getForEntity(groupId, URI_PEERS, PeerInfo[].class);
     }
 
     /**
@@ -97,7 +106,7 @@ public class FrontInterfaceService {
         log.debug("start getContractCode groupId:{} address:{} blockNumber:{}", groupId,
             address, blockNumber);
         String uri = String.format(FrontRestTools.URI_CODE, address, blockNumber);
-        String contractCode = frontRestTools.getFrontForEntity(groupId, uri, String.class);
+        String contractCode = frontRestTools.getForEntity(groupId, uri, String.class);
         log.debug("end getContractCode. contractCode:{}", contractCode);
         return contractCode;
     }
@@ -109,8 +118,7 @@ public class FrontInterfaceService {
         throws NodeMgrException {
         log.debug("start getTransReceipt groupId:{} transaction:{}", groupId, transHash);
         String uri = String.format(FrontRestTools.FRONT_TRANS_RECEIPT_BY_HASH_URI, transHash);
-        TransReceipt transReceipt = frontRestTools
-            .getFrontForEntity(groupId, uri, TransReceipt.class);
+        TransReceipt transReceipt = frontRestTools.getForEntity(groupId, uri, TransReceipt.class);
         log.debug("end getTransReceipt");
         return transReceipt;
     }
@@ -126,7 +134,7 @@ public class FrontInterfaceService {
         }
         String uri = String.format(FrontRestTools.URI_TRANS_BY_HASH, transHash);
         TransactionInfo transInfo = frontRestTools
-            .getFrontForEntity(groupId, uri, TransactionInfo.class);
+            .getForEntity(groupId, uri, TransactionInfo.class);
         log.debug("end getTransaction");
         return transInfo;
     }
@@ -140,9 +148,9 @@ public class FrontInterfaceService {
         String uri = String.format(FrontRestTools.URI_BLOCK_BY_NUMBER, blockNumber);
         BlockInfo blockInfo = null;
         try {
-            blockInfo = frontRestTools.getFrontForEntity(groupId, uri, BlockInfo.class);
+            blockInfo = frontRestTools.getForEntity(groupId, uri, BlockInfo.class);
         } catch (Exception ex) {
-            log.error("fail getBlockByNumber,exception:{}", ex);
+            log.info("fail getBlockByNumber,exception:{}", ex);
         }
         log.debug("end getBlockByNumber");
         return blockInfo;
@@ -157,7 +165,7 @@ public class FrontInterfaceService {
         log.debug("start getblockByHash. groupId:{}  pkHash:{}", groupId,
             pkHash);
         String uri = String.format(FrontRestTools.URI_BLOCK_BY_HASH, pkHash);
-        BlockInfo blockInfo = frontRestTools.getFrontForEntity(groupId, uri, BlockInfo.class);
+        BlockInfo blockInfo = frontRestTools.getForEntity(groupId, uri, BlockInfo.class);
         log.debug("end getblockByHash. blockInfo:{}", JSON.toJSONString(blockInfo));
         return blockInfo;
     }
@@ -198,7 +206,7 @@ public class FrontInterfaceService {
         log.debug("start getCodeFromFront. groupId:{} address:{} blockNumber:{}",
             groupId, address, blockNumber);
         String uri = String.format(FrontRestTools.URI_CODE, address, blockNumber);
-        String code = frontRestTools.getFrontForEntity(groupId, uri, String.class);
+        String code = frontRestTools.getForEntity(groupId, uri, String.class);
 
         log.debug("end getCodeFromFront:{}", code);
         return code;
@@ -210,7 +218,7 @@ public class FrontInterfaceService {
     public TotalTransCountInfo getTotalTransactionCount(Integer groupId) {
         log.debug("start getTotalTransactionCount. groupId:{}", groupId);
         TotalTransCountInfo totalCount = frontRestTools
-            .getFrontForEntity(groupId, FrontRestTools.URI_TRANS_TOTAL,
+            .getForEntity(groupId, FrontRestTools.URI_TRANS_TOTAL,
                 TotalTransCountInfo.class);
         log.debug("end getTotalTransactionCount:{}", totalCount);
         return totalCount;
@@ -237,7 +245,7 @@ public class FrontInterfaceService {
     public List<String> getGroupPeers(Integer groupId) {
         log.debug("start getGroupPeers. groupId:{}", groupId);
         List<String> groupPeers = frontRestTools
-            .getFrontForEntity(groupId, FrontRestTools.URI_GROUP_PEERS, List.class);
+            .getForEntity(groupId, URI_GROUP_PEERS, List.class);
         log.debug("end getGroupPeers. groupPeers:{}", JSON.toJSONString(groupPeers));
         return groupPeers;
     }
@@ -249,7 +257,7 @@ public class FrontInterfaceService {
     public String getConsensusStatus(Integer groupId) {
         log.debug("start getConsensusStatus. groupId:{}", groupId);
         String consensusStatus = frontRestTools
-            .getFrontForEntity(groupId, FrontRestTools.URI_CONSENSUS_STATUS, String.class);
+            .getForEntity(groupId, FrontRestTools.URI_CONSENSUS_STATUS, String.class);
         log.debug("end getConsensusStatus. consensusStatus:{}", consensusStatus);
         return consensusStatus;
     }
@@ -260,7 +268,7 @@ public class FrontInterfaceService {
     public SyncStatus getSyncStatus(Integer groupId) {
         log.debug("start getSyncStatus. groupId:{}", groupId);
         SyncStatus ststus = frontRestTools
-            .getFrontForEntity(groupId, FrontRestTools.URI_CSYNC_STATUS, SyncStatus.class);
+            .getForEntity(groupId, FrontRestTools.URI_CSYNC_STATUS, SyncStatus.class);
         log.debug("end getSyncStatus. ststus:{}", JSON.toJSONString(ststus));
         return ststus;
     }
@@ -271,7 +279,7 @@ public class FrontInterfaceService {
     public BigInteger getLatestBlockNumber(Integer groupId) {
         log.debug("start getLatestBlockNumber. groupId:{}", groupId);
         BigInteger latestBlockNmber = frontRestTools
-            .getFrontForEntity(groupId, FrontRestTools.URI_BLOCK_NUMBER, BigInteger.class);
+            .getForEntity(groupId, FrontRestTools.URI_BLOCK_NUMBER, BigInteger.class);
         log.debug("end getLatestBlockNumber. latestBlockNmber:{}", latestBlockNmber);
         return latestBlockNmber;
     }
@@ -283,7 +291,7 @@ public class FrontInterfaceService {
     public String getSystemConfigByKey(Integer groupId, String key) {
         log.debug("start getSystemConfigByKey. groupId:{}", groupId);
         String uri = String.format(FrontRestTools.URI_SYSTEMCONFIG_BY_KEY, key);
-        String config = frontRestTools.getFrontForEntity(groupId, uri, String.class);
+        String config = frontRestTools.getForEntity(groupId, uri, String.class);
         log.debug("end getSystemConfigByKey. config:{}", config);
         return config;
     }

@@ -28,7 +28,7 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 
 ### mgr服务搭建问题
-* 问：执行构建命令`gradle build`抛出异常：
+* 问：执行构建命令`gradle build -x test`抛出异常：
 ```
 A problem occurred evaluating root project 'webase-node-mgr'.
 Could not find method annotationProcessor() for arguments [[org.projectlombok:lombok:1.18.2]] on object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
@@ -36,10 +36,3 @@ Could not find method annotationProcessor() for arguments [[org.projectlombok:lo
 答：已安装的gradle版本过低，没有annotationProcessor()方法,升级gradle版本到4.9以上即可。
 
 
-* 问：mgr服务能正常启动，但查看日志有异常：
-```
-2019-03-26 10:25:49.332 [http-nio-8083-exec-2] WARN  ExceptionsHandler() - business exception return:{"code":202000,"message":"invalid node info","data":null}
-2019-03-26 10:25:54.348 [http-nio-8083-exec-1] WARN  ExceptionsHandler() - catch business exception
-com.webank.webase.node.mgr.base.exception.NodeMgrException: invalid node info
-```
-答：服务中有些功能（如上报、和数据同步等）需要用到节点信息，可在webase-web的【 节点管理】页面新增节点信息。

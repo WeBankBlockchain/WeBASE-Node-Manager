@@ -14,10 +14,19 @@
 package com.webank.webase.node.mgr.node;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
+import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
+import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import java.math.BigInteger;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,16 +41,22 @@ public class NodeService {
 
     @Autowired
     private NodeMapper nodeMapper;
+    @Autowired
+    private FrontInterfaceService frontInterfacee;
 
     /**
      * add new node data.
      */
-    public String addNodeInfo(Integer groupId,PeerInfo peerInfo) throws NodeMgrException {
-        String[] ipPort = peerInfo.getIPAndPort().split(":");
-        String nodeIp = ipPort[0];
-        Integer nodeP2PPort = Integer.valueOf(ipPort[1]);
+    public void addNodeInfo(Integer groupId, PeerInfo peerInfo) throws NodeMgrException {
+        String nodeIp = null;
+        Integer nodeP2PPort = null;
 
-        String nodeName = nodeIp + "_" +nodeP2PPort;
+        if (StringUtils.isNotBlank(peerInfo.getIPAndPort())) {
+            String[] ipPort = peerInfo.getIPAndPort().split(":");
+            nodeIp = ipPort[0];
+            nodeP2PPort = Integer.valueOf(ipPort[1]);
+        }
+        String nodeName = groupId + "_" + peerInfo.getNodeId();
 
         // add row
         TbNode tbNode = new TbNode();
@@ -51,8 +66,6 @@ public class NodeService {
         tbNode.setNodeName(nodeName);
         tbNode.setP2pPort(nodeP2PPort);
         nodeMapper.add(tbNode);
-
-        return tbNode.getNodeId();
     }
 
     /**
@@ -71,12 +84,6 @@ public class NodeService {
         }
     }
 
-    /**
-     * query all nodes
-     */
-    public List<TbNode> getAllNodes(){
-        return qureyNodeList(new NodeParam());
-    }
 
     /**
      * query node list by page.
@@ -94,7 +101,7 @@ public class NodeService {
     /**
      * query node by groupId
      */
-    public List<TbNode> queryByGroupId(int groupId){
+    public List<TbNode> queryByGroupId(int groupId) {
         NodeParam nodeParam = new NodeParam();
         nodeParam.setGroupId(groupId);
         return qureyNodeList(nodeParam);
@@ -103,7 +110,7 @@ public class NodeService {
     /**
      * query all node list
      */
-    public List<TbNode> getAll(){
+    public List<TbNode> getAll() {
         return qureyNodeList(new NodeParam());
     }
 
@@ -145,31 +152,6 @@ public class NodeService {
     }
 
     /**
-     * query tb_node by nodeIp and p2pPort.
-     */
-    public TbNode queryNodeByIpAndP2pPort(String nodeIp, Integer p2pPort) throws NodeMgrException {
-        log.debug("start queryNodeByIpAndP2pPort nodeIp:{} p2pPort:{}", nodeIp, p2pPort);
-
-        if (StringUtils.isBlank(nodeIp)) {
-            log.error("fail getGroupIdByNode. nodeIp blank");
-            throw new NodeMgrException(ConstantCode.NODE_IP_EMPTY);
-        }
-        if (p2pPort == null) {
-            log.error("fail getGroupIdByNode. p2pPort null");
-            throw new NodeMgrException(ConstantCode.NODE_P2P_PORT_EMPTY);
-        }
-        TbNode tbNode = null;
-        try {
-            tbNode = nodeMapper.queryNodeByIpAndP2pPort(nodeIp, p2pPort);
-        } catch (RuntimeException ex) {
-            log.error("fail queryNodeByIpAndP2pPort. nodeIp:{} p2pPort:{}", nodeIp, p2pPort, ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-        log.debug("end queryNodeByIpAndP2pPort nodeIp:{} p2pPort:{}", nodeIp, p2pPort);
-        return tbNode;
-    }
-
-    /**
      * query node info.
      */
     public TbNode queryNodeInfo(NodeParam nodeParam) {
@@ -197,5 +179,79 @@ public class NodeService {
         }
 
         log.debug("end deleteByNodeId");
+    }
+
+
+    /**
+     * check node status
+     */
+    public void checkNodeStatus(int groupId) {
+        //get local node list
+        List<TbNode> nodeList = queryByGroupId(groupId);
+
+        //getPeerOfConsensusStatus
+        List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
+        for (TbNode tbNode : nodeList) {
+            String nodeId = tbNode.getNodeId();
+            BigInteger localBlockNumber = tbNode.getBlockNumber();
+            BigInteger localPbftView = tbNode.getPbftView();
+
+            BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId,nodeId);//blockNumber
+            BigInteger latestView = consensusList.stream()
+                .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
+                .orElse(BigInteger.ZERO);//pbftView
+
+            if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
+                log.warn("node[{}] is invalid", nodeId);
+                tbNode.setNodeActive(DataStatus.INVALID.getValue());
+            } else {
+                tbNode.setBlockNumber(latestNumber);
+                tbNode.setPbftView(latestView);
+                tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+            }
+
+            //update node
+            updateNode(tbNode);
+        }
+
+    }
+
+
+    /**
+     * get latest number of peer on chain.
+     */
+    private BigInteger getBlockNumberOfNodeOnChain(int groupId,String nodeId) {
+        SyncStatus syncStatus = frontInterfacee.getSyncStatus(groupId);
+        if(nodeId.equals(syncStatus.getNodeId())){
+            return syncStatus.getBlockNumber();
+        }
+        List<PeerOfSyncStatus> peerList = syncStatus.getPeers();
+        BigInteger latestNumber = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
+            .map(s -> s.getBlockNumber()).findFirst().orElse(BigInteger.ZERO);//blockNumber
+        return latestNumber;
+    }
+
+
+    /**
+     * get peer of consensusStatus
+     */
+    private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
+        String consensusStatusJson = frontInterfacee.getConsensusStatus(groupId);
+        JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
+        List<Object> dataIsListTest = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List).collect(
+            Collectors.toList());
+        List<Object> dataIsList = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List)
+            .map(arr -> {
+                Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
+                try {
+                  NodeMgrTools.object2JavaBean(obj, PeerOfConsensusStatus.class);
+                } catch (Exception e) {
+                    return null;
+                }
+                return arr;
+            }).collect(Collectors.toList());
+
+        List<PeerOfConsensusStatus> li= JSONArray.parseArray(JSON.toJSONString(dataIsList.get(0)), PeerOfConsensusStatus.class);
+        return JSONArray.parseArray(JSON.toJSONString(dataIsList.get(0)), PeerOfConsensusStatus.class);
     }
 }

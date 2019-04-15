@@ -40,8 +40,8 @@ public class ChainController {
     @Autowired
     private ChainService chainService;
 
-    @GetMapping(value = "/mointorInfo/{nodeId}")
-    public BaseResponse getChainMoinntorInfo(@PathVariable("nodeId") Integer nodeId,
+    @GetMapping(value = "/mointorInfo/{frontId}")
+    public BaseResponse getChainMoinntorInfo(@PathVariable("frontId") Integer frontId,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime beginDate,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime endDate,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime contrastBeginDate,
@@ -51,11 +51,11 @@ public class ChainController {
         Instant startTime = Instant.now();
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         log.info(
-            "start getChainInfo. startTime:{} nodeId:{} beginDate:{} endDate:{} "
+            "start getChainInfo. startTime:{} frontId:{} beginDate:{} endDate:{} "
                 + "contrastBeginDate:{} contrastEndDate:{} gap:{}", startTime.toEpochMilli(),
-            nodeId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
+            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
         Object rspObj = chainService
-            .getChainMonitorInfo(nodeId, beginDate, endDate, contrastBeginDate, contrastEndDate,
+            .getChainMonitorInfo(frontId, beginDate, endDate, contrastBeginDate, contrastEndDate,
                 gap);
 
         response.setData(rspObj);

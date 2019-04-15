@@ -5,8 +5,6 @@
 CREATE TABLE IF NOT EXISTS tb_group (
         group_id int(11) NOT NULL COMMENT '群组ID',
         group_name varchar(64) NOT NULL COMMENT '群组名字',
-        latest_block bigint DEFAULT NULL COMMENT '最新块高',
-        trans_count bigint(20) DEFAULT '0' COMMENT '总交易数',
         node_count int DEFAULT '0' COMMENT '群组下节点数',
         group_desc varchar(1024) COMMENT '群组描述',
         create_time datetime DEFAULT NULL COMMENT '创建时间',
@@ -50,7 +48,7 @@ CREATE TABLE IF NOT EXISTS tb_node (
   node_id varchar(250) NOT NULL  COMMENT '节点编号',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   node_name varchar(120) NOT NULL COMMENT '节点名称',
-  node_ip varchar(16) NOT NULL COMMENT '节点ip',
+  node_ip varchar(16) DEFAULT NULL COMMENT '节点ip',
   p2p_port int(11) DEFAULT NULL COMMENT '节点p2p端口',
   block_number bigint(20) DEFAULT '0' COMMENT '节点块高',
   pbft_view bigint(20) DEFAULT '0' COMMENT 'pbft_view',
@@ -58,8 +56,7 @@ CREATE TABLE IF NOT EXISTS tb_node (
   description text DEFAULT NULL COMMENT '描述',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (node_id,group_id),
-  UNIQUE KEY unique_node_base (group_id,node_ip,p2p_port)
+  PRIMARY KEY (node_id,group_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='节点表';
 
 

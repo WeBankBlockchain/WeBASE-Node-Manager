@@ -107,6 +107,7 @@ public class NodeMgrTools {
         return JSON.parseObject(jsonStr, clazz);
     }
 
+
     public static JSONObject Object2JSONObject(Object obj) {
         if (obj == null) {
             log.warn("obj is null");

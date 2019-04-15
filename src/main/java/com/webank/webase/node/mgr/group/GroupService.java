@@ -16,10 +16,9 @@ package com.webank.webase.node.mgr.group;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.node.NodeService;
+import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.table.TableService;
-import java.math.BigInteger;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +34,9 @@ public class GroupService {
     @Autowired
     private GroupMapper groupMapper;
     @Autowired
-    private FrontService frontService;
-    @Autowired
-    private NodeService nodeService;
-    @Autowired
     private TableService tableService;
+    @Autowired
+    private FrontInterfaceService frontInterface;
 
 
     /**
@@ -56,29 +53,6 @@ public class GroupService {
 
         //create table by group id
         tableService.newTableByGroupId(groupId);
-    }
-
-    /**
-     * update group latest block number.
-     */
-    public void updateGroupInfo(Integer groupId, BigInteger latestBlock)
-        throws NodeMgrException {
-        log.debug("start updateGroupInfo groupId:{} latestBlock:{} ", groupId,
-            latestBlock);
-        try {
-            Integer affectRow = groupMapper.update(groupId, latestBlock);
-            if (affectRow == 0) {
-                log.info(
-                    "fail updateGroupInfo. groupId:{}  latestBlock:{}. affect 0 rows"
-                        + " of tb_group",
-                    groupId, latestBlock);
-                throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-            }
-        } catch (RuntimeException ex) {
-            log.debug("fail updateGroupInfo groupId:{} latestBlock:{}", groupId,
-                latestBlock, ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
     }
 
     /**
@@ -157,18 +131,15 @@ public class GroupService {
     /**
      * query group overview information.
      */
-    public GroupGeneral queryGroupGeneral(Integer groupId) throws NodeMgrException {
+    public GroupGeneral queryGroupGeneral(int groupId) throws NodeMgrException {
         log.debug("start queryGroupGeneral groupId:{}", groupId);
-        try {
-            // qurey general info from tb_group
-            GroupGeneral generalInfo = groupMapper.getGeneral(groupId);
-            log.debug("end queryGroupGeneral generalInfo:{}",
-                JSON.toJSONString(generalInfo));
-            return generalInfo;
-        } catch (RuntimeException ex) {
-            log.error("fail queryGroupGeneral", ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        GroupGeneral generalInfo = groupMapper.getGeneral(groupId);
+        if (generalInfo != null) {
+            TotalTransCountInfo transCountInfo = frontInterface.getTotalTransactionCount(groupId);
+            generalInfo.setLatestBlock(transCountInfo.getBlockNumber());
+            generalInfo.setTransactionCount(transCountInfo.getTxSum());
         }
+        return generalInfo;
     }
 
 

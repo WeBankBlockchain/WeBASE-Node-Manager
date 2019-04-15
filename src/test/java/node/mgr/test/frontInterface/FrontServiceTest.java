@@ -137,8 +137,8 @@ public class FrontServiceTest {
 
     @Test
     public void getPeersTest() {
-        List<PeerInfo> list = frontInterface.getPeers(groupId);
-        assert (list != null && list.size() > 0);
+        PeerInfo[] list = frontInterface.getPeers(groupId);
+        assert (list != null && list.length > 0);
         System.out.println("=====================list:" + JSON.toJSONString(list));
     }
 

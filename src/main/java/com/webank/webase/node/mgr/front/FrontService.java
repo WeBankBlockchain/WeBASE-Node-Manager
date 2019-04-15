@@ -24,7 +24,9 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 @Service
 public class FrontService {
+
     @Autowired
     private GroupService groupService;
     @Autowired
@@ -46,7 +49,7 @@ public class FrontService {
     @Autowired
     private FrontGroupMapService frontGroupMapService;
     @Autowired
-    private FrontInterfaceService frontInterfaceService;
+    private FrontInterfaceService frontInterface;
 
     /**
      * add new front
@@ -58,26 +61,36 @@ public class FrontService {
         Integer frontPort = frontInfo.getFrontPort();
 
         //check front ip and port
-        checkFrontNotExist(frontIp,frontPort);
+        checkFrontNotExist(frontIp, frontPort);
         //query group list
-        List<String> groupIdList = frontInterfaceService.getGroupListFromSpecificFront(frontIp, frontPort);
+        List<String> groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
         //copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         //save front info
         frontMapper.add(tbFront);
-        for(String groupId:groupIdList){
+        for (String groupId : groupIdList) {
             Integer group = Integer.valueOf(groupId);
             //peer in group
-            List<PeerInfo>  peerList = frontInterfaceService.getPeersFromSpecificFront(frontIp,frontPort,group);
+            List<String> groupPeerList = frontInterface
+                .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
+            //get peers on chain
+            PeerInfo[] peerArr = frontInterface.getPeersFromSpecificFront(frontIp, frontPort, group);
+            List<PeerInfo> peerList = Arrays.asList(peerArr);
             //add groupId
-            groupService.saveGroupId(group,peerList.size());
+            groupService.saveGroupId(group, groupPeerList.size());
             //save front group map
-            frontGroupMapService.newFrontGroup(tbFront.getFrontId(),group);
+            frontGroupMapService.newFrontGroup(tbFront.getFrontId(), group);
             //save nodes
-            for(Object obj:peerList){
-                PeerInfo peerInfo = NodeMgrTools.object2JavaBean(obj,PeerInfo.class);
-                nodeService.addNodeInfo(group,peerInfo);
+            for (String nodeId : groupPeerList) {
+
+                PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools
+                    .object2JavaBean(p,PeerInfo.class)).filter(peer -> nodeId.equals(peer.getNodeId()))
+                    .findFirst().orElseGet(() -> new PeerInfo(nodeId));
+                nodeService.addNodeInfo(group, newPeer);
             }
+
+            //check node status
+            nodeService.checkNodeStatus(group);
         }
         return tbFront;
     }
@@ -88,37 +101,48 @@ public class FrontService {
      *
      * if exist:throw exception
      */
-    private void checkFrontNotExist(String frontIp,int frontPort){
-        FrontParam param = new FrontParam(null,frontIp,frontPort);
+    private void checkFrontNotExist(String frontIp, int frontPort) {
+        FrontParam param = new FrontParam(null, frontIp, frontPort);
         int count = getFrontCount(param);
-        if(count > 0)
+        if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
+        }
     }
 
 
     /**
      * get front count
      */
-    public int getFrontCount(FrontParam param){
+    public int getFrontCount(FrontParam param) {
         return frontMapper.getCount(param);
     }
 
     /**
      * get front list
      */
-    public List<TbFront> getFrontList(FrontParam param){
+    public List<TbFront> getFrontList(FrontParam param) {
         return frontMapper.getList(param);
+    }
+
+    /**
+     * query front by frontId.
+     */
+    public TbFront getById(int frontId) {
+        if (frontId == 0) {
+            return null;
+        }
+        return frontMapper.getById(frontId);
     }
 
     /**
      * remove front
      */
-    public void removeFront(int frontId){
+    public void removeFront(int frontId) {
         //check frontId
         FrontParam param = new FrontParam();
         param.setFrontId(frontId);
         int count = getFrontCount(param);
-        if(count==0){
+        if (count == 0) {
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
         }
 

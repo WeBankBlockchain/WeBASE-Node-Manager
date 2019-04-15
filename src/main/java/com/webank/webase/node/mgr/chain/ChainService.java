@@ -15,10 +15,15 @@
  */
 package com.webank.webase.node.mgr.chain;
 
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_URL;
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CHAIN;
+
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
 import java.time.LocalDateTime;
@@ -34,20 +39,20 @@ import org.springframework.web.client.RestTemplate;
 public class ChainService {
 
     @Autowired
-    private NodeService nodeService;
+    private FrontService frontService;
     @Autowired
     private RestTemplate genericRestTemplate;
 
     /**
      * get chain info.
      */
-    public Object getChainMonitorInfo(Integer nodeId, LocalDateTime beginDate,
+    public Object getChainMonitorInfo(Integer frontId, LocalDateTime beginDate,
         LocalDateTime endDate, LocalDateTime contrastBeginDate,
         LocalDateTime contrastEndDate, int gap) {
         log.debug(
-            "start getChainMonitorInfo.  nodeId:{} beginDate:{} endDate:{}"
+            "start getChainMonitorInfo.  frontId:{} beginDate:{} endDate:{}"
                 + " contrastBeginDate:{} contrastEndDate:{} gap:{}",
-            nodeId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
+            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
 
         // request param to str
         List<Object> valueList = Arrays
@@ -57,16 +62,15 @@ public class ChainService {
 
         String chainUrlParam = NodeMgrTools.convertUrlParam(nameList, valueList);
 
-        // query by node Id
-        TbNode tbNode = nodeService.queryByNodeId(nodeId);
-        if (tbNode == null) {
-            throw new NodeMgrException(ConstantCode.INVALID_NODE_ID);
+        // query by front Id
+        TbFront tbFront = frontService.getById(frontId);
+        if (tbFront == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
         }
 
         // request url
-       // String url = String.format(RestTools.FRONT_URL, tbNode.getNodeIp(), tbNode.getFrontPort(),
-  //              RestTools.URI_CHAIN);  TODO
-        String url = null;
+        String url = String.format(FRONT_URL, tbFront.getFrontIp(), tbFront.getFrontPort(),
+               URI_CHAIN);
         url = url + "?" + chainUrlParam;
         log.info("getChainMonitorInfo request url:{}", url);
 

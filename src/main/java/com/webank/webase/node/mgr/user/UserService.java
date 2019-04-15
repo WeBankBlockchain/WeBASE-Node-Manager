@@ -69,7 +69,7 @@ public class UserService {
         }
 
         KeyPair keyPair = frontRestTools
-            .getFrontForEntity(groupId, FrontRestTools.URI_KEY_PAIR, KeyPair.class);
+            .getForEntity(groupId, FrontRestTools.URI_KEY_PAIR, KeyPair.class);
         String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
         String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
         String address = Optional.ofNullable(keyPair).map(k -> k.getAddress()).orElse(null);

@@ -14,27 +14,20 @@
 package com.webank.webase.node.mgr.scheduler;
 
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
-import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
-import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,8 +40,6 @@ public class ResetGroupListTask {
     private FrontService frontService;
     @Autowired
     private GroupService groupService;
-    @Autowired
-    private FrontMapper frontMapper;
     @Autowired
     private NodeService nodeService;
     @Autowired
@@ -79,18 +70,18 @@ public class ResetGroupListTask {
             for (String groupId : groupIdList) {
                 Integer gId = Integer.valueOf(groupId);
                 //peer in group
-                List<PeerInfo> peerList = frontInterfacee.getPeers(gId);
+                List<String> groupPeerList = frontInterfacee.getGroupPeers(gId);
                 //save new groupId
                 localGroupList.stream().filter(localGroup -> gId != localGroup.getGroupId())
                     .forEach(newGroup -> {
-                        groupService.saveGroupId(newGroup.getGroupId(), peerList.size());
+                        groupService.saveGroupId(newGroup.getGroupId(), groupPeerList.size());
                         frontGroupMapService.newFrontGroup(front.getFrontId(), gId);
                     });
 
                 //save new peers
-                savePeerList(gId, peerList);
+                savePeerList(gId, groupPeerList);
                 //check node status
-                checkNodeStatus(gId);
+                nodeService.checkNodeStatus(gId);
             }
         }
     }
@@ -98,81 +89,22 @@ public class ResetGroupListTask {
     /**
      * save new peers.
      */
-    private void savePeerList(int groupId, List<PeerInfo> peerList) {
+    private void savePeerList(int groupId, List<String> groupPeerList) {
         //get all local nodes
         List<TbNode> localNodeList = nodeService.queryByGroupId(groupId);
+        //get peers on chain
+        PeerInfo[] peerArr = frontInterfacee.getPeers(groupId);
+        List<PeerInfo> peerList = Arrays.asList(peerArr);
         //save new nodes
-        for (Object obj : peerList) {
-            PeerInfo peerInfo = NodeMgrTools.object2JavaBean(obj, PeerInfo.class);
+        for (String nodeId : groupPeerList) {
             long count = localNodeList.stream().filter(
-                ln -> groupId == ln.getGroupId() && peerInfo.getNodeId().equals(ln.getNodeId()))
-                .count();
+                ln -> groupId == ln.getGroupId() && nodeId.equals(ln.getNodeId())).count();
             if (count == 0) {
-                nodeService.addNodeInfo(groupId, peerInfo);
+                PeerInfo newPeer = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
+                    .findFirst().orElseGet(() -> new PeerInfo(nodeId));
+                nodeService.addNodeInfo(groupId, newPeer);
             }
         }
     }
 
-    /**
-     * check node status
-     */
-    private void checkNodeStatus(int groupId) {
-        //get local node list
-        List<TbNode> nodeList = nodeService.queryByGroupId(groupId);
-        //get PeerOfSyncStatus
-        List<PeerOfSyncStatus> syncList = getPeerOfSyncStatus(groupId);
-        //getPeerOfConsensusStatus
-        List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
-        for (TbNode tbNode : nodeList) {
-            String nodeId = tbNode.getNodeId();
-            BigInteger localBlockNumber = tbNode.getBlockNumber();
-            BigInteger localPbftView = tbNode.getPbftView();
-
-            BigInteger latestNumber = syncList.stream().filter(sl -> nodeId.equals(sl.getNodeId()))
-                .map(s -> s.getBlockNumber()).findFirst().orElse(BigInteger.ZERO);//blockNumber
-            BigInteger latestView = consensusList.stream()
-                .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
-                .orElse(BigInteger.ZERO);//pbftView
-
-            if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
-                log.warn("node[{}] is invalid", nodeId);
-                tbNode.setNodeActive(DataStatus.INVALID.getValue());
-            } else {
-                tbNode.setBlockNumber(latestNumber);
-                tbNode.setPbftView(latestView);
-                tbNode.setNodeActive(DataStatus.NORMAL.getValue());
-            }
-
-            //update node
-            nodeService.updateNode(tbNode);
-        }
-
-    }
-
-    /**
-     * get peer Of SyncStatus
-     */
-    public List<PeerOfSyncStatus> getPeerOfSyncStatus(int groupId) {
-        SyncStatus syncStatus = frontInterfacee.getSyncStatus(groupId);
-        return syncStatus.getPeers();
-    }
-
-    /**
-     * get peer of consensusStatus
-     */
-    private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
-        String consensusStatusJson = frontInterfacee.getConsensusStatus(groupId);
-        JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
-        List<Object> dataIsList = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List)
-            .map(arr -> {
-                Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
-                try {
-                    return NodeMgrTools.object2JavaBean(obj, PeerOfConsensusStatus.class);
-                } catch (Exception e) {
-                    return null;
-                }
-            }).collect(Collectors.toList());
-
-        return JSONArray.parseArray(JSON.toJSONString(dataIsList), PeerOfConsensusStatus.class);
-    }
 }

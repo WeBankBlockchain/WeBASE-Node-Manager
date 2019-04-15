@@ -5,7 +5,12 @@ import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +47,16 @@ public class TransHashServiceTest {
         List<TbTransHash> trans = transHashService.getTransListFromChain(groupId, transHash, blockNumber);
         assert (trans != null);
         System.out.println(JSON.toJSONString(trans));
+    }
+
+    @Test
+    public  void test(){
+        List<String> list = new ArrayList<>(Arrays.asList("aa","bb","cc"));
+        System.out.println("-----------------------:"+JSON.toJSONString(list));
+        Collections.shuffle(list);
+        System.out.println("-----------------------:"+JSON.toJSONString(list));
+        Collections.shuffle(list);
+        System.out.println("-----------------------:"+JSON.toJSONString(list));
+
     }
 }

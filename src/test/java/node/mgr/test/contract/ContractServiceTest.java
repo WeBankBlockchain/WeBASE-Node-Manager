@@ -68,7 +68,7 @@ public class ContractServiceTest {
         param.setGroupId(groupId);
         param.setAbiInfo(abiList);
         param.setUserId(userId);
-        param.setVersion("123");
+        param.setVersion("v1.0");
         param.setContractName("Ok");
         param.setFuncName("trans");
         param.setFuncParam(Arrays.asList(3));

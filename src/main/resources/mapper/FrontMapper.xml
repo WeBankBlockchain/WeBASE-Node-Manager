@@ -55,4 +55,8 @@
     </if>
   </select>
 
+  <select id="getById" resultMap="frontMap" parameterType="java.lang.Integer">
+     select * from tb_front where front_id = #{frontId}
+  </select>
+
 </mapper>
