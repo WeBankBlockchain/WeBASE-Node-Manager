@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 package com.webank.webase.node.mgr.contract.entity;
 
 import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
+import jnr.ffi.annotations.In;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class ContractParam extends BaseQueryParam {
-
+    private Integer groupId;
     private Integer contractId;
     private String contractName;
     private String contractVersion;
@@ -35,8 +36,9 @@ public class ContractParam extends BaseQueryParam {
     /**
      * init by contractName、contractVersion.
      */
-    public ContractParam(String contractName, String contractVersion) {
+    public ContractParam(int groupId,String contractName, String contractVersion) {
         super();
+        this.groupId = groupId;
         this.contractName = contractName;
         this.contractVersion = contractVersion;
     }

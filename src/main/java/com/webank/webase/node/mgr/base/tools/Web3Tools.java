@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +15,15 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
+
+import static org.bcos.web3j.crypto.Keys.getAddress;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.bcos.web3j.crypto.Hash;
-import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bcos.web3j.protocol.ObjectMapperFactory;
 import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
@@ -49,7 +50,7 @@ public class Web3Tools {
     }*/
 
     public static String getAddressByPublicKey(String publicKey) {
-        String address = "0x" + Keys.getAddress(publicKey);
+        String address = "0x" + getAddress(publicKey);
         return address;
     }
 

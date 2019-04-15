@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,14 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChainTransInfo {
-
     private String from;
     private String to;
     private String input;

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,9 +56,6 @@ public class AccountDetailsService implements UserDetailsService {
         List<GrantedAuthority> list = new ArrayList<GrantedAuthority>();
         list.add(new SimpleGrantedAuthority("ROLE_" + accountRow.getRoleName()));
 
-        // sha-256 sign:account+password TODO
-        // String sha256AccountAuth = NodeMgrTools.shaList(Arrays.asList(account,
-        // accountRow.getAccountPwd()));
 
         User authUser = new User(account, accountRow.getAccountPwd(), list);
         return authUser;

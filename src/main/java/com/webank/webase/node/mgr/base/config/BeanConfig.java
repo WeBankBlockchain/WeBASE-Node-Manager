@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,6 @@
 package com.webank.webase.node.mgr.base.config;
 
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.properties.ExecutorProperties;
-import com.webank.webase.node.mgr.executor.VisiableThreadPoolTaskExecutor;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -37,8 +32,6 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class BeanConfig {
 
-    @Autowired
-    private ExecutorProperties executorProperties;
     @Autowired
     private ConstantProperties constantProperties;
 
@@ -79,20 +72,4 @@ public class BeanConfig {
         return factory;
     }
 
-    /**
-     * init thread pool.
-     */
-    @Bean
-    public Executor asyncServiceExecutor() {
-        log.info("start asyncServiceExecutor");
-        ThreadPoolTaskExecutor executor = new VisiableThreadPoolTaskExecutor();
-        executor.setCorePoolSize(executorProperties.getCorePoolSize());
-        executor.setMaxPoolSize(executorProperties.getMaxPoolSize());
-        executor.setQueueCapacity(executorProperties.getQueueSize());
-        executor.setThreadNamePrefix(executorProperties.getThreadNamePrefix());
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        // init executor
-        executor.initialize();
-        return executor;
-    }
 }

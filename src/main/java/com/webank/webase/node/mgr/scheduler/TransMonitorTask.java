@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,28 +15,57 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.TbGroup;
 import com.webank.webase.node.mgr.monitor.MonitorService;
-import com.webank.webase.node.mgr.transhash.TbTransHash;
-import com.webank.webase.node.mgr.transhash.TransHashService;
+import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
+import com.webank.webase.node.mgr.transaction.TransHashService;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Log4j2
 @Component
 public class TransMonitorTask {
 
     @Autowired
     MonitorService monitorService;
     @Autowired
+    private GroupService groupService;
+    @Autowired
     private TransHashService transHashService;
 
+
     /**
-     * init monitorInfoHandle.
+     * start mointor
      */
-    public void monitorInfoHandle() {
-        List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList();
+    public void monitorStart(){
+        Instant startTime = Instant.now();
+        log.info("start monitor. startTime:{}", startTime.toEpochMilli());
+        //get group list
+        List<TbGroup> groupList = groupService.getAllGroup();
+        if (groupList == null || groupList.size() == 0) {
+            log.info("monitor jump over .not found any group");
+            return;
+        }
+
+        //delete block by groupId
+        groupList.stream().forEach(group -> monitorHandle(group.getGroupId()));
+        log.info("end monitor. useTime:{} ",
+            Duration.between(startTime, Instant.now()).toMillis());
+    }
+
+
+    /**
+     * monitor every group.
+     */
+    private void monitorHandle(int groupId) {
+        List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList(groupId);
         if (transHashList != null && transHashList.size() > 0) {
-            monitorService.insertTransMonitorInfo(transHashList);
+            monitorService.insertTransMonitorInfo(groupId,transHashList);
         }
     }
 }

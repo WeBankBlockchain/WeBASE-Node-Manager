@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,8 +46,8 @@ public class PerformanceController {
     /**
      * get ratio of performance.
      */
-    @GetMapping(value = "/ratio/{nodeId}")
-    public BaseResponse getPerformanceRatio(@PathVariable("nodeId") Integer nodeId,
+    @GetMapping(value = "/ratio/{frontId}")
+    public BaseResponse getPerformanceRatio(@PathVariable("frontId") Integer frontId,
         @RequestParam("beginDate") @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime beginDate,
         @RequestParam("endDate") @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime endDate,
         @RequestParam(value = "contrastBeginDate", required = false)
@@ -59,13 +59,13 @@ public class PerformanceController {
         Instant startTime = Instant.now();
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         log.info(
-            "start getPerformanceRatio. startTime:{} nodeId:{} beginDate:{}"
+            "start getPerformanceRatio. startTime:{} frontId:{} beginDate:{}"
                 + " endDate:{} contrastBeginDate:{} contrastEndDate:{} gap:{}",
-            startTime.toEpochMilli(), nodeId, beginDate, endDate, contrastBeginDate,
+            startTime.toEpochMilli(), frontId, beginDate, endDate, contrastBeginDate,
             contrastEndDate, gap);
 
         Object rspObj = performanceService
-            .getPerformanceRatio(nodeId, beginDate, endDate, contrastBeginDate, contrastEndDate,
+            .getPerformanceRatio(frontId, beginDate, endDate, contrastBeginDate, contrastEndDate,
                 gap);
         response.setData(rspObj);
         log.info("end getPerformanceRatio. useTime:{} response:{}",
@@ -77,14 +77,14 @@ public class PerformanceController {
     /**
      * get config of performance.
      */
-    @GetMapping(value = "/config/{nodeId}")
-    public BaseResponse getPerformanceConfig(@PathVariable("nodeId") Integer nodeId)
+    @GetMapping(value = "/config/{frontId}")
+    public BaseResponse getPerformanceConfig(@PathVariable("frontId") Integer frontId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
-        log.info("start getPerformanceConfig. startTime:{} nodeId:{}", startTime.toEpochMilli(),
-            nodeId);
-        Object frontRsp = performanceService.getPerformanceConfig(nodeId);
+        log.info("start getPerformanceConfig. startTime:{} frontId:{}", startTime.toEpochMilli(),
+            frontId);
+        Object frontRsp = performanceService.getPerformanceConfig(frontId);
         response.setData(frontRsp);
         log.info("end getPerformanceConfig. useTime:{} response:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(response));
