@@ -5,22 +5,11 @@
 <!--对应mapper接口 -->
 <mapper namespace="com.webank.webase.node.mgr.node.NodeMapper">
   <resultMap id="nodeMap" type="com.webank.webase.node.mgr.node.TbNode">
-    <id column="node_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="nodeId"/>
+    <id column="node_id" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeId"/>
+    <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
     <result column="node_name" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeName"/>
-    <result column="network_id" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="networkId"/>
-    <result column="org_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="orgId"/>
-    <result column="org_name" javaType="java.lang.String" jdbcType="VARCHAR" property="orgName"/>
     <result column="node_ip" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeIp"/>
     <result column="p2p_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="p2pPort"/>
-    <result column="rpc_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="rpcPort"/>
-    <result column="channel_port" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="channelPort"/>
-    <result column="front_port" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="frontPort"/>
-    <result column="chain_index" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="chainIndex"/>
-    <result column="node_type" javaType="java.lang.Integer" jdbcType="INTEGER" property="nodeType"/>
     <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="blockNumber"/>
     <result column="pbft_view" javaType="java.math.BigInteger" jdbcType="INTEGER"
@@ -37,30 +26,21 @@
 
 
   <sql id="ALL_SELECT_COLUMN">
-		node_id,node_name,network_id,node_ip,p2p_port,rpc_port,front_port,node_type,block_number,pbft_view,node_active,create_time,modify_time
+		node_id,node_name,group_id,node_ip,p2p_port,block_number,pbft_view,node_active,create_time,modify_time
 	</sql>
 
-  <insert id="addNodeRow" parameterType="com.webank.webase.node.mgr.node.TbNode">
-    insert into
-    tb_node(node_name,network_id,org_id,node_ip,p2p_port,rpc_port,node_type,channel_port,front_port,description,create_time,modify_time)
-    values(#{nodeName},#{networkId},#{orgId},#{nodeIp},#{p2pPort},#{rpcPort},#{nodeType},#{channelPort},#{frontPort},#{description},NOW(),NOW())
-    <selectKey keyProperty="nodeId" order="AFTER" resultType="java.lang.Integer">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
+  <insert id="add" parameterType="com.webank.webase.node.mgr.node.TbNode">
+    insert ignore into tb_node
+    (node_id,node_name,group_id,node_ip,p2p_port,description,create_time,modify_time)
+    values(#{nodeId},#{nodeName},#{groupId},#{nodeIp},#{p2pPort},#{description},NOW(),NOW())
   </insert>
 
-  <select id="countByIpP2pRpc" resultType="java.lang.Integer">
-		select count(1) from tb_node where node_ip = #{nodeIp} and p2p_port = #{p2pPort} and rpc_port = #{rpcPort}
-	</select>
 
-  <select id="countOfNode" parameterType="com.webank.webase.node.mgr.node.NodeParam"
+  <select id="getCount" parameterType="com.webank.webase.node.mgr.node.NodeParam"
     resultType="java.lang.Integer">
     select count(1) from tb_node where 1=1
-    <if test="networkId != null and networkId != ''">
-      and network_id = #{networkId}
-    </if>
-    <if test="orgId != null and orgId != ''">
-      and org_id = #{orgId}
+    <if test="groupId != null and groupId != ''">
+      and group_id = #{groupId}
     </if>
     <if test="nodeId != null and nodeId != ''">
       and node_id = #{nodeId}
@@ -68,28 +48,16 @@
     <if test="p2pPort != null and p2pPort != ''">
       and p2p_port = #{p2pPort}
     </if>
-    <if test="rpcPort != null and rpcPort != ''">
-      and rpc_port = #{rpcPort}
-    </if>
-    <if test="nodeName != null and nodeName != ''">
-      and node_name = #{nodeName}
-    </if>
     <if test="nodeIp != null and nodeIp != ''">
       and node_ip = #{nodeIp}
     </if>
-    <if test="nodeType != null and nodeType != ''">
-      and node_type = #{nodeType}
-    </if>
   </select>
 
-  <select id="listOfNode" parameterType="com.webank.webase.node.mgr.node.NodeParam"
+  <select id="getList" parameterType="com.webank.webase.node.mgr.node.NodeParam"
     resultMap="nodeMap">
-    select a.*,b.org_name from tb_node a left join tb_organization b on(a.org_id=b.org_id) where 1=1
-    <if test="networkId != null and networkId != ''">
-      and a.network_id = #{networkId}
-    </if>
-    <if test="orgId != null and orgId != ''">
-      and a.org_id = #{orgId}
+    select a.* from tb_node a where 1=1
+    <if test="groupId != null and groupId != ''">
+      and a.group_id = #{groupId}
     </if>
     <if test="nodeId != null and nodeId != ''">
       and a.node_id = #{nodeId}
@@ -97,17 +65,11 @@
     <if test="p2pPort != null and p2pPort != ''">
       and a.p2p_port = #{p2pPort}
     </if>
-    <if test="rpcPort != null and rpcPort != ''">
-      and a.rpc_port = #{rpcPort}
-    </if>
     <if test="nodeName != null and nodeName != ''">
       and a.node_name = #{nodeName}
     </if>
     <if test="nodeIp != null and nodeIp != ''">
       and a.node_ip = #{nodeIp}
-    </if>
-    <if test="nodeType != null and nodeType != ''">
-      and a.node_type = #{nodeType}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
       order by a.modify_time ${flagSortedByTime}
@@ -126,7 +88,7 @@
 		select * from tb_node where node_id = #{nodeId}
 	</select>
 
-  <update id="updateNodeInfo" parameterType="com.webank.webase.node.mgr.node.TbNode">
+  <update id="update" parameterType="com.webank.webase.node.mgr.node.TbNode">
     update tb_node set modify_time=NOW()
     <if test="blockNumber != null">
       ,block_number = #{blockNumber}
@@ -134,26 +96,20 @@
     <if test="pbftView != null">
       ,pbft_view = #{pbftView}
     </if>
-    <if test="chainIndex != null">
-      ,chain_index = #{chainIndex}
-    </if>
     <if test="description != null">
       ,description = #{description}
     </if>
     <if test="nodeActive != null">
       ,node_active = #{nodeActive}
     </if>
-    where node_id=#{nodeId}
+    where node_id=#{nodeId} and group_id=#{groupId}
   </update>
 
   <select id="queryNodeInfo" parameterType="com.webank.webase.node.mgr.node.NodeParam"
     resultMap="nodeMap">
     select * from tb_node where 1=1
-    <if test="networkId != null and networkId != ''">
-      and network_id = #{networkId}
-    </if>
-    <if test="orgId != null and orgId != ''">
-      and org_id = #{orgId}
+    <if test="groupId != null and groupId != ''">
+      and group_id = #{groupId}
     </if>
     <if test="nodeId != null and nodeId != ''">
       and node_id = #{nodeId}
@@ -161,24 +117,14 @@
     <if test="p2pPort != null and p2pPort != ''">
       and p2p_port = #{p2pPort}
     </if>
-    <if test="rpcPort != null and rpcPort != ''">
-      and rpc_port = #{rpcPort}
-    </if>
     <if test="nodeName != null and nodeName != ''">
       and node_name = #{nodeName}
     </if>
     <if test="nodeIp != null and nodeIp != ''">
       and node_ip = #{nodeIp}
     </if>
-    <if test="nodeType != null">
-      and node_type = #{nodeType}
-    </if>
     limit 1
   </select>
-
-  <select id="queryMaxChainIndex" parameterType="java.lang.Integer" resultType="java.lang.Integer">
-		select max(chain_index) from tb_node where network_id = #{networkId}
-	</select>
 
   <delete id="deleteByNodeId" parameterType="java.lang.Integer">
 		delete from tb_node where node_id=#{nodeId}

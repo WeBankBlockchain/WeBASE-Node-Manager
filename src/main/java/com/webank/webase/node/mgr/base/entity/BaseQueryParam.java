@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,34 +23,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseQueryParam {
-
-    private Integer networkId;
     private Integer start;
     private Integer pageSize;
     private String flagSortedByTime;
-
-    public BaseQueryParam(Integer networkId) {
-        super();
-        this.networkId = networkId;
-    }
-
-    /**
-     * init BaseQueryParam by networkId、start、pageSize.
-     */
-    public BaseQueryParam(Integer networkId, Integer start, Integer pageSize) {
-        super();
-        this.networkId = networkId;
+    public BaseQueryParam(Integer start,Integer pageSize){
         this.start = start;
         this.pageSize = pageSize;
     }
-
-    /**
-     * init BaseQueryParam by start、pageSize.
-     */
-    public BaseQueryParam(Integer start, Integer pageSize) {
-        super();
-        this.start = start;
-        this.pageSize = pageSize;
-    }
-
 }
