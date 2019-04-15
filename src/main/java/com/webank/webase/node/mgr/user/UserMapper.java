@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,19 +43,13 @@ public interface UserMapper {
     /**
      * Query user list according to some conditions.
      */
-    TbUser queryUser(@Param("userId") Integer userId, @Param("networkId") Integer networkId,
-        @Param("userName") String userName,
-        @Param("orgId") Integer orgId, @Param("address") String address);
+    TbUser queryUser(@Param("userId") Integer userId, @Param("groupId") Integer groupId,
+        @Param("userName") String userName, @Param("address") String address);
 
     /**
      * update user row.
      */
     Integer updateUser(TbUser tbuser);
-
-    /**
-     * delete user by id.
-     */
-    Integer deleteUser(@Param("userId") Integer userId);
 
     /**
      * add new user_key_map data.
@@ -68,19 +62,9 @@ public interface UserMapper {
     PrivateKeyInfo queryPrivateKey(Integer userId);
 
     /**
-     * query system user.
-     */
-    TbUser querySystemUser(Integer networkId);
-
-    /**
      * query max chainIndex of user.
      */
-    String queryUserNameByAddress(@Param("networkId") Integer networkId,
+    String queryUserNameByAddress(@Param("groupId") Integer groupId,
         @Param("address") String address);
 
-
-    /**
-     * query max chainIndex of user.
-     */
-    Integer queryMaxChainIndex(Integer networkId);
 }

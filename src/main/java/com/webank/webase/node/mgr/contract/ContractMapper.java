@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +33,7 @@ public interface ContractMapper {
 
     Integer updateContract(TbContract tbContract);
 
-    Integer countOfContract(ContractParam param);
+    int countOfContract(ContractParam param);
 
     List<TbContract> listOfContract(ContractParam param);
 
@@ -41,15 +41,13 @@ public interface ContractMapper {
 
     TbContract queryContract(ContractParam queryParam);
 
-    List<TbContract> queryContractByBin(@Param("networkId") Integer networkId,
+    List<TbContract> queryContractByBin(@Param("groupId") Integer groupId,
         @Param("contractBin") String contractBin);
 
-    Integer queryMaxChainIndex(Integer networkId);
-
-    String querySystemContractBin(@Param("networkId") Integer networkId,
+    String querySystemContractBin(@Param("groupId") Integer groupId,
         @Param("contractName") String contractName);
 
-    void updateSystemContract(@Param("networkId") Integer networkId,
+    void updateSystemContract(@Param("groupId") Integer groupId,
         @Param("contractName") String contractName, @Param("contractBin") String contractBin,
         @Param("contractAddress") String contractAddress);
 }

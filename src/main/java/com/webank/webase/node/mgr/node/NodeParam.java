@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,13 +26,9 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class NodeParam extends BaseQueryParam {
-
-    private Integer orgId;
+    private Integer groupId;
     private Integer nodeId;
     private Integer p2pPort;
-    private Integer rpcPort;
     private String nodeName;
-    private Integer nodeType;
     private String nodeIp;
-    private Integer frontPort;
 }
