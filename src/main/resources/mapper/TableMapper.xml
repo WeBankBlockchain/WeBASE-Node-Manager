@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.webank.webase.node.mgr.table.TableMapper">
+
+  <select id="queryAllTables">
+    select table_name from information_schema.tables where table_schema=#{dbName};
+  </select>
+
+  <update id="removeTable" parameterType="String">
+      delete from information_schema.tables where table_schema=#{dbName} and table_name =${tableName};
+  </update>
+
+  <update id="createTbBlock" parameterType="String">
+    CREATE TABLE IF NOT EXISTS ${tableName}(
+        pk_hash varchar(128) NOT NULL COMMENT '块hash值',
+        block_timestamp datetime NOT NULL COMMENT '出块时间',
+        block_number bigint(20) NOT NULL COMMENT '快高',
+        trans_count bigint(20) DEFAULT '0' COMMENT '块包含的交易数',
+        create_time datetime DEFAULT NULL COMMENT '创建时间',
+        modify_time datetime DEFAULT NULL COMMENT '修改时间',
+        PRIMARY KEY (pk_hash),
+        KEY index_number (block_number)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区块信息表';
+  </update>
+
+  <update id="createTransHash" parameterType="String">
+    CREATE TABLE IF NOT EXISTS ${tableName} (
+        trans_hash varchar(128) NOT NULL COMMENT '交易hash',
+        block_number bigint(25) NOT NULL COMMENT '所属区块',
+        block_timestamp datetime NOT NULL COMMENT '所属块出块时间',
+        statistics_flag int(1) DEFAULT '1' COMMENT '是否已统计（1-未统计，2-已统计）',
+        create_time datetime DEFAULT NULL COMMENT '创建时间',
+        modify_time datetime DEFAULT NULL COMMENT '修改时间',
+        PRIMARY KEY (trans_hash)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交易hash信息表';
+  </update>
+
+
+  <update id="createUserTransactionMonitor" parameterType="String">
+    CREATE TABLE IF NOT EXISTS ${tableName} (
+        user_name varchar(128) NOT NULL COMMENT '用户名称',
+        user_type tinyint(4) DEFAULT '0' COMMENT '用户类型(0-正常，1-异常)',
+        contract_name varchar(128) NOT NULL COMMENT '合约名称',
+        contract_address varchar(64) COMMENT '合约地址',
+        interface_name varchar(32) COMMENT '合约接口名',
+        trans_type tinyint(4) DEFAULT '0' COMMENT '交易类型(0-合约部署，1-接口调用)',
+        trans_unusual_type tinyint(4) DEFAULT '0' COMMENT '交易异常类型 (0-正常，1-异常合约，2-异常接口)',
+        trans_count int(11) NOT NULL COMMENT '交易量',
+        trans_hashs varchar(1024) COMMENT '交易hashs(最多5个)',
+        trans_hash_lastest varchar(128) COMMENT '最新交易hash',
+        create_time datetime DEFAULT NULL COMMENT '创建时间',
+        modify_time datetime DEFAULT NULL COMMENT '修改时间',
+          INDEX idx_un (user_name),
+          INDEX idx_cn (contract_name),
+          INDEX idx_ct (create_time),
+          INDEX idx_mt (modify_time)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户交易监管统计表'
+      PARTITION BY RANGE (TO_DAYS(create_time)) (
+          PARTITION p1 VALUES LESS THAN (TO_DAYS('2019-07-01')),
+          PARTITION p2 VALUES LESS THAN (TO_DAYS('2020-01-01')),
+          PARTITION p3 VALUES LESS THAN (TO_DAYS('2020-07-01')),
+          PARTITION p4 VALUES LESS THAN (TO_DAYS('2021-01-01')),
+          PARTITION p5 VALUES LESS THAN (TO_DAYS('2021-07-01')),
+          PARTITION p6 VALUES LESS THAN (TO_DAYS('2022-01-01')),
+          PARTITION p7 VALUES LESS THAN (TO_DAYS('2022-07-01')),
+          PARTITION p8 VALUES LESS THAN (TO_DAYS('2023-01-01')),
+          PARTITION p9 VALUES LESS THAN (TO_DAYS('2023-07-01')),
+          PARTITION p99 VALUES LESS THAN (MAXVALUE)
+      );
+  </update>
+
+</mapper>

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,9 @@
  */
 package com.webank.webase.node.mgr.block;
 
+import com.webank.webase.node.mgr.block.entity.BlockListParam;
+import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
+import com.webank.webase.node.mgr.block.entity.TbBlock;
 import java.math.BigInteger;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -27,34 +30,33 @@ import org.springframework.stereotype.Repository;
 public interface BlockMapper {
 
     /**
-     * query latest block number by networkId.
+     * query latest block number
      */
-    BigInteger queryLatestBlockNumber(@Param("networkId") Integer networkId);
+    BigInteger getLatestBlockNumber(@Param("tableName") String tableName);
 
     /**
      * Add new block data.
      */
-    Integer addBlockRow(TbBlock tbBlock);
+    Integer add(@Param("tableName") String tableName, @Param("block") TbBlock tbBlock);
 
     /**
      * query list of block by page.
      */
-    List<TbBlock> listOfBlock(@Param("param") BlockListParam param);
+    List<TbBlock> getList(@Param("tableName") String tableName,@Param("param") BlockListParam param);
 
     /**
      * query block count.
      */
-    Integer countOfBlock(@Param("networkId") Integer networkId, @Param("pkHash") String pkHash,
+    int getCount(@Param("tableName") String tableName, @Param("pkHash") String pkHash,
         @Param("blockNumber") BigInteger blockNumber);
 
     /**
      * query the min and max block number of tb_block.
      */
-    List<MinMaxBlock> queryMinMaxBlock();
+    List<MinMaxBlock> queryMinMaxBlock(@Param("tableName") String tableName);
 
     /**
      * Delete block height.
      */
-    Integer deleteSomeBlocks(@Param("networkId") Integer networkId,
-        @Param("deleteNumber") BigInteger deleteNumber);
+    Integer remove(@Param("tableName") String tableName,@Param("deleteNumber") BigInteger deleteNumber);
 }

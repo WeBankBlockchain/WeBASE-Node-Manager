@@ -1,17 +1,15 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.contract;
 
@@ -19,26 +17,24 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.ShareType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.DeployIncoming;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.Transaction;
-import com.webank.webase.node.mgr.scheduler.SharedChainInfoTask;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,14 +46,15 @@ public class ContractController {
 
     @Autowired
     private ContractService contractService;
-    @Autowired
-    private SharedChainInfoTask sharedChainInfoTask;
+    /*
 
-    /**
-     * add new contract info.
      */
+/**
+ * add new contract info.
+ *//*
+
     @PostMapping(value = "/contractInfo")
-    public BaseResponse addCotractInfo(@RequestBody Contract contract) throws NodeMgrException {
+    public BaseResponse addCotractInfo(@RequestBody DeployIncoming contract) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addCotractInfo startTime:{} contract:{}", startTime.toEpochMilli(),
@@ -75,11 +72,13 @@ public class ContractController {
         return baseResponse;
     }
 
-    /**
-     * update contract info.
-     */
+    */
+/**
+ * update contract info.
+ *//*
+
     @PutMapping(value = "/contractInfo")
-    public BaseResponse updateContractInfo(@RequestBody Contract contract)
+    public BaseResponse updateContractInfo(@RequestBody DeployIncoming contract)
         throws NodeMgrException, Exception {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -97,36 +96,34 @@ public class ContractController {
         return baseResponse;
     }
 
+    */
+
+    /**
+     * qurey contract info list.
+     */
     /**
      * qurey contract info list.
      */
     @PostMapping(value = "/contractList")
-    public BasePageResponse queryContractList(@RequestBody QueryContractParam queryParam) throws NodeMgrException {
+    public BasePageResponse queryContractList(@RequestBody QueryContractParam inputParam)
+        throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start contractList. startTime:{} queryParam:{}",
-            startTime.toEpochMilli(), JSON.toJSONString(queryParam));
-        Integer networkId = queryParam.getNetworkId();
-        Integer pageNumber = queryParam.getPageNumber();
-        Integer pageSize = queryParam.getPageSize();
+        log.info("start contractList. startTime:{} inputParam:{}",
+            startTime.toEpochMilli(), JSON.toJSONString(inputParam));
 
+        //param
+        ContractParam queryParam = new ContractParam();
+        BeanUtils.copyProperties(inputParam, queryParam);
 
-        // share from chain
-        sharedChainInfoTask.asyncShareFromChain(networkId, ShareType.CONTRACT);
-
-        ContractParam param = new ContractParam();
-        param.setNetworkId(networkId);
-        // param.setContractType(ContractType.GENERALCONTRACT.getValue());
-
-        Integer count = contractService.countOfContract(param);
-        if (count != null && count > 0) {
-            Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
-                .orElse(0);
-            param.setPageSize(pageSize);
-            param.setStart(start);
-            param.setFlagSortedByTime(SqlSortType.DESC.getValue());
+        int count = contractService.countOfContract(queryParam);
+        if (count > 0) {
+            Integer start = Optional.ofNullable(inputParam.getPageNumber())
+                .map(page -> (page - 1) * inputParam.getPageNumber()).orElse(0);
+            queryParam.setStart(start);
+            queryParam.setFlagSortedByTime(SqlSortType.DESC.getValue());
             // query list
-            List<TbContract> listOfContract = contractService.qureyContractList(param);
+            List<TbContract> listOfContract = contractService.qureyContractList(queryParam);
 
             pagesponse.setData(listOfContract);
             pagesponse.setTotalCount(count);
@@ -140,7 +137,7 @@ public class ContractController {
     /**
      * delete contract by id.
      */
-    @DeleteMapping(value = "/{contractId}")
+/*    @DeleteMapping(value = "/{contractId}")
     public BaseResponse deleteContract(@PathVariable("contractId") Integer contractId)
         throws NodeMgrException, Exception {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -153,7 +150,7 @@ public class ContractController {
         log.info("end deleteContract useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
-    }
+    }*/
 
     /**
      * query by contract id.
@@ -175,16 +172,17 @@ public class ContractController {
     }
 
     /**
-     * deploy contract.
+     * deploy deployIncoming.
      */
     @PostMapping(value = "/deploy")
-    public BaseResponse deployContract(@RequestBody Contract contract) throws NodeMgrException {
+    public BaseResponse deployContract(@RequestBody DeployIncoming deployIncoming)
+        throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start queryContract startTime:{} contract:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(contract));
+        log.info("start queryContract startTime:{} deployIncoming:{}", startTime.toEpochMilli(),
+            JSON.toJSONString(deployIncoming));
 
-        TbContract tbContract = contractService.deployContract(contract);
+        TbContract tbContract = contractService.deployContract(deployIncoming);
         baseResponse.setData(tbContract);
 
         log.info("end deployContract useTime:{} result:{}",
@@ -201,12 +199,30 @@ public class ContractController {
         Instant startTime = Instant.now();
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
             JSON.toJSONString(param));
-
-        BaseResponse transRsp = contractService.sendTransaction(param);
-
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Object transRsp = contractService.sendTransaction(param);
+        baseResponse.setData(transRsp);
         log.info("end sendTransaction useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(transRsp));
+            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
 
-        return transRsp;
+        return baseResponse;
+    }
+
+    /**
+     * get contract code.
+     */
+    @GetMapping("/code/{groupId}/{address}/{blockNumber}")
+    public BaseResponse getContractCode(@PathVariable("groupId") Integer groupId,
+        @PathVariable("address") String address,
+        @PathVariable("blockNumber") BigInteger blockNumber) throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getContractCode startTime:{} groupId:{} address:{} blockNumber:{}",
+            startTime.toEpochMilli(), groupId, address, blockNumber);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        String contractCode = contractService.getContractCode(groupId, address, blockNumber);
+        baseResponse.setData(contractCode);
+        log.info("end getContractCode useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+        return baseResponse;
     }
 }

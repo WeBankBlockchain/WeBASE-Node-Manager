@@ -1,4 +1,0 @@
-#!/bin/sh
-
-source fisco-bcos-ddl.sql;
-source fisco-bcos-dml.sql;
