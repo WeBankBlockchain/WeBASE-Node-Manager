@@ -34,6 +34,8 @@ cd webase-node-mgr
 gradle build -x test
 ```
 构建完成后，会在根目录webase-node-mgr下生成已编译的代码目录dist。
+
+
 ## 3.3 数据库初始化
 ### 3.3.1 新建数据库
 ```
@@ -75,7 +77,7 @@ cd dist/conf
 修改服务配置：
 ```shell
 修改当前服务端口：sed -i "s/8080/${your_server_port}/g" application.yml
-修改数据库IP：sed -i "s/127.0.0.1/${your_db_port}/g" application.yml
+修改数据库IP：sed -i "s/127.0.0.1/${your_db_ip}/g" application.yml
 修改数据库名称：sed -i "s/fisco-bcos-data/${your_db_name}/g" application.yml
 修改数据库用户名：sed -i "s/defaultAccount/${your_db_account}/g" application.yml
 修改数据库密码：sed -i "s/defaultPassword/${your_db_password}/g" application.yml
