@@ -11,18 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.contract.entity;
+package com.webank.webase.node.mgr.method.entity;
 
+import java.time.LocalDateTime;
 import lombok.Data;
 
+/**
+ * Entity class of table tb_method.
+ */
 @Data
-public class QueryContractParam {
+public class TbMethod {
 
+    private String methodId;
     private Integer groupId;
-    private String contractName;
-    private String contractAddress;
-    private Integer pageNumber;
-    private Integer pageSize;
-
-
+    private String abiInfo;
+    private String methodType;
+    private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
 }
