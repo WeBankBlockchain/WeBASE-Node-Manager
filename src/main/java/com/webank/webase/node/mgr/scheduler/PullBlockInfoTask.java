@@ -78,18 +78,18 @@ public class PullBlockInfoTask {
         log.info("start pullBlockByGroupId groupId:{}", groupId);
         while (latestTimeQueryDb != null && isLatestTimeQueryDbValid()) {
             try {
+                Thread.sleep(cProperties.getPullBlockSleepTime());
+
                 //get next block
                 BigInteger nextBlock = getNextBlockNumber(groupId);
                 //get block by number
                 BlockInfo blockInfo = frontInterfaceService.getBlockByNumber(groupId, nextBlock);
                 if (blockInfo == null || blockInfo.getNumber() == null) {
                     log.info("pullBlockByGroupId jump over. not found new block.");
-                    break;
+                    continue;
                 }
                 //save block info
                 blockService.saveBLockInfo(blockInfo, groupId);
-
-                Thread.sleep(cProperties.getPullBlockSleepTime());
             } catch (Exception ex) {
                 log.error("fail pullBlockByGroupId. groupId:{} ",groupId, ex);
                 break;
