@@ -177,7 +177,7 @@ public class TransHashService {
             List<TransactionInfo> transInBlock = frontInterface
                 .getTransByBlockNumber(groupId, blockNumber);
             transInBlock.stream().forEach(tran -> {
-                TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getBlockNumber(),
+                TbTransHash tbTransHash = new TbTransHash(tran.getHash(),tran.getFrom(),tran.getTo(), tran.getBlockNumber(),
                     null);
                 transList.add(tbTransHash);
             });
@@ -194,10 +194,10 @@ public class TransHashService {
         throws NodeMgrException {
         log.info("start getTransFromFrontByHash. groupId:{}  transaction:{}", groupId,
             transHash);
-        TransactionInfo transactionInfo = frontInterface.getTransaction(groupId, transHash);
+        TransactionInfo trans = frontInterface.getTransaction(groupId, transHash);
         TbTransHash tbTransHash = null;
-        if (transactionInfo != null) {
-            tbTransHash = new TbTransHash(transHash, transactionInfo.getBlockNumber(), null);
+        if (trans != null) {
+            tbTransHash = new TbTransHash(transHash,trans.getFrom(),trans.getTo(), trans.getBlockNumber(), null);
         }
         log.info("end getTransFromFrontByHash. tbTransHash:{}", JSON.toJSONString(tbTransHash));
         return tbTransHash;

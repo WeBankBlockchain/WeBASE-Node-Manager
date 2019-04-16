@@ -11,18 +11,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.contract.entity;
-
-import lombok.Data;
-
-@Data
-public class QueryContractParam {
-
-    private Integer groupId;
-    private String contractName;
-    private String contractAddress;
-    private Integer pageNumber;
-    private Integer pageSize;
+package com.webank.webase.node.mgr.method;
 
 
+import com.webank.webase.node.mgr.method.entity.TbMethod;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface MethodMapper {
+
+    void add(TbMethod tbMethod);
+
+    TbMethod getMethodById(@Param("methodId") String methodId, @Param("groupId") int groupId);
 }

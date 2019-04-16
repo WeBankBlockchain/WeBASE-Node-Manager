@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,11 +64,13 @@ public class BlockService {
             blockTimestamp = NodeMgrTools
                 .timestamp2LocalDateTime(Long.valueOf(blockInfo.getTimestamp()));
         }
+        int sealerIndex = Integer.parseInt(blockInfo.getSealer().substring(2),16);
+
         List<TransactionInfo> transList = blockInfo.getTransactions();
 
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
-            transList.size());
+            transList.size(), sealerIndex);
         return tbBlock;
     }
 
@@ -83,9 +86,9 @@ public class BlockService {
         addBlockInfo(tbBlock, groupId);
 
         // save trans hash
-        for (TransactionInfo transaction : transList) {
-            TbTransHash tbTransHash = new TbTransHash(transaction.getHash(),
-                tbBlock.getBlockNumber(),tbBlock.getBlockTimestamp());
+        for (TransactionInfo trans : transList) {
+            TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
+                trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
         }
     }
@@ -118,13 +121,9 @@ public class BlockService {
         log.debug("start queryBlockList groupId:{},queryParam:{}", groupId,
             JSON.toJSONString(queryParam));
 
-        List<TbBlock> listOfBlock = null;
-        try {
-            listOfBlock = blockmapper.getList(TableName.BLOCK.getTableName(groupId), queryParam);
-        } catch (RuntimeException ex) {
-            log.error("fail queryBlockList. queryParam:{}", JSON.toJSONString(queryParam), ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
+        List<TbBlock>  listOfBlock = blockmapper.getList(TableName.BLOCK.getTableName(groupId), queryParam);
+        //check sealer
+        listOfBlock.stream().forEach(block -> checkSearlerOfBlock(groupId, block));
 
         log.debug("end queryBlockList listOfBlockSize:{}", listOfBlock.size());
         return listOfBlock;
@@ -146,6 +145,23 @@ public class BlockService {
             log.error("fail countOfBlock groupId:{} pkHash:{}", groupId, pkHash, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
+    }
+
+    /**
+     * get sealer by index.
+     */
+    public void checkSearlerOfBlock(int groupId, TbBlock tbBlock) {
+        if (StringUtils.isNotBlank(tbBlock.getSealer())) {
+            return;
+        }
+
+        //get sealer from chain.
+        List<String> sealerList = frontInterface.getSealerList(groupId);
+        String sealer = sealerList.get(tbBlock.getSealerIndex());
+        tbBlock.setSealer(sealer);
+
+        //save sealer
+        blockmapper.update(TableName.BLOCK.getTableName(groupId), tbBlock);
     }
 
     /**

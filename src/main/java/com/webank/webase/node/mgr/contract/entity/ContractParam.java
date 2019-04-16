@@ -30,8 +30,11 @@ public class ContractParam extends BaseQueryParam {
     private Integer groupId;
     private Integer contractId;
     private String contractName;
+    private String contractAddress;
     private String contractVersion;
     private Integer contractType;
+    private String partOfByecodebin;
+
 
     /**
      * init by contractName、contractVersion.

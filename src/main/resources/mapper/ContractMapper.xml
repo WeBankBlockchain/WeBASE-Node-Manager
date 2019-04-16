@@ -37,8 +37,8 @@
 
   <insert id="addContractRow" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     insert into
-    tb_contract(group_id,contract_version,contract_name,contract_source,contract_abi,contract_bin,bytecodeBin,description,deploy_time,create_time,modify_time)
-    values(#{groupId},#{contractVersion},#{contractName},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{description},#{deployTime},NOW(),NOW())
+    tb_contract(group_id,contract_version,contract_name,contract_source,contract_abi,contract_bin,bytecodeBin,contract_address,description,deploy_time,create_time,modify_time)
+    values(#{groupId},#{contractVersion},#{contractName},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW())
     <selectKey keyProperty="contractId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -96,6 +96,9 @@
     <if test="contractName != null and contractName != ''">
       and contract_name = #{contractName}
     </if>
+    <if test="contractAddress != null and contractAddress != ''">
+      and contract_address = #{contractAddress}
+    </if>
     <if test="contractVersion != null and contractVersion != ''">
       and contract_version = #{contractVersion}
     </if>
@@ -116,6 +119,12 @@
     </if>
     <if test="contractType != null">
       and contract_type = #{contractType}
+    </if>
+    <if test="contractName != null and contractName != ''">
+      and contract_name = #{contractName}
+    </if>
+    <if test="contractAddress != null and contractAddress != ''">
+      and contract_address = #{contractAddress}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
       order by modify_time ${flagSortedByTime}
@@ -144,8 +153,14 @@
     <if test="contractName != null and contractName != ''">
       and contract_name = #{contractName}
     </if>
+    <if test="contractAddress != null and contractAddress != ''">
+      and contract_address = #{contractAddress}
+    </if>
     <if test="contractVersion != null and contractVersion != ''">
       and contract_version = #{contractVersion}
+    </if>
+    <if test="partOfByecodebin != null and partOfByecodebin != ''">
+      and locate(bytecodeBin,#{partOfByecodebin})
     </if>
     limit 1
   </select>
@@ -157,4 +172,5 @@
   <select id="querySystemContractBin" resultType="java.lang.String">
 		select contract_bin from tb_contract where group_id = #{groupId} and contract_name = #{contractName}
 	</select>
+
 </mapper>
