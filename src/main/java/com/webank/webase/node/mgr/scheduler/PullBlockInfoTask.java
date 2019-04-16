@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.group.TbGroup;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,16 +58,20 @@ public class PullBlockInfoTask {
             return;
         }
         //one group one thread
+        List<Thread> threadList = new ArrayList<>();
         for (int i = 0; i < groupList.size(); i++) {
             TbGroup tbGroup = groupList.get(i);
             Thread t = new Thread(() -> pullBlockByGroupId(tbGroup.getGroupId()));
             t.start();
+            threadList.add(t);
+        }
+        threadList.stream().forEach(t -> {
             try {
                 t.join();
             } catch (InterruptedException e) {
                 log.error("pull block exception", e);
             }
-        }
+        });
         log.info("end startPull useTime:{} ",
             Duration.between(startTime, Instant.now()).toMillis());
     }
@@ -76,7 +81,7 @@ public class PullBlockInfoTask {
      */
     private void pullBlockByGroupId(int groupId) {
         log.info("start pullBlockByGroupId groupId:{}", groupId);
-        while (latestTimeQueryDb != null && isLatestTimeQueryDbValid()) {
+        while (isLatestTimeQueryDbValid()) {
             try {
                 Thread.sleep(cProperties.getPullBlockSleepTime());
 
@@ -91,7 +96,7 @@ public class PullBlockInfoTask {
                 //save block info
                 blockService.saveBLockInfo(blockInfo, groupId);
             } catch (Exception ex) {
-                log.error("fail pullBlockByGroupId. groupId:{} ",groupId, ex);
+                log.error("fail pullBlockByGroupId. groupId:{} ", groupId, ex);
                 break;
             }
         }
@@ -125,6 +130,9 @@ public class PullBlockInfoTask {
      * check latestTimeQueryDb.
      */
     private Boolean isLatestTimeQueryDbValid() {
+        if (latestTimeQueryDb == null) {
+            return false;
+        }
         Long subTime = Duration.between(latestTimeQueryDb, Instant.now()).toMillis();
         return subTime < cProperties.getResetGroupListCycle();
     }
