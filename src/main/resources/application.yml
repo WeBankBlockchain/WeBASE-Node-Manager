@@ -15,13 +15,13 @@ mybatis:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/webase_mgr_dev?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
-    username: root
-    password: 123456
+    url: jdbc:mysql://127.0.0.1:3306/fisco-bcos-data?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+    username: defaultAccount
+    password: defaultPassword
 
 #log config
 logging:
-  config: classpath:log/log4j2-dev.xml
+  config: classpath:log/log4j2.xml
   level:
     com.webank.webase.node.mgr: debug
 
@@ -32,7 +32,7 @@ constant:
   deleteInfoCron: "0 0/2 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
   insertTransMonitorCron: "0 0/10 * * * ?"
-  pullBlockSleepTime: 2000
+  pullBlockSleepTime: 500
   resetGroupListCycle: 600000
   isBlockPullFromZero: false
   contractDeployTimeOut: 30000
