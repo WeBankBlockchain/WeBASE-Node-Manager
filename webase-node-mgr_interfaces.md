@@ -1,8 +1,14 @@
 # 区块链平台节点管理接口设计
 
-## 1 <span id="1">目录</span>
+##  <span id="catalog_top">目录</span>
+- [1.前置管理模块](#1)
+  - [1.1.新增节点前置信息](#1.1)
+  - [1.2.获取所有前置列表](#1.2)
+  - [1.3.删除前置信息](#1.3)
 - [2.交易信息模块](#2)
   - [2.1.查询交易信息列表](#2.1)
+  - [2.2.查询交易回执](#2.2)
+  - [2.3.根据交易hash查询交易信息](#2.3)
 - [3.帐号管理模块](#3)
   - [3.1.新增帐号](#3.1)
   - [3.2.修改帐号](#3.2)
@@ -11,14 +17,12 @@
   - [3.5.更改当前密码](#3.5)
 - [4.区块管理模块](#4)
   - [4.1.查询区块列表](#4.1)
+  - [4.2.根据块高查询区块信息](#4.2)
 - [5.合约管理模块](#5)
-  - [5.1.新增合约](#5.1)
-  - [5.2.修改合约](#5.2)
-  - [5.3.删除合约](#5.3)
-  - [5.4.查询合约列表](#5.4)
-  - [5.5.查询合约信息](#5.5)
-  - [5.6.部署合约](#5.6)
-  - [5.7.发送交易](#5.7)
+  - [5.1.查询合约列表](#5.1)
+  - [5.2.查询合约信息](#5.2)
+  - [5.3.部署合约](#5.3)
+  - [5.4.发送交易](#5.4)
 - [6.服务器监控相关](#6)
   - [6.1.获取节点监控信息](#6.1)
   - [6.2.获取服务器监控信息](#6.2)
@@ -46,21 +50,187 @@
   - [11.5.查询用户列表](#11.5)
 - [12.文件管理模块](#12)
   - [12.1.文件上传](#12.1)
-- [13.前置管理模块](#13) 
-  - [13.1.新增节点前置信息](#13.1)
-  - [13.2.获取所有前置列表](#13.2)
-  - [13.3.删除前置信息](#13.3)  
 
 
-## <span id="2">2 交易信息模块</span>  [top](#1)
 
-### <span id="2.1">2.1 查询交易信息列表</span>  [top](#1)
+
+
+
+## <span id="1">1 前置管理模块</span>  [top](#catalog_top)
+### <span id="1.1">1.1 新增节点前置信息</span>  [top](#catalog_top)
+
+#### 1.1.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址： `/front/new`
+* 请求方式：POST
+* 请求头：Content-type: application/json
+* 返回格式：JSON
+
+#### 1.1.2 参数信息详情
+
+| 序号 | 输入参数    | 类型          | 可为空 | 备注                                       |
+|------|-------------|---------------|--------|--------------------------------------------|                          |
+| 1    | frontIp     | string        | 否     | 前置ip                                     |
+| 2    | frontPort   | int           | 否     | 前置服务端口                               |
+| 序号 | 输出参数    | 类型          |        | 备注                                       |
+| 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败                 |
+| 2    | message     | String        | 否     | 描述                                       |
+| 3    |             | Object        |        | 节点信息对象                               |
+| 3.1  | frontId     | int           | 否     | 前置编号                                                         |
+| 3.2  | frontIp     | string        | 否     | 前置ip                                           |
+| 3.3  | frontPort   | int           | 否     | 前置端口                                   |                               |
+| 3.4  | createTime  | LocalDateTime | 否     | 落库时间                                   |
+| 3.5  | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
+
+#### 1.1.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/node`
+```
+{
+    "frontIp": "127.0.0.1",
+    "frontPort": "8081"
+}
+```
+
+
+#### 1.1.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "data": {
+        "frontId": 500001,
+        "frontIp": "127.0.0.1",
+        "frontPort": 8181,
+        "createTime": "2019-02-14 17:47:00",
+        "modifyTime": "2019-03-15 11:14:29"
+    }
+}
+```
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+### <span id="1.2">1.2 获取所有前置列表</span>  [top](#catalog_top)
+
+#### 1.2.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址： `/front/find?frontId={frontId}`
+* 请求方式：GET
+* 返回格式：JSON
+
+#### 1.2.2 参数信息详情
+
+| 序号  | 输入参数      | 类型          | 可为空 | 备注                       |
+|-------|---------------|---------------|--------|----------------------------|
+| 1     | frontId       | Int           | 是     | 前置编号                  |
+| 序号  | 输出参数      | 类型           |        | 备注                       |
+| 1     | code          | Int           | 否     | 返回码，0：成功 其它：失败 |
+| 2     | message       | String        | 否     | 描述                       |
+| 3     | totalCount    | Int           | 否     | 总记录数                   |
+| 4     | data          | List          | 否     | 组织列表                   |
+| 4.1   |               | Object        |        | 节点信息对象               |
+| 4.1.1 | frontId       | int           | 否     | 前置编号                   |
+| 4.1.2 | frontIp       | string        | 否     | 前置ip                     |
+| 4.1.3 | frontPort     | int           | 否     | 前置端口                   |                               |
+| 4.1.4 | createTime    | LocalDateTime | 否     | 落库时间                   |
+| 4.1.5 | modifyTime    | LocalDateTime | 否     | 修改时间                   |
+
+
+#### 1.2.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/front/find`
+
+#### 1.2.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "totalCount": 1,
+    "data": [
+        {
+        "frontId": 500001,
+        "frontIp": "127.0.0.1",
+        "frontPort": 8181,
+        "createTime": "2019-02-14 17:47:00",
+        "modifyTime": "2019-03-15 11:14:29"
+        }
+    ]
+}
+```
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+
+### <span id="1.3">1.3 删除前置信息</span>  [top](#catalog_top)
+
+#### 1.3.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址：`/front/{frontId}`
+* 请求方式：DELETE
+* 请求头：Content-type: application/json
+* 返回格式：JSON
+
+#### 1.3.2 参数信息详情
+
+| 序号 | 输入参数   | 类型   | 可为空 | 备注                       |
+|------|------------|--------|--------|----------------------------|
+| 1    | frontId    | int    | 否     | 前置编号                   |
+| 序号 | 输出参数   | 类型   |        | 备注                       |
+| 1    | code       | Int    | 否     | 返回码，0：成功 其它：失败 |
+| 2    | message    | String | 否     | 描述                       |
+| 3    | data       | object | 是     | 返回信息实体（空）         |
+
+#### 1.3.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/front/{frontId}`
+
+#### 1.3.4 出参示例
+
+* 成功：
+```
+{
+    "code": 0,
+    "data": {},
+    "message": "Success"
+}
+```
+
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+
+## <span id="2">2 交易信息模块</span>  [top](#catalog_top)
+
+### <span id="2.1">2.1 查询交易信息列表</span>  [top](#catalog_top)
 
 
 #### 2.1.1 传输协议规范
 
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/transList/{groupId}/{pageNumber}/{pageSize}?transactionHash={transactionHash}&blockNumber={blockNumber}`
+* 请求地址：`/transaction/transList/{groupId}/{pageNumber}/{pageSize}?transactionHash={transactionHash}&blockNumber={blockNumber}`
 * 请求方式：GET
 * 返回格式：JSON
 
@@ -121,9 +291,91 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-## <span id="3">3 帐号管理模块</span>  [top](#1)
 
-### <span id="3.1">3.1 新增帐号</span>  [top](#1)
+### <span id="2.2">2.2 查询交易回执</span>  [top](#catalog_top)
+
+
+#### 2.1.1 传输协议规范
+
+* 网络传输协议：使用HTTP协议
+* 请求地址：`/transaction/transactionReceipt/{groupId}/{transHash}`
+* 请求方式：GET
+* 返回格式：JSON
+
+#### 2.1.2 参数信息详情
+
+| 序号  | 输入参数        | 类型          | 可为空 | 备注                       |
+|-------|-----------------|---------------|--------|----------------------------|
+| 1     | groupId         | int           | 否     | 所属群组编号               |
+| 2     | transHash | String        | 是     | 交易hash                   |
+| 序号  | 输出参数        | 类型          |        | 备注                       |
+| 1     | code            | Int           | 否     | 返回码，0：成功 其它：失败 |
+| 2     | message         | String        | 否     | 描述                       |
+| 3     |                 | Object        |        | 交易信息对象               |
+| 3.1 | transactionHash       | String        | 否     | 交易hash                   |
+| 3.2 | transactionIndex         | Int           | 否     | 在区块中的索引               |
+| 3.2 | blockHash         | String           | 否     | 区块hash               |
+| 3.3 | blockNumber     | BigInteger    | 否     | 所属块高                   |
+| 3.4 | cumulativeGasUsed  | Int           | 否     |                |
+| 3.5 | gasUsed      | Int | 否     | 交易消耗的gas                   |
+| 3.6 | contractAddress      | String | 否     | 合约地址                   |
+| 3.7 | status      | String | 否     | 交易的状态值                   |
+| 3.8 | from      | String | 否     | 交易发起者                   |
+| 3.9 | to      | String | 否     | 交易目标                   |
+| 3.10 | output      | String | 否     | 交易输出内容                   |
+| 3.11 | logs      | String | 否     | 日志                   |
+| 3.12 | logsBloom      | String | 否     | log的布隆过滤值                   |
+
+#### 2.1.3 入参示例
+```
+http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda879949df6b5d75d2d807f036b461e0cebcc1abaccac119c9a282d3941a4818
+```
+
+#### 2.1.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "data": {
+        "transactionHash": "0xda879949df6b5d75d2d807f036b461e0cebcc1abaccac119c9a282d3941a4818",
+        "transactionIndex": 0,
+        "blockHash": "0x739853061c6c87ed691c0ee6f938589f7e2e442d42b16f582b353a475359b91d",
+        "blockNumber": 4311,
+        "cumulativeGasUsed": 0,
+        "gasUsed": 32940,
+        "contractAddress": "0x0000000000000000000000000000000000000000",
+        "status": "0x0",
+        "from": "0xe4bc056009daed8253008e03db6f62d93ccfacea",
+        "to": "0x522eda3fbe88c07025f1db3f7dc7d9836af95b3f",
+        "output": "0x",
+        "logs": [],
+        "logsBloom": "0x000000000000000000000000000000000000000",
+        "blockNumberRaw": "0x10d7",
+        "transactionIndexRaw": "0x0",
+        "statusOK": true,
+        "gasUsedRaw": "0x80ac"
+    }
+}
+```
+
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+
+
+
+## <span id="3">3 帐号管理模块</span>  [top](#catalog_top)
+
+### <span id="3.1">3.1 新增帐号</span>  [top](#catalog_top)
 
 #### 3.1.1 传输协议规范
 
@@ -198,7 +450,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 ```
 
 
-### <span id="3.2">3.2 修改帐号</span>  [top](#1)
+### <span id="3.2">3.2 修改帐号</span>  [top](#catalog_top)
 
 #### 3.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -270,7 +522,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="3.3">3.3 删除帐号</span>  [top](#1)
+### <span id="3.3">3.3 删除帐号</span>  [top](#catalog_top)
 
 #### 3.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -310,7 +562,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-###  <span id="3.4">3.4 查询帐号列表</span>  [top](#1)
+###  <span id="3.4">3.4 查询帐号列表</span>  [top](#catalog_top)
 
 #### 3.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -387,7 +639,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="3.5">3.5 更新当前密码</span>  [top](#1)
+### <span id="3.5">3.5 更新当前密码</span>  [top](#catalog_top)
 
 #### 3.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -434,9 +686,9 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-## <span id="4">4 区块管理模块</span>  [top](#1)
+## <span id="4">4 区块管理模块</span>  [top](#catalog_top)
 
-### <span id="4.1">4.1 查询区块列表</span>  [top](#1)
+### <span id="4.1">4.1 查询区块列表</span>  [top](#catalog_top)
 
 #### 4.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -509,234 +761,25 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-## <span id="5">5 合约管理模块</span>  [top](#1)
+## <span id="5">5 合约管理模块</span>  [top](#catalog_top)
 
-### <span id="5.1">5.1 新增合约</span>  [top](#1)
+### <span id="5.1">5.1 查询合约列表</span>  [top](#catalog_top)
 
 #### 5.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/deployIncoming/contractInfo`
+* 请求地址： `/contract/contractList/{groupId}/{pageNumber}/{pageSize}`
 * 请求方式：POST
-* 请求头：Content-type: application/json
 * 返回格式：JSON
 
 #### 5.1.2 参数信息详情
 
-| 序号 | 输入参数        | 类型          | 可为空 | 备注                                            |
-|------|-----------------|---------------|--------|-------------------------------------------------|
-| 1    | groupId       | int           | 否     | 所属群组编号                                    |
-| 2    | contractName    | string        | 否     | 合约名称                                        |
-| 3    | contractVersion | String        | 否     | 合约版本                                        |
-| 4    | contractSource  | String        | 否     | 源码（base64）                                  |
-| 序号 | 输出参数        | 类型          |        | 备注                                            |
-| 1    | code            | Int           | 否     | 返回码，0：成功 其它：失败                      |
-| 2    | message         | String        | 否     | 描述                                            |
-| 3    | data            | object        |        | 返回信息实体（成功时不为空）                    |
-| 3.1  | contractId      | int           | 否     | 合约编号                                        |
-| 3.2  | contractName    | String        | 否     | 合约名称                                        |
-| 3.3  | groupId       | Int           | 否     | 所属群组编号                                      |
-| 3.5  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
-| 3.6  | contractSource  | String        | 否     | 合约源码                                        |
-| 3.7  | contractStatus  | Int           | 否     | 部署状态（1：未部署，2：部署成功，3：部署失败） |
-| 3.8  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
-| 3.9  | contractBin     | String        | 是     | 合约binary                                      |
-| 3.10 | bytecodeBin     | String        | 是     | 合约bin                                         |
-| 3.11 | contractAddress | String        | 是     | 合约地址                                        |
-| 3.12 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
-| 3.13 | contractVersion | String        | 否     | 合约版本                                        |
-| 3.14 | description     | String        | 是     | 备注                                            |
-| 3.15 | createTime      | LocalDateTime | 否     | 创建时间                                        |
-| 3.16 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
-
-#### 5.1.3 入参示例
-
-`http://127.0.0.1:8080/webase-node-mgr/deployIncoming`
-```
-{
-    "groupId": "300001",
-    "contractName": "Helllo",
-    "contractVersion": "v1.0",
-    "contractSource": "cHJhZ21hIHNvbGlkaXR5IF4wLjQuMjsN"
-}
-```
-
-
-#### 5.1.4 出参示例
-* 成功：
-```
-{
-    "code": 0,
-    "message": "success",
-    "data": {
-        "contractId": 200035,
-        "contractName": "Helllo",
-        "groupId": 300001,
-        "contractType": 0,
-        "contractSource": "cHJhZ21hIHNvbGlkaXR5IF4wLjQuMjsN",
-        "contractStatus": 1,
-        "contractAbi": null,
-        "contractBin": null,
-        "bytecodeBin": null,
-        "contractAddress": null,
-        "deployTime": null,
-        "contractVersion": "v1.0",
-        "description": null,
-        "createTime": "2019-03-11 10:11:59",
-        "modifyTime": "2019-03-11 10:11:59"
-    }
-}
-```
-
-* 失败：
-```
-{
-    "code": 102000,
-    "message": "system exception",
-    "data": {}
-}
-```
-
-
-
-### <span id="5.2">5.2 修改合约</span>  [top](#1)
-
-#### 5.2.1 传输协议规范
-* 网络传输协议：使用HTTP协议
-* 请求地址：`/deployIncoming/contractInfo`
-* 请求方式：PUT
-* 请求头：Content-type: application/json
-* 返回格式：JSON
-
-#### 5.2.2 参数信息详情
-
-| 序号 | 输入参数        | 类型          | 可为空 | 备注                                            |
-|------|-----------------|---------------|--------|-------------------------------------------------|
-| 1    | contractId      | int           | 否     | 合约编号                                        |
-| 2    | contractName    | String        | 否     | 合约名称                                        |
-| 3    | groupId       | Int           | 否     | 所属群组编号                                      |
-| 4    | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
-| 5    | contractSource  | String        | 否     | 合约源码                                        |
-| 6    | contractStatus  | Int           | 否     | 部署状态（1：未部署，2：部署成功，3：部署失败） |
-| 7    | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
-| 8    | contractBin     | String        | 是     | 合约binary                                      |
-| 9    | bytecodeBin     | String        | 是     | 合约bin                                         |
-| 10   | contractAddress | String        | 是     | 合约地址                                        |
-| 11   | deployTime      | LocalDateTime | 是     | 部署时间                                        |
-| 12   | contractVersion | String        | 否     | 合约版本                                        |
-| 13   | description     | String        | 是     | 备注                                            |
-| 序号 | 输出参数        | 类型          |        | 备注                                            |
-| 1    | code            | Int           | 否     | 返回码，0：成功 其它：失败                      |
-| 2    | message         | String        | 否     | 描述                                            |
-| 3    | data            | object        | 是     | 返回信息实体（空）                              |
-
-#### 5.2.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/contractInfo`
-```
-{
-    "groupId": "300001",
-    "contractId": 200035,
-    "contractBin": "60606040526000357c010000000",
-    "bytecodeBin": "6060604052341561000c57fe",
-    "contractSource": "cHJhZ21hIHNvbGlkaXR5IF4wLjQuMjsNCmNvbQ==",
-    "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"type\":\"function\"}\"}]"
-}
-```
-
-
-#### 5.2.4 出参示例
-* 成功：
-```
-{
-    "code": 0,
-    "message": "success",
-    "data": {
-        "contractId": 200035,
-        "contractName": "Helllo",
-        "groupId": 300001,
-        "contractType": 0,
-        "contractSource": "cHJhZ21hIHNvbGgICAgfQ0KfQ==",
-        "contractStatus": 1,
-        "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"type\":\"function\"}]",
-        "contractBin": "606060405260004a9354c32393ae5c9bfee50029",
-        "bytecodeBin": "6060604052341561000c57fe5b6040516103dd3803806103dd829",
-        "contractAddress": null,
-        "deployTime": null,
-        "contractVersion": "v1.0",
-        "description": null,
-        "createTime": "2019-03-11 10:11:59",
-        "modifyTime": "2019-03-11 10:28:06"
-    }
-}
-```
-
-
-* 失败：
-```
-{
-    "code": 102000,
-    "message": "system exception",
-    "data": {}
-}
-```
-
-### <span id="5.3">5.3 删除合约</span>  [top](#1)
-
-#### 5.3.1 传输协议规范
-* 网络传输协议：使用HTTP协议
-* 请求地址：`/deployIncoming/{contractId}`
-* 请求方式：DELETE
-* 请求头：Content-type: application/json
-* 返回格式：JSON
-
-#### 5.3.2 参数信息详情
-
-| 序号 | 输入参数   | 类型   | 可为空 | 备注                       |
-|------|------------|--------|--------|----------------------------|
-| 1    | contractId | int    | 否     | 合约编号名称               |
-| 序号 | 输出参数   | 类型   |        | 备注                       |
-| 1    | code       | Int    | 否     | 返回码，0：成功 其它：失败 |
-| 2    | message    | String | 否     | 描述                       |
-| 3    | data       | object | 是     | 返回信息实体（空）         |
-
-#### 5.3.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/{contractId}`
-
-#### 5.3.4 出参示例
-
-* 成功：
-```
-{
-    "code": 0,
-    "data": {},
-    "message": "Success"
-}
-```
-
-
-* 失败：
-```
-{
-    "code": 102000,
-    "message": "system exception",
-    "data": {}
-}
-```
-
-### <span id="5.4">5.4 查询合约列表</span>  [top](#1)
-
-#### 5.4.1 传输协议规范
-* 网络传输协议：使用HTTP协议
-* 请求地址： `/deployIncoming/contractList/{groupId}/{pageNumber}/{pageSize}`
-* 请求方式：GET
-* 返回格式：JSON
-
-#### 5.4.2 参数信息详情
-
 | 序号   | 输入参数        | 类型          | 可为空 | 备注                                            |
 |--------|-----------------|---------------|--------|-------------------------------------------------|
 | 1      | groupId       | int           | 否     | 群组id                                          |
-| 2      | pageSize        | int           | 否     | 每页记录数                                      |
-| 3      | pageNumber      | int           | 否     | 当前页码                                        |
+| 2      | contractName       | String           | 否     | 合约名                             |
+| 3      | contractAddress    | String           | 否     | 合约地址                               |
+| 4      | pageSize        | int           | 否     | 每页记录数                                      |
+| 5      | pageNumber      | int           | 否     | 当前页码                                        |
 |        |                 |               |        |                                                 |
 | 序号   | 输出参数        | 类型          | 可为空 | 备注                                            |
 | 1      | code            | Int           | 否     | 返回码，0：成功 其它：失败                      |
@@ -760,10 +803,13 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 5.1.14 | createTime      | LocalDateTime | 否     | 创建时间                                        |
 | 5.1.15 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
 
-#### 5.4.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/*deployIncoming/contractList/300001/1/15`
+#### 5.1.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/contract/contractList`
+```
 
-#### 5.4.4 出参示例
+```
+
+#### 5.1.4 出参示例
 
 * 成功：
 ```
@@ -802,15 +848,15 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="5.5">5.5 查询合约信息</span>  [top](#1)
+### <span id="5.2">5.2 查询合约信息</span>  [top](#catalog_top)
 
-#### 5.5.1 传输协议规范
+#### 5.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址： `/deployIncoming/{contractId}`
+* 请求地址： `/contract/{contractId}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 5.5.2 参数信息详情
+#### 5.2.2 参数信息详情
 
 | 序号 | 输入参数        | 类型          | 可为空 | 备注                                            |
 |------|-----------------|---------------|--------|-------------------------------------------------|
@@ -835,10 +881,10 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 3.14 | createTime      | LocalDateTime | 否     | 创建时间                                        |
 | 3.15 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
 
-#### 5.5.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/200001`
+#### 5.2.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/contract/200001`
 
-#### 5.5.4 出参示例
+#### 5.2.4 出参示例
 
 * 成功：
 ```
@@ -872,16 +918,16 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="5.6">5.6 部署合约</span>  [top](#1)
+### <span id="5.3">5.3 部署合约</span>  [top](#catalog_top)
 
-#### 5.6.1 传输协议规范
+#### 5.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/deployIncoming/deploy`
+* 请求地址：`/contract/deploy`
 * 请求方式：POST
 * 请求头：Content-type: application/json
 * 返回格式：JSON
 
-#### 5.6.2 参数信息详情
+#### 5.3.2 参数信息详情
 
 | 序号 | 输入参数          | 类型           | 可为空 | 备注                       |
 |------|-------------------|----------------|--------|----------------------------|
@@ -899,8 +945,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 2    | message           | String         | 否     | 描述                       |
 | 3    | data              | object         | 是     | 返回信息实体（空）         |
 
-#### 5.6.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/deploy`
+#### 5.3.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/contract/deploy`
 ```
 {
     "groupId": "300001",
@@ -914,7 +960,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 ```
 
 
-#### 5.6.4 出参示例
+#### 5.3.4 出参示例
 
 * 成功：
 ```
@@ -951,16 +997,16 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="5.7">5.7 发送交易</span>  [top](#1)
+### <span id="5.4">5.4 发送交易</span>  [top](#catalog_top)
 
-#### 5.7.1 传输协议规范
+#### 5.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/deployIncoming/transaction`
+* 请求地址：`/contract/transaction`
 * 请求方式：POST
 * 请求头：Content-type: application/json
 * 返回格式：JSON
 
-#### 5.7.2 参数信息详情
+#### 5.4.2 参数信息详情
 
 | 序号 | 输入参数     | 类型           | 可为空 | 备注                       |
 |------|--------------|----------------|--------|----------------------------|
@@ -976,8 +1022,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 2    | message      | String         | 否     | 描述                       |
 | 3    | data         | object         | 是     | 返回信息实体（空）         |
 
-#### 5.7.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/deployIncoming/deploy`
+#### 5.4.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/contract/transaction`
 ```
 {
     "groupId": "300001",
@@ -991,7 +1037,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 ```
 
 
-#### 5.7.4 出参示例
+#### 5.4.4 出参示例
 * 成功：
 ```
 {
@@ -1012,9 +1058,9 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 ```
 
 
-## <span id="6">6 服务器监控相关</span>  [top](#1)
+## <span id="6">6 服务器监控相关</span>  [top](#catalog_top)
 
-### <span id="6.1">6.1 获取节点监控信息</span>  [top](#1)
+### <span id="6.1">6.1 获取节点监控信息</span>  [top](#catalog_top)
 
 #### 6.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1115,7 +1161,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="6.2">6.2 获取服务器监控信息</span>  [top](#1)
+### <span id="6.2">6.2 获取服务器监控信息</span>  [top](#catalog_top)
 
 #### 6.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1216,9 +1262,9 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 ```
 
 
-## <span id="7">7 审计相关模块</span>  [top](#1)
+## <span id="7">7 审计相关模块</span>  [top](#catalog_top)
 
-### <span id="7.1">7.1 获取用户交易监管信息列表</span>  [top](#1)
+### <span id="7.1">7.1 获取用户交易监管信息列表</span>  [top](#catalog_top)
 
 #### 7.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1303,7 +1349,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="7.2">7.2 获取合约方法监管信息列表</span>  [top](#1)
+### <span id="7.2">7.2 获取合约方法监管信息列表</span>  [top](#catalog_top)
 
 #### 7.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1390,7 +1436,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="7.3">7.3 获取交易hash监管信息列表</span>  [top](#1)
+### <span id="7.3">7.3 获取交易hash监管信息列表</span>  [top](#catalog_top)
 
 #### 7.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1454,7 +1500,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="7.4">7.4 获取异常用户信息列表</span>  [top](#1)
+### <span id="7.4">7.4 获取异常用户信息列表</span>  [top](#catalog_top)
 
 #### 7.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1511,7 +1557,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="7.5">7.5 获取异常合约信息列表</span>  [top](#1)
+### <span id="7.5">7.5 获取异常合约信息列表</span>  [top](#catalog_top)
 
 #### 7.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1573,9 +1619,9 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-## <span id="8">8 群组信息模块</span>  [top](#1)
+## <span id="8">8 群组信息模块</span>  [top](#catalog_top)
 
-### <span id="8.1">8.1 获取群组概况</span>  [top](#1)
+### <span id="8.1">8.1 获取群组概况</span>  [top](#catalog_top)
 
 #### 8.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1627,7 +1673,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="8.2">8.2 获取所有群组列表</span>  [top](#1)
+### <span id="8.2">8.2 获取所有群组列表</span>  [top](#catalog_top)
 
 #### 8.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1685,7 +1731,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="8.3">8.3 查询每日交易数据</span>  [top](#1)
+### <span id="8.3">8.3 查询每日交易数据</span>  [top](#catalog_top)
 
 #### 8.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1744,7 +1790,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 
 
-### <span id="8.4">8.4 修改群组名称</span>  [top](#1)
+### <span id="8.4">8.4 修改群组名称</span>  [top](#catalog_top)
 
 #### 8.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1792,9 +1838,9 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 ```
 
 
-## <span id="9">9 节点管理模块</span>  [top](#1)
+## <span id="9">9 节点管理模块</span>  [top](#catalog_top)
 
-### <span id="9.1">9.1 查询节点列表</span>  [top](#1)
+### <span id="9.1">9.1 查询节点列表</span>  [top](#catalog_top)
 
 #### 9.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1865,7 +1911,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="9.2">9.2 查询节点信息</span>  [top](#1)
+### <span id="9.2">9.2 查询节点信息</span>  [top](#catalog_top)
 
 #### 9.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1928,9 +1974,9 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-## <span id="10">10 角色管理模块</span>  [top](#1)
+## <span id="10">10 角色管理模块</span>  [top](#catalog_top)
 
-### <span id="10.1">10.1 查询角色列表</span>  [top](#1)
+### <span id="10.1">10.1 查询角色列表</span>  [top](#catalog_top)
 
 ### 10.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2004,9 +2050,9 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-## <span id="11">11 用户管理模块</span>  [top](#1)
+## <span id="11">11 用户管理模块</span>  [top](#catalog_top)
 
-### <span id="11.1">11.1 新增私钥用户</span>  [top](#1)
+### <span id="11.1">11.1 新增私钥用户</span>  [top](#catalog_top)
 
 #### 11.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2081,7 +2127,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="11.2">11.2 绑定公钥用户</span>  [top](#1)
+### <span id="11.2">11.2 绑定公钥用户</span>  [top](#catalog_top)
 
 #### 11.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2157,7 +2203,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="11.3">11.3 修改用户备注</span>  [top](#1)
+### <span id="11.3">11.3 修改用户备注</span>  [top](#catalog_top)
 
 #### 11.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2230,7 +2276,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="11.4">11.4 查询私钥</span>  [top](#1)
+### <span id="11.4">11.4 查询私钥</span>  [top](#catalog_top)
 
 #### 11.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2277,7 +2323,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-### <span id="11.5">11.5 查询用户列表</span>  [top](#1)
+### <span id="11.5">11.5 查询用户列表</span>  [top](#catalog_top)
 
 #### 11.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2351,9 +2397,9 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 
 
 
-## <span id="12">12 文件管理模块</span>  [top](#1)
+## <span id="12">12 文件管理模块</span>  [top](#catalog_top)
 
-### <span id="12.1">12.1 文件上传</span>  [top](#1)
+### <span id="12.1">12.1 文件上传</span>  [top](#catalog_top)
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/file/uploadFile`
 * 请求方式：POST
@@ -2405,168 +2451,3 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 }
 ```
 
-
-
-## <span id="13">13 前置管理模块</span>  [top](#1)
-### <span id="13.1">13.1 新增节点前置信息</span>  [top](#1)
-
-#### 13.1.1 传输协议规范
-* 网络传输协议：使用HTTP协议
-* 请求地址： `/front/new`
-* 请求方式：POST
-* 请求头：Content-type: application/json
-* 返回格式：JSON
-
-#### 13.1.2 参数信息详情
-
-| 序号 | 输入参数    | 类型          | 可为空 | 备注                                       |
-|------|-------------|---------------|--------|--------------------------------------------|                          |
-| 1    | frontIp     | string        | 否     | 前置ip                                     |
-| 2    | frontPort   | int           | 否     | 前置服务端口                               |
-| 序号 | 输出参数    | 类型          |        | 备注                                       |
-| 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败                 |
-| 2    | message     | String        | 否     | 描述                                       |
-| 3    |             | Object        |        | 节点信息对象                               |
-| 3.1  | frontId     | int           | 否     | 前置编号                                                         |
-| 3.2  | frontIp     | string        | 否     | 前置ip                                           |
-| 3.3  | frontPort   | int           | 否     | 前置端口                                   |                               |
-| 3.4  | createTime  | LocalDateTime | 否     | 落库时间                                   |
-| 3.5  | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
-
-#### 13.1.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/node`
-```
-{
-    "frontIp": "127.0.0.1",
-    "frontPort": "8081"
-}
-```
-
-
-#### 13.1.4 出参示例
-* 成功：
-```
-{
-    "code": 0,
-    "message": "success",
-    "data": {
-        "frontId": 500001,
-        "frontIp": "127.0.0.1",
-        "frontPort": 8181,
-        "createTime": "2019-02-14 17:47:00",
-        "modifyTime": "2019-03-15 11:14:29"
-    }
-}
-```
-
-* 失败：
-```
-{
-    "code": 102000,
-    "message": "system exception",
-    "data": {}
-}
-```
-
-
-### <span id="13.2">13.2 获取所有前置列表</span>  [top](#1)
-
-#### 13.2.1 传输协议规范
-* 网络传输协议：使用HTTP协议
-* 请求地址： `/front/find?frontId={frontId}`
-* 请求方式：GET
-* 返回格式：JSON
-
-#### 13.2.2 参数信息详情
-
-| 序号  | 输入参数      | 类型          | 可为空 | 备注                       |
-|-------|---------------|---------------|--------|----------------------------|
-| 1     | frontId       | Int           | 是     | 前置编号                  |
-| 序号  | 输出参数      | 类型           |        | 备注                       |
-| 1     | code          | Int           | 否     | 返回码，0：成功 其它：失败 |
-| 2     | message       | String        | 否     | 描述                       |
-| 3     | totalCount    | Int           | 否     | 总记录数                   |
-| 4     | data          | List          | 否     | 组织列表                   |
-| 4.1   |               | Object        |        | 节点信息对象               |
-| 4.1.1 | frontId       | int           | 否     | 前置编号                   |
-| 4.1.2 | frontIp       | string        | 否     | 前置ip                     |
-| 4.1.3 | frontPort     | int           | 否     | 前置端口                   |                               |
-| 4.1.4 | createTime    | LocalDateTime | 否     | 落库时间                   |
-| 4.1.5 | modifyTime    | LocalDateTime | 否     | 修改时间                   |
-
-
-#### 13.2.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/front/find`
-
-#### 13.2.4 出参示例
-* 成功：
-```
-{
-    "code": 0,
-    "message": "success",
-    "totalCount": 1,
-    "data": [
-        {
-        "frontId": 500001,
-        "frontIp": "127.0.0.1",
-        "frontPort": 8181,
-        "createTime": "2019-02-14 17:47:00",
-        "modifyTime": "2019-03-15 11:14:29"
-        }
-    ]
-}
-```
-
-* 失败：
-```
-{
-    "code": 102000,
-    "message": "system exception",
-    "data": {}
-}
-```
-
-
-
-### <span id="13.3">13.3 删除前置信息</span>  [top](#1)
-
-#### 13.3.1 传输协议规范
-* 网络传输协议：使用HTTP协议
-* 请求地址：`/front/{frontId}`
-* 请求方式：DELETE
-* 请求头：Content-type: application/json
-* 返回格式：JSON
-
-#### 13.3.2 参数信息详情
-
-| 序号 | 输入参数   | 类型   | 可为空 | 备注                       |
-|------|------------|--------|--------|----------------------------|
-| 1    | frontId    | int    | 否     | 前置编号                   |
-| 序号 | 输出参数   | 类型   |        | 备注                       |
-| 1    | code       | Int    | 否     | 返回码，0：成功 其它：失败 |
-| 2    | message    | String | 否     | 描述                       |
-| 3    | data       | object | 是     | 返回信息实体（空）         |
-
-#### 13.3.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/front/{frontId}`
-
-#### 13.3.4 出参示例
-
-* 成功：
-```
-{
-    "code": 0,
-    "data": {},
-    "message": "Success"
-}
-```
-
-
-* 失败：
-```
-{
-    "code": 102000,
-    "message": "system exception",
-    "data": {}
-}
-```

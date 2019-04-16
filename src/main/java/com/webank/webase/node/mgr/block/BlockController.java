@@ -1,17 +1,15 @@
 /**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.block;
 
@@ -20,22 +18,17 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
-import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.BlockListParam;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
-import com.webank.webase.node.mgr.front.FrontService;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,8 +43,6 @@ public class BlockController {
 
     @Autowired
     private BlockService blockService;
-    @Autowired
-    private FrontService frontService;
 
     /**
      * query block list.
@@ -77,7 +68,7 @@ public class BlockController {
                 .orElse(null);
             BlockListParam queryParam = new BlockListParam(start, pageSize, pkHash,
                 blockNumber, SqlSortType.DESC.getValue());
-            List<TbBlock> blockList = blockService.queryBlockList(groupId,queryParam);
+            List<TbBlock> blockList = blockService.queryBlockList(groupId, queryParam);
             pageResponse.setData(blockList);
             pageResponse.setTotalCount(count);
         } else {
@@ -85,7 +76,7 @@ public class BlockController {
             if (blockNumber != null) {
                 log.debug("did not find block, request from front. blockNumber:{} groupId:{}",
                     blockNumber, groupId);
-                 blockInfo = blockService.getBlockFromFrontByNumber(groupId, blockNumber);
+                blockInfo = blockService.getBlockFromFrontByNumber(groupId, blockNumber);
             } else if (StringUtils.isNotBlank(pkHash)) {
                 log.debug(
                     "did not find block,request from front. pkHash:{} groupId:{}",

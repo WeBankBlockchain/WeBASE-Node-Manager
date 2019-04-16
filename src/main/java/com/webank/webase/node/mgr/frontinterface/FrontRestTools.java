@@ -59,6 +59,7 @@ public class FrontRestTools {
     public static final String URI_SYSTEMCONFIG_BY_KEY = "web3/systemConfigByKey/%1s";
     public static final String URI_CODE = "web3/code/%1s/%2s";
     public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
+    public static final String URI_GET_SEALER_LIST = "web3/sealerList";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey";
@@ -204,6 +205,7 @@ public class FrontRestTools {
         List<FrontGroup> mapList = mapService.listByGroupId(groupId);
         while (true) {
             String url = buildFrontUrl(mapList, uri, HttpMethod.GET);//build url
+            log.info("getForEntity url:{}",url);
             try {
                 if (StringUtils.isBlank(url)) {
                     log.warn("fail getForEntity. url is null");
@@ -227,6 +229,8 @@ public class FrontRestTools {
         List<FrontGroup> mapList = mapService.listByGroupId(groupId);
         while (true) {
             String url = buildFrontUrl(mapList, uri, HttpMethod.POST);//build url
+            log.info("postForEntity url:{}",url);
+
             try {
                 if (StringUtils.isBlank(url)) {
                     log.warn("fail postForEntity. url is null");

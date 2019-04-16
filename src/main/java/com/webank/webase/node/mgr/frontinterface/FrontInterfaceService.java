@@ -55,7 +55,7 @@ public class FrontInterfaceService {
         log.debug("start getFromSpecificFront. groupId:{} frontIp:{} frontPort:{} uri:{}", groupId,
             frontIp, frontPort, uri);
 
-        uri = FrontRestTools.uriAddGroupId(groupId,uri);
+        uri = FrontRestTools.uriAddGroupId(groupId, uri);
 
         String url = String.format(FrontRestTools.FRONT_URL, frontIp, frontPort, uri);
         log.info("getFromSpecificFront. url:{}", url);
@@ -282,6 +282,17 @@ public class FrontInterfaceService {
             .getForEntity(groupId, FrontRestTools.URI_BLOCK_NUMBER, BigInteger.class);
         log.debug("end getLatestBlockNumber. latestBlockNmber:{}", latestBlockNmber);
         return latestBlockNmber;
+    }
+
+    /**
+     * get sealerList.
+     */
+    public List<String> getSealerList(Integer groupId) {
+        log.debug("start getSealerList. groupId:{}", groupId);
+        List getSealerList = frontRestTools
+            .getForEntity(groupId, FrontRestTools.URI_GET_SEALER_LIST, List.class);
+        log.debug("end getSealerList. getSealerList:{}", JSON.toJSONString(getSealerList));
+        return getSealerList;
     }
 
 

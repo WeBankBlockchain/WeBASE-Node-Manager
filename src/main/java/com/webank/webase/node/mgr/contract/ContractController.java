@@ -98,9 +98,7 @@ public class ContractController {
 
     */
 
-    /**
-     * qurey contract info list.
-     */
+
     /**
      * qurey contract info list.
      */
@@ -222,6 +220,26 @@ public class ContractController {
         String contractCode = contractService.getContractCode(groupId, address, blockNumber);
         baseResponse.setData(contractCode);
         log.info("end getContractCode useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * get by partOfBytecodeBin.
+     */
+    @GetMapping(value = "/findByPartOfBytecodeBin/{groupId}/{partOfBytecodeBin}")
+    public BaseResponse getByPartOfByecodebin(@PathVariable("groupId") Integer groupId,
+        @PathVariable("partOfBytecodeBin") String partOfBytecodeBin) {
+        Instant startTime = Instant.now();
+        log.info("start getByPartOfByecodebin startTime:{} groupId:{} partOfBytecodeBin:{}",
+            startTime.toEpochMilli(), groupId, partOfBytecodeBin);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        ContractParam param = new ContractParam();
+        param.setGroupId(groupId);
+        param.setPartOfByecodebin(partOfBytecodeBin);
+        TbContract tbContract = contractService.queryContract(param);
+        baseResponse.setData(tbContract);
+        log.info("end getByPartOfByecodebin useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
     }

@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package node.mgr.test.block;
+package node.mgr.test.method;
 
-
+import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.method.entity.Method;
+import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,7 +39,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
-public class BlockControllerTest {
+public class MethodControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
@@ -46,23 +50,32 @@ public class BlockControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
+
     @Test
-    public void testGetBlockList() throws Exception {
+    public void testAddMethod() throws Exception {
+        Method method = new Method();
+        method.setMethodId("methodIdttttt");
+        method.setAbiInfo("abiTest2222");
+        method.setMethodType("function");
 
-        String queryByblockList="/block/blockList/1/1/1";
-        String queryByblockNumber="/block/blockList/1/1/15?blockNumber=10";
-        String queryByblockHash="/block/blockList/1/1/15?pkHash=0xca84147e343acb972dc9247727b920b5c081320bbe940f4e2b24363836dca4a1";
+        NewMethodInputParam param = new NewMethodInputParam();
+        param.setMethodList(Arrays.asList(method));
+        param.setGroupId(2);
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(queryByblockList));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post( "/method/add").
+            content(JSON.toJSONString(param)).
+            contentType(MediaType.APPLICATION_JSON)
+        );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
-        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+        System.out.println("response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
 
+
     @Test
-    public void testBlockByNumber() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/block/blockByNumber/1/11"));
+    public void testFindById() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/method/findById/2/atestMethod"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
