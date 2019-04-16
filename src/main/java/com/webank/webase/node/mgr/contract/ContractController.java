@@ -206,10 +206,11 @@ public class ContractController {
         return baseResponse;
     }
 
+
     /**
      * get contract code.
      */
-    @GetMapping("/code/{groupId}/{address}/{blockNumber}")
+   /* @GetMapping("/code/{groupId}/{address}/{blockNumber}")
     public BaseResponse getContractCode(@PathVariable("groupId") Integer groupId,
         @PathVariable("address") String address,
         @PathVariable("blockNumber") BigInteger blockNumber) throws NodeMgrException {
@@ -222,7 +223,7 @@ public class ContractController {
         log.info("end getContractCode useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
-    }
+    }*/
 
     /**
      * get by partOfBytecodeBin.
