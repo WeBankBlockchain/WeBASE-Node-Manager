@@ -40,6 +40,11 @@ public interface BlockMapper {
     Integer add(@Param("tableName") String tableName, @Param("block") TbBlock tbBlock);
 
     /**
+     * update sealer.
+     */
+    Integer update(@Param("tableName") String tableName, @Param("block") TbBlock tbBlock);
+
+    /**
      * query list of block by page.
      */
     List<TbBlock> getList(@Param("tableName") String tableName,@Param("param") BlockListParam param);
