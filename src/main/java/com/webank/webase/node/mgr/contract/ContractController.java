@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.DeployIncoming;
+import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.Transaction;
@@ -46,58 +47,6 @@ public class ContractController {
 
     @Autowired
     private ContractService contractService;
-    /*
-
-     */
-/**
- * add new contract info.
- *//*
-
-    @PostMapping(value = "/contractInfo")
-    public BaseResponse addCotractInfo(@RequestBody DeployIncoming contract) throws NodeMgrException {
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start addCotractInfo startTime:{} contract:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(contract));
-
-        // add contract row
-        Integer contractId = contractService.addContractInfo(contract);
-
-        // query the record of a new row
-        TbContract contractRow = contractService.queryByContractId(contractId);
-        baseResponse.setData(contractRow);
-
-        log.info("end addCotractInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
-    */
-/**
- * update contract info.
- *//*
-
-    @PutMapping(value = "/contractInfo")
-    public BaseResponse updateContractInfo(@RequestBody DeployIncoming contract)
-        throws NodeMgrException, Exception {
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start updateContractInfo startTime:{} contract:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(contract));
-
-        // update contract row
-        contractService.updateContract(contract);
-        // query the record of a new row
-        TbContract contractRow = contractService.queryByContractId(contract.getContractId());
-        baseResponse.setData(contractRow);
-
-        log.info("end updateContractInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
-    */
-
 
     /**
      * qurey contract info list.
@@ -132,23 +81,6 @@ public class ContractController {
         return pagesponse;
     }
 
-    /**
-     * delete contract by id.
-     */
-/*    @DeleteMapping(value = "/{contractId}")
-    public BaseResponse deleteContract(@PathVariable("contractId") Integer contractId)
-        throws NodeMgrException, Exception {
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start deleteContract startTime:{} contractId:{}", startTime.toEpochMilli(),
-            contractId);
-
-        contractService.deleteContract(contractId);
-
-        log.info("end deleteContract useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
-        return baseResponse;
-    }*/
 
     /**
      * query by contract id.
@@ -207,37 +139,19 @@ public class ContractController {
     }
 
 
-    /**
-     * get contract code.
-     */
-   /* @GetMapping("/code/{groupId}/{address}/{blockNumber}")
-    public BaseResponse getContractCode(@PathVariable("groupId") Integer groupId,
-        @PathVariable("address") String address,
-        @PathVariable("blockNumber") BigInteger blockNumber) throws NodeMgrException {
-        Instant startTime = Instant.now();
-        log.info("start getContractCode startTime:{} groupId:{} address:{} blockNumber:{}",
-            startTime.toEpochMilli(), groupId, address, blockNumber);
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        String contractCode = contractService.getContractCode(groupId, address, blockNumber);
-        baseResponse.setData(contractCode);
-        log.info("end getContractCode useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
-        return baseResponse;
-    }*/
+
 
     /**
      * get by partOfBytecodeBin.
      */
-    @GetMapping(value = "/findByPartOfBytecodeBin/{groupId}/{partOfBytecodeBin}")
-    public BaseResponse getByPartOfByecodebin(@PathVariable("groupId") Integer groupId,
-        @PathVariable("partOfBytecodeBin") String partOfBytecodeBin) {
+    @PostMapping(value = "/findByPartOfBytecodeBin")
+    public BaseResponse getByPartOfByecodebin(@RequestBody QueryByBinParam queryParam) {
         Instant startTime = Instant.now();
-        log.info("start getByPartOfByecodebin startTime:{} groupId:{} partOfBytecodeBin:{}",
-            startTime.toEpochMilli(), groupId, partOfBytecodeBin);
+        log.info("start getByPartOfByecodebin startTime:{} groupId:{} queryParam:{}",
+            startTime.toEpochMilli(), JSON.toJSONString(queryParam));
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         ContractParam param = new ContractParam();
-        param.setGroupId(groupId);
-        param.setPartOfByecodebin(partOfBytecodeBin);
+        BeanUtils.copyProperties(queryParam,param);
         TbContract tbContract = contractService.queryContract(param);
         baseResponse.setData(tbContract);
         log.info("end getByPartOfByecodebin useTime:{} result:{}",

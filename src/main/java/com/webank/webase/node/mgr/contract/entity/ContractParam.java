@@ -33,7 +33,7 @@ public class ContractParam extends BaseQueryParam {
     private String contractAddress;
     private String contractVersion;
     private Integer contractType;
-    private String partOfByecodebin;
+    private String partOfBytecodeBin;
 
 
     /**
