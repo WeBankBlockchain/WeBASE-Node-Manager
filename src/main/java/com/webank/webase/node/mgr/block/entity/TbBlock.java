@@ -30,6 +30,8 @@ public class TbBlock {
     private BigInteger blockNumber = BigInteger.ZERO;
     private LocalDateTime blockTimestamp;
     private int transCount;
+    private int sealerIndex;
+    private String sealer;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
@@ -38,12 +40,13 @@ public class TbBlock {
      * init by  pkHash、blockNumber、blockTimestamp、transCount.
      */
     public TbBlock(String pkHash, BigInteger blockNumber,
-        LocalDateTime blockTimestamp, Integer transCount) {
+        LocalDateTime blockTimestamp, Integer transCount,int sealerIndex) {
         super();
         this.pkHash = pkHash;
         this.blockNumber = blockNumber;
         this.blockTimestamp = blockTimestamp;
         this.transCount = transCount;
+        this.sealerIndex = sealerIndex;
     }
 
 }

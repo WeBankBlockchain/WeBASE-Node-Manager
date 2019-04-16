@@ -238,8 +238,6 @@ public class NodeService {
     private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
         String consensusStatusJson = frontInterfacee.getConsensusStatus(groupId);
         JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
-        List<Object> dataIsListTest = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List).collect(
-            Collectors.toList());
         List<Object> dataIsList = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List)
             .map(arr -> {
                 Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
@@ -250,8 +248,6 @@ public class NodeService {
                 }
                 return arr;
             }).collect(Collectors.toList());
-
-        List<PeerOfConsensusStatus> li= JSONArray.parseArray(JSON.toJSONString(dataIsList.get(0)), PeerOfConsensusStatus.class);
         return JSONArray.parseArray(JSON.toJSONString(dataIsList.get(0)), PeerOfConsensusStatus.class);
     }
 }

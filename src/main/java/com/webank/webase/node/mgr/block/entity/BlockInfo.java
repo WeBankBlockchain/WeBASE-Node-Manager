@@ -25,7 +25,8 @@ public class BlockInfo {
     private BigInteger number;
     private String hash;
     private String parentHash;
-    private int nonce;
+    private String nonce;
+    private String sealer;
     private String logsBloom;
     private String transactionsRoot;
     private String stateRoot;

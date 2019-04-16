@@ -1,4 +1,4 @@
-package node.mgr.test;
+package node.mgr.test.transaction;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
@@ -49,14 +49,4 @@ public class TransHashServiceTest {
         System.out.println(JSON.toJSONString(trans));
     }
 
-    @Test
-    public  void test(){
-        List<String> list = new ArrayList<>(Arrays.asList("aa","bb","cc"));
-        System.out.println("-----------------------:"+JSON.toJSONString(list));
-        Collections.shuffle(list);
-        System.out.println("-----------------------:"+JSON.toJSONString(list));
-        Collections.shuffle(list);
-        System.out.println("-----------------------:"+JSON.toJSONString(list));
-
-    }
 }

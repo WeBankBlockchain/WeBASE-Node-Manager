@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package node.mgr.test.block;
-
+package node.mgr.test.transaction;
 
 import com.webank.webase.node.mgr.Application;
 import org.junit.Before;
@@ -35,7 +34,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
-public class BlockControllerTest {
+public class TransHashControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
@@ -47,13 +46,8 @@ public class BlockControllerTest {
     }
 
     @Test
-    public void testGetBlockList() throws Exception {
-
-        String queryByblockList="/block/blockList/1/1/1";
-        String queryByblockNumber="/block/blockList/1/1/15?blockNumber=10";
-        String queryByblockHash="/block/blockList/1/1/15?pkHash=0xca84147e343acb972dc9247727b920b5c081320bbe940f4e2b24363836dca4a1";
-
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(queryByblockList));
+    public void testGetTransList() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/transaction/transList/1/1/15"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
@@ -61,12 +55,11 @@ public class BlockControllerTest {
     }
 
     @Test
-    public void testBlockByNumber() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/block/blockByNumber/1/11"));
+    public void testGetTransactionReceipt() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/transaction/transactionReceipt/1/0xda879949df6b5d75d2d807f036b461e0cebcc1abaccac119c9a282d3941a4818"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
         System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
-
 }
