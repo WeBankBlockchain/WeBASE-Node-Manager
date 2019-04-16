@@ -26,6 +26,8 @@ import lombok.NoArgsConstructor;
 public class TbTransHash {
 
     private String transHash;
+    private String transFrom;
+    private String transTo;
     private BigInteger blockNumber;
     private LocalDateTime blockTimestamp;
     private Integer statisticsFlag;
@@ -35,8 +37,10 @@ public class TbTransHash {
     /**
      * init by transaction、blockNumber、blockTimestamp.
      */
-    public TbTransHash(String transHash, BigInteger blockNumber, LocalDateTime blockTimestamp) {
+    public TbTransHash(String transHash,String transFrom,String transTo, BigInteger blockNumber, LocalDateTime blockTimestamp) {
         this.transHash = transHash;
+        this.transFrom = transFrom;
+        this.transTo = transTo;
         this.blockNumber = blockNumber;
         this.blockTimestamp = blockTimestamp;
     }
