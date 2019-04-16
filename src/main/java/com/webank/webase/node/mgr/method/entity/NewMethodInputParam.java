@@ -11,18 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.contract.entity;
+package com.webank.webase.node.mgr.method.entity;
 
+
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * entity of newMethod input.
+ */
 @Data
-public class QueryContractParam {
+public class NewMethodInputParam {
 
+    @NotNull
     private Integer groupId;
-    private String contractName;
-    private String contractAddress;
-    private Integer pageNumber;
-    private Integer pageSize;
-
-
+    @NotNull
+    List<Method> methodList;
 }

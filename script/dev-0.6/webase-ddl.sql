@@ -87,7 +87,18 @@ CREATE TABLE IF NOT EXISTS tb_contract (
 
 
 
-
+-- ----------------------------
+-- Table structure for tb_method
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_method(
+  method_id varchar(128) COMMENT '方法id',
+  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  abi_info text COMMENT 'abi信息',
+  method_type varchar(32) COMMENT '方法类型',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (method_id,group_id)
+) COMMENT='方法解析信息表' ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 
