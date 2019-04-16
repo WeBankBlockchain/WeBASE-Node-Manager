@@ -78,6 +78,7 @@ cd dist/conf
 ```shell
 修改当前服务端口：sed -i "s/8080/${your_server_port}/g" application.yml
 修改数据库IP：sed -i "s/127.0.0.1/${your_db_ip}/g" application.yml
+修改数据库端口：sed -i "s/3306/${your_db_port}/g" application.yml
 修改数据库名称：sed -i "s/fisco-bcos-data/${your_db_name}/g" application.yml
 修改数据库用户名：sed -i "s/defaultAccount/${your_db_account}/g" application.yml
 修改数据库密码：sed -i "s/defaultPassword/${your_db_password}/g" application.yml
