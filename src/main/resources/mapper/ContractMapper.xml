@@ -159,8 +159,8 @@
     <if test="contractVersion != null and contractVersion != ''">
       and contract_version = #{contractVersion}
     </if>
-    <if test="partOfByecodebin != null and partOfByecodebin != ''">
-      and locate(bytecodeBin,#{partOfByecodebin})
+    <if test="partOfBytecodeBin != null and partOfBytecodeBin != ''">
+      and locate(bytecodeBin,#{partOfBytecodeBin})
     </if>
     limit 1
   </select>
