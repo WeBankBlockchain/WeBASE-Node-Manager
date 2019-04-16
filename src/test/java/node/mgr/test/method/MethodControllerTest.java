@@ -54,8 +54,8 @@ public class MethodControllerTest {
     @Test
     public void testAddMethod() throws Exception {
         Method method = new Method();
-        method.setMethodId("methodIdttttt");
-        method.setAbiInfo("abiTest2222");
+        method.setMethodId("methodIasdfdttttt");
+        method.setAbiInfo("fsdabiTestfd232222");
         method.setMethodType("function");
 
         NewMethodInputParam param = new NewMethodInputParam();
@@ -75,7 +75,7 @@ public class MethodControllerTest {
 
     @Test
     public void testFindById() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/method/findById/2/atestMethod"));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/method/findById/2/methodIasdfdttttt"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
