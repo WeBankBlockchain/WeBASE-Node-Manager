@@ -62,4 +62,14 @@ public class TransHashControllerTest {
             andDo(MockMvcResultHandlers.print());
         System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
+
+
+    @Test
+    public void testGetTransactionByHash() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/transaction/transInfo/1/0xda879949df6b5d75d2d807f036b461e0cebcc1abaccac119c9a282d3941a4818"));
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
 }

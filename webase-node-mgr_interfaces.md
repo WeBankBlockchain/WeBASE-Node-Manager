@@ -23,6 +23,7 @@
   - [5.2.查询合约信息](#5.2)
   - [5.3.部署合约](#5.3)
   - [5.4.发送交易](#5.4)
+  - [5.5.根据包含bytecodeBin的字符串查询合约](#5.5)
 - [6.服务器监控相关](#6)
   - [6.1.获取节点监控信息](#6.1)
   - [6.2.获取服务器监控信息](#6.2)
@@ -36,7 +37,6 @@
   - [8.1.获取群组概况](#8.1)
   - [8.2.获取所有群组列表](#8.2)
   - [8.3.查询每日交易数据](#8.3)
-  - [8.4.修改群组名称](#8.4)
 - [9.节点管理模块](#9)
   - [9.1.查询节点列表](#9.1)
   - [9.2.查询节点信息](#9.2)
@@ -48,9 +48,9 @@
   - [11.3.修改用户备注](#11.3)
   - [11.4.查询私钥](#11.4)
   - [11.5.查询用户列表](#11.5)
-- [12.文件管理模块](#12)
-  - [12.1.文件上传](#12.1)
-
+- [12.合约方法管理模块](#12)
+  - [12.1.新增合约方法](#12.1)
+  - [12.2.根据方法编号查询](#12.2)
 
 
 
@@ -295,14 +295,14 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 ### <span id="2.2">2.2 查询交易回执</span>  [top](#catalog_top)
 
 
-#### 2.1.1 传输协议规范
+#### 2.2.1 传输协议规范
 
 * 网络传输协议：使用HTTP协议
 * 请求地址：`/transaction/transactionReceipt/{groupId}/{transHash}`
 * 请求方式：GET
 * 返回格式：JSON
 
-#### 2.1.2 参数信息详情
+#### 2.2.2 参数信息详情
 
 | 序号  | 输入参数        | 类型          | 可为空 | 备注                       |
 |-------|-----------------|---------------|--------|----------------------------|
@@ -326,12 +326,12 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 | 3.11 | logs      | String | 否     | 日志                   |
 | 3.12 | logsBloom      | String | 否     | log的布隆过滤值                   |
 
-#### 2.1.3 入参示例
+#### 2.2.3 入参示例
 ```
 http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda879949df6b5d75d2d807f036b461e0cebcc1abaccac119c9a282d3941a4818
 ```
 
-#### 2.1.4 出参示例
+#### 2.2.4 出参示例
 * 成功：
 ```
 {
@@ -369,6 +369,97 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 }
 ```
 
+
+### <span id="2.3">2.3 根据交易hash查询交易信息</span>  [top](#catalog_top)
+
+
+#### 2.3.1 传输协议规范
+
+* 网络传输协议：使用HTTP协议
+* 请求地址：`/transaction/transInfo/{groupId}/{transHash}`
+* 请求方式：GET
+* 返回格式：JSON
+
+#### 2.3.2 参数信息详情
+
+| 序号  | 输入参数        | 类型          | 可为空 | 备注                       |
+|-------|-----------------|---------------|--------|----------------------------|
+| 1     | groupId         | int           | 否     | 所属群组编号               |
+| 2     | transHash       | String        | 是     | 交易hash                   |
+| 序号  | 输出参数        | 类型          |        | 备注                       |
+| 1     | code            | Int           | 否     | 返回码，0：成功 其它：失败 |
+| 2     | message         | String        | 否     | 描述                       |
+| 3     |                 | Object        |        | 交易信息对象               |
+| 3.1   | hash            | String        | 否     | 交易hash                   |
+| 3.2   | transactionIndex         | Int           | 否     | 在区块中的索引               |
+| 3.2   | blockHash         | String           | 否     | 区块hash               |
+| 3.3   | blockNumber     | BigInteger    | 否     | 所属块高                   |
+| 3.4   | cumulativeGasUsed  | Int           | 否     |                |
+| 3.5   | gasUsed         | Int | 否     | 交易消耗的gas                   |
+| 3.6   | contractAddress      | String | 否     | 合约地址                   |
+| 3.7   | status          | String | 否     | 交易的状态值                   |
+| 3.8   | from            | String | 否     | 交易发起者                   |
+| 3.9   | to              | String | 否     | 交易目标                   |
+| 3.10  | output          | String | 否     | 交易输出内容                   |
+| 3.11  | logs            | String | 否     | 日志                   |
+| 3.12  | logsBloom       | String | 否     | log的布隆过滤值                   |
+| 3.13  | nonce           | String | 否     |                    |
+| 3.14  | value           | String | 否     |                    |
+| 3.15  | gasPrice        | long | 否     |                    |
+| 3.16  | gas             | long | 否     |                    |
+| 3.17  | input           | String | 否     |                    |
+| 3.18  | v               | int | 否     |                    |
+| 3.19  | nonceRaw        | String | 否     |                    |
+| 3.20  | blockNumberRaw  | String | 否     |                    |
+| 3.21  | gasPriceRaw     | String | 否     |                    |
+| 3.22  | gasRaw          | String | 否     |                    |
+
+
+
+
+
+#### 2.3.3 入参示例
+```
+http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75d2d807f036b461e0cebcc1abaccac119c9a282d3941a4818
+```
+
+#### 2.3.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "data": {
+        "hash": "0xda879949df6b5d75d2d807f036b461e0cebcc1abaccac119c9a282d3941a4818",
+        "nonce": "600264747827990445399299219738839026203774909117379671331964756256186263529",
+        "blockHash": "0x739853061c6c87ed691c0ee6f938589f7e2e442d42b16f582b353a475359b91d",
+        "blockNumber": 4311,
+        "transactionIndex": 0,
+        "from": "0xe4bc056009daed8253008e03db6f62d93ccfacea",
+        "to": "0x522eda3fbe88c07025f1db3f7dc7d9836af95b3f",
+        "value": 0,
+        "gasPrice": 100000000,
+        "gas": 100000000,
+        "input": "0x4ed3885e000000000000000",
+        "v": 0,
+        "nonceRaw": "0x153bce0f26461030fe5189385b9c3e84336b007769a3849524ca3f4af7d67e9",
+        "blockNumberRaw": "0x10d7",
+        "transactionIndexRaw": "0x0",
+        "gasPriceRaw": "0x5f5e100",
+        "gasRaw": "0x5f5e100"
+    }
+}
+```
+
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
 
 
 
@@ -761,6 +852,140 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 }
 ```
 
+
+### <span id="4.2">4.2 根据块高查询区块信息</span>  [top](#catalog_top)
+
+#### 4.2.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址:`/block/blockList/{groupId}/{pageNumber}/{pageSize}}?pkHash={pkHash}&blockNumber={blockNumber}`
+* 请求方式：GET
+* 返回格式：JSON
+
+#### 4.2.2 参数信息详情
+
+| 序号  | 输入参数       | 类型          | 可为空 | 备注                       |
+|-------|----------------|---------------|--------|----------------------------|
+| 1     | groupId        | Int           | 否     | 当前所属链                 |
+| 2     | pageSize       | Int           | 否     | 每页记录数                 |
+| 3     | pageNumber     | Int           | 否     | 当前页码                   |
+| 4     | pkHash         | String        | 是     | 区块hash                   |
+| 5     | blockNumber    | BigInteger    | 是     | 块高                       |
+|       | 输出参数       | 类型          |        | 备注                       |
+| 1     | code           | Int           | 否     | 返回码，0：成功 其它：失败 |
+| 2     | message        | String        | 否     | 描述                       |
+| 3     |                | Object        |        | 区块信息对象               |
+| 3.1   | number         | BigInteger    | 否     | 块高                       |
+| 3.2   | hash           | String        | 否     | 区块hsah                   |
+| 3.3   | parentHash     | String        | 否     | 父块hash                   |
+| 3.4   | nonce          | String        | 否     | 随机数                     |
+| 3.5   | sealer         | String        | 否     | 打包节点索                 |
+| 3.6   | logsBloom      | String        | 否     | log的布隆过滤值            |
+| 3.7   | transactionsRoot        | String        | 否     |                    |
+| 3.8   | stateRoot        | String        | 否     |                    |
+| 3.9   | difficulty        | String        | 否     |                    |
+| 3.10   | totalDifficulty        | String        | 否     |                    |
+| 3.11   | extraData        | String        | 否     |                    |
+| 3.12   | size        | int        | 否     |                    |
+| 3.13   | gasLimit        | long        | 否     | 限制gas值                   |
+| 3.14   | gasUsed        | long        | 否     | 已使用的gas值                 |
+| 3.15   | timestamp        | String        | 否     | 出块时间                   |
+| 3.16 | gasLimitRaw        | String        | 否     |                    |
+| 3.17   | timestampRaw        | String        | 否     |                    |
+| 3.18   | gasUsedRaw        | String        | 否     |                    |
+| 3.19   | numberRaw        | String        | 否     |                    |
+| 3.20   | transactions        | List        | 否     |                    |
+| 3.20.1     |                 | Object        |        | 交易信息对象               |
+| 3.20.1.1   | hash            | String        | 否     | 交易hash                   |
+| 3.20.1.2   | blockHash         | String           | 否     | 区块hash               |
+| 3.20.1.3   | blockNumber     | BigInteger    | 否     | 所属块高                   |
+| 3.20.1.4   | cumulativeGasUsed  | Int           | 否     |                |
+| 3.20.1.5   | gasUsed         | Int | 否     | 交易消耗的gas                   |
+| 3.20.1.6   | contractAddress      | String | 否     | 合约地址                   |
+| 3.20.1.7   | status          | String | 否     | 交易的状态值                   |
+| 3.20.1.8   | from            | String | 否     | 交易发起者                   |
+| 3.20.1.9   | to              | String | 否     | 交易目标                   |
+| 3.20.1.10  | output          | String | 否     | 交易输出内容                   |
+| 3.20.1.11  | logs            | String | 否     | 日志                   |
+| 3.20.1.12  | logsBloom       | String | 否     | log的布隆过滤值                   |
+| 3.20.1.13  | nonce           | String | 否     |                    |
+| 3.20.1.14  | value           | String | 否     |                    |
+| 3.20.1.15  | gasPrice        | long | 否     |                    |
+| 3.20.1.16  | gas             | long | 否     |                    |
+| 3.20.1.17  | input           | String | 否     |                    |
+| 3.20.1.18  | v               | int | 否     |                    |
+| 3.20.1.19  | nonceRaw        | String | 否     |                    |
+| 3.20.1.20  | blockNumberRaw  | String | 否     |                    |
+| 3.20.1.21  | gasPriceRaw     | String | 否     |                    |
+| 3.20.1.22  | gasRaw          | String | 否     |                    |
+| 3.20.1.23  | transactionIndex         | Int           | 否     | 在区块中的索引               |
+
+
+
+#### 4.2.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/block/blockByNumber/1/11`
+
+#### 4.2.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "data": {
+        "number": 11,
+        "hash": "0xeef574a136f1d5031ce7f5d4bbc19fa1a1b5736f38ec5687d43405a572219405",
+        "parentHash": "0xca84147e343acb972dc9247727b920b5c081320bbe940f4e2b24363836dca4a1",
+        "nonce": "0",
+        "sealer": "0x0",
+        "logsBloom": "0x000000000000000000000000000000000000",
+        "transactionsRoot": "0x68510be0e37b993874c6cb59170b87f01fc9672a162b30df7ea96cb026f3ab27",
+        "stateRoot": "0xa6e930f100c2f4a13816e57aede9b63f3b7d51d64148f4412d8a6efcb0fa9c79",
+        "difficulty": 0,
+        "totalDifficulty": 0,
+        "extraData": [],
+        "size": 0,
+        "gasLimit": 0,
+        "gasUsed": 0,
+        "timestamp": "1551667286153",
+        "gasLimitRaw": "0x0",
+        "timestampRaw": "0x1694693d089",
+        "gasUsedRaw": "0x0",
+        "numberRaw": "0xb",
+        "transactions": [
+            {
+                "hash": "0x30ab22a942a6545cfe46fd725e53311fbcfea655f9c0d1e198b83749f5d7bf9b",
+                "nonce": "1224685724047484442779169279180691132123728860283320089873703663086305160417",
+                "blockHash": "0xeef574a136f1d5031ce7f5d4bbc19fa1a1b5736f38ec5687d43405a572219405",
+                "blockNumber": 11,
+                "transactionIndex": 0,
+                "from": "0x148947262ec5e21739fe3a931c29e8b84ee34a0f",
+                "to": "0xdfb1684019f7f6ea2c41590ac55d29961de5deba",
+                "value": 0,
+                "gasPrice": 300000000,
+                "gas": 300000000,
+                "input": "0x66c991390000000000000000000000000000000000000000000000000000000000000004",
+                "v": 0,
+                "nonceRaw": "0x2b525c633f530fdd935428a58afcfbb533e4dd16f24eda6b6a860b63e6a2ce1",
+                "blockNumberRaw": "0xb",
+                "transactionIndexRaw": "0x0",
+                "gasPriceRaw": "0x11e1a300",
+                "gasRaw": "0x11e1a300"
+            }
+        ]
+    }
+```
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+
+
 ## <span id="5">5 合约管理模块</span>  [top](#catalog_top)
 
 ### <span id="5.1">5.1 查询合约列表</span>  [top](#catalog_top)
@@ -792,16 +1017,17 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 | 5.1.3  | groupId       | Int           | 否     | 所属群组编号                                    |
 | 5.1.4  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
 | 5.1.5  | contractSource  | String        | 否     | 合约源码                                        |
-| 5.1.6  | contractStatus  | Int           | 否     | 部署状态（1：未部署，2：部署成功，3：部署失败） |
-| 5.1.7  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
-| 5.1.8  | contractBin     | String        | 是     | 合约binary                                      |
-| 5.1.9 | bytecodeBin     | String        | 是     | 合约bin                                         |
-| 5.1.10 | contractAddress | String        | 是     | 合约地址                                        |
-| 5.1.11 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
-| 5.1.12 | contractVersion | String        | 否     | 合约版本                                        |
-| 5.1.13 | description     | String        | 是     | 备注                                            |
-| 5.1.14 | createTime      | LocalDateTime | 否     | 创建时间                                        |
-| 5.1.15 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
+| 5.1.6  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
+| 5.1.7  | contractBin     | String        | 是     | 合约binary                                      |
+| 5.1.8 | bytecodeBin     | String        | 是     | 合约bin                                         |
+| 5.1.9 | contractAddress | String        | 是     | 合约地址                                        |
+| 5.1.10 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
+| 5.1.11 | contractVersion | String        | 否     | 合约版本                                        |
+| 5.1.12 | description     | String        | 是     | 备注                                            |
+| 5.1.13 | createTime      | LocalDateTime | 否     | 创建时间                                        |
+| 5.1.14 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
+
+
 
 #### 5.1.3 入参示例
 `http://127.0.0.1:8080/webase-node-mgr/contract/contractList`
@@ -823,7 +1049,6 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
             "groupId": 300001,
             "contractType": 0,
             "contractSource": "cHJhZ21hIHNvbQ0KfQ==",
-            "contractStatus": 1,
             "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":\"}]",
             "contractBin": "60606040526945a9521ffdcb8fe5825c208260d0029",
             "bytecodeBin": "6060604052341561000c57fe5b06103dd83029",
@@ -870,16 +1095,15 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 | 3.3  | groupId       | Int           | 否     | 所属群组编号                                      |
 | 3.4  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
 | 3.5  | contractSource  | String        | 否     | 合约源码                                        |
-| 3.6  | contractStatus  | Int           | 否     | 部署状态（1：未部署，2：部署成功，3：部署失败） |
-| 3.7  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
-| 3.8  | contractBin     | String        | 是     | 合约binary                                      |
-| 3.9 | bytecodeBin     | String        | 是     | 合约bin                                         |
-| 3.10 | contractAddress | String        | 是     | 合约地址                                        |
-| 3.11 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
-| 3.12 | contractVersion | String        | 否     | 合约版本                                        |
-| 3.13 | description     | String        | 是     | 备注                                            |
-| 3.14 | createTime      | LocalDateTime | 否     | 创建时间                                        |
-| 3.15 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
+| 3.6  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
+| 3.7  | contractBin     | String        | 是     | 合约binary                                      |
+| 3.8 | bytecodeBin     | String        | 是     | 合约bin                                         |
+| 3.9 | contractAddress | String        | 是     | 合约地址                                        |
+| 3.10 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
+| 3.11 | contractVersion | String        | 否     | 合约版本                                        |
+| 3.12 | description     | String        | 是     | 备注                                            |
+| 3.13 | createTime      | LocalDateTime | 否     | 创建时间                                        |
+| 3.14 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
 
 #### 5.2.3 入参示例
 `http://127.0.0.1:8080/webase-node-mgr/contract/200001`
@@ -896,7 +1120,6 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
         "contractName": "33",
         "groupId": 300001,
         "contractSource": "efsdfde",
-        "contractStatus": 1,
         "contractAbi": "sdfsd",
         "contractAddress": "vcde",
         "deployTime": null,
@@ -931,19 +1154,37 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 
 | 序号 | 输入参数          | 类型           | 可为空 | 备注                       |
 |------|-------------------|----------------|--------|----------------------------|
-| 1    | contractId        | int            | 否     | 合约编号                   |
-| 2    | groupId           | Int            | 否     | 所属群组编号               |
+| 1    | groupId           | Int            | 否     | 所属群组编号               |
+| 2    | contractName      | String         | 否     | 合约名称               |
 | 3    | contractSource    | String         | 否     | 合约源码                   |
 | 4    | contractAbi       | String         | 否     | 编译合约生成的abi文件内容  |
 | 5    | contractBin       | String         | 否     | 合约binary                 |
 | 6    | bytecodeBin       | String         | 否     | 合约bin                    |
-| 7    | description       | String         | 是     | 备注                       |
-| 8    | userId            | String         | 否     | 私钥用户编号               |
-| 9    | constructorParams | List\<Object\> | 是     | 构造函数入参               |
+| 7    | userId            | String         | 否     | 私钥用户编号               |
+| 8    | constructorParams | List\<Object\> | 是     | 构造函数入参               |
 | 序号 | 输出参数          | 类型           |        | 备注                       |
-| 1    | code              | Int            | 否     | 返回码，0：成功 其它：失败 |
-| 2    | message           | String         | 否     | 描述                       |
-| 3    | data              | object         | 是     | 返回信息实体（空）         |
+| 1    | code            | Int           | 否     | 返回码，0：成功 其它：失败                      |
+| 2    | message         | String        | 否     | 描述                                            |
+| 3    |                 | Oject         |        | 返回信息实体                                    |
+| 3.1  | contractId      | int           | 否     | 合约编号                                        |
+| 3.2  | contractName    | String        | 否     | 合约名称                                        |
+| 3.3  | groupId       | Int           | 否     | 所属群组编号                                      |
+| 3.4  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
+| 3.5  | contractSource  | String        | 否     | 合约源码                                        |
+| 3.6  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
+| 3.7  | contractBin     | String        | 是     | 合约binary                                      |
+| 3.8 | bytecodeBin     | String        | 是     | 合约bin                                         |
+| 3.9 | contractAddress | String        | 是     | 合约地址                                        |
+| 3.10 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
+| 3.11 | contractVersion | String        | 否     | 合约版本                                        |
+| 3.12 | description     | String        | 是     | 备注                                            |
+| 3.13 | createTime      | LocalDateTime | 否     | 创建时间                                        |
+| 3.14 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
+
+
+
+
+
 
 #### 5.3.3 入参示例
 `http://127.0.0.1:8080/webase-node-mgr/contract/deploy`
@@ -968,21 +1209,17 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
     "code": 0,
     "message": "success",
     "data": {
-        "contractId": 200035,
-        "contractName": "Helllo",
+        "contractId": 200001,
+        "contractName": "33",
         "groupId": 300001,
-        "contractType": 0,
-        "contractSource": "cHJhZ21hIHNvbGgICAgfQ0KfQ==",
-        "contractStatus": 1,
-        "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"type\":\"function\"}]",
-        "contractBin": "606060405260004a9354c32393ae5c9bfee50029",
-        "bytecodeBin": "6060604052341561000c57fe5b6040516103dd3803806103dd829",
-        "contractAddress": null,
+        "contractSource": "efsdfde",
+        "contractAbi": "sdfsd",
+        "contractAddress": "vcde",
         "deployTime": null,
-        "contractVersion": "v1.0",
-        "description": null,
-        "createTime": "2019-03-11 10:11:59",
-        "modifyTime": "2019-03-11 10:28:06"
+        "contractVersion": "33",
+        "description": "vcde",
+        "createTime": "2018-12-02 16:09:57",
+        "modifyTime": "2018-12-02 16:22:25"
     }
 }
 ```
@@ -1016,7 +1253,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 | 4    | version      | String         | 否     | 合约版本                   |
 | 5    | contractName | String         | 否     | 合约名称                   |
 | 6    | funcName     | String         | 否     | 合约方法名                 |
-| 7    | funcParam    | List\<Object\> | 是     | 合约方法入参               |
+| 7    | contractAddress     | String         | 是     | 合约地址（传合约名和版本时可为空）   |
+| 8    | funcParam    | List\<Object\> | 是     | 合约方法入参               |
 | 序号 | 输出参数     | 类型           |        | 备注                       |
 | 1    | code         | Int            | 否     | 返回码，0：成功 其它：失败 |
 | 2    | message      | String         | 否     | 描述                       |
@@ -1029,7 +1267,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
     "groupId": "300001",
     "contractBin": "6060604052600f8dee08980029",
     "bytecodeBin": null,
-    "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"bytes\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"type\":\"function\"}]",
+    "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"type\":\"function\"}]",
     "contractSource": "cHJhZ21hIHNvbGlkaXR5IF4wLjQuMjfQ==",
     "userId": 700001,
     "contractId": 200033
@@ -1056,6 +1294,83 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
     "data": {}
 }
 ```
+
+
+### <span id="5.5">5.5 根据包含bytecodeBin的字符串查询合约</span>  [top](#catalog_top)
+
+#### 5.2.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址： `/contract/findByPartOfBytecodeBin/{groupId}/{partOfBytecodeBin}`
+* 请求方式：GET
+* 返回格式：JSON
+
+#### 5.2.2 参数信息详情
+
+| 序号 | 输入参数        | 类型          | 可为空 | 备注                                            |
+|------|-----------------|---------------|--------|-------------------------------------------------|
+| 1    | groupId         | int           | 否     | 所属群组编号                                        |
+| 2    | partOfBytecodeBin      | String           | 否     | 包含合约bytecodeBin的的字符串         |
+| 序号 | 输出参数        | 类型          | 可为空 | 备注                                            |
+| 1    | code            | Int           | 否     | 返回码，0：成功 其它：失败                      |
+| 2    | message         | String        | 否     | 描述                                            |
+| 3    |                 | Oject         |        | 返回信息实体                                    |
+| 3.1  | contractId      | int           | 否     | 合约编号                                        |
+| 3.2  | contractName    | String        | 否     | 合约名称                                        |
+| 3.3  | groupId       | Int           | 否     | 所属群组编号                                      |
+| 3.4  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
+| 3.5  | contractSource  | String        | 否     | 合约源码                                        |
+| 3.6  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
+| 3.7  | contractBin     | String        | 是     | 合约binary                                      |
+| 3.8 | bytecodeBin     | String        | 是     | 合约bin                                         |
+| 3.9 | contractAddress | String        | 是     | 合约地址                                        |
+| 3.10 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
+| 3.11 | contractVersion | String        | 否     | 合约版本                                        |
+| 3.12 | description     | String        | 是     | 备注                                            |
+| 3.13 | createTime      | LocalDateTime | 否     | 创建时间                                        |
+| 3.14 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
+
+#### 5.2.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/contract/findByPartOfBytecodeBin/1/abc123455dev`
+
+#### 5.2.4 出参示例
+
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "data": {
+        "contractId": 200002,
+        "contractName": "Ok",
+        "groupId": 2,
+        "chainIndex": null,
+        "contractType": 0,
+        "contractSource": "cHJhZ21hIDQoNCg0KfQ==",
+        "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"type\":\"function\"}]",
+        "contractBin": "60606040526000357c01000000000029",
+        "bytecodeBin": "123455",
+        "contractAddress": "0x19146d3a2f138aacb97ac52dd45dd7ba7cb3e04a",
+        "deployTime": null,
+        "contractVersion": "v6.0",
+        "description": null,
+        "createTime": "2019-04-15 21:14:40",
+        "modifyTime": "2019-04-15 21:14:40"
+    }
+}
+```
+
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+
 
 
 ## <span id="6">6 服务器监控相关</span>  [top](#catalog_top)
@@ -1790,52 +2105,6 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 
 
 
-### <span id="8.4">8.4 修改群组名称</span>  [top](#catalog_top)
-
-#### 8.4.1 传输协议规范
-* 网络传输协议：使用HTTP协议
-* 请求地址：`/group/update`
-* 请求方式：put
-* 请求头：Content-type: application/json
-* 返回格式：JSON
-
-#### 8.4.2 参数信息详情
-
-| 序号 | 输入参数      | 类型   | 可为空 | 备注                        |
-|------|---------------|--------|--------|---------------------------|
-| 1    | groupId      | int     | 否     | 群组编号                   |
-| 2    | groupName    | String | 否      | 群组新名称                  |
-| 序号 | 输出参数      | 类型   |        | 备注                        |
-| 1    | code          | Int    | 否     | 返回码，0：成功 其它：失败  |
-| 2    | message       | String | 否     | 描述                       |
-
-### 8.4.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/group/update`
-```
-{
-    "groupId": 12541,
-    "groupName": "groupNew"
-}
-```
-
-
-#### 8.4.4 出参示例
-* 成功：
-```
-{
-    "code": 0,
-    "message": "success"
-}
-```
-
-* 失败：
-```
-{
-    "code": 102000,
-    "message": "system exception",
-    "data": {}
-}
-```
 
 
 ## <span id="9">9 节点管理模块</span>  [top](#catalog_top)
@@ -2397,37 +2666,48 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 
 
 
-## <span id="12">12 文件管理模块</span>  [top](#catalog_top)
 
-### <span id="12.1">12.1 文件上传</span>  [top](#catalog_top)
+
+## <span id="12">12 合约方法管理模块</span>  [top](#catalog_top)
+
+### <span id="12.1">12.1 新增合约方法</span>  [top](#catalog_top)
+
+#### 12.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址：`/file/uploadFile`
+* 请求地址： `/method/add`
 * 请求方式：POST
-* 请求编码：multipart/form-data
+* 请求头：Content-type: application/json
 * 返回格式：JSON
 
 #### 12.1.2 参数信息详情
 
-| 序号 | 输入参数        | 类型          | 可为空 | 备注                                            |
-|------|-----------------|---------------|--------|-------------------------------------------------|
-| 1    | groupId         | int           | 否     | 所属群组id                                      |
-| 2    | file            | File          | 否     | 文件  （支持格式：sol、zip ）                   |
-| 3    | description     | String        | 是     | 备注                   |
-| 2    | type            | int           | 否     | 文件类型 （0-合约）                             |
-| 序号 | 输出参数        | 类型          |        | 备注                                            |
-| 1    | code            | Int           | 否     | 返回码，0：成功 其它：失败                      |
-| 2    | message         | String        | 否     | 描述                                            |
-| 3    | data            | object        | 是     |                                                 |
+| 序号 | 输入参数    | 类型          | 可为空 | 备注                               |
+|------|-------------|---------------|--------|------------------------------------|
+| 1    | groupId     | Int           | 否     | 所属群组                           |
+| 2    | methodList  | List           | 否     | 方法列表                           |
+| 2.1  |             | Object           | 否     | 方法实体                           |
+| 2.1.1 | abiInfo    | String        | 否     | 合约abi信息                           |
+| 2.1.2 | methodId   | String        | 否     | 方法编号                           |
+| 2.1.3 | methodType | String        | 否     | 方法类型                           |
+| 序号 | 输出参数    | 类型          |        | 备注                               |
+| 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败         |
+| 2    | message     | String        | 否     | 描述                               |
+| 3    | data        | object        | 是     | 返回信息实体（空）       |
+
 
 #### 12.1.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/method/add`
 
-`http://127.0.0.1:8080/webase-node-mgr/file/uploadFile`
 ```
 {
-    "groupId": "300001",
-    "file":  File,
-    "description": "testFile",
-    "type": 0
+    "groupId": 2,
+    "methodList": [
+        {
+            "abiInfo": "fsdabiTestfd232222",
+            "methodId": "methodIasdfdttttt",
+            "methodType": "function"
+        }
+    ]
 }
 ```
 
@@ -2438,9 +2718,65 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 {
     "code": 0,
     "message": "success",
+    "data": null
+}
+```
+
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
     "data": {}
 }
 ```
+
+
+
+
+### <span id="12.2">12.2 根据方法编号查询</span>  [top](#catalog_top)
+
+#### 12.1.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址： `/method/findById/{groupId}/{methodId}`
+* 请求方式：POST
+* 请求头：Content-type: application/json
+* 返回格式：JSON
+
+#### 12.1.2 参数信息详情
+
+| 序号 | 输入参数    | 类型          | 可为空 | 备注                               |
+|------|-------------|---------------|--------|------------------------------------|
+| 1    | groupId     | Int           | 否     | 所属群组                           |
+| 2    | methodId    | String        | 否     | 方法编号                           |
+| 序号  | 输出参数     | 类型           |       | 备注                               |
+| 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败            |
+| 2    | message     | String        | 否     | 描述                               |
+| 3    | data        | List          | 是     | 返回信息实体                        |
+
+
+#### 12.1.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/method/findById/2/methodIasdfdttttt`
+
+
+#### 12.1.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "data": {
+        "methodId": "methodIasdfdttttt",
+        "groupId": 2,
+        "abiInfo": "fsdabiTestfd232222",
+        "methodType": "function",
+        "createTime": "2019-04-16 16:59:27",
+        "modifyTime": "2019-04-16 16:59:27"
+    }
+}
+```
+
 
 * 失败：
 ```
