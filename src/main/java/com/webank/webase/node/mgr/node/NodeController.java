@@ -111,41 +111,4 @@ public class NodeController {
         return baseResponse;
     }
 
-    /**
-     * add node info.
-     */
-    @PostMapping(value = "/nodeInfo")
-    public BaseResponse addNodeInfo(@RequestBody Node node) throws NodeMgrException {
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start addNodeInfo startTime:{} Node:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(node));
-
-        // add node ip
-        Integer nodeId = null;//nodeService.addNodeInfo(node);
-        // query node row
-        TbNode tbNode = nodeService.queryByNodeId(nodeId);
-        baseResponse.setData(tbNode);
-
-        log.info("end addNodeInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
-    /**
-     * delete node info.
-     */
-    @DeleteMapping(value = "/nodeInfo/{nodeId}")
-    public BaseResponse deleteNode(@PathVariable("nodeId") Integer nodeId) throws NodeMgrException {
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start deleteNode. startTime:{} nodeId:{}", startTime.toEpochMilli(), nodeId);
-
-        nodeService.deleteByNodeId(nodeId);
-
-        log.info("end deleteNode. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
 }
