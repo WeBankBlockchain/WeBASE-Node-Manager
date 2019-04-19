@@ -15,8 +15,7 @@
  */
 package com.webank.webase.node.mgr.contract.entity;
 
-import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
-import jnr.ffi.annotations.In;
+import com.webank.webase.node.mgr.front.entity.TransactionParam;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,35 +25,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class ContractParam extends BaseQueryParam {
+public class TransactionInputParam extends TransactionParam {
     private Integer groupId;
     private Integer contractId;
-    private String contractName;
-    private String contractPath;
-    private String contractVersion;
-    private String contractAddress;
-    private Integer contractStatus;
-    private Integer contractType;
-    private String partOfBytecodeBin;
-
-    /**
-     * init by contractId.
-     */
-    public ContractParam(int contractId,int groupId) {
-        super();
-        this.contractId = contractId;
-        this.groupId = groupId;
-    }
-
-    /**
-     * init by contractName、contractPath.
-     */
-    public ContractParam(int groupId, String contractPath,String contractName,String contractVersion) {
-        super();
-        this.groupId = groupId;
-        this.contractName = contractName;
-        this.contractPath = contractPath;
-        this.contractVersion = contractVersion;
-    }
-
 }

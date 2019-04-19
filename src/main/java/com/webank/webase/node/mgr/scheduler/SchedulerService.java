@@ -62,7 +62,7 @@ public class SchedulerService implements SchedulingConfigurer {
                 .nextExecutionTime(context));
 
         taskRegistrar.addFixedDelayTask(() -> pullBlockInfoTask.startPull(),
-            constants.getResetGroupListCycle());
+            constants.getPullBlockTaskFixedDelay());
 
         taskRegistrar.addFixedDelayTask(() -> resetGroupListTask.resetGroupList(),
             constants.getResetGroupListCycle());

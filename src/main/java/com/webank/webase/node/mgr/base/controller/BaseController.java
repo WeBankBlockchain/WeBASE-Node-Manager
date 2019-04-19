@@ -21,12 +21,24 @@ import javax.servlet.http.HttpSession;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 
 @Log4j2
 public class BaseController {
 
     @Autowired
     protected HttpServletRequest request;
+
+
+    /**
+     * check param valid result.
+     */
+    protected void checkBindResult(BindingResult result) throws BindException {
+        if(result.hasErrors()){
+            throw new BindException(result);
+        }
+    }
 
     /**
      * set session value.

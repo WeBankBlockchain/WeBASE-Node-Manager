@@ -14,25 +14,32 @@
 package com.webank.webase.node.mgr.contract;
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.DeployIncoming;
+import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.contract.entity.Transaction;
-import java.math.BigInteger;
+import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.BindingResultUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,10 +50,52 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 @RestController
 @RequestMapping("contract")
-public class ContractController {
+public class ContractController extends BaseController {
 
     @Autowired
     private ContractService contractService;
+
+    /**
+     * add new contract info.
+     */
+    @PostMapping(value = "/save")
+    public BaseResponse saveContract(@RequestBody @Valid Contract contract, BindingResult result)
+        throws NodeMgrException, BindException {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start saveContract startTime:{} contract:{}", startTime.toEpochMilli(),
+            JSON.toJSONString(contract));
+
+        // add contract row
+        TbContract tbContract = contractService.saveContract(contract);
+
+        baseResponse.setData(tbContract);
+
+        log.info("end saveContract useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+
+    /**
+     * delete contract by id.
+     */
+    @DeleteMapping(value = "/{groupId}/{contractId}")
+    public BaseResponse deleteContract(@PathVariable("groupId") Integer groupId,@PathVariable("contractId") Integer contractId)
+        throws NodeMgrException, Exception {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start deleteContract startTime:{} contractId:{} groupId:{}", startTime.toEpochMilli(),
+            contractId,groupId);
+
+        contractService.deleteContract(contractId,groupId);
+
+        log.info("end deleteContract useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
 
     /**
      * qurey contract info list.
@@ -102,17 +151,17 @@ public class ContractController {
     }
 
     /**
-     * deploy deployIncoming.
+     * deploy deployInputParam.
      */
     @PostMapping(value = "/deploy")
-    public BaseResponse deployContract(@RequestBody DeployIncoming deployIncoming)
+    public BaseResponse deployContract(@RequestBody DeployInputParam deployInputParam)
         throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start queryContract startTime:{} deployIncoming:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(deployIncoming));
+        log.info("start queryContract startTime:{} deployInputParam:{}", startTime.toEpochMilli(),
+            JSON.toJSONString(deployInputParam));
 
-        TbContract tbContract = contractService.deployContract(deployIncoming);
+        TbContract tbContract = contractService.deployContract(deployInputParam);
         baseResponse.setData(tbContract);
 
         log.info("end deployContract useTime:{} result:{}",
@@ -125,7 +174,7 @@ public class ContractController {
      * send transaction.
      */
     @PostMapping(value = "/transaction")
-    public BaseResponse sendTransaction(@RequestBody Transaction param) throws NodeMgrException {
+    public BaseResponse sendTransaction(@RequestBody TransactionInputParam param) throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
             JSON.toJSONString(param));
