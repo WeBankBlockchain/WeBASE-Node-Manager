@@ -74,13 +74,15 @@ public class FrontGroupMapService {
         if (groupId == 0) {
             return null;
         }
-        return getList(null,groupId,null);
+        MapListParam param = new MapListParam();
+        param.setGroupId(groupId);
+        return getList(param);
     }
 
     /**
      * get map list
      */
-    public List<FrontGroup> getList(Integer mapId, Integer groupId, Integer frontId) {
-        return frontGroupMapMapper.getList(mapId, groupId, frontId);
+    public List<FrontGroup> getList(MapListParam mapListParam) {
+        return frontGroupMapMapper.getList(mapListParam);
     }
 }

@@ -48,17 +48,17 @@ public class ChainService {
      */
     public Object getChainMonitorInfo(Integer frontId, LocalDateTime beginDate,
         LocalDateTime endDate, LocalDateTime contrastBeginDate,
-        LocalDateTime contrastEndDate, int gap) {
+        LocalDateTime contrastEndDate, int gap,int groupId) {
         log.debug(
             "start getChainMonitorInfo.  frontId:{} beginDate:{} endDate:{}"
-                + " contrastBeginDate:{} contrastEndDate:{} gap:{}",
-            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
+                + " contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}",
+            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap,groupId);
 
         // request param to str
         List<Object> valueList = Arrays
-            .asList(beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
+            .asList(beginDate, endDate, contrastBeginDate, contrastEndDate, gap,groupId);
         List<String> nameList = Arrays
-            .asList("beginDate", "endDate", "contrastBeginDate", "contrastEndDate", "gap");
+            .asList("beginDate", "endDate", "contrastBeginDate", "contrastEndDate", "gap", "groupId");
 
         String chainUrlParam = NodeMgrTools.convertUrlParam(nameList, valueList);
 

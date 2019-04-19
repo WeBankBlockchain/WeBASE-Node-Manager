@@ -27,11 +27,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ContractMapper {
 
-    Integer addContractRow(TbContract tbContract);
+    Integer add(TbContract tbContract);
 
-    Integer deleteContract(@Param("contractId") Integer contractId);
+    Integer remove(@Param("contractId") Integer contractId);
 
-    Integer updateContract(TbContract tbContract);
+    Integer update(TbContract tbContract);
 
     int countOfContract(ContractParam param);
 

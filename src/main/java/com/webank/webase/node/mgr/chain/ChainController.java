@@ -46,17 +46,18 @@ public class ChainController {
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime endDate,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime contrastBeginDate,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime contrastEndDate,
-        @RequestParam(required = false, defaultValue = "1") int gap)
+        @RequestParam(required = false, defaultValue = "1") int gap,
+        @RequestParam(required = false, defaultValue = "1") int groupId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         log.info(
             "start getChainInfo. startTime:{} frontId:{} beginDate:{} endDate:{} "
-                + "contrastBeginDate:{} contrastEndDate:{} gap:{}", startTime.toEpochMilli(),
-            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
+                + "contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}", startTime.toEpochMilli(),
+            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap,groupId);
         Object rspObj = chainService
             .getChainMonitorInfo(frontId, beginDate, endDate, contrastBeginDate, contrastEndDate,
-                gap);
+                gap,groupId);
 
         response.setData(rspObj);
         log.info("end getChainInfo. endTime:{} response:{}",

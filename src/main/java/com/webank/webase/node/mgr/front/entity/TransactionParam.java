@@ -34,11 +34,11 @@ public class TransactionParam {
     /**
      * init TransactionParam.
      */
-    public TransactionParam(Integer userId, String version, String contractName, String funcName,
+    public TransactionParam(Integer userId, String contractAddress, String contractName, String funcName,
         List<Object> funcParam) {
         super();
         this.userId = userId;
-        this.version = version;
+        this.contractAddress = contractAddress;
         this.contractName = contractName;
         this.funcName = funcName;
         this.funcParam = funcParam;

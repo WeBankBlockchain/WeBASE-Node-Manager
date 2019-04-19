@@ -35,7 +35,7 @@
     </if>
   </select>
 
-  <select id="getList" resultMap="frontGroupMap">
+  <select id="getList" resultMap="frontGroupMap" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam">
     select a.map_id,a.front_id,a.group_id,b.front_ip,b.front_port,c.group_name
     from tb_front_group_map a
     left join tb_front b on(a.front_id=b.front_id)

@@ -19,28 +19,19 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * receive contract info entity.
  */
 @Data
-public class DeployIncoming {
-    @NotNull
-    private Integer groupId;
-    @NotBlank
-    private String contractName;
-    @NotBlank
-    private String contractVersion;
-    @NotBlank
-    private String contractSource;
-    @NotBlank
-    private String contractAbi;
-    @NotBlank
-    private String contractBin;
-    @NotBlank
-    private String bytecodeBin;
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class DeployInputParam extends Contract{
     @NotNull
     private Integer userId;
+
     private List<Object> constructorParams;
 }
 
