@@ -4,7 +4,7 @@
 
 <!--对应mapper接口 -->
 <mapper namespace="com.webank.webase.node.mgr.group.GroupMapper">
-  <resultMap id="groupMap" type="com.webank.webase.node.mgr.group.TbGroup">
+  <resultMap id="groupMap" type="com.webank.webase.node.mgr.group.entity.TbGroup">
     <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
     <result column="group_name" javaType="java.lang.String" jdbcType="VARCHAR"
       property="groupName"/>
@@ -18,7 +18,7 @@
 
 
   <resultMap id="statisticalTransMap"
-    type="com.webank.webase.node.mgr.group.StatisticalGroupTransInfo">
+    type="com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo">
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="groupId"/>
     <result column="maxDay" javaType="java.time.LocalDate" jdbcType="TIMESTAMP" property="maxDay"/>
@@ -32,11 +32,11 @@
 		front_id frontId,front_ip frontIp,front_port frontPort,create_time createTime,modify_time modifyTime
 	</sql>
 
-  <insert id="save" parameterType="com.webank.webase.node.mgr.group.TbGroup">
-		insert ignore into tb_group
+  <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
+		insert into tb_group
 		(group_id,group_name,node_count,create_time,modify_time)
 		values(#{groupId},#{groupName},#{nodeCount},NOW(),NOW())
-		ON DUPLICATE KEY UPDATE node_count=#{nodeCount};
+		ON DUPLICATE KEY UPDATE node_count=#{nodeCount}
 	</insert>
 
 
@@ -58,16 +58,16 @@
 		(select group_id,max(trans_day) as maxDay from tb_trans_daily GROUP BY group_id)b
 		on (a.group_id = b.group_id)
 		LEFT JOIN
-		tb_trans_daily c on(b.group_id = c.group_id and b.maxDay = c.trans_day);
+		tb_trans_daily c on(b.group_id = c.group_id and b.maxDay = c.trans_day)
 	</select>
 
-  <select id="getGeneral" resultType="com.webank.webase.node.mgr.group.GroupGeneral">
+  <select id="getGeneral" resultType="com.webank.webase.node.mgr.group.entity.GroupGeneral">
 		SELECT a.group_id groupId,a.node_count nodeCount,b.contractCount
 		FROM tb_group a
 		LEFT 	JOIN
 		(
 		select group_id,count(1)
-		contractCount from tb_contract where contract_type=0 GROUP BY group_id
+		contractCount from tb_contract where contract_type=0 and contract_status=2 GROUP BY group_id
 		)b on(a.group_id = b.group_id)
 		where a.group_id = #{groupId}
 	</select>

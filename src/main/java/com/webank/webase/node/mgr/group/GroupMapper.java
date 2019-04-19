@@ -13,6 +13,9 @@
  */
 package com.webank.webase.node.mgr.group;
 
+import com.webank.webase.node.mgr.group.entity.GroupGeneral;
+import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

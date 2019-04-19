@@ -83,7 +83,7 @@ public class ConstantCode {
     public static final RetCode DELETE_DEPLOYED_CONTRACT = RetCode
         .mark(202022, "unable to delete deployed contract");
 
-    public static final RetCode NODE_IP_EMPTY = RetCode.mark(202023, "node ip cannot be empty");
+    public static final RetCode CONTRACT_NOT_DEPLOY = RetCode.mark(202023, "contract has not deploy");
 
     public static final RetCode NODE_P2P_PORT_EMPTY = RetCode
         .mark(202024, "node p2p port cannot be empty");
