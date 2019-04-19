@@ -31,6 +31,5 @@ public interface FrontGroupMapMapper {
 
     int removeByFrontId(@Param("frontId") Integer frontId);
 
-    List<FrontGroup> getList(@Param("mapId") Integer mapId, @Param("groupId") Integer groupId,
-        @Param("frontId") Integer frontId);
+    List<FrontGroup> getList(MapListParam mapListParam);
 }

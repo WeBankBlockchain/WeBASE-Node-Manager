@@ -20,6 +20,8 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.group.entity.GroupGeneral;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.scheduler.StatisticsTransdailyTask;
 import com.webank.webase.node.mgr.transdaily.SeventDaysTrans;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;

@@ -13,17 +13,25 @@
  */
 package com.webank.webase.node.mgr.contract.entity;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ *
+ */
 @Data
-public class QueryContractParam {
-
+public class Contract {
+    @NotNull
     private Integer groupId;
+    private Integer contractId;
+    @NotBlank
     private String contractName;
-    private String contractAddress;
-    private Integer contractStatus;
-    private Integer pageNumber;
-    private Integer pageSize;
-
-
+    @NotBlank
+    private String contractPath;
+    private String contractSource;
+    private String contractVersion;
+    private String contractAbi;
+    private String contractBin;
+    private String bytecodeBin;
 }

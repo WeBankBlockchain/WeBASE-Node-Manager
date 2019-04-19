@@ -23,6 +23,7 @@ public class TbFront {
     private Integer frontId;
     private String frontIp;
     private Integer frontPort;
+    private String agency;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 }

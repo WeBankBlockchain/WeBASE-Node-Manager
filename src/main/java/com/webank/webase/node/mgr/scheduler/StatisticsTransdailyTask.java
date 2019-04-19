@@ -16,13 +16,12 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
-import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.block.entity.BlockListParam;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.StatisticalGroupTransInfo;
+import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import java.math.BigInteger;
 import java.time.Duration;
