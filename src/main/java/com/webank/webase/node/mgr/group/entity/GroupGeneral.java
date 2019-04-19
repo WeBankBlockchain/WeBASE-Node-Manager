@@ -13,32 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.group;
+package com.webank.webase.node.mgr.group.entity;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-/**
- * Entity class of table tb_group.
- */
 @Data
-@NoArgsConstructor
-public class TbGroup {
+public class GroupGeneral {
 
     private Integer groupId;
-    private String groupName;
-    private int groupStatus;
-    private Integer nodeCount;
+    private int orgCount;
+    private int nodeCount;
+    private int contractCount;
+    private BigInteger transactionCount = BigInteger.ZERO;
     private BigInteger latestBlock = BigInteger.ZERO;
-    private BigInteger transCount = BigInteger.ZERO;
-    private LocalDateTime createTime;
-    private LocalDateTime modifyTime;
 
-    public TbGroup(Integer groupId, String groupName,Integer nodeCount){
-        this.groupId = groupId;
-        this.groupName = groupName;
-        this.nodeCount = nodeCount;
-    }
 }

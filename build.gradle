@@ -85,6 +85,7 @@ clean {
     delete 'build'
 }
 
+
 jar {
     destinationDir file('dist/apps')
     archiveName project.name + '.jar'

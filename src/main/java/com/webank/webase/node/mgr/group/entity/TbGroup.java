@@ -13,19 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.contract.entity;
+package com.webank.webase.node.mgr.group.entity;
 
-import com.webank.webase.node.mgr.front.entity.TransactionParam;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
+/**
+ * Entity class of table tb_group.
+ */
 @Data
 @NoArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class Transaction extends TransactionParam {
+public class TbGroup {
 
     private Integer groupId;
+    private String groupName;
+    private int groupStatus;
+    private Integer nodeCount;
+    private BigInteger latestBlock = BigInteger.ZERO;
+    private BigInteger transCount = BigInteger.ZERO;
+    private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
+
+    public TbGroup(Integer groupId, String groupName,Integer nodeCount){
+        this.groupId = groupId;
+        this.groupName = groupName;
+        this.nodeCount = nodeCount;
+    }
 }

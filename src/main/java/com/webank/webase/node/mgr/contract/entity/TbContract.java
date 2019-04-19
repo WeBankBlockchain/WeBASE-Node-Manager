@@ -27,9 +27,11 @@ import lombok.NoArgsConstructor;
 public class TbContract {
 
     private Integer contractId;
+    private String contractPath;
+    private String contractVersion;
     private String contractName;
+    private Integer contractStatus;
     private Integer groupId;
-    private Integer chainIndex;
     private Integer contractType;
     private String contractSource;
     private String contractAbi;
@@ -37,20 +39,18 @@ public class TbContract {
     private String bytecodeBin;
     private String contractAddress;
     private LocalDateTime deployTime;
-    private String contractVersion;
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
     /**
-     * init by contractId、contractName、groupId、contractVersion.
+     * init by contractId、contractName、groupId、contractPath.
      */
-    public TbContract(Integer contractId, String contractName, Integer groupId,
-        String contractVersion) {
+    public TbContract(Integer contractId, String contractName, Integer groupId) {
         super();
         this.contractId = contractId;
         this.contractName = contractName;
         this.groupId = groupId;
-        this.contractVersion = contractVersion;
     }
+
 }

@@ -18,7 +18,7 @@ import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.TbGroup;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
