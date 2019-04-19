@@ -16,7 +16,7 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.TbGroup;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.TransHashService;

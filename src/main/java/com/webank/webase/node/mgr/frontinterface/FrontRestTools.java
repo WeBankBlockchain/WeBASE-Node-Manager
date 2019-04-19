@@ -18,6 +18,7 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -31,9 +32,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -81,6 +80,8 @@ public class FrontRestTools {
     private RestTemplate deployRestTemplate;
     @Autowired
     private ConstantProperties cproperties;
+    @Autowired
+    private FrontGroupMapCache frontGroupMapCache;
 
     //description：key:frontIp$frontPort   value:FailInfo
     //example： key:12345475275272$8081  value: {"lastTime":554294068415,"failCount":3}
@@ -202,10 +203,10 @@ public class FrontRestTools {
      * get from front for entity.
      */
     public <T> T getForEntity(Integer groupId, String uri, Class<T> clazz) {
-        List<FrontGroup> mapList = mapService.listByGroupId(groupId);
-        while (true) {
+        List<FrontGroup> mapList = frontGroupMapCache.getMapListByGroupId(groupId);
+        while (mapList != null && mapList.size() > 0) {
             String url = buildFrontUrl(mapList, uri, HttpMethod.GET);//build url
-            log.info("getForEntity url:{}",url);
+            log.info("getForEntity url:{}", url);
             try {
                 if (StringUtils.isBlank(url)) {
                     log.warn("fail getForEntity. url is null");
@@ -219,6 +220,7 @@ public class FrontRestTools {
                 continue;
             }
         }
+        return null;
     }
 
 
@@ -226,10 +228,10 @@ public class FrontRestTools {
      * post from front for entity.
      */
     public <T> T postForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
-        List<FrontGroup> mapList = mapService.listByGroupId(groupId);
-        while (true) {
+        List<FrontGroup> mapList = frontGroupMapCache.getMapListByGroupId(groupId);
+        while (mapList != null && mapList.size() > 0) {
             String url = buildFrontUrl(mapList, uri, HttpMethod.POST);//build url
-            log.info("postForEntity url:{}",url);
+            log.info("postForEntity url:{}", url);
 
             try {
                 if (StringUtils.isBlank(url)) {
@@ -249,6 +251,7 @@ public class FrontRestTools {
                 continue;
             }
         }
+        return null;
     }
 
 }

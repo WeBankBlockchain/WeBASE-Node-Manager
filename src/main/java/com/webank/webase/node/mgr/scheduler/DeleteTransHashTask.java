@@ -18,7 +18,7 @@ package com.webank.webase.node.mgr.scheduler;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.TbGroup;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.math.BigInteger;
 import java.time.Duration;

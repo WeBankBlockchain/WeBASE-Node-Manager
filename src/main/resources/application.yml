@@ -32,7 +32,8 @@ constant:
   deleteInfoCron: "0 0/2 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
   insertTransMonitorCron: "0 0/10 * * * ?"
-  pullBlockSleepTime: 500
+  pullBlockSleepTime: 100
+  pullBlockTaskFixedDelay: 30000
   resetGroupListCycle: 600000
   isBlockPullFromZero: false
   contractDeployTimeOut: 30000

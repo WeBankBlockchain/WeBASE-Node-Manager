@@ -55,20 +55,20 @@ public class ExceptionsHandler {
 
 
     /**
-     * catch：Exception.
+     * catch：RuntimeException.
      */
     @ResponseBody
-    @ExceptionHandler(value = Exception.class)
-    public BaseResponse exceptionHandler(Exception exc) {
-        log.info("catch exception", exc);
+    @ExceptionHandler(value = RuntimeException.class)
+    public BaseResponse exceptionHandler(RuntimeException exc) {
+        log.info("catch RuntimeException", exc);
         // 默认系统异常
         RetCode retCode = ConstantCode.SYSTEM_EXCEPTION;
 
         BaseResponse bre = new BaseResponse(retCode);
         try {
-            log.warn("system exception return:{}", mapper.writeValueAsString(bre));
+            log.warn("system RuntimeException return:{}", mapper.writeValueAsString(bre));
         } catch (JsonProcessingException ex) {
-            log.warn("system exception", ex);
+            log.warn("system RuntimeException", ex);
         }
 
         return bre;
