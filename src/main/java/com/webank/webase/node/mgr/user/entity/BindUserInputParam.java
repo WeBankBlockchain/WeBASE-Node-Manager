@@ -13,19 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.account;
+package com.webank.webase.node.mgr.user.entity;
 
+import com.webank.webase.node.mgr.base.enums.UserType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * entity for update password.
- */
 @Data
-public class PasswordInfo {
+@NoArgsConstructor
+public class BindUserInputParam {
     @NotBlank
-    private String oldAccountPwd;
+    public String userName;
     @NotBlank
-    private String newAccountPwd;
+    public String publicKey;
+    @NotNull
+    public Integer groupId;
+    public String description;
+    public Integer userType = UserType.GENERALUSER.getValue();
 }

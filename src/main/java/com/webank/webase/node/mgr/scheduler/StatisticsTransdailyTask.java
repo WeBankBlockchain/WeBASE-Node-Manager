@@ -98,7 +98,7 @@ public class StatisticsTransdailyTask {
             if (blockList == null | blockList.size() == 0) {
                 log.info("updateTransdailyData jump over .This chain [{}] did not find new block",
                     groupId);
-                return;
+                continue;
             }
             for (int i = 0; i < blockList.size(); i++) {
                 TbBlock tbBlock = blockList.get(i);
@@ -106,7 +106,7 @@ public class StatisticsTransdailyTask {
                     : tbBlock.getBlockTimestamp().toLocalDate();
                 if (blockDate == null) {
                     log.warn("updateTransdailyData jump over . blockDate is null");
-                    return;
+                    continue;
                 }
 
                 BigInteger blockTransCount = new BigInteger(

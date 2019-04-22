@@ -73,6 +73,9 @@
     <if test="contractStatus != null and contractStatus != ''">
       ,contract_status = #{contractStatus}
     </if>
+    <if test="contractName != null and contractName != ''">
+      ,contract_name = #{contractName}
+    </if>
     <if test="contractVersion != null and contractVersion != ''">
       ,contract_version = #{contractVersion}
     </if>
@@ -104,7 +107,7 @@
       and group_id = #{groupId}
     </if>
     <if test="contractName != null and contractName != ''">
-      and contract_name = #{contractName}
+      and contract_name like CONCAT('%',#{contractName},'%')
     </if>
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address = #{contractAddress}
