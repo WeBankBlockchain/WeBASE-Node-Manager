@@ -26,12 +26,25 @@ import lombok.ToString;
  * receive contract info entity.
  */
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class DeployInputParam extends Contract{
+public class DeployInputParam{
     @NotNull
     private Integer userId;
-
+    @NotNull
+    private Integer groupId;
+    @NotNull
+    private Integer contractId;
+    @NotBlank
+    private String contractName;
+    @NotBlank
+    private String contractPath;
+    @NotBlank
+    private String contractSource;
+    @NotBlank
+    private String contractAbi;
+    @NotBlank
+    private String contractBin;
+    @NotBlank
+    private String bytecodeBin;
     private List<Object> constructorParams;
 }
 

@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.front;
 
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
@@ -28,8 +29,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 @RestController
 @RequestMapping("front")
-public class FrontController {
+public class FrontController extends BaseController {
 
     @Autowired
     private FrontService frontService;
@@ -54,7 +57,8 @@ public class FrontController {
      * add new front
      */
     @PostMapping("/new")
-    public BaseResponse newFront(@RequestBody FrontInfo frontInfo) {
+    public BaseResponse newFront(@RequestBody @Valid FrontInfo frontInfo, BindingResult result) {
+        checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start newFront startTime:{} frontInfo:{}",
             startTime.toEpochMilli(), JSON.toJSONString(frontInfo));

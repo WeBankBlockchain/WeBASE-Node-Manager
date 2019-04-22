@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.user;
+package com.webank.webase.node.mgr.user.entity;
 
 import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
 import lombok.Data;

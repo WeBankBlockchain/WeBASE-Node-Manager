@@ -1250,11 +1250,10 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 1    | groupId      | Int            | 否     | 所属群组编号               |
 | 2    | abiInfo      | List\<Object\> | 否     | 合约编译的abi              |
 | 3    | userId       | Integer        | 否     | 私钥用户编号               |
-| 4    | version      | String         | 否     | 合约版本                   |
-| 5    | contractName | String         | 否     | 合约名称                   |
-| 6    | funcName     | String         | 否     | 合约方法名                 |
-| 7    | contractAddress     | String         | 是     | 合约地址（传合约名和版本时可为空）   |
-| 8    | funcParam    | List\<Object\> | 是     | 合约方法入参               |
+| 4    | contractName | String         | 否     | 合约名称                   |
+| 5    | funcName     | String         | 否     | 合约方法名                 |
+| 6    | contractAddress     | String         | 是     | 合约地址（传合约名和版本时可为空）   |
+| 7    | funcParam    | List\<Object\> | 是     | 合约方法入参               |
 | 序号 | 输出参数     | 类型           |        | 备注                       |
 | 1    | code         | Int            | 否     | 返回码，0：成功 其它：失败 |
 | 2    | message      | String         | 否     | 描述                       |

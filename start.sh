@@ -1,8 +1,5 @@
 #!/bin/sh
 
-#JDK  path
-#JAVA_HOME="/usr/share/jdk1.8.0_181"
-
 APP_MAIN=com.webank.webase.node.mgr.Application
 CLASSPATH='conf/:apps/*:lib/*'
 

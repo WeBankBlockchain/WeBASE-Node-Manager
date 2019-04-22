@@ -11,18 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.front.entity;
+package com.webank.webase.node.mgr.user.entity;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class FrontInfo {
-    @NotBlank
-    private String frontIp;
+@NoArgsConstructor
+public class UpdateUserInputParam {
+
     @NotNull
-    private Integer frontPort;
+    public Integer userId;
     @NotBlank
-    private String agency;
+    public String description;
 }
