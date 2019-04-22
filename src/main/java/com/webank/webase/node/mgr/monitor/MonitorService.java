@@ -312,6 +312,9 @@ public class MonitorService {
                         .getAddressByHash(groupId, trans.getTransHash());
                     contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress,
                         trans.getBlockNumber());
+                    if(contractBin.startsWith("0x")){
+                        StringUtils.removeStart(contractBin,"0x");
+                    }
                     List<TbContract> contractRow = contractService
                         .queryContractByBin(groupId, contractBin);
                     if (contractRow != null && contractRow.size() > 0) {
@@ -331,6 +334,9 @@ public class MonitorService {
                     contractAddress = chainTransInfo.getTo();
                     contractBin = frontInterfacee
                         .getCodeFromFront(groupId, contractAddress, trans.getBlockNumber());
+                    if(contractBin.startsWith("0x")){
+                        StringUtils.removeStart(contractBin,"0x");
+                    }
                     transType = TransType.CALL.getValue();
 
                     List<TbContract> contractRow = contractService

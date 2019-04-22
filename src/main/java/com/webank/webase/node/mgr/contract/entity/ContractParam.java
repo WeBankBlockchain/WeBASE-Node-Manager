@@ -49,12 +49,11 @@ public class ContractParam extends BaseQueryParam {
     /**
      * init by contractName、contractPath.
      */
-    public ContractParam(int groupId, String contractPath,String contractName,String contractVersion) {
+    public ContractParam(int groupId, String contractPath,String contractName) {
         super();
         this.groupId = groupId;
         this.contractName = contractName;
         this.contractPath = contractPath;
-        this.contractVersion = contractVersion;
     }
 
 }

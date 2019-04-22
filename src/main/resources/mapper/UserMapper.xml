@@ -4,7 +4,7 @@
 
 <!--对应mapper接口 -->
 <mapper namespace="com.webank.webase.node.mgr.user.UserMapper">
-  <resultMap id="userMap" type="com.webank.webase.node.mgr.user.TbUser">
+  <resultMap id="userMap" type="com.webank.webase.node.mgr.user.entity.TbUser">
     <id column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="userId"/>
     <result column="user_name" javaType="java.lang.String" jdbcType="VARCHAR" property="userName"/>
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -24,7 +24,7 @@
       property="modifyTime"/>
   </resultMap>
 
-  <insert id="addUserRow" parameterType="com.webank.webase.node.mgr.user.TbUser">
+  <insert id="addUserRow" parameterType="com.webank.webase.node.mgr.user.entity.TbUser">
     insert into
     tb_user(user_name,group_id,has_pk,user_type,public_key,address,description,create_time,modify_time)
     values(#{userName},#{groupId},#{hasPk},#{userType},#{publicKey},#{address},#{description},NOW(),NOW())
@@ -34,7 +34,7 @@
   </insert>
 
 
-  <select id="countOfUser" parameterType="com.webank.webase.node.mgr.user.UserParam"
+  <select id="countOfUser" parameterType="com.webank.webase.node.mgr.user.entity.UserParam"
     resultType="java.lang.Integer">
     select count(1) from tb_user where 1=1
     <if test="groupId != null and groupId != ''">
@@ -56,7 +56,7 @@
   </select>
 
 
-  <select id="listOfUser" parameterType="com.webank.webase.node.mgr.user.UserParam"
+  <select id="listOfUser" parameterType="com.webank.webase.node.mgr.user.entity.UserParam"
     resultMap="userMap">
     select * from tb_user where 1=1
     <if test="groupId != null and groupId != ''">
@@ -96,7 +96,7 @@
   </select>
 
 
-  <insert id="addUserKeyMapRow" parameterType="com.webank.webase.node.mgr.user.TbUserKeyMap">
+  <insert id="addUserKeyMapRow" parameterType="com.webank.webase.node.mgr.user.entity.TbUserKeyMap">
     insert into
     tb_user_key_mapping(user_id,private_key,create_time,modify_time)values(#{userId},#{privateKey},NOW(),NOW())
     <selectKey keyProperty="mapId" order="AFTER" resultType="java.lang.Integer">
@@ -104,7 +104,7 @@
     </selectKey>
   </insert>
 
-  <update id="updateUser" parameterType="com.webank.webase.node.mgr.user.TbUser">
+  <update id="updateUser" parameterType="com.webank.webase.node.mgr.user.entity.TbUser">
     update tb_user set modify_time = now()
     <if test="description != null and description != ''">
       ,description = #{description}
@@ -119,7 +119,7 @@
 	</delete>
 
   <select id="queryPrivateKey" parameterType="java.lang.Integer"
-    resultType="com.webank.webase.node.mgr.user.PrivateKeyInfo">
+    resultType="com.webank.webase.node.mgr.user.entity.PrivateKeyInfo">
 		select a.address,b.private_key privateKey from tb_user a left join tb_user_key_mapping b on(a.user_id=b.user_id)
 		where
 		b.map_status=1 and a.user_id = #{userId}

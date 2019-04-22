@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   contract_id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约编号',
   contract_path varchar(24) NOT NULL COMMENT '合约所在目录',
   contract_name varchar(120) NOT NULL COMMENT '合约名称',
-  contract_version varchar(120) DEFAULT NULL COMMENT '合约版本（预留字段）',
+  contract_version varchar(120) DEFAULT NULL COMMENT '合约版本',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   contract_source text COMMENT '合约源码',
   contract_abi text COMMENT '编译合约生成的abi文件内容',
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (contract_id),
-  UNIQUE KEY UK_GroupId_Name_ContractVersion (group_id,contract_path,contract_name,contract_version)
+  UNIQUE KEY uk_group_path_name (group_id,contract_path,contract_name)
 ) ENGINE=InnoDB AUTO_INCREMENT=200001 DEFAULT CHARSET=utf8 COMMENT='合约表';
 
 
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   description varchar(250) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (user_id),
-  UNIQUE KEY unique_name (user_name)
+  UNIQUE KEY unique_name (group_id,user_name)
 ) ENGINE=InnoDB AUTO_INCREMENT=700001 DEFAULT CHARSET=utf8 COMMENT='用户信息表';
 
 
