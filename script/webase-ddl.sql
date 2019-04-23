@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS tb_trans_daily (
 CREATE TABLE IF NOT EXISTS tb_user (
   user_id int(11) NOT NULL AUTO_INCREMENT COMMENT '用户编号',
   user_name varchar(64) NOT NULL COMMENT '用户名',
-  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
   public_key varchar(250) NOT NULL COMMENT '公钥',
   user_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
   user_type int(1) NOT NULL DEFAULT '1' COMMENT '用户类型（1-普通用户 2-系统用户）',

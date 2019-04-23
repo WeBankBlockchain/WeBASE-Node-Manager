@@ -71,4 +71,8 @@ public interface UserMapper {
     String queryUserNameByAddress(@Param("groupId") Integer groupId,
         @Param("address") String address);
 
+    /**
+     * query system User.
+     */
+    TbUser querySystemUser();
 }

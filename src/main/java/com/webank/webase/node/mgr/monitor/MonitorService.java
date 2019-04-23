@@ -30,6 +30,7 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -301,6 +302,10 @@ public class MonitorService {
                 String userName = userService
                     .queryUserNameByAddress(groupId, chainTransInfo.getFrom());
                 if (StringUtils.isBlank(userName)) {
+                    //system user
+                    userName = getSystemUserName(chainTransInfo.getFrom());
+                }
+                if (StringUtils.isBlank(userName)) {
                     userName = chainTransInfo.getFrom();
                     userType = MonitorUserType.ABNORMAL.getValue();
                 }
@@ -312,8 +317,8 @@ public class MonitorService {
                         .getAddressByHash(groupId, trans.getTransHash());
                     contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress,
                         trans.getBlockNumber());
-                    if(contractBin.startsWith("0x")){
-                        StringUtils.removeStart(contractBin,"0x");
+                    if (contractBin.startsWith("0x")) {
+                        StringUtils.removeStart(contractBin, "0x");
                     }
                     List<TbContract> contractRow = contractService
                         .queryContractByBin(groupId, contractBin);
@@ -334,8 +339,8 @@ public class MonitorService {
                     contractAddress = chainTransInfo.getTo();
                     contractBin = frontInterfacee
                         .getCodeFromFront(groupId, contractAddress, trans.getBlockNumber());
-                    if(contractBin.startsWith("0x")){
-                        StringUtils.removeStart(contractBin,"0x");
+                    if (contractBin.startsWith("0x")) {
+                        StringUtils.removeStart(contractBin, "0x");
                     }
                     transType = TransType.CALL.getValue();
 
@@ -393,6 +398,17 @@ public class MonitorService {
             Duration.between(startTime, Instant.now()).toMillis());
     }
 
+    /**
+     * get systemUser name.
+     */
+    private String getSystemUserName(String address) {
+        if (StringUtils.isBlank(address)) {
+            return null;
+        }
+        TbUser user = userService.getSystemUser();
+        return Optional.ofNullable(user).filter(u -> address.equals(u.getAddress()))
+            .map(u1 -> u1.getUserName()).orElse(null);
+    }
 
     /**
      * insert and update.
