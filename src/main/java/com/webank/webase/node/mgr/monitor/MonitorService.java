@@ -318,7 +318,7 @@ public class MonitorService {
                     contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress,
                         trans.getBlockNumber());
                     if (contractBin.startsWith("0x")) {
-                        StringUtils.removeStart(contractBin, "0x");
+                        contractBin = StringUtils.removeStart(contractBin, "0x");
                     }
                     List<TbContract> contractRow = contractService
                         .queryContractByBin(groupId, contractBin);
@@ -340,7 +340,7 @@ public class MonitorService {
                     contractBin = frontInterfacee
                         .getCodeFromFront(groupId, contractAddress, trans.getBlockNumber());
                     if (contractBin.startsWith("0x")) {
-                        StringUtils.removeStart(contractBin, "0x");
+                        contractBin = StringUtils.removeStart(contractBin, "0x");
                     }
                     transType = TransType.CALL.getValue();
 
