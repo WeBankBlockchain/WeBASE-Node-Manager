@@ -222,7 +222,6 @@ public class FrontRestTools {
                     return null;
                 }
                 return restTemplateExchange(genericRestTemplate, url, HttpMethod.GET, null,clazz);
-              //  return genericRestTemplate.getForObject(url, clazz);
             } catch (ResourceAccessException ex) {
                 log.info("fail getForEntity", ex);
                 setFailCount(url, HttpMethod.GET.toString());
@@ -256,12 +255,9 @@ public class FrontRestTools {
                 }
                 if (url.contains(URI_CONTRACT_DEPLOY)) {
                     //is deploy contract
-                    //   test(deployRestTemplate,url,HttpMethod.POST,params);  TODO
-                   // return deployRestTemplate.postForObject(url, params, clazz);
                     return restTemplateExchange(deployRestTemplate, url, HttpMethod.POST, params,clazz);
                 } else {
                     return restTemplateExchange(genericRestTemplate, url, HttpMethod.POST, params,clazz);
-                  //  return genericRestTemplate.postForObject(url, params, clazz);
                 }
             } catch (ResourceAccessException ex) {
                 log.info("fail postForEntity", ex);
