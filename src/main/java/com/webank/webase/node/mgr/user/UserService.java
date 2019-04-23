@@ -23,6 +23,14 @@ import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
+import com.webank.webase.node.mgr.user.entity.KeyPair;
+import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
+import com.webank.webase.node.mgr.user.entity.PrivateKeyInfo;
+import com.webank.webase.node.mgr.user.entity.TbUser;
+import com.webank.webase.node.mgr.user.entity.TbUserKeyMap;
+import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
+import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
@@ -53,7 +61,7 @@ public class UserService {
      * add new user data.
      */
     @Transactional
-    public Integer addUserInfo(User user) throws NodeMgrException {
+    public Integer addUserInfo(NewUserInputParam user) throws NodeMgrException {
         log.debug("start addUserInfo User:{}", JSON.toJSONString(user));
 
         Integer groupId = user.getGroupId();
@@ -62,7 +70,7 @@ public class UserService {
         groupService.checkgroupId(groupId);
 
         // check userName
-        TbUser userRow = queryByName(user.getUserName());
+        TbUser userRow = queryByName(user.groupId, user.getUserName());
         if (userRow != null) {
             log.warn("fail addUserIndo. user info already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
@@ -111,7 +119,7 @@ public class UserService {
      * bind user info.
      */
     @Transactional
-    public Integer bindUserInfo(User user) throws NodeMgrException {
+    public Integer bindUserInfo(BindUserInputParam user) throws NodeMgrException {
         log.debug("start bindUserInfo User:{}", JSON.toJSONString(user));
 
         String publicKey = user.getPublicKey();
@@ -130,7 +138,7 @@ public class UserService {
         groupService.checkgroupId(user.getGroupId());
 
         // check userName
-        TbUser userRow = queryByName(user.getUserName());
+        TbUser userRow = queryByName(user.getGroupId(), user.getUserName());
         if (userRow != null) {
             log.warn("fail bindUserInfo. userName is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
@@ -245,8 +253,8 @@ public class UserService {
     /**
      * query by userName.
      */
-    public TbUser queryByName(String userName) throws NodeMgrException {
-        return queryUser(null, null, userName, null);
+    public TbUser queryByName(int groupId, String userName) throws NodeMgrException {
+        return queryUser(null, groupId, userName, null);
     }
 
     /**
@@ -266,11 +274,9 @@ public class UserService {
     /**
      * update user info.
      */
-    public void updateUser(User user) throws NodeMgrException {
-        Integer userId = Optional.ofNullable(user).map(u -> u.getUserId()).orElse(null);
-        String description = Optional.ofNullable(user).map(u -> u.getDescription()).orElse(null);
-        TbUser tbUser = queryByUserId(userId);
-        tbUser.setDescription(description);
+    public void updateUser(UpdateUserInputParam user) throws NodeMgrException {
+        TbUser tbUser = queryByUserId(user.getUserId());
+        tbUser.setDescription(user.getDescription());
         updateUser(tbUser);
     }
 
@@ -344,5 +350,12 @@ public class UserService {
         String userName = userMapper.queryUserNameByAddress(groupId, address);
         log.debug("end queryUserNameByAddress");
         return userName;
+    }
+
+    /**
+     * get systemUser.
+     */
+    public TbUser getSystemUser(){
+        return userMapper.querySystemUser();
     }
 }

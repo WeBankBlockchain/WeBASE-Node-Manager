@@ -196,7 +196,7 @@ public class NodeService {
             BigInteger localBlockNumber = tbNode.getBlockNumber();
             BigInteger localPbftView = tbNode.getPbftView();
 
-            BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId,nodeId);//blockNumber
+            BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
             BigInteger latestView = consensusList.stream()
                 .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
                 .orElse(BigInteger.ZERO);//pbftView
@@ -220,9 +220,9 @@ public class NodeService {
     /**
      * get latest number of peer on chain.
      */
-    private BigInteger getBlockNumberOfNodeOnChain(int groupId,String nodeId) {
+    private BigInteger getBlockNumberOfNodeOnChain(int groupId, String nodeId) {
         SyncStatus syncStatus = frontInterfacee.getSyncStatus(groupId);
-        if(nodeId.equals(syncStatus.getNodeId())){
+        if (nodeId.equals(syncStatus.getNodeId())) {
             return syncStatus.getBlockNumber();
         }
         List<PeerOfSyncStatus> peerList = syncStatus.getPeers();
@@ -237,17 +237,21 @@ public class NodeService {
      */
     private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
         String consensusStatusJson = frontInterfacee.getConsensusStatus(groupId);
+        if (StringUtils.isBlank(consensusStatusJson)) {
+            return null;
+        }
         JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
         List<Object> dataIsList = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List)
             .map(arr -> {
                 Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
                 try {
-                  NodeMgrTools.object2JavaBean(obj, PeerOfConsensusStatus.class);
+                    NodeMgrTools.object2JavaBean(obj, PeerOfConsensusStatus.class);
                 } catch (Exception e) {
                     return null;
                 }
                 return arr;
             }).collect(Collectors.toList());
-        return JSONArray.parseArray(JSON.toJSONString(dataIsList.get(0)), PeerOfConsensusStatus.class);
+        return JSONArray
+            .parseArray(JSON.toJSONString(dataIsList.get(0)), PeerOfConsensusStatus.class);
     }
 }

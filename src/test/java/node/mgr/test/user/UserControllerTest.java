@@ -15,7 +15,14 @@ package node.mgr.test.user;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.user.User;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
+import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
+import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
+import java.util.Iterator;
+import java.util.List;
+import org.bcos.web3j.crypto.Credentials;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +48,8 @@ public class UserControllerTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+    @Autowired
+    private FrontGroupMapCache frontGroupMapCache;
 
     @Before
     public void setUp() throws Exception {
@@ -49,8 +58,8 @@ public class UserControllerTest {
 
     @Test
     public void testNewUser() throws Exception {
-        User newUser = new User();
-        newUser.setUserName("testUser");
+        NewUserInputParam newUser = new NewUserInputParam();
+        newUser.setUserName("cnsUser");
         newUser.setGroupId(1);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/userInfo").
@@ -65,8 +74,26 @@ public class UserControllerTest {
     }
 
     @Test
+    public void testUpdateUser() throws Exception {
+        UpdateUserInputParam updateUser = new UpdateUserInputParam();
+        updateUser.setUserId(700001);
+        updateUser.setDescription("testtttttttttttttttttttttttt");
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put("/user/userInfo").
+            content(JSON.toJSONString(updateUser)).
+            contentType(MediaType.APPLICATION_JSON)
+        );
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out
+            .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+
+    @Test
     public void testBindUser() throws Exception {
-        User newUser = new User();
+        BindUserInputParam newUser = new BindUserInputParam();
         newUser.setUserName("testPublic");
         newUser.setGroupId(1);
         newUser.setPublicKey(
@@ -105,5 +132,14 @@ public class UserControllerTest {
         System.out.println(
             "======================response:" + resultActions.andReturn().getResponse()
                 .getContentAsString());
+    }
+
+    @Test
+    public void testGenerateKey() throws Exception {
+       Credentials credentials = Credentials.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+        System.out.println( credentials.getAddress());
+        System.out.println( credentials.getEcKeyPair().getPrivateKey().toString(16));
+        System.out.println(  credentials.getEcKeyPair().getPublicKey().toString(16));
+
     }
 }

@@ -30,7 +30,6 @@ public class Contract {
     @NotBlank
     private String contractPath;
     private String contractSource;
-    private String contractVersion;
     private String contractAbi;
     private String contractBin;
     private String bytecodeBin;

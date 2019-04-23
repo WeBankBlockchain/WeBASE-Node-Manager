@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +34,9 @@ public class FrontGroupMapServiceTest {
 
     @Test
     public void getListTest() {
-        List<FrontGroup> list = frontGroupMapService.getList(null, 2, null);
+        MapListParam param = new MapListParam();
+        param.setGroupId(2);
+        List<FrontGroup> list = frontGroupMapService.getList(param);
         assert (list != null);
         System.out.println(JSON.toJSONString(list));
     }
