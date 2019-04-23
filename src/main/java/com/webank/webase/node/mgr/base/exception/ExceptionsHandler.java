@@ -23,9 +23,11 @@ import com.webank.webase.node.mgr.base.entity.RetCode;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * catch an handler exception.
@@ -52,6 +54,23 @@ public class ExceptionsHandler {
         log.warn("business exception return:{}", mapper.writeValueAsString(bre));
         return bre;
     }
+
+    /**
+     * catch:paramException
+     */
+    @ResponseBody
+    @ExceptionHandler(value = ParamException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public BaseResponse paramExceptionHandler(ParamException paramException) throws Exception {
+        log.warn("catch param exception", paramException);
+        RetCode retCode = Optional.ofNullable(paramException).map(ParamException::getRetCode)
+            .orElse(ConstantCode.SYSTEM_EXCEPTION);
+
+        BaseResponse bre = new BaseResponse(retCode);
+        log.warn("param exception return:{}", mapper.writeValueAsString(bre));
+        return bre;
+    }
+
 
 
     /**

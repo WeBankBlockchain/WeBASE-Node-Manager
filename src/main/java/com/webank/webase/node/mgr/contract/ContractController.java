@@ -30,15 +30,12 @@ import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.BindingResultUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,7 +57,7 @@ public class ContractController extends BaseController {
      */
     @PostMapping(value = "/save")
     public BaseResponse saveContract(@RequestBody @Valid Contract contract, BindingResult result)
-        throws NodeMgrException, BindException {
+        throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -82,14 +79,16 @@ public class ContractController extends BaseController {
      * delete contract by id.
      */
     @DeleteMapping(value = "/{groupId}/{contractId}")
-    public BaseResponse deleteContract(@PathVariable("groupId") Integer groupId,@PathVariable("contractId") Integer contractId)
+    public BaseResponse deleteContract(@PathVariable("groupId") Integer groupId,
+        @PathVariable("contractId") Integer contractId)
         throws NodeMgrException, Exception {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start deleteContract startTime:{} contractId:{} groupId:{}", startTime.toEpochMilli(),
-            contractId,groupId);
+        log.info("start deleteContract startTime:{} contractId:{} groupId:{}",
+            startTime.toEpochMilli(),
+            contractId, groupId);
 
-        contractService.deleteContract(contractId,groupId);
+        contractService.deleteContract(contractId, groupId);
 
         log.info("end deleteContract useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
@@ -154,8 +153,9 @@ public class ContractController extends BaseController {
      * deploy deployInputParam.
      */
     @PostMapping(value = "/deploy")
-    public BaseResponse deployContract(@RequestBody DeployInputParam deployInputParam)
-        throws NodeMgrException {
+    public BaseResponse deployContract(@RequestBody @Valid DeployInputParam deployInputParam,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryContract startTime:{} deployInputParam:{}", startTime.toEpochMilli(),
@@ -174,7 +174,9 @@ public class ContractController extends BaseController {
      * send transaction.
      */
     @PostMapping(value = "/transaction")
-    public BaseResponse sendTransaction(@RequestBody TransactionInputParam param) throws NodeMgrException {
+    public BaseResponse sendTransaction(@RequestBody @Valid TransactionInputParam param,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
             JSON.toJSONString(param));
@@ -188,19 +190,19 @@ public class ContractController extends BaseController {
     }
 
 
-
-
     /**
      * get by partOfBytecodeBin.
      */
     @PostMapping(value = "/findByPartOfBytecodeBin")
-    public BaseResponse getByPartOfByecodebin(@RequestBody QueryByBinParam queryParam) {
+    public BaseResponse getByPartOfByecodebin(@RequestBody @Valid QueryByBinParam queryParam,
+        BindingResult result) {
+        checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start getByPartOfByecodebin startTime:{} groupId:{} queryParam:{}",
             startTime.toEpochMilli(), JSON.toJSONString(queryParam));
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         ContractParam param = new ContractParam();
-        BeanUtils.copyProperties(queryParam,param);
+        BeanUtils.copyProperties(queryParam, param);
         TbContract tbContract = contractService.queryContract(param);
         baseResponse.setData(tbContract);
         log.info("end getByPartOfByecodebin useTime:{} result:{}",

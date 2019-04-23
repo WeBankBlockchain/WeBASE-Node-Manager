@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.method;
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -21,8 +22,10 @@ import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
 import java.time.Duration;
 import java.time.Instant;
+import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 @RestController
 @RequestMapping("method")
-public class MethodController {
+public class MethodController extends BaseController {
 
     @Autowired
     private MethodService methodService;
@@ -42,8 +45,9 @@ public class MethodController {
      * add method info.
      */
     @PostMapping(value = "/add")
-    public BaseResponse addMethod(@RequestBody NewMethodInputParam newMethodInputParam)
-        throws NodeMgrException {
+    public BaseResponse addMethod(@RequestBody @Valid NewMethodInputParam newMethodInputParam,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addMethod. startTime:{} newMethodInputParam:{}",

@@ -15,10 +15,14 @@
  */
 package com.webank.webase.node.mgr.contract.entity;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class QueryByBinParam {
-    private int groupId;
+    @NotNull
+    private Integer groupId;
+    @NotBlank
     private String partOfBytecodeBin;
 }

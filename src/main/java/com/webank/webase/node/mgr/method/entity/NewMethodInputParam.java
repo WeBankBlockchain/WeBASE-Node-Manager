@@ -23,7 +23,6 @@ import lombok.Data;
  */
 @Data
 public class NewMethodInputParam {
-
     @NotNull
     private Integer groupId;
     @NotNull

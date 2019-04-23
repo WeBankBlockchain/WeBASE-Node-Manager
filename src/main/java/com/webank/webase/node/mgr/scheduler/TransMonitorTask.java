@@ -52,7 +52,6 @@ public class TransMonitorTask {
             return;
         }
 
-        //delete block by groupId
         groupList.stream().forEach(group -> monitorHandle(group.getGroupId()));
         log.info("end monitor. useTime:{} ",
             Duration.between(startTime, Instant.now()).toMillis());
