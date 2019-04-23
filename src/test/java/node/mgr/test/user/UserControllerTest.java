@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import java.util.Iterator;
 import java.util.List;
+import org.bcos.web3j.crypto.Credentials;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +59,7 @@ public class UserControllerTest {
     @Test
     public void testNewUser() throws Exception {
         NewUserInputParam newUser = new NewUserInputParam();
-        newUser.setUserName("testUser");
+        newUser.setUserName("cnsUser");
         newUser.setGroupId(1);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/userInfo").
@@ -131,5 +132,14 @@ public class UserControllerTest {
         System.out.println(
             "======================response:" + resultActions.andReturn().getResponse()
                 .getContentAsString());
+    }
+
+    @Test
+    public void testGenerateKey() throws Exception {
+       Credentials credentials = Credentials.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+        System.out.println( credentials.getAddress());
+        System.out.println( credentials.getEcKeyPair().getPrivateKey().toString(16));
+        System.out.println(  credentials.getEcKeyPair().getPublicKey().toString(16));
+
     }
 }

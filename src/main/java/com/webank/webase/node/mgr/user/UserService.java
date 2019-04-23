@@ -70,7 +70,7 @@ public class UserService {
         groupService.checkgroupId(groupId);
 
         // check userName
-        TbUser userRow = queryByName(user.groupId,user.getUserName());
+        TbUser userRow = queryByName(user.groupId, user.getUserName());
         if (userRow != null) {
             log.warn("fail addUserIndo. user info already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
@@ -138,7 +138,7 @@ public class UserService {
         groupService.checkgroupId(user.getGroupId());
 
         // check userName
-        TbUser userRow = queryByName(user.getGroupId(),user.getUserName());
+        TbUser userRow = queryByName(user.getGroupId(), user.getUserName());
         if (userRow != null) {
             log.warn("fail bindUserInfo. userName is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
@@ -253,7 +253,7 @@ public class UserService {
     /**
      * query by userName.
      */
-    public TbUser queryByName(int groupId,String userName) throws NodeMgrException {
+    public TbUser queryByName(int groupId, String userName) throws NodeMgrException {
         return queryUser(null, groupId, userName, null);
     }
 
@@ -350,5 +350,12 @@ public class UserService {
         String userName = userMapper.queryUserNameByAddress(groupId, address);
         log.debug("end queryUserNameByAddress");
         return userName;
+    }
+
+    /**
+     * get systemUser.
+     */
+    public TbUser getSystemUser(){
+        return userMapper.querySystemUser();
     }
 }
