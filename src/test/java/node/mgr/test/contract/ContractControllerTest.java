@@ -46,8 +46,8 @@ public class ContractControllerTest {
 
     private MockMvc mockMvc;
     private Integer groupId = 1;
-    private Integer userId = 700001;
-    private String version = "123";
+    private Integer userId = 700002;
+    private String version = "1555919366883";
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -177,20 +177,24 @@ public class ContractControllerTest {
     @Test
     public void tesSendTransaction() throws Exception {
         //abi
-        String abiStr = "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"type\":\"constructor\"}]";
+        String abiStr = "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"a\",\"type\":\"string\"}],\"name\":\"abb\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"b\",\"type\":\"string\"}],\"name\":\"bba\",\"type\":\"event\"}]";
         List<Object> abiList = JSONArray.parseArray(abiStr);
 
         //param
         TransactionInputParam param = new TransactionInputParam();
-        param.setContractId(200014);
+        param.setContractId(200048);
         param.setGroupId(groupId);
         param.setAbiInfo(abiList);
         param.setUserId(userId);
         param.setVersion(version);
         param.setContractName("Ok");
-        //  param.setContractAddress("0x821bd01b8aa7f14b53bc62da33c9882bbe045459");
         param.setFuncName("trans");
         param.setFuncParam(Arrays.asList(3));
+
+
+        //if make exception
+      //  param.setFuncParam(Arrays.asList("asdfasfasd"));
+
 
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/transaction").
