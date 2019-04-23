@@ -13,14 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.user;
+package com.webank.webase.node.mgr.user.entity;
 
+
+import com.webank.webase.node.mgr.base.enums.UserType;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+/**
+ * new user data.
+ */
 @Data
-public class KeyPair {
-
-    private String privateKey;
-    private String publicKey;
-    private String address;
+@NoArgsConstructor
+public class NewUserInputParam {
+    @NotBlank
+    public String userName;
+    @NotNull
+    public Integer groupId;
+    public String description;
+    public Integer userType = UserType.GENERALUSER.getValue();
 }

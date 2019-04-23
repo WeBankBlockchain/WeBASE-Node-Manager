@@ -24,7 +24,7 @@ import lombok.Data;
  */
 @Data
 public class Method {
-    @NotNull
+    @NotBlank
     private String methodId;
     @NotBlank
     private String abiInfo;

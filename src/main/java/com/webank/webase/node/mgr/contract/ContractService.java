@@ -23,9 +23,9 @@ import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.monitor.MonitorService;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -49,8 +49,6 @@ public class ContractService {
     private FrontRestTools frontRestTools;
     @Autowired
     private MonitorService monitorService;
-    @Autowired
-    private FrontInterfaceService frontInterface;
 
     /**
      * add new contract data.
@@ -74,7 +72,7 @@ public class ContractService {
     private TbContract newContract(Contract contract) {
         //check contract not exist.
         verifyContractNotExist(contract.getGroupId(), contract.getContractPath(),
-            contract.getContractName(), contract.getContractVersion());
+            contract.getContractName());
 
         //add to database.
         TbContract tbContract = new TbContract();
@@ -91,6 +89,9 @@ public class ContractService {
         //check not deploy
         TbContract tbContract = verifyContractNotDeploy(contract.getContractId(),
             contract.getGroupId());
+        //check contractName
+        verifyContractNameNotExist(contract.getGroupId(), contract.getContractPath(),
+            contract.getContractName(), contract.getContractId());
         BeanUtils.copyProperties(contract, tbContract);
         contractMapper.update(tbContract);
         return tbContract;
@@ -160,15 +161,13 @@ public class ContractService {
     public List<TbContract> queryContractByBin(Integer groupId, String contractBin)
         throws NodeMgrException {
         try {
-            List<TbContract> contractRow = contractMapper
-                .queryContractByBin(groupId, contractBin);
+            List<TbContract> contractRow = contractMapper.queryContractByBin(groupId, contractBin);
             log.debug("start queryContractByBin:{}", contractBin, JSON.toJSONString(contractRow));
             return contractRow;
         } catch (RuntimeException ex) {
             log.error("fail queryContractByBin", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
-
     }
 
     /**
@@ -178,15 +177,25 @@ public class ContractService {
         log.info("start deployContract. inputParam:{}", JSON.toJSONString(inputParam));
         int groupId = inputParam.getGroupId();
         String contractName = inputParam.getContractName();
+        String version = Instant.now().toEpochMilli() + "";
         //check contract
         verifyContractNotDeploy(inputParam.getContractId(), inputParam.getGroupId());
+        //check contractName
+        verifyContractNameNotExist(inputParam.getGroupId(), inputParam.getContractPath(),
+            inputParam.getContractName(), inputParam.getContractId());
+
+        JSONArray abiArray = JSONArray.parseArray(inputParam.getContractAbi());
+        if(abiArray==null||abiArray.isEmpty()){
+            log.info("fail deployContract. abi is empty");
+            throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);
+        }
 
         // deploy param
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
         params.put("userId", inputParam.getUserId());
         params.put("contractName", contractName);
-        params.put("version", inputParam.getContractVersion());
+        params.put("version", version);
         params.put("abiInfo", JSONArray.parseArray(inputParam.getContractAbi()));
         params.put("bytecodeBin", inputParam.getBytecodeBin());
         params.put("funcParam", inputParam.getConstructorParams());
@@ -200,6 +209,7 @@ public class ContractService {
         BeanUtils.copyProperties(inputParam, tbContract);
         tbContract.setContractAddress(contractAddress);
         tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+        tbContract.setContractVersion(version);
         tbContract.setDeployTime(LocalDateTime.now());
         contractMapper.update(tbContract);
 
@@ -235,8 +245,8 @@ public class ContractService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
         //check contractId
-        verifyContractDeploy(param.getContractId(), param.getGroupId());
-
+        TbContract contract  = verifyContractDeploy(param.getContractId(), param.getGroupId());
+        param.setVersion(contract.getContractVersion());
         // request send transaction
         Object frontRsp = frontRestTools
             .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, param,
@@ -249,10 +259,10 @@ public class ContractService {
     /**
      * verify that the contract does not exist.
      */
-    private void verifyContractNotExist(int groupId, String name, String path, String verion) {
-        ContractParam param = new ContractParam(groupId, path, name, verion);
-        int count = countOfContract(param);
-        if (count > 0) {
+    private void verifyContractNotExist(int groupId, String name, String path) {
+        ContractParam param = new ContractParam(groupId, path, name);
+        TbContract contract = queryContract(param);
+        if (Objects.nonNull(contract)) {
             log.warn("contract is exist. groupId:{} name:{} path:{}", groupId, name, path);
             throw new NodeMgrException(ConstantCode.CONTRACT_EXISTS);
         }
@@ -293,6 +303,20 @@ public class ContractService {
             throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
         }
         return contract;
+    }
+
+    /**
+     * contract name can not be repeated.
+     */
+    private void verifyContractNameNotExist(int groupId, String path, String name, int contractId) {
+        ContractParam param = new ContractParam(groupId, path, name);
+        TbContract localContract = queryContract(param);
+        if (Objects.isNull(localContract)) {
+            return;
+        }
+        if (contractId != localContract.getContractId()) {
+            throw new NodeMgrException(ConstantCode.CONTRACT_NAME_REPEAT);
+        }
     }
 
 }

@@ -13,26 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.user;
+package com.webank.webase.node.mgr.user.entity;
 
-import com.webank.webase.node.mgr.base.enums.UserType;
 import lombok.Data;
 
-/**
- * receive user info entity.
- */
 @Data
-public class User {
+public class KeyPair {
 
-    public Integer userId;
-    public String userName;
-    public String publicKey;
-    public String description;
-    public Integer groupId;
-    public Integer userType = UserType.GENERALUSER.getValue();
-
-    public User() {
-        super();
-    }
-
+    private String privateKey;
+    private String publicKey;
+    private String address;
 }

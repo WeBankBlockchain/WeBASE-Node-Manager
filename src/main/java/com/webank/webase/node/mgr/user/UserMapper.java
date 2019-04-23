@@ -15,6 +15,10 @@
  */
 package com.webank.webase.node.mgr.user;
 
+import com.webank.webase.node.mgr.user.entity.PrivateKeyInfo;
+import com.webank.webase.node.mgr.user.entity.TbUser;
+import com.webank.webase.node.mgr.user.entity.TbUserKeyMap;
+import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -67,4 +71,8 @@ public interface UserMapper {
     String queryUserNameByAddress(@Param("groupId") Integer groupId,
         @Param("address") String address);
 
+    /**
+     * query system User.
+     */
+    TbUser querySystemUser();
 }

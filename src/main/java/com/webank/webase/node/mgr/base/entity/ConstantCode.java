@@ -57,7 +57,7 @@ public class ConstantCode {
 
     public static final RetCode NET_ORG_MAP_NOT_EXISTS = RetCode.mark(202010, "");
 
-    public static final RetCode CURRENT_ORG_NOT_EXISTS = RetCode.mark(202011, "");
+    public static final RetCode CONTRACT_ABI_EMPTY = RetCode.mark(202011, "abiInfo cannot be empty");
 
     public static final RetCode USER_ID_NULL = RetCode.mark(202012, "user id cannot be empty");
 
@@ -74,7 +74,7 @@ public class ConstantCode {
 
     public static final RetCode INVALID_PARAM_INFO = RetCode.mark(202018, "invalid param info");
 
-    public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202019, "");
+    public static final RetCode CONTRACT_NAME_REPEAT = RetCode.mark(202019, "contract name cannot be repeated");
 
     public static final RetCode CURRENT_ORG_EXISTS = RetCode.mark(202020, "");
 
@@ -172,5 +172,8 @@ public class ConstantCode {
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
     public static final RetCode ACCESS_DENIED = RetCode.mark(302001, "access denied");
+
+    /* param exception */
+    public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
 
 }

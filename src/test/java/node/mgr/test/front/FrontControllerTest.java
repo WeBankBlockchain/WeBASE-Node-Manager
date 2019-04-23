@@ -54,6 +54,7 @@ public class FrontControllerTest {
         FrontInfo param = new FrontInfo();
         param.setFrontIp("127.0.0.1");
         param.setFrontPort(8081);
+        param.setAgency("1fe");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post( "/front/new").
             content(JSON.toJSONString(param)).

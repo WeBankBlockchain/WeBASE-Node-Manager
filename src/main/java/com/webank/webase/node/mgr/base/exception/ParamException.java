@@ -13,13 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.user;
+package com.webank.webase.node.mgr.base.exception;
 
-import lombok.Data;
 
-@Data
-public class PrivateKeyInfo {
+import com.webank.webase.node.mgr.base.entity.RetCode;
 
-    private String privateKey;
-    private String address;
+/**
+ * param Exception
+ */
+public class ParamException extends RuntimeException {
+
+    private static final long serialVersionUID = 1L;
+    private RetCode retCode;
+
+
+    public ParamException(int code, String msg) {
+        super(msg);
+        this.retCode = new RetCode(code, msg);
+    }
+
+    public RetCode getRetCode() {
+        return retCode;
+    }
 }
