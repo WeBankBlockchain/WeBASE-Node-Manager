@@ -17,7 +17,7 @@ package com.webank.webase.node.mgr.transdaily;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.network.NetworkService;
 import java.math.BigInteger;

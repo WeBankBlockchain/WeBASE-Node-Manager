@@ -18,7 +18,7 @@ package com.webank.webase.node.mgr.node;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.NodeType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;

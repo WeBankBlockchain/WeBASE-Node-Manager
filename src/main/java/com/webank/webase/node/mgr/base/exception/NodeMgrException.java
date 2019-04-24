@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.base.exception;
 
-import com.webank.webase.node.mgr.base.entity.RetCode;
+import com.webank.webase.node.mgr.base.code.RetCode;
 
 /**
  * business exception.
