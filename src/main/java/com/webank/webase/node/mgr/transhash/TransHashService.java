@@ -16,7 +16,7 @@
 package com.webank.webase.node.mgr.transhash;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.block.MinMaxBlock;
 import com.webank.webase.node.mgr.transhash.entity.TransactionInfo;

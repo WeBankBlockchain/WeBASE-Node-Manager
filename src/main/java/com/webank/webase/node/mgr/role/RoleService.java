@@ -16,7 +16,7 @@
 package com.webank.webase.node.mgr.role;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;

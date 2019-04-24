@@ -68,4 +68,6 @@ public class ConstantProperties {
     // constant
     private Boolean supportTransaction = false;
 
+    //spring security
+    private Boolean isUseSecurity = true;
 }
