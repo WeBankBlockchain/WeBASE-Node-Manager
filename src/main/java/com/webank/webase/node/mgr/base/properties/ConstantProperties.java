@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.base.properties;
 
 import java.math.BigInteger;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = ConstantProperties.CONSTANT_PREFIX)
 public class ConstantProperties {
+    @Autowired
+    private ConstantProperties constants;
 
     // constant
     public static final String CONSTANT_PREFIX = "constant";
@@ -60,4 +63,7 @@ public class ConstantProperties {
 
     // COOKIE
     private Integer cookieMaxAge = 900; // seconds
+
+    //spring security
+    private Boolean isUseSecurity = true;
 }
