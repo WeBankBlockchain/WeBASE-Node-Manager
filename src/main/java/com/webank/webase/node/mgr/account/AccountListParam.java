@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,7 @@ public class AccountListParam extends BaseQueryParam {
 
     public AccountListParam(Integer start, Integer pageSize, String account,
         String flagSortedByTime) {
-        super(null, start, pageSize, flagSortedByTime);
+        super(start, pageSize, flagSortedByTime);
         this.account = account;
     }
 

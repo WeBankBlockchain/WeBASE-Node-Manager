@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,38 +26,38 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MonitorMapper {
 
-    void addRow(TbMonitor tbMonitor);
+    void add(@Param("tableName")String tableName, @Param("monitor") TbMonitor tbMonitor);
 
-    void updateRow(TbMonitor tbMonitor);
+    void update(@Param("tableName")String tableName, @Param("monitor") TbMonitor tbMonitor);
 
-    void updateUnusualUser(@Param("networkId") Integer networkId,
+    void updateUnusualUser(@Param("tableName")String tableName,
         @Param("userName") String userName, @Param("address") String address);
 
-    void updateUnusualContract(@Param("networkId") Integer networkId,
+    void updateUnusualContract(@Param("tableName")String tableName,
         @Param("contractName") String contractName,
         @Param("contractBin") String contractBin, @Param("interfaceName") String interfaceName,
         @Param("transUnusualType") int transUnusualType);
 
-    String queryUnusualTxhash(@Param("networkId") Integer networkId,
+    String queryUnusualTxhash(@Param("tableName")String tableName,
         @Param("contractBin") String contractBin);
 
-    TbMonitor queryTbMonitor(TbMonitor tbMonitor);
+    TbMonitor queryTbMonitor(@Param("tableName")String tableName, @Param("monitor") TbMonitor tbMonitor);
 
-    List<TbMonitor> monitorUserList(@Param("networkId") Integer networkId);
+    List<TbMonitor> monitorUserList(@Param("tableName")String tableName);
 
-    List<TbMonitor> monitorInterfaceList(@Param("networkId") Integer networkId,
+    List<TbMonitor> monitorInterfaceList(@Param("tableName")String tableName,
         @Param("userName") String userName);
 
     Integer countOfMonitorTrans(Map<String, Object> queryParam);
 
     List<PageTransInfo> qureyTransCountList(Map<String, Object> queryParam);
 
-    Integer countOfUnusualUser(@Param("networkId") Integer networkId,
+    Integer countOfUnusualUser(@Param("tableName")String tableName,
         @Param("userName") String userName);
 
     List<UnusualUserInfo> listOfUnusualUser(Map<String, Object> queryParam);
 
-    Integer countOfUnusualContract(@Param("networkId") Integer networkId,
+    Integer countOfUnusualContract(@Param("tableName")String tableName,
         @Param("contractAddress") String contractAddress);
 
     List<UnusualContractInfo> listOfUnusualContract(Map<String, Object> queryParam);

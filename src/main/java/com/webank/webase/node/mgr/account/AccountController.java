@@ -1,18 +1,16 @@
 
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.account;
 
@@ -28,8 +26,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +53,9 @@ public class AccountController extends BaseController {
      * add account info.
      */
     @PostMapping(value = "/accountInfo")
-    public BaseResponse addAccountInfo(@RequestBody AccountInfo info) throws NodeMgrException {
+    public BaseResponse addAccountInfo(@RequestBody @Valid AccountInfo info, BindingResult result)
+        throws NodeMgrException {
+        checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addAccountInfo. startTime:{} accountInfo:{}", startTime.toEpochMilli(),
@@ -76,7 +78,9 @@ public class AccountController extends BaseController {
      * update account info.
      */
     @PutMapping(value = "/accountInfo")
-    public BaseResponse updateAccountInfo(@RequestBody AccountInfo info) throws NodeMgrException {
+    public BaseResponse updateAccountInfo(@RequestBody @Valid AccountInfo info,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start updateAccountInfo startTime:{} accountInfo:{}", startTime.toEpochMilli(),
@@ -110,8 +114,7 @@ public class AccountController extends BaseController {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{} account:{} ",
-            startTime.toEpochMilli(), pageNumber, pageSize,
-            account);
+            startTime.toEpochMilli(), pageNumber, pageSize, account);
 
         int count = accountService.countOfAccount(account);
         if (count > 0) {
@@ -151,7 +154,9 @@ public class AccountController extends BaseController {
      * update password.
      */
     @PutMapping(value = "/passwordUpdate")
-    public BaseResponse updatePassword(@RequestBody PasswordInfo info) throws NodeMgrException {
+    public BaseResponse updatePassword(@RequestBody @Valid PasswordInfo info, BindingResult result)
+        throws NodeMgrException {
+        checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start updatePassword startTime:{} passwordInfo:{}", startTime.toEpochMilli(),

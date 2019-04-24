@@ -14,9 +14,9 @@ targetCompatibility = 1.8
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-    maven {
-        url "http://maven.aliyun.com/nexus/content/groups/public/"
-    }
+    maven {url "http://maven.aliyun.com/nexus/content/groups/public/"}
+	
+   // maven { url 'https://dl.bintray.com/ethereum/maven/' }
     mavenLocal()
     mavenCentral()
 }
@@ -26,7 +26,7 @@ List springboot = [
          "org.springframework.boot:spring-boot-starter-web:$springboot_version",
          "org.springframework.boot:spring-boot-starter-log4j2:$springboot_version",
          "org.springframework.boot:spring-boot-starter-security:$springboot_version",
-         "org.springframework.boot:spring-boot-starter-test:$springboot_version"
+        // "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
 ]
 
 List web3jsdk = [
@@ -35,6 +35,11 @@ List web3jsdk = [
 
 List lombok = [
         "org.projectlombok:lombok:1.18.2"
+]
+
+
+List test = [
+       "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
 
@@ -51,7 +56,7 @@ dependencies {
     annotationProcessor lombok
     compileOnly lombok
 
-    testCompile springboot
+    testCompile test
 }
 
 configurations {
@@ -61,8 +66,6 @@ configurations {
     all*.exclude group: 'org.ow2.asm', module: 'asm'
     all*.exclude group: 'jline', module: 'jline'
     all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
-    all*.exclude group: 'org.hamcrest', module: 'hamcrest-library'
-    all*.exclude group: 'org.hamcrest', module: 'hamcrest-core'
     all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
 }
 
@@ -81,6 +84,7 @@ clean {
     delete 'dist'
     delete 'build'
 }
+
 
 jar {
     destinationDir file('dist/apps')

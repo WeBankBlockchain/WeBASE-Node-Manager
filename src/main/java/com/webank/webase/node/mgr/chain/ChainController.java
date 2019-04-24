@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,23 +40,24 @@ public class ChainController {
     @Autowired
     private ChainService chainService;
 
-    @GetMapping(value = "/mointorInfo/{nodeId}")
-    public BaseResponse getChainMoinntorInfo(@PathVariable("nodeId") Integer nodeId,
+    @GetMapping(value = "/mointorInfo/{frontId}")
+    public BaseResponse getChainMoinntorInfo(@PathVariable("frontId") Integer frontId,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime beginDate,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime endDate,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime contrastBeginDate,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime contrastEndDate,
-        @RequestParam(required = false, defaultValue = "1") int gap)
+        @RequestParam(required = false, defaultValue = "1") int gap,
+        @RequestParam(required = false, defaultValue = "1") int groupId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         log.info(
-            "start getChainInfo. startTime:{} nodeId:{} beginDate:{} endDate:{} "
-                + "contrastBeginDate:{} contrastEndDate:{} gap:{}", startTime.toEpochMilli(),
-            nodeId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
+            "start getChainInfo. startTime:{} frontId:{} beginDate:{} endDate:{} "
+                + "contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}", startTime.toEpochMilli(),
+            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap,groupId);
         Object rspObj = chainService
-            .getChainMonitorInfo(nodeId, beginDate, endDate, contrastBeginDate, contrastEndDate,
-                gap);
+            .getChainMonitorInfo(frontId, beginDate, endDate, contrastBeginDate, contrastEndDate,
+                gap,groupId);
 
         response.setData(rspObj);
         log.info("end getChainInfo. endTime:{} response:{}",

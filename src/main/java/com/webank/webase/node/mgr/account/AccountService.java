@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -90,7 +90,7 @@ public class AccountService {
         // String sha256Str = NodeMgrTools.shaEncode(accountInfo.getAccountPwd());
         String encryptStr = passwordEncoder.encode(accountInfo.getAccountPwd());
         // add account row
-        TbAccountInfo rowInfo = new TbAccountInfo(accountStr, encryptStr, roleId, null);// TODO
+        TbAccountInfo rowInfo = new TbAccountInfo(accountStr, encryptStr, roleId, null);
         Integer affectRow = accountMapper.addAccountRow(rowInfo);
 
         // check result
@@ -125,7 +125,7 @@ public class AccountService {
             }
         }
         accountRow.setRoleId(accountInfo.getRoleId());
-        //accountRow.setDescription(accountInfo.getDescription()); TODO
+        //accountRow.setDescription(accountInfo.getDescription());
 
         // update account info
         Integer affectRow = accountMapper.updateAccountRow(accountRow);
