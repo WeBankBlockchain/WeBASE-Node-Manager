@@ -4,43 +4,41 @@
 
 <!--对应mapper接口 -->
 <mapper namespace="com.webank.webase.node.mgr.block.BlockMapper">
-  <resultMap id="blockMap" type="com.webank.webase.node.mgr.block.TbBlock">
+  <resultMap id="blockMap" type="com.webank.webase.node.mgr.block.entity.TbBlock">
     <id column="pk_hash" javaType="java.lang.String" jdbcType="VARCHAR" property="pkHash"/>
-    <result column="network_id" javaType="java.lang.Integer" jdbcType="INTEGER"
-      property="networkId"/>
     <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="blockNumber"/>
-    <result column="miner" javaType="java.lang.String" jdbcType="VARCHAR" property="miner"/>
     <result column="block_timestamp" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="blockTimestamp"/>
     <result column="trans_count" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="transCount"/>
+    <result column="sealer_index" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="sealerIndex"/>
+    <result column="sealer" javaType="java.lang.String" jdbcType="VARCHAR" property="sealer"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
   </resultMap>
 
-  <sql id="NEW_ROW_COLUMN">
-		(pk_hash,network_id,block_number,miner,block_timestamp,trans_count,create_time,modify_time)
-	</sql>
-
-  <select id="queryLatestBlockNumber" resultType="java.math.BigInteger">
-		select max(block_number) from tb_block where network_id=#{networkId}
+  <select id="getLatestBlockNumber" resultType="java.math.BigInteger">
+		select max(block_number) from ${tableName}
 	</select>
 
-  <insert id="addBlockRow" parameterType="com.webank.webase.node.mgr.block.TbBlock">
-    insert ignore into tb_block
-    <include refid="NEW_ROW_COLUMN"/>
-    values(#{pkHash},#{networkId},#{blockNumber},#{miner},#{blockTimestamp},#{transCount},NOW(),NOW())
+  <insert id="add">
+    insert ignore into ${tableName}
+    (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time)
+    values
+    (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW())
   </insert>
 
-  <select id="listOfBlock" parameterType="com.webank.webase.node.mgr.block.BlockListParam"
+  <update id="update">
+    update ${tableName} set sealer = #{block.sealer} where pk_hash=#{block.pkHash};
+  </update>
+
+  <select id="getList" parameterType="com.webank.webase.node.mgr.block.entity.BlockListParam"
     resultMap="blockMap">
-    select * from tb_block where 1=1
-    <if test="param.networkId != null">
-      and network_id = #{param.networkId}
-    </if>
+    select * from ${tableName} where 1=1
     <if test="param.pkHash != null and param.pkHash != ''">
       and pk_hash = #{param.pkHash}
     </if>
@@ -63,11 +61,8 @@
   </select>
 
 
-  <select id="countOfBlock" resultType="java.lang.Integer">
-    select count(1) from tb_block where 1=1
-    <if test="networkId != null">
-      and network_id = #{networkId}
-    </if>
+  <select id="getCount" resultType="java.lang.Integer">
+    select count(1) from ${tableName} where 1=1
     <if test="pkHash != null and pkHash != ''">
       and pk_hash = #{pkHash}
     </if>
@@ -76,12 +71,11 @@
     </if>
   </select>
 
-  <select id="queryMinMaxBlock" resultType="com.webank.webase.node.mgr.block.MinMaxBlock">
-		select network_id as networkId,max(block_number) maxBlockNumber,min(block_number) minBLockNumber
-		from tb_block group by network_id
+  <select id="queryMinMaxBlock" resultType="com.webank.webase.node.mgr.block.entity.MinMaxBlock">
+		select max(block_number) maxBlockNumber,min(block_number) minBLockNumber from ${tableName}
 	</select>
 
-  <delete id="deleteSomeBlocks">
-		delete from tb_block where network_id = #{networkId} and block_number &lt; #{deleteNumber}
+  <delete id="remove">
+		delete from ${tableName} where block_number &lt; #{deleteNumber}
 	</delete>
 </mapper>

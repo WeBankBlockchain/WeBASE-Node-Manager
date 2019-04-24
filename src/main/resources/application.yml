@@ -23,32 +23,22 @@ spring:
 logging:
   config: classpath:log/log4j2.xml
   level:
-    com.webank.webase.node.mgr: info
-
-# executor config
-executor:
-  corePoolSize: 5
-  maxPoolSize: 10
-  queueSize: 800
-  threadNamePrefix: "node-mgr-async-"
-
+    com.webank.webase.node.mgr: debug
 
 #constants
 constant:
-  nodeWaitMax: 90
   blockRetainMax: 10000
-  logRetainMax: 10000
   transRetainMax: 10000
   deleteInfoCron: "0 0/2 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
-  checkNodeStatusCron: "30 0/1 * * * ?"
   insertTransMonitorCron: "0 0/10 * * * ?"
-  sharedChainInfoCron: "0 0/10 * * * ?"
+  pullBlockSleepTime: 100
+  pullBlockTaskFixedDelay: 30000
+  resetGroupListCycle: 600000
+  isBlockPullFromZero: false
   contractDeployTimeOut: 30000
   httpTimeOut: 5000
   aesKey: ERTadb83f9ege39k
   cookieMaxAge: 1800
-  sysContractContractdetailName: contractdetail
-  sysContractUserName: user
-  sysContractNodeName: node
-  supportTransaction: true
+  maxRequestFail: 3
+  sleepWhenHttpMaxFail: 60000

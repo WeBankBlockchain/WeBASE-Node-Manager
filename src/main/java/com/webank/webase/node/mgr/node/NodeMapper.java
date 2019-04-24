@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,23 +28,18 @@ public interface NodeMapper {
     /**
      * Add new node data.
      */
-    Integer addNodeRow(TbNode tbNode);
+    Integer add(TbNode tbNode);
 
     /**
      * Query the number of node according to some conditions.
      */
-    Integer countOfNode(NodeParam nodeParam);
+    Integer getCount(NodeParam nodeParam);
 
-    /**
-     * query number of node by nodeIp、p2pPort、rpcPort.
-     */
-    Integer countByIpP2pRpc(@Param("nodeIp") String nodeIp, @Param("p2pPort") Integer p2pPort,
-        @Param("rpcPort") Integer rpcPort);
 
     /**
      * Query node list according to some conditions.
      */
-    List<TbNode> listOfNode(NodeParam nodeParam);
+    List<TbNode> getList(NodeParam nodeParam);
 
     /**
      * query tb_node by nodeip and p2pport.
@@ -60,12 +55,7 @@ public interface NodeMapper {
     /**
      * update node info.
      */
-    Integer updateNodeInfo(TbNode dbNode);
-
-    /**
-     * query max chainIndex of node.
-     */
-    Integer queryMaxChainIndex(Integer networkId);
+    Integer update(TbNode dbNode);
 
     /**
      * query node info.

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,43 +17,40 @@ package com.webank.webase.node.mgr.contract.entity;
 
 import java.time.LocalDateTime;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Entity class of table tb_contract.
  */
 @Data
+@NoArgsConstructor
 public class TbContract {
 
     private Integer contractId;
+    private String contractPath;
+    private String contractVersion;
     private String contractName;
-    private Integer networkId;
-    private Integer chainIndex;
+    private Integer contractStatus;
+    private Integer groupId;
     private Integer contractType;
     private String contractSource;
-    private int contractStatus;
     private String contractAbi;
     private String contractBin;
     private String bytecodeBin;
     private String contractAddress;
     private LocalDateTime deployTime;
-    private String contractVersion;
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
-    public TbContract() {
-        super();
-    }
-
     /**
-     * init by contractId、contractName、networkId、contractVersion.
+     * init by contractId、contractName、groupId、contractPath.
      */
-    public TbContract(Integer contractId, String contractName, Integer networkId,
-        String contractVersion) {
+    public TbContract(Integer contractId, String contractName, Integer groupId) {
         super();
         this.contractId = contractId;
         this.contractName = contractName;
-        this.networkId = networkId;
-        this.contractVersion = contractVersion;
+        this.groupId = groupId;
     }
+
 }

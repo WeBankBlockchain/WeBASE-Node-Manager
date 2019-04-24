@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +21,16 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.RetCode;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * catch an handler exception.
@@ -53,22 +58,39 @@ public class ExceptionsHandler {
         return bre;
     }
 
-
     /**
-     * catch：Exception.
+     * catch:paramException
      */
     @ResponseBody
-    @ExceptionHandler(value = Exception.class)
-    public BaseResponse exceptionHandler(Exception exc) {
-        log.info("catch exception", exc);
+    @ExceptionHandler(value = ParamException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public BaseResponse paramExceptionHandler(ParamException paramException) throws Exception {
+        log.warn("catch param exception", paramException);
+        RetCode retCode = Optional.ofNullable(paramException).map(ParamException::getRetCode)
+            .orElse(ConstantCode.SYSTEM_EXCEPTION);
+
+        BaseResponse bre = new BaseResponse(retCode);
+        log.warn("param exception return:{}", mapper.writeValueAsString(bre));
+        return bre;
+    }
+
+
+
+    /**
+     * catch：RuntimeException.
+     */
+    @ResponseBody
+    @ExceptionHandler(value = RuntimeException.class)
+    public BaseResponse exceptionHandler(RuntimeException exc) {
+        log.info("catch RuntimeException", exc);
         // 默认系统异常
         RetCode retCode = ConstantCode.SYSTEM_EXCEPTION;
 
         BaseResponse bre = new BaseResponse(retCode);
         try {
-            log.warn("system exception return:{}", mapper.writeValueAsString(bre));
+            log.warn("system RuntimeException return:{}", mapper.writeValueAsString(bre));
         } catch (JsonProcessingException ex) {
-            log.warn("system exception", ex);
+            log.warn("system RuntimeException", ex);
         }
 
         return bre;

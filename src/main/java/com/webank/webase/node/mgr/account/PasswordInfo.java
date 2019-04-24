@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,8 @@
  */
 package com.webank.webase.node.mgr.account;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -22,7 +24,8 @@ import lombok.Data;
  */
 @Data
 public class PasswordInfo {
-
+    @NotBlank
     private String oldAccountPwd;
+    @NotBlank
     private String newAccountPwd;
 }
