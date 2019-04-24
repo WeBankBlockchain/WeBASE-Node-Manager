@@ -18,7 +18,7 @@ package com.webank.webase.node.mgr.security;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

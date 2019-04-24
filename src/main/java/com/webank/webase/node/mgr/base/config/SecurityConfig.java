@@ -59,6 +59,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private JsonAccessDeniedHandler jsonAccessDeniedHandler;
     @Autowired
     private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
+    @Autowired
+    private ConstantProperties constants;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -94,6 +96,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         super.configure(web);
+        if(!constants.getIsUseSecurity()){
+            web.ignoring().antMatchers("/**");
+        }
     }
 
     @Override
