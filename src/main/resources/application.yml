@@ -42,3 +42,4 @@ constant:
   cookieMaxAge: 1800
   maxRequestFail: 3
   sleepWhenHttpMaxFail: 60000
+  isUseSecurity: true
