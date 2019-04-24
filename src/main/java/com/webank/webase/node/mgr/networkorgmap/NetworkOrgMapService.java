@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.networkorgmap;
 
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.network.NetworkService;
 import com.webank.webase.node.mgr.organization.OrganizationService;

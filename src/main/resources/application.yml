@@ -53,3 +53,4 @@ constant:
   sysContractUserName: user
   sysContractNodeName: node
   supportTransaction: true
+  isUseSecurity: false
