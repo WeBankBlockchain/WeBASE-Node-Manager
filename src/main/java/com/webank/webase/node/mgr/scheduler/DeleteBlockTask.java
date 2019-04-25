@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -74,6 +75,9 @@ public class DeleteBlockTask {
             }
 
             for (MinMaxBlock minMaxBlock : listOfBlock) {
+                if(Objects.isNull(minMaxBlock)){
+                    continue;
+                }
                 BigInteger maxBlockNumber = minMaxBlock.getMaxBlockNumber();
                 BigInteger minBLockNumber = minMaxBlock.getMinBLockNumber();
                 if (maxBlockNumber == null || minBLockNumber == null) {

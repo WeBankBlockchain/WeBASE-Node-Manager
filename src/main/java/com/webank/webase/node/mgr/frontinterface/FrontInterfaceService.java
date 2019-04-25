@@ -58,7 +58,7 @@ public class FrontInterfaceService {
         uri = FrontRestTools.uriAddGroupId(groupId, uri);
 
         String url = String.format(FrontRestTools.FRONT_URL, frontIp, frontPort, uri);
-        log.info("getFromSpecificFront. url:{}", url);
+        log.debug("getFromSpecificFront. url:{}", url);
         try {
             return genericRestTemplate.getForObject(url, clazz);
         } catch (Exception e) {

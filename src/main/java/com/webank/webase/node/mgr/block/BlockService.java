@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.BlockListParam;
@@ -29,10 +30,13 @@ import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +54,70 @@ public class BlockService {
     private BlockMapper blockmapper;
     @Autowired
     private TransHashService transHashService;
+    @Autowired
+    private ConstantProperties cProperties;
+
+
+    /**
+     * get block from chain by groupId
+     */
+    @Async(value = "mgrAsyncExecutor")
+    public void pullBlockByGroupId(CountDownLatch latch, int groupId) {
+        log.debug("start pullBlockByGroupId groupId:{}", groupId);
+        try {
+            //max block in chain
+            BigInteger maxChainBlock = frontInterface.getLatestBlockNumber(groupId);
+            //next block
+            BigInteger nextBlock = getNextBlockNumber(groupId);
+
+            //pull block
+            while (Objects.nonNull(maxChainBlock) && maxChainBlock.compareTo(nextBlock) >= 0) {
+                log.debug("continue pull block. maxChainBlock:{} nextBlock:{}", maxChainBlock,
+                    nextBlock);
+                Thread.sleep(cProperties.getPullBlockSleepTime());
+                pullBlockByNumber(groupId, nextBlock);
+                nextBlock = getNextBlockNumber(groupId);
+                int i = maxChainBlock.compareTo(nextBlock);
+                System.out.println(i);
+            }
+        } catch (Exception ex) {
+            log.error("fail pullBlockByGroupId. groupId:{} ", groupId, ex);
+        }
+        latch.countDown();
+        log.debug("end pullBlockByGroupId groupId:{}", groupId);
+    }
+
+
+    /**
+     * pull block by number.
+     */
+    private void pullBlockByNumber(int groupId, BigInteger blockNumber) {
+        //get block by number
+        BlockInfo blockInfo = frontInterface.getBlockByNumber(groupId, blockNumber);
+        if (blockInfo == null || blockInfo.getNumber() == null) {
+            log.info("pullBlockByNumber jump over. not found new block.");
+            return;
+        }
+        //save block info
+        saveBLockInfo(blockInfo, groupId);
+    }
+
+    /**
+     * get next blockNumber
+     */
+    private BigInteger getNextBlockNumber(int groupId) {
+        //get max blockNumber in table
+        BigInteger localMaxBlockNumber = getLatestBlockNumber(groupId);
+        if (Objects.nonNull(localMaxBlockNumber)) {
+            return localMaxBlockNumber.add(BigInteger.ONE);
+        }
+        if (cProperties.getIsBlockPullFromZero()) {
+            return BigInteger.ZERO;
+        } else {
+            return frontInterface.getLatestBlockNumber(groupId);
+        }
+    }
+
 
     /**
      * copy chainBlock properties;
@@ -64,7 +132,7 @@ public class BlockService {
             blockTimestamp = NodeMgrTools
                 .timestamp2LocalDateTime(Long.valueOf(blockInfo.getTimestamp()));
         }
-        int sealerIndex = Integer.parseInt(blockInfo.getSealer().substring(2),16);
+        int sealerIndex = Integer.parseInt(blockInfo.getSealer().substring(2), 16);
 
         List<TransactionInfo> transList = blockInfo.getTransactions();
 
@@ -121,7 +189,8 @@ public class BlockService {
         log.debug("start queryBlockList groupId:{},queryParam:{}", groupId,
             JSON.toJSONString(queryParam));
 
-        List<TbBlock>  listOfBlock = blockmapper.getList(TableName.BLOCK.getTableName(groupId), queryParam);
+        List<TbBlock> listOfBlock = blockmapper
+            .getList(TableName.BLOCK.getTableName(groupId), queryParam);
         //check sealer
         listOfBlock.stream().forEach(block -> checkSearlerOfBlock(groupId, block));
 
