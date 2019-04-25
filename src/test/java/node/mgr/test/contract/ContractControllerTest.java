@@ -182,7 +182,7 @@ public class ContractControllerTest {
 
         //param
         TransactionInputParam param = new TransactionInputParam();
-        param.setContractId(200048);
+        param.setContractId(200069);
         param.setGroupId(groupId);
         param.setAbiInfo(abiList);
         param.setUserId(userId);
@@ -193,7 +193,7 @@ public class ContractControllerTest {
 
 
         //if make exception
-      //  param.setFuncParam(Arrays.asList("asdfasfasd"));
+        param.setFuncParam(Arrays.asList("asdfasfasd"));
 
 
         ResultActions resultActions = mockMvc
