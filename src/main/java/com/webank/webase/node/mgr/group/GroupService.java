@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.table.TableService;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
@@ -40,7 +41,8 @@ public class GroupService {
     private TableService tableService;
     @Autowired
     private FrontInterfaceService frontInterface;
-
+    @Autowired
+    private ResetGroupListTask resetGroupListTask;
 
     /**
      * save group id
@@ -86,6 +88,8 @@ public class GroupService {
 
         try {
             List<TbGroup> groupList = groupMapper.getList();
+            //reset group
+            resetGroupListTask.asyncResetGroupList();
             log.debug("end getAllGroup groupList:{}", JSON.toJSONString(groupList));
             return groupList;
         } catch (RuntimeException ex) {

@@ -23,7 +23,7 @@ spring:
 logging:
   config: classpath:log/log4j2.xml
   level:
-    com.webank.webase.node.mgr: debug
+    com.webank.webase.node.mgr: info
 
 #constants
 constant:
@@ -32,7 +32,7 @@ constant:
   deleteInfoCron: "0 0/2 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
   insertTransMonitorCron: "0 0/10 * * * ?"
-  pullBlockSleepTime: 100
+  pullBlockSleepTime: 200
   pullBlockTaskFixedDelay: 30000
   resetGroupListCycle: 600000
   isBlockPullFromZero: false
@@ -43,3 +43,11 @@ constant:
   maxRequestFail: 3
   sleepWhenHttpMaxFail: 60000
   isUseSecurity: true
+
+
+# executor config
+executor:
+  corePoolSize: 3
+  maxPoolSize: 10
+  queueSize: 50
+  threadNamePrefix: "node-mgr-async-"

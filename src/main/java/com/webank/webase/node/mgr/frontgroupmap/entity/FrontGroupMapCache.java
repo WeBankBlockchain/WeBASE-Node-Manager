@@ -40,14 +40,22 @@ public class FrontGroupMapCache {
      * get groupList.
      */
     public List<FrontGroup> getMapListByGroupId(int groupId) {
+        List<FrontGroup> list = getAllMap();
+        if (list == null) {
+            return null;
+        }
+        List<FrontGroup> map = list.stream().filter(m -> groupId == m.getGroupId())
+            .collect(Collectors.toList());
+        return map;
+    }
+
+    /**
+     * get all groupList.
+     */
+    public  List<FrontGroup> getAllMap(){
         if (mapList == null || mapList.size() == 0) {
             mapList = resetMapList();
         }
-        if (mapList == null) {
-            return null;
-        }
-        List<FrontGroup> map = mapList.stream().filter(m -> groupId == m.getGroupId())
-            .collect(Collectors.toList());
-        return map;
+        return mapList;
     }
 }
