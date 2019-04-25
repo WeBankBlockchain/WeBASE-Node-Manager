@@ -13,26 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.base.entity;
+package com.webank.webase.node.mgr.base.properties;
 
-import com.webank.webase.node.mgr.base.code.RetCode;
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-/**
- * Entity class of response info.
- */
 @Data
-public class BaseResponse {
+@Component
+@ConfigurationProperties(prefix = ExecutorProperties.EXECUTOR_PREFIX)
+public class ExecutorProperties {
+    public static final String EXECUTOR_PREFIX = "executor";
 
-    private int code;
-    private String message;
-    private Object data;
+    private Integer corePoolSize = 3;
+    private Integer maxPoolSize = 5;
+    private Integer queueSize = 50;
+    private String threadNamePrefix = "node-mgr-async-";
 
-    public BaseResponse() {
-    }
-
-    public BaseResponse(RetCode retcode) {
-        this.code = retcode.getCode();
-        this.message = retcode.getMsg();
-    }
 }
