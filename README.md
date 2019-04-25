@@ -40,9 +40,8 @@
 # <a id="chapter-3">3. 部署说明</a>
 
 ## 3.1 注意事项
-* 本文档默认服务器为centos，如果在ubuntu搭建，请将下面所有命令中的sh更该为bash,如：bash start.sh
-* 在服务搭建的过程中，如碰到问题，请查看[常见问题解答](#https://github.com/WeBankFinTech/webase-node-mgr/blob/dev-0.6/install_FAQ.md)
-
+本文档默认服务器为centos，如果在ubuntu搭建，请将下面所有命令中的sh更该为bash,如：bash start.sh
+在服务搭建的过程中，如碰到问题，请查看 [常见问题解答](#https://github.com/WeBankFinTech/webase-node-mgr/blob/dev-0.6/install_FAQ.md)
 ## 3.2 拉取代码
 执行命令：
 ```shell
