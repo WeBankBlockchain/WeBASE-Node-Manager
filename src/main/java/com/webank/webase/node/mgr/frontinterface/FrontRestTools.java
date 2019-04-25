@@ -78,8 +78,7 @@ public class FrontRestTools {
         .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR);
 
 
-    @Autowired
-    private FrontGroupMapService mapService;
+
     @Qualifier(value = "genericRestTemplate")
     @Autowired
     private RestTemplate genericRestTemplate;
@@ -91,8 +90,6 @@ public class FrontRestTools {
     @Autowired
     private FrontGroupMapCache frontGroupMapCache;
 
-    //description：key:frontIp$frontPort   value:FailInfo
-    //example： key:12345475275272$8081  value: {"lastTime":554294068415,"failCount":3}
     private static Map<String, FailInfo> failRequestMap = new HashMap<>();
 
 
@@ -193,7 +190,7 @@ public class FrontRestTools {
             iterator.remove();
 
             if (isServiceSleep(url, httpMethod.toString())) {
-                log.info("front url[{}] is sleep,jump over", url);
+                log.warn("front url[{}] is sleep,jump over", url);
                 continue;
             }
             return url;
@@ -206,16 +203,16 @@ public class FrontRestTools {
      * get from front for entity.
      */
     public <T> T getForEntity(Integer groupId, String uri, Class<T> clazz) {
-        List<FrontGroup> mapList = frontGroupMapCache.getMapListByGroupId(groupId);
-        if (mapList == null || mapList.size() == 0) {
-            log.info("fail getForEntity. nmapList is empty");
+        List<FrontGroup> frontList = frontGroupMapCache.getMapListByGroupId(groupId);
+        if (frontList == null || frontList.size() == 0) {
+            log.warn("fail getForEntity. frontList is empty");
             return null;
         }
 
-        ArrayList<FrontGroup> list = new ArrayList<>(mapList);
+        ArrayList<FrontGroup> list = new ArrayList<>(frontList);
         while (list != null && list.size() > 0) {
             String url = buildFrontUrl(list, uri, HttpMethod.GET);//build url
-            log.info("getForEntity url:{}", url);
+            log.debug("getForEntity url:{}", url);
             try {
                 if (StringUtils.isBlank(url)) {
                     log.warn("fail getForEntity. url is null");
@@ -223,7 +220,7 @@ public class FrontRestTools {
                 }
                 return restTemplateExchange(genericRestTemplate, url, HttpMethod.GET, null,clazz);
             } catch (ResourceAccessException ex) {
-                log.info("fail getForEntity", ex);
+                log.warn("fail getForEntity", ex);
                 setFailCount(url, HttpMethod.GET.toString());
                 log.info("continue next front", ex);
                 continue;
@@ -237,16 +234,16 @@ public class FrontRestTools {
      * post from front for entity.
      */
     public <T> T postForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
-        List<FrontGroup> mapList = frontGroupMapCache.getMapListByGroupId(groupId);
-        if (mapList == null || mapList.size() == 0) {
-            log.info("fail postForEntity. nmapList is empty");
+        List<FrontGroup> frontList = frontGroupMapCache.getMapListByGroupId(groupId);
+        if (frontList == null || frontList.size() == 0) {
+            log.debug("fail postForEntity. frontList is empty");
             return null;
         }
 
-        ArrayList<FrontGroup> list = new ArrayList<>(mapList);
+        ArrayList<FrontGroup> list = new ArrayList<>(frontList);
         while (list != null && list.size() > 0) {
             String url = buildFrontUrl(list, uri, HttpMethod.POST);//build url
-            log.info("postForEntity url:{}", url);
+            log.debug("postForEntity url:{}", url);
 
             try {
                 if (StringUtils.isBlank(url)) {
@@ -260,7 +257,7 @@ public class FrontRestTools {
                     return restTemplateExchange(genericRestTemplate, url, HttpMethod.POST, params,clazz);
                 }
             } catch (ResourceAccessException ex) {
-                log.info("fail postForEntity", ex);
+                log.warn("fail postForEntity", ex);
                 setFailCount(url, HttpMethod.GET.toString());
                 log.info("continue next front", ex);
                 continue;
@@ -285,7 +282,6 @@ public class FrontRestTools {
             HttpEntity requestEntity = new HttpEntity(paramStr, headers);
 
             ResponseEntity<T> response = restTemplate.exchange(url, method, requestEntity, clazz);
-            T t = response.getBody();
             return response.getBody();
         } catch (HttpStatusCodeException e) {
             JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());

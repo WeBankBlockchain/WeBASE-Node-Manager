@@ -37,7 +37,7 @@ public class SchedulerServiceTest {
 
     @Test
     public void pullBlockInfoTaskTest() {
-        pullBlockInfoTask.startPull();
+        pullBlockInfoTask.pullBlockStart();
     }
 
     @Test

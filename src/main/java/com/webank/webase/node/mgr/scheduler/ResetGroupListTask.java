@@ -18,17 +18,19 @@ import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Log4j2
@@ -48,9 +50,16 @@ public class ResetGroupListTask {
     @Autowired
     private FrontGroupMapCache frontGroupMapCache;
 
+    @Async(value = "mgrAsyncExecutor")
+    public void asyncResetGroupList() {
+        resetGroupList();
+    }
+
+
     public void resetGroupList() {
-        //get all local groups
-        List<TbGroup> localGroupList = groupService.getAllGroup();
+        Instant startTime = Instant.now();
+        log.info("start resetGroupList. startTime:{}", startTime.toEpochMilli());
+
         //get all front
         List<TbFront> frontList = frontService.getFrontList(new FrontParam());
         if (frontList == null || frontList.size() == 0) {
@@ -72,13 +81,9 @@ public class ResetGroupListTask {
                 Integer gId = Integer.valueOf(groupId);
                 //peer in group
                 List<String> groupPeerList = frontInterfacee.getGroupPeers(gId);
-                //save new groupId
-                localGroupList.stream().filter(localGroup -> gId != localGroup.getGroupId())
-                    .forEach(newGroup -> {
-                        groupService.saveGroupId(newGroup.getGroupId(), groupPeerList.size());
-                        frontGroupMapService.newFrontGroup(front.getFrontId(), gId);
-                    });
-
+                //save groupId
+                groupService.saveGroupId(gId, groupPeerList.size());
+                frontGroupMapService.newFrontGroup(front.getFrontId(), gId);
                 //save new peers
                 savePeerList(gId, groupPeerList);
                 //check node status
@@ -88,6 +93,9 @@ public class ResetGroupListTask {
 
         //reset frontGroupMapList cache.
         frontGroupMapCache.resetMapList();
+
+        log.info("end resetGroupList. useTime:{} ",
+            Duration.between(startTime, Instant.now()).toMillis());
     }
 
     /**
