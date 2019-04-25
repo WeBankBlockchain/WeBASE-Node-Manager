@@ -42,6 +42,7 @@ GRANT ALL PRIVILEGES ON *.* TO 'TestUser'@'%' IDENTIFIED BY '此处为TestUser�
 A problem occurred evaluating root project 'webase-node-mgr'.
 Could not find method annotationProcessor() for arguments [[org.projectlombok:lombok:1.18.2]] on object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
 ```
-答：已安装的gradle版本过低，没有annotationProcessor()方法,升级gradle版本到4.9以上即可。
-
+答：
+1、已安装的gradle版本过低，没有annotationProcessor()方法,升级gradle版本到4.9以上即可。
+2、或者直接使用命令：`./gradlew build -x test`
 
