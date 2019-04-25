@@ -54,4 +54,14 @@ public class GroupControllerTest {
         System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
 
+    @Test
+    public void testGetAll() throws Exception {
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/all"));
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
 }
