@@ -18,6 +18,7 @@ import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_PEERS;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
@@ -33,7 +34,12 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -56,14 +62,16 @@ public class FrontInterfaceService {
             frontIp, frontPort, uri);
 
         uri = FrontRestTools.uriAddGroupId(groupId, uri);
-
         String url = String.format(FrontRestTools.FRONT_URL, frontIp, frontPort, uri);
         log.debug("getFromSpecificFront. url:{}", url);
+
         try {
-            return genericRestTemplate.getForObject(url, clazz);
-        } catch (Exception e) {
-            log.warn("fail getGroupListFromSpecificFront url:{} errorMsg:{}", url, e.getMessage());
-            throw new NodeMgrException(ConstantCode.INVALID_FRONT_INFO);
+            ResponseEntity<T> response = genericRestTemplate.exchange(url, HttpMethod.GET, null, clazz);
+            return response.getBody();
+        } catch (HttpStatusCodeException e) {
+            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
+            throw new NodeMgrException(error.getInteger("statusCode"),
+                error.getString("errorMessage"));
         }
     }
 

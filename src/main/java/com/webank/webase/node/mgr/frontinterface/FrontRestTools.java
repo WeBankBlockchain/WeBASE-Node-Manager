@@ -15,9 +15,9 @@ package com.webank.webase.node.mgr.frontinterface;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
@@ -76,7 +76,6 @@ public class FrontRestTools {
 
     private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
         .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR);
-
 
 
     @Qualifier(value = "genericRestTemplate")
@@ -200,93 +199,81 @@ public class FrontRestTools {
     }
 
     /**
+     * build httpEntity
+     */
+    public static HttpEntity buildHttpEntity(Object param) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String paramStr = null;
+        if (Objects.nonNull(param)) {
+            paramStr = JSON.toJSONString(param);
+        }
+        HttpEntity requestEntity = new HttpEntity(paramStr, headers);
+        return requestEntity;
+    }
+
+    /**
+     * case restTemplate by uri.
+     */
+    private RestTemplate caseRestemplate(String uri) {
+        if (StringUtils.isBlank(uri)) {
+            return null;
+        }
+        if (uri.contains(URI_CONTRACT_DEPLOY)) {
+            return deployRestTemplate;
+        }
+        return genericRestTemplate;
+    }
+
+
+    /**
      * get from front for entity.
      */
     public <T> T getForEntity(Integer groupId, String uri, Class<T> clazz) {
-        List<FrontGroup> frontList = frontGroupMapCache.getMapListByGroupId(groupId);
-        if (frontList == null || frontList.size() == 0) {
-            log.warn("fail getForEntity. frontList is empty");
-            return null;
-        }
-
-        ArrayList<FrontGroup> list = new ArrayList<>(frontList);
-        while (list != null && list.size() > 0) {
-            String url = buildFrontUrl(list, uri, HttpMethod.GET);//build url
-            log.debug("getForEntity url:{}", url);
-            try {
-                if (StringUtils.isBlank(url)) {
-                    log.warn("fail getForEntity. url is null");
-                    return null;
-                }
-                return restTemplateExchange(genericRestTemplate, url, HttpMethod.GET, null,clazz);
-            } catch (ResourceAccessException ex) {
-                log.warn("fail getForEntity", ex);
-                setFailCount(url, HttpMethod.GET.toString());
-                log.info("continue next front", ex);
-                continue;
-            }
-        }
-        return null;
+        return restTemplateExchange(groupId, uri, HttpMethod.GET, null, clazz);
     }
-
 
     /**
      * post from front for entity.
      */
     public <T> T postForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
+        return restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
+    }
+
+    /**
+     * restTemplate exchange.
+     */
+    private <T> T restTemplateExchange(int groupId, String uri, HttpMethod method,
+        Object param, Class<T> clazz) {
         List<FrontGroup> frontList = frontGroupMapCache.getMapListByGroupId(groupId);
         if (frontList == null || frontList.size() == 0) {
-            log.debug("fail postForEntity. frontList is empty");
-            return null;
+            log.error("fail restTemplateExchange. frontList is empty");
+            throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT);
         }
-
         ArrayList<FrontGroup> list = new ArrayList<>(frontList);
-        while (list != null && list.size() > 0) {
-            String url = buildFrontUrl(list, uri, HttpMethod.POST);//build url
-            log.debug("postForEntity url:{}", url);
+        RestTemplate restTemplate = caseRestemplate(uri);
 
+        while (list != null && list.size() > 0) {
+            String url = buildFrontUrl(list, uri, method);//build url
             try {
-                if (StringUtils.isBlank(url)) {
-                    log.warn("fail postForEntity. url is null");
-                    return null;
-                }
-                if (url.contains(URI_CONTRACT_DEPLOY)) {
-                    //is deploy contract
-                    return restTemplateExchange(deployRestTemplate, url, HttpMethod.POST, params,clazz);
-                } else {
-                    return restTemplateExchange(genericRestTemplate, url, HttpMethod.POST, params,clazz);
-                }
+                HttpEntity entity = buildHttpEntity(param);// build entity
+                ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
+                return response.getBody();
             } catch (ResourceAccessException ex) {
-                log.warn("fail postForEntity", ex);
-                setFailCount(url, HttpMethod.GET.toString());
+                log.warn("fail restTemplateExchange", ex);
+                setFailCount(url, method.toString());
+                if (isServiceSleep(url, method.toString())) {
+                    throw ex;
+                }
                 log.info("continue next front", ex);
                 continue;
+            } catch (HttpStatusCodeException e) {
+                JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
+                throw new NodeMgrException(error.getInteger("statusCode"),
+                    error.getString("errorMessage"));
             }
         }
         return null;
     }
 
-
-    /**
-     * restTemplate exchange.
-     */
-    private <T> T restTemplateExchange(RestTemplate restTemplate, String url, HttpMethod method,
-        Object param, Class<T> clazz) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            String paramStr =null;
-            if(Objects.nonNull(param)){
-                paramStr = JSON.toJSONString(param);
-            }
-            HttpEntity requestEntity = new HttpEntity(paramStr, headers);
-
-            ResponseEntity<T> response = restTemplate.exchange(url, method, requestEntity, clazz);
-            return response.getBody();
-        } catch (HttpStatusCodeException e) {
-            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-            throw new NodeMgrException(error.getInteger("statusCode"),
-                error.getString("errorMessage"));
-        }
-    }
 }

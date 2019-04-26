@@ -105,7 +105,7 @@ public class FrontServiceTest {
     }
 
 
-    //TODO
+
     @Test
     public void getTotalTransactionCountTest() {
         TotalTransCountInfo totalTransCount = frontInterface.getTotalTransactionCount(groupId);
