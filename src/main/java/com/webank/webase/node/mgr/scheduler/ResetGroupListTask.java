@@ -52,10 +52,18 @@ public class ResetGroupListTask {
 
     @Async(value = "mgrAsyncExecutor")
     public void asyncResetGroupList() {
+        try {
+            Thread.sleep(10000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         resetGroupList();
     }
 
 
+    /**
+     * reset groupList.
+     */
     public void resetGroupList() {
         Instant startTime = Instant.now();
         log.info("start resetGroupList. startTime:{}", startTime.toEpochMilli());
@@ -91,8 +99,8 @@ public class ResetGroupListTask {
             }
         }
 
-        //reset frontGroupMapList cache.
-        frontGroupMapCache.resetMapList();
+        //clear cache
+        frontGroupMapCache.clearMapList();
 
         log.info("end resetGroupList. useTime:{} ",
             Duration.between(startTime, Instant.now()).toMillis());
