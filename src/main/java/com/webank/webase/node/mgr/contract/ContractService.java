@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -203,6 +204,10 @@ public class ContractService {
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
             FrontRestTools.URI_CONTRACT_DEPLOY, params, String.class);
+        if(StringUtils.isBlank(contractAddress)){
+            log.error("fail deploy, contractAddress is empty");
+         throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
+        }
 
         //save contract
         TbContract tbContract = new TbContract();

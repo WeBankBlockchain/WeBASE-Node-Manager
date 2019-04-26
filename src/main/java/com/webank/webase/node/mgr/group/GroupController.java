@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.scheduler.StatisticsTransdailyTask;
 import com.webank.webase.node.mgr.transdaily.SeventDaysTrans;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
@@ -51,6 +52,8 @@ public class GroupController {
     private TransDailyService transDailyService;
     @Autowired
     private StatisticsTransdailyTask statisticsTask;
+    @Autowired
+    private ResetGroupListTask resetGroupListTask;
 
     /**
      * get group general.
@@ -98,6 +101,10 @@ public class GroupController {
         Integer totalCount = Optional.ofNullable(groupList).map(list -> list.size()).orElse(0);
         pagesponse.setTotalCount(totalCount);
         pagesponse.setData(groupList);
+
+        //reset group
+        resetGroupListTask.asyncResetGroupList();
+
 
         log.info("end getAllGroup useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));

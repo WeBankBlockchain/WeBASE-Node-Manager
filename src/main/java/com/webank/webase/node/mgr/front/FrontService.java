@@ -20,6 +20,7 @@ import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeService;
@@ -49,6 +50,8 @@ public class FrontService {
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private FrontInterfaceService frontInterface;
+    @Autowired
+    private FrontGroupMapCache frontGroupMapCache;
 
     /**
      * add new front
@@ -58,8 +61,9 @@ public class FrontService {
         TbFront tbFront = new TbFront();
         String frontIp = frontInfo.getFrontIp();
         Integer frontPort = frontInfo.getFrontPort();
-
         //check front ip and port
+        NodeMgrTools.checkServerConnect(frontIp, frontPort);
+        //check front not exist
         checkFrontNotExist(frontIp, frontPort);
         //query group list
         List<String> groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
@@ -73,7 +77,8 @@ public class FrontService {
             List<String> groupPeerList = frontInterface
                 .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
             //get peers on chain
-            PeerInfo[] peerArr = frontInterface.getPeersFromSpecificFront(frontIp, frontPort, group);
+            PeerInfo[] peerArr = frontInterface
+                .getPeersFromSpecificFront(frontIp, frontPort, group);
             List<PeerInfo> peerList = Arrays.asList(peerArr);
             //add groupId
             groupService.saveGroupId(group, groupPeerList.size());
@@ -81,13 +86,16 @@ public class FrontService {
             frontGroupMapService.newFrontGroup(tbFront.getFrontId(), group);
             //save nodes
             for (String nodeId : groupPeerList) {
-
                 PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools
-                    .object2JavaBean(p,PeerInfo.class)).filter(peer -> nodeId.equals(peer.getNodeId()))
+                    .object2JavaBean(p, PeerInfo.class))
+                    .filter(peer -> nodeId.equals(peer.getNodeId()))
                     .findFirst().orElseGet(() -> new PeerInfo(nodeId));
                 nodeService.addNodeInfo(group, newPeer);
             }
         }
+
+        //clear cache
+        frontGroupMapCache.clearMapList();
         return tbFront;
     }
 
@@ -147,5 +155,8 @@ public class FrontService {
 
         //remove map
         frontGroupMapService.removeByFrontId(frontId);
+
+        //clear cache
+        frontGroupMapCache.clearMapList();
     }
 }

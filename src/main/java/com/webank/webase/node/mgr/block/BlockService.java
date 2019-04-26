@@ -77,8 +77,11 @@ public class BlockService {
                 Thread.sleep(cProperties.getPullBlockSleepTime());
                 pullBlockByNumber(groupId, nextBlock);
                 nextBlock = getNextBlockNumber(groupId);
-                int i = maxChainBlock.compareTo(nextBlock);
-                System.out.println(i);
+
+                //reset maxChainBlock
+                if (maxChainBlock.compareTo(nextBlock) < 0) {
+                    maxChainBlock = frontInterface.getLatestBlockNumber(groupId);
+                }
             }
         } catch (Exception ex) {
             log.error("fail pullBlockByGroupId. groupId:{} ", groupId, ex);
