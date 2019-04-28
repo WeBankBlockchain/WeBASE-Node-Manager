@@ -3,7 +3,9 @@ server:
   port: 8080
   servlet:
     context-path: /webase-node-mgr
-
+  compression:
+    enabled: true
+    min-response-size: 2048
 
 #mybatis config
 mybatis:
