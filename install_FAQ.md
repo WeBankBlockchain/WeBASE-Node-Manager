@@ -40,8 +40,9 @@ GRANT ALL PRIVILEGES ON *.* TO 'TestUser'@'%' IDENTIFIED BY '此处为TestUser�
 * 问：执行构建命令`gradle build -x test`抛出异常：
 ```
 A problem occurred evaluating root project 'webase-node-mgr'.
-Could not find method annotationProcessor() for arguments [[org.projectlombok:lombok:1.18.2]] on object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
+Could not find method compileOnly() for arguments [[org.projectlombok:lombok:1.18.2]] on root project 'webase-node-mgr'.
 ```
-答：已安装的gradle版本过低，没有annotationProcessor()方法,升级gradle版本到4.9以上即可。
-
+答：
+方法1、已安装的gradle版本过低，升级gradle版本到4.10以上即可。
+方法2、直接使用命令：`./gradlew build -x test`
 

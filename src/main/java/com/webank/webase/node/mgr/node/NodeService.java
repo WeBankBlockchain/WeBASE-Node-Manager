@@ -202,7 +202,9 @@ public class NodeService {
                 .orElse(BigInteger.ZERO);//pbftView
 
             if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
-                log.warn("node[{}] is invalid", nodeId);
+                log.warn(
+                    "node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                    nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
                 tbNode.setNodeActive(DataStatus.INVALID.getValue());
             } else {
                 tbNode.setBlockNumber(latestNumber);
