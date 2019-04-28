@@ -16,28 +16,22 @@
 package com.webank.webase.node.mgr.report;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.logs.LatestLog;
-import com.webank.webase.node.mgr.logs.NodeLogService;
-import com.webank.webase.node.mgr.logs.TbNodeLog;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -50,20 +44,14 @@ import org.springframework.stereotype.Service;
 public class ReportService {
 
     private static final String BLOCK_INFO_ATTR = "block_info";// report block info
-    private static final String NODE_LOG_ATTR = "node_log"; // report node log info
     private static final String LATEST_BLOCK_ATTR = "latest_block";// query latest block
-    private static final String LATEST_NODE_LOG_ATTR = "latest_node_log";// query latest node log
     // all attr for report blockChainInfo
-    private static final List<String> REPORT_ARRT_NAME_LIST = Arrays
-        .asList(BLOCK_INFO_ATTR, NODE_LOG_ATTR);
+    private static final List<String> REPORT_ARRT_NAME_LIST = Arrays.asList(BLOCK_INFO_ATTR);
     // all attr for query blockChainInfo
-    private static final List<String> QUERY_ARRT_NAME_LIST = Arrays
-        .asList(LATEST_BLOCK_ATTR, LATEST_NODE_LOG_ATTR);
+    private static final List<String> QUERY_ARRT_NAME_LIST = Arrays.asList(LATEST_BLOCK_ATTR);
 
     @Autowired
     private NodeService nodeService;
-    @Autowired
-    private NodeLogService nodeLogService;
     @Autowired
     private BlockService blockService;
     @Autowired
@@ -117,9 +105,6 @@ public class ReportService {
             case LATEST_BLOCK_ATTR:
                 getLatestBlockNumber(tbNode.getNetworkId(), nodeIp, nodeP2PPort, baseResponse);
                 break;
-            case LATEST_NODE_LOG_ATTR:
-                getLatestNodeLog(nodeIp, nodeP2PPort, baseResponse);
-                break;
             default:
                 break;
         }
@@ -157,20 +142,6 @@ public class ReportService {
         log.debug("end getLatestBlockNumber.  baseResponse:{} ", JSON.toJSONString(baseResponse));
     }
 
-    /**
-     * query latest node log.
-     */
-    public void getLatestNodeLog(String nodeIp, Integer nodeP2PPort, BaseResponse baseResponse)
-        throws NodeMgrException {
-        log.debug("start getLatestNodeLog.  nodeIp:{} nodeP2PPort:{} ", nodeIp, nodeP2PPort);
-
-        // query latest log
-        LatestLog latestLog = nodeLogService.queryLatestNodeLog(nodeIp, nodeP2PPort);
-        baseResponse.setData(latestLog);
-
-        log.debug("end getLatestNodeLog.  baseResponse:{} ", JSON.toJSONString(baseResponse));
-
-    }
 
     /**
      * case report attr.
@@ -195,48 +166,8 @@ public class ReportService {
             case BLOCK_INFO_ATTR:
                 handleReportBlockInfo(tbNode, metricData.getMetricValue());
                 break;
-            case NODE_LOG_ATTR:
-                saveNodeLog(tbNode, metricData.getMetricValue());
-                break;
             default:
                 break;
-        }
-
-    }
-
-
-    /**
-     * save node log.
-     */
-    public void saveNodeLog(TbNode tbNode, Object metricValue) throws NodeMgrException {
-        Integer nodeId = Optional.ofNullable(tbNode).map(TbNode::getNodeId)
-            .orElseThrow(() -> new NodeMgrException(ConstantCode.INVALID_NODE_INFO));
-
-        List<?> listNodeLog = (List<?>) metricValue;
-        for (int i = 0; i < listNodeLog.size(); i++) {
-            NodeLogInfo nodeLog = NodeMgrTools
-                .object2JavaBean(listNodeLog.get(i), NodeLogInfo.class);
-            if (nodeLog == null) {
-                log.warn("fail saveNodeLog. logs null");
-                return;
-            }
-            // save node log
-            LocalDateTime logTime = nodeLog.getLogTime();
-            Integer rowNumber = nodeLog.getRowNumber();
-            String logMsg = nodeLog.getLogMsg();
-            String fileName = nodeLog.getFileName();
-
-            if (StringUtils.isAnyBlank(logMsg, fileName) || rowNumber == null || logTime == null) {
-                log.warn(
-                    "fail saveNodeLog. nodeId:{} fileName:{} rowNumber:{} logTimeStr:{} logMsg:{}",
-                    nodeId, fileName, rowNumber, logTime,
-                    logMsg);
-                return;
-            }
-
-            TbNodeLog logRow = new TbNodeLog(nodeId, fileName, logTime, rowNumber, logMsg,
-                DataStatus.NORMAL.getValue());
-            nodeLogService.addNodeLog(logRow);
         }
 
     }

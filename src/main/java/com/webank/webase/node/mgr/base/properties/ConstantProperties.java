@@ -41,7 +41,6 @@ public class ConstantProperties {
     // scheduler
     private long nodeWaitMax = 180L;
     private BigInteger blockRetainMax = new BigInteger("10000");
-    private int logRetainMax = 10000;
     private BigInteger transRetainMax = new BigInteger("10000");
     private String statisticsTransDailyCron = "0 0/1 * * * ?";// Execute once every minute
     private String deleteInfoCron = "0 0/2 * * * ?";// Execute once every two minute

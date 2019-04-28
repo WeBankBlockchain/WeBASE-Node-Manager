@@ -221,26 +221,6 @@ CREATE TABLE IF NOT EXISTS `tb_account_info` (
 
 
 
--- ----------------------------
--- Table structure for `tb_node_log`
--- ----------------------------
-CREATE TABLE IF NOT EXISTS `tb_node_log` (
-  `log_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '日志编号',
-  `node_id` int(11) NOT NULL COMMENT '所属节点',
-  `log_time` datetime NOT NULL COMMENT '日志产生时间',
-  `row_number` int(5) NOT NULL COMMENT '日志所在文件行号',
-  `file_name` varchar(50) NOT NULL COMMENT '日志文件名',
-  `log_msg` text NOT NULL COMMENT '日志内容',
-  `log_status` int(1) NOT NULL DEFAULT '1' COMMENT '记录状态(1有效，2无效)',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `modify_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`log_id`),
-  UNIQUE KEY `unique_node_row_time` (`node_id`,`row_number`,`log_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='节点错误日志信息表';
-
-
-
-
 
 
 -- ----------------------------
