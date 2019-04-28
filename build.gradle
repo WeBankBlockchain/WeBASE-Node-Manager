@@ -47,8 +47,7 @@ dependencies {
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.54'
-
-    annotationProcessor lombok
+    
     compileOnly lombok
 
     testCompile springboot

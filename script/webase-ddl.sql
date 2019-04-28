@@ -18,8 +18,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 -- Table structure for `tb_block`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_block`;
-CREATE TABLE `tb_block` (
+CREATE TABLE IF NOT EXISTS `tb_block` (
   `pk_hash` varchar(128) NOT NULL COMMENT '块hash值',
   `network_id` int(11) NOT NULL COMMENT '所属网络',
   `block_number` int(11) NOT NULL COMMENT '高度',
@@ -37,8 +36,7 @@ CREATE TABLE `tb_block` (
 -- ----------------------------
 -- Table structure for `tb_contract`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_contract`;
-CREATE TABLE `tb_contract` (
+CREATE TABLE IF NOT EXISTS `tb_contract` (
   `contract_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '合约编号',
   `contract_name` varchar(120) DEFAULT NULL COMMENT '合约名称',
   `network_id` int(11) NOT NULL COMMENT '所属网络',
@@ -66,8 +64,7 @@ CREATE TABLE `tb_contract` (
 -- ----------------------------
 -- Table structure for `tb_network`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_network`;
-CREATE TABLE `tb_network` (
+CREATE TABLE IF NOT EXISTS `tb_network` (
   `network_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '网络编号',
   `network_name` varchar(120) DEFAULT NULL COMMENT '网络名称',
   `network_status` int(1) DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
@@ -86,8 +83,7 @@ CREATE TABLE `tb_network` (
 -- ----------------------------
 -- Table structure for `tb_network_org_map`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_network_org_map`;
-CREATE TABLE `tb_network_org_map` (
+CREATE TABLE IF NOT EXISTS `tb_network_org_map` (
   `map_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
   `network_id` int(11) NOT NULL COMMENT '网络编号',
   `org_id` int(11) NOT NULL COMMENT '组织编号',
@@ -104,8 +100,7 @@ CREATE TABLE `tb_network_org_map` (
 -- ----------------------------
 -- Table structure for `tb_node`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_node`;
-CREATE TABLE `tb_node` (
+CREATE TABLE IF NOT EXISTS `tb_node` (
   `node_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '节点编号',
   `node_name` varchar(120) NOT NULL COMMENT '节点名称',
   `network_id` int(11) NOT NULL COMMENT '所属网络',
@@ -134,8 +129,7 @@ CREATE TABLE `tb_node` (
 -- ----------------------------
 -- Table structure for `tb_organization`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_organization`;
-CREATE TABLE `tb_organization` (
+CREATE TABLE IF NOT EXISTS `tb_organization` (
   `org_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '组织编号',
   `org_name` varchar(120) DEFAULT NULL COMMENT '组织名称',
   `org_type` int(1) DEFAULT '2' COMMENT '组织类型（1-本组织 2-其他组织） 默认其他组织',
@@ -156,8 +150,7 @@ CREATE TABLE `tb_organization` (
 -- ----------------------------
 -- Table structure for `tb_trans_daily`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_trans_daily`;
-CREATE TABLE `tb_trans_daily` (
+CREATE TABLE IF NOT EXISTS `tb_trans_daily` (
   `network_id` int(11) NOT NULL COMMENT '所属网络',
   `trans_day` date NOT NULL COMMENT '日期',
   `trans_count` int(11) DEFAULT '0' COMMENT '交易数量',
@@ -173,8 +166,7 @@ CREATE TABLE `tb_trans_daily` (
 -- ----------------------------
 -- Table structure for `tb_user`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_user`;
-CREATE TABLE `tb_user` (
+CREATE TABLE IF NOT EXISTS `tb_user` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户编号',
   `user_name` varchar(64) NOT NULL COMMENT '用户名',
   `network_id` int(11) NOT NULL COMMENT '所属网络',
@@ -198,8 +190,7 @@ CREATE TABLE `tb_user` (
 -- ----------------------------
 -- Table structure for `tb_user_key_mapping`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_user_key_mapping`;
-CREATE TABLE `tb_user_key_mapping` (
+CREATE TABLE IF NOT EXISTS `tb_user_key_mapping` (
   `map_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
   `user_id` int(11) NOT NULL COMMENT '用户编号',
   `private_key` text NOT NULL COMMENT '私钥',
@@ -215,8 +206,7 @@ CREATE TABLE `tb_user_key_mapping` (
 -- ----------------------------
 -- Table structure for `tb_account_info`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_account_info`;
-CREATE TABLE `tb_account_info` (
+CREATE TABLE IF NOT EXISTS `tb_account_info` (
   `account` varchar(50) NOT NULL COMMENT '系统账号',
   `account_pwd` varchar(250) NOT NULL COMMENT '登录密码',
   `role_id` int(11) NOT NULL COMMENT '所属角色编号',
@@ -234,8 +224,7 @@ CREATE TABLE `tb_account_info` (
 -- ----------------------------
 -- Table structure for `tb_node_log`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_node_log`;
-CREATE TABLE `tb_node_log` (
+CREATE TABLE IF NOT EXISTS `tb_node_log` (
   `log_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '日志编号',
   `node_id` int(11) NOT NULL COMMENT '所属节点',
   `log_time` datetime NOT NULL COMMENT '日志产生时间',
@@ -257,8 +246,7 @@ CREATE TABLE `tb_node_log` (
 -- ----------------------------
 -- Table structure for `tb_role`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_role`;
-CREATE TABLE `tb_role` (
+CREATE TABLE IF NOT EXISTS `tb_role` (
   `role_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '角色编号',
   `role_name` varchar(120) DEFAULT NULL COMMENT '角色英文名称',
   `role_name_zh` varchar(120) DEFAULT NULL COMMENT '角色中文名称',
@@ -275,8 +263,7 @@ CREATE TABLE `tb_role` (
 -- ----------------------------
 -- Table structure for `tb_trans_hash`
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_trans_hash`;
-CREATE TABLE `tb_trans_hash` (
+CREATE TABLE IF NOT EXISTS `tb_trans_hash` (
   `trans_hash` varchar(128) NOT NULL COMMENT '交易hash',
   `network_id` int(11) NOT NULL COMMENT '所属网络编号',
   `block_number` bigint(25) NOT NULL COMMENT '所属区块',
@@ -291,8 +278,7 @@ CREATE TABLE `tb_trans_hash` (
 -- ----------------------------
 -- Table structure for tb_user_transaction_monitor
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_user_transaction_monitor`;
-CREATE TABLE `tb_user_transaction_monitor` (
+CREATE TABLE IF NOT EXISTS `tb_user_transaction_monitor` (
   `user_name` varchar(128) NOT NULL COMMENT '用户名称',
   `user_type` tinyint(4) DEFAULT '0' COMMENT '用户类型(0-正常，1-异常)',
   `network_id` int(11) NOT NULL COMMENT '所属网络',
