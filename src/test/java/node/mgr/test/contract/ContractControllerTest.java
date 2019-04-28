@@ -15,6 +15,7 @@ package node.mgr.test.contract;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
@@ -22,7 +23,9 @@ import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -194,7 +197,6 @@ public class ContractControllerTest {
 
         //if make exception
         param.setFuncParam(Arrays.asList("asdfasfasd"));
-
 
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/transaction").

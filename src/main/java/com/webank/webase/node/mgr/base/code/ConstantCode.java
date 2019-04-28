@@ -38,9 +38,9 @@ public class ConstantCode {
 
     public static final RetCode DB_EXCEPTION = RetCode.mark(202001, "database exception");
 
-    public static final RetCode ORG_EXISTS = RetCode.mark(202002, "");
+    public static final RetCode FRONT_LIST_NOT_FOUNT = RetCode.mark(202002, "not fount any front");
 
-    public static final RetCode ORG_NOT_EXISTS = RetCode.mark(202003, "");
+    public static final RetCode INVALID_FRONT_IP = RetCode.mark(202003, "not support this ip");
 
     public static final RetCode FRONT_EXISTS = RetCode.mark(202004, "front already exists");
 
@@ -149,10 +149,11 @@ public class ConstantCode {
     public static final RetCode PUBLICKEY_LENGTH_ERROR = RetCode
         .mark(202050, "publicKey's length is 130,address's length is 42");
 
-    public static final RetCode INVALID_FRONT_INFO = RetCode.mark(202051, "ip or port error");
+    public static final RetCode SERVER_HOST_CONNECT_FAIL = RetCode
+        .mark(202051, "un know this host");
 
-    public static final RetCode FRONT_NOT_EXISTS = RetCode
-        .mark(202052, "did not find any front info");
+    public static final RetCode SERVER_PORT_CONNECT_FAIL = RetCode
+        .mark(202052, "un know this port");
 
     public static final RetCode NOT_FOUND_SYSTEM_USER = RetCode.mark(202053, "");
 

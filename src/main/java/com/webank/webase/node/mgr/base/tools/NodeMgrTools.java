@@ -15,7 +15,13 @@ package com.webank.webase.node.mgr.base.tools;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -218,5 +224,45 @@ public class NodeMgrTools {
             map.put(nameList.get(i), valueList.get(i));
         }
         return map;
+    }
+
+    /**
+     * check server host.
+     */
+    public static void checkServerHostConnect(String serverHost) {
+        Boolean state;
+        try {
+            InetAddress address = InetAddress.getByName(serverHost);
+            state = address.isReachable(500);
+        } catch (Exception ex) {
+            log.error("fail checkServerHostConnect", ex);
+            throw new NodeMgrException(ConstantCode.SERVER_HOST_CONNECT_FAIL);
+        }
+
+        if (!state) {
+            log.info("host connect state:{}", state);
+            throw new NodeMgrException(ConstantCode.SERVER_HOST_CONNECT_FAIL);
+        }
+    }
+
+
+    /**
+     * check host an port.
+     */
+    public static void checkServerConnect(String serverHost, int serverPort) {
+        //check host
+        checkServerHostConnect(serverHost);
+
+        try {
+            //check port
+            Socket socket = new Socket();
+            socket.setReceiveBufferSize(8193);
+            socket.setSoTimeout(500);
+            SocketAddress address = new InetSocketAddress(serverHost, serverPort);
+            socket.connect(address, 1000);
+        } catch (Exception ex) {
+            log.error("fail checkServerConnect", ex);
+            throw new NodeMgrException(ConstantCode.SERVER_PORT_CONNECT_FAIL);
+        }
     }
 }
