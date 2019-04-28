@@ -40,7 +40,7 @@ public class ConstantCode {
 
     public static final RetCode FRONT_LIST_NOT_FOUNT = RetCode.mark(202002, "not fount any front");
 
-    public static final RetCode ORG_NOT_EXISTS = RetCode.mark(202003, "");
+    public static final RetCode INVALID_FRONT_IP = RetCode.mark(202003, "not support this ip");
 
     public static final RetCode FRONT_EXISTS = RetCode.mark(202004, "front already exists");
 

@@ -52,6 +52,7 @@ public class FrontService {
     private FrontInterfaceService frontInterface;
     @Autowired
     private FrontGroupMapCache frontGroupMapCache;
+    private List<String> NOT_SUPPORT_IP_LIST = Arrays.asList("0.0.0.0", "localhost", "127.0.0.1");
 
     /**
      * add new front
@@ -61,6 +62,8 @@ public class FrontService {
         TbFront tbFront = new TbFront();
         String frontIp = frontInfo.getFrontIp();
         Integer frontPort = frontInfo.getFrontPort();
+        //check valid ip
+        checkNotSupportIp(frontIp);
         //check front ip and port
         NodeMgrTools.checkServerConnect(frontIp, frontPort);
         //check front not exist
@@ -99,6 +102,14 @@ public class FrontService {
         return tbFront;
     }
 
+    /**
+     * check not support ip.
+     */
+    private void checkNotSupportIp(String ip) {
+        if (NOT_SUPPORT_IP_LIST.contains(ip)) {
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_IP);
+        }
+    }
 
     /**
      * check front ip and prot
