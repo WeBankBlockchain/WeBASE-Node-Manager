@@ -129,6 +129,15 @@ public class TransDailyService {
             log.error("start queryMaxBlockByGroup groupId:{}", groupId, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
+    }
 
+    /**
+     * delete by groupId.
+     */
+    public void deleteByGroupId(int groupId){
+        if(groupId==0){
+            return;
+        }
+        tbTransDailyMapper.deleteByGroupId(groupId);
     }
 }

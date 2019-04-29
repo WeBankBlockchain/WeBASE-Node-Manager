@@ -162,23 +162,22 @@ public class NodeService {
     }
 
     /**
-     * delete by node id.
+     * delete by node and group.
      */
-    public void deleteByNodeId(Integer nodeId) throws NodeMgrException {
-        log.debug("start deleteByNodeId nodeId:{}", nodeId);
-        TbNode nodeRow = queryByNodeId(nodeId);
-        if (nodeRow == null) {
-            log.info("fail deleteByNodeId. invalid node ip");
-            throw new NodeMgrException(ConstantCode.INVALID_ROLE_ID);
-        }
+    public void deleteByNodeAndGroupId(String nodeId, int groupId) throws NodeMgrException {
+        log.debug("start deleteByNodeAndGroupId nodeId:{} groupId:{}", nodeId, groupId);
+        nodeMapper.deleteByNodeAndGroup(nodeId, groupId);
+        log.debug("end deleteByNodeAndGroupId");
+    }
 
-        Integer affectRow = nodeMapper.deleteByNodeId(nodeId);
-        if (affectRow == 0) {
-            log.warn("affect 0 rows of tb_node");
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+    /**
+     * delete by groupId.
+     */
+    public void deleteByGroupId(int groupId){
+        if(groupId==0){
+            return;
         }
-
-        log.debug("end deleteByNodeId");
+        nodeMapper.deleteByGroupId(groupId);
     }
 
 

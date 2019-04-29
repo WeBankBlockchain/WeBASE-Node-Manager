@@ -4,15 +4,18 @@
 
 <mapper namespace="com.webank.webase.node.mgr.table.TableMapper">
 
-  <select id="queryAllTables">
-    select table_name from information_schema.tables where table_schema=#{dbName};
+  <select id="queryTables" resultType="java.lang.String">
+    select table_name from information_schema.tables where table_schema=#{dbName}
+    <if test="tableName != null">
+      and table_name = #{tableName}
+    </if>
   </select>
 
-  <update id="removeTable" parameterType="String">
-      delete from information_schema.tables where table_schema=#{dbName} and table_name =${tableName};
+  <update id="dropTable" parameterType="java.lang.String">
+      drop table if exists ${tableName}
   </update>
 
-  <update id="createTbBlock" parameterType="String">
+  <update id="createTbBlock" parameterType="java.lang.String">
     CREATE TABLE IF NOT EXISTS ${tableName}(
         pk_hash varchar(128) NOT NULL COMMENT '块hash值',
         block_timestamp datetime NOT NULL COMMENT '出块时间',
@@ -27,7 +30,7 @@
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区块信息表';
   </update>
 
-  <update id="createTransHash" parameterType="String">
+  <update id="createTransHash" parameterType="java.lang.String">
     CREATE TABLE IF NOT EXISTS ${tableName} (
         trans_hash varchar(128) NOT NULL COMMENT '交易hash',
         block_number bigint(25) NOT NULL COMMENT '所属区块',
@@ -41,8 +44,12 @@
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交易hash信息表';
   </update>
 
+  <delete id="deleteByTableName" parameterType="java.lang.String">
+        delete from ${tableName} limit 1000
+  </delete>
 
-  <update id="createUserTransactionMonitor" parameterType="String">
+
+  <update id="createUserTransactionMonitor" parameterType="java.lang.String">
     CREATE TABLE IF NOT EXISTS ${tableName} (
         user_name varchar(128) NOT NULL COMMENT '用户名称',
         user_type tinyint(4) DEFAULT '0' COMMENT '用户类型(0-正常，1-异常)',

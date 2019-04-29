@@ -15,10 +15,10 @@ package com.webank.webase.node.mgr.front;
 
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -73,15 +73,18 @@ public class FrontController extends BaseController {
      */
     @GetMapping(value = "/find")
     public BasePageResponse queryFrontList(
-        @RequestParam(value = "frontId", required = false) Integer frontId)
+        @RequestParam(value = "frontId", required = false) Integer frontId,
+        @RequestParam(value = "groupId", required = false) Integer groupId)
         throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start queryFrontList startTime:{} frontId:{}", startTime.toEpochMilli(), frontId);
+        log.info("start queryFrontList startTime:{} frontId:{} groupId:{}",
+            startTime.toEpochMilli(), frontId, groupId);
 
         //param
         FrontParam param = new FrontParam();
         param.setFrontId(frontId);
+        param.setGroupId(groupId);
 
         //query front info
         int count = frontService.getFrontCount(param);

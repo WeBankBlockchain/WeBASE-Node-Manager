@@ -33,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 
 public class MonitorControllerTest {
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -46,47 +47,63 @@ public class MonitorControllerTest {
 
     @Test
     public void testUserList() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/userList/1"));
+        ResultActions resultActions = mockMvc
+            .perform(MockMvcRequestBuilders.get("/monitor/userList/1"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
-        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+        System.out.println(
+            "======================response:" + resultActions.andReturn().getResponse()
+                .getContentAsString());
     }
 
     @Test
     public void testInterfaceList() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/interfaceList/1?userName=abc"));
+        ResultActions resultActions = mockMvc
+            .perform(MockMvcRequestBuilders.get("/monitor/interfaceList/1?userName=abc"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
-        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+        System.out.println(
+            "======================response:" + resultActions.andReturn().getResponse()
+                .getContentAsString());
     }
 
     @Test
     public void testUnusualUserList() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/unusualUserList/1/1/15"));
+        ResultActions resultActions = mockMvc
+            .perform(MockMvcRequestBuilders.get("/monitor/unusualUserList/1/1/15"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
-        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+        System.out.println(
+            "======================response:" + resultActions.andReturn().getResponse()
+                .getContentAsString());
     }
 
     @Test
     public void testTransList() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/transList/1?userName=safas&interfaceName=fasdf"));
+        ResultActions resultActions = mockMvc.perform(
+            MockMvcRequestBuilders.get("/monitor/transList/1?userName=safas&interfaceName=fasdf"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
-        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+        System.out.println(
+            "======================response:" + resultActions.andReturn().getResponse()
+                .getContentAsString());
     }
 
     @Test
     public void testUnusualContractList() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/monitor/unusualContractList/1/1/15"));
+        ResultActions resultActions = mockMvc
+            .perform(MockMvcRequestBuilders.get("/monitor/unusualContractList/1/1/15"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
-        System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+        System.out.println(
+            "======================response:" + resultActions.andReturn().getResponse()
+                .getContentAsString());
     }
+
 
 }

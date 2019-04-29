@@ -73,7 +73,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .successHandler(loginSuccessHandler) // if login success
             .failureHandler(loginfailHandler) // if login fail
             .and().authorizeRequests()
-            .antMatchers("/js/**", "/account/login", "/login", "/report/**", "/user/privateKey/**")
+            .antMatchers("/account/login", "/login", "/user/privateKey/**")
             .permitAll()
             .antMatchers(HttpMethod.POST, "/account/accountInfo").access(adminRolePermit)
             .antMatchers(HttpMethod.PUT, "/account/accountInfo").access(adminRolePermit)

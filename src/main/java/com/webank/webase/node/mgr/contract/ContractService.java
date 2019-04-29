@@ -324,4 +324,14 @@ public class ContractService {
         }
     }
 
+
+    /**
+     * delete by groupId
+     */
+    public void deleteByGroupId(int groupId){
+        if(groupId==0){
+            return;
+        }
+        contractMapper.removeByGroupId(groupId);
+    }
 }

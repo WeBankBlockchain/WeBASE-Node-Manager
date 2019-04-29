@@ -49,4 +49,14 @@ public class MethodService {
         return methodMapper.getMethodById(methodId, groupId);
     }
 
+    /**
+     * delete by groupId.
+     */
+    public void deleteByGroupId(int groupId){
+        if(groupId==0){
+            return;
+        }
+        methodMapper.removeByGroupId(groupId);
+    }
+
 }
