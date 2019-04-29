@@ -24,4 +24,8 @@
   <select id="getMethodById" resultMap="methodMap">
     SELECT * FROM tb_method WHERE method_id = #{methodId} and group_id=#{groupId}
   </select>
+
+  <delete id="removeByGroupId" parameterType="java.lang.Integer">
+    delete from tb_method where group_id=#{groupId}
+  </delete>
 </mapper>
