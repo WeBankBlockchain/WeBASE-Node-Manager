@@ -7,9 +7,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TableMapper {
 
-    List<String> queryAllTables(@Param("dbName") String dbName);
+    List<String> queryTables(@Param("dbName") String dbName, @Param("tableName") String tableName);
 
-    int removeTable(@Param("dbName") String dbName, @Param("tableName") String tableName);
+    int dropTable(@Param("dbName") String dbName, @Param("tableName") String tableName);
+
+    int deleteByTableName(@Param("tableName") String tableName);
 
     int createTbBlock(@Param("tableName") String tableName);
 

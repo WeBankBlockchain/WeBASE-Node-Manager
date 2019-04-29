@@ -317,9 +317,7 @@ public class MonitorService {
                         .getAddressByHash(groupId, trans.getTransHash());
                     contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress,
                         trans.getBlockNumber());
-                    if (contractBin.startsWith("0x")) {
-                        contractBin = StringUtils.removeStart(contractBin, "0x");
-                    }
+                    contractBin = removeBinFirstAndLast(contractBin);
                     List<TbContract> contractRow = contractService
                         .queryContractByBin(groupId, contractBin);
                     if (contractRow != null && contractRow.size() > 0) {
@@ -339,9 +337,7 @@ public class MonitorService {
                     contractAddress = chainTransInfo.getTo();
                     contractBin = frontInterfacee
                         .getCodeFromFront(groupId, contractAddress, trans.getBlockNumber());
-                    if (contractBin.startsWith("0x")) {
-                        contractBin = StringUtils.removeStart(contractBin, "0x");
-                    }
+                    contractBin = removeBinFirstAndLast(contractBin);
                     transType = TransType.CALL.getValue();
 
                     List<TbContract> contractRow = contractService
@@ -431,5 +427,21 @@ public class MonitorService {
         }
 
         transHashService.updateTransStatFlag(groupId, tbMonitor.getTransHashLastest());
+    }
+
+    /**
+     * remove "0x" and last 68 character.
+     */
+    private String removeBinFirstAndLast(String contractBin){
+        if(StringUtils.isBlank(contractBin)){
+            return null;
+        }
+        if (contractBin.startsWith("0x")) {
+            contractBin = StringUtils.removeStart(contractBin, "0x");
+        }
+        if(contractBin.length()>68){
+            contractBin=contractBin.substring(0,contractBin.length()-68);
+        }
+        return contractBin;
     }
 }

@@ -32,6 +32,11 @@ public interface GroupMapper {
     int save(TbGroup tbGroup);
 
     /**
+     * remove by id.
+     */
+    int remove(@Param("groupId") Integer groupId);
+
+    /**
      * query group count.
      */
     int getCount(@Param("groupId") Integer groupId);

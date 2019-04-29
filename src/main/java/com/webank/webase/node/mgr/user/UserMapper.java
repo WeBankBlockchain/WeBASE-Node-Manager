@@ -75,4 +75,14 @@ public interface UserMapper {
      * query system User.
      */
     TbUser querySystemUser();
+
+    /**
+     * delete user.
+     */
+    void deleteUser(@Param("groupId") Integer groupId);
+
+    /**
+     * delete user_key map
+     */
+    void deleteUserKeyMap(@Param("groupId") Integer groupId);
 }
