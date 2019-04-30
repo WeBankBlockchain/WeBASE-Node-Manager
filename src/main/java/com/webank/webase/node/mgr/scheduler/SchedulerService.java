@@ -37,8 +37,6 @@ public class SchedulerService implements SchedulingConfigurer {
     @Autowired
     private DeleteBlockTask deleteBlockTask;
     @Autowired
-    private DeleteNodeLogTask deleteNodeLogTask;
-    @Autowired
     private DeleteTransHashTask deleteTransHashTask;
     @Autowired
     private TransMonitorTask transMonitorTask;
@@ -58,10 +56,6 @@ public class SchedulerService implements SchedulingConfigurer {
                 .nextExecutionTime(context));
 
         taskRegistrar.addTriggerTask(() -> deleteBlockTask.deleteBlockInfo(),
-            (context) -> new CronTrigger(constants.getDeleteInfoCron())
-                .nextExecutionTime(context));
-
-        taskRegistrar.addTriggerTask(() -> deleteNodeLogTask.deleteNodeLogInfo(),
             (context) -> new CronTrigger(constants.getDeleteInfoCron())
                 .nextExecutionTime(context));
 
