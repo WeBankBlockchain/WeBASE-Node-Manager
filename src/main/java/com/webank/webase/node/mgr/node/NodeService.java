@@ -25,6 +25,8 @@ import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
@@ -173,8 +175,8 @@ public class NodeService {
     /**
      * delete by groupId.
      */
-    public void deleteByGroupId(int groupId){
-        if(groupId==0){
+    public void deleteByGroupId(int groupId) {
+        if (groupId == 0) {
             return;
         }
         nodeMapper.deleteByGroupId(groupId);
@@ -194,11 +196,19 @@ public class NodeService {
             String nodeId = tbNode.getNodeId();
             BigInteger localBlockNumber = tbNode.getBlockNumber();
             BigInteger localPbftView = tbNode.getPbftView();
+            LocalDateTime modifyTime = tbNode.getModifyTime();
 
             BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
             BigInteger latestView = consensusList.stream()
                 .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
                 .orElse(BigInteger.ZERO);//pbftView
+
+            Duration duration = Duration.between(modifyTime, LocalDateTime.now());
+            Long subTime = duration.toMillis();
+            if (subTime < 5000) {
+                log.info("checkNodeStatus jump over. subTime:{}", subTime);
+                return;
+            }
 
             if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
                 log.warn(
