@@ -198,17 +198,18 @@ public class NodeService {
             BigInteger localPbftView = tbNode.getPbftView();
             LocalDateTime modifyTime = tbNode.getModifyTime();
 
-            BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
-            BigInteger latestView = consensusList.stream()
-                .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
-                .orElse(BigInteger.ZERO);//pbftView
-
             Duration duration = Duration.between(modifyTime, LocalDateTime.now());
             Long subTime = duration.toMillis();
             if (subTime < 5000) {
                 log.info("checkNodeStatus jump over. subTime:{}", subTime);
                 return;
             }
+
+            BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
+            BigInteger latestView = consensusList.stream()
+                .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
+                .orElse(BigInteger.ZERO);//pbftView
+
 
             if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
                 log.warn(
