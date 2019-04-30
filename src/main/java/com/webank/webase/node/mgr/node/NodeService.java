@@ -45,6 +45,7 @@ public class NodeService {
     private NodeMapper nodeMapper;
     @Autowired
     private FrontInterfaceService frontInterfacee;
+    private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
 
     /**
      * add new node data.
@@ -200,7 +201,7 @@ public class NodeService {
 
             Duration duration = Duration.between(modifyTime, LocalDateTime.now());
             Long subTime = duration.toMillis();
-            if (subTime < 5000) {
+            if (subTime < CHECK_NODE_WAIT_MIN_MILLIS) {
                 log.info("checkNodeStatus jump over. subTime:{}", subTime);
                 return;
             }
