@@ -46,4 +46,9 @@ public interface TbTransDailyMapper {
      * query max block number by group id.
      */
     BigInteger queryMaxBlockByGroup(@Param("groupId") Integer groupId);
+
+    /**
+     * delete by groupId.
+     */
+    Integer deleteByGroupId( @Param("groupId") Integer groupId);
 }

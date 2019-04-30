@@ -52,6 +52,7 @@ public class ConstantProperties {
     private Boolean isBlockPullFromZero = false;
     private Integer maxRequestFail = 3;
     private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
+    private String ignoreCheckFront;
 
 
     // http
