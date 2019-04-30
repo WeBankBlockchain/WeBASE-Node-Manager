@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FrontParam {
     private Integer frontId;
+    private Integer groupId;
     private String frontIp;
     private Integer frontPort;
 }

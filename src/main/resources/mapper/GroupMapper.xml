@@ -39,6 +39,10 @@
 		ON DUPLICATE KEY UPDATE node_count=#{nodeCount}
 	</insert>
 
+	<delete id="remove" parameterType="java.lang.Integer">
+    delete from tb_group where group_id=#{groupId}
+  </delete>
+
 
   <select id="getCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
     select count(1) from tb_group where 1 = 1

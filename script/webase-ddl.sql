@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
 CREATE TABLE IF NOT EXISTS tb_user_key_mapping (
   map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
   user_id int(11) NOT NULL COMMENT '用户编号',
+  group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
   private_key text NOT NULL COMMENT '私钥',
   map_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
   create_time datetime DEFAULT NULL COMMENT '创建时间',

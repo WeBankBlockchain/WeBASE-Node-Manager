@@ -25,6 +25,7 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
@@ -52,6 +53,8 @@ public class FrontService {
     private FrontInterfaceService frontInterface;
     @Autowired
     private FrontGroupMapCache frontGroupMapCache;
+    @Autowired
+    private ResetGroupListTask resetGroupListTask;
     private List<String> NOT_SUPPORT_IP_LIST = Arrays.asList("0.0.0.0", "localhost", "127.0.0.1");
 
     /**
@@ -117,7 +120,9 @@ public class FrontService {
      * if exist:throw exception
      */
     private void checkFrontNotExist(String frontIp, int frontPort) {
-        FrontParam param = new FrontParam(null, frontIp, frontPort);
+        FrontParam param = new FrontParam();
+        param.setFrontIp(frontIp);
+        param.setFrontPort(frontPort);
         int count = getFrontCount(param);
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
@@ -129,7 +134,8 @@ public class FrontService {
      * get front count
      */
     public int getFrontCount(FrontParam param) {
-        return frontMapper.getCount(param);
+        Integer count = frontMapper.getCount(param);
+        return count == null ? 0 : count;
     }
 
     /**
@@ -163,10 +169,10 @@ public class FrontService {
 
         //remove front
         frontMapper.remove(frontId);
-
         //remove map
         frontGroupMapService.removeByFrontId(frontId);
-
+        //reset group list
+        resetGroupListTask.asyncResetGroupList();
         //clear cache
         frontGroupMapCache.clearMapList();
     }

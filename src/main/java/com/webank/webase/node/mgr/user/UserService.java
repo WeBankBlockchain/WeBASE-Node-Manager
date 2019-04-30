@@ -102,7 +102,7 @@ public class UserService {
 
         // add user_key_mapping info
         String aesPrivateKey = aesTools.aesEncrypt(privateKey);
-        TbUserKeyMap newMapRow = new TbUserKeyMap(userId, aesPrivateKey);
+        TbUserKeyMap newMapRow = new TbUserKeyMap(userId,groupId, aesPrivateKey);
         Integer affectMapRow = userMapper.addUserKeyMapRow(newMapRow);
         if (affectMapRow == 0) {
             log.warn("affect 0 rows of tb_user_key_map");
@@ -357,5 +357,18 @@ public class UserService {
      */
     public TbUser getSystemUser(){
         return userMapper.querySystemUser();
+    }
+
+    /**
+     *delete by groupId.
+     */
+    public void deleteByGroupId(int groupId){
+        if(groupId==0){
+            return;
+        }
+        //delete user
+        userMapper.deleteUser(groupId);
+        //delete map
+        userMapper.deleteUserKeyMap(groupId);
     }
 }
