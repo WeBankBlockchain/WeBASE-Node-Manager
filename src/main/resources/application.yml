@@ -43,7 +43,7 @@ constant:
   maxRequestFail: 3
   sleepWhenHttpMaxFail: 60000
   isUseSecurity: true
-
+  ignoreCheckFront: /account/login,/login,/user/privateKey,/front/new,/front/find
 
 # executor config
 executor:
