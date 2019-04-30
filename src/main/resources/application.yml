@@ -39,7 +39,6 @@ executor:
 constant:
   nodeWaitMax: 90
   blockRetainMax: 10000
-  logRetainMax: 10000
   transRetainMax: 10000
   deleteInfoCron: "0 0/2 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
