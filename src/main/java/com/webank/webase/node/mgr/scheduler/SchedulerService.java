@@ -31,9 +31,7 @@ public class SchedulerService implements SchedulingConfigurer {
     @Autowired
     private StatisticsTransdailyTask statisticsTask;
     @Autowired
-    private DeleteBlockTask deleteBlockTask;
-    @Autowired
-    private DeleteTransHashTask deleteTransHashTask;
+    private DeleteInfoTask deleteInfoTask;
     @Autowired
     private TransMonitorTask transMonitorTask;
     @Autowired
@@ -45,16 +43,15 @@ public class SchedulerService implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+
+        if (constants.getIsDeleteInfo()) {
+            taskRegistrar.addTriggerTask(() -> deleteInfoTask.deleteInfoStart(),
+                (context) -> new CronTrigger(constants.getDeleteInfoCron())
+                    .nextExecutionTime(context));
+        }
+
         taskRegistrar.addTriggerTask(() -> statisticsTask.updateTransdailyData(),
             (context) -> new CronTrigger(constants.getStatisticsTransDailyCron())
-                .nextExecutionTime(context));
-
-        taskRegistrar.addTriggerTask(() -> deleteBlockTask.deleteBlockStart(),
-            (context) -> new CronTrigger(constants.getDeleteInfoCron())
-                .nextExecutionTime(context));
-
-        taskRegistrar.addTriggerTask(() -> deleteTransHashTask.deleteTransStart(),
-            (context) -> new CronTrigger(constants.getDeleteInfoCron())
                 .nextExecutionTime(context));
 
         taskRegistrar.addTriggerTask(() -> transMonitorTask.monitorStart(),
