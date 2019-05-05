@@ -21,15 +21,16 @@ spring:
 
 #log config
 logging:
-  config: classpath:log/log4j2.xml
+  config: classpath:log/log4j2-dev.xml
   level:
-    com.webank.webase.node.mgr: info
+    com.webank.webase.node.mgr: debug
 
 #constants
 constant:
+  isDeleteInfo: true
   blockRetainMax: 10000
   transRetainMax: 10000
-  deleteInfoCron: "0 0/2 * * * ?"
+  deleteInfoCron: "0 0/1 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
   insertTransMonitorCron: "0 0/10 * * * ?"
   pullBlockSleepTime: 200
@@ -44,6 +45,8 @@ constant:
   sleepWhenHttpMaxFail: 60000
   isUseSecurity: true
   ignoreCheckFront: /account/login,/login,/user/privateKey,/front/new,/front/find
+  defaultAddress: 0x0000000000000000000000000000000000001004,0x0000000000000000000000000000000000000000
+
 
 # executor config
 executor:

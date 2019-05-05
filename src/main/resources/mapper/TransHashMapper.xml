@@ -6,7 +6,8 @@
 <mapper namespace="com.webank.webase.node.mgr.transaction.TransHashMapper">
   <resultMap id="transHashMap" type="com.webank.webase.node.mgr.transaction.entity.TbTransHash">
     <id column="trans_hash" javaType="java.lang.String" jdbcType="VARCHAR" property="transHash"/>
-    <result column="trans_from" javaType="java.lang.String" jdbcType="VARCHAR" property="transFrom"/>
+    <result column="trans_from" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="transFrom"/>
     <result column="trans_to" javaType="java.lang.String" jdbcType="VARCHAR" property="transTo"/>
     <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="blockNumber"/>
@@ -19,7 +20,6 @@
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
   </resultMap>
-
 
 
   <insert id="add">
@@ -77,8 +77,11 @@
 	</select>
 
   <delete id="remove">
-		delete from ${tableName} where statistics_flag=2 and block_number &lt; #{deleteNumber}
-	</delete>
+   DELETE from ${tableName} where trans_hash not in(
+    select t.trans_hash from(
+      select trans_hash,block_number from ${tableName} ORDER BY block_number DESC LIMIT ${transRetainMax}) t
+    ) and statistics_flag = 2
+  </delete>
 
   <update id="updateTransStatFlag">
         update ${tableName}

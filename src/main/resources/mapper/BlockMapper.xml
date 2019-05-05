@@ -71,11 +71,8 @@
     </if>
   </select>
 
-  <select id="queryMinMaxBlock" resultType="com.webank.webase.node.mgr.block.entity.MinMaxBlock">
-		select max(block_number) maxBlockNumber,min(block_number) minBLockNumber from ${tableName}
-	</select>
-
   <delete id="remove">
-		delete from ${tableName} where block_number &lt; #{deleteNumber}
-	</delete>
+    DELETE tb from ${tableName} as tb,(SELECT max(block_number) maxBlock FROM ${tableName}) AS tmp
+    where tb.block_number &lt;= tmp.maxBlock - ${blockRetainMax}
+  </delete>
 </mapper>

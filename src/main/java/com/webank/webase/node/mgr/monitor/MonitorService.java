@@ -14,8 +14,8 @@
 package com.webank.webase.node.mgr.monitor;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.MonitorUserType;
 import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.enums.TransType;
@@ -64,6 +64,9 @@ public class MonitorService {
     private TransHashService transHashService;
     @Autowired
     private FrontInterfaceService frontInterfacee;
+    @Autowired
+    private ConstantProperties cProperties;
+
 
     public void addRow(int groupId, TbMonitor tbMonitor) {
         monitorMapper.add(TableName.MONITOR.getTableName(groupId), tbMonitor);
@@ -98,16 +101,16 @@ public class MonitorService {
                 return;
             }
             String interfaceName = "";
-            int transUnusualType = 0;
+            int transUnusualType = TransUnusualType.NORMAL.getValue();
             // contract deploy
-            if (StringUtils.isBlank(chainTransInfo.getTo())) {
+            if (isDeploy(chainTransInfo.getTo())) {
                 List<TbContract> contractRow = contractService
                     .queryContractByBin(groupId, contractBin.substring(2));
                 if (contractRow != null && contractRow.size() > 0) {
                     interfaceName = contractRow.get(0).getContractName();
                 } else {
                     interfaceName = chainTransInfo.getInput().substring(0, 10);
-                    transUnusualType = 1;
+                    transUnusualType = TransUnusualType.CONTRACT.getValue();
                 }
             } else {    // function call
                 String methodId = chainTransInfo.getInput().substring(0, 10);
@@ -127,11 +130,11 @@ public class MonitorService {
                     }
                     if (StringUtils.isBlank(interfaceName)) {
                         interfaceName = chainTransInfo.getInput().substring(0, 10);
-                        transUnusualType = 2;
+                        transUnusualType = TransUnusualType.FUNCTION.getValue();
                     }
                 } else {
                     interfaceName = chainTransInfo.getInput().substring(0, 10);
-                    transUnusualType = 1;
+                    transUnusualType = TransUnusualType.CONTRACT.getValue();
                 }
             }
             monitorMapper
@@ -312,26 +315,19 @@ public class MonitorService {
 
                 String contractBin = "";
                 // contract deploy
-                if (StringUtils.isBlank(chainTransInfo.getTo())) {
+                if (isDeploy(chainTransInfo.getTo())) {
                     contractAddress = frontInterfacee
                         .getAddressByHash(groupId, trans.getTransHash());
                     contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress,
                         trans.getBlockNumber());
                     contractBin = removeBinFirstAndLast(contractBin);
-                    List<TbContract> contractRow = contractService
-                        .queryContractByBin(groupId, contractBin);
-                    if (contractRow != null && contractRow.size() > 0) {
-                        contractName = contractRow.get(0).getContractName();
-                        interfaceName = contractRow.get(0).getContractName();
+                    if (contractBin.length() < 10) {
+                        contractName = ConstantProperties.CONTRACT_NAME_ZERO;
                     } else {
-                        if (contractBin.length() < 10) {
-                            contractName = ConstantProperties.CONTRACT_NAME_ZERO;
-                        } else {
-                            contractName = contractBin.substring(contractBin.length() - 10);
-                        }
-                        interfaceName = chainTransInfo.getInput().substring(0, 10);
-                        transUnusualType = TransUnusualType.CONTRACT.getValue();
+                        contractName = contractBin.substring(contractBin.length() - 10);
                     }
+                    interfaceName = chainTransInfo.getInput().substring(0, 10);
+                    transUnusualType = TransUnusualType.CONTRACT.getValue();
                 } else {    // function call
                     String methodId = chainTransInfo.getInput().substring(0, 10);
                     contractAddress = chainTransInfo.getTo();
@@ -432,16 +428,32 @@ public class MonitorService {
     /**
      * remove "0x" and last 68 character.
      */
-    private String removeBinFirstAndLast(String contractBin){
-        if(StringUtils.isBlank(contractBin)){
+    private String removeBinFirstAndLast(String contractBin) {
+        if (StringUtils.isBlank(contractBin)) {
             return null;
         }
         if (contractBin.startsWith("0x")) {
             contractBin = StringUtils.removeStart(contractBin, "0x");
         }
-        if(contractBin.length()>68){
-            contractBin=contractBin.substring(0,contractBin.length()-68);
+        if (contractBin.length() > 68) {
+            contractBin = contractBin.substring(0, contractBin.length() - 68);
         }
         return contractBin;
+    }
+
+    /**
+     * check the address is deploy.
+     */
+    private boolean isDeploy(String address) {
+        String defaultAddress = cProperties.getDefaultAddress();
+
+        if (StringUtils.isBlank(address)) {
+            return true;
+        }
+        if (StringUtils.isBlank(defaultAddress)) {
+            return false;
+        }
+        List<String> addressList = Arrays.asList(defaultAddress.split(","));
+        return addressList.contains(address);
     }
 }
