@@ -48,12 +48,13 @@ public class ConstantProperties {
     private String insertTransMonitorCron = "0 0/10 * * * ?";
     private Long resetGroupListCycle = 600000L; //10 min
     private Long pullBlockSleepTime = 20L; //20 mills
+    private Long analysisSleepTime = 200L;
     private Long pullBlockTaskFixedDelay = 30000L; //30 s
     private Boolean isBlockPullFromZero = false;
     private Integer maxRequestFail = 3;
     private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
     private String ignoreCheckFront = null;
-    private String defaultAddress = null;
+    private String cnsAddress = null;
 
 
     // http
