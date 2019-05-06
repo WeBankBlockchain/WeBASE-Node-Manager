@@ -236,44 +236,14 @@ public class BlockService {
         blockmapper.update(TableName.BLOCK.getTableName(groupId), tbBlock);
     }
 
-    /**
-     * query the min and max block number of tb_block.
-     */
-    public List<MinMaxBlock> queryMinMaxBlock(int groupId) throws NodeMgrException {
-        log.debug("start queryMinMaxBlock");
-        try {
-            List<MinMaxBlock> listMinMaxBlock = blockmapper
-                .queryMinMaxBlock(TableName.BLOCK.getTableName(groupId));
-            int listSize = Optional.ofNullable(listMinMaxBlock).map(list -> list.size()).orElse(0);
-            log.info("end queryMinMaxBlock listMinMaxBlockSize:{}", listSize);
-            return listMinMaxBlock;
-        } catch (RuntimeException ex) {
-            log.error("fail queryMinMaxBlock", ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-    }
-
 
     /**
-     * Remove all block heights less than inputValue.
+     * remove block into.
      */
-    public Integer deleteSomeBlocks(Integer groupId, BigInteger deleteBlockNumber)
+    public Integer remove(Integer groupId, BigInteger blockRetainMax)
         throws NodeMgrException {
-        log.debug("start deleteSomeBlocks. groupId:{} deleteBlockNumber:{}", groupId,
-            deleteBlockNumber);
-
-        Integer affectRow = 0;
-        try {
-            affectRow = blockmapper
-                .remove(TableName.BLOCK.getTableName(groupId), deleteBlockNumber);
-        } catch (RuntimeException ex) {
-            log.error("fail deleteSomeBlocks. groupId:{} deleteBlockNumber:{}", groupId,
-                deleteBlockNumber, ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-
-        log.debug("end deleteSomeBlocks. groupId:{} deleteBlockNumber:{} affectRow:{}", groupId,
-            deleteBlockNumber, affectRow);
+        String tableName = TableName.BLOCK.getTableName(groupId);
+        Integer affectRow = blockmapper.remove(tableName, blockRetainMax);
         return affectRow;
     }
 
