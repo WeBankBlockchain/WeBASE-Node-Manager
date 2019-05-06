@@ -452,7 +452,7 @@ public class MonitorService {
         if (StringUtils.isBlank(cnsAddress)) {
             return false;
         }
-        return cnsAddress.equals(cnsAddress);
+        return cnsAddress.equals(address);
     }
 
     /**
