@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import java.util.concurrent.Executors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
@@ -43,6 +44,7 @@ public class SchedulerService implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        taskRegistrar.setScheduler(Executors.newScheduledThreadPool(5));
 
         if (constants.getIsDeleteInfo()) {
             taskRegistrar.addTriggerTask(() -> deleteInfoTask.deleteInfoStart(),

@@ -28,7 +28,7 @@ public class TransactionInfo {
     private String to;
     private int value;
     private Long gasPrice;
-    private Long gas;
+    private BigInteger gas;
     private String input;
     private int v;
     private String nonceRaw;
