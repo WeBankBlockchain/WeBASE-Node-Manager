@@ -38,7 +38,7 @@ public interface TransHashMapper {
     List<MinMaxBlock> queryMinMaxBlock(@Param("tableName") String tableName);
 
     Integer remove(@Param("tableName") String tableName,
-        @Param("deleteNumber") BigInteger deleteNumber);
+        @Param("transRetainMax") BigInteger transRetainMax);
 
     List<TbTransHash> listOfUnStatTransHash(@Param("tableName") String tableName);
 
