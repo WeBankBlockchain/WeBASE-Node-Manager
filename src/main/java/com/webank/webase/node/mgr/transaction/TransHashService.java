@@ -109,26 +109,14 @@ public class TransHashService {
     }
 
     /**
-     * Remove some trans info.
+     * Remove trans info.
      */
-    public Integer deleteSomeTrans(Integer groupId, BigInteger deleteBlockNumber)
-        throws NodeMgrException {
-        log.debug("start deleteSomeTrans. groupId:{} deleteBlockNumber:{}", groupId,
-            deleteBlockNumber);
+    public Integer remove(Integer groupId, BigInteger transRetainMax) {
         String tableName = TableName.TRANS.getTableName(groupId);
-        Integer affectRow = 0;
-        try {
-            affectRow = transHashMapper.remove(tableName, deleteBlockNumber);
-        } catch (RuntimeException ex) {
-            log.error("fail deleteSomeTrans. groupId:{} deleteBlockNumber:{}", groupId,
-                deleteBlockNumber, ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-
-        log.debug("end deleteSomeTrans. groupId:{} deleteBlockNumber:{} affectRow:{}", groupId,
-            deleteBlockNumber, affectRow);
+        Integer affectRow = transHashMapper.remove(tableName, transRetainMax);
         return affectRow;
     }
+
 
     /**
      * query un statistics transaction list.
@@ -177,7 +165,8 @@ public class TransHashService {
             List<TransactionInfo> transInBlock = frontInterface
                 .getTransByBlockNumber(groupId, blockNumber);
             transInBlock.stream().forEach(tran -> {
-                TbTransHash tbTransHash = new TbTransHash(tran.getHash(),tran.getFrom(),tran.getTo(), tran.getBlockNumber(),
+                TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getFrom(),
+                    tran.getTo(), tran.getBlockNumber(),
                     null);
                 transList.add(tbTransHash);
             });
@@ -197,7 +186,8 @@ public class TransHashService {
         TransactionInfo trans = frontInterface.getTransaction(groupId, transHash);
         TbTransHash tbTransHash = null;
         if (trans != null) {
-            tbTransHash = new TbTransHash(transHash,trans.getFrom(),trans.getTo(), trans.getBlockNumber(), null);
+            tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
+                trans.getBlockNumber(), null);
         }
         log.info("end getTransFromFrontByHash. tbTransHash:{}", JSON.toJSONString(tbTransHash));
         return tbTransHash;

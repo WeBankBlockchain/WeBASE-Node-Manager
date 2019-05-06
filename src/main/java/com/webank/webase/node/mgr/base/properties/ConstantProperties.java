@@ -1,17 +1,15 @@
 /**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.base.properties;
 
@@ -28,6 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = ConstantProperties.CONSTANT_PREFIX)
 public class ConstantProperties {
+
     @Autowired
     private ConstantProperties constants;
 
@@ -41,6 +40,7 @@ public class ConstantProperties {
     public static final int ADDRESS_LENGTH = 42;
 
     // scheduler
+    private Boolean isDeleteInfo = true;
     private BigInteger blockRetainMax = new BigInteger("10000");
     private BigInteger transRetainMax = new BigInteger("10000");
     private String statisticsTransDailyCron = "0 0/1 * * * ?";// Execute once every minute
@@ -48,11 +48,13 @@ public class ConstantProperties {
     private String insertTransMonitorCron = "0 0/10 * * * ?";
     private Long resetGroupListCycle = 600000L; //10 min
     private Long pullBlockSleepTime = 20L; //20 mills
+    private Long analysisSleepTime = 200L;
     private Long pullBlockTaskFixedDelay = 30000L; //30 s
     private Boolean isBlockPullFromZero = false;
     private Integer maxRequestFail = 3;
     private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
-    private String ignoreCheckFront;
+    private String ignoreCheckFront = null;
+    private String cnsAddress = null;
 
 
     // http
