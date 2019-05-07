@@ -72,6 +72,7 @@
 |------|-------------|---------------|--------|--------------------------------------------|
 | 1    | frontIp     | string        | 否     | 前置ip                                     |
 | 2    | frontPort   | int           | 否     | 前置服务端口                               |
+| 2    | agency   | int           | 否     | 所属机构                               |
 | 序号 | 输出参数    | 类型          |        | 备注                                       |
 | 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败                 |
 | 2    | message     | String        | 否     | 描述                                       |
@@ -83,11 +84,12 @@
 | 3.5  | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
 #### 1.1.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/node`
+`http://127.0.0.1:8080/webase-node-mgr/front/new`
 ```
 {
     "frontIp": "127.0.0.1",
-    "frontPort": "8081"
+    "frontPort": "8081",
+    "agency": "abc"
 }
 ```
 
