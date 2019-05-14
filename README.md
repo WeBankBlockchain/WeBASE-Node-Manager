@@ -77,7 +77,7 @@ CREATE DATABASE IF NOT EXISTS {your_db_name} DEFAULT CHARSET utf8 COLLATE utf8_g
 
 ### 3.4.2 修改脚本配置
 进入数据库脚本目录
-```shell7
+```shell
 cd  dist/script
 ```
 修改数据库连接信息：
