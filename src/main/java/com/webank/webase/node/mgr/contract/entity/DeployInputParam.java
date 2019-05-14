@@ -28,7 +28,7 @@ import lombok.ToString;
 @Data
 public class DeployInputParam{
     @NotNull
-    private Integer userId;
+    private Integer user;
     @NotNull
     private Integer groupId;
     @NotNull

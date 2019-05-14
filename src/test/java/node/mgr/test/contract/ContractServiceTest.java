@@ -67,7 +67,6 @@ public class ContractServiceTest {
         //param
         TransactionInputParam param = new TransactionInputParam();
         param.setGroupId(groupId);
-        param.setAbiInfo(abiList);
         param.setUserId(userId);
         param.setVersion("v9.9");
         param.setContractName("Ok");
