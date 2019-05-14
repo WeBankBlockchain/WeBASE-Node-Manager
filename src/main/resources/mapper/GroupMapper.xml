@@ -8,6 +8,8 @@
     <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
     <result column="group_name" javaType="java.lang.String" jdbcType="VARCHAR"
       property="groupName"/>
+    <result column="group_status" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupStatus"/>
     <result column="node_count" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="nodeCount"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
@@ -34,15 +36,18 @@
 
   <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
 		insert into tb_group
-		(group_id,group_name,node_count,create_time,modify_time)
-		values(#{groupId},#{groupName},#{nodeCount},NOW(),NOW())
-		ON DUPLICATE KEY UPDATE node_count=#{nodeCount}
+		(group_id,group_name,node_count,create_time)
+		values(#{groupId},#{groupName},#{nodeCount},NOW())
+		ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
 	</insert>
 
-	<delete id="remove" parameterType="java.lang.Integer">
+  <delete id="remove" parameterType="java.lang.Integer">
     delete from tb_group where group_id=#{groupId}
   </delete>
 
+  <update id="updateStatus">
+     update tb_group set group_status=#{groupStatus},modify_time=NOW() where group_id=#{groupId}
+  </update>
 
   <select id="getCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
     select count(1) from tb_group where 1 = 1

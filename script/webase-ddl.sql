@@ -5,6 +5,7 @@
 CREATE TABLE IF NOT EXISTS tb_group (
         group_id int(11) NOT NULL COMMENT '群组ID',
         group_name varchar(64) NOT NULL COMMENT '群组名字',
+        group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常）',
         node_count int DEFAULT '0' COMMENT '群组下节点数',
         group_desc varchar(1024) COMMENT '群组描述',
         create_time datetime DEFAULT NULL COMMENT '创建时间',
