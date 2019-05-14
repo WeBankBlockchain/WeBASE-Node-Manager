@@ -188,7 +188,6 @@ public class ContractControllerTest {
         param.setContractId(200069);
         param.setGroupId(groupId);
         param.setUser(userId);
-        param.setVersion(version);
         param.setContractName("Ok");
         param.setFuncName("trans");
         param.setFuncParam(Arrays.asList(3));
