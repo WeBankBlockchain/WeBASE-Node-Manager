@@ -16,7 +16,7 @@ targetCompatibility = 1.8
 repositories {
     maven {url "http://maven.aliyun.com/nexus/content/groups/public/"}
 	
-   // maven { url 'https://dl.bintray.com/ethereum/maven/' }
+    maven { url 'https://dl.bintray.com/ethereum/maven/' }
     mavenLocal()
     mavenCentral()
 }

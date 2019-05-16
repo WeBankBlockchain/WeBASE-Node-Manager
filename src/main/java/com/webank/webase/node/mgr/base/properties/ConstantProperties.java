@@ -55,6 +55,7 @@ public class ConstantProperties {
     private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
     private String ignoreCheckFront = null;
     private String cnsAddress = null;
+    private Boolean isPrivateKeyEncrypt = true;
 
 
     // http

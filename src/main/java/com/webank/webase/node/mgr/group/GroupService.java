@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.front.FrontService;
@@ -129,6 +130,17 @@ public class GroupService {
         }
     }
 
+
+    /**
+     * update status.
+     */
+    public void updateGroupStatus(int groupId, int groupStatus) {
+        log.debug("start updateGroupStatus groupId:{} groupStatus:{}", groupId, groupStatus);
+        groupMapper.updateStatus(groupId, groupStatus);
+        log.debug("end updateGroupStatus groupId:{} groupStatus:{}", groupId, groupStatus);
+
+    }
+
     /**
      * Check the validity of the groupId.
      */
@@ -228,8 +240,8 @@ public class GroupService {
             }
         }
 
-        //remove invalid group
-        removeInvalidGroup(allGroupSet);
+        //check group status
+        checkGroupStatusAndRemoveInvalidGroup(allGroupSet);
         //clear cache
         frontGroupMapCache.clearMapList();
 
@@ -292,9 +304,9 @@ public class GroupService {
     }
 
     /**
-     * remove invalid group.
+     * check group status.
      */
-    private void removeInvalidGroup(Set<Integer> allGroupOnChain) {
+    private void checkGroupStatusAndRemoveInvalidGroup(Set<Integer> allGroupOnChain) {
         if (CollectionUtils.isEmpty(allGroupOnChain)) {
             return;
         }
@@ -308,7 +320,12 @@ public class GroupService {
             int localGroupId = localGroup.getGroupId();
             long count = allGroupOnChain.stream().filter(id -> id == localGroupId).count();
             if (count > 0) {
+                //update NORMAL
+                updateGroupStatus(localGroupId, DataStatus.NORMAL.getValue());
                 continue;
+            } else {
+                //update invalid or remove
+
             }
             try {
                 removeByGroupId(localGroupId);
@@ -318,6 +335,7 @@ public class GroupService {
             }
         }
     }
+
 
     /**
      * remove by groupId.

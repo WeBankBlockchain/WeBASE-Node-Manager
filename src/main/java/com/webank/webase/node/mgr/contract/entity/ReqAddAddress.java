@@ -1,3 +1,5 @@
+package com.webank.webase.node.mgr.contract.entity;
+
 /**
  * Copyright 2014-2019  the original author or authors.
  *
@@ -11,30 +13,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.front.entity;
+public class ReqAddAddress {
 
-import java.util.List;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-/**
- * param of send transaction.
- */
-@Data
-@NoArgsConstructor
-public class TransactionParam {
-
-    @NotNull
-    private Integer groupId;
-    @NotNull
-    private Integer user;
-    @NotBlank
-    private String contractName;
-    @NotBlank
-    private String funcName;
-    private String contractAddress;
-    private Boolean useAes;
-    private List<Object> funcParam;
 }

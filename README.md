@@ -54,6 +54,10 @@ git clone https://github.com/WeBankFinTech/webase-node-mgr.git
 ```shell
 cd webase-node-mgr
 ```
+切换到0.6分支：
+```shell
+git checkout dev-0.6
+```
 在代码的根目录webase-node-mgr执行构建命令：
 ```shell
 gradle build -x test
