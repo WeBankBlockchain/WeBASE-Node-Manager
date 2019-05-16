@@ -47,6 +47,7 @@ constant:
   isUseSecurity: true
   ignoreCheckFront: /account/login,/login,/user/privateKey,/front/new,/front/find
   cnsAddress: 0x0000000000000000000000000000000000001004
+  isPrivateKeyEncrypt: true
 
 
 # executor config

@@ -72,6 +72,7 @@
 |------|-------------|---------------|--------|--------------------------------------------|
 | 1    | frontIp     | string        | 否     | 前置ip                                     |
 | 2    | frontPort   | int           | 否     | 前置服务端口                               |
+| 2    | agency   | int           | 否     | 所属机构                               |
 | 序号 | 输出参数    | 类型          |        | 备注                                       |
 | 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败                 |
 | 2    | message     | String        | 否     | 描述                                       |
@@ -83,11 +84,12 @@
 | 3.5  | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
 #### 1.1.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/node`
+`http://127.0.0.1:8080/webase-node-mgr/front/new`
 ```
 {
     "frontIp": "127.0.0.1",
-    "frontPort": "8081"
+    "frontPort": "8081",
+    "agency": "abc"
 }
 ```
 
@@ -1248,12 +1250,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 序号 | 输入参数     | 类型           | 可为空 | 备注                       |
 |------|--------------|----------------|--------|----------------------------|
 | 1    | groupId      | Int            | 否     | 所属群组编号               |
-| 2    | abiInfo      | List\<Object\> | 否     | 合约编译的abi              |
-| 3    | userId       | Integer        | 否     | 私钥用户编号               |
-| 4    | contractName | String         | 否     | 合约名称                   |
-| 5    | funcName     | String         | 否     | 合约方法名                 |
-| 6    | contractAddress     | String         | 是     | 合约地址（传合约名和版本时可为空）   |
-| 7    | funcParam    | List\<Object\> | 是     | 合约方法入参               |
+| 2    | userId       | Integer        | 否     | 私钥用户编号               |
+| 3    | contractName | String         | 否     | 合约名称                   |
+| 4    | funcName     | String         | 否     | 合约方法名                 |
+| 5    | contractAddress     | String         | 是     | 合约地址（传合约名和版本时可为空）   |
+|     | funcParam    | List\<Object\> | 是     | 合约方法入参               |
 | 序号 | 输出参数     | 类型           |        | 备注                       |
 | 1    | code         | Int            | 否     | 返回码，0：成功 其它：失败 |
 | 2    | message      | String         | 否     | 描述                       |
