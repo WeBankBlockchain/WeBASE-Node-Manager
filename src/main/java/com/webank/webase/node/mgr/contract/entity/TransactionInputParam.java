@@ -28,7 +28,5 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class TransactionInputParam extends TransactionParam {
     @NotNull
-    private Integer groupId;
-    @NotNull
     private Integer contractId;
 }

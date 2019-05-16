@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,30 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.front.entity;
+package com.webank.webase.node.mgr.frontinterface.entity;
 
 import java.util.List;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+
 
 /**
- * param of send transaction.
+ * abiMeta interface parameter.
  */
 @Data
-@NoArgsConstructor
-public class TransactionParam {
+public class PostAbiInfo {
 
-    @NotNull
     private Integer groupId;
-    @NotNull
-    private Integer user;
-    @NotBlank
     private String contractName;
-    @NotBlank
-    private String funcName;
-    private String contractAddress;
-    private Boolean useAes;
-    private List<Object> funcParam;
+    private String address;
+    private List<AbiDefinition> abiInfo;
+    private String contractBin;
 }

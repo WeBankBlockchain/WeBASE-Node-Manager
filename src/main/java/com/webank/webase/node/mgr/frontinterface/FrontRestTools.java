@@ -69,13 +69,14 @@ public class FrontRestTools {
     public static final String URI_GET_SEALER_LIST = "web3/sealerList";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
-    public static final String URI_KEY_PAIR = "privateKey";
+    public static final String URI_KEY_PAIR = "privateKey?useAes=%1b";
     public static final String URI_CONTRACT_DEPLOY = "contract/deploy";
+    public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
     public static final String URI_SEND_TRANSACTION = "trans/handle";
     public static final String URI_CHAIN = "chain";
 
     private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
-        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR);
+        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_CONTRACT_SENDABI);
 
 
     @Qualifier(value = "genericRestTemplate")
@@ -99,7 +100,11 @@ public class FrontRestTools {
         if (groupId == null || StringUtils.isBlank(uri)) {
             return null;
         }
-        if (URI_NOT_CONTAIN_GROUP_ID.contains(uri)) {
+
+        final String tempUri = uri.contains("?") ? uri.substring(0, uri.indexOf("?")) : uri;
+
+        long count = URI_NOT_CONTAIN_GROUP_ID.stream().filter(u -> u.contains(tempUri)).count();
+        if (count > 0) {
             return uri;
         }
         return groupId + "/" + uri;
@@ -269,11 +274,11 @@ public class FrontRestTools {
                 continue;
             } catch (HttpStatusCodeException e) {
                 JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
+                log.error("http request fail. error:{}", JSON.toJSONString(error));
                 throw new NodeMgrException(error.getInteger("statusCode"),
                     error.getString("errorMessage"));
             }
         }
         return null;
     }
-
 }

@@ -106,7 +106,7 @@ public class ConstantCode {
 
     public static final RetCode INVALID_ROLE_ID = RetCode.mark(202032, "invalid role id");
 
-    public static final RetCode INVALID_ATTR = RetCode.mark(202033, "");
+    public static final RetCode CONTRACT_ADDRESS_INVALID = RetCode.mark(202033, "invalid contract address");
 
     public static final RetCode LOGIN_FAIL = RetCode.mark(202034, "login fail");
 
