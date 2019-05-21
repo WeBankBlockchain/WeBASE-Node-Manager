@@ -18,6 +18,7 @@ package com.webank.webase.node.mgr.chain;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.node.NodeService;
@@ -38,6 +39,8 @@ public class ChainService {
     private NodeService nodeService;
     @Autowired
     private RestTemplate genericRestTemplate;
+    @Autowired
+    private ConstantProperties constant;
 
     /**
      * get chain info.
@@ -66,7 +69,7 @@ public class ChainService {
 
         // request url
         String url = String
-            .format(FrontService.FRONT_URL, tbNode.getNodeIp(), tbNode.getFrontPort(),
+            .format(constant.getFrontUrl(), tbNode.getNodeIp(), tbNode.getFrontPort(),
                 FrontService.FRONT_CHAIN);
         url = url + "?" + chainUrlParam;
         log.info("getChainMonitorInfo request url:{}", url);

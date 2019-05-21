@@ -60,6 +60,8 @@ public class MonitorService {
     private UserService userService;
     @Autowired
     private TransHashService transHashService;
+    @Autowired
+    private ConstantProperties cProperties;
 
     public void addRow(TbMonitor tbMonitor) {
         monitorMapper.addRow(tbMonitor);
@@ -72,6 +74,15 @@ public class MonitorService {
     public void updateUnusualUser(Integer networkId, String userName, String address) {
         log.info("start updateUnusualUser address:{}", address);
         monitorMapper.updateUnusualUser(networkId, userName, address);
+    }
+
+
+    /**
+     * Remove trans monitor info.
+     */
+    public Integer deleteAndRetainMax(Integer networkId, Integer monitorInfoRetainMax) {
+        Integer affectRow = monitorMapper.deleteAndRetainMax(networkId, monitorInfoRetainMax);
+        return affectRow;
     }
 
     /**
@@ -129,6 +140,9 @@ public class MonitorService {
                     transUnusualType = 1;
                 }
             }
+
+            //is monitor ignore contract
+            transUnusualType = cProperties.getIsMonitorIgnoreContract() ? 0 : transUnusualType;
             monitorMapper.updateUnusualContract(networkId, contractName,
                 contractBin.substring(contractBin.length() - 10), interfaceName, transUnusualType);
         } catch (Exception ex) {
@@ -329,7 +343,7 @@ public class MonitorService {
                         chainTransInfo.getFrom());
                 if (StringUtils.isBlank(userName)) {
                     userName = chainTransInfo.getFrom();
-                    userType = 1;
+                    userType = cProperties.getIsMonitorIgnoreUser() ? 0 : 1;
                 }
 
                 String contractBin = "";
@@ -361,6 +375,7 @@ public class MonitorService {
                     contractBin = frontService
                         .getCodeFromFront(transHashList.get(i).getNetworkId(), contractAddress,
                             transHashList.get(i).getBlockNumber());
+                    contractBin = removeBinFirstAndLast(contractBin);
                     transType = 1;
 
                     List<TbContract> contractRow = contractService
@@ -401,7 +416,8 @@ public class MonitorService {
                 tbMonitor.setContractAddress(contractAddress);
                 tbMonitor.setInterfaceName(interfaceName);
                 tbMonitor.setTransType(transType);
-                tbMonitor.setTransUnusualType(transUnusualType);
+                tbMonitor.setTransUnusualType(
+                    cProperties.getIsMonitorIgnoreContract() ? 0 : transUnusualType);
                 tbMonitor.setTransHashs(transHashList.get(i).getTransHash());
                 tbMonitor.setTransHashLastest(transHashList.get(i).getTransHash());
                 tbMonitor.setTransCount(1);
@@ -438,5 +454,21 @@ public class MonitorService {
         }
 
         transHashService.updateTransStatFlag(tbMonitor.getTransHashLastest());
+    }
+
+    /**
+     * remove "0x" and last 68 character.
+     */
+    private String removeBinFirstAndLast(String contractBin) {
+        if (StringUtils.isBlank(contractBin)) {
+            return null;
+        }
+        if (contractBin.startsWith("0x")) {
+            contractBin = StringUtils.removeStart(contractBin, "0x");
+        }
+        if (contractBin.length() > 68) {
+            contractBin = contractBin.substring(0, contractBin.length() - 68);
+        }
+        return contractBin;
     }
 }

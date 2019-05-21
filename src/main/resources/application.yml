@@ -40,6 +40,7 @@ constant:
   nodeWaitMax: 90
   blockRetainMax: 10000
   transRetainMax: 10000
+  monitorInfoRetainMax: 4
   deleteInfoCron: "0 0/2 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
   checkNodeStatusCron: "30 0/1 * * * ?"
@@ -55,3 +56,6 @@ constant:
   sysContractNodeName: node
   supportTransaction: true
   isUseSecurity: true
+  frontUrl: http://%1s:%2d/webase-front/%3s
+  isMonitorIgnoreUser: false
+  isMonitorIgnoreContract: false

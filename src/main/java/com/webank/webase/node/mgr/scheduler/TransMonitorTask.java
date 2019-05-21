@@ -16,27 +16,65 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.network.NetworkService;
+import com.webank.webase.node.mgr.network.TbNetwork;
 import com.webank.webase.node.mgr.transhash.TbTransHash;
 import com.webank.webase.node.mgr.transhash.TransHashService;
 import java.util.List;
+import java.util.stream.Collectors;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Log4j2
 @Component
 public class TransMonitorTask {
 
     @Autowired
     MonitorService monitorService;
     @Autowired
+    private NetworkService networkService;
+    @Autowired
     private TransHashService transHashService;
+    private static final int UNUSUAL_MAX_COUNT = 20;
 
     /**
      * init monitorInfoHandle.
      */
     public void monitorInfoHandle() {
-        List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList();
+        List<TbNetwork> networkList = networkService.getAllNetwork();
+        if (networkList == null || networkList.isEmpty()) {
+            log.error("fail monitorInfoHandle. networkList is empty");
+            return;
+        }
+        List<Integer> idList = networkList.stream().map(n -> n.getNetworkId())
+            .filter(id -> isNetworkContinueMonitor(id)).collect(
+                Collectors.toList());
+        if (idList == null || idList.isEmpty()) {
+            log.error("fail monitorInfoHandle. networkIdList is empty");
+            return;
+        }
+        List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList(idList);
         if (transHashList != null && transHashList.size() > 0) {
             monitorService.insertTransMonitorInfo(transHashList);
         }
     }
+
+
+    /**
+     * check networkId.
+     */
+    private boolean isNetworkContinueMonitor(int networkId) {
+        int unusualUserCount = monitorService.countOfUnusualUser(networkId, null);
+        int unusualContractCount = monitorService.countOfUnusualContract(networkId, null);
+        if (unusualUserCount >= UNUSUAL_MAX_COUNT || unusualUserCount >= UNUSUAL_MAX_COUNT) {
+            log.error(
+                "monitorHandle jump over. networkId:{} unusualUserCount:{} unusualUserCount:{} UNUSUAL_MAX_COUNT:{}",
+                networkId, unusualUserCount, unusualContractCount, UNUSUAL_MAX_COUNT);
+            return false;
+        }
+        return true;
+    }
 }
+
+

@@ -61,4 +61,7 @@ public interface MonitorMapper {
         @Param("contractAddress") String contractAddress);
 
     List<UnusualContractInfo> listOfUnusualContract(Map<String, Object> queryParam);
+
+    Integer deleteAndRetainMax(@Param("networkId") Integer networkId,
+        @Param("monitorInfoRetainMax") Integer monitorInfoRetainMax);
 }
