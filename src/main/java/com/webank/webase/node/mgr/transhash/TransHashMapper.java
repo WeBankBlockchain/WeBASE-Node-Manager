@@ -38,7 +38,7 @@ public interface TransHashMapper {
     Integer deleteSomeTrans(@Param("networkId") Integer networkId,
         @Param("deleteNumber") BigInteger deleteNumber);
 
-    List<TbTransHash> listOfUnStatTransHash();
+    List<TbTransHash> listOfUnStatTransHash(@Param("networkList") List<Integer> networkList);
 
     List<TbTransHash> listOfUnStatTransHashByJob(
         @Param("shardingTotalCount") Integer shardingTotalCount,

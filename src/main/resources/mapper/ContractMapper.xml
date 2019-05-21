@@ -161,7 +161,7 @@
   </select>
 
   <select id="queryContractByBin" resultMap="contractMap">
-		select * from tb_contract where network_id = #{networkId} and contract_bin = #{contractBin}
+		select * from tb_contract where network_id = #{networkId} and contract_bin like CONCAT(#{contractBin},'%')
 	</select>
 
   <select id="querySystemContractBin" resultType="java.lang.String">

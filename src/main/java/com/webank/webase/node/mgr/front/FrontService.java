@@ -50,7 +50,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class FrontService {
 
-    public static final String FRONT_URL = "http://%1s:%2d/webase-front/%3s";
+  //  public static final String FRONT_URL = "http://%1s:%2d/webase-front/%3s";
     public static final String FRONT_BLOCK_BY_NUMBER_URI = "web3/blockByNumber/%1d";
     public static final String FRONT_TRANS_BY_HASH_URI = "web3/transaction/%1s";
     public static final String FRONT_CODE_URI = "web3/code/%1s/%2s";
@@ -75,7 +75,7 @@ public class FrontService {
     @Autowired
     private RestTemplate deployRestTemplate;
     @Autowired
-    private ConstantProperties constantProperties;
+    private ConstantProperties constant;
 
     /**
      * random request front.
@@ -114,7 +114,7 @@ public class FrontService {
             TbNode node = nodeList.get(index);
             indexList.add(index);// save the index of nodeList
 
-            String url = String.format(FRONT_URL, node.getNodeIp(), node.getFrontPort(), uri);
+            String url = String.format(constant.getFrontUrl(), node.getNodeIp(), node.getFrontPort(), uri);
             log.info("requestNodeFront url: {}", url);
             try {
                 if (httpType == null) {
