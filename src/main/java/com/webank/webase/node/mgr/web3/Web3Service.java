@@ -18,6 +18,7 @@ package com.webank.webase.node.mgr.web3;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.entity.BlockInfoInChain;
 import com.webank.webase.node.mgr.front.FrontService;
@@ -43,6 +44,8 @@ public class Web3Service {
     @Qualifier(value = "genericRestTemplate")
     @Autowired
     private RestTemplate genericRestTemplate;
+    @Autowired
+    private ConstantProperties constant;
 
     /**
      * get contract code.
@@ -87,7 +90,7 @@ public class Web3Service {
     public BaseResponse nodeHeartBeat(String nodeIp, Integer frontPort) throws NodeMgrException {
         log.debug("start nodeHeartBeat. frontPort:{} FrontPort:{}", nodeIp, frontPort);
         String url = String
-            .format(FrontService.FRONT_URL, nodeIp, frontPort, FrontService.FRONT_NODE_HEARTBEAT);
+            .format(constant.getFrontUrl(), nodeIp, frontPort, FrontService.FRONT_NODE_HEARTBEAT);
         BaseResponse frontRsp = genericRestTemplate.getForObject(url, BaseResponse.class);
         log.debug("end nodeHeartBeat. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;

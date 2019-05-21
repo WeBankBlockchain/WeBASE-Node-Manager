@@ -55,6 +55,8 @@ public class NodeService {
     @Qualifier(value = "genericRestTemplate")
     @Autowired
     private RestTemplate genericRestTemplate;
+    @Autowired
+    private ConstantProperties constant;
 
     private List<String> INVALID_IP_LIST = Arrays.asList("0.0.0.0","localhost","127.0.0.1");
 
@@ -64,7 +66,7 @@ public class NodeService {
     public NodeInfo getNodeInfoFromFront(String nodeIp, Integer frontPort) throws NodeMgrException {
         log.debug("start getNodeInfoFromFront. nodeIp:{} frontPort:{}", nodeIp, frontPort);
         String url = String
-            .format(FrontService.FRONT_URL, nodeIp, frontPort, FrontService.FRONT_NODE_INFO);
+            .format(constant.getFrontUrl(), nodeIp, frontPort, FrontService.FRONT_NODE_INFO);
         log.info("getNodeInfoFromFront. url:{}", url);
         // get node info
         BaseResponse frontRsp = genericRestTemplate.getForObject(url, BaseResponse.class);

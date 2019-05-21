@@ -49,7 +49,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- *  services for contract data.
+ * services for contract data.
  */
 @Log4j2
 @Service

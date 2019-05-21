@@ -42,14 +42,18 @@ public class ConstantProperties {
     private long nodeWaitMax = 180L;
     private BigInteger blockRetainMax = new BigInteger("10000");
     private BigInteger transRetainMax = new BigInteger("10000");
+    private Integer monitorInfoRetainMax;
     private String statisticsTransDailyCron = "0 0/1 * * * ?";// Execute once every minute
     private String deleteInfoCron = "0 0/2 * * * ?";// Execute once every two minute
     private String checkNodeStatusCron = "30 0/1 * * * ?";
     private String insertTransMonitorCron = "0 0/10 * * * ?";
     private String sharedChainInfoCron = "0 0/10 * * * ?";// Execute once every ten minute
     private Boolean isBlockPullFromZero = false;
+    private Boolean isMonitorIgnoreUser = false;
+    private Boolean isMonitorIgnoreContract = false;
 
     // http
+    private String frontUrl;
     private Integer contractDeployTimeOut = 30000;
     private Integer httpTimeOut = 5000;
 

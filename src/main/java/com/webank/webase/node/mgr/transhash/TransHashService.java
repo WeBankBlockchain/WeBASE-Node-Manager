@@ -130,8 +130,8 @@ public class TransHashService {
     /**
      * query un statistics transhash list.
      */
-    public List<TbTransHash> qureyUnStatTransHashList() {
-        List<TbTransHash> list = transHashMapper.listOfUnStatTransHash();
+    public List<TbTransHash> qureyUnStatTransHashList(List<Integer> networkList) {
+        List<TbTransHash> list = transHashMapper.listOfUnStatTransHash(networkList);
         return list;
     }
 
