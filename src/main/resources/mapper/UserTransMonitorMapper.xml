@@ -253,7 +253,8 @@
     </select>
 
   <delete id="deleteAndRetainMax">
-   DELETE from tb_user_transaction_monitor where network_id = #{networkId} and modify_time not in(
+   DELETE from tb_user_transaction_monitor where network_id = #{networkId} and user_type=0 and trans_unusual_type=0
+   and modify_time not in(
     select t.modify_time from(
       select modify_time from tb_user_transaction_monitor where network_id = #{networkId} ORDER BY modify_time DESC LIMIT ${monitorInfoRetainMax}
       ) t
