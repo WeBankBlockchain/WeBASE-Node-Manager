@@ -68,12 +68,15 @@
   </select>
 
   <select id="listOfUnStatTransHash" resultMap="transHashMap">
-        select *
-        from tb_trans_hash 
-        where statistics_flag=1
-        order by block_number
-        limit 0,10000
-    </select>
+    select *
+    from tb_trans_hash
+    where network_id in
+    <foreach collection="networkList" open="(" separator="," close=")" item="item" index="index">
+    #{item}
+    </foreach>
+    and statistics_flag=1 order by block_number
+    limit 0,10000
+  </select>
 
   <select id="listOfUnStatTransHashByJob" resultMap="transHashMap">
         select *

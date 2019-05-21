@@ -43,6 +43,8 @@ public class SchedulerService implements SchedulingConfigurer {
     @Autowired
     private SharedChainInfoTask sharedChainInfoTask;
     @Autowired
+    private DeleteMonitorInfoTask deleteMonitorInfoTask;
+    @Autowired
     private ConstantProperties constants;
 
     @Override
@@ -63,6 +65,10 @@ public class SchedulerService implements SchedulingConfigurer {
             (context) -> new CronTrigger(constants.getDeleteInfoCron())
                 .nextExecutionTime(context));
 
+        taskRegistrar.addTriggerTask(() -> deleteMonitorInfoTask.deleteMonitorInfo(),
+            (context) -> new CronTrigger(constants.getDeleteInfoCron())
+                .nextExecutionTime(context));
+
         taskRegistrar.addTriggerTask(() -> transMonitorTask.monitorInfoHandle(),
             (context) -> new CronTrigger(constants.getInsertTransMonitorCron())
                 .nextExecutionTime(context));
@@ -72,5 +78,6 @@ public class SchedulerService implements SchedulingConfigurer {
                 (context) -> new CronTrigger(constants.getSharedChainInfoCron())
                     .nextExecutionTime(context));
         }
+
     }
 }
