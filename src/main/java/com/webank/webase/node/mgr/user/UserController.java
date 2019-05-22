@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ShareType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.scheduler.SharedChainInfoTask;
 import java.time.Duration;
 import java.time.Instant;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,6 +53,7 @@ public class UserController {
      * add new user info.
      */
     @PostMapping(value = "/userInfo")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse addUserInfo(@RequestBody User user) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -71,6 +74,7 @@ public class UserController {
      * bind user info.
      */
     @PostMapping(value = "/bind")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse bindUserInfo(@RequestBody User user) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -91,6 +95,7 @@ public class UserController {
      * update user info.
      */
     @PutMapping(value = "/userInfo")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateUserInfo(@RequestBody User user) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();

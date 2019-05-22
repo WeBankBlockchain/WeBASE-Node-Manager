@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ShareType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +59,7 @@ public class ContractController {
      * add new contract info.
      */
     @PostMapping(value = "/contractInfo")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse addCotractInfo(@RequestBody Contract contract) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -79,6 +82,7 @@ public class ContractController {
      * update contract info.
      */
     @PutMapping(value = "/contractInfo")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateContractInfo(@RequestBody Contract contract)
         throws NodeMgrException, Exception {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -141,6 +145,7 @@ public class ContractController {
      * delete contract by id.
      */
     @DeleteMapping(value = "/{contractId}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deleteContract(@PathVariable("contractId") Integer contractId)
         throws NodeMgrException, Exception {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -178,6 +183,7 @@ public class ContractController {
      * deploy contract.
      */
     @PostMapping(value = "/deploy")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deployContract(@RequestBody Contract contract) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -197,6 +203,7 @@ public class ContractController {
      * send transaction.
      */
     @PostMapping(value = "/transaction")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse sendTransaction(@RequestBody Transaction param) throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
