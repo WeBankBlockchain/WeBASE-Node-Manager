@@ -23,6 +23,7 @@ import com.webank.webase.node.mgr.base.code.RetCode;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -53,6 +54,19 @@ public class ExceptionsHandler {
         return bre;
     }
 
+
+    /**
+     * catch：AccessDeniedException.
+     */
+    @ResponseBody
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public BaseResponse accessDeniedExceptionHandler(AccessDeniedException exception)
+        throws Exception {
+        log.warn("catch accessDenied exception", exception);
+        BaseResponse bre = new BaseResponse(ConstantCode.ACCESS_DENIED);
+        log.warn("accessDenied exception return:{}", mapper.writeValueAsString(bre));
+        return bre;
+    }
 
     /**
      * catch：Exception.
