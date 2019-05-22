@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.base.properties;
 
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import java.math.BigInteger;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -37,6 +38,7 @@ public class ConstantProperties {
     public static final String NAME_SPRIT = "$";
     public static final int PUBLICKEY_LENGTH = 130;
     public static final int ADDRESS_LENGTH = 42;
+    public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
 
     // scheduler
     private long nodeWaitMax = 180L;
