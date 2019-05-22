@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +54,7 @@ public class AccountController extends BaseController {
      * add account info.
      */
     @PostMapping(value = "/accountInfo")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse addAccountInfo(@RequestBody AccountInfo info) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -76,6 +78,7 @@ public class AccountController extends BaseController {
      * update account info.
      */
     @PutMapping(value = "/accountInfo")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateAccountInfo(@RequestBody AccountInfo info) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -104,6 +107,7 @@ public class AccountController extends BaseController {
      * query account list.
      */
     @GetMapping(value = "/accountList/{pageNumber}/{pageSize}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BasePageResponse queryAccountList(@PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
@@ -134,6 +138,7 @@ public class AccountController extends BaseController {
      * delete contract by id.
      */
     @DeleteMapping(value = "/{account}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deleteAccount(@PathVariable("account") String account)
         throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);

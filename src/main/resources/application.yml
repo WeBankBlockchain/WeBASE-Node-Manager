@@ -40,7 +40,7 @@ constant:
   nodeWaitMax: 90
   blockRetainMax: 10000
   transRetainMax: 10000
-  monitorInfoRetainMax: 4
+  monitorInfoRetainMax: 10000
   deleteInfoCron: "0 0/2 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
   checkNodeStatusCron: "30 0/1 * * * ?"

@@ -64,7 +64,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        String adminRolePermit = String.format("hasRole('%1s')", RoleType.ADMIN.getValue());
         http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler); // 无权访问 JSON 格式的数据
 
         http.formLogin().loginPage("/login") // login page
@@ -75,11 +74,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and().authorizeRequests()
             .antMatchers("/js/**", "/account/login", "/login", "/report/**", "/user/privateKey/**")
             .permitAll()
-            .antMatchers(HttpMethod.POST, "/account/accountInfo").access(adminRolePermit)
-            .antMatchers(HttpMethod.PUT, "/account/accountInfo").access(adminRolePermit)
-            .antMatchers(HttpMethod.DELETE, "/account/**").access(adminRolePermit)
-            .antMatchers("/account/accountList/**").access(adminRolePermit)
-            .antMatchers("/role/roleList").access(adminRolePermit)
             .anyRequest().authenticated().and().csrf()
             .disable() // close csrf
             .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint).and().logout()
