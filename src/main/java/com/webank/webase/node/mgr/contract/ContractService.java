@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,10 +91,7 @@ public class ContractService {
 
         // add row
         TbContract tbContract = new TbContract();
-        tbContract.setNetworkId(contract.getNetworkId());
-        tbContract.setContractName(contract.getContractName());
-        tbContract.setContractVersion(contract.getContractVersion());
-        tbContract.setContractSource(contract.getContractSource());
+        BeanUtils.copyProperties(contract,tbContract);
         tbContract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
 
         Integer affectRow = 0;

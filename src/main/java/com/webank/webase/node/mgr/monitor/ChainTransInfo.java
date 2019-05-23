@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
+import java.math.BigInteger;
 import lombok.Data;
 
 @Data
@@ -23,4 +24,5 @@ public class ChainTransInfo {
     private String from;
     private String to;
     private String input;
+    private BigInteger blockNumber;
 }
