@@ -442,6 +442,7 @@ public class FrontService {
         chainTransInfo.setFrom(json.getString("from"));
         chainTransInfo.setTo(json.getString("to"));
         chainTransInfo.setInput(json.getString("input"));
+        chainTransInfo.setBlockNumber(json.getBigInteger("blockNumber"));
 
         return chainTransInfo;
     }
