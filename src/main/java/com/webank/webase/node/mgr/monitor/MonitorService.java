@@ -364,6 +364,7 @@ public class MonitorService {
         if (StringUtils.isBlank(transTo)) {
             contractAddress = frontService.getAddressFromFrontByHash(networkId, transHash);
             contractBin = frontService.getCodeFromFront(networkId, contractAddress, blockNumber);
+            contractBin = removeBinFirstAndLast(contractBin);
             contractName = getNameFromContractBin(networkId, contractBin);
             interfaceName = transInput.substring(0, 10);
         } else {    // function call
@@ -464,7 +465,7 @@ public class MonitorService {
 
 
     /**
-     * remove "0x" and last 68 character.
+     * remove "0x" and last 70 character.
      */
     private String removeBinFirstAndLast(String contractBin) {
         if (StringUtils.isBlank(contractBin)) {
@@ -473,8 +474,8 @@ public class MonitorService {
         if (contractBin.startsWith("0x")) {
             contractBin = StringUtils.removeStart(contractBin, "0x");
         }
-        if (contractBin.length() > 68) {
-            contractBin = contractBin.substring(0, contractBin.length() - 68);
+        if (contractBin.length() > 70) {
+            contractBin = contractBin.substring(0, contractBin.length() - 70);
         }
         return contractBin;
     }

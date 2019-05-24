@@ -91,7 +91,7 @@ public class ContractService {
 
         // add row
         TbContract tbContract = new TbContract();
-        BeanUtils.copyProperties(contract,tbContract);
+        BeanUtils.copyProperties(contract, tbContract);
         tbContract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
 
         Integer affectRow = 0;
@@ -102,9 +102,10 @@ public class ContractService {
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
-        if (affectRow == 0) {
-            log.warn("affect 0 rows of tb_contract");
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        if (StringUtils.isNotBlank(tbContract.getContractBin())) {
+            // update monitor unusual contract's info
+            monitorService.updateUnusualContract(networkId, tbContract.getContractName(),
+                tbContract.getContractBin());
         }
 
         Integer contractId = tbContract.getContractId();
@@ -180,6 +181,12 @@ public class ContractService {
         if (affectRow == 0) {
             log.warn("affect 0 rows of tb_contract");
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+
+        if (StringUtils.isNotBlank(tbContract.getContractBin())) {
+            // update monitor unusual contract's info
+            monitorService.updateUnusualContract(tbContract.getNetworkId(),
+                tbContract.getContractName(), tbContract.getContractBin());
         }
 
         log.debug("end updateContract");
@@ -341,9 +348,6 @@ public class ContractService {
             tbc.setContractStatus(ContractStatus.DEPLOYED.getValue());
             tbc.setContractAddress(address);
             contractMapper.updateContract(tbc);
-
-            // update monitor unusual contract's info
-            monitorService.updateUnusualContract(networkId, tbc.getContractName(), contractBin);
 
             if (!cp.getSupportTransaction()) {
                 log.info("current config is not support transaction");
