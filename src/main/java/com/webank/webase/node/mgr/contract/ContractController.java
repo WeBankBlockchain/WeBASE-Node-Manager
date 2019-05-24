@@ -67,10 +67,8 @@ public class ContractController {
             JSON.toJSONString(contract));
 
         // add contract row
-        Integer contractId = contractService.addContractInfo(contract);
+        TbContract contractRow = contractService.addContractInfo(contract);
 
-        // query the record of a new row
-        TbContract contractRow = contractService.queryByContractId(contractId);
         baseResponse.setData(contractRow);
 
         log.info("end addCotractInfo useTime:{} result:{}",
@@ -91,9 +89,7 @@ public class ContractController {
             JSON.toJSONString(contract));
 
         // update contract row
-        contractService.updateContract(contract);
-        // query the record of a new row
-        TbContract contractRow = contractService.queryByContractId(contract.getContractId());
+        TbContract contractRow = contractService.updateContract(contract);
         baseResponse.setData(contractRow);
 
         log.info("end updateContractInfo useTime:{} result:{}",
