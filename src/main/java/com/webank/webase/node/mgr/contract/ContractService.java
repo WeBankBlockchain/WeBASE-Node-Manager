@@ -72,7 +72,7 @@ public class ContractService {
     /**
      * add new contract data.
      */
-    public Integer addContractInfo(Contract contract) throws NodeMgrException {
+    public TbContract addContractInfo(Contract contract) throws NodeMgrException {
         log.debug("start addContractInfo Contract:{}", JSON.toJSONString(contract));
         Integer networkId = Optional.ofNullable(contract).map(c -> c.getNetworkId())
             .orElseThrow(() -> new NodeMgrException(ConstantCode.INVALID_PARAM_INFO));
@@ -102,15 +102,17 @@ public class ContractService {
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
-        if (StringUtils.isNotBlank(tbContract.getContractBin())) {
+        // query the record of a new row
+        TbContract newContract = queryByContractId(contract.getContractId());
+
+        if (StringUtils.isNotBlank(newContract.getContractBin())) {
             // update monitor unusual contract's info
-            monitorService.updateUnusualContract(networkId, tbContract.getContractName(),
-                tbContract.getContractBin());
+            monitorService.updateUnusualContract(newContract.getNetworkId(),
+                newContract.getContractName(), newContract.getContractBin());
         }
 
-        Integer contractId = tbContract.getContractId();
-        log.debug("end addContractInfo contractId:{}", contractId);
-        return contractId;
+        log.debug("end addContractInfo newContract:{}", JSON.toJSONString(newContract));
+        return newContract;
     }
 
     /**
@@ -161,7 +163,8 @@ public class ContractService {
      * update contract data.
      */
     @Transactional
-    public void updateContract(Contract contract) throws NodeMgrException, JsonProcessingException {
+    public TbContract updateContract(Contract contract)
+        throws NodeMgrException, JsonProcessingException {
         log.debug("start updateContract contract:{}", JSON.toJSONString(contract));
 
         Integer contractId = Optional.ofNullable(contract).map(c -> c.getContractId())
@@ -183,13 +186,17 @@ public class ContractService {
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
-        if (StringUtils.isNotBlank(tbContract.getContractBin())) {
+        // query the record of a new row
+        TbContract newContract = queryByContractId(contract.getContractId());
+
+        if (StringUtils.isNotBlank(newContract.getContractBin())) {
             // update monitor unusual contract's info
-            monitorService.updateUnusualContract(tbContract.getNetworkId(),
-                tbContract.getContractName(), tbContract.getContractBin());
+            monitorService.updateUnusualContract(newContract.getNetworkId(),
+                newContract.getContractName(), newContract.getContractBin());
         }
 
         log.debug("end updateContract");
+        return newContract;
     }
 
     /**
@@ -307,13 +314,13 @@ public class ContractService {
         // get systemUserId
         Integer systemUserId = userService.queryIdOfSystemUser(networkId);
 
+        TbContract tbc = null;
         if (contractId == null) {
             log.info("contract had not save. save contract now");
-            contractId = addContractInfo(contract);
+            tbc = addContractInfo(contract);
+        } else {
+            tbc = contractMapper.queryByContractId(contractId);
         }
-
-        // query contract
-        TbContract tbc = contractMapper.queryByContractId(contractId);
         if (tbc != null && tbc.getContractStatus() == ContractStatus.DEPLOYED.getValue()) {
             throw new NodeMgrException(ConstantCode.CONTRACT_HAS_BEAN_DEPLOYED);
         }
