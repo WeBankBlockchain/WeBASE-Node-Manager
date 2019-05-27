@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.base.entity;
 
+import com.webank.webase.node.mgr.base.code.RetCode;
 import java.util.Collections;
 import lombok.Data;
 

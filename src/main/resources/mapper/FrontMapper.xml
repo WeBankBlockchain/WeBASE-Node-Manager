@@ -30,29 +30,46 @@
   </delete>
 
   <select id="getCount" resultType="java.lang.Integer" parameterType="com.webank.webase.node.mgr.front.entity.FrontParam">
-    select count(1) from tb_front where 1=1
+    select count(1) from
+    (select * from tb_front_group_map where 1=1
+    <if test="groupId != null and groupId !=''">
+      and group_id = #{groupId}
+    </if>
+     group by front_id) a
+     left join tb_front b on(a.front_id=b.front_id)
+     where 1=1
     <if test="frontId != null and frontId !=''">
-      and front_id = #{frontId}
+      and b.front_id = #{frontId}
     </if>
     <if test="frontIp != null and frontIp !=''">
-      and front_ip = #{frontIp}
+      and b.front_ip = #{frontIp}
     </if>
     <if test="frontPort != null and frontPort !=''">
-      and front_port = #{frontPort}
+      and b.front_port = #{frontPort}
     </if>
   </select>
 
 
   <select id="getList" resultMap="frontMap" parameterType="com.webank.webase.node.mgr.front.entity.FrontParam">
-    select * from tb_front where 1=1
+    select b.* from
+    (select * from tb_front_group_map where 1=1
+    <if test="groupId != null and groupId !=''">
+      and group_id = #{groupId}
+    </if>
+    group by front_id) a
+    left join tb_front b on(a.front_id=b.front_id)
+    where 1=1
     <if test="frontId != null and frontId !=''">
-      and front_id = #{frontId}
+      and b.front_id = #{frontId}
     </if>
     <if test="frontIp != null and frontIp !=''">
-      and front_ip = #{frontIp}
+      and b.front_ip = #{frontIp}
     </if>
     <if test="frontPort != null and frontPort !=''">
-      and front_port = #{frontPort}
+      and b.front_port = #{frontPort}
+    </if>
+    <if test="groupId != null and groupId !=''">
+      and a.group_id = #{groupId}
     </if>
   </select>
 

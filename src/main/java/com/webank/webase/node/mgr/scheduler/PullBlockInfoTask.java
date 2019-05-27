@@ -13,17 +13,14 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.block.BlockService;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.entity.TbGroup;
-import java.math.BigInteger;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,104 +33,34 @@ import org.springframework.stereotype.Component;
 public class PullBlockInfoTask {
 
     @Autowired
-    private GroupService groupService;
-    @Autowired
-    private ConstantProperties cProperties;
-    @Autowired
     private BlockService blockService;
     @Autowired
-    private FrontInterfaceService frontInterfaceService;
-    private Instant latestTimeQueryDb = null;
+    private FrontGroupMapCache frontGroupMapCache;
+    private CountDownLatch latch;
 
     /**
      * task start
      */
-    public void startPull() {
+    public synchronized void pullBlockStart() {
         Instant startTime = Instant.now();
-        log.info("start startPull startTime:{}", startTime.toEpochMilli());
-        List<TbGroup> groupList = groupService.getAllGroup();
-        latestTimeQueryDb = Instant.now();
+        log.info("start pullBLock startTime:{}", startTime.toEpochMilli());
+        List<FrontGroup> groupList = frontGroupMapCache.getAllMap();
         if (groupList == null || groupList.size() == 0) {
             log.info("pullBlock jump over .not found any group");
             return;
         }
-        //one group one thread
-        List<Thread> threadList = new ArrayList<>();
-        for (int i = 0; i < groupList.size(); i++) {
-            TbGroup tbGroup = groupList.get(i);
-            Thread t = new Thread(() -> pullBlockByGroupId(tbGroup.getGroupId()));
-            t.start();
-            threadList.add(t);
+
+        latch = new CountDownLatch(groupList.size());
+        groupList.stream()
+            .forEach(group -> blockService.pullBlockByGroupId(latch, group.getGroupId()));
+
+        try {
+            latch.await(5, TimeUnit.MINUTES);//5min
+        } catch (InterruptedException ex) {
+            log.error("InterruptedException", ex);
         }
-        threadList.stream().forEach(t -> {
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                log.error("pull block exception", e);
-            }
-        });
-        log.info("end startPull useTime:{} ",
+
+        log.info("end pullBLock useTime:{} ",
             Duration.between(startTime, Instant.now()).toMillis());
-    }
-
-    /**
-     * get block from chain by groupId
-     */
-    private void pullBlockByGroupId(int groupId) {
-        log.info("start pullBlockByGroupId groupId:{}", groupId);
-        while (isLatestTimeQueryDbValid()) {
-            try {
-                Thread.sleep(cProperties.getPullBlockSleepTime());
-
-                //get next block
-                BigInteger nextBlock = getNextBlockNumber(groupId);
-                //get block by number
-                BlockInfo blockInfo = frontInterfaceService.getBlockByNumber(groupId, nextBlock);
-                if (blockInfo == null || blockInfo.getNumber() == null) {
-                    log.info("pullBlockByGroupId jump over. not found new block.");
-                    continue;
-                }
-                //save block info
-                blockService.saveBLockInfo(blockInfo, groupId);
-            } catch (Exception ex) {
-                log.error("fail pullBlockByGroupId. groupId:{} ", groupId, ex);
-                break;
-            }
-        }
-        log.info("end pullBlockByGroupId groupId:{}", groupId);
-    }
-
-
-    /**
-     * get next blockNumber
-     */
-    private BigInteger getNextBlockNumber(int groupId) {
-        BigInteger nextBlock = null;
-
-        //get max blockNumber in table
-        BigInteger latestBlockNumber = blockService.getLatestBlockNumber(groupId);
-
-        if (latestBlockNumber == null) {
-            if (cProperties.getIsBlockPullFromZero()) {
-                nextBlock = BigInteger.ZERO;
-            } else {
-                nextBlock = frontInterfaceService.getLatestBlockNumber(groupId);
-            }
-        } else {
-            nextBlock = latestBlockNumber.add(BigInteger.ONE);
-        }
-        return nextBlock;
-    }
-
-
-    /**
-     * check latestTimeQueryDb.
-     */
-    private Boolean isLatestTimeQueryDbValid() {
-        if (latestTimeQueryDb == null) {
-            return false;
-        }
-        Long subTime = Duration.between(latestTimeQueryDb, Instant.now()).toMillis();
-        return subTime < cProperties.getResetGroupListCycle();
     }
 }

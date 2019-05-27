@@ -26,6 +26,7 @@ public class TbUserKeyMap {
 
     private Integer mapId;
     private Integer userId;
+    private Integer groupId;
     private String privateKey;
     private int mapStatus;
     private LocalDateTime createTime;
@@ -38,9 +39,10 @@ public class TbUserKeyMap {
     /**
      * init TbUserKeyMap.
      */
-    public TbUserKeyMap(Integer userId, String privateKey) {
+    public TbUserKeyMap(Integer userId,Integer groupId, String privateKey) {
         super();
         this.userId = userId;
+        this.groupId = groupId;
         this.privateKey = privateKey;
     }
 

@@ -23,22 +23,48 @@ spring:
 logging:
   config: classpath:log/log4j2.xml
   level:
-    com.webank.webase.node.mgr: debug
+    com.webank.webase.node.mgr: info
 
 #constants
 constant:
-  blockRetainMax: 10000
+  ###common
+  isDeleteInfo: true
   transRetainMax: 10000
-  deleteInfoCron: "0 0/2 * * * ?"
+  deleteInfoCron: "0 0/1 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
-  insertTransMonitorCron: "0 0/10 * * * ?"
-  pullBlockSleepTime: 100
-  pullBlockTaskFixedDelay: 30000
   resetGroupListCycle: 600000
+  groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
+
+  ###block into
   isBlockPullFromZero: false
-  contractDeployTimeOut: 30000
-  httpTimeOut: 5000
-  aesKey: ERTadb83f9ege39k
+  pullBlockSleepTime: 200
+  pullBlockTaskFixedDelay: 30000
+  blockRetainMax: 10000
+  ###receive http request
   cookieMaxAge: 1800
+  isUseSecurity: true
+  jwtSecret: S3g4HtJyg7G6Hg0Ln3g4H5Jyg7H6f9dL
+  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find
+  ###front http request
+  frontUrl: http://%1s:%2d/webase-front/%3s
+  httpTimeOut: 5000
+  contractDeployTimeOut: 30000
+  isPrivateKeyEncrypt: true
   maxRequestFail: 3
   sleepWhenHttpMaxFail: 60000
+  ###transaction monitor
+  insertTransMonitorCron: "0 0/10 * * * ?"
+  monitorInfoRetainMax: 10000
+  analysisSleepTime: 200
+  isMonitorIgnoreUser: false
+  isMonitorIgnoreContract: false
+  cnsAddress: 0x0000000000000000000000000000000000001004
+
+
+
+# executor config
+executor:
+  corePoolSize: 3
+  maxPoolSize: 10
+  queueSize: 50
+  threadNamePrefix: "node-mgr-async-"
