@@ -226,4 +226,11 @@
         group by contract_name
     </select>
 
+
+  <delete id="deleteAndRetainMax">
+   DELETE from ${tableName} where create_time not in(
+    select t.create_time from(
+      select create_time from ${tableName} ORDER BY create_time DESC LIMIT ${monitorInfoRetainMax}) t
+    ) and user_type=0 and trans_unusual_type=0;
+  </delete>
 </mapper>

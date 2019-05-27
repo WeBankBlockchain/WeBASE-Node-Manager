@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.front;
 
+import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -77,6 +78,10 @@ public class FrontService {
         BeanUtils.copyProperties(frontInfo, tbFront);
         //save front info
         frontMapper.add(tbFront);
+        if (tbFront.getFrontId() == null || tbFront.getFrontId() == 0) {
+            log.warn("fail newFront, after save, tbFront:{}", JSON.toJSONString(tbFront));
+            throw new NodeMgrException(ConstantCode.SAVE_FRONT_FAIL);
+        }
         for (String groupId : groupIdList) {
             Integer group = Integer.valueOf(groupId);
             //peer in group

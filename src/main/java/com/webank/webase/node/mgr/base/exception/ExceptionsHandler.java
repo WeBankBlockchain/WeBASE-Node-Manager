@@ -19,7 +19,9 @@ import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,6 +39,7 @@ public class ExceptionsHandler {
      */
     @ResponseBody
     @ExceptionHandler(value = NodeMgrException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public BaseResponse myExceptionHandler(NodeMgrException nodeMgrException) {
         log.warn("catch business exception", nodeMgrException);
         RetCode retCode = Optional.ofNullable(nodeMgrException).map(NodeMgrException::getRetCode)
@@ -63,12 +66,42 @@ public class ExceptionsHandler {
         return bre;
     }
 
+    /**
+     * parameter exception:TypeMismatchException
+     */
+    @ResponseBody
+    @ExceptionHandler(value = TypeMismatchException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public BaseResponse typeMismatchExceptionHandler(TypeMismatchException ex) {
+        log.warn("catch typeMismatchException", ex);
+
+        RetCode retCode = new RetCode(ConstantCode.PARAM_EXCEPTION.getCode(), ex.getMessage());
+        BaseResponse bre = new BaseResponse(retCode);
+        log.warn("typeMismatchException return:{}", JSON.toJSONString(bre));
+        return bre;
+    }
+
+
+    /**
+     * catch：AccessDeniedException.
+     */
+    @ResponseBody
+    @ExceptionHandler(value = AccessDeniedException.class)
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    public BaseResponse accessDeniedExceptionHandler(AccessDeniedException exception)
+        throws Exception {
+        log.warn("catch accessDenied exception", exception);
+        BaseResponse bre = new BaseResponse(ConstantCode.ACCESS_DENIED);
+        log.warn("accessDenied exception return:{}", JSON.toJSONString(bre));
+        return bre;
+    }
 
     /**
      * catch：RuntimeException.
      */
     @ResponseBody
     @ExceptionHandler(value = RuntimeException.class)
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public BaseResponse exceptionHandler(RuntimeException exc) {
         log.info("catch RuntimeException", exc);
         // 默认系统异常

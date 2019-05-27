@@ -3,8 +3,8 @@ package com.webank.webase.node.mgr.base.filter;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import java.io.IOException;
@@ -26,8 +26,9 @@ import org.springframework.util.CollectionUtils;
 
 @Log4j2
 @Component
-@WebFilter(filterName = "FrontFilter")
+@WebFilter(filterName = "frontFilter")
 public class FrontFilter implements Filter {
+
     @Autowired
     private ConstantProperties properties;
     @Autowired
@@ -45,7 +46,7 @@ public class FrontFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
         throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String uri = getUri(httpRequest);
+        String uri = HttpRequestTools.getUri(httpRequest);
         if (isIgnore(uri)) {
             log.debug("FrontFilter ignore:{}", uri);
             filterChain.doFilter(request, response);
@@ -59,16 +60,6 @@ public class FrontFilter implements Filter {
             }
             filterChain.doFilter(request, response);
         }
-    }
-
-
-    /**
-     * get uri.
-     */
-    private String getUri(HttpServletRequest httpRequest) {
-        String uri = httpRequest.getRequestURI().replace("//", "/");
-        String contextPath = httpRequest.getContextPath();
-        return StringUtils.removeStart(uri, contextPath);
     }
 
     /**

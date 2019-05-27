@@ -49,11 +49,11 @@ public class ConstantCode {
 
     public static final RetCode INVALID_GROUP_ID = RetCode.mark(202006, "invalid group id");
 
-    public static final RetCode ORG_ID_NULL = RetCode.mark(202007, "");
+    public static final RetCode CHECK_CODE_NULL = RetCode.mark(202007, "checkCode is null");
 
-    public static final RetCode INVALID_ORG_ID = RetCode.mark(202008, "");
+    public static final RetCode INVALID_CHECK_CODE = RetCode.mark(202008, "invalid checkCode");
 
-    public static final RetCode NET_ORG_MAP_EXISTS = RetCode.mark(202009, "");
+    public static final RetCode SAVE_FRONT_FAIL = RetCode.mark(202009, "save front fail");
 
     public static final RetCode NET_ORG_MAP_NOT_EXISTS = RetCode.mark(202010, "");
 
