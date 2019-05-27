@@ -16,7 +16,10 @@ package com.webank.webase.node.mgr.base.tools;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -31,6 +34,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,6 +48,29 @@ public class NodeMgrTools {
 
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_TIME_FORMAT_NO_SPACE = "yyyyMMddHHmmss";
+    private static final char[] CHARS = {'2', '3', '4', '5', '6', '7', '8', '9', 'a',
+        'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's',
+        't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J',
+        'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+
+
+    /**
+     * 获取指定位数的数字和字母组合的字符串
+     *
+     * @param length 字符串长度
+     */
+    public static String randomString(int length) {
+        if (length > CHARS.length) {
+            return null;
+        }
+        StringBuffer sb = new StringBuffer();
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            sb.append(CHARS[random.nextInt(CHARS.length)]);
+        }
+        return sb.toString();
+    }
+
 
     /**
      * convert hex to localDateTime.
@@ -265,4 +294,63 @@ public class NodeMgrTools {
             throw new NodeMgrException(ConstantCode.SERVER_PORT_CONNECT_FAIL);
         }
     }
+
+
+    /**
+     * response exception.
+     */
+    public static void responseRetCodeException(HttpServletResponse response, RetCode retCode) {
+        BaseResponse baseResponse = new BaseResponse(retCode);
+/*        baseResponse.setMessage(ex.getMessage());
+        response.setContentType("application/json;charset=UTF-8");*/
+        try {
+            response.getWriter().write(JSON.toJSONString(baseResponse));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * check target time is valid.
+     *
+     * @param dateTime target time.
+     * @param validLength y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid;
+     * example1:1d;example2:n
+     */
+    public static boolean isDateTimeInValid(LocalDateTime dateTime, String validLength) {
+        log.debug("start isDateTimeInValid. dateTime:{} validLength:{}", dateTime, validLength);
+        if ("n".equals(validLength)) {
+            return true;
+        }
+        if (Objects.isNull(dateTime) || StringUtils.isBlank(validLength)
+            || validLength.length() < 2) {
+            return false;
+        }
+
+        String lifeStr = validLength.substring(0, validLength.length() - 1);
+        if (!StringUtils.isNumeric(lifeStr)) {
+            log.warn("fail isDateTimeInValid");
+            throw new RuntimeException("fail isDateTimeInValid. validLength is error");
+        }
+        int lifeValue = Integer.valueOf(lifeStr);
+        String lifeUnit = validLength.substring(validLength.length() - 1);
+
+        LocalDateTime now = LocalDateTime.now();
+        switch (lifeUnit) {
+            case "y":
+                return dateTime.getYear() - now.getYear() < lifeValue;
+            case "M":
+                return dateTime.getMonthValue() - now.getMonthValue() < lifeValue;
+            case "d":
+                return dateTime.getDayOfMonth() - now.getDayOfMonth() < lifeValue;
+            case "m":
+                return dateTime.getMinute() - now.getMinute() < lifeValue;
+            default:
+                log.warn("fail isDateTimeInValid lifeUnit:{}", lifeUnit);
+                return false;
+        }
+    }
+
+
 }

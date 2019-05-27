@@ -27,27 +27,39 @@ logging:
 
 #constants
 constant:
+  ###common
   isDeleteInfo: true
-  blockRetainMax: 10000
   transRetainMax: 10000
   deleteInfoCron: "0 0/1 * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
-  insertTransMonitorCron: "0 0/10 * * * ?"
+  resetGroupListCycle: 600000
+  groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
+
+  ###block into
+  isBlockPullFromZero: false
   pullBlockSleepTime: 200
   pullBlockTaskFixedDelay: 30000
-  resetGroupListCycle: 600000
-  isBlockPullFromZero: false
-  contractDeployTimeOut: 30000
-  analysisSleepTime: 200
-  httpTimeOut: 5000
-  aesKey: ERTadb83f9ege39k
+  blockRetainMax: 10000
+  ###receive http request
   cookieMaxAge: 1800
+  isUseSecurity: true
+  jwtSecret: S3g4HtJyg7G6Hg0Ln3g4H5Jyg7H6f9dL
+  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find
+  ###front http request
+  frontUrl: http://%1s:%2d/webase-front/%3s
+  httpTimeOut: 5000
+  contractDeployTimeOut: 30000
+  isPrivateKeyEncrypt: true
   maxRequestFail: 3
   sleepWhenHttpMaxFail: 60000
-  isUseSecurity: true
-  ignoreCheckFront: /account/login,/login,/user/privateKey,/front/new,/front/find
+  ###transaction monitor
+  insertTransMonitorCron: "0 0/10 * * * ?"
+  monitorInfoRetainMax: 10000
+  analysisSleepTime: 200
+  isMonitorIgnoreUser: false
+  isMonitorIgnoreContract: false
   cnsAddress: 0x0000000000000000000000000000000000001004
-  isPrivateKeyEncrypt: true
+
 
 
 # executor config

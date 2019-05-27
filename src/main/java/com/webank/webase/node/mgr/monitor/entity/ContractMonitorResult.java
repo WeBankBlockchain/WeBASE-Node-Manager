@@ -11,28 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.monitor;
+package com.webank.webase.node.mgr.monitor.entity;
 
-import com.webank.webase.node.mgr.base.enums.MonitorUserType;
-import com.webank.webase.node.mgr.base.enums.TransType;
-import com.webank.webase.node.mgr.base.enums.TransUnusualType;
-import java.time.LocalDateTime;
 import lombok.Data;
 
+/**
+ * contract monitor result info.
+ */
 @Data
-public class TbMonitor {
-
-    private String userName;
-    private Integer userType = MonitorUserType.NORMAL.getValue();
+public class ContractMonitorResult {
     private String contractName;
     private String contractAddress;
     private String interfaceName;
-    private Integer transType = TransType.DEPLOY.getValue();
-    private Integer transUnusualType = TransUnusualType.NORMAL.getValue();
-    private Integer transCount;
-    private String transHashs;
-    private String transHashLastest;
-    private LocalDateTime createTime;
-    private LocalDateTime modifyTime;
-
+    private Integer transType;
+    private Integer transUnusualType;
 }
