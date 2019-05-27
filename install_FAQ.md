@@ -3,7 +3,7 @@
 ### 一般问题
 * 问：执行shell脚本报下面错误：
 ```
-[app@VM_96_107_centos deployInputParam]$ sh start.sh
+[app@VM_96_107_centos deployInputParam]$ bash start.sh
 start.sh: line 2: $'\r': command not found
 start.sh: line 8: $'\r': command not found
 start.sh: line 9: $'\r': command not found

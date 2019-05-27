@@ -54,11 +54,18 @@
     <if test="groupId != null and groupId !=''">
       and group_id = #{groupId}
     </if>
+    <if test="groupStatus != null and groupStatus !=''">
+      and group_status = #{groupStatus}
+    </if>
   </select>
 
   <select id="getList" resultMap="groupMap">
-		select * from tb_group order by group_id asc
-	</select>
+    select * from tb_group where 1=1
+    <if test="groupStatus != null and groupStatus !=''">
+      and group_status = #{groupStatus}
+    </if>
+    order by group_id asc
+  </select>
 
 
   <select id="queryLatestStatisticalTrans" resultMap="statisticalTransMap">
