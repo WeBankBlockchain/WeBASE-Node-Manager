@@ -15,7 +15,7 @@ package com.webank.webase.node.mgr.node;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -25,6 +25,8 @@ import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
@@ -43,6 +45,7 @@ public class NodeService {
     private NodeMapper nodeMapper;
     @Autowired
     private FrontInterfaceService frontInterfacee;
+    private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
 
     /**
      * add new node data.
@@ -162,23 +165,22 @@ public class NodeService {
     }
 
     /**
-     * delete by node id.
+     * delete by node and group.
      */
-    public void deleteByNodeId(Integer nodeId) throws NodeMgrException {
-        log.debug("start deleteByNodeId nodeId:{}", nodeId);
-        TbNode nodeRow = queryByNodeId(nodeId);
-        if (nodeRow == null) {
-            log.info("fail deleteByNodeId. invalid node ip");
-            throw new NodeMgrException(ConstantCode.INVALID_ROLE_ID);
-        }
+    public void deleteByNodeAndGroupId(String nodeId, int groupId) throws NodeMgrException {
+        log.debug("start deleteByNodeAndGroupId nodeId:{} groupId:{}", nodeId, groupId);
+        nodeMapper.deleteByNodeAndGroup(nodeId, groupId);
+        log.debug("end deleteByNodeAndGroupId");
+    }
 
-        Integer affectRow = nodeMapper.deleteByNodeId(nodeId);
-        if (affectRow == 0) {
-            log.warn("affect 0 rows of tb_node");
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+    /**
+     * delete by groupId.
+     */
+    public void deleteByGroupId(int groupId) {
+        if (groupId == 0) {
+            return;
         }
-
-        log.debug("end deleteByNodeId");
+        nodeMapper.deleteByGroupId(groupId);
     }
 
 
@@ -195,14 +197,25 @@ public class NodeService {
             String nodeId = tbNode.getNodeId();
             BigInteger localBlockNumber = tbNode.getBlockNumber();
             BigInteger localPbftView = tbNode.getPbftView();
+            LocalDateTime modifyTime = tbNode.getModifyTime();
+
+            Duration duration = Duration.between(modifyTime, LocalDateTime.now());
+            Long subTime = duration.toMillis();
+            if (subTime < CHECK_NODE_WAIT_MIN_MILLIS) {
+                log.info("checkNodeStatus jump over. subTime:{}", subTime);
+                return;
+            }
 
             BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
             BigInteger latestView = consensusList.stream()
                 .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
                 .orElse(BigInteger.ZERO);//pbftView
 
+
             if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
-                log.warn("node[{}] is invalid", nodeId);
+                log.warn(
+                    "node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                    nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
                 tbNode.setNodeActive(DataStatus.INVALID.getValue());
             } else {
                 tbNode.setBlockNumber(latestNumber);

@@ -14,7 +14,7 @@
 package com.webank.webase.node.mgr.base.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.ParamException;
 import java.util.Enumeration;
 import java.util.stream.Collectors;

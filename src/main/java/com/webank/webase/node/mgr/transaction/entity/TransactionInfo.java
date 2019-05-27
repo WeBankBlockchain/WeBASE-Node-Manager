@@ -21,7 +21,6 @@ import lombok.Data;
 @Data
 public class TransactionInfo {
     private String hash;
-    private String nonce;
     private String blockHash;
     private BigInteger blockNumber;
     private int transactionIndex;
@@ -29,7 +28,7 @@ public class TransactionInfo {
     private String to;
     private int value;
     private Long gasPrice;
-    private Long gas;
+    private BigInteger gas;
     private String input;
     private int v;
     private String nonceRaw;

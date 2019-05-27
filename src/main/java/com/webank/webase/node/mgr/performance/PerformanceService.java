@@ -17,16 +17,14 @@ package com.webank.webase.node.mgr.performance;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_PERFORMANCE_CONFIG;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_PERFORMANCE_RATIO;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_URL;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.TbNode;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +41,8 @@ public class PerformanceService {
     private FrontService frontService;
     @Autowired
     private RestTemplate genericRestTemplate;
+    @Autowired
+    private ConstantProperties cproperties;
 
     /**
      * get ratio of performance.
@@ -70,7 +70,7 @@ public class PerformanceService {
         }
 
         // request url
-        String url = String.format(FRONT_URL, tbFront.getFrontIp(), tbFront.getFrontPort(),
+        String url = String.format(cproperties.getFrontUrl(), tbFront.getFrontIp(), tbFront.getFrontPort(),
                 FRONT_PERFORMANCE_RATIO);
         url = url + "?" + urlParam;
         log.info("getPerformanceRatio request url:{}", url);
@@ -94,7 +94,7 @@ public class PerformanceService {
         }
 
         // request url
-        String url = String.format(FRONT_URL, tbFront.getFrontIp(), tbFront.getFrontPort(),
+        String url = String.format(cproperties.getFrontUrl(), tbFront.getFrontIp(), tbFront.getFrontPort(),
                FRONT_PERFORMANCE_CONFIG);
         log.info("getPerformanceConfig request url:{}", url);
 

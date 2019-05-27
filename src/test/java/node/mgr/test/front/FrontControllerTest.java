@@ -77,7 +77,7 @@ public class FrontControllerTest {
 
     @Test
     public void testRemoveFront() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete("/front/2"));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete("/front/500025"));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());

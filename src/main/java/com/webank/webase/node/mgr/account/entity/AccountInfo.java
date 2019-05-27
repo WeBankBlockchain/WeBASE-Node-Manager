@@ -13,29 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.base.entity;
+package com.webank.webase.node.mgr.account.entity;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 
-/**
- * class about exception code and message.
- */
 @Data
-public class RetCode {
-
-    private Integer code;
-    private String msg;
-
-    public RetCode(int code, String msg) {
-        this.code = code;
-        this.msg = msg;
-    }
-
-    public static RetCode mark(int code, String msg) {
-        return new RetCode(code, msg);
-    }
-
-    public static RetCode mark(Integer code) {
-        return new RetCode(code, null);
-    }
+public class AccountInfo {
+    @NotBlank
+    private String account;
+    @NotBlank
+    private String accountPwd;
+    @NotNull
+    private Integer roleId;
 }

@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 /**
  * reset maxAge of cookie.
  */
-@Order(10)
+@Order(-2000)
 @Component
 @WebFilter(filterName = "resetCookieFilter", urlPatterns = "/*")
 public class ResetCookieFilter implements Filter {

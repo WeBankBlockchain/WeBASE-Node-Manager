@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.account;
+package com.webank.webase.node.mgr.base.properties;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 @Data
-public class LoginInfo {
+@Component
+@ConfigurationProperties(prefix = ExecutorProperties.EXECUTOR_PREFIX)
+public class ExecutorProperties {
+    public static final String EXECUTOR_PREFIX = "executor";
 
-    private String account;
-    private String accountPwd;
+    private Integer corePoolSize = 3;
+    private Integer maxPoolSize = 5;
+    private Integer queueSize = 50;
+    private String threadNamePrefix = "node-mgr-async-";
+
 }

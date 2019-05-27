@@ -2,6 +2,9 @@
 
 APP_MAIN=com.webank.webase.node.mgr.Application
 CLASSPATH='conf/:apps/*:lib/*'
+CURRENT_DIR=`pwd`
+CONF_DIR=${CURRENT_DIR}/conf
+ARIAL_DIR=${CONF_DIR}/Arial
 
 JAVA_OPTS=" -Dfile.encoding=UTF-8"
 JAVA_OPTS+=" -Djava.security.egd=file:/dev/./urandom"
@@ -18,8 +21,19 @@ getTradeProtalPID(){
 }
 
 
+
+copyArial(){
+ arialFolder="/usr/share/fonts/arial"
+ if [ ! -d "$arialFolder" ]; then
+    sudo mkdir "$arialFolder" && sudo cp $ARIAL_DIR/arial*.ttf $arialFolder/
+ fi
+}
+
+
 startup(){
+    copyArial
     getTradeProtalPID
+
     echo "==============================================================================================="
     if [ $tradePortalPID -ne 0 ]; then
         echo "$APP_MAIN already started(PID=$tradePortalPID)"
