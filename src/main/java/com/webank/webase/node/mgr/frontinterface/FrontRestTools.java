@@ -275,7 +275,7 @@ public class FrontRestTools {
             } catch (HttpStatusCodeException e) {
                 JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
                 log.error("http request fail. error:{}", JSON.toJSONString(error));
-                throw new NodeMgrException(error.getInteger("statusCode"),
+                throw new NodeMgrException(error.getInteger("code"),
                     error.getString("errorMessage"));
             }
         }
