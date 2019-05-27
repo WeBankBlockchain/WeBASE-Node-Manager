@@ -55,8 +55,6 @@ public class ConstantCode {
 
     public static final RetCode SAVE_FRONT_FAIL = RetCode.mark(202009, "save front fail");
 
-    public static final RetCode NET_ORG_MAP_NOT_EXISTS = RetCode.mark(202010, "");
-
     public static final RetCode CONTRACT_ABI_EMPTY = RetCode.mark(202011, "abiInfo cannot be empty");
 
     public static final RetCode USER_ID_NULL = RetCode.mark(202012, "user id cannot be empty");
@@ -67,28 +65,13 @@ public class ConstantCode {
 
     public static final RetCode CONTRACT_EXISTS = RetCode.mark(202015, "contract already exists");
 
-    public static final RetCode CONTRACT_ID_NULL = RetCode
-        .mark(202016, "contract id cannot be empty");
-
     public static final RetCode INVALID_CONTRACT_ID = RetCode.mark(202017, "invalid contract id");
 
     public static final RetCode INVALID_PARAM_INFO = RetCode.mark(202018, "invalid param info");
 
     public static final RetCode CONTRACT_NAME_REPEAT = RetCode.mark(202019, "contract name cannot be repeated");
 
-    public static final RetCode CURRENT_ORG_EXISTS = RetCode.mark(202020, "");
-
-    public static final RetCode INVALID_ORG_TYPE = RetCode.mark(202021, "");
-
-    public static final RetCode DELETE_DEPLOYED_CONTRACT = RetCode
-        .mark(202022, "unable to delete deployed contract");
-
     public static final RetCode CONTRACT_NOT_DEPLOY = RetCode.mark(202023, "contract has not deploy");
-
-    public static final RetCode NODE_P2P_PORT_EMPTY = RetCode
-        .mark(202024, "node p2p port cannot be empty");
-
-    public static final RetCode NODE_LOG_NOT_EXISTS = RetCode.mark(202025, "");
 
     public static final RetCode ACCOUNT_EXISTS = RetCode
         .mark(202026, "account info already exists");
@@ -115,60 +98,20 @@ public class ConstantCode {
 
     public static final RetCode PUBLICKEY_NULL = RetCode.mark(202036, "publicKey cannot be empty");
 
-    public static final RetCode USER_DOES_NOT_EXISTS = RetCode.mark(202037, "");
-
-    public static final RetCode INTERFACE_DOES_NOT_EXISTS = RetCode.mark(202038, "");
-
-    public static final RetCode NOT_SAVE_BLOCK = RetCode
-        .mark(202039, "do not save this block height");
-
     public static final RetCode CONTRACT_DEPLOY_FAIL = RetCode
         .mark(202040, "contract deploy not success");
 
-    public static final RetCode INVALID_USER_INDEX = RetCode.mark(202041, "");
-
-    public static final RetCode INVALID_CONTRACT_INDEX = RetCode.mark(202042, "");
-
-    public static final RetCode NOT_FOUND_CONTRACTDETAIL = RetCode.mark(202043, "");
-
-    public static final RetCode NOT_FOUND_USERCONTRACT = RetCode.mark(202044, "");
-
     public static final RetCode NOW_PWD_EQUALS_OLD = RetCode
         .mark(202045, "the new password cannot be same as old");
-
-    public static final RetCode CONTRACT_HAS_NOT_COMPILE = RetCode
-        .mark(202046, "contract has not compiled");
-
-    public static final RetCode NOT_FOUND_NODECONTRACT = RetCode
-        .mark(202047, "did not found system contract:node");
-
-    public static final RetCode INVALID_NODE_INDEX = RetCode.mark(202048, "");
-
-    public static final RetCode CONTRACT_NAME_EMPTY = RetCode.mark(202049, "");
 
     public static final RetCode PUBLICKEY_LENGTH_ERROR = RetCode
         .mark(202050, "publicKey's length is 130,address's length is 42");
 
     public static final RetCode SERVER_HOST_CONNECT_FAIL = RetCode
-        .mark(202051, "un know this host");
+        .mark(202051, "unKnow this host");
 
     public static final RetCode SERVER_PORT_CONNECT_FAIL = RetCode
-        .mark(202052, "un know this port");
-
-    public static final RetCode NOT_FOUND_SYSTEM_USER = RetCode.mark(202053, "");
-
-    public static final RetCode CONTRACT_HAD_NOT_DEPLOY = RetCode
-        .mark(202054, "contract had not deploy");
-
-    public static final RetCode INVALID_CONTRACT = RetCode.mark(202055, "invalid contract");
-
-    public static final RetCode INVALID_NODE_TYPE = RetCode.mark(202056, "");
-
-    public static final RetCode IP_PORT_EMPTY = RetCode.mark(202057, "");
-
-    public static final RetCode NOT_SUPPORT_TRANS = RetCode.mark(202058, "");
-
-    public static final RetCode INVALID_NODE_ID = RetCode.mark(202059, "invalid node id");
+        .mark(202052, "unKnow this port");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
