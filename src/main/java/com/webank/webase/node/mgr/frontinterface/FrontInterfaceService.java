@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
@@ -55,7 +56,7 @@ public class FrontInterfaceService {
     @Autowired
     private RestTemplate genericRestTemplate;
     @Autowired
-    private FrontGroupMapCache frontGroupMapCache;
+    private ConstantProperties cproperties;
 
     /**
      * request from specific front.
@@ -66,7 +67,7 @@ public class FrontInterfaceService {
             + "httpMethod:{} uri:{}", groupId, frontIp, frontPort, method.toString(), uri);
 
         uri = FrontRestTools.uriAddGroupId(groupId, uri);
-        String url = String.format(FrontRestTools.FRONT_URL, frontIp, frontPort, uri);
+        String url = String.format(cproperties.getFrontUrl(), frontIp, frontPort, uri);
         log.debug("requestSpecificFront. url:{}", url);
 
         try {
@@ -88,7 +89,7 @@ public class FrontInterfaceService {
         Class<T> clazz) {
         log.debug("start getFromSpecificFront. groupId:{} frontIp:{} frontPort:{}  uri:{}", groupId,
             frontIp, frontPort.toString(), uri);
-        String url = String.format(FrontRestTools.FRONT_URL, frontIp, frontPort, uri);
+        String url = String.format(cproperties.getFrontUrl(), frontIp, frontPort, uri);
         log.debug("getFromSpecificFront. url:{}", url);
         return requestSpecificFront(groupId, frontIp, frontPort,
             HttpMethod.GET, uri, null, clazz);
@@ -217,9 +218,9 @@ public class FrontInterfaceService {
     public ChainTransInfo getTransInfoByHash(Integer groupId, String hash)
         throws NodeMgrException {
         log.debug("start getTransInfoByHash. groupId:{} hash:{}", groupId, hash);
-        TransactionInfo transaction = getTransaction(groupId, hash);
-        ChainTransInfo chainTransInfo = new ChainTransInfo(transaction.getFrom(),
-            transaction.getTo(), transaction.getInput());
+        TransactionInfo trans = getTransaction(groupId, hash);
+        ChainTransInfo chainTransInfo = new ChainTransInfo(trans.getFrom(),
+            trans.getTo(), trans.getInput(), trans.getBlockNumber());
         log.debug("end getTransInfoByHash:{}", JSON.toJSONString(chainTransInfo));
         return chainTransInfo;
     }
@@ -241,11 +242,11 @@ public class FrontInterfaceService {
     /**
      * get code from front.
      */
-    public String getCodeFromFront(Integer groupId, String address, BigInteger blockNumber)
+    public String getCodeFromFront(Integer groupId, String contractAddress, BigInteger blockNumber)
         throws NodeMgrException {
-        log.debug("start getCodeFromFront. groupId:{} address:{} blockNumber:{}",
-            groupId, address, blockNumber);
-        String uri = String.format(FrontRestTools.URI_CODE, address, blockNumber);
+        log.debug("start getCodeFromFront. groupId:{} contractAddress:{} blockNumber:{}",
+            groupId, contractAddress, blockNumber);
+        String uri = String.format(FrontRestTools.URI_CODE, contractAddress, blockNumber);
         String code = frontRestTools.getForEntity(groupId, uri, String.class);
 
         log.debug("end getCodeFromFront:{}", code);
