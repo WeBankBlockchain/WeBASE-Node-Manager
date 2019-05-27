@@ -37,7 +37,6 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
         throws IOException, ServletException {
         log.debug("user not logged in");
         BaseResponse baseResponse = new BaseResponse(ConstantCode.USER_NOT_LOGGED_IN);
-
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(JSON.toJSONString(baseResponse));
     }

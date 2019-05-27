@@ -17,6 +17,8 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -37,6 +39,7 @@ import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import com.webank.webase.node.mgr.user.UserService;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -76,6 +79,8 @@ public class GroupService {
     private MethodService methodService;
     @Autowired
     private TransDailyService transDailyService;
+    @Autowired
+    private ConstantProperties constants;
 
     /**
      * save group id
@@ -96,10 +101,10 @@ public class GroupService {
     /**
      * query count of group.
      */
-    public Integer countOfGroup(Integer groupId) throws NodeMgrException {
+    public Integer countOfGroup(Integer groupId, Integer groupStatus) throws NodeMgrException {
         log.debug("start countOfGroup groupId:{}", groupId);
         try {
-            Integer count = groupMapper.getCount(groupId);
+            Integer count = groupMapper.getCount(groupId, groupStatus);
             log.debug("end countOfGroup groupId:{} count:{}", groupId, count);
             return count;
         } catch (RuntimeException ex) {
@@ -111,21 +116,15 @@ public class GroupService {
     /**
      * query all group info.
      */
-    public List<TbGroup> getAllGroup() throws NodeMgrException {
-        log.debug("start getAllGroup");
-        // query group count
-        int count = countOfGroup(null);
-        if (count == 0) {
-            return null;
-        }
-
+    public List<TbGroup> getGroupList(Integer groupStatus) throws NodeMgrException {
+        log.debug("start getGroupList");
         try {
-            List<TbGroup> groupList = groupMapper.getList();
+            List<TbGroup> groupList = groupMapper.getList(groupStatus);
 
-            log.debug("end getAllGroup groupList:{}", JSON.toJSONString(groupList));
+            log.debug("end getGroupList groupList:{}", JSON.toJSONString(groupList));
             return groupList;
         } catch (RuntimeException ex) {
-            log.error("fail getAllGroup", ex);
+            log.error("fail getGroupList", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -144,20 +143,20 @@ public class GroupService {
     /**
      * Check the validity of the groupId.
      */
-    public void checkgroupId(Integer groupId) throws NodeMgrException {
-        log.debug("start checkgroupId groupId:{}", groupId);
+    public void checkGroupId(Integer groupId) throws NodeMgrException {
+        log.debug("start checkGroupId groupId:{}", groupId);
 
         if (groupId == null) {
-            log.error("fail checkgroupId groupId is null");
+            log.error("fail checkGroupId groupId is null");
             throw new NodeMgrException(ConstantCode.GROUP_ID_NULL);
         }
 
-        Integer groupCount = countOfGroup(groupId);
-        log.debug("checkgroupId groupId:{} groupCount:{}", groupId, groupCount);
+        Integer groupCount = countOfGroup(groupId, null);
+        log.debug("checkGroupId groupId:{} groupCount:{}", groupId, groupCount);
         if (groupCount == null || groupCount == 0) {
             throw new NodeMgrException(ConstantCode.INVALID_GROUP_ID);
         }
-        log.debug("end checkgroupId");
+        log.debug("end checkGroupId");
     }
 
     /**
@@ -208,7 +207,7 @@ public class GroupService {
         List<TbFront> frontList = frontService.getFrontList(new FrontParam());
         if (frontList == null || frontList.size() == 0) {
             log.info("not fount any front, start remove all group");
-            //remove all group
+            //remove all group   TODO
             removeAllGroup();
             return;
         }
@@ -275,7 +274,7 @@ public class GroupService {
      * remove all group.
      */
     private void removeAllGroup() {
-        List<TbGroup> allGroup = getAllGroup();
+        List<TbGroup> allGroup = getGroupList(null);
         if (CollectionUtils.isEmpty(allGroup)) {
             log.info("removeAllGroup jump over. not fount any group");
             return;
@@ -311,7 +310,7 @@ public class GroupService {
             return;
         }
 
-        List<TbGroup> allLocalGroup = getAllGroup();
+        List<TbGroup> allLocalGroup = getGroupList(null);
         if (CollectionUtils.isEmpty(allLocalGroup)) {
             return;
         }
@@ -319,20 +318,34 @@ public class GroupService {
         for (TbGroup localGroup : allLocalGroup) {
             int localGroupId = localGroup.getGroupId();
             long count = allGroupOnChain.stream().filter(id -> id == localGroupId).count();
-            if (count > 0) {
-                //update NORMAL
-                updateGroupStatus(localGroupId, DataStatus.NORMAL.getValue());
-                continue;
-            } else {
-                //update invalid or remove
-
-            }
             try {
-                removeByGroupId(localGroupId);
+                if (count > 0) {
+                    log.warn("group is valid, localGroupId:{}", localGroupId);
+                    //update NORMAL
+                    updateGroupStatus(localGroupId, DataStatus.NORMAL.getValue());
+                    continue;
+                }
+
+                if (!NodeMgrTools.isDateTimeInValid(localGroup.getModifyTime(),
+                    constants.getGroupInvalidGrayscaleValue())) {
+                    log.warn("remove group, localGroup:{}", JSON.toJSONString(localGroup));
+                    //remove group
+                    removeByGroupId(localGroupId);
+                    continue;
+                }
+
+                log.warn("group is invalid, localGroupId:{}", localGroupId);
+                if (DataStatus.NORMAL.getValue() == localGroup.getGroupStatus()) {
+                    //update invalid
+                    updateGroupStatus(localGroupId, DataStatus.INVALID.getValue());
+                    continue;
+                }
+
             } catch (Exception ex) {
-                log.warn("fail removeGroupId. groupId:{}", localGroupId, ex);
+                log.info("fail check group. localGroup:{}", JSON.toJSONString(localGroup));
                 continue;
             }
+
         }
     }
 

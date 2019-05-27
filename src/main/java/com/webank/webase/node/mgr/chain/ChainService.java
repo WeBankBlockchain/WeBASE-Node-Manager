@@ -1,26 +1,24 @@
 /**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.chain;
 
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_URL;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CHAIN;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -37,6 +35,8 @@ import org.springframework.web.client.RestTemplate;
 public class ChainService {
 
     @Autowired
+    private ConstantProperties cproperties;
+    @Autowired
     private FrontService frontService;
     @Autowired
     private RestTemplate genericRestTemplate;
@@ -46,17 +46,18 @@ public class ChainService {
      */
     public Object getChainMonitorInfo(Integer frontId, LocalDateTime beginDate,
         LocalDateTime endDate, LocalDateTime contrastBeginDate,
-        LocalDateTime contrastEndDate, int gap,int groupId) {
+        LocalDateTime contrastEndDate, int gap, int groupId) {
         log.debug(
             "start getChainMonitorInfo.  frontId:{} beginDate:{} endDate:{}"
                 + " contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}",
-            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap,groupId);
+            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
 
         // request param to str
         List<Object> valueList = Arrays
-            .asList(beginDate, endDate, contrastBeginDate, contrastEndDate, gap,groupId);
+            .asList(beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
         List<String> nameList = Arrays
-            .asList("beginDate", "endDate", "contrastBeginDate", "contrastEndDate", "gap", "groupId");
+            .asList("beginDate", "endDate", "contrastBeginDate", "contrastEndDate", "gap",
+                "groupId");
 
         String chainUrlParam = NodeMgrTools.convertUrlParam(nameList, valueList);
 
@@ -67,8 +68,9 @@ public class ChainService {
         }
 
         // request url
-        String url = String.format(FRONT_URL, tbFront.getFrontIp(), tbFront.getFrontPort(),
-               URI_CHAIN);
+        String url = String
+            .format(cproperties.getFrontUrl(), tbFront.getFrontIp(), tbFront.getFrontPort(),
+                URI_CHAIN);
         url = url + "?" + chainUrlParam;
         log.info("getChainMonitorInfo request url:{}", url);
 

@@ -31,7 +31,7 @@
 | 序号  | 软件                                          |
 |-------|---------------------------------------------------|
 | 1     | fisco-bcos 2.0                                    |
-| 2     | webase-front 0.6版本                  |
+| 2     | webase-front 0.7版本                  |
 | 3     | mysql5.5或5.6版本【更高版本需要更改mysql配置，可参考《install_FAQ.md》】    |
 | 4     | java1.8.0_181或更高版本                           |
 | 5     | gradle-4.10或以上版本                            |
@@ -40,23 +40,18 @@
 # <a id="chapter-3">3. 部署说明</a>
 
 ## 3.1 注意事项
-* 本文档默认服务器为centos，如果在ubuntu搭建，请将下面所有命令中的sh更该为bash,如：bash start.sh
-* 在服务搭建的过程中，如碰到问题，请查看 [常见问题解答](https://github.com/WeBankFinTech/webase-node-mgr/blob/dev-0.6/install_FAQ.md)
+* 在服务搭建的过程中，如碰到问题，请查看 [常见问题解答](https://github.com/WeBankFinTech/webase-node-mgr/blob/dev-0.7/install_FAQ.md)
 * 安全温馨提示： 强烈建议设置复杂的数据库登录密码，且严格控制数据操作的权限和网络策略。
 
 ## 3.2 拉取代码
 执行命令：
 ```shell
-git clone https://github.com/WeBankFinTech/webase-node-mgr.git
+git clone -b dev-0.7 https://github.com/WeBankFinTech/webase-node-mgr.git
 ```
 ## 3.3 编译代码
 进入代码根目录：
 ```shell
 cd webase-node-mgr
-```
-切换到0.7分支：
-```shell
-git checkout dev-0.7
 ```
 在代码的根目录webase-node-mgr执行构建命令：
 ```shell
@@ -92,10 +87,10 @@ sed -i "s/defaultAccount/root/g" webase.sh
 ```
 
 ### 3.4.3 运行数据库脚本
-执行命令：sh  webase.sh  ${dbIP}  ${dbPort}
+执行命令：bash  webase.sh  ${dbIP}  ${dbPort}
 如：
 ```shell
-sh  webase.sh  127.0.0.1 3306
+bash  webase.sh  127.0.0.1 3306
 ```
 
 ## 3.5 节点服务的配置及启动
@@ -121,15 +116,15 @@ cd dist
 ```
 启动：
 ```shell
-sh start.sh
+bash start.sh
 ```
 停止：
 ```shell
-sh stop.sh
+bash stop.sh
 ```
 状态检查：
 ```shell
-sh serverStatus.sh
+bash serverStatus.sh
 ```
 ## 3.5.3 查看日志
 进入到日志目录：

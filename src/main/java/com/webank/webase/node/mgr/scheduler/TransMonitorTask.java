@@ -1,20 +1,19 @@
 /**
  * Copyright 2014-2019  the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.node.mgr.scheduler;
 
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.monitor.MonitorService;
@@ -32,21 +31,22 @@ import org.springframework.stereotype.Component;
 public class TransMonitorTask {
 
     @Autowired
-    MonitorService monitorService;
+    private MonitorService monitorService;
     @Autowired
     private GroupService groupService;
     @Autowired
     private TransHashService transHashService;
+    private static final int UNUSUAL_MAX_COUNT = 20;
 
 
     /**
-     * start mointor
+     * start monitor.
      */
-    public void monitorStart(){
+    public void monitorStart() {
         Instant startTime = Instant.now();
         log.info("start monitor. startTime:{}", startTime.toEpochMilli());
         //get group list
-        List<TbGroup> groupList = groupService.getAllGroup();
+        List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
             log.info("monitor jump over .not found any group");
             return;
@@ -62,9 +62,17 @@ public class TransMonitorTask {
      * monitor every group.
      */
     private void monitorHandle(int groupId) {
+        int unusualUserCount = monitorService.countOfUnusualUser(groupId, null);
+        int unusualContractCount = monitorService.countOfUnusualContract(groupId, null);
+        if (unusualUserCount >= UNUSUAL_MAX_COUNT || unusualUserCount >= UNUSUAL_MAX_COUNT) {
+            log.error(
+                "monitorHandle jump over. unusualUserCount:{} unusualUserCount:{} UNUSUAL_MAX_COUNT:{}",
+                unusualUserCount, unusualContractCount, UNUSUAL_MAX_COUNT);
+            return;
+        }
         List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList(groupId);
         if (transHashList != null && transHashList.size() > 0) {
-            monitorService.insertTransMonitorInfo(groupId,transHashList);
+            monitorService.insertTransMonitorInfo(groupId, transHashList);
         }
     }
 }

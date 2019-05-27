@@ -66,7 +66,7 @@ public class UserService {
         Integer groupId = user.getGroupId();
 
         // check group id
-        groupService.checkgroupId(groupId);
+        groupService.checkGroupId(groupId);
 
         // check userName
         TbUser userRow = queryByName(user.groupId, user.getUserName());
@@ -135,7 +135,7 @@ public class UserService {
         }
 
         // check group id
-        groupService.checkgroupId(user.getGroupId());
+        groupService.checkGroupId(user.getGroupId());
 
         // check userName
         TbUser userRow = queryByName(user.getGroupId(), user.getUserName());
