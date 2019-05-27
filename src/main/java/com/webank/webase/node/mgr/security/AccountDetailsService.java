@@ -16,7 +16,7 @@
 package com.webank.webase.node.mgr.security;
 
 import com.webank.webase.node.mgr.account.AccountService;
-import com.webank.webase.node.mgr.account.TbAccountInfo;
+import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import java.util.ArrayList;
 import java.util.List;

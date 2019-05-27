@@ -142,4 +142,5 @@ public class UserControllerTest {
         System.out.println( credentials.getEcKeyPair().getPrivateKey().toString(16));
         System.out.println(  credentials.getEcKeyPair().getPublicKey().toString(16));
     }
+
 }

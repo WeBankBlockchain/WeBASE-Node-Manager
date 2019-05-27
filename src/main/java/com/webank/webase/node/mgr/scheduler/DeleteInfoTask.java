@@ -14,10 +14,12 @@
 package com.webank.webase.node.mgr.scheduler;
 
 
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.time.Duration;
 import java.time.Instant;
@@ -38,6 +40,8 @@ public class DeleteInfoTask {
     private TransHashService transHashService;
     @Autowired
     private ConstantProperties cProperties;
+    @Autowired
+    private MonitorService monitorService;
 
     /**
      * start.
@@ -46,7 +50,7 @@ public class DeleteInfoTask {
         Instant startTime = Instant.now();
         log.info("start DeleteInfoTask. startTime:{}", startTime.toEpochMilli());
         //get group list
-        List<TbGroup> groupList = groupService.getAllGroup();
+        List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
             log.info("DeleteInfoTask jump over .not found any group");
             return;
@@ -66,6 +70,8 @@ public class DeleteInfoTask {
         deleteBlock(groupId);
         //delete transHash
         deleteTransHash(groupId);
+        //delete transaction monitor info
+        deleteTransMonitor(groupId);
     }
 
 
@@ -92,6 +98,21 @@ public class DeleteInfoTask {
             log.info("end deleteTransHash. groupId:{} removeCount:{}", groupId, removeCount);
         } catch (Exception ex) {
             log.info("fail deleteTransHash. groupId:{}", groupId, ex);
+        }
+    }
+
+
+    /**
+     * delete monitor info.
+     */
+    private void deleteTransMonitor(int groupId) {
+        log.info("start deleteTransMonitor. groupId:{}", groupId);
+        try {
+            Integer removeCount = monitorService
+                .delete(groupId, cProperties.getMonitorInfoRetainMax());
+            log.info("end deleteTransMonitor. groupId:{} removeCount:{}", groupId, removeCount);
+        } catch (Exception ex) {
+            log.info("fail deleteTransMonitor. groupId:{}", groupId, ex);
         }
     }
 }

@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @Order(-1000)
-@WebFilter(filterName = "resetCookieFilter", urlPatterns = "/*")
+@WebFilter(filterName = "uriFormatFilter", urlPatterns = "/*")
 public class UriFormatFilter implements Filter {
 
     @Override
