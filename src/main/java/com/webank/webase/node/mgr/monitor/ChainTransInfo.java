@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
+import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,4 +27,5 @@ public class ChainTransInfo {
     private String from;
     private String to;
     private String input;
+    private BigInteger blockNumber;
 }

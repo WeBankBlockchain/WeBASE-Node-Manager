@@ -14,8 +14,8 @@
 package com.webank.webase.node.mgr.monitor;
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.MonitorUserType;
 import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.enums.TransType;
@@ -27,20 +27,25 @@ import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.monitor.entity.ContractMonitorResult;
+import com.webank.webase.node.mgr.monitor.entity.UserMonitorResult;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.TbUser;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +69,9 @@ public class MonitorService {
     private TransHashService transHashService;
     @Autowired
     private FrontInterfaceService frontInterfacee;
+    @Autowired
+    private ConstantProperties cProperties;
+
 
     public void addRow(int groupId, TbMonitor tbMonitor) {
         monitorMapper.add(TableName.MONITOR.getTableName(groupId), tbMonitor);
@@ -79,6 +87,15 @@ public class MonitorService {
     }
 
     /**
+     * Remove trans monitor info.
+     */
+    public Integer delete(Integer groupId, Integer monitorInfoRetainMax) {
+        String tableName = TableName.MONITOR.getTableName(groupId);
+        Integer affectRow = monitorMapper.deleteAndRetainMax(tableName, monitorInfoRetainMax);
+        return affectRow;
+    }
+
+    /**
      * update unusual contract.
      */
     public void updateUnusualContract(Integer groupId, String contractName, String contractBin)
@@ -86,58 +103,23 @@ public class MonitorService {
         try {
             log.info("start updateUnusualContract groupId:{} contractName:{} contractBin:{}",
                 groupId, contractName, contractBin);
-            String txHash = monitorMapper
-                .queryUnusualTxhash(TableName.MONITOR.getTableName(groupId),
-                    contractBin.substring(contractBin.length() - 10));
+            String tableName = TableName.MONITOR.getTableName(groupId);
+            contractBin = removeBinFirstAndLast(contractBin);
+            String subContractBin = subContractBinForName(contractBin);
+            String txHash = monitorMapper.queryUnusualTxhash(tableName, subContractBin);
             if (StringUtils.isBlank(txHash)) {
                 return;
             }
-            ChainTransInfo chainTransInfo = frontInterfacee
-                .getTransInfoByHash(groupId, txHash);
-            if (chainTransInfo == null) {
+            ChainTransInfo trans = frontInterfacee.getTransInfoByHash(groupId, txHash);
+            if (trans == null) {
                 return;
             }
-            String interfaceName = "";
-            int transUnusualType = 0;
-            // contract deploy
-            if (StringUtils.isBlank(chainTransInfo.getTo())) {
-                List<TbContract> contractRow = contractService
-                    .queryContractByBin(groupId, contractBin.substring(2));
-                if (contractRow != null && contractRow.size() > 0) {
-                    interfaceName = contractRow.get(0).getContractName();
-                } else {
-                    interfaceName = chainTransInfo.getInput().substring(0, 10);
-                    transUnusualType = 1;
-                }
-            } else {    // function call
-                String methodId = chainTransInfo.getInput().substring(0, 10);
-                List<TbContract> contractRow = contractService
-                    .queryContractByBin(groupId, contractBin.substring(2));
-                if (contractRow != null && contractRow.size() > 0) {
-                    List<AbiDefinition> abiList = Web3Tools
-                        .loadContractDefinition(contractRow.get(0).getContractAbi());
-                    for (AbiDefinition abiDefinition : abiList) {
-                        if ("function".equals(abiDefinition.getType())) {
-                            String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
-                            if (methodId.equals(buildMethodId)) {
-                                interfaceName = abiDefinition.getName();
-                                break;
-                            }
-                        }
-                    }
-                    if (StringUtils.isBlank(interfaceName)) {
-                        interfaceName = chainTransInfo.getInput().substring(0, 10);
-                        transUnusualType = 2;
-                    }
-                } else {
-                    interfaceName = chainTransInfo.getInput().substring(0, 10);
-                    transUnusualType = 1;
-                }
-            }
-            monitorMapper
-                .updateUnusualContract(TableName.MONITOR.getTableName(groupId), contractName,
-                    contractBin.substring(contractBin.length() - 10), interfaceName,
-                    transUnusualType);
+            ContractMonitorResult contractResult = monitorContract(groupId, txHash, trans.getTo(),
+                trans.getInput(), trans.getBlockNumber());
+
+            //update monitor into
+            monitorMapper.updateUnusualContract(tableName, contractName, subContractBin,
+                contractResult.getInterfaceName(), contractResult.getTransUnusualType());
         } catch (Exception ex) {
             log.error("fail updateUnusualContract", ex);
             throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
@@ -285,118 +267,119 @@ public class MonitorService {
                 if (createTime.getDayOfYear() != trans.getBlockTimestamp().getDayOfYear()) {
                     createTime = trans.getBlockTimestamp();
                 }
-                String contractName = "";
-                String interfaceName = "";
-                String contractAddress = "";
 
-                int userType = MonitorUserType.NORMAL.getValue();
-                int transType = TransType.DEPLOY.getValue();
-                int transUnusualType = TransUnusualType.NORMAL.getValue();
-
-                ChainTransInfo chainTransInfo = frontInterfacee
+                ChainTransInfo chanTrans = frontInterfacee
                     .getTransInfoByHash(groupId, trans.getTransHash());
-                if (chainTransInfo == null) {
+                if (Objects.isNull(chanTrans)) {
+                    log.error("monitor jump over,invalid hash. groupId:{} hash:{}", groupId,
+                        trans.getTransHash());
                     continue;
                 }
 
-                String userName = userService
-                    .queryUserNameByAddress(groupId, chainTransInfo.getFrom());
-                if (StringUtils.isBlank(userName)) {
-                    //system user
-                    userName = getSystemUserName(chainTransInfo.getFrom());
-                }
-                if (StringUtils.isBlank(userName)) {
-                    userName = chainTransInfo.getFrom();
-                    userType = MonitorUserType.ABNORMAL.getValue();
-                }
-
-                String contractBin = "";
-                // contract deploy
-                if (StringUtils.isBlank(chainTransInfo.getTo())) {
-                    contractAddress = frontInterfacee
-                        .getAddressByHash(groupId, trans.getTransHash());
-                    contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress,
-                        trans.getBlockNumber());
-                    if (contractBin.startsWith("0x")) {
-                        contractBin = StringUtils.removeStart(contractBin, "0x");
-                    }
-                    List<TbContract> contractRow = contractService
-                        .queryContractByBin(groupId, contractBin);
-                    if (contractRow != null && contractRow.size() > 0) {
-                        contractName = contractRow.get(0).getContractName();
-                        interfaceName = contractRow.get(0).getContractName();
-                    } else {
-                        if (contractBin.length() < 10) {
-                            contractName = ConstantProperties.CONTRACT_NAME_ZERO;
-                        } else {
-                            contractName = contractBin.substring(contractBin.length() - 10);
-                        }
-                        interfaceName = chainTransInfo.getInput().substring(0, 10);
-                        transUnusualType = TransUnusualType.CONTRACT.getValue();
-                    }
-                } else {    // function call
-                    String methodId = chainTransInfo.getInput().substring(0, 10);
-                    contractAddress = chainTransInfo.getTo();
-                    contractBin = frontInterfacee
-                        .getCodeFromFront(groupId, contractAddress, trans.getBlockNumber());
-                    if (contractBin.startsWith("0x")) {
-                        contractBin = StringUtils.removeStart(contractBin, "0x");
-                    }
-                    transType = TransType.CALL.getValue();
-
-                    List<TbContract> contractRow = contractService
-                        .queryContractByBin(groupId, contractBin);
-                    if (contractRow != null && contractRow.size() > 0) {
-                        contractName = contractRow.get(0).getContractName();
-                        List<AbiDefinition> abiList = Web3Tools
-                            .loadContractDefinition(contractRow.get(0).getContractAbi());
-                        for (AbiDefinition abiDefinition : abiList) {
-                            if ("function".equals(abiDefinition.getType())) {
-                                String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
-                                if (methodId.equals(buildMethodId)) {
-                                    interfaceName = abiDefinition.getName();
-                                    break;
-                                }
-                            }
-                        }
-                        if (StringUtils.isBlank(interfaceName)) {
-                            interfaceName = chainTransInfo.getInput().substring(0, 10);
-                            transUnusualType = TransUnusualType.FUNCTION.getValue();
-                        }
-                    } else {
-                        if (contractBin.length() < 10) {
-                            contractName = ConstantProperties.CONTRACT_NAME_ZERO;
-                        } else {
-                            contractName = contractBin.substring(contractBin.length() - 10);
-                        }
-                        interfaceName = chainTransInfo.getInput().substring(0, 10);
-                        transUnusualType = TransUnusualType.CONTRACT.getValue();
-                    }
-                }
+                // monitor user
+                UserMonitorResult userResult = monitorUser(groupId, trans.getTransFrom());
+                //monitor contract
+                ContractMonitorResult contractRes = monitorContract(groupId, trans.getTransHash(),
+                    chanTrans.getTo(), chanTrans.getInput(), trans.getBlockNumber());
 
                 TbMonitor tbMonitor = new TbMonitor();
-                tbMonitor.setUserName(userName);
-                tbMonitor.setUserType(userType);
-                tbMonitor.setContractName(contractName);
-                tbMonitor.setContractAddress(contractAddress);
-                tbMonitor.setInterfaceName(interfaceName);
-                tbMonitor.setTransType(transType);
-                tbMonitor.setTransUnusualType(transUnusualType);
+                BeanUtils.copyProperties(userResult, tbMonitor);
+                BeanUtils.copyProperties(contractRes, tbMonitor);
                 tbMonitor.setTransHashs(trans.getTransHash());
                 tbMonitor.setTransHashLastest(trans.getTransHash());
                 tbMonitor.setTransCount(1);
                 tbMonitor.setCreateTime(createTime);
                 tbMonitor.setModifyTime(trans.getBlockTimestamp());
-
                 monitorService.dataAddAndUpdate(groupId, tbMonitor);
             } catch (Exception ex) {
                 log.error("transaction:{} analysis fail...", trans.getTransHash(),
                     ex);
+            } finally {
+                try {
+                    Thread.sleep(cProperties.getAnalysisSleepTime());
+                } catch (InterruptedException e) {
+                    log.error("thread sleep fail", e);
+                }
             }
         }
         log.info("end insertTransMonitorInfo useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
     }
+
+
+    /**
+     * monitor contract.
+     */
+    private ContractMonitorResult monitorContract(int groupId, String transHash, String transTo,
+        String transInput, BigInteger blockNumber) {
+        String contractAddress, contractName, interfaceName, contractBin;
+        int transType = TransType.DEPLOY.getValue();
+        int transUnusualType = TransUnusualType.NORMAL.getValue();
+
+        if (isDeploy(transTo)) {
+            contractAddress = frontInterfacee.getAddressByHash(groupId, transHash);
+            contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
+            contractName = getNameFromContractBin(groupId, contractBin);
+            interfaceName = transInput.substring(0, 10);
+        } else {    // function call
+            transType = TransType.CALL.getValue();
+            String methodId = transInput.substring(0, 10);
+            contractAddress = transTo;
+            contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
+            contractBin = removeBinFirstAndLast(contractBin);
+
+            List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
+            if (contractRow != null && contractRow.size() > 0) {
+                contractName = contractRow.get(0).getContractName();
+                interfaceName = getInterfaceName(methodId, contractRow.get(0).getContractAbi());
+                if (StringUtils.isBlank(interfaceName)) {
+                    interfaceName = transInput.substring(0, 10);
+                    transUnusualType = TransUnusualType.FUNCTION.getValue();
+                }
+            } else {
+                contractName = getNameFromContractBin(groupId, contractBin);
+                interfaceName = transInput.substring(0, 10);
+                transUnusualType = TransUnusualType.CONTRACT.getValue();
+            }
+        }
+
+        transUnusualType =
+            cProperties.getIsMonitorIgnoreContract() ? TransUnusualType.NORMAL.getValue()
+                : transUnusualType;
+        ContractMonitorResult contractResult = new ContractMonitorResult();
+        contractResult.setContractName(contractName);
+        contractResult.setContractAddress(contractAddress);
+        contractResult.setInterfaceName(interfaceName);
+        contractResult.setTransType(transType);
+        contractResult.setTransUnusualType(transUnusualType);
+        return contractResult;
+    }
+
+
+    /**
+     * monitor user.
+     */
+    private UserMonitorResult monitorUser(int groupId, String userAddress) {
+        String userName = userService.queryUserNameByAddress(groupId, userAddress);
+
+        if (StringUtils.isBlank(userName)) {
+            userName = getSystemUserName(userAddress);
+        }
+
+        int userType = MonitorUserType.NORMAL.getValue();
+        if (StringUtils.isBlank(userName)) {
+            userName = userAddress;
+            userType =
+                cProperties.getIsMonitorIgnoreUser() ? MonitorUserType.NORMAL.getValue()
+                    : MonitorUserType.ABNORMAL.getValue();
+        }
+
+        UserMonitorResult monitorResult = new UserMonitorResult();
+        monitorResult.setUserName(userName);
+        monitorResult.setUserType(userType);
+        return monitorResult;
+    }
+
 
     /**
      * get systemUser name.
@@ -431,5 +414,86 @@ public class MonitorService {
         }
 
         transHashService.updateTransStatFlag(groupId, tbMonitor.getTransHashLastest());
+    }
+
+
+    /**
+     * get interface name.
+     */
+    private String getInterfaceName(String methodId, String contractAbi) {
+        if (StringUtils.isAnyBlank(methodId, contractAbi)) {
+            log.warn("fail getInterfaceName. methodId:{} contractAbi:{}", methodId, contractAbi);
+            return null;
+        }
+
+        String interfaceName = null;
+        try {
+            List<AbiDefinition> abiList = Web3Tools.loadContractDefinition(contractAbi);
+            for (AbiDefinition abiDefinition : abiList) {
+                if ("function".equals(abiDefinition.getType())) {
+                    String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                    if (methodId.equals(buildMethodId)) {
+                        interfaceName = abiDefinition.getName();
+                        break;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.error("fail getInterfaceName", ex);
+        }
+        return interfaceName;
+    }
+
+    /**
+     * remove "0x" and last 68 character.
+     */
+    private String removeBinFirstAndLast(String contractBin) {
+        if (StringUtils.isBlank(contractBin)) {
+            return null;
+        }
+        if (contractBin.startsWith("0x")) {
+            contractBin = StringUtils.removeStart(contractBin, "0x");
+        }
+        if (contractBin.length() > 68) {
+            contractBin = contractBin.substring(0, contractBin.length() - 68);
+        }
+        return contractBin;
+    }
+
+    /**
+     * check the address is deploy.
+     */
+    private boolean isDeploy(String address) {
+        String cnsAddress = cProperties.getCnsAddress();
+
+        if (StringUtils.isBlank(address)) {
+            return false;
+        }
+        if (StringUtils.isBlank(cnsAddress)) {
+            return false;
+        }
+        return cnsAddress.equals(address);
+    }
+
+    /**
+     * get contractName from contractBin.
+     */
+    private String getNameFromContractBin(int groupId, String contractBin) {
+        List<TbContract> contractList = contractService.queryContractByBin(groupId, contractBin);
+        if (contractList != null && contractList.size() > 0) {
+            return contractList.get(0).getContractName();
+        }
+        return subContractBinForName(contractBin);
+    }
+
+    /**
+     * substring contractBin for contractName.
+     */
+    private String subContractBinForName(String contractBin) {
+        String contractName = ConstantProperties.CONTRACT_NAME_ZERO;
+        if (StringUtils.isNotBlank(contractBin) && contractBin.length() > 10) {
+            contractName = contractBin.substring(contractBin.length() - 10);
+        }
+        return contractName;
     }
 }

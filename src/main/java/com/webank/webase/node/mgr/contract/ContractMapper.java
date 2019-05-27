@@ -50,4 +50,6 @@ public interface ContractMapper {
     void updateSystemContract(@Param("groupId") Integer groupId,
         @Param("contractName") String contractName, @Param("contractBin") String contractBin,
         @Param("contractAddress") String contractAddress);
+
+    void removeByGroupId(@Param("groupId") Integer groupId);
 }

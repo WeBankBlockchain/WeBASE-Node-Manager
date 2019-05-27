@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import java.util.concurrent.Executors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
@@ -31,9 +32,7 @@ public class SchedulerService implements SchedulingConfigurer {
     @Autowired
     private StatisticsTransdailyTask statisticsTask;
     @Autowired
-    private DeleteBlockTask deleteBlockTask;
-    @Autowired
-    private DeleteTransHashTask deleteTransHashTask;
+    private DeleteInfoTask deleteInfoTask;
     @Autowired
     private TransMonitorTask transMonitorTask;
     @Autowired
@@ -45,23 +44,23 @@ public class SchedulerService implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        taskRegistrar.setScheduler(Executors.newScheduledThreadPool(5));
+
+        if (constants.getIsDeleteInfo()) {
+            taskRegistrar.addTriggerTask(() -> deleteInfoTask.deleteInfoStart(),
+                (context) -> new CronTrigger(constants.getDeleteInfoCron())
+                    .nextExecutionTime(context));
+        }
+
         taskRegistrar.addTriggerTask(() -> statisticsTask.updateTransdailyData(),
             (context) -> new CronTrigger(constants.getStatisticsTransDailyCron())
-                .nextExecutionTime(context));
-
-        taskRegistrar.addTriggerTask(() -> deleteBlockTask.deleteBlockStart(),
-            (context) -> new CronTrigger(constants.getDeleteInfoCron())
-                .nextExecutionTime(context));
-
-        taskRegistrar.addTriggerTask(() -> deleteTransHashTask.deleteTransStart(),
-            (context) -> new CronTrigger(constants.getDeleteInfoCron())
                 .nextExecutionTime(context));
 
         taskRegistrar.addTriggerTask(() -> transMonitorTask.monitorStart(),
             (context) -> new CronTrigger(constants.getInsertTransMonitorCron())
                 .nextExecutionTime(context));
 
-        taskRegistrar.addFixedDelayTask(() -> pullBlockInfoTask.startPull(),
+        taskRegistrar.addFixedDelayTask(() -> pullBlockInfoTask.pullBlockStart(),
             constants.getPullBlockTaskFixedDelay());
 
         taskRegistrar.addFixedDelayTask(() -> resetGroupListTask.resetGroupList(),

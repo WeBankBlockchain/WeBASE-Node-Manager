@@ -14,6 +14,7 @@
 package node.mgr.test.user;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
@@ -140,6 +141,6 @@ public class UserControllerTest {
         System.out.println( credentials.getAddress());
         System.out.println( credentials.getEcKeyPair().getPrivateKey().toString(16));
         System.out.println(  credentials.getEcKeyPair().getPublicKey().toString(16));
-
     }
+
 }

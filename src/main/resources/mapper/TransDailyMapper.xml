@@ -29,4 +29,8 @@
     resultType="java.math.BigInteger">
 		select max(block_number) from tb_trans_daily where group_id = #{groupId}
 	</select>
+
+	<delete id="deleteByGroupId">
+		delete from tb_trans_daily where group_id = #{groupId}
+	</delete>
 </mapper>

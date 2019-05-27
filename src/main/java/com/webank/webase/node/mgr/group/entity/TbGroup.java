@@ -29,7 +29,7 @@ public class TbGroup {
 
     private Integer groupId;
     private String groupName;
-    private int groupStatus;
+    private Integer groupStatus;
     private Integer nodeCount;
     private BigInteger latestBlock = BigInteger.ZERO;
     private BigInteger transCount = BigInteger.ZERO;

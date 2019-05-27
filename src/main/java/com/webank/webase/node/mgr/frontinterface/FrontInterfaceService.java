@@ -18,10 +18,15 @@ import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_PEERS;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.alibaba.fastjson.JSONObject;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.monitor.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
@@ -33,7 +38,11 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -46,25 +55,57 @@ public class FrontInterfaceService {
     @Qualifier(value = "genericRestTemplate")
     @Autowired
     private RestTemplate genericRestTemplate;
+    @Autowired
+    private ConstantProperties cproperties;
+
+    /**
+     * request from specific front.
+     */
+    private <T> T requestSpecificFront(int groupId, String frontIp, Integer frontPort,
+        HttpMethod method, String uri, Object param, Class<T> clazz) {
+        log.debug("start requestSpecificFront. groupId:{} frontIp:{} frontPort:{} "
+            + "httpMethod:{} uri:{}", groupId, frontIp, frontPort, method.toString(), uri);
+
+        uri = FrontRestTools.uriAddGroupId(groupId, uri);
+        String url = String.format(cproperties.getFrontUrl(), frontIp, frontPort, uri);
+        log.debug("requestSpecificFront. url:{}", url);
+
+        try {
+            HttpEntity entity = FrontRestTools.buildHttpEntity(param);// build entity
+            ResponseEntity<T> response = genericRestTemplate.exchange(url, method, entity, clazz);
+            return response.getBody();
+        } catch (HttpStatusCodeException e) {
+            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
+            throw new NodeMgrException(error.getInteger("code"),
+                error.getString("errorMessage"));
+        }
+    }
+
 
     /**
      * get from specific front.
      */
     private <T> T getFromSpecificFront(int groupId, String frontIp, Integer frontPort, String uri,
         Class<T> clazz) {
-        log.debug("start getFromSpecificFront. groupId:{} frontIp:{} frontPort:{} uri:{}", groupId,
-            frontIp, frontPort, uri);
+        log.debug("start getFromSpecificFront. groupId:{} frontIp:{} frontPort:{}  uri:{}", groupId,
+            frontIp, frontPort.toString(), uri);
+        String url = String.format(cproperties.getFrontUrl(), frontIp, frontPort, uri);
+        log.debug("getFromSpecificFront. url:{}", url);
+        return requestSpecificFront(groupId, frontIp, frontPort,
+            HttpMethod.GET, uri, null, clazz);
+    }
 
-        uri = FrontRestTools.uriAddGroupId(groupId, uri);
 
-        String url = String.format(FrontRestTools.FRONT_URL, frontIp, frontPort, uri);
-        log.info("getFromSpecificFront. url:{}", url);
-        try {
-            return genericRestTemplate.getForObject(url, clazz);
-        } catch (Exception e) {
-            log.warn("fail getGroupListFromSpecificFront url:{} errorMsg:{}", url, e.getMessage());
-            throw new NodeMgrException(ConstantCode.INVALID_FRONT_INFO);
-        }
+    /**
+     * send contract abi
+     */
+    public void sendAbi(int groupId, PostAbiInfo param) {
+        log.debug("start sendAbi groupId:{} param:{}", groupId, JSON.toJSONString(param));
+
+        frontRestTools
+            .postForEntity(groupId, FrontRestTools.URI_CONTRACT_SENDABI, param, Object.class);
+        log.debug("end sendAbi groupId:{} param:{}", groupId, JSON.toJSONString(param));
+
     }
 
     /**
@@ -177,9 +218,9 @@ public class FrontInterfaceService {
     public ChainTransInfo getTransInfoByHash(Integer groupId, String hash)
         throws NodeMgrException {
         log.debug("start getTransInfoByHash. groupId:{} hash:{}", groupId, hash);
-        TransactionInfo transaction = getTransaction(groupId, hash);
-        ChainTransInfo chainTransInfo = new ChainTransInfo(transaction.getFrom(),
-            transaction.getTo(), transaction.getInput());
+        TransactionInfo trans = getTransaction(groupId, hash);
+        ChainTransInfo chainTransInfo = new ChainTransInfo(trans.getFrom(),
+            trans.getTo(), trans.getInput(), trans.getBlockNumber());
         log.debug("end getTransInfoByHash:{}", JSON.toJSONString(chainTransInfo));
         return chainTransInfo;
     }
@@ -201,11 +242,11 @@ public class FrontInterfaceService {
     /**
      * get code from front.
      */
-    public String getCodeFromFront(Integer groupId, String address, BigInteger blockNumber)
+    public String getCodeFromFront(Integer groupId, String contractAddress, BigInteger blockNumber)
         throws NodeMgrException {
-        log.debug("start getCodeFromFront. groupId:{} address:{} blockNumber:{}",
-            groupId, address, blockNumber);
-        String uri = String.format(FrontRestTools.URI_CODE, address, blockNumber);
+        log.debug("start getCodeFromFront. groupId:{} contractAddress:{} blockNumber:{}",
+            groupId, contractAddress, blockNumber);
+        String uri = String.format(FrontRestTools.URI_CODE, contractAddress, blockNumber);
         String code = frontRestTools.getForEntity(groupId, uri, String.class);
 
         log.debug("end getCodeFromFront:{}", code);
