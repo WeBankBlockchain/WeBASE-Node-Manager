@@ -103,7 +103,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(value = RuntimeException.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public BaseResponse exceptionHandler(RuntimeException exc) {
-        log.info("catch RuntimeException", exc);
+        log.warn("catch RuntimeException", exc);
         // 默认系统异常
         RetCode retCode = ConstantCode.SYSTEM_EXCEPTION;
 
