@@ -32,14 +32,24 @@ public interface GroupMapper {
     int save(TbGroup tbGroup);
 
     /**
+     * remove by id.
+     */
+    int remove(@Param("groupId") Integer groupId);
+
+    /**
+     * update status.
+     */
+    int updateStatus(@Param("groupId") Integer groupId, @Param("groupStatus") Integer groupStatus);
+
+    /**
      * query group count.
      */
-    int getCount(@Param("groupId") Integer groupId);
+    int getCount(@Param("groupId") Integer groupId, @Param("groupStatus") Integer groupStatus);
 
     /**
      * get all group.
      */
-    List<TbGroup> getList();
+    List<TbGroup> getList(@Param("groupStatus") Integer groupStatus);
 
     /**
      * query the latest statistics trans on all groups.

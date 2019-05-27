@@ -69,25 +69,27 @@
 #### 1.1.2 参数信息详情
 
 | 序号 | 输入参数    | 类型          | 可为空 | 备注                                       |
-|------|-------------|---------------|--------|--------------------------------------------|                          |
+|------|-------------|---------------|--------|--------------------------------------------|
 | 1    | frontIp     | string        | 否     | 前置ip                                     |
 | 2    | frontPort   | int           | 否     | 前置服务端口                               |
+| 2    | agency   | int           | 否     | 所属机构                               |
 | 序号 | 输出参数    | 类型          |        | 备注                                       |
 | 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败                 |
 | 2    | message     | String        | 否     | 描述                                       |
 | 3    |             | Object        |        | 节点信息对象                               |
-| 3.1  | frontId     | int           | 否     | 前置编号                                                         |
-| 3.2  | frontIp     | string        | 否     | 前置ip                                           |
-| 3.3  | frontPort   | int           | 否     | 前置端口                                   |                               |
+| 3.1  | frontId     | int           | 否     | 前置编号                        |
+| 3.2  | frontIp     | string        | 否     | 前置ip                                    |
+| 3.3  | frontPort   | int           | 否     | 前置端口                                   |
 | 3.4  | createTime  | LocalDateTime | 否     | 落库时间                                   |
 | 3.5  | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
 #### 1.1.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/node`
+`http://127.0.0.1:8080/webase-node-mgr/front/new`
 ```
 {
     "frontIp": "127.0.0.1",
-    "frontPort": "8081"
+    "frontPort": "8081",
+    "agency": "abc"
 }
 ```
 
@@ -139,7 +141,7 @@
 | 4.1   |               | Object        |        | 节点信息对象               |
 | 4.1.1 | frontId       | int           | 否     | 前置编号                   |
 | 4.1.2 | frontIp       | string        | 否     | 前置ip                     |
-| 4.1.3 | frontPort     | int           | 否     | 前置端口                   |                               |
+| 4.1.3 | frontPort     | int           | 否     | 前置端口                   |
 | 4.1.4 | createTime    | LocalDateTime | 否     | 落库时间                   |
 | 4.1.5 | modifyTime    | LocalDateTime | 否     | 修改时间                   |
 
@@ -402,7 +404,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 | 3.9   | to              | String | 否     | 交易目标                   |
 | 3.10  | output          | String | 否     | 交易输出内容                   |
 | 3.11  | logs            | String | 否     | 日志                   |
-| 3.12  | logsBloom       | String | 否     | log的布隆过滤值                   |
+| 3.12  | logsBloom       | String | 否     | log的布隆过滤值      |
 | 3.13  | nonce           | String | 否     |                    |
 | 3.14  | value           | String | 否     |                    |
 | 3.15  | gasPrice        | long | 否     |                    |
@@ -1248,12 +1250,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 序号 | 输入参数     | 类型           | 可为空 | 备注                       |
 |------|--------------|----------------|--------|----------------------------|
 | 1    | groupId      | Int            | 否     | 所属群组编号               |
-| 2    | abiInfo      | List\<Object\> | 否     | 合约编译的abi              |
-| 3    | userId       | Integer        | 否     | 私钥用户编号               |
-| 4    | contractName | String         | 否     | 合约名称                   |
-| 5    | funcName     | String         | 否     | 合约方法名                 |
-| 6    | contractAddress     | String         | 是     | 合约地址（传合约名和版本时可为空）   |
-| 7    | funcParam    | List\<Object\> | 是     | 合约方法入参               |
+| 2    | userId       | Integer        | 否     | 私钥用户编号               |
+| 3    | contractName | String         | 否     | 合约名称                   |
+| 4    | funcName     | String         | 否     | 合约方法名                 |
+| 5    | contractAddress     | String         | 是     | 合约地址（传合约名和版本时可为空）   |
+|     | funcParam    | List\<Object\> | 是     | 合约方法入参               |
 | 序号 | 输出参数     | 类型           |        | 备注                       |
 | 1    | code         | Int            | 否     | 返回码，0：成功 其它：失败 |
 | 2    | message      | String         | 否     | 描述                       |

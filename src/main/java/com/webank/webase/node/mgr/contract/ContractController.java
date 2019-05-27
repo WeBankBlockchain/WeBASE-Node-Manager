@@ -14,12 +14,13 @@
 package com.webank.webase.node.mgr.contract;
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
@@ -35,6 +36,7 @@ import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,6 +58,7 @@ public class ContractController extends BaseController {
      * add new contract info.
      */
     @PostMapping(value = "/save")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse saveContract(@RequestBody @Valid Contract contract, BindingResult result)
         throws NodeMgrException {
         checkBindResult(result);
@@ -79,6 +82,7 @@ public class ContractController extends BaseController {
      * delete contract by id.
      */
     @DeleteMapping(value = "/{groupId}/{contractId}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deleteContract(@PathVariable("groupId") Integer groupId,
         @PathVariable("contractId") Integer contractId)
         throws NodeMgrException, Exception {
@@ -153,6 +157,7 @@ public class ContractController extends BaseController {
      * deploy deployInputParam.
      */
     @PostMapping(value = "/deploy")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deployContract(@RequestBody @Valid DeployInputParam deployInputParam,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -174,6 +179,7 @@ public class ContractController extends BaseController {
      * send transaction.
      */
     @PostMapping(value = "/transaction")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse sendTransaction(@RequestBody @Valid TransactionInputParam param,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);

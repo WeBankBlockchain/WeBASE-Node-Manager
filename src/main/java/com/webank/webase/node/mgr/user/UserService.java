@@ -14,11 +14,10 @@
 package com.webank.webase.node.mgr.user;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.AesTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
@@ -51,11 +50,11 @@ public class UserService {
     @Autowired
     private GroupService groupService;
     @Autowired
-    private AesTools aesTools;
-    @Autowired
     private FrontRestTools frontRestTools;
     @Autowired
     private MonitorService monitorService;
+    @Autowired
+    private ConstantProperties constants;
 
     /**
      * add new user data.
@@ -67,7 +66,7 @@ public class UserService {
         Integer groupId = user.getGroupId();
 
         // check group id
-        groupService.checkgroupId(groupId);
+        groupService.checkGroupId(groupId);
 
         // check userName
         TbUser userRow = queryByName(user.groupId, user.getUserName());
@@ -76,8 +75,10 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
 
+        String keyUri = String
+            .format(FrontRestTools.URI_KEY_PAIR, constants.getIsPrivateKeyEncrypt());
         KeyPair keyPair = frontRestTools
-            .getForEntity(groupId, FrontRestTools.URI_KEY_PAIR, KeyPair.class);
+            .getForEntity(groupId, keyUri, KeyPair.class);
         String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
         String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
         String address = Optional.ofNullable(keyPair).map(k -> k.getAddress()).orElse(null);
@@ -101,8 +102,7 @@ public class UserService {
         Integer userId = newUserRow.getUserId();
 
         // add user_key_mapping info
-        String aesPrivateKey = aesTools.aesEncrypt(privateKey);
-        TbUserKeyMap newMapRow = new TbUserKeyMap(userId, aesPrivateKey);
+        TbUserKeyMap newMapRow = new TbUserKeyMap(userId, groupId, privateKey);
         Integer affectMapRow = userMapper.addUserKeyMapRow(newMapRow);
         if (affectMapRow == 0) {
             log.warn("affect 0 rows of tb_user_key_map");
@@ -135,7 +135,7 @@ public class UserService {
         }
 
         // check group id
-        groupService.checkgroupId(user.getGroupId());
+        groupService.checkGroupId(user.getGroupId());
 
         // check userName
         TbUser userRow = queryByName(user.getGroupId(), user.getUserName());
@@ -317,7 +317,7 @@ public class UserService {
         checkUserId(userId);
 
         PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userId);
-        privateKeyInfoInfo.setPrivateKey(aesTools.aesDecrypt(privateKeyInfoInfo.getPrivateKey()));
+        privateKeyInfoInfo.setPrivateKey(privateKeyInfoInfo.getPrivateKey());
         log.debug("end getPrivateKey,privateKeyInfoInfo:{}", JSON.toJSONString(privateKeyInfoInfo));
         return privateKeyInfoInfo;
     }
@@ -355,7 +355,20 @@ public class UserService {
     /**
      * get systemUser.
      */
-    public TbUser getSystemUser(){
+    public TbUser getSystemUser() {
         return userMapper.querySystemUser();
+    }
+
+    /**
+     * delete by groupId.
+     */
+    public void deleteByGroupId(int groupId) {
+        if (groupId == 0) {
+            return;
+        }
+        //delete user
+        userMapper.deleteUser(groupId);
+        //delete map
+        userMapper.deleteUserKeyMap(groupId);
     }
 }

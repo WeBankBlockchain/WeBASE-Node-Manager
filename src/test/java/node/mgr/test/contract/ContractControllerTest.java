@@ -15,6 +15,7 @@ package node.mgr.test.contract;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
@@ -22,7 +23,9 @@ import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -104,7 +107,7 @@ public class ContractControllerTest {
         //param
         DeployInputParam deployInputParam = new DeployInputParam();
         deployInputParam.setGroupId(groupId);
-        deployInputParam.setUserId(userId);
+        deployInputParam.setUser(userId);
         deployInputParam.setContractPath("myPath");
         deployInputParam.setContractId(200001);
         deployInputParam.setContractName("Ok");
@@ -182,19 +185,16 @@ public class ContractControllerTest {
 
         //param
         TransactionInputParam param = new TransactionInputParam();
-        param.setContractId(200048);
+        param.setContractId(200069);
         param.setGroupId(groupId);
-        param.setAbiInfo(abiList);
-        param.setUserId(userId);
-        param.setVersion(version);
+        param.setUser(userId);
         param.setContractName("Ok");
         param.setFuncName("trans");
         param.setFuncParam(Arrays.asList(3));
 
 
         //if make exception
-      //  param.setFuncParam(Arrays.asList("asdfasfasd"));
-
+        param.setFuncParam(Arrays.asList("asdfasfasd"));
 
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/transaction").

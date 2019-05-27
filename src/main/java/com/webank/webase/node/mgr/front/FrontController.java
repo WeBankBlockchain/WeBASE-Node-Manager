@@ -15,23 +15,22 @@ package com.webank.webase.node.mgr.front;
 
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.entity.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.node.NodeParam;
-import com.webank.webase.node.mgr.node.TbNode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,6 +56,7 @@ public class FrontController extends BaseController {
      * add new front
      */
     @PostMapping("/new")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse newFront(@RequestBody @Valid FrontInfo frontInfo, BindingResult result) {
         checkBindResult(result);
         Instant startTime = Instant.now();
@@ -76,15 +76,18 @@ public class FrontController extends BaseController {
      */
     @GetMapping(value = "/find")
     public BasePageResponse queryFrontList(
-        @RequestParam(value = "frontId", required = false) Integer frontId)
+        @RequestParam(value = "frontId", required = false) Integer frontId,
+        @RequestParam(value = "groupId", required = false) Integer groupId)
         throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start queryFrontList startTime:{} frontId:{}", startTime.toEpochMilli(), frontId);
+        log.info("start queryFrontList startTime:{} frontId:{} groupId:{}",
+            startTime.toEpochMilli(), frontId, groupId);
 
         //param
         FrontParam param = new FrontParam();
         param.setFrontId(frontId);
+        param.setGroupId(groupId);
 
         //query front info
         int count = frontService.getFrontCount(param);
