@@ -76,7 +76,7 @@ public class FrontInterfaceService {
             return response.getBody();
         } catch (HttpStatusCodeException e) {
             JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-            throw new NodeMgrException(error.getInteger("statusCode"),
+            throw new NodeMgrException(error.getInteger("code"),
                 error.getString("errorMessage"));
         }
     }
