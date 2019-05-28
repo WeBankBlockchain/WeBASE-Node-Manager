@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.network.NetworkService;
 import com.webank.webase.node.mgr.network.TbNetwork;
@@ -36,7 +37,8 @@ public class TransMonitorTask {
     private NetworkService networkService;
     @Autowired
     private TransHashService transHashService;
-    private static final int UNUSUAL_MAX_COUNT = 20;
+    @Autowired
+    private ConstantProperties cProperties;
 
     /**
      * init monitorInfoHandle.
@@ -67,10 +69,11 @@ public class TransMonitorTask {
     private boolean isNetworkContinueMonitor(int networkId) {
         int unusualUserCount = monitorService.countOfUnusualUser(networkId, null);
         int unusualContractCount = monitorService.countOfUnusualContract(networkId, null);
-        if (unusualUserCount >= UNUSUAL_MAX_COUNT || unusualUserCount >= UNUSUAL_MAX_COUNT) {
+        int unusualMaxCount = cProperties.getMonitorUnusualMaxCount();
+        if (unusualUserCount >= unusualMaxCount || unusualContractCount >= unusualMaxCount) {
             log.error(
-                "monitorHandle jump over. networkId:{} unusualUserCount:{} unusualUserCount:{} UNUSUAL_MAX_COUNT:{}",
-                networkId, unusualUserCount, unusualContractCount, UNUSUAL_MAX_COUNT);
+                "monitorHandle jump over. networkId:{} unusualUserCount:{} unusualUserCount:{} monitorUnusualMaxCount:{}",
+                networkId, unusualUserCount, unusualContractCount, unusualMaxCount);
             return false;
         }
         return true;
