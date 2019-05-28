@@ -258,6 +258,6 @@
     select t.modify_time from(
       select modify_time from tb_user_transaction_monitor where network_id = #{networkId} ORDER BY modify_time DESC LIMIT ${monitorInfoRetainMax}
       ) t
-    );
+    ) limit 2000;
   </delete>
 </mapper>

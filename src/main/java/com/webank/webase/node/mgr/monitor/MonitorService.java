@@ -465,7 +465,7 @@ public class MonitorService {
 
 
     /**
-     * remove "0x" and last 70 character.
+     * remove "0x" and last 68 character.
      */
     private String removeBinFirstAndLast(String contractBin) {
         if (StringUtils.isBlank(contractBin)) {
@@ -474,8 +474,8 @@ public class MonitorService {
         if (contractBin.startsWith("0x")) {
             contractBin = StringUtils.removeStart(contractBin, "0x");
         }
-        if (contractBin.length() > 70) {
-            contractBin = contractBin.substring(0, contractBin.length() - 70);
+        if (contractBin.length() > 68) {
+            contractBin = contractBin.substring(0, contractBin.length() - 68);
         }
         return contractBin;
     }

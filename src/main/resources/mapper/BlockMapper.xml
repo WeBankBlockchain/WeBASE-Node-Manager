@@ -82,6 +82,6 @@
 	</select>
 
   <delete id="deleteSomeBlocks">
-		delete from tb_block where network_id = #{networkId} and block_number &lt; #{deleteNumber}
+		delete from tb_block where network_id = #{networkId} and block_number &lt; #{deleteNumber} limit 2000
 	</delete>
 </mapper>

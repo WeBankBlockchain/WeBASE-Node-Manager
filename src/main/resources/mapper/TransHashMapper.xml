@@ -93,7 +93,7 @@
 	</select>
 
   <delete id="deleteSomeTrans">
-		delete from tb_trans_hash where network_id = #{networkId} and statistics_flag=2 and block_number &lt; #{deleteNumber}
+		delete from tb_trans_hash where network_id = #{networkId} and statistics_flag=2 and block_number &lt; #{deleteNumber} limit 2000
 	</delete>
 
   <update id="updateTransStatFlag">

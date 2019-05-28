@@ -59,3 +59,4 @@ constant:
   frontUrl: http://%1s:%2d/webase-front/%3s
   isMonitorIgnoreUser: false
   isMonitorIgnoreContract: false
+  monitorUnusualMaxCount: 20
