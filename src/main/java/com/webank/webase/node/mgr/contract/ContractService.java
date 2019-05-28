@@ -237,7 +237,7 @@ public class ContractService {
         log.debug("start queryContract contractId:{}", contractId);
         try {
             TbContract contractRow = contractMapper.queryByContractId(contractId);
-            log.debug("start queryContract contractId:{} contractRow:{}", contractId,
+            log.debug("end queryContract contractId:{} contractRow:{}", contractId,
                 JSON.toJSONString(contractRow));
             return contractRow;
         } catch (RuntimeException ex) {

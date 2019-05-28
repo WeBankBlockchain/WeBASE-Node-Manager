@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
  */
 package com.webank.webase.node.mgr.base.properties;
 
-import com.webank.webase.node.mgr.base.enums.RoleType;
 import java.math.BigInteger;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -53,6 +52,7 @@ public class ConstantProperties {
     private Boolean isBlockPullFromZero = false;
     private Boolean isMonitorIgnoreUser = false;
     private Boolean isMonitorIgnoreContract = false;
+    private Integer monitorUnusualMaxCount;
 
     // http
     private String frontUrl;
