@@ -75,5 +75,6 @@ public class ConstantProperties {
     private Boolean isMonitorIgnoreUser = false;
     private Boolean isMonitorIgnoreContract = false;
     private String cnsAddress = null;
+    private Integer monitorUnusualMaxCount;
 
 }
