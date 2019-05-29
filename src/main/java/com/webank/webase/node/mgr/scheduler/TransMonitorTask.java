@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.monitor.MonitorService;
@@ -36,7 +37,8 @@ public class TransMonitorTask {
     private GroupService groupService;
     @Autowired
     private TransHashService transHashService;
-    private static final int UNUSUAL_MAX_COUNT = 20;
+    @Autowired
+    private ConstantProperties cProperties;
 
 
     /**
@@ -64,10 +66,11 @@ public class TransMonitorTask {
     private void monitorHandle(int groupId) {
         int unusualUserCount = monitorService.countOfUnusualUser(groupId, null);
         int unusualContractCount = monitorService.countOfUnusualContract(groupId, null);
-        if (unusualUserCount >= UNUSUAL_MAX_COUNT || unusualUserCount >= UNUSUAL_MAX_COUNT) {
+        int unusualMaxCount = cProperties.getMonitorUnusualMaxCount();
+        if (unusualUserCount >= unusualMaxCount || unusualContractCount >= unusualMaxCount) {
             log.error(
-                "monitorHandle jump over. unusualUserCount:{} unusualUserCount:{} UNUSUAL_MAX_COUNT:{}",
-                unusualUserCount, unusualContractCount, UNUSUAL_MAX_COUNT);
+                "monitorHandle jump over. unusualUserCount:{} unusualUserCount:{} monitorUnusualMaxCount:{}",
+                unusualUserCount, unusualContractCount, unusualMaxCount);
             return;
         }
         List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList(groupId);
