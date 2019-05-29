@@ -113,7 +113,7 @@ public class TransHashService {
      */
     public Integer remove(Integer groupId, BigInteger transRetainMax) {
         String tableName = TableName.TRANS.getTableName(groupId);
-        Integer affectRow = transHashMapper.remove(tableName, transRetainMax);
+        Integer affectRow = transHashMapper.remove(tableName, transRetainMax, groupId);
         return affectRow;
     }
 

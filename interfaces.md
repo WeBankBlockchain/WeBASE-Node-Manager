@@ -72,7 +72,7 @@
 |------|-------------|---------------|--------|--------------------------------------------|
 | 1    | frontIp     | string        | 否     | 前置ip                                     |
 | 2    | frontPort   | int           | 否     | 前置服务端口                               |
-| 2    | agency   | int           | 否     | 所属机构                               |
+| 2    | agency      | int           | 否     | 所属机构                               |
 | 序号 | 输出参数    | 类型          |        | 备注                                       |
 | 1    | code        | Int           | 否     | 返回码，0：成功 其它：失败                 |
 | 2    | message     | String        | 否     | 描述                                       |
@@ -80,8 +80,9 @@
 | 3.1  | frontId     | int           | 否     | 前置编号                        |
 | 3.2  | frontIp     | string        | 否     | 前置ip                                    |
 | 3.3  | frontPort   | int           | 否     | 前置端口                                   |
-| 3.4  | createTime  | LocalDateTime | 否     | 落库时间                                   |
-| 3.5  | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
+| 3.4  | agency      | string        | 否     | 所属机构                                   |
+| 3.5  | createTime  | LocalDateTime | 否     | 落库时间                                   |
+| 3.6  | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
 #### 1.1.3 入参示例
 `http://127.0.0.1:8080/webase-node-mgr/front/new`
@@ -104,6 +105,7 @@
         "frontId": 500001,
         "frontIp": "127.0.0.1",
         "frontPort": 8181,
+        "agency": "abc",
         "createTime": "2019-02-14 17:47:00",
         "modifyTime": "2019-03-15 11:14:29"
     }
@@ -124,7 +126,7 @@
 
 #### 1.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址： `/front/find?frontId={frontId}`
+* 请求地址： `/front/find?frontId={frontId}&groupId={groupId}`
 * 请求方式：GET
 * 返回格式：JSON
 
@@ -133,6 +135,7 @@
 | 序号  | 输入参数      | 类型          | 可为空 | 备注                       |
 |-------|---------------|---------------|--------|----------------------------|
 | 1     | frontId       | Int           | 是     | 前置编号                  |
+| 2     | groupId       | Int           | 是     | 所属群组编号                |
 | 序号  | 输出参数      | 类型           |        | 备注                       |
 | 1     | code          | Int           | 否     | 返回码，0：成功 其它：失败 |
 | 2     | message       | String        | 否     | 描述                       |
