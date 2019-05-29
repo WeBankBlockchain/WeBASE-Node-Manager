@@ -17,26 +17,19 @@ package com.webank.webase.node.mgr.account;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
-import com.webank.webase.node.mgr.account.entity.ImageToken;
 import com.webank.webase.node.mgr.account.entity.PasswordInfo;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JwtUtils;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.base.tools.TokenImgGenerator;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,51 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController extends BaseController {
 
     @Autowired
-    private ConstantProperties constants;
-    @Autowired
     private AccountService accountService;
-    private static final int PICTURE_CHECK_CODE_CHAR_NUMBER = 4;
-    private static final long JWT_TOKEN_LIFE_TIME_MILLS = 60000L;//30s
-
-    /**
-     * 获取验证码
-     */
-    @GetMapping(value = "pictureCheckCode")
-    public BaseResponse getPictureCheckCode() throws Exception {
-        log.info("start getPictureCheckCode");
-
-        // random code
-        String checkCode = NodeMgrTools.randomString(PICTURE_CHECK_CODE_CHAR_NUMBER);
-
-        String jwtToken = JwtUtils
-            .createJwtToken(constants.getJwtSecret(), null, checkCode, JWT_TOKEN_LIFE_TIME_MILLS);
-        log.info("new checkCode:" + checkCode);
-
-        OutputStream outputstream = null;
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        try {
-            // 得到图形验证码并返回给页面
-            String base64Image = TokenImgGenerator.getBase64Image(checkCode);
-            ImageToken tokenData = new ImageToken();
-            tokenData.setToken(jwtToken);
-            tokenData.setBase64Image(base64Image);
-            baseResponse.setData(tokenData);
-            log.info("end getPictureCheckCode. baseResponse:{}", JSON.toJSONString(baseResponse));
-            return baseResponse;
-        } catch (Exception e) {
-            log.error("fail getPictureCheckCode", e);
-            throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
-        } finally {
-            if (outputstream != null) {
-                try {
-                    outputstream.flush();
-                    outputstream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
 
 
     /**
