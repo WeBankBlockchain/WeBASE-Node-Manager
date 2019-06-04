@@ -14,8 +14,6 @@
 package com.webank.webase.node.mgr.front.entity;
 
 import java.util.List;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,13 +24,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TransactionParam {
 
-    @NotNull
     private Integer groupId;
-    @NotNull
-    private Integer user;
-    @NotBlank
+    private String user;
     private String contractName;
-    @NotBlank
     private String funcName;
     private String contractAddress;
     private Boolean useAes;

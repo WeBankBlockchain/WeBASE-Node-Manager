@@ -31,6 +31,7 @@ import com.webank.webase.node.mgr.user.entity.TbUserKeyMap;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -61,6 +62,61 @@ public class UserService {
      */
     @Transactional
     public Integer addUserInfo(NewUserInputParam user) throws NodeMgrException {
+        log.debug("start addUserInfo User:{}", JSON.toJSONString(user));
+
+        Integer groupId = user.getGroupId();
+        String userName = user.getUserName();
+
+        // check group id
+        groupService.checkGroupId(groupId);
+
+        // check userName
+        TbUser userRow = queryByName(userName);
+        if (userRow != null) {
+            log.warn("fail addUserIndo. user info already exists");
+            throw new NodeMgrException(ConstantCode.USER_EXISTS);
+        }
+
+        String keyUri = String
+            .format(FrontRestTools.URI_KEY_PAIR, constants.getIsPrivateKeyEncrypt(), userName);
+        KeyPair keyPair = frontRestTools
+            .getForEntity(groupId, keyUri, KeyPair.class);
+        String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
+        String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
+        String address = Optional.ofNullable(keyPair).map(k -> k.getAddress()).orElse(null);
+
+        if (StringUtils.isAnyBlank(privateKey, publicKey, address)) {
+            log.warn("get key pair fail. privateKey:{} publicKey:{} address:{}", privateKey,
+                publicKey, address);
+            throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
+        }
+
+        // add row
+        TbUser newUserRow = new TbUser(HasPk.HAS.getValue(), user.getUserType(), user.getUserName(),
+            groupId, address, publicKey,
+            user.getDescription());
+        Integer affectRow = userMapper.addUserRow(newUserRow);
+        if (affectRow == 0) {
+            log.warn("affect 0 rows of tb_user");
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+
+        Integer userId = newUserRow.getUserId();
+
+        // add user_key_mapping info
+        TbUserKeyMap newMapRow = new TbUserKeyMap(userId, groupId, privateKey);
+        Integer affectMapRow = userMapper.addUserKeyMapRow(newMapRow);
+        if (affectMapRow == 0) {
+            log.warn("affect 0 rows of tb_user_key_map");
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+        // update monitor unusual user's info
+        monitorService.updateUnusualUser(groupId, user.getUserName(), address);
+
+        log.debug("end addNodeInfo userId:{}", userId);
+        return userId;
+    }
+    /*public Integer addUserInfo(NewUserInputParam user) throws NodeMgrException {
         log.debug("start addUserInfo User:{}", JSON.toJSONString(user));
 
         Integer groupId = user.getGroupId();
@@ -113,7 +169,7 @@ public class UserService {
 
         log.debug("end addNodeInfo userId:{}", userId);
         return userId;
-    }
+    }*/
 
     /**
      * bind user info.
@@ -138,7 +194,7 @@ public class UserService {
         groupService.checkGroupId(user.getGroupId());
 
         // check userName
-        TbUser userRow = queryByName(user.getGroupId(), user.getUserName());
+        TbUser userRow = queryByName(user.getUserName());
         if (userRow != null) {
             log.warn("fail bindUserInfo. userName is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
@@ -253,8 +309,8 @@ public class UserService {
     /**
      * query by userName.
      */
-    public TbUser queryByName(int groupId, String userName) throws NodeMgrException {
-        return queryUser(null, groupId, userName, null);
+    public TbUser queryByName(String userName) throws NodeMgrException {
+        return queryUser(null, null, userName, null);
     }
 
     /**
@@ -311,34 +367,35 @@ public class UserService {
     /**
      * get private key.
      */
-    public PrivateKeyInfo getPrivateKey(Integer userId) throws NodeMgrException {
-        log.debug("start getPrivateKey userId:{} ", userId);
+    public PrivateKeyInfo getPrivateKey(String userName) throws NodeMgrException {
+        log.debug("start getPrivateKey userName:{} ", userName);
         // check user id
-        checkUserId(userId);
+        checkUserName(userName);
 
-        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userId);
+        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userName);
         privateKeyInfoInfo.setPrivateKey(privateKeyInfoInfo.getPrivateKey());
-        log.debug("end getPrivateKey,privateKeyInfoInfo:{}", JSON.toJSONString(privateKeyInfoInfo));
+        log.debug("end getPrivateKey");
         return privateKeyInfoInfo;
     }
 
     /**
-     * check usder id.
+     * check user.
      */
-    public void checkUserId(Integer userId) throws NodeMgrException {
-        log.debug("start checkUserId userId:{}", userId);
+    public void checkUserName(String userName) throws NodeMgrException {
+        log.debug("start checkUserName userName:{}", userName);
 
-        if (userId == null) {
-            log.error("fail checkUserId userId is null");
-            throw new NodeMgrException(ConstantCode.USER_ID_NULL);
+        if (StringUtils.isBlank(userName)) {
+            log.error("fail checkUserName userName is null");
+            throw new NodeMgrException(ConstantCode.INVALID_USER);
         }
 
-        Integer userCount = countOfUser(userId);
-        log.debug("checkUserId userId:{} userCount:{}", userId, userCount);
-        if (userCount == null || userCount == 0) {
-            throw new NodeMgrException(ConstantCode.INVALID_USER_ID);
+        TbUser user = queryByName(userName);
+
+        if (Objects.isNull(user)) {
+            log.warn("fail checkUserName, not fount user. userName:{} ", userName);
+            throw new NodeMgrException(ConstantCode.INVALID_USER);
         }
-        log.debug("end checkUserId");
+        log.debug("end checkUserName");
     }
 
     /**

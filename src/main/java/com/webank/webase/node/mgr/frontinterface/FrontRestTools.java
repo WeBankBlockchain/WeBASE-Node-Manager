@@ -69,7 +69,8 @@ public class FrontRestTools {
     public static final String URI_GET_SEALER_LIST = "web3/sealerList";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
-    public static final String URI_KEY_PAIR = "privateKey?useAes=%1b";
+    public static final String URI_KEY_PAIR = "privateKey?useAes=%1b&userName=%2s";
+   // public static final String URI_NEW_USER = "privateKey/newUser?userName=%1s";
     public static final String URI_CONTRACT_DEPLOY = "contract/deploy";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
     public static final String URI_SEND_TRANSACTION = "trans/handle";
@@ -189,7 +190,8 @@ public class FrontRestTools {
             FrontGroup frontGroup = iterator.next();
             uri = uriAddGroupId(frontGroup.getGroupId(), uri);//append groupId to uri
             String url = String
-                .format(cproperties.getFrontUrl(), frontGroup.getFrontIp(), frontGroup.getFrontPort(), uri)
+                .format(cproperties.getFrontUrl(), frontGroup.getFrontIp(),
+                    frontGroup.getFrontPort(), uri)
                 .replaceAll(" ", "");
             iterator.remove();
 

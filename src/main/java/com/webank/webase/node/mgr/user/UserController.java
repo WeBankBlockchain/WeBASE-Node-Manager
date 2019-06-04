@@ -125,14 +125,14 @@ public class UserController extends BaseController {
     /**
      * get private key by user id.
      */
-    @GetMapping(value = "/privateKey/{userId}")
-    public BaseResponse getPrivateKey(@PathVariable("userId") Integer userId)
+    @GetMapping(value = "/privateKey/{userName}")
+    public BaseResponse getPrivateKey(@PathVariable("userName") String userName)
         throws NodeMgrException {
         BaseResponse pagesponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start getPrivateKey startTime:{} userId:{}", startTime.toEpochMilli(), userId);
+        log.info("start getPrivateKey startTime:{} userName:{}", startTime.toEpochMilli(), userName);
 
-        PrivateKeyInfo privateKeyInfo = userService.getPrivateKey(userId);
+        PrivateKeyInfo privateKeyInfo = userService.getPrivateKey(userName);
         pagesponse.setData(privateKeyInfo);
 
         log.info("end getPrivateKey useTime:{} result:{}",

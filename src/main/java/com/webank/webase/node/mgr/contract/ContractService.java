@@ -29,6 +29,8 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import io.netty.channel.local.LocalAddress;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -36,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
@@ -56,6 +59,8 @@ public class ContractService {
     private FrontRestTools frontRestTools;
     @Autowired
     private MonitorService monitorService;
+    @Autowired
+    private UserService userService;
     @Autowired
     private FrontInterfaceService frontInterface;
     @Autowired
@@ -202,10 +207,14 @@ public class ContractService {
             throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);
         }
 
+        TbUser user = userService.queryByUserId(inputParam.getUser());
+        String userName = Optional.ofNullable(user).map(u -> u.getUserName())
+            .orElseThrow(() -> new NodeMgrException(ConstantCode.INVALID_USER));
+
         // deploy param
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
-        params.put("user", String.valueOf(inputParam.getUser()));
+        params.put("user", userName);
         params.put("contractName", contractName);
         // params.put("version", version);
         params.put("abiInfo", JSONArray.parseArray(inputParam.getContractAbi()));
@@ -269,10 +278,15 @@ public class ContractService {
         //check contract deploy
         verifyContractDeploy(param.getContractId(), param.getGroupId());
 
+        TbUser user = userService.queryByUserId(param.getUser());
+        String userName = Optional.ofNullable(user).map(u -> u.getUserName())
+            .orElseThrow(() -> new NodeMgrException(ConstantCode.INVALID_USER));
+
         //send transaction
         TransactionParam transParam = new TransactionParam();
         BeanUtils.copyProperties(param, transParam);
         transParam.setUseAes(constants.getIsPrivateKeyEncrypt());
+        transParam.setUser(userName);
 
         Object frontRsp = frontRestTools
             .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, transParam,

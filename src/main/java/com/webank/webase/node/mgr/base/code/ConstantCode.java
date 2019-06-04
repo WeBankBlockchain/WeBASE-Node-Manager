@@ -59,7 +59,7 @@ public class ConstantCode {
 
     public static final RetCode USER_ID_NULL = RetCode.mark(202012, "user id cannot be empty");
 
-    public static final RetCode INVALID_USER_ID = RetCode.mark(202013, "invalid user id");
+    public static final RetCode INVALID_USER = RetCode.mark(202013, "invalid user");
 
     public static final RetCode USER_EXISTS = RetCode.mark(202014, "user already exists");
 

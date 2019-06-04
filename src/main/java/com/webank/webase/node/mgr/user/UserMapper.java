@@ -63,7 +63,7 @@ public interface UserMapper {
     /**
      * query private key by user id.
      */
-    PrivateKeyInfo queryPrivateKey(Integer userId);
+    PrivateKeyInfo queryPrivateKey(String userName);
 
     /**
      * query max chainIndex of user.
