@@ -1,63 +1,71 @@
 # 区块链平台节点管理接口设计
 
-##  <span id="catalog_top">目录</span>
-- [1.前置管理模块](#1)
-  - [1.1.新增节点前置信息](#1.1)
-  - [1.2.获取所有前置列表](#1.2)
-  - [1.3.删除前置信息](#1.3)
-- [2.交易信息模块](#2)
-  - [2.1.查询交易信息列表](#2.1)
-  - [2.2.查询交易回执](#2.2)
-  - [2.3.根据交易hash查询交易信息](#2.3)
-- [3.帐号管理模块](#3)
-  - [3.1.新增帐号](#3.1)
-  - [3.2.修改帐号](#3.2)
-  - [3.3.删除帐号](#3.3)
-  - [3.4.查询帐号列表](#3.4)
-  - [3.5.更改当前密码](#3.5)
-- [4.区块管理模块](#4)
-  - [4.1.查询区块列表](#4.1)
-  - [4.2.根据块高查询区块信息](#4.2)
-- [5.合约管理模块](#5)
-  - [5.1.查询合约列表](#5.1)
-  - [5.2.查询合约信息](#5.2)
-  - [5.3.部署合约](#5.3)
-  - [5.4.发送交易](#5.4)
-  - [5.5.根据包含bytecodeBin的字符串查询合约](#5.5)
-- [6.服务器监控相关](#6)
-  - [6.1.获取节点监控信息](#6.1)
-  - [6.2.获取服务器监控信息](#6.2)
-- [7.审计相关模块](#7)
-  - [7.1.获取节点日志列表](#7.1)
-  - [7.2.获取合约方法监管信息列表](#7.2)
-  - [7.3.获取交易hash监管信息列表](#7.3)
-  - [7.4.获取异常用户信息列表](#7.4)
-  - [7.5.获取异常合约信息列表](#7.5)
-- [8.群组信息模块](#8)
-  - [8.1.获取群组概况](#8.1)
-  - [8.2.获取所有群组列表](#8.2)
-  - [8.3.查询每日交易数据](#8.3)
-- [9.节点管理模块](#9)
-  - [9.1.查询节点列表](#9.1)
-  - [9.2.查询节点信息](#9.2)
-- [10.角色管理模块](#10)
-  - [10.1.查询角色列表](#10.1)
-- [11.用户管理模块](#11)
-  - [11.1.新增私钥用户](#11.1)
-  - [11.2.绑定公钥用户](#11.2)
-  - [11.3.修改用户备注](#11.3)
-  - [11.4.查询私钥](#11.4)
-  - [11.5.查询用户列表](#11.5)
-- [12.合约方法管理模块](#12)
-  - [12.1.新增合约方法](#12.1)
-  - [12.2.根据方法编号查询](#12.2)
+## 目录
+<!-- TOC -->1 前置管理模块
+- [区块链平台节点管理接口设计](#区块链平台节点管理接口设计)
+    - [目录](#目录)
+    - [1 前置管理模块](#1-前置管理模块)
+        - [1.1 新增节点前置信息](#11-新增节点前置信息)
+        - [1.2 获取所有前置列表](#12-获取所有前置列表)
+        - [1.3 删除前置信息](#13-删除前置信息)
+    - [2 交易信息模块](#2-交易信息模块)
+        - [2.1 查询交易信息列表](#21-查询交易信息列表)
+        - [2.2 查询交易回执](#22-查询交易回执)
+        - [2.3 根据交易hash查询交易信息](#23-根据交易hash查询交易信息)
+    - [3 帐号管理模块](#3-帐号管理模块)
+        - [3.1 新增帐号](#31-新增帐号)
+        - [3.2 修改帐号](#32-修改帐号)
+        - [3.3 删除帐号](#33-删除帐号)
+        - [3.4 查询帐号列表](#34-查询帐号列表)
+        - [3.5 更新当前密码](#35-更新当前密码)
+        - [3.6 获取登录验证码](#36-获取登录验证码)
+        - [3.7 登录接口](#37-登录接口)
+    - [4 区块管理模块](#4-区块管理模块)
+        - [4.1 查询区块列表](#41-查询区块列表)
+        - [4.2 根据块高或hash查询区块信息](#42-根据块高或hash查询区块信息)
+    - [5 合约管理模块](#5-合约管理模块)
+        - [5.1 查询合约列表](#51-查询合约列表)
+        - [5.2 查询合约信息](#52-查询合约信息)
+        - [5.3 部署合约](#53-部署合约)
+        - [5.4 发送交易](#54-发送交易)
+        - [5.5 根据包含bytecodeBin的字符串查询合约](#55-根据包含bytecodebin的字符串查询合约)
+    - [6 服务器监控相关](#6-服务器监控相关)
+        - [6.1 获取节点监控信息](#61-获取节点监控信息)
+        - [6.2 获取服务器监控信息](#62-获取服务器监控信息)
+    - [7 审计相关模块](#7-审计相关模块)
+        - [7.1 获取用户交易监管信息列表](#71-获取用户交易监管信息列表)
+        - [7.2 获取合约方法监管信息列表](#72-获取合约方法监管信息列表)
+        - [7.3 获取交易hash监管信息列表](#73-获取交易hash监管信息列表)
+        - [7.4 获取异常用户信息列表](#74-获取异常用户信息列表)
+        - [7.5 获取异常合约信息列表](#75-获取异常合约信息列表)
+    - [8 群组信息模块](#8-群组信息模块)
+        - [8.1 获取群组概况](#81-获取群组概况)
+        - [8.2 获取所有群组列表](#82-获取所有群组列表)
+        - [8.3 查询每日交易数据](#83-查询每日交易数据)
+    - [9 节点管理模块](#9-节点管理模块)
+        - [9.1 查询节点列表](#91-查询节点列表)
+        - [9.2 查询节点信息](#92-查询节点信息)
+    - [10 角色管理模块](#10-角色管理模块)
+    - [11 用户管理模块](#11-用户管理模块)
+        - [11.1 新增私钥用户](#111-新增私钥用户)
+        - [11.2 绑定公钥用户](#112-绑定公钥用户)
+        - [11.3 修改用户备注](#113-修改用户备注)
+        - [11.4 查询私钥](#114-查询私钥)
+        - [11.5 查询用户列表](#115-查询用户列表)
+    - [12 合约方法管理模块](#12-合约方法管理模块)
+        - [12.1 新增合约方法](#121-新增合约方法)
+        - [12.2 根据方法编号查询](#122-根据方法编号查询)
+
+<!-- /TOC -->
 
 
 
 
 
-## <span id="1">1 前置管理模块</span>  [top](#catalog_top)
-### <span id="1.1">1.1 新增节点前置信息</span>  [top](#catalog_top)
+## 1 前置管理模块  
+[top](#目录)
+### 1.1 新增节点前置信息
+[top](#目录)
 
 #### 1.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -122,7 +130,8 @@
 ```
 
 
-### <span id="1.2">1.2 获取所有前置列表</span>  [top](#catalog_top)
+### 1.2 获取所有前置列表 
+[top](#目录)
 
 #### 1.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -147,6 +156,7 @@
 | 4.1.3 | frontPort     | int           | 否     | 前置端口                   |
 | 4.1.4 | createTime    | LocalDateTime | 否     | 落库时间                   |
 | 4.1.5 | modifyTime    | LocalDateTime | 否     | 修改时间                   |
+| 4.1.6 | agency        | string        | 否     | 所属机构                   |
 
 
 #### 1.2.3 入参示例
@@ -158,16 +168,17 @@
 {
     "code": 0,
     "message": "success",
-    "totalCount": 1,
     "data": [
         {
-        "frontId": 500001,
-        "frontIp": "127.0.0.1",
-        "frontPort": 8181,
-        "createTime": "2019-02-14 17:47:00",
-        "modifyTime": "2019-03-15 11:14:29"
+            "frontId": 500001,
+            "frontIp": "10.107.105.18",
+            "frontPort": 8081,
+            "agency": "aa",
+            "createTime": "2019-06-04 20:49:42",
+            "modifyTime": "2019-06-04 20:49:42"
         }
-    ]
+    ],
+    "totalCount": 1
 }
 ```
 
@@ -182,7 +193,8 @@
 
 
 
-### <span id="1.3">1.3 删除前置信息</span>  [top](#catalog_top)
+### 1.3 删除前置信息
+[top](#目录)
 
 #### 1.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -227,9 +239,11 @@
 
 
 
-## <span id="2">2 交易信息模块</span>  [top](#catalog_top)
+## 2 交易信息模块
+[top](#目录)
 
-### <span id="2.1">2.1 查询交易信息列表</span>  [top](#catalog_top)
+### 2.1 查询交易信息列表
+[top](#目录)
 
 
 #### 2.1.1 传输协议规范
@@ -297,7 +311,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transList/300001/1/10?transact
 ```
 
 
-### <span id="2.2">2.2 查询交易回执</span>  [top](#catalog_top)
+### 2.2 查询交易回执 
+[top](#目录)
 
 
 #### 2.2.1 传输协议规范
@@ -375,7 +390,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transactionReceipt/1/0xda87994
 ```
 
 
-### <span id="2.3">2.3 根据交易hash查询交易信息</span>  [top](#catalog_top)
+### 2.3 根据交易hash查询交易信息 
+[top](#目录)
 
 
 #### 2.3.1 传输协议规范
@@ -469,9 +485,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 
 
 
-## <span id="3">3 帐号管理模块</span>  [top](#catalog_top)
+## 3 帐号管理模块
+[top](#目录)
 
-### <span id="3.1">3.1 新增帐号</span>  [top](#catalog_top)
+### 3.1 新增帐号
+[top](#目录)
 
 #### 3.1.1 传输协议规范
 
@@ -488,9 +506,9 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 1    | account       | String        | 否     | 帐号名称                   |
 | 2    | accountPwd    | String        | 否     | 登录密码（sha256）         |
 | 3    | roleId        | int           | 否     | 所属角色                   |
-| 序号 | 输出参数      | 类型          |        | 备注                       |
-| 1    | code          | Int           | 否     | 返回码，0：成功 其它：失败 |
-| 2    | message       | String        | 否     | 描述                       |
+| 序号 | 输出参数      | 类型          |        | 备注                        |
+| 1    | code          | Int           | 否     | 返回码，0：成功 其它：失败   |
+| 2    | message       | String        | 否     | 描述                      |
 | 3    | data          | object        | 否     | 返回信息实体               |
 | 3.1  | account       | String        | 否     | 帐号                       |
 | 3.2  | roleId        | Integer       | 否     | 所属角色                   |
@@ -546,7 +564,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 ```
 
 
-### <span id="3.2">3.2 修改帐号</span>  [top](#catalog_top)
+### 3.2 修改帐号
+[top](#目录)
 
 #### 3.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -618,7 +637,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="3.3">3.3 删除帐号</span>  [top](#catalog_top)
+### 3.3 删除帐号
+[top](#目录)
 
 #### 3.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -629,7 +649,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 #### 3.3.2 参数信息详情
 
 | 序号 | 输入参数 | 类型   | 可为空 | 备注                       |
-|------|----------|--------|--------|----------------------------|
+|------|----------|--------|--------|------------------------|
 | 1    | account  | String | 否     | 帐号名称                   |
 | 序号 | 输出参数 | 类型   |        | 备注                       |
 | 1    | code     | Int    | 否     | 返回码，0：成功 其它：失败 |
@@ -658,7 +678,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-###  <span id="3.4">3.4 查询帐号列表</span>  [top](#catalog_top)
+###  3.4 查询帐号列表
+[top](#目录)
 
 #### 3.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -735,7 +756,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="3.5">3.5 更新当前密码</span>  [top](#catalog_top)
+### 3.5 更新当前密码 
+[top](#目录)
 
 #### 3.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -782,9 +804,130 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-## <span id="4">4 区块管理模块</span>  [top](#catalog_top)
 
-### <span id="4.1">4.1 查询区块列表</span>  [top](#catalog_top)
+
+### 3.6 获取登录验证码 
+[top](#目录)
+
+#### 3.6.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址：`/account/pictureCheckCode`
+* 请求方式：get
+* 请求头：Content-type: application/json
+* 返回格式：JSON
+
+#### 3.6.2 参数信息详情
+
+| 序号 | 输入参数      | 类型   | 可为空 | 备注                       |
+|------|---------------|--------|--------|----------------------------|
+| 无 |  |  |    |         |
+| 序号 | 输出参数      | 类型   |        | 备注                        |
+| 1    | code          | Int    | 否     | 返回码，0：成功 其它：失败   |
+| 2    | message       | String | 否     | 描述                      |
+| 3    | data       | Object | 否     | 图片信息实体                  |
+| 3.1  | base64Image   | String | 否     | 图片的base64              |
+| 3.2  | token   | String | 否     | token（登录接口需要用到此值）     |
+
+
+
+### 3.6.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/account/pictureCheckCode`
+
+
+
+#### 3.6.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "message": "success",
+    "data": {
+        "base64Image": "iVBORw0KGgoAAAANSUhEUgAAAJsAAAA8CAIAAAD+Gl+NAAAC3ElEQVR42u3cO04DMRAG4DkER6CFhoNwCgoq6DgQh0DiVJR0oUCKovWuPU977P2trZK1s/GnGb8g9PN7wbXSRReUtQpEIYoCURSIokAUBaIQTV2+P798r3mfnJbB69nXvmAnjdHm9+8ZgruNjI31mUQrvWPpPpeuH+43n2g9FOJyrOJmiMpQ+4fC0cdVniED6hzj6NjMdv3cZvJHjCpz70DazJY+oh2mBptmH+7um5eo/ff3F+mVENJHVDrMeEUGB1W0mFGgLrhnVI9OL1QdZ58wzTnVIMcA3X3FXTQP6tjJ7dFuBjnm29JgXlGXbazoubcs63K23JgSxu/MQXXpKd1IWS6XQ42b7ZOoH/lIZfp9ff7YXCuJHvX709sj87Jb1kQ5Ichp/XpPySmlra9hvCJAl3vr77qg8kO/h2idU4eaRJTTCXzRo9QtSuOkBuOjckQVriWqC7MIldnX6jD1OfF25NwNUP679X50n+4qljH2rMBJvNYY5QefDrWspZ4xRSxjOqMyh1I+arhoqbVbS4HK5IzebejAKUIlS/AlRL0OJ1OgShcwyvVotKjjLGmD2vSOXptGc3J63iSaBFUUx+oDmVSilf4/nWieMHURLRWsomrUnhvcOVEdRW8tyIIkuj9OtKmVUDSC01NUh9ozr2ZDdU+5jRPvIFHmEsUy3eVMeqP37jtwVk7uyCgkrcU5VtOFcsW1/2F4kCjnCLZxPqqI1Hot/mmMPVKDNgXdRflnMso9I07Aqc/abl+PWMOsispvmaRZVL3ru3vmF7EkdT+NWUq0kr5FO4Vl3U31iB0GL865UAV/Czj8X/tOUoxdhN9hyChqqQ7RpTghClEUiKJAFKIQBSpEF0aFKETX7cRsW1q6JyEoHh0qZABWfDqdnDPi5rGPSqflHLK06OBKiM7O1e0DRH1EIETn2HY4bMxffp31F5MHRmeQq3EW5vPrN2eOTq8h2X0u/d/aH4oBfftm+5EiAAAAAElFTkSuQmCC",
+        "token": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzOGM0NjlhNC1kMTg3LTQyZDQtYWM1YS02OWU0OWM5MjMxNTkiLCJpYXQiOjE1NjAyNDY3MzksInN1YiI6ImU1RnoiLCJleHAiOjE1NjAyNDY3OTl9.FJYRZJSAhFjvO_P4AjMO6bnoOZJiu-AOSdO9ikb-30M"
+    }
+}
+```
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+### 3.7 登录接口
+[top](#目录)
+
+#### 3.7.1 传输协议规范
+* 网络传输协议：使用HTTP协议
+* 请求地址：`/account/login?checkCode={checkCode}`
+* 请求方式：get
+* 请求头：Content-type: application/json;token:{token}
+* 返回格式：JSON
+
+#### 3.7.2 参数信息详情
+
+| 序号 | 输入参数      | 类型   | 可为空 | 备注                       |
+|------|---------------|--------|--------|----------------------------|
+| 1    | checkCode          | String    | 否     | 登录验证码   |
+| 2    | account          | String    | 否     | 帐号   |
+| 3    | accountPwd          | String    | 否     | 密码   |
+| 4    | token          | String    | 否     | 随验证码返回的token   |
+| 序号 | 输出参数      | 类型   |        | 备注                        |
+| 1    | code          | Int    | 否     | 返回码，0：成功 其它：失败   |
+| 2    | message       | String | 否     | 描述                      |
+| 3    | data       | Object | 否     | 信息实体                  |
+| 3.1  | accountStatus   | int | 否     | 1未修改密码，2正常   |
+| 3.2  | roleName   | String | 否     | 所属角色名称     |
+| 3.3  | account   | String | 否     | 帐号名称     |
+
+
+
+### 3.7.3 入参示例
+`http://127.0.0.1:8080/webase-node-mgr/account/login?checkCode=aege`
+```
+{
+    "account": "admin",
+    "accountPwd": "Abcd1234"
+}
+```
+
+
+#### 3.7.4 出参示例
+* 成功：
+```
+{
+    "code": 0,
+    "data": {
+        "accountStatus": 2,
+        "roleName": "admin",
+        "account": "admin"
+    },
+    "message": "success"
+}
+```
+
+* 失败：
+```
+{
+    "code": 102000,
+    "message": "system exception",
+    "data": {}
+}
+```
+
+
+
+
+
+## 4 区块管理模块
+[top](#目录)
+
+### 4.1 查询区块列表
+[top](#目录)
 
 #### 4.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -808,12 +951,13 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 4     | data           | List          | 是     | 区块列表                   |
 | 4.1   |                | Object        |        | 区块信息对象               |
 | 4.1.1 | pkHash         | String        | 否     | 块hash                     |
-| 4.1.2 | groupId        | int           | 否     | 所属群组编号               |
-| 4.1.3 | blockNumber    | BigInteger    | 否     | 块高                       |
-| 4.1.4 | blockTimestamp | LocalDateTime | 否     | 出块时间                   |
-| 4.1.5 | transCount     | int           | 否     | 交易数                     |
-| 4.1.6 | createTime     | LocalDateTime | 否     | 创建时间                   |
-| 4.1.7 | modifyTime     | LocalDateTime | 否     | 修改时间                   |
+| 4.1.2 | blockNumber    | BigInteger    | 否     | 块高                       |
+| 4.1.3 | blockTimestamp | LocalDateTime | 否     | 出块时间                   |
+| 4.1.4 | transCount     | int           | 否     | 交易数                     |
+| 4.1.5 | sealerIndex    | int           | 否     | 打包节点索引                     |
+| 4.1.6 | sealer         | String        | 否     | 打包节点                     |
+| 4.1.7 | createTime     | LocalDateTime | 否     | 创建时间                   |
+| 4.1.8 | modifyTime     | LocalDateTime | 否     | 修改时间                   |
 
 #### 4.1.3 入参示例
 `http://127.0.0.1:8080/webase-node-mgr/block/blockList/300001/1/10?pkHash=`
@@ -824,27 +968,19 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 {
     "code": 0,
     "message": "success",
-    "totalCount": 2,
     "data": [
         {
-            "pkHash": "0xe6438646633542e26d053f75931d74a258a607464207e1343344c100da89e661",
-            "groupId": 300001,
-            "blockNumber": 1442,
-            "blockTimestamp": "2019-02-27 19:18:23",
+            "pkHash": "0x10fb8485eebffbb2a0b0d4f22d58d5cd54df2ac53f974b6c731c954957f36dd7",
+            "blockNumber": 127,
+            "blockTimestamp": "2019-06-11 18:11:32",
             "transCount": 1,
-            "createTime": "2019-03-04 10:29:07",
-            "modifyTime": "2019-03-04 10:29:07"
-        },
-        {
-            "pkHash": "0x2e036eba6d1581a280712276e06517987c7be40f0f252fca34303eef157d8c3d",
-            "groupId": 300001,
-            "blockNumber": 1441,
-            "blockTimestamp": "2019-02-27 19:18:22",
-            "transCount": 1,
-            "createTime": "2019-03-04 10:29:07",
-            "modifyTime": "2019-03-04 10:29:07"
+            "sealerIndex": 2,
+            "sealer": "552398be0eef124c000e632b0b76a48c52b6cfbd547d92c15527c2d1df15fab2bcded48353db22526c3540e4ab2027630722889f20a4a614bb11a7887a85941b",
+            "createTime": "2019-06-11 18:11:36",
+            "modifyTime": "2019-06-11 18:11:36"
         }
-    ]
+    ],
+    "totalCount": 1
 }
 ```
 
@@ -858,7 +994,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 ```
 
 
-### <span id="4.2">4.2 根据块高查询区块信息</span>  [top](#catalog_top)
+### 4.2 根据块高或hash查询区块信息
+[top](#目录)
 
 #### 4.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -991,9 +1128,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 
 
 
-## <span id="5">5 合约管理模块</span>  [top](#catalog_top)
+## 5 合约管理模块  
+[top](#目录)
 
-### <span id="5.1">5.1 查询合约列表</span>  [top](#catalog_top)
+### 5.1 查询合约列表 
+[top](#目录)
 
 #### 5.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1010,6 +1149,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 3      | contractAddress    | String           | 否     | 合约地址                               |
 | 4      | pageSize        | int           | 否     | 每页记录数                                      |
 | 5      | pageNumber      | int           | 否     | 当前页码                                        |
+| 6      | contractStatus      | int           | 否     | 1未部署，2已部署                        |
 |        |                 |               |        |                                                 |
 | 序号   | 输出参数        | 类型          | 可为空 | 备注                                            |
 | 1      | code            | Int           | 否     | 返回码，0：成功 其它：失败                      |
@@ -1018,19 +1158,21 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 4      | data            | List          | 是     | 列表                                            |
 | 5.1    |                 | Oject         |        | 返回信息实体                                    |
 | 5.1.1  | contractId      | int           | 否     | 合约编号                                        |
-| 5.1.2  | contractName    | String        | 否     | 合约名称                                        |
-| 5.1.3  | groupId       | Int           | 否     | 所属群组编号                                    |
-| 5.1.4  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
-| 5.1.5  | contractSource  | String        | 否     | 合约源码                                        |
-| 5.1.6  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
-| 5.1.7  | contractBin     | String        | 是     | 合约binary                                      |
-| 5.1.8 | bytecodeBin     | String        | 是     | 合约bin                                         |
-| 5.1.9 | contractAddress | String        | 是     | 合约地址                                        |
-| 5.1.10 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
-| 5.1.11 | contractVersion | String        | 否     | 合约版本                                        |
-| 5.1.12 | description     | String        | 是     | 备注                                            |
-| 5.1.13 | createTime      | LocalDateTime | 否     | 创建时间                                        |
-| 5.1.14 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
+| 5.1.2  | contractPath    | String        | 否     | 合约所在目录                              |
+| 5.1.3  | contractName    | String        | 否     | 合约名称                                        |
+| 5.1.4  | groupId       | Int           | 否     | 所属群组编号                                    |
+| 5.1.5  | contractStatus      | int           | 否     | 1未部署，2已部署                        |
+| 5.1.6  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
+| 5.1.7  | contractSource  | String        | 否     | 合约源码                                        |
+| 5.1.8  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
+| 5.1.9  | contractBin     | String        | 是     | 合约binary                                      |
+| 5.1.10 | bytecodeBin     | String        | 是     | 合约bin                                         |
+| 5.1.11 | contractAddress | String        | 是     | 合约地址                                        |
+| 5.1.12 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
+| 5.1.13 | contractVersion | String        | 否     | 合约版本（会去除该字段）               |
+| 5.1.14 | description     | String        | 是     | 备注                                            |
+| 5.1.15 | createTime      | LocalDateTime | 否     | 创建时间                                        |
+| 5.1.16 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
 
 
 
@@ -1049,20 +1191,21 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
     "message": "success",
     "data": [
         {
-            "contractId": 200034,
-            "contractName": "Hello3",
-            "groupId": 300001,
+            "contractId": 200002,
+            "contractPath": "hellos",
+            "contractVersion": null,
+            "contractName": "hellos",
+            "contractStatus": 2,
+            "groupId": 1,
             "contractType": 0,
-            "contractSource": "cHJhZ21hIHNvbQ0KfQ==",
-            "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":\"}]",
-            "contractBin": "60606040526945a9521ffdcb8fe5825c208260d0029",
-            "bytecodeBin": "6060604052341561000c57fe5b06103dd83029",
-            "contractAddress": null,
-            "deployTime": null,
-            "contractVersion": "1",
+            "contractSource": "cHJhZ21hIHNvbGlkaXgICAJbmFtZSA9IG47CiAgICB9Cn0=",
+            "contractAbi": "[\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}]",
+            "contractBin": "60806040526004361061004c576000398de7e4ddf5fdc9ccbcfd44565fed695cd960b0029",
+            "bytecodeBin": "608060405234801561001057600080004d4c",
+            "deployTime": "2019-06-11 18:11:33",
             "description": null,
-            "createTime": "2019-02-21 14:47:14",
-            "modifyTime": "2019-03-12 11:02:03"
+            "createTime": "2019-06-05 16:40:40",
+            "modifyTime": "2019-06-11 18:11:33"
         }
     ],
     "totalCount": 1
@@ -1078,7 +1221,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="5.2">5.2 查询合约信息</span>  [top](#catalog_top)
+### 5.2 查询合约信息
+[top](#目录)
 
 #### 5.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1090,25 +1234,28 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 
 | 序号 | 输入参数        | 类型          | 可为空 | 备注                                            |
 |------|-----------------|---------------|--------|-------------------------------------------------|
-| 1    | contractId      | int           | 否     | 合约编号                                        |
+| 1    | groupId       | int           | 否     | 群组id                                          |
+| 2    | contractId      | int           | 否     | 合约编号                                        |
 | 序号 | 输出参数        | 类型          | 可为空 | 备注                                            |
 | 1    | code            | Int           | 否     | 返回码，0：成功 其它：失败                      |
 | 2    | message         | String        | 否     | 描述                                            |
 | 3    |                 | Oject         |        | 返回信息实体                                    |
 | 3.1  | contractId      | int           | 否     | 合约编号                                        |
-| 3.2  | contractName    | String        | 否     | 合约名称                                        |
-| 3.3  | groupId       | Int           | 否     | 所属群组编号                                      |
-| 3.4  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
-| 3.5  | contractSource  | String        | 否     | 合约源码                                        |
-| 3.6  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
-| 3.7  | contractBin     | String        | 是     | 合约binary                                      |
-| 3.8 | bytecodeBin     | String        | 是     | 合约bin                                         |
-| 3.9 | contractAddress | String        | 是     | 合约地址                                        |
-| 3.10 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
-| 3.11 | contractVersion | String        | 否     | 合约版本                                        |
-| 3.12 | description     | String        | 是     | 备注                                            |
-| 3.13 | createTime      | LocalDateTime | 否     | 创建时间                                        |
-| 3.14 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
+| 3.2  | contractPath    | String        | 否     | 合约所在目录                              |
+| 3.3  | contractName    | String        | 否     | 合约名称                                        |
+| 3.4  | groupId         | Int           | 否     | 所属群组编号                                    |
+| 3.5  | contractStatus  | int           | 否     | 1未部署，2已部署                        |
+| 3.6  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
+| 3.7  | contractSource  | String        | 否     | 合约源码                                        |
+| 3.8  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
+| 3.9  | contractBin     | String        | 是     | 合约binary                                      |
+| 3.10 | bytecodeBin     | String        | 是     | 合约bin                                         |
+| 3.11 | contractAddress | String        | 是     | 合约地址                                        |
+| 3.12 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
+| 3.13 | contractVersion | String        | 否     | 合约版本（会去除该字段）               |
+| 3.14 | description     | String        | 是     | 备注                                            |
+| 3.15 | createTime      | LocalDateTime | 否     | 创建时间                                        |
+| 3.16 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
 
 #### 5.2.3 入参示例
 `http://127.0.0.1:8080/webase-node-mgr/contract/200001`
@@ -1121,17 +1268,21 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
     "code": 0,
     "message": "success",
     "data": {
-        "contractId": 200001,
-        "contractName": "33",
-        "groupId": 300001,
-        "contractSource": "efsdfde",
-        "contractAbi": "sdfsd",
-        "contractAddress": "vcde",
-        "deployTime": null,
-        "contractVersion": "33",
-        "description": "vcde",
-        "createTime": "2018-12-02 16:09:57",
-        "modifyTime": "2018-12-02 16:22:25"
+        "contractId": 200002,
+        "contractPath": "hellos",
+        "contractVersion": null,
+        "contractName": "hellos",
+        "contractStatus": 2,
+        "groupId": 1,
+        "contractType": 0,
+        "contractSource": "cHJhZ21hIHNvbGlkaXgICAJbmFtZSA9IG47CiAgICB9Cn0=",
+        "contractAbi": "[\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}]",
+        "contractBin": "60806040526004361061004c576000398de7e4ddf5fdc9ccbcfd44565fed695cd960b0029",
+        "bytecodeBin": "608060405234801561001057600080004d4c",
+        "deployTime": "2019-06-11 18:11:33",
+        "description": null,
+        "createTime": "2019-06-05 16:40:40",
+        "modifyTime": "2019-06-11 18:11:33"
     }
 }
 ```
@@ -1146,7 +1297,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="5.3">5.3 部署合约</span>  [top](#catalog_top)
+### 5.3 部署合约
+[top](#目录)
 
 #### 5.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1165,28 +1317,30 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 4    | contractAbi       | String         | 否     | 编译合约生成的abi文件内容  |
 | 5    | contractBin       | String         | 否     | 合约binary                 |
 | 6    | bytecodeBin       | String         | 否     | 合约bin                    |
-| 7    | userId            | String         | 否     | 私钥用户编号               |
-| 8    | constructorParams | List\<Object\> | 是     | 构造函数入参               |
+| 7    | contractId      | String         | 否     | 合约名称               |
+| 8    | contractPath      | String         | 否     | 合约所在目录               |
+| 9    | user              | String         | 否     | 私钥用户               |
+| 10    | constructorParams | List | 是     | 构造函数入参               |
 | 序号 | 输出参数          | 类型           |        | 备注                       |
 | 1    | code            | Int           | 否     | 返回码，0：成功 其它：失败                      |
 | 2    | message         | String        | 否     | 描述                                            |
 | 3    |                 | Oject         |        | 返回信息实体                                    |
 | 3.1  | contractId      | int           | 否     | 合约编号                                        |
-| 3.2  | contractName    | String        | 否     | 合约名称                                        |
-| 3.3  | groupId       | Int           | 否     | 所属群组编号                                      |
-| 3.4  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
-| 3.5  | contractSource  | String        | 否     | 合约源码                                        |
-| 3.6  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
-| 3.7  | contractBin     | String        | 是     | 合约binary                                      |
-| 3.8 | bytecodeBin     | String        | 是     | 合约bin                                         |
-| 3.9 | contractAddress | String        | 是     | 合约地址                                        |
-| 3.10 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
-| 3.11 | contractVersion | String        | 否     | 合约版本                                        |
-| 3.12 | description     | String        | 是     | 备注                                            |
-| 3.13 | createTime      | LocalDateTime | 否     | 创建时间                                        |
-| 3.14 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
-
-
+| 3.2  | contractPath    | String        | 否     | 合约所在目录                              |
+| 3.3  | contractName    | String        | 否     | 合约名称                                        |
+| 3.4  | groupId         | Int           | 否     | 所属群组编号                                    |
+| 3.5  | contractStatus  | int           | 否     | 1未部署，2已部署                        |
+| 3.6  | contractType    | Int           | 否     | 合约类型(0-普通合约，1-系统合约)                |
+| 3.7  | contractSource  | String        | 否     | 合约源码                                        |
+| 3.8  | contractAbi     | String        | 是     | 编译合约生成的abi文件内容                       |
+| 3.9  | contractBin     | String        | 是     | 合约binary                                      |
+| 3.10 | bytecodeBin     | String        | 是     | 合约bin                                         |
+| 3.11 | contractAddress | String        | 是     | 合约地址                                        |
+| 3.12 | deployTime      | LocalDateTime | 是     | 部署时间                                        |
+| 3.13 | contractVersion | String        | 否     | 合约版本（会去除该字段）               |
+| 3.14 | description     | String        | 是     | 备注                                            |
+| 3.15 | createTime      | LocalDateTime | 否     | 创建时间                                        |
+| 3.16 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
 
 
 
@@ -1195,13 +1349,16 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 `http://127.0.0.1:8080/webase-node-mgr/contract/deploy`
 ```
 {
-    "groupId": "300001",
-    "contractBin": "60606040526000357c01e08980029",
-    "bytecodeBin": null,
-    "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"bytes\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"type\":\"function\"}]",
-    "contractSource": "cHJhZ21hIHudCByZXR1Sk7DQogICAgfQ0KfQ==",
-    "userId": 700001,
-    "contractId": 200033
+    "groupId": "1",
+    "contractBin": "60806040526004361061004c576000357c010000002269b80029",
+    "bytecodeBin": "60806040523480156100105761146031c79ef057dd274c87bff322ea2269b80029",
+    "contractAbi": "[]",
+    "contractSource": "cHJhZ21hIHNvbGlkaXR5IF4wLICAJbmFtZSA9IG47CiAgICB9Cn0=",
+    "user": 700006,
+    "contractName": "HeHe",
+    "contractId": 200008,
+    "contractPath": "Hi",
+    "constructorParams": ["a"]
 }
 ```
 
@@ -1214,17 +1371,22 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
     "code": 0,
     "message": "success",
     "data": {
-        "contractId": 200001,
-        "contractName": "33",
-        "groupId": 300001,
-        "contractSource": "efsdfde",
-        "contractAbi": "sdfsd",
-        "contractAddress": "vcde",
-        "deployTime": null,
-        "contractVersion": "33",
-        "description": "vcde",
-        "createTime": "2018-12-02 16:09:57",
-        "modifyTime": "2018-12-02 16:22:25"
+        "contractId": 200008,
+        "contractPath": "Hi",
+        "contractVersion": null,
+        "contractName": "HeHe",
+        "contractStatus": 2,
+        "groupId": 1,
+        "contractType": null,
+        "contractSource": "cHJhZ21hIHNvbGlkaXR5IF4wLjQuM0=",
+        "contractAbi": "[]",
+        "contractBin": "60806040526004361061004c576000357c010274c87bff322ea2269b80029",
+        "bytecodeBin": "608060405234801561001057629",
+        "contractAddress": "0xa2ea2280b3a08a3ae2e1785dff09561e13915fb2",
+        "deployTime": "2019-06-11 18:58:33",
+        "description": null,
+        "createTime": null,
+        "modifyTime": null
     }
 }
 ```
@@ -1239,7 +1401,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="5.4">5.4 发送交易</span>  [top](#catalog_top)
+### 5.4 发送交易
+[top](#目录)
 
 #### 5.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1253,11 +1416,12 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 序号 | 输入参数     | 类型           | 可为空 | 备注                       |
 |------|--------------|----------------|--------|----------------------------|
 | 1    | groupId      | Int            | 否     | 所属群组编号               |
-| 2    | userId       | Integer        | 否     | 私钥用户编号               |
+| 2    | user       | Integer        | 否     | 私钥用户               |
 | 3    | contractName | String         | 否     | 合约名称                   |
-| 4    | funcName     | String         | 否     | 合约方法名                 |
-| 5    | contractAddress     | String         | 是     | 合约地址（传合约名和版本时可为空）   |
-|     | funcParam    | List\<Object\> | 是     | 合约方法入参               |
+| 4    | contractId      | String         | 否     | 合约名称               |
+| 5    | funcName     | String         | 否     | 合约方法名                 |
+| 6    | contractAddress     | String         | 是     | 合约地址（传合约名和版本时可为空）   |
+| 7   | funcParam    | List | 是     | 合约方法入参               |
 | 序号 | 输出参数     | 类型           |        | 备注                       |
 | 1    | code         | Int            | 否     | 返回码，0：成功 其它：失败 |
 | 2    | message      | String         | 否     | 描述                       |
@@ -1299,11 +1463,12 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 ```
 
 
-### <span id="5.5">5.5 根据包含bytecodeBin的字符串查询合约</span>  [top](#catalog_top)
+### 5.5 根据包含bytecodeBin的字符串查询合约  
+[top](#目录)
 
 #### 5.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
-* 请求地址： `/contract/findByPartOfBytecodeBin/{groupId}/{partOfBytecodeBin}`
+* 请求地址： `/contract/findByPartOfBytecodeBin`
 * 请求方式：GET
 * 返回格式：JSON
 
@@ -1333,7 +1498,13 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 | 3.14 | modifyTime      | LocalDateTime | 是     | 修改时间                                        |
 
 #### 5.2.3 入参示例
-`http://127.0.0.1:8080/webase-node-mgr/contract/findByPartOfBytecodeBin/1/abc123455dev`
+`http://127.0.0.1:8080/webase-node-mgr/contract/findByPartOfBytecodeBin`
+```
+{
+    "groupId": "300001",
+    "partOfBytecodeBin": "abc123455dev"
+}
+```
 
 #### 5.2.4 出参示例
 
@@ -1349,7 +1520,7 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
         "chainIndex": null,
         "contractType": 0,
         "contractSource": "cHJhZ21hIDQoNCg0KfQ==",
-        "contractAbi": "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"type\":\"function\"}]",
+        "contractAbi": "[]",
         "contractBin": "60606040526000357c01000000000029",
         "bytecodeBin": "123455",
         "contractAddress": "0x19146d3a2f138aacb97ac52dd45dd7ba7cb3e04a",
@@ -1376,9 +1547,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 
 
 
-## <span id="6">6 服务器监控相关</span>  [top](#catalog_top)
+## 6 服务器监控相关
+[top](#目录)
 
-### <span id="6.1">6.1 获取节点监控信息</span>  [top](#catalog_top)
+### 6.1 获取节点监控信息  
+[top](#目录)
 
 #### 6.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1479,7 +1652,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="6.2">6.2 获取服务器监控信息</span>  [top](#catalog_top)
+### 6.2 获取服务器监控信息 
+[top](#目录)
 
 #### 6.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1580,9 +1754,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 ```
 
 
-## <span id="7">7 审计相关模块</span>  [top](#catalog_top)
+## 7 审计相关模块
+[top](#目录)
 
-### <span id="7.1">7.1 获取用户交易监管信息列表</span>  [top](#catalog_top)
+### 7.1 获取用户交易监管信息列表
+[top](#目录)
 
 #### 7.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1667,7 +1843,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="7.2">7.2 获取合约方法监管信息列表</span>  [top](#catalog_top)
+### 7.2 获取合约方法监管信息列表
+[top](#目录)
 
 #### 7.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1754,7 +1931,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="7.3">7.3 获取交易hash监管信息列表</span>  [top](#catalog_top)
+### 7.3 获取交易hash监管信息列表
+[top](#目录)
 
 #### 7.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1818,7 +1996,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="7.4">7.4 获取异常用户信息列表</span>  [top](#catalog_top)
+### 7.4 获取异常用户信息列表
+[top](#目录)
 
 #### 7.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1875,7 +2054,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="7.5">7.5 获取异常合约信息列表</span>  [top](#catalog_top)
+### 7.5 获取异常合约信息列表
+[top](#目录)
 
 #### 7.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1937,9 +2117,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-## <span id="8">8 群组信息模块</span>  [top](#catalog_top)
+## 8 群组信息模块
+[top](#目录)
 
-### <span id="8.1">8.1 获取群组概况</span>  [top](#catalog_top)
+### 8.1 获取群组概况
+[top](#目录)
 
 #### 8.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -1991,7 +2173,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="8.2">8.2 获取所有群组列表</span>  [top](#catalog_top)
+### 8.2 获取所有群组列表
+[top](#目录)
 
 #### 8.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2049,7 +2232,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="8.3">8.3 查询每日交易数据</span>  [top](#catalog_top)
+### 8.3 查询每日交易数据
+[top](#目录)
 
 #### 8.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2110,9 +2294,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 
 
 
-## <span id="9">9 节点管理模块</span>  [top](#catalog_top)
+## 9 节点管理模块
+[top](#目录)
 
-### <span id="9.1">9.1 查询节点列表</span>  [top](#catalog_top)
+### 9.1 查询节点列表
+[top](#目录)
 
 #### 9.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2183,7 +2369,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="9.2">9.2 查询节点信息</span>  [top](#catalog_top)
+### 9.2 查询节点信息
+[top](#目录)
 
 #### 9.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2246,9 +2433,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-## <span id="10">10 角色管理模块</span>  [top](#catalog_top)
+## 10 角色管理模块
+[top](#目录)
 
-### <span id="10.1">10.1 查询角色列表</span>  [top](#catalog_top)
+### 10.1 查询角色列表
+[top](#目录)
 
 ### 10.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2322,9 +2511,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-## <span id="11">11 用户管理模块</span>  [top](#catalog_top)
+## 11 用户管理模块 
+[top](#目录)
 
-### <span id="11.1">11.1 新增私钥用户</span>  [top](#catalog_top)
+### 11.1 新增私钥用户
+[top](#目录)
 
 #### 11.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2399,7 +2590,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="11.2">11.2 绑定公钥用户</span>  [top](#catalog_top)
+### 11.2 绑定公钥用户
+[top](#目录)
 
 #### 11.2.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2475,7 +2667,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="11.3">11.3 修改用户备注</span>  [top](#catalog_top)
+### 11.3 修改用户备注
+[top](#目录)
 
 #### 11.3.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2548,7 +2741,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="11.4">11.4 查询私钥</span>  [top](#catalog_top)
+### 11.4 查询私钥
+[top](#目录)
 
 #### 11.4.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2595,7 +2789,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 }
 ```
 
-### <span id="11.5">11.5 查询用户列表</span>  [top](#catalog_top)
+### 11.5 查询用户列表
+[top](#目录)
 
 #### 11.5.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2671,9 +2866,11 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 
 
 
-## <span id="12">12 合约方法管理模块</span>  [top](#catalog_top)
+## 12 合约方法管理模块 
+[top](#目录)
 
-### <span id="12.1">12.1 新增合约方法</span>  [top](#catalog_top)
+### 12.1 新增合约方法 
+[top](#目录)
 
 #### 12.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议
@@ -2738,7 +2935,8 @@ http://127.0.0.1:8080/webase-node-mgr/transaction/transInfo/1/0xda879949df6b5d75
 
 
 
-### <span id="12.2">12.2 根据方法编号查询</span>  [top](#catalog_top)
+### 12.2 根据方法编号查询
+[top](#目录)
 
 #### 12.1.1 传输协议规范
 * 网络传输协议：使用HTTP协议

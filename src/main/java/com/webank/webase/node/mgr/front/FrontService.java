@@ -103,6 +103,8 @@ public class FrontService {
                     .findFirst().orElseGet(() -> new PeerInfo(nodeId));
                 nodeService.addNodeInfo(group, newPeer);
             }
+            //check node status
+            nodeService.checkNodeStatus(group);
         }
 
         //clear cache
