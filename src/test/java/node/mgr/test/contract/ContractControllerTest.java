@@ -49,7 +49,7 @@ public class ContractControllerTest {
 
     private MockMvc mockMvc;
     private Integer groupId = 1;
-    private Integer userId = 700002;
+    private String userId = "";
     private String version = "1555919366883";
 
     @Autowired

@@ -19,7 +19,7 @@ import lombok.Data;
 
 @Data
 public class PrivateKeyInfo {
-
+    private String publicKey;
     private String privateKey;
     private String address;
 }

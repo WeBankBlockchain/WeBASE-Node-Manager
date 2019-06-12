@@ -55,6 +55,8 @@ public class ConstantCode {
 
     public static final RetCode SAVE_FRONT_FAIL = RetCode.mark(202009, "save front fail");
 
+    public static final RetCode REQUEST_FRONT_FAIL = RetCode.mark(202010,"request front fail");
+
     public static final RetCode CONTRACT_ABI_EMPTY = RetCode.mark(202011, "abiInfo cannot be empty");
 
     public static final RetCode USER_ID_NULL = RetCode.mark(202012, "user id cannot be empty");

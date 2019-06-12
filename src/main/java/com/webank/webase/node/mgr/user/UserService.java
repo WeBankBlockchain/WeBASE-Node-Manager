@@ -78,9 +78,9 @@ public class UserService {
         }
 
         String keyUri = String
-            .format(FrontRestTools.URI_KEY_PAIR, constants.getIsPrivateKeyEncrypt(), userName);
-        KeyPair keyPair = frontRestTools
-            .getForEntity(groupId, keyUri, KeyPair.class);
+            .format(FrontRestTools.URI_KEY_PAIR, constants.getIsPrivateKeyEncrypt(), userName,
+                groupId);
+        KeyPair keyPair = frontRestTools.getForEntity(groupId, keyUri, KeyPair.class);
         String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
         String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
         String address = Optional.ofNullable(keyPair).map(k -> k.getAddress()).orElse(null);
@@ -321,6 +321,13 @@ public class UserService {
     }
 
     /**
+     * query by groupId and address.
+     */
+    public TbUser queryByGroupIdAndAddress(int groupId, String address) {
+        return queryUser(null, groupId, null, address);
+    }
+
+    /**
      * query by userId.
      */
     public TbUser queryByUserId(Integer userId) throws NodeMgrException {
@@ -367,35 +374,36 @@ public class UserService {
     /**
      * get private key.
      */
-    public PrivateKeyInfo getPrivateKey(String userName) throws NodeMgrException {
-        log.debug("start getPrivateKey userName:{} ", userName);
-        // check user id
-        checkUserName(userName);
+    public PrivateKeyInfo getPrivateKey(int groupId, String userAddress) throws NodeMgrException {
+        log.debug("start getPrivateKey");
+        // check user
+        checkAddress(groupId, userAddress);
 
-        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userName);
+        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(groupId, userAddress);
         privateKeyInfoInfo.setPrivateKey(privateKeyInfoInfo.getPrivateKey());
         log.debug("end getPrivateKey");
         return privateKeyInfoInfo;
     }
 
     /**
-     * check user.
+     * check userAddress.
      */
-    public void checkUserName(String userName) throws NodeMgrException {
-        log.debug("start checkUserName userName:{}", userName);
-
-        if (StringUtils.isBlank(userName)) {
-            log.error("fail checkUserName userName is null");
+    public void checkAddress(int groupId, String address) throws NodeMgrException {
+        if (StringUtils.isBlank(address)) {
+            log.error("fail checkAddress address is null");
             throw new NodeMgrException(ConstantCode.INVALID_USER);
         }
+        if (groupId <= 0) {
+            log.error("fail checkAddress. groupId:{}", groupId);
+            throw new NodeMgrException(ConstantCode.INVALID_GROUP_ID);
+        }
 
-        TbUser user = queryByName(userName);
-
+        TbUser user = queryByGroupIdAndAddress(groupId, address);
         if (Objects.isNull(user)) {
-            log.warn("fail checkUserName, not fount user. userName:{} ", userName);
+            log.warn("fail checkAddress, not fount user. groupId:{} address:{}", groupId, address);
             throw new NodeMgrException(ConstantCode.INVALID_USER);
         }
-        log.debug("end checkUserName");
+        log.debug("end checkAddress");
     }
 
     /**

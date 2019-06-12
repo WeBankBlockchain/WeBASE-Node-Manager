@@ -29,8 +29,8 @@ public class TransactionInputParam {
     private Integer contractId;
     @NotNull
     private Integer groupId;
-    @NotNull
-    private Integer user;
+    @NotBlank
+    private String user;
     @NotBlank
     private String contractName;
     @NotBlank

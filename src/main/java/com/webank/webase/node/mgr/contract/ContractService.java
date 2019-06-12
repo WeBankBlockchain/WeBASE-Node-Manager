@@ -197,6 +197,8 @@ public class ContractService {
         // String version = Instant.now().toEpochMilli() + "";
         //check contract
         verifyContractNotDeploy(inputParam.getContractId(), inputParam.getGroupId());
+        //check user
+        userService.checkAddress(groupId, inputParam.getUser());
         //check contractName
         verifyContractNameNotExist(inputParam.getGroupId(), inputParam.getContractPath(),
             inputParam.getContractName(), inputParam.getContractId());
@@ -207,14 +209,10 @@ public class ContractService {
             throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);
         }
 
-        TbUser user = userService.queryByUserId(inputParam.getUser());
-        String userName = Optional.ofNullable(user).map(u -> u.getUserName())
-            .orElseThrow(() -> new NodeMgrException(ConstantCode.INVALID_USER));
-
         // deploy param
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
-        params.put("user", userName);
+        params.put("user", inputParam.getUser());
         params.put("contractName", contractName);
         // params.put("version", version);
         params.put("abiInfo", JSONArray.parseArray(inputParam.getContractAbi()));
@@ -277,16 +275,14 @@ public class ContractService {
         sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
         //check contract deploy
         verifyContractDeploy(param.getContractId(), param.getGroupId());
-
-        TbUser user = userService.queryByUserId(param.getUser());
-        String userName = Optional.ofNullable(user).map(u -> u.getUserName())
-            .orElseThrow(() -> new NodeMgrException(ConstantCode.INVALID_USER));
+        //check user
+        userService.checkAddress(param.getGroupId(), param.getUser());
 
         //send transaction
         TransactionParam transParam = new TransactionParam();
         BeanUtils.copyProperties(param, transParam);
         transParam.setUseAes(constants.getIsPrivateKeyEncrypt());
-        transParam.setUser(userName);
+        transParam.setUser(param.getUser());
 
         Object frontRsp = frontRestTools
             .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, transParam,
