@@ -94,16 +94,15 @@ public class ContractService {
         BeanUtils.copyProperties(contract, tbContract);
         tbContract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
 
-        Integer affectRow = 0;
         try {
-            affectRow = contractMapper.addContractRow(tbContract);
+           contractMapper.addContractRow(tbContract);
         } catch (RuntimeException ex) {
             log.error("fail addContractInfo", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
         // query the record of a new row
-        TbContract newContract = queryByContractId(contract.getContractId());
+        TbContract newContract = queryByContractId(tbContract.getContractId());
 
         if (StringUtils.isNotBlank(newContract.getContractBin())) {
             // update monitor unusual contract's info
