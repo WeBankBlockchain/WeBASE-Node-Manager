@@ -79,6 +79,11 @@ public class ContractService {
             tbContract = updateContract(contract);//update
         }
 
+        if (Objects.nonNull(tbContract) && StringUtils.isNotBlank(tbContract.getContractBin())) {
+            // update monitor unusual deployInputParam's info
+            monitorService.updateUnusualContract(tbContract.getGroupId(),
+                tbContract.getContractName(), tbContract.getContractBin());
+        }
         return tbContract;
     }
 
