@@ -31,6 +31,7 @@ import com.webank.webase.node.mgr.user.entity.TbUserKeyMap;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -311,34 +312,34 @@ public class UserService {
     /**
      * get private key.
      */
-    public PrivateKeyInfo getPrivateKey(Integer userId) throws NodeMgrException {
-        log.debug("start getPrivateKey userId:{} ", userId);
+    public PrivateKeyInfo getPrivateKey(String userAddress) throws NodeMgrException {
+        log.debug("start getPrivateKey ");
         // check user id
-        checkUserId(userId);
+        checkUserAddress(userAddress);
 
-        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userId);
+        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userAddress);
         privateKeyInfoInfo.setPrivateKey(privateKeyInfoInfo.getPrivateKey());
         log.debug("end getPrivateKey,privateKeyInfoInfo:{}", JSON.toJSONString(privateKeyInfoInfo));
         return privateKeyInfoInfo;
     }
 
     /**
-     * check usder id.
+     * check userAddress.
      */
-    public void checkUserId(Integer userId) throws NodeMgrException {
-        log.debug("start checkUserId userId:{}", userId);
+    public void checkUserAddress(String userAddress) throws NodeMgrException {
+        log.debug("start checkUserAddress");
 
-        if (userId == null) {
-            log.error("fail checkUserId userId is null");
-            throw new NodeMgrException(ConstantCode.USER_ID_NULL);
+        if (StringUtils.isBlank(userAddress)) {
+            log.error("fail checkUserAddress, userAddress is null");
+            throw new NodeMgrException(ConstantCode.INVALID_USER);
         }
 
-        Integer userCount = countOfUser(userId);
-        log.debug("checkUserId userId:{} userCount:{}", userId, userCount);
-        if (userCount == null || userCount == 0) {
-            throw new NodeMgrException(ConstantCode.INVALID_USER_ID);
+        TbUser user = queryByAddress(userAddress);
+        if (Objects.isNull(user)) {
+            log.error("fail checkUserAddress, invalid userAddress:{}", userAddress);
+            throw new NodeMgrException(ConstantCode.INVALID_USER);
         }
-        log.debug("end checkUserId");
+        log.debug("end checkUserAddress");
     }
 
     /**

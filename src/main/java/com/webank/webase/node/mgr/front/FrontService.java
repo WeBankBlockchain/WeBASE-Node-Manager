@@ -73,7 +73,13 @@ public class FrontService {
         //check front not exist
         checkFrontNotExist(frontIp, frontPort);
         //query group list
-        List<String> groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+        List<String> groupIdList = null;
+        try {
+            groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+        } catch (Exception e) {
+            log.error("fail newFront, frontIp:{},frontPort:{}",frontIp,frontPort);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
         //copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         //save front info
