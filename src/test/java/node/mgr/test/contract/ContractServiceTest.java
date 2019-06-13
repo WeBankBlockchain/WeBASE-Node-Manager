@@ -37,7 +37,7 @@ public class ContractServiceTest {
     @Autowired
     private ContractService contractService;
     private Integer groupId = 1;
-    private Integer userId = 700001;
+    private String userId = "";
 
 
     @Test

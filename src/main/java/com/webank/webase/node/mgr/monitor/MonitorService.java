@@ -122,7 +122,6 @@ public class MonitorService {
                 contractResult.getInterfaceName(), contractResult.getTransUnusualType());
         } catch (Exception ex) {
             log.error("fail updateUnusualContract", ex);
-            throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
         }
     }
 
@@ -320,7 +319,7 @@ public class MonitorService {
             contractAddress = frontInterfacee.getAddressByHash(groupId, transHash);
             contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
             contractName = getNameFromContractBin(groupId, contractBin);
-            interfaceName = transInput.substring(0, 10);
+            interfaceName = contractName;
         } else {    // function call
             transType = TransType.CALL.getValue();
             String methodId = transInput.substring(0, 10);

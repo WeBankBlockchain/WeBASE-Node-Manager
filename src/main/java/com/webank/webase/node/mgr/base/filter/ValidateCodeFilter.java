@@ -104,6 +104,7 @@ public class ValidateCodeFilter implements Filter {
         if (!codeInRequest.equalsIgnoreCase(realCheckCode)) {
             log.warn("fail validateCode. realCheckCode:{} codeInRequest:{}", realCheckCode,
                 codeInRequest);
+            throw new NodeMgrException(ConstantCode.INVALID_CHECK_CODE);
         }
     }
 

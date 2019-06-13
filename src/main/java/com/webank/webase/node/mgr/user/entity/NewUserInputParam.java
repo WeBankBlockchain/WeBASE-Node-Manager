@@ -19,6 +19,7 @@ package com.webank.webase.node.mgr.user.entity;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -29,6 +30,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NewUserInputParam {
     @NotBlank
+    @Pattern(regexp = "[a-zA-Z0-9_]{3,32}")
     public String userName;
     @NotNull
     public Integer groupId;

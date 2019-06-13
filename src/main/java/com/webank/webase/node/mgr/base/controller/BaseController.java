@@ -37,12 +37,13 @@ public class BaseController {
      */
     protected void checkBindResult(BindingResult result) {
         if (result.hasErrors()) {
+            log.error("param exception. error:{}", JSON.toJSONString(result.getAllErrors()));
             String errFieldStr = result.getAllErrors().stream()
                 .map(obj -> JSON.parseObject(JSON.toJSONString(obj)))
                 .map(err -> err.getString("field"))
                 .collect(Collectors.joining(","));
             StringUtils.removeEnd(errFieldStr, ",");
-            String message = "these fields can not be empty:" + errFieldStr;
+            String message = "These fields do not match:" + errFieldStr;
             throw new ParamException(ConstantCode.PARAM_EXCEPTION.getCode(), message);
         }
     }

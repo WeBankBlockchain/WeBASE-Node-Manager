@@ -31,7 +31,7 @@
 | 序号  | 软件                                          |
 |-------|---------------------------------------------------|
 | 1     | fisco-bcos 2.0                                    |
-| 2     | webase-front 0.7版本                  |
+| 2     | webase-front dev版本                  |
 | 3     | mysql5.5或5.6版本【更高版本需要更改mysql配置，可参考《install_FAQ.md》】    |
 | 4     | java1.8.0_181或更高版本                           |
 | 5     | gradle-4.10或以上版本                            |
@@ -46,7 +46,7 @@
 ## 3.2 拉取代码
 执行命令：
 ```shell
-git clone -b dev-0.7 https://github.com/WeBankFinTech/webase-node-mgr.git
+git clone -b dev https://github.com/WeBankFinTech/webase-node-mgr.git
 ```
 ## 3.3 编译代码
 进入代码根目录：

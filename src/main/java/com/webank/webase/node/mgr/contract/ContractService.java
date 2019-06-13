@@ -29,6 +29,8 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import io.netty.channel.local.LocalAddress;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -36,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
@@ -57,6 +60,8 @@ public class ContractService {
     @Autowired
     private MonitorService monitorService;
     @Autowired
+    private UserService userService;
+    @Autowired
     private FrontInterfaceService frontInterface;
     @Autowired
     private ConstantProperties constants;
@@ -74,6 +79,11 @@ public class ContractService {
             tbContract = updateContract(contract);//update
         }
 
+        if (Objects.nonNull(tbContract) && StringUtils.isNotBlank(tbContract.getContractBin())) {
+            // update monitor unusual deployInputParam's info
+            monitorService.updateUnusualContract(tbContract.getGroupId(),
+                tbContract.getContractName(), tbContract.getContractBin());
+        }
         return tbContract;
     }
 
@@ -192,6 +202,8 @@ public class ContractService {
         // String version = Instant.now().toEpochMilli() + "";
         //check contract
         verifyContractNotDeploy(inputParam.getContractId(), inputParam.getGroupId());
+        //check user
+        userService.checkAddress(groupId, inputParam.getUser());
         //check contractName
         verifyContractNameNotExist(inputParam.getGroupId(), inputParam.getContractPath(),
             inputParam.getContractName(), inputParam.getContractId());
@@ -205,7 +217,7 @@ public class ContractService {
         // deploy param
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
-        params.put("user", String.valueOf(inputParam.getUser()));
+        params.put("user", inputParam.getUser());
         params.put("contractName", contractName);
         // params.put("version", version);
         params.put("abiInfo", JSONArray.parseArray(inputParam.getContractAbi()));
@@ -268,11 +280,14 @@ public class ContractService {
         sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
         //check contract deploy
         verifyContractDeploy(param.getContractId(), param.getGroupId());
+        //check user
+        userService.checkAddress(param.getGroupId(), param.getUser());
 
         //send transaction
         TransactionParam transParam = new TransactionParam();
         BeanUtils.copyProperties(param, transParam);
         transParam.setUseAes(constants.getIsPrivateKeyEncrypt());
+        transParam.setUser(param.getUser());
 
         Object frontRsp = frontRestTools
             .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, transParam,

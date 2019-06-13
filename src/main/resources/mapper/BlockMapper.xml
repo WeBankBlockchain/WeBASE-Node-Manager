@@ -73,6 +73,6 @@
 
   <delete id="remove">
     DELETE tb from ${tableName} as tb,(SELECT max(block_number) maxBlock FROM ${tableName}) AS tmp
-    where tb.block_number &lt;= tmp.maxBlock - ${blockRetainMax} limit 2000
+    where tb.block_number &lt;= tmp.maxBlock - ${blockRetainMax}
   </delete>
 </mapper>
