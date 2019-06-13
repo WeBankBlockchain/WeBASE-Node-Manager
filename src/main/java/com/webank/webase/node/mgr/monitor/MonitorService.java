@@ -71,6 +71,7 @@ public class MonitorService {
     private FrontInterfaceService frontInterfacee;
     @Autowired
     private ConstantProperties cProperties;
+    private static final String DEPLOY_OR_CNS_SPLIT = ",";
 
 
     public void addRow(int groupId, TbMonitor tbMonitor) {
@@ -318,6 +319,7 @@ public class MonitorService {
         if (isDeploy(transTo)) {
             contractAddress = frontInterfacee.getAddressByHash(groupId, transHash);
             contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
+            contractBin = removeBinFirstAndLast(contractBin);
             contractName = getNameFromContractBin(groupId, contractBin);
             interfaceName = contractName;
         } else {    // function call
@@ -471,7 +473,9 @@ public class MonitorService {
         if (StringUtils.isBlank(cnsAddress)) {
             return false;
         }
-        return cnsAddress.equals(address);
+
+        List<String> addressList = Arrays.asList(cnsAddress.split(DEPLOY_OR_CNS_SPLIT));
+        return addressList.contains(address);
     }
 
     /**
