@@ -118,7 +118,7 @@ public class ContractController extends BaseController {
         int count = contractService.countOfContract(queryParam);
         if (count > 0) {
             Integer start = Optional.ofNullable(inputParam.getPageNumber())
-                .map(page -> (page - 1) * inputParam.getPageNumber()).orElse(0);
+                .map(page -> (page - 1) * inputParam.getPageSize()).orElse(0);
             queryParam.setStart(start);
             queryParam.setFlagSortedByTime(SqlSortType.DESC.getValue());
             // query list

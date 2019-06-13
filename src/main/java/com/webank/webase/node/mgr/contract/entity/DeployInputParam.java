@@ -19,16 +19,14 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 /**
  * receive contract info entity.
  */
 @Data
 public class DeployInputParam{
-    @NotNull
-    private Integer user;
+    @NotBlank
+    private String user;
     @NotNull
     private Integer groupId;
     @NotNull
