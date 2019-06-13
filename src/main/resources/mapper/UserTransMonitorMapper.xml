@@ -194,7 +194,7 @@
     </if>
   </select>
 
-  <select id="listOfUnusualContract" parameterType="Map"
+  <select id="listOfUnusualContract" parameterType="Map"cc
     resultType="com.webank.webase.node.mgr.monitor.UnusualContractInfo">
     select
     t.contract_name as contractName,
