@@ -93,8 +93,8 @@ public class ContractService {
      */
     private TbContract newContract(Contract contract) {
         //check contract not exist.
-        verifyContractNotExist(contract.getGroupId(), contract.getContractPath(),
-            contract.getContractName());
+        verifyContractNotExist(contract.getGroupId(), contract.getContractName(),
+            contract.getContractPath());
 
         //add to database.
         TbContract tbContract = new TbContract();
