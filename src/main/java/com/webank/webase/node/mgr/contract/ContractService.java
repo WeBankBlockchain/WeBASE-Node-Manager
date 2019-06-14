@@ -74,6 +74,12 @@ public class ContractService {
             tbContract = updateContract(contract);//update
         }
 
+        if (Objects.nonNull(tbContract) && StringUtils.isNotBlank(tbContract.getContractBin())) {
+            // update monitor unusual deployInputParam's info
+            monitorService.updateUnusualContract(tbContract.getGroupId(),
+                tbContract.getContractName(), tbContract.getContractBin());
+        }
+
         return tbContract;
     }
 
@@ -83,8 +89,8 @@ public class ContractService {
      */
     private TbContract newContract(Contract contract) {
         //check contract not exist.
-        verifyContractNotExist(contract.getGroupId(), contract.getContractPath(),
-            contract.getContractName());
+        verifyContractNotExist(contract.getGroupId(), contract.getContractName(),
+            contract.getContractPath());
 
         //add to database.
         TbContract tbContract = new TbContract();
@@ -205,7 +211,7 @@ public class ContractService {
         // deploy param
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
-        params.put("user", String.valueOf(inputParam.getUser()));
+        params.put("user", inputParam.getUser());
         params.put("contractName", contractName);
         // params.put("version", version);
         params.put("abiInfo", JSONArray.parseArray(inputParam.getContractAbi()));
@@ -229,10 +235,6 @@ public class ContractService {
         //tbContract.setContractVersion(version);
         tbContract.setDeployTime(LocalDateTime.now());
         contractMapper.update(tbContract);
-
-        // update monitor unusual deployInputParam's info
-        monitorService
-            .updateUnusualContract(groupId, contractName, inputParam.getContractBin());
 
         log.debug("end deployContract. contractId:{} groupId:{} contractAddress:{}",
             tbContract.getContractId(), groupId, contractAddress);

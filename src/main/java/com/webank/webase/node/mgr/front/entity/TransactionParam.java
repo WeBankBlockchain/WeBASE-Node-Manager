@@ -28,8 +28,8 @@ public class TransactionParam {
 
     @NotNull
     private Integer groupId;
-    @NotNull
-    private Integer user;
+    @NotBlank
+    private String user;
     @NotBlank
     private String contractName;
     @NotBlank
