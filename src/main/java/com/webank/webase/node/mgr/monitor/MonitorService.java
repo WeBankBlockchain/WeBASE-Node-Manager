@@ -71,6 +71,7 @@ public class MonitorService {
     private FrontInterfaceService frontInterfacee;
     @Autowired
     private ConstantProperties cProperties;
+    private static final String DEPLOY_OR_CNS_SPLIT = ",";
 
 
     public void addRow(int groupId, TbMonitor tbMonitor) {
@@ -122,7 +123,6 @@ public class MonitorService {
                 contractResult.getInterfaceName(), contractResult.getTransUnusualType());
         } catch (Exception ex) {
             log.error("fail updateUnusualContract", ex);
-            throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
         }
     }
 
@@ -319,8 +319,9 @@ public class MonitorService {
         if (isDeploy(transTo)) {
             contractAddress = frontInterfacee.getAddressByHash(groupId, transHash);
             contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
+            contractBin = removeBinFirstAndLast(contractBin);
             contractName = getNameFromContractBin(groupId, contractBin);
-            interfaceName = transInput.substring(0, 10);
+            interfaceName = contractName;
         } else {    // function call
             transType = TransType.CALL.getValue();
             String methodId = transInput.substring(0, 10);
@@ -472,7 +473,8 @@ public class MonitorService {
         if (StringUtils.isBlank(cnsAddress)) {
             return false;
         }
-        return cnsAddress.equals(address);
+        List<String> addressList = Arrays.asList(cnsAddress.split(DEPLOY_OR_CNS_SPLIT));
+        return addressList.contains(address);
     }
 
     /**
