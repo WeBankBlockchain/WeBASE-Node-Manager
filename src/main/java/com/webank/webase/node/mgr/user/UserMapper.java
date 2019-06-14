@@ -61,9 +61,9 @@ public interface UserMapper {
     Integer addUserKeyMapRow(TbUserKeyMap tbUserKeyMap);
 
     /**
-     * query private key by user id.
+     * query private key by userAddress.
      */
-    PrivateKeyInfo queryPrivateKey(Integer userId);
+    PrivateKeyInfo queryPrivateKey(String userAddress);
 
     /**
      * query max chainIndex of user.
