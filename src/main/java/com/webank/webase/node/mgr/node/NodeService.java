@@ -198,10 +198,11 @@ public class NodeService {
             BigInteger localBlockNumber = tbNode.getBlockNumber();
             BigInteger localPbftView = tbNode.getPbftView();
             LocalDateTime modifyTime = tbNode.getModifyTime();
+            LocalDateTime createTime = tbNode.getCreateTime();
 
             Duration duration = Duration.between(modifyTime, LocalDateTime.now());
             Long subTime = duration.toMillis();
-            if (subTime < CHECK_NODE_WAIT_MIN_MILLIS) {
+            if (subTime < CHECK_NODE_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
                 log.info("checkNodeStatus jump over. subTime:{}", subTime);
                 return;
             }
@@ -210,7 +211,6 @@ public class NodeService {
             BigInteger latestView = consensusList.stream()
                 .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
                 .orElse(BigInteger.ZERO);//pbftView
-
 
             if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
                 log.warn(
