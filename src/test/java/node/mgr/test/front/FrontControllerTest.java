@@ -52,7 +52,7 @@ public class FrontControllerTest {
     @Test
     public void testNewFront() throws Exception {
         FrontInfo param = new FrontInfo();
-        param.setFrontIp("10.39.182.200");
+        param.setFrontIp("localhost");
         param.setFrontPort(8081);
         param.setAgency("1fe");
 

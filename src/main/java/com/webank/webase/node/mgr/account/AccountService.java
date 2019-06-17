@@ -91,7 +91,6 @@ public class AccountService {
         // check role id
         roleService.roleIdExist(roleId);
         // encode password
-        // String sha256Str = NodeMgrTools.shaEncode(accountInfo.getAccountPwd());
         String encryptStr = passwordEncoder.encode(accountInfo.getAccountPwd());
         // add account row
         TbAccountInfo rowInfo = new TbAccountInfo(accountStr, encryptStr, roleId, null);

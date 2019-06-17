@@ -24,3 +24,13 @@ INSERT INTO tb_user(user_name, public_key, user_status, user_type, address, has_
 -- 4、init tb_user_key_mapping data
 -- ----------------------------
 INSERT INTO tb_user_key_mapping(user_id, private_key, map_status, create_time, modify_time) VALUES (700001, 'SzK9KCjpyVCW0T9K9r/MSlmcpkeckYKVn/D1X7fzzp18MM7yHhUHQugTxKXVJJY5XWOb4zZ79IXMBu77zmXsr0mCRnATZTUqFfWLX6tUBIw=', 1, now(), now());
+
+
+
+
+-- ----------------------------
+-- 5、init tb_method   (cns info)
+-- ----------------------------
+INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, `create_time`, `modify_time`) VALUES ('0x819a3d62', 1, '{\"constant\":true,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"}],\"name\":\"selectByName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}', 'function', '2019-06-17 20:32:30', '2019-06-17 20:32:30');
+INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, `create_time`, `modify_time`) VALUES ('0x897f0251', 1, '{\"constant\":true,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"}],\"name\":\"selectByNameAndVersion\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}', 'function', '2019-06-17 20:32:30', '2019-06-17 20:32:30');
+INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, `create_time`, `modify_time`) VALUES ('0xa216464b', 1, '{\"constant\":false,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"},{\"name\":\"abi\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}', 'function', '2019-06-17 20:32:30', '2019-06-17 20:32:30');

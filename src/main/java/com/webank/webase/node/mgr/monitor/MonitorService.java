@@ -292,13 +292,13 @@ public class MonitorService {
                 tbMonitor.setModifyTime(trans.getBlockTimestamp());
                 monitorService.dataAddAndUpdate(groupId, tbMonitor);
             } catch (Exception ex) {
-                log.error("transaction:{} analysis fail...", trans.getTransHash(),
-                    ex);
+                log.error("transaction:{} analysis fail...", trans.getTransHash(),ex);
             } finally {
                 try {
                     Thread.sleep(cProperties.getAnalysisSleepTime());
                 } catch (InterruptedException e) {
                     log.error("thread sleep fail", e);
+                    Thread.currentThread().interrupt();
                 }
             }
         }
