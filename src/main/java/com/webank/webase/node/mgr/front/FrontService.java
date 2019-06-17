@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.front;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -29,7 +30,9 @@ import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,7 +59,8 @@ public class FrontService {
     private FrontGroupMapCache frontGroupMapCache;
     @Autowired
     private ResetGroupListTask resetGroupListTask;
-    private List<String> NOT_SUPPORT_IP_LIST = Arrays.asList("0.0.0.0", "localhost", "127.0.0.1");
+    @Autowired
+    private ConstantProperties constants;
 
     /**
      * add new front
@@ -120,7 +124,11 @@ public class FrontService {
      * check not support ip.
      */
     private void checkNotSupportIp(String ip) {
-        if (NOT_SUPPORT_IP_LIST.contains(ip)) {
+
+        String ipConfig = constants.getNotSupportFrontIp();
+        if(StringUtils.isBlank(ipConfig))return;
+        List<String> list = Arrays.asList(ipConfig.split(","));
+        if (list.contains(ip)) {
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_IP);
         }
     }

@@ -299,6 +299,7 @@ public class MonitorService {
                     Thread.sleep(cProperties.getAnalysisSleepTime());
                 } catch (InterruptedException e) {
                     log.error("thread sleep fail", e);
+                    Thread.currentThread().interrupt();
                 }
             }
         }

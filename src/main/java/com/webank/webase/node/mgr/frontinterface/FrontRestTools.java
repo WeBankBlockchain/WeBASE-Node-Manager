@@ -263,6 +263,10 @@ public class FrontRestTools {
             String url = buildFrontUrl(list, uri, method);//build url
             try {
                 HttpEntity entity = buildHttpEntity(param);// build entity
+                if (null == restTemplate) {
+                    log.error("fail restTemplateExchange, rest is null. groupId:{} uri:{}", groupId,uri);
+                    throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
+                }
                 ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
                 return response.getBody();
             } catch (ResourceAccessException ex) {
