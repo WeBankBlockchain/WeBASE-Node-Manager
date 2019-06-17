@@ -42,7 +42,7 @@ public class FrontServiceTest {
     private BigInteger blockNumber = new BigInteger("12");
     private String transHash = "0x1d99fdfa84b90d9478f09b722bb85b7d804e6b4d0273ec94fa4418c56a415211";
     private String blockHash = "0x337eb77084c0e6b09c508cc0f7dbc125af459c2aab19b9ca43c731ffc9fe604f";
-    private String frontIp = "127.0.0.1";
+    private String frontIp = "localhost";
     private Integer frontPort = 8081;
 
     @Test

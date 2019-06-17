@@ -64,7 +64,7 @@ public class TransMonitorTask {
     private void monitorHandle(int groupId) {
         int unusualUserCount = monitorService.countOfUnusualUser(groupId, null);
         int unusualContractCount = monitorService.countOfUnusualContract(groupId, null);
-        if (unusualUserCount >= UNUSUAL_MAX_COUNT || unusualUserCount >= UNUSUAL_MAX_COUNT) {
+        if (unusualUserCount >= UNUSUAL_MAX_COUNT || unusualContractCount >= UNUSUAL_MAX_COUNT) {
             log.error(
                 "monitorHandle jump over. unusualUserCount:{} unusualUserCount:{} UNUSUAL_MAX_COUNT:{}",
                 unusualUserCount, unusualContractCount, UNUSUAL_MAX_COUNT);
