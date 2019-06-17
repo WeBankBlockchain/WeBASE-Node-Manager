@@ -203,7 +203,7 @@ public class ContractService {
         //check contract
         verifyContractNotDeploy(inputParam.getContractId(), inputParam.getGroupId());
         //check user
-        userService.checkAddress(groupId, inputParam.getUser());
+        userService.checkAddress(inputParam.getUser());
         //check contractName
         verifyContractNameNotExist(inputParam.getGroupId(), inputParam.getContractPath(),
             inputParam.getContractName(), inputParam.getContractId());
@@ -281,7 +281,7 @@ public class ContractService {
         //check contract deploy
         verifyContractDeploy(param.getContractId(), param.getGroupId());
         //check user
-        userService.checkAddress(param.getGroupId(), param.getUser());
+        userService.checkAddress(param.getUser());
 
         //send transaction
         TransactionParam transParam = new TransactionParam();

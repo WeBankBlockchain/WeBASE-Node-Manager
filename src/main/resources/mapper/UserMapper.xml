@@ -118,7 +118,7 @@
     resultType="com.webank.webase.node.mgr.user.entity.PrivateKeyInfo">
 		select a.address,b.private_key privateKey from tb_user a left join tb_user_key_mapping b on(a.user_id=b.user_id)
 		where
-		b.map_status=1 and a.group_id = #{groupId} and a.address = #{address}
+		b.map_status=1 and a.address = #{address}
 	</select>
 
   <select id="queryUserNameByAddress" resultType="java.lang.String">

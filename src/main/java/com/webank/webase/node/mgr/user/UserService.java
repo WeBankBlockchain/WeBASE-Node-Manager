@@ -78,8 +78,7 @@ public class UserService {
         }
 
         String keyUri = String
-            .format(FrontRestTools.URI_KEY_PAIR, constants.getIsPrivateKeyEncrypt(), userName,
-                groupId);
+            .format(FrontRestTools.URI_KEY_PAIR, constants.getIsPrivateKeyEncrypt());
         KeyPair keyPair = frontRestTools.getForEntity(groupId, keyUri, KeyPair.class);
         String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
         String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
@@ -291,20 +290,6 @@ public class UserService {
         }
     }
 
-    /**
-     * query by groupId、userName.
-     */
-    public TbUser queryUser(Integer groupId, String userName)
-        throws NodeMgrException {
-        return queryUser(null, groupId, userName, null);
-    }
-
-    /**
-     * query by groupId.
-     */
-    public TbUser queryBygroupId(Integer groupId) throws NodeMgrException {
-        return queryUser(null, groupId, null, null);
-    }
 
     /**
      * query by userName.
@@ -318,13 +303,6 @@ public class UserService {
      */
     public TbUser queryByAddress(String address) throws NodeMgrException {
         return queryUser(null, null, null, address);
-    }
-
-    /**
-     * query by groupId and address.
-     */
-    public TbUser queryByGroupIdAndAddress(int groupId, String address) {
-        return queryUser(null, groupId, null, address);
     }
 
     /**
@@ -374,12 +352,12 @@ public class UserService {
     /**
      * get private key.
      */
-    public PrivateKeyInfo getPrivateKey(int groupId, String userAddress) throws NodeMgrException {
+    public PrivateKeyInfo getPrivateKey(String userAddress) throws NodeMgrException {
         log.debug("start getPrivateKey");
         // check user
-        checkAddress(groupId, userAddress);
+        checkAddress(userAddress);
 
-        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(groupId, userAddress);
+        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userAddress);
         privateKeyInfoInfo.setPrivateKey(privateKeyInfoInfo.getPrivateKey());
         log.debug("end getPrivateKey");
         return privateKeyInfoInfo;
@@ -388,19 +366,15 @@ public class UserService {
     /**
      * check userAddress.
      */
-    public void checkAddress(int groupId, String address) throws NodeMgrException {
+    public void checkAddress(String address) throws NodeMgrException {
         if (StringUtils.isBlank(address)) {
             log.error("fail checkAddress address is null");
             throw new NodeMgrException(ConstantCode.INVALID_USER);
         }
-        if (groupId <= 0) {
-            log.error("fail checkAddress. groupId:{}", groupId);
-            throw new NodeMgrException(ConstantCode.INVALID_GROUP_ID);
-        }
 
-        TbUser user = queryByGroupIdAndAddress(groupId, address);
+        TbUser user = queryByAddress(address);
         if (Objects.isNull(user)) {
-            log.warn("fail checkAddress, not fount user. groupId:{} address:{}", groupId, address);
+            log.warn("fail checkAddress, not fount user. address:{}", address);
             throw new NodeMgrException(ConstantCode.INVALID_USER);
         }
         log.debug("end checkAddress");
