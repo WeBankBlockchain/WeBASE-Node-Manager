@@ -20,23 +20,20 @@ import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.ImageToken;
 import com.webank.webase.node.mgr.account.entity.PasswordInfo;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JwtUtils;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.TokenImgGenerator;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +75,7 @@ public class AccountController extends BaseController {
             .createJwtToken(constants.getJwtSecret(), null, checkCode, JWT_TOKEN_LIFE_TIME_MILLS);
         log.info("new checkCode:" + checkCode);
 
-        OutputStream outputstream = null;
+
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         try {
             // 得到图形验证码并返回给页面
@@ -92,15 +89,6 @@ public class AccountController extends BaseController {
         } catch (Exception e) {
             log.error("fail getPictureCheckCode", e);
             throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
-        } finally {
-            if (outputstream != null) {
-                try {
-                    outputstream.flush();
-                    outputstream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 

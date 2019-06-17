@@ -55,9 +55,11 @@ public class PullBlockInfoTask {
             .forEach(group -> blockService.pullBlockByGroupId(latch, group.getGroupId()));
 
         try {
-            latch.await(5, TimeUnit.MINUTES);//5min
+            boolean result = latch.await(5, TimeUnit.MINUTES);//5min
+            log.info("latch result:{}", result);
         } catch (InterruptedException ex) {
             log.error("InterruptedException", ex);
+            Thread.currentThread().interrupt();
         }
 
         log.info("end pullBLock useTime:{} ",
