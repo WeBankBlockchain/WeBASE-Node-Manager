@@ -47,6 +47,7 @@ public class ConstantProperties {
     private String deleteInfoCron = "0 0/2 * * * ?";// Execute once every two minute
     private Long resetGroupListCycle = 600000L; //10 min
     private String groupInvalidGrayscaleValue;  //y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
+    private String notSupportFrontIp;
 
     //block into
     private BigInteger blockRetainMax = new BigInteger("10000");

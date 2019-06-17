@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -193,6 +194,11 @@ public class NodeService {
 
         //getPeerOfConsensusStatus
         List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
+        if(Objects.isNull(consensusList)){
+            log.error("fail checkNodeStatus, consensusList is null");
+            return;
+        }
+
         for (TbNode tbNode : nodeList) {
             String nodeId = tbNode.getNodeId();
             BigInteger localBlockNumber = tbNode.getBlockNumber();
