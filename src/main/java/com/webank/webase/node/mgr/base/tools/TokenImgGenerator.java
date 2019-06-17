@@ -49,7 +49,6 @@ public class TokenImgGenerator {
 //		int period = generator.nextInt(2);
         int period = generator.nextInt(200) + 10;
 
-        boolean borderGap = false;
         int frames = 1;
 //		int phase = generator.nextInt(2);
         int phase = generator.nextInt(200);
@@ -60,11 +59,6 @@ public class TokenImgGenerator {
                 + (6.2831853071795862D * (double) phase)
                 / (double) frames);
             g.copyArea(0, i, w1, 1, (int) d, 0);
-            if (borderGap) {
-                g.setColor(color);
-                g.drawLine((int) d, i, 0, i);
-                g.drawLine((int) d + w1, i, w1, i);
-            }
         }
 
     }

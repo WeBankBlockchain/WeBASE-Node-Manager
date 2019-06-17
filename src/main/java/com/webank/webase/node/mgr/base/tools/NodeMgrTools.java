@@ -282,9 +282,10 @@ public class NodeMgrTools {
         //check host
         checkServerHostConnect(serverHost);
 
+        Socket socket = null;
         try {
             //check port
-            Socket socket = new Socket();
+            socket = new Socket();
             socket.setReceiveBufferSize(8193);
             socket.setSoTimeout(500);
             SocketAddress address = new InetSocketAddress(serverHost, serverPort);
@@ -292,6 +293,14 @@ public class NodeMgrTools {
         } catch (Exception ex) {
             log.error("fail checkServerConnect", ex);
             throw new NodeMgrException(ConstantCode.SERVER_PORT_CONNECT_FAIL);
+        } finally {
+            if (Objects.nonNull(socket)) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    log.error("fail close socket", e);
+                }
+            }
         }
     }
 
@@ -306,7 +315,7 @@ public class NodeMgrTools {
         try {
             response.getWriter().write(JSON.toJSONString(baseResponse));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("fail responseRetCodeException",e);
         }
     }
 
