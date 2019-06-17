@@ -29,9 +29,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NewUserInputParam {
     @NotBlank
-    public String userName;
+    private String userName;
     @NotNull
-    public Integer groupId;
-    public String description;
-    public Integer userType = UserType.GENERALUSER.getValue();
+    private Integer groupId;
+    private String description;
+    private Integer userType = UserType.GENERALUSER.getValue();
 }
