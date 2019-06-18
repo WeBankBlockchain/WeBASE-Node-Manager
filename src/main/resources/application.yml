@@ -54,11 +54,13 @@ constant:
   maxRequestFail: 3
   sleepWhenHttpMaxFail: 60000
   ###transaction monitor
-  insertTransMonitorCron: "0 0/10 * * * ?"
-  monitorInfoRetainMax: 10000
+  transMonitorTaskFixedDelay: 60000  #How long does it take to start the next task after the end (second)
+  transMonitorTaskExecuteMaxTime: 10 # Length of time each task is executed (minute)
   analysisSleepTime: 200
+  monitorInfoRetainMax: 10000
   isMonitorIgnoreUser: false
   isMonitorIgnoreContract: false
+  monitorUnusualMaxCount: 20
   cnsAddress: 0x0000000000000000000000000000000000001004,0x0000000000000000000000000000000000000000
 
 
