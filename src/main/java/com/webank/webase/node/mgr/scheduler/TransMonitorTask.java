@@ -14,15 +14,14 @@
 package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.monitor.MonitorService;
-import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
-import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,10 +34,7 @@ public class TransMonitorTask {
     private MonitorService monitorService;
     @Autowired
     private GroupService groupService;
-    @Autowired
-    private TransHashService transHashService;
-    @Autowired
-    private ConstantProperties cProperties;
+    private CountDownLatch latch;
 
 
     /**
@@ -54,28 +50,21 @@ public class TransMonitorTask {
             return;
         }
 
-        groupList.stream().forEach(group -> monitorHandle(group.getGroupId()));
+        latch = new CountDownLatch(groupList.size());
+        groupList.stream()
+            .forEach(group -> monitorService.transMonitorByGroupId(latch, group.getGroupId()));
+
+        try {
+            boolean result = latch.await(5, TimeUnit.MINUTES);//5min
+            log.debug("monitor latch result:{}", result);
+        } catch (InterruptedException ex) {
+            log.error("InterruptedException", ex);
+            Thread.currentThread().interrupt();
+        }
+
         log.info("end monitor. useTime:{} ",
             Duration.between(startTime, Instant.now()).toMillis());
     }
 
 
-    /**
-     * monitor every group.
-     */
-    private void monitorHandle(int groupId) {
-        int unusualUserCount = monitorService.countOfUnusualUser(groupId, null);
-        int unusualContractCount = monitorService.countOfUnusualContract(groupId, null);
-        int unusualMaxCount = cProperties.getMonitorUnusualMaxCount();
-        if (unusualUserCount >= unusualMaxCount || unusualContractCount >= unusualMaxCount) {
-            log.error(
-                "monitorHandle jump over. unusualUserCount:{} unusualUserCount:{} monitorUnusualMaxCount:{}",
-                unusualUserCount, unusualContractCount, unusualMaxCount);
-            return;
-        }
-        List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList(groupId);
-        if (transHashList != null && transHashList.size() > 0) {
-            monitorService.insertTransMonitorInfo(groupId, transHashList);
-        }
-    }
 }

@@ -61,7 +61,7 @@
         select * from ${tableName}
         where statistics_flag=1
         order by block_number
-        limit 0,10000
+        limit 2000
     </select>
 
   <select id="listOfUnStatTransHashByJob" resultMap="transHashMap">

@@ -16,9 +16,10 @@
 package com.webank.webase.node.mgr.security;
 
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,10 +35,15 @@ public class LoginFailHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
         AuthenticationException ex)
-        throws JsonProcessingException, IOException {
+        throws IOException {
         log.info("login fail", ex);
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.LOGIN_FAIL);
-        baseResponse.setMessage(ex.getMessage());
+        String errorMsg = ex.getMessage();
+        RetCode retCode = ConstantCode.PASSWORD_ERROR; //default password fail
+        if(errorMsg.contains("code")){
+             retCode = JSONObject.parseObject(errorMsg,RetCode.class);
+        }
+
+        BaseResponse baseResponse = new BaseResponse(retCode);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(JSON.toJSONString(baseResponse));
     }

@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -58,6 +59,7 @@ public class ContractService {
     @Autowired
     private FrontRestTools frontRestTools;
     @Autowired
+    @Lazy
     private MonitorService monitorService;
     @Autowired
     private UserService userService;

@@ -42,11 +42,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,10 +61,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class MonitorService {
 
     @Autowired
-    MonitorService monitorService;
-    @Autowired
     private MonitorMapper monitorMapper;
     @Autowired
+    @Lazy
     private ContractService contractService;
     @Autowired
     private UserService userService;
@@ -71,7 +73,69 @@ public class MonitorService {
     private FrontInterfaceService frontInterfacee;
     @Autowired
     private ConstantProperties cProperties;
+
     private static final String DEPLOY_OR_CNS_SPLIT = ",";
+
+
+    /**
+     * monitor every group.
+     */
+    @Async(value = "mgrAsyncExecutor")
+    public void transMonitorByGroupId(CountDownLatch latch, int groupId) {
+        try {
+            Instant startTimem = Instant.now();//start time
+            Long useTimeSum = 0L;
+            LocalDateTime createTime = LocalDateTime.now(); //createTime of monitor info
+            do {
+                List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList(groupId);
+                if (Objects.isNull(transHashList) || transHashList.size() == 0) {
+                    log.debug("transMonitorByGroupId jump over. transHashList is empty");
+                    return;
+                }
+
+                if (checkUnusualMax(groupId)) {
+                    return;
+                }
+
+                //monitor
+                for (TbTransHash trans : transHashList) {
+                    if (createTime.getDayOfYear() != trans.getBlockTimestamp().getDayOfYear()) {
+                        createTime = trans.getBlockTimestamp();
+                    }
+                    monitorTransHash(groupId, trans, createTime);
+                }
+
+                //monitor useTime
+                useTimeSum = Duration.between(startTimem, Instant.now()).toMinutes();
+                log.debug("monitor groupId:{} useTimeSum:{} maxTime:{}", groupId, useTimeSum,
+                    cProperties.getTransMonitorTaskExecuteMaxTime());
+            } while (useTimeSum < cProperties.getTransMonitorTaskExecuteMaxTime());
+            log.debug("end monitor. groupId:{} allUseTime:{", groupId, useTimeSum);
+        } catch (Exception ex) {
+            log.error("fail transMonitorByGroupId, group:{}", groupId, ex);
+        } finally {
+            if (Objects.nonNull(latch)) {
+                latch.countDown();
+            }
+        }
+    }
+
+    /**
+     * check unusualUserCount or unusualContractCount is max.
+     */
+    private boolean checkUnusualMax(int groupId) {
+        int unusualUserCount = this.countOfUnusualUser(groupId, null);
+        int unusualContractCount = this.countOfUnusualContract(groupId, null);
+        int unusualMaxCount = cProperties.getMonitorUnusualMaxCount();
+        if (unusualUserCount >= unusualMaxCount
+            || unusualContractCount >= unusualMaxCount) {
+            log.error(
+                "monitorHandle jump over. unusualUserCount:{} unusualUserCount:{} monitorUnusualMaxCount:{}",
+                unusualUserCount, unusualContractCount, unusualMaxCount);
+            return true;
+        }
+        return false;
+    }
 
 
     public void addRow(int groupId, TbMonitor tbMonitor) {
@@ -254,57 +318,45 @@ public class MonitorService {
     }
 
     /**
-     * add trans monitor info.
+     * monitor TransHash.
      */
-    public void insertTransMonitorInfo(int groupId, List<TbTransHash> transList) {
-        Instant startTime = Instant.now();
-        log.info("start insertTransMonitorInfo startTime:{}", startTime.toEpochMilli());
+    public void monitorTransHash(int groupId, TbTransHash trans, LocalDateTime createTime) {
 
-        LocalDateTime createTime = transList.get(0).getBlockTimestamp();
-        // query untreated TxHash
-        for (TbTransHash trans : transList) {
+        try {
+            ChainTransInfo chanTrans = frontInterfacee
+                .getTransInfoByHash(groupId, trans.getTransHash());
+            if (Objects.isNull(chanTrans)) {
+                log.error("monitor jump over,invalid hash. groupId:{} hash:{}", groupId,
+                    trans.getTransHash());
+                return;
+            }
+
+            // monitor user
+            UserMonitorResult userResult = monitorUser(groupId, trans.getTransFrom());
+            //monitor contract
+            ContractMonitorResult contractRes = monitorContract(groupId, trans.getTransHash(),
+                chanTrans.getTo(), chanTrans.getInput(), trans.getBlockNumber());
+
+            TbMonitor tbMonitor = new TbMonitor();
+            BeanUtils.copyProperties(userResult, tbMonitor);
+            BeanUtils.copyProperties(contractRes, tbMonitor);
+            tbMonitor.setTransHashs(trans.getTransHash());
+            tbMonitor.setTransHashLastest(trans.getTransHash());
+            tbMonitor.setTransCount(1);
+            tbMonitor.setCreateTime(createTime);
+            tbMonitor.setModifyTime(trans.getBlockTimestamp());
+            this.dataAddAndUpdate(groupId, tbMonitor);
+        } catch (Exception ex) {
+            log.error("transaction:{} analysis fail...", trans.getTransHash(), ex);
+            return;
+        } finally {
             try {
-                if (createTime.getDayOfYear() != trans.getBlockTimestamp().getDayOfYear()) {
-                    createTime = trans.getBlockTimestamp();
-                }
-
-                ChainTransInfo chanTrans = frontInterfacee
-                    .getTransInfoByHash(groupId, trans.getTransHash());
-                if (Objects.isNull(chanTrans)) {
-                    log.error("monitor jump over,invalid hash. groupId:{} hash:{}", groupId,
-                        trans.getTransHash());
-                    continue;
-                }
-
-                // monitor user
-                UserMonitorResult userResult = monitorUser(groupId, trans.getTransFrom());
-                //monitor contract
-                ContractMonitorResult contractRes = monitorContract(groupId, trans.getTransHash(),
-                    chanTrans.getTo(), chanTrans.getInput(), trans.getBlockNumber());
-
-                TbMonitor tbMonitor = new TbMonitor();
-                BeanUtils.copyProperties(userResult, tbMonitor);
-                BeanUtils.copyProperties(contractRes, tbMonitor);
-                tbMonitor.setTransHashs(trans.getTransHash());
-                tbMonitor.setTransHashLastest(trans.getTransHash());
-                tbMonitor.setTransCount(1);
-                tbMonitor.setCreateTime(createTime);
-                tbMonitor.setModifyTime(trans.getBlockTimestamp());
-                monitorService.dataAddAndUpdate(groupId, tbMonitor);
-            } catch (Exception ex) {
-                log.error("transaction:{} analysis fail...", trans.getTransHash(),
-                    ex);
-            } finally {
-                try {
-                    Thread.sleep(cProperties.getAnalysisSleepTime());
-                } catch (InterruptedException e) {
-                    log.error("thread sleep fail", e);
-                    Thread.currentThread().interrupt();
-                }
+                Thread.sleep(cProperties.getAnalysisSleepTime());
+            } catch (InterruptedException e) {
+                log.error("thread sleep fail", e);
+                Thread.currentThread().interrupt();
             }
         }
-        log.info("end insertTransMonitorInfo useTime:{}",
-            Duration.between(startTime, Instant.now()).toMillis());
     }
 
 
@@ -400,9 +452,9 @@ public class MonitorService {
      */
     @Transactional
     public void dataAddAndUpdate(int groupId, TbMonitor tbMonitor) {
-        TbMonitor dbInfo = monitorService.queryTbMonitor(groupId, tbMonitor);
+        TbMonitor dbInfo = this.queryTbMonitor(groupId, tbMonitor);
         if (dbInfo == null) {
-            monitorService.addRow(groupId, tbMonitor);
+            this.addRow(groupId, tbMonitor);
         } else {
             String[] txHashsArr = dbInfo.getTransHashs().split(",");
             if (txHashsArr.length < 5) {
@@ -412,7 +464,7 @@ public class MonitorService {
             } else {
                 tbMonitor.setTransHashs(dbInfo.getTransHashs());
             }
-            monitorService.updateRow(groupId, tbMonitor);
+            this.updateRow(groupId, tbMonitor);
         }
 
         transHashService.updateTransStatFlag(groupId, tbMonitor.getTransHashLastest());
