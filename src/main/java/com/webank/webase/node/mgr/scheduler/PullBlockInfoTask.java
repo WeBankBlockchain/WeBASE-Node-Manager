@@ -56,7 +56,7 @@ public class PullBlockInfoTask {
 
         try {
             boolean result = latch.await(5, TimeUnit.MINUTES);//5min
-            log.info("latch result:{}", result);
+            log.debug("pull block latch result:{}", result);
         } catch (InterruptedException ex) {
             log.error("InterruptedException", ex);
             Thread.currentThread().interrupt();

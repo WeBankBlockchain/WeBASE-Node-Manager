@@ -70,11 +70,13 @@ public class ConstantProperties {
     private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
 
     //transaction monitor
-    private String insertTransMonitorCron = "0 0/10 * * * ?";
+    private Long transMonitorTaskFixedDelay = 30L; //second
+    private Long transMonitorTaskExecuteMaxTime = 10L; //10 min
     private Integer monitorInfoRetainMax;
     private Long analysisSleepTime = 200L;
     private Boolean isMonitorIgnoreUser = false;
     private Boolean isMonitorIgnoreContract = false;
     private String cnsAddress = null;
+    private Integer monitorUnusualMaxCount;
 
 }
