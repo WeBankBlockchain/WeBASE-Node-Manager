@@ -107,7 +107,7 @@ public class ContractControllerTest {
         //param
         DeployInputParam deployInputParam = new DeployInputParam();
         deployInputParam.setGroupId(groupId);
-        deployInputParam.setUser(userId);
+        deployInputParam.setUser("");
         deployInputParam.setContractPath("myPath");
         deployInputParam.setContractId(200001);
         deployInputParam.setContractName("Ok");
@@ -187,7 +187,7 @@ public class ContractControllerTest {
         TransactionInputParam param = new TransactionInputParam();
         param.setContractId(200069);
         param.setGroupId(groupId);
-        param.setUser(userId);
+        param.setUser("");
         param.setContractName("Ok");
         param.setFuncName("trans");
         param.setFuncParam(Arrays.asList(3));
