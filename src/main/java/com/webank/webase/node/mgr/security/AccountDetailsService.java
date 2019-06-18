@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.security;
 
+import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -45,11 +46,10 @@ public class AccountDetailsService implements UserDetailsService {
         try {
             accountRow = accountService.queryByAccount(account);
         } catch (Exception e) {
-            //throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-            throw new UsernameNotFoundException(ConstantCode.DB_EXCEPTION.getMsg());
+            throw new UsernameNotFoundException(JSON.toJSONString(ConstantCode.DB_EXCEPTION));
         }
         if (null == accountRow) {
-            throw new UsernameNotFoundException(ConstantCode.INVALID_ACCOUNT_NAME.getMsg());
+            throw new UsernameNotFoundException(JSON.toJSONString(ConstantCode.INVALID_ACCOUNT_NAME));
         }
 
         // add role
