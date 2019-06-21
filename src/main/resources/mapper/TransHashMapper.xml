@@ -77,12 +77,10 @@
 	</select>
 
   <delete id="remove">
-   DELETE from ${tableName} where trans_hash not in(
+   DELETE from ${tableName} where statistics_flag = 2 and trans_hash not in(
     select t.trans_hash from(
       select trans_hash,block_number from ${tableName} ORDER BY block_number DESC LIMIT ${transRetainMax}) t
-    ) and statistics_flag = 2
-    and block_number &lt;=  (select max(block_number) blockNumber from tb_trans_daily where group_id = #{groupId})
-     limit 2000
+    )
   </delete>
 
   <update id="updateTransStatFlag">
