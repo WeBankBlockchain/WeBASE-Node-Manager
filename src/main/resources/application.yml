@@ -54,8 +54,7 @@ constant:
   maxRequestFail: 3
   sleepWhenHttpMaxFail: 60000
   ###transaction monitor
-  transMonitorTaskFixedDelay: 60000  #How long does it take to start the next task after the end (second)
-  transMonitorTaskExecuteMaxTime: 10 # Length of time each task is executed (minute)
+  transMonitorTaskFixedRate: 600000  #How long does it take to start the next task after the end (second)
   analysisSleepTime: 200
   monitorInfoRetainMax: 10000
   isMonitorIgnoreUser: false

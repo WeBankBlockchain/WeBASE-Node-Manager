@@ -70,9 +70,7 @@ public class ConstantProperties {
     private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
 
     //transaction monitor
-
-    private Long transMonitorTaskFixedDelay = 30L; //second
-    private Long transMonitorTaskExecuteMaxTime = 10L; //10 min
+    private Long transMonitorTaskFixedRate = 60000L; //second
     private Integer monitorInfoRetainMax;
     private Long analysisSleepTime = 200L;
     private Boolean isMonitorIgnoreUser = false;
