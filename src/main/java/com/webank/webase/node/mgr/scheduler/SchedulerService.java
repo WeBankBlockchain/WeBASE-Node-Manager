@@ -56,8 +56,8 @@ public class SchedulerService implements SchedulingConfigurer {
             (context) -> new CronTrigger(constants.getStatisticsTransDailyCron())
                 .nextExecutionTime(context));
 
-        taskRegistrar.addFixedDelayTask(() -> transMonitorTask.monitorStart(),
-            constants.getTransMonitorTaskFixedDelay());
+        taskRegistrar.addFixedRateTask(() -> transMonitorTask.monitorStart(),
+            constants.getTransMonitorTaskFixedRate());
 
         taskRegistrar.addFixedDelayTask(() -> pullBlockInfoTask.pullBlockStart(),
             constants.getPullBlockTaskFixedDelay());

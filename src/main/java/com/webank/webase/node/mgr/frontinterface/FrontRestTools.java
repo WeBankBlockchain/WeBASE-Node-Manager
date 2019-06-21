@@ -46,13 +46,13 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * about http request for webase-front.
+ * about http request for WeBASE-Front.
  */
 @Log4j2
 @Service
 public class FrontRestTools {
 
-    //public static final String FRONT_URL = "http://%1s:%2d/webase-front/%3s";
+    //public static final String FRONT_URL = "http://%1s:%2d/WeBASE-Front/%3s";
     public static final String FRONT_TRANS_RECEIPT_BY_HASH_URI = "web3/transactionReceipt/%1s";
     public static final String URI_BLOCK_BY_NUMBER = "web3/blockByNumber/%1d";
     public static final String URI_BLOCK_BY_HASH = "web3/blockByHash/%1s";
