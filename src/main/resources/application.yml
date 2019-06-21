@@ -2,7 +2,7 @@
 server:
   port: 8080
   servlet:
-    context-path: /webase-node-mgr
+    context-path: /WeBASE-Node-Manager
 
 
 #mybatis config
@@ -47,15 +47,14 @@ constant:
   jwtSecret: S3g4HtJyg7G6Hg0Ln3g4H5Jyg7H6f9dL
   ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find
   ###front http request
-  frontUrl: http://%1s:%2d/webase-front/%3s
+  frontUrl: http://%1s:%2d/WeBASE-Front/%3s
   httpTimeOut: 5000
   contractDeployTimeOut: 30000
   isPrivateKeyEncrypt: true
   maxRequestFail: 3
   sleepWhenHttpMaxFail: 60000
   ###transaction monitor
-  transMonitorTaskFixedDelay: 60000  #How long does it take to start the next task after the end (second)
-  transMonitorTaskExecuteMaxTime: 10 # Length of time each task is executed (minute)
+  transMonitorTaskFixedRate: 60000  #How long does it take to start the next task after the end (second)
   analysisSleepTime: 200
   monitorInfoRetainMax: 10000
   isMonitorIgnoreUser: false

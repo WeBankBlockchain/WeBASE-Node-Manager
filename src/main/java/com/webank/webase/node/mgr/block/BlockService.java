@@ -56,6 +56,7 @@ public class BlockService {
     private TransHashService transHashService;
     @Autowired
     private ConstantProperties cProperties;
+    private static final Long SAVE_TRANS_SLEEP_TIME = 5L;
 
 
     /**
@@ -85,8 +86,9 @@ public class BlockService {
             }
         } catch (Exception ex) {
             log.error("fail pullBlockByGroupId. groupId:{} ", groupId, ex);
+        }finally {
+            latch.countDown();
         }
-        latch.countDown();
         log.debug("end pullBlockByGroupId groupId:{}", groupId);
     }
 
@@ -161,6 +163,12 @@ public class BlockService {
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
+            try {
+                Thread.sleep(SAVE_TRANS_SLEEP_TIME);
+            } catch (InterruptedException ex) {
+                log.error("saveBLockInfo", ex);
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
