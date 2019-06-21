@@ -20,7 +20,7 @@ package com.webank.webase.node.mgr.base.code;
  * 1:system exception <br/>
  * 2:business exception <br/>
  * B:project number <br/>
- * webase-node-mgr:02 <br/>
+ * WeBASE-Node-Manager:02 <br/>
  * C: error code <br/>
  */
 public class ConstantCode {
