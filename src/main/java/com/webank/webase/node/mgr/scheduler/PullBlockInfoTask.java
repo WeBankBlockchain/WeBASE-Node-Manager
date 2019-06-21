@@ -36,7 +36,7 @@ public class PullBlockInfoTask {
     private BlockService blockService;
     @Autowired
     private FrontGroupMapCache frontGroupMapCache;
-    private CountDownLatch latch;
+
 
     /**
      * task start
@@ -50,13 +50,12 @@ public class PullBlockInfoTask {
             return;
         }
 
-        latch = new CountDownLatch(groupList.size());
+        CountDownLatch latch = new CountDownLatch(groupList.size());
         groupList.stream()
             .forEach(group -> blockService.pullBlockByGroupId(latch, group.getGroupId()));
 
         try {
-            boolean result = latch.await(5, TimeUnit.MINUTES);//5min
-            log.debug("pull block latch result:{}", result);
+            latch.await();//5min
         } catch (InterruptedException ex) {
             log.error("InterruptedException", ex);
             Thread.currentThread().interrupt();

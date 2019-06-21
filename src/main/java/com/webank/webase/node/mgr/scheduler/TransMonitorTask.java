@@ -34,13 +34,12 @@ public class TransMonitorTask {
     private MonitorService monitorService;
     @Autowired
     private GroupService groupService;
-    private CountDownLatch latch;
 
 
     /**
      * start monitor.
      */
-    public void monitorStart() {
+    public synchronized void monitorStart() {
         Instant startTime = Instant.now();
         log.info("start monitor. startTime:{}", startTime.toEpochMilli());
         //get group list
@@ -50,13 +49,12 @@ public class TransMonitorTask {
             return;
         }
 
-        latch = new CountDownLatch(groupList.size());
+        CountDownLatch latch = new CountDownLatch(groupList.size());
         groupList.stream()
             .forEach(group -> monitorService.transMonitorByGroupId(latch, group.getGroupId()));
 
         try {
-            boolean result = latch.await(5, TimeUnit.MINUTES);//5min
-            log.debug("monitor latch result:{}", result);
+             latch.await();
         } catch (InterruptedException ex) {
             log.error("InterruptedException", ex);
             Thread.currentThread().interrupt();
