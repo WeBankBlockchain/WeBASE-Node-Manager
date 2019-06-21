@@ -29,16 +29,7 @@
       property="modifyTime"/>
   </resultMap>
 
-  <!-- <insert id="addRow" parameterType="TbMonitor">
-        insert into tb_user_transaction_monitor(user_name,user_type,group_id,contract_name,contract_address,interface_name,trans_type,trans_unusual_type,trans_count,trans_hashs,trans_hash_lastest,create_time,modify_time)
-        values(#{userName},#{userType},#{groupId},#{contractName},#{contractAddress},#{interfaceName},#{transType},#{transUnusualType},#{transCount},#{transHashs},#{transHashLastest},NOW(),NOW())
-        on DUPLICATE key 
-    update
-      trans_count = trans_count + 1,
-      trans_hashs = values(trans_hashs),
-      trans_hash_lastest = values(trans_hash_lastest),
-      modify_time = values(modify_time)
-    </insert> -->
+
   <insert id="add">
         insert into ${tableName}
         (user_name,user_type,contract_name,contract_address,interface_name,trans_type,
