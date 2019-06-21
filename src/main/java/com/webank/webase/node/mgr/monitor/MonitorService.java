@@ -72,10 +72,10 @@ public class MonitorService {
     @Autowired
     private FrontInterfaceService frontInterfacee;
     @Autowired
+    private MonitorTransactionService monitorTransactionService;
+    @Autowired
     private ConstantProperties cProperties;
     private static final String DEPLOY_OR_CNS_SPLIT = ",";
-
-
 
 
     /**
@@ -86,9 +86,11 @@ public class MonitorService {
         try {
             Instant startTimem = Instant.now();//start time
             Long useTimeSum = 0L;
-            LocalDateTime createTime = LocalDateTime.now(); //createTime of monitor info
+            LocalDateTime start = LocalDateTime.now(); //createTime of monitor info
+            LocalDateTime createTime = start;
             do {
-                List<TbTransHash> transHashList = transHashService.qureyUnStatTransHashList(groupId);
+                List<TbTransHash> transHashList = transHashService
+                    .qureyUnStatTransHashList(groupId);
                 if (Objects.isNull(transHashList) || transHashList.size() == 0) {
                     log.debug("transMonitorByGroupId jump over. transHashList is empty");
                     return;
@@ -100,18 +102,27 @@ public class MonitorService {
 
                 //monitor
                 for (TbTransHash trans : transHashList) {
-                    if (createTime.getDayOfYear() != trans.getBlockTimestamp().getDayOfYear()) {
+                    if (createTime.getDayOfYear() != trans.getBlockTimestamp().getDayOfYear()
+                        || start == createTime) {
+                        log.info(
+                            "=========================================createTime:{} blockTimestamp:{}",
+                            createTime,
+                            trans.getBlockTimestamp());
+                        log.info(
+                            "=========================================createData:{} blockTimestampData:{}",
+                            createTime.getDayOfYear(),
+                            trans.getBlockTimestamp().getDayOfYear());
                         createTime = trans.getBlockTimestamp();
                     }
                     monitorTransHash(groupId, trans, createTime);
                 }
 
                 //monitor useTime
-                useTimeSum = Duration.between(startTimem, Instant.now()).toMinutes();
-                log.debug("monitor groupId:{} useTimeSum:{} maxTime:{}", groupId, useTimeSum,
-                    cProperties.getTransMonitorTaskExecuteMaxTime());
-            } while (useTimeSum < cProperties.getTransMonitorTaskExecuteMaxTime());
-            log.debug("end monitor. groupId:{} allUseTime:{", groupId, useTimeSum);
+                useTimeSum = Duration.between(startTimem, Instant.now()).getSeconds();
+                log.debug("monitor groupId:{} useTimeSum:{}s maxTime:{}s", groupId, useTimeSum,
+                    cProperties.getTransMonitorTaskFixedRate());
+            } while (useTimeSum < cProperties.getTransMonitorTaskFixedRate());
+            log.debug("end monitor. groupId:{} allUseTime:{}s", groupId, useTimeSum);
         } catch (Exception ex) {
             log.error("fail transMonitorByGroupId, group:{}", groupId, ex);
         } finally {
@@ -139,13 +150,8 @@ public class MonitorService {
     }
 
 
-    public void addRow(int groupId, TbMonitor tbMonitor) {
-        monitorMapper.add(TableName.MONITOR.getTableName(groupId), tbMonitor);
-    }
 
-    public void updateRow(int groupId, TbMonitor tbMonitor) {
-        monitorMapper.update(TableName.MONITOR.getTableName(groupId), tbMonitor);
-    }
+
 
     public void updateUnusualUser(Integer groupId, String userName, String address) {
         log.info("start updateUnusualUser address:{}", address);
@@ -191,12 +197,6 @@ public class MonitorService {
         }
     }
 
-    /**
-     * query monitor info.
-     */
-    public TbMonitor queryTbMonitor(int groupId, TbMonitor tbMonitor) {
-        return monitorMapper.queryTbMonitor(TableName.MONITOR.getTableName(groupId), tbMonitor);
-    }
 
     /**
      * query monitor user list.
@@ -346,7 +346,7 @@ public class MonitorService {
             tbMonitor.setTransCount(1);
             tbMonitor.setCreateTime(createTime);
             tbMonitor.setModifyTime(trans.getBlockTimestamp());
-            this.dataAddAndUpdate(groupId, tbMonitor);
+            monitorTransactionService.dataAddAndUpdate(groupId, tbMonitor);
         } catch (Exception ex) {
             log.error("transaction:{} analysis fail...", trans.getTransHash(), ex);
             return;
@@ -448,28 +448,7 @@ public class MonitorService {
             .map(u1 -> u1.getUserName()).orElse(null);
     }
 
-    /**
-     * insert and update.
-     */
-    @Transactional
-    public void dataAddAndUpdate(int groupId, TbMonitor tbMonitor) {
-        TbMonitor dbInfo = this.queryTbMonitor(groupId, tbMonitor);
-        if (dbInfo == null) {
-            this.addRow(groupId, tbMonitor);
-        } else {
-            String[] txHashsArr = dbInfo.getTransHashs().split(",");
-            if (txHashsArr.length < 5) {
-                StringBuilder sb = new StringBuilder(dbInfo.getTransHashs()).append(",")
-                    .append(tbMonitor.getTransHashLastest());
-                tbMonitor.setTransHashs(sb.toString());
-            } else {
-                tbMonitor.setTransHashs(dbInfo.getTransHashs());
-            }
-            this.updateRow(groupId, tbMonitor);
-        }
 
-        transHashService.updateTransStatFlag(groupId, tbMonitor.getTransHashLastest());
-    }
 
 
     /**
