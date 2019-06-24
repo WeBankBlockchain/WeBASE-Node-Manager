@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.contract.ContractMapper">
+  <resultMap id="contractMap" type="com.webank.webase.node.mgr.contract.entity.TbContract">
+    <id column="contract_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="contractId"/>
+    <result column="contract_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractName"/>
+    <result column="contract_path" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractPath"/>
+    <result column="contract_version" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractVersion"/>
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId"/>
+    <result column="contract_source" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractSource"/>
+    <result column="contract_status" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="contractStatus"/>
+    <result column="contract_type" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="contractType"/>
+    <result column="contract_abi" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractAbi"/>
+    <result column="contract_bin" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractBin"/>
+    <result column="bytecodeBin" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="bytecodeBin"/>
+    <result column="contract_address" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractAddress"/>
+    <result column="description" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="description"/>
+    <result column="deploy_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="deployTime"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
+
+  <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
+    insert into
+    tb_contract(group_id,contract_path,contract_version,contract_name,contract_source,contract_abi,contract_bin,bytecodeBin,contract_address,description,deploy_time,create_time,modify_time)
+    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW())
+    <selectKey keyProperty="contractId" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+  </insert>
+
+  <delete id="remove" parameterType="java.lang.Integer">
+		delete from tb_contract where contract_id = #{contractId}
+	</delete>
+
+  <delete id="removeByGroupId" parameterType="java.lang.Integer">
+		delete from tb_contract where group_id = #{groupId}
+	</delete>
+
+
+  <update id="update" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
+    update tb_contract set modify_time = now()
+    <if test="contractSource != null and contractSource != ''">
+      ,contract_source = #{contractSource}
+    </if>
+    <if test="contractAbi != null and contractAbi != ''">
+      ,contract_abi = #{contractAbi}
+    </if>
+    <if test="contractBin != null and contractBin != ''">
+      ,contract_bin = #{contractBin}
+    </if>
+    <if test="bytecodeBin != null and bytecodeBin != ''">
+      ,bytecodeBin = #{bytecodeBin}
+    </if>
+    <if test="contractAddress != null and contractAddress != ''">
+      ,contract_address = #{contractAddress}
+    </if>
+    <if test="contractStatus != null and contractStatus != ''">
+      ,contract_status = #{contractStatus}
+    </if>
+    <if test="contractName != null and contractName != ''">
+      ,contract_name = #{contractName}
+    </if>
+    <if test="contractVersion != null and contractVersion != ''">
+      ,contract_version = #{contractVersion}
+    </if>
+    <if test="deployTime != null">
+      ,deploy_time = #{deployTime}
+    </if>
+    <if test="description != null and description != ''">
+      ,description = #{description}
+    </if>
+    where contract_id = #{contractId}
+  </update>
+
+  <update id="updateSystemContract">
+		update tb_contract
+		set contract_bin = #{contractBin},
+		contract_address = #{contractAddress}
+		where group_id = #{groupId}
+		and contract_name = #{contractName}
+	</update>
+
+
+  <select id="countOfContract" parameterType="com.webank.webase.node.mgr.contract.entity.ContractParam"
+    resultType="java.lang.Integer">
+    select count(1) from tb_contract where 1=1
+    <if test="contractId != null and contractId != ''">
+      and contract_id = #{contractId}
+    </if>
+    <if test="groupId != null and groupId != ''">
+      and group_id = #{groupId}
+    </if>
+    <if test="contractName != null and contractName != ''">
+      and contract_name like CONCAT('%',#{contractName},'%')
+    </if>
+    <if test="contractAddress != null and contractAddress != ''">
+      and contract_address = #{contractAddress}
+    </if>
+    <if test="contractPath != null and contractPath != ''">
+      and contract_path = #{contractVersion}
+    </if>
+    <if test="contractVersion != null and contractVersion != ''">
+      and contract_version = #{contractVersion}
+    </if>
+    <if test="contractType != null">
+      and contract_type = #{contractType}
+    </if>
+    <if test="contractStatus != null and contractStatus != ''">
+      and contract_status = #{contractStatus}
+    </if>
+  </select>
+
+
+  <select id="listOfContract" parameterType="com.webank.webase.node.mgr.contract.entity.ContractParam"
+    resultMap="contractMap">
+    select * from tb_contract where 1=1
+    <if test="contractId != null and contractId != ''">
+      and contract_id = #{contractId}
+    </if>
+    <if test="groupId != null and groupId != ''">
+      and group_id = #{groupId}
+    </if>
+    <if test="contractType != null">
+      and contract_type = #{contractType}
+    </if>
+    <if test="contractStatus != null and contractStatus != ''">
+      and contract_status = #{contractStatus}
+    </if>
+    <if test="contractName != null and contractName != ''">
+      and contract_name = #{contractName}
+    </if>
+    <if test="contractAddress != null and contractAddress != ''">
+      and contract_address = #{contractAddress}
+    </if>
+    <if test="flagSortedByTime != null and flagSortedByTime != ''">
+      order by modify_time ${flagSortedByTime}
+    </if>
+    <if test="start != null and pageSize != null">
+      limit #{start},#{pageSize}
+    </if>
+  </select>
+
+  <select id="queryByContractId" parameterType="java.lang.Integer" resultMap="contractMap">
+		select * from tb_contract where contract_id = #{contractId}
+	</select>
+
+  <select id="queryContract" parameterType="com.webank.webase.node.mgr.contract.entity.ContractParam"
+    resultMap="contractMap">
+    select * from tb_contract where 1=1
+    <if test="contractId != null">
+      and contract_id = #{contractId}
+    </if>
+    <if test="groupId != null">
+      and group_id = #{groupId}
+    </if>
+    <if test="contractType != null">
+      and contract_type = #{contractType}
+    </if>
+    <if test="contractName != null and contractName != ''">
+      and contract_name = #{contractName}
+    </if>
+    <if test="contractAddress != null and contractAddress != ''">
+      and contract_address = #{contractAddress}
+    </if>
+    <if test="contractStatus != null and contractStatus != ''">
+      and contract_status = #{contractStatus}
+    </if>
+    <if test="contractPath != null and contractPath != ''">
+      and contract_path = #{contractPath}
+    </if>
+    <if test="contractVersion != null and contractVersion != ''">
+      and contract_version = #{contractVersion}
+    </if>
+    <if test="partOfBytecodeBin != null and partOfBytecodeBin != ''">
+      and locate(bytecodeBin,#{partOfBytecodeBin})
+    </if>
+    limit 1
+  </select>
+
+  <select id="queryContractByBin" resultMap="contractMap">
+		select * from tb_contract where group_id = #{groupId} and contract_bin like CONCAT(#{contractBin},'%')
+	</select>
+
+  <select id="querySystemContractBin" resultType="java.lang.String">
+		select contract_bin from tb_contract where group_id = #{groupId} and contract_name = #{contractName}
+	</select>
+
+</mapper>
