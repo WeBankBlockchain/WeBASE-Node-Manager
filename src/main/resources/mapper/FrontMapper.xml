@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.webank.webase.node.mgr.front.FrontMapper">
+  <resultMap id="frontMap" type="com.webank.webase.node.mgr.front.entity.TbFront">
+    <id column="front_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontId"/>
+    <result column="front_ip" javaType="java.lang.String" jdbcType="VARCHAR"  property="frontIp"/>
+    <result column="front_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontPort"/>
+    <result column="agency" javaType="java.lang.String" jdbcType="VARCHAR" property="agency"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"  property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"  property="modifyTime"/>
+  </resultMap>
+
+
+  <sql id="QUERY_ROW_COLUMN">
+		front_id frontId,front_ip frontIp,front_port frontPort,agency,create_time createTime,modify_time modifyTime
+	</sql>
+
+  <insert id="add">
+    insert ignore into tb_front (front_ip,front_port,agency,create_time,modify_time)
+    values(#{frontIp},#{frontPort},#{agency},NOW(),NOW())
+    <selectKey keyProperty="frontId" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+  </insert>
+
+  <delete id="remove" parameterType="java.lang.Integer">
+    delete from tb_front where front_id=#{frontId}
+  </delete>
+
+  <select id="getCount" resultType="java.lang.Integer" parameterType="com.webank.webase.node.mgr.front.entity.FrontParam">
+    select count(1) from
+    (select * from tb_front_group_map where 1=1
+    <if test="groupId != null and groupId !=''">
+      and group_id = #{groupId}
+    </if>
+     group by front_id) a
+     left join tb_front b on(a.front_id=b.front_id)
+     where 1=1
+    <if test="frontId != null and frontId !=''">
+      and b.front_id = #{frontId}
+    </if>
+    <if test="frontIp != null and frontIp !=''">
+      and b.front_ip = #{frontIp}
+    </if>
+    <if test="frontPort != null and frontPort !=''">
+      and b.front_port = #{frontPort}
+    </if>
+  </select>
+
+
+  <select id="getList" resultMap="frontMap" parameterType="com.webank.webase.node.mgr.front.entity.FrontParam">
+    select b.* from
+    (select * from tb_front_group_map where 1=1
+    <if test="groupId != null and groupId !=''">
+      and group_id = #{groupId}
+    </if>
+    group by front_id) a
+    left join tb_front b on(a.front_id=b.front_id)
+    where 1=1
+    <if test="frontId != null and frontId !=''">
+      and b.front_id = #{frontId}
+    </if>
+    <if test="frontIp != null and frontIp !=''">
+      and b.front_ip = #{frontIp}
+    </if>
+    <if test="frontPort != null and frontPort !=''">
+      and b.front_port = #{frontPort}
+    </if>
+    <if test="groupId != null and groupId !=''">
+      and a.group_id = #{groupId}
+    </if>
+  </select>
+
+  <select id="getById" resultMap="frontMap" parameterType="java.lang.Integer">
+     select * from tb_front where front_id = #{frontId}
+  </select>
+
+</mapper>

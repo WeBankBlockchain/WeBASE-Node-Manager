@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.transdaily.TbTransDailyMapper">
+  <resultMap id="seventDayOfTransMap" type="com.webank.webase.node.mgr.transdaily.SeventDaysTrans">
+    <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
+    <id column="trans_day" javaType="java.time.LocalDate" jdbcType="TIMESTAMP" property="day"/>
+    <result column="trans_count" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="transCount"/>
+  </resultMap>
+
+  <select id="listSeventDayOfTransDaily" resultMap="seventDayOfTransMap">
+		select group_id,trans_day,trans_count from tb_trans_daily where group_id = #{groupId} and trans_day &gt;= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+	</select>
+
+  <update id="updateTransDaily">
+		update tb_trans_daily set trans_count=#{transCount},block_number=#{latestBlockNumber},modify_time=now()
+		where group_id=#{groupId} and trans_day=#{transDay} and block_number=#{oldBlockNumber}
+	</update>
+
+  <insert id="addTransDailyRow" parameterType="com.webank.webase.node.mgr.transdaily.TbTransDaily">
+		insert ignore into tb_trans_daily(group_id,trans_day,trans_count,block_number,create_time,modify_time)
+		values(#{groupId},#{transDay},#{transCount},#{blockNumber},NOW(),NOW())
+	</insert>
+
+  <select id="queryMaxBlockByGroup" parameterType="java.lang.Integer"
+    resultType="java.math.BigInteger">
+		select max(block_number) from tb_trans_daily where group_id = #{groupId}
+	</select>
+
+	<delete id="deleteByGroupId">
+		delete from tb_trans_daily where group_id = #{groupId}
+	</delete>
+</mapper>

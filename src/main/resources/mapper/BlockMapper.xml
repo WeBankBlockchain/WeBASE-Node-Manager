@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.block.BlockMapper">
+  <resultMap id="blockMap" type="com.webank.webase.node.mgr.block.entity.TbBlock">
+    <id column="pk_hash" javaType="java.lang.String" jdbcType="VARCHAR" property="pkHash"/>
+    <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
+      property="blockNumber"/>
+    <result column="block_timestamp" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="blockTimestamp"/>
+    <result column="trans_count" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="transCount"/>
+    <result column="sealer_index" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="sealerIndex"/>
+    <result column="sealer" javaType="java.lang.String" jdbcType="VARCHAR" property="sealer"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
+  <select id="getLatestBlockNumber" resultType="java.math.BigInteger">
+		select max(block_number) from ${tableName}
+	</select>
+
+  <insert id="add">
+    insert ignore into ${tableName}
+    (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time)
+    values
+    (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW())
+  </insert>
+
+  <update id="update">
+    update ${tableName} set sealer = #{block.sealer} where pk_hash=#{block.pkHash};
+  </update>
+
+  <select id="getList" parameterType="com.webank.webase.node.mgr.block.entity.BlockListParam"
+    resultMap="blockMap">
+    select * from ${tableName} where 1=1
+    <if test="param.pkHash != null and param.pkHash != ''">
+      and pk_hash = #{param.pkHash}
+    </if>
+    <if test="param.blockNumber != null">
+      and block_number = #{param.blockNumber}
+    </if>
+    <if test="param.minDay != null">
+      and block_timestamp &gt;= #{param.minDay}
+    </if>
+    <if test="param.minBlockNumber != null">
+      and block_number > #{param.minBlockNumber}
+    </if>
+    <if test="param.flagSortedByBlock != null and param.flagSortedByBlock != ''">
+      order by block_number ${param.flagSortedByBlock}
+    </if>
+
+    <if test="param.start != null and param.pageSize != null">
+      limit #{param.start},#{param.pageSize}
+    </if>
+  </select>
+
+
+  <select id="getCount" resultType="java.lang.Integer">
+    select count(1) from ${tableName} where 1=1
+    <if test="pkHash != null and pkHash != ''">
+      and pk_hash = #{pkHash}
+    </if>
+    <if test="blockNumber != null">
+      and block_number = #{blockNumber}
+    </if>
+  </select>
+
+  <delete id="remove">
+    DELETE tb from ${tableName} as tb,(SELECT max(block_number) maxBlock FROM ${tableName}) AS tmp
+    where tb.block_number &lt;= tmp.maxBlock - ${blockRetainMax}
+  </delete>
+</mapper>

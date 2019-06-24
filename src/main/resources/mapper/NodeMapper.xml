@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.node.NodeMapper">
+  <resultMap id="nodeMap" type="com.webank.webase.node.mgr.node.TbNode">
+    <id column="node_id" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeId"/>
+    <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
+    <result column="node_name" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeName"/>
+    <result column="node_ip" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeIp"/>
+    <result column="p2p_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="p2pPort"/>
+    <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
+      property="blockNumber"/>
+    <result column="pbft_view" javaType="java.math.BigInteger" jdbcType="INTEGER"
+      property="pbftView"/>
+    <result column="node_active" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="nodeActive"/>
+    <result column="description" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="description"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
+
+  <sql id="ALL_SELECT_COLUMN">
+		node_id,node_name,group_id,node_ip,p2p_port,block_number,pbft_view,node_active,create_time,modify_time
+	</sql>
+
+  <insert id="add" parameterType="com.webank.webase.node.mgr.node.TbNode">
+    insert ignore into tb_node
+    (node_id,node_name,group_id,node_ip,p2p_port,description,create_time,modify_time)
+    values(#{nodeId},#{nodeName},#{groupId},#{nodeIp},#{p2pPort},#{description},NOW(),NOW())
+  </insert>
+
+
+  <select id="getCount" parameterType="com.webank.webase.node.mgr.node.NodeParam"
+    resultType="java.lang.Integer">
+    select count(1) from tb_node where 1=1
+    <if test="groupId != null and groupId != ''">
+      and group_id = #{groupId}
+    </if>
+    <if test="nodeId != null and nodeId != ''">
+      and node_id = #{nodeId}
+    </if>
+    <if test="p2pPort != null and p2pPort != ''">
+      and p2p_port = #{p2pPort}
+    </if>
+    <if test="nodeIp != null and nodeIp != ''">
+      and node_ip = #{nodeIp}
+    </if>
+  </select>
+
+  <select id="getList" parameterType="com.webank.webase.node.mgr.node.NodeParam"
+    resultMap="nodeMap">
+    select a.* from tb_node a where 1=1
+    <if test="groupId != null and groupId != ''">
+      and a.group_id = #{groupId}
+    </if>
+    <if test="nodeId != null and nodeId != ''">
+      and a.node_id = #{nodeId}
+    </if>
+    <if test="p2pPort != null and p2pPort != ''">
+      and a.p2p_port = #{p2pPort}
+    </if>
+    <if test="nodeName != null and nodeName != ''">
+      and a.node_name = #{nodeName}
+    </if>
+    <if test="nodeIp != null and nodeIp != ''">
+      and a.node_ip = #{nodeIp}
+    </if>
+    <if test="flagSortedByTime != null and flagSortedByTime != ''">
+      order by a.modify_time ${flagSortedByTime}
+    </if>
+    <if test="start != null and pageSize != null">
+      limit #{start},#{pageSize}
+    </if>
+  </select>
+
+
+  <select id="queryNodeByIpAndP2pPort" resultMap="nodeMap">
+		select * from tb_node where node_ip = #{nodeIp} and p2p_port = #{p2pPort}
+	</select>
+
+  <select id="queryByNodeId" resultMap="nodeMap">
+		select * from tb_node where node_id = #{nodeId}
+	</select>
+
+  <update id="update" parameterType="com.webank.webase.node.mgr.node.TbNode">
+    update tb_node set modify_time=NOW()
+    <if test="blockNumber != null">
+      ,block_number = #{blockNumber}
+    </if>
+    <if test="pbftView != null">
+      ,pbft_view = #{pbftView}
+    </if>
+    <if test="description != null">
+      ,description = #{description}
+    </if>
+    <if test="nodeActive != null">
+      ,node_active = #{nodeActive}
+    </if>
+    where node_id=#{nodeId} and group_id=#{groupId}
+  </update>
+
+  <select id="queryNodeInfo" parameterType="com.webank.webase.node.mgr.node.NodeParam"
+    resultMap="nodeMap">
+    select * from tb_node where 1=1
+    <if test="groupId != null and groupId != ''">
+      and group_id = #{groupId}
+    </if>
+    <if test="nodeId != null and nodeId != ''">
+      and node_id = #{nodeId}
+    </if>
+    <if test="p2pPort != null and p2pPort != ''">
+      and p2p_port = #{p2pPort}
+    </if>
+    <if test="nodeName != null and nodeName != ''">
+      and node_name = #{nodeName}
+    </if>
+    <if test="nodeIp != null and nodeIp != ''">
+      and node_ip = #{nodeIp}
+    </if>
+    limit 1
+  </select>
+
+  <delete id="deleteByNodeAndGroup">
+		delete from tb_node where node_id=#{nodeId} and group_id = #{groupId}
+	</delete>
+
+  <delete id="deleteByGroupId">
+		delete from tb_node where group_id = #{groupId}
+	</delete>
+</mapper>
