@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.user.UserMapper">
+  <resultMap id="userMap" type="com.webank.webase.node.mgr.user.entity.TbUser">
+    <id column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="userId"/>
+    <result column="user_name" javaType="java.lang.String" jdbcType="VARCHAR" property="userName"/>
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId"/>
+    <result column="user_status" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="userStatus"/>
+    <result column="has_pk" javaType="java.lang.Integer" jdbcType="INTEGER" property="hasPk"/>
+    <result column="user_type" javaType="java.lang.Integer" jdbcType="INTEGER" property="userType"/>
+    <result column="public_key" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="publicKey"/>
+    <result column="address" javaType="java.lang.String" jdbcType="VARCHAR" property="address"/>
+    <result column="description" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="description"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
+  <insert id="addUserRow" parameterType="com.webank.webase.node.mgr.user.entity.TbUser">
+    insert into
+    tb_user(user_name,group_id,has_pk,user_type,public_key,address,description,create_time,modify_time)
+    values(#{userName},#{groupId},#{hasPk},#{userType},#{publicKey},#{address},#{description},NOW(),NOW())
+    <selectKey keyProperty="userId" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+  </insert>
+
+
+  <select id="countOfUser" parameterType="com.webank.webase.node.mgr.user.entity.UserParam"
+    resultType="java.lang.Integer">
+    select count(1) from tb_user where 1=1
+    <if test="groupId != null and groupId != ''">
+      and group_id = #{groupId}
+    </if>
+    <if test="userId != null and userId != ''">
+      and user_id = #{userId}
+    </if>
+    <if test="userName != null and userName != ''">
+      and user_name like CONCAT(#{userName},'%')
+    </if>
+    <if test="userName != null and userName != ''">
+      and user_name like CONCAT(#{userName},'%')
+    </if>
+    <if test="commParam != null and commParam != ''">
+      and user_name like CONCAT(#{commParam},'%')
+      or address like CONCAT(#{commParam},'%')
+    </if>
+  </select>
+
+
+  <select id="listOfUser" parameterType="com.webank.webase.node.mgr.user.entity.UserParam"
+    resultMap="userMap">
+    select * from tb_user where 1=1
+    <if test="groupId != null and groupId != ''">
+      and group_id = #{groupId}
+    </if>
+    <if test="userId != null and userId != ''">
+      and user_id = #{userId}
+    </if>
+    <if test="userName != null and userName != ''">
+      and user_name like CONCAT(#{userName},'%')
+    </if>
+    <if test="commParam != null and commParam != ''">
+      and user_name like CONCAT(#{commParam},'%')
+      or address like CONCAT(#{commParam},'%')
+    </if>
+    order by user_id desc
+    <if test="start != null and pageSize != null">
+      limit #{start},#{pageSize}
+    </if>
+  </select>
+
+  <select id="queryUser" resultMap="userMap">
+    select * from tb_user where 1=1
+    <if test="groupId != null">
+      and group_id = #{groupId}
+    </if>
+    <if test="userId != null">
+      and user_id = #{userId}
+    </if>
+    <if test="userName != null and userName != ''">
+      and user_name = #{userName}
+    </if>
+    <if test="address != null and address != ''">
+      and address = #{address}
+    </if>
+    limit 1
+  </select>
+
+
+  <insert id="addUserKeyMapRow" parameterType="com.webank.webase.node.mgr.user.entity.TbUserKeyMap">
+    insert into
+    tb_user_key_mapping(user_id,group_id,private_key,create_time,modify_time)values(#{userId},#{groupId},#{privateKey},NOW(),NOW())
+    <selectKey keyProperty="mapId" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+  </insert>
+
+  <update id="updateUser" parameterType="com.webank.webase.node.mgr.user.entity.TbUser">
+    update tb_user set modify_time = now()
+    <if test="description != null and description != ''">
+      ,description = #{description}
+    </if>
+
+    where user_id = #{userId}
+  </update>
+
+
+  <select id="queryPrivateKey" parameterType="java.lang.String"
+    resultType="com.webank.webase.node.mgr.user.entity.PrivateKeyInfo">
+		select a.address,b.private_key privateKey from tb_user a left join tb_user_key_mapping b on(a.user_id=b.user_id)
+		where
+		b.map_status=1 and a.address = #{userAddress}
+	</select>
+
+  <select id="queryUserNameByAddress" resultType="java.lang.String">
+		select user_name from tb_user where group_id = #{groupId} and address = #{address}
+	</select>
+  <select id="querySystemUser" parameterType="java.lang.Integer" resultMap="userMap">
+		select * from tb_user where user_status=1 and user_type = 2 limit 1
+	</select>
+
+
+  <delete id="deleteUser" parameterType="java.lang.Integer">
+		delete from tb_user where group_id = #{groupId}
+	</delete>
+
+  <delete id="deleteUserKeyMap" parameterType="java.lang.Integer">
+		delete from tb_user_key_mapping where group_id = #{groupId}
+	</delete>
+
+</mapper>
