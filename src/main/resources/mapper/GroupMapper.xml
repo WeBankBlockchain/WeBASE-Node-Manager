@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.group.GroupMapper">
+  <resultMap id="groupMap" type="com.webank.webase.node.mgr.group.entity.TbGroup">
+    <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
+    <result column="group_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="groupName"/>
+    <result column="group_status" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupStatus"/>
+    <result column="node_count" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="nodeCount"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
+
+  <resultMap id="statisticalTransMap"
+    type="com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo">
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId"/>
+    <result column="maxDay" javaType="java.time.LocalDate" jdbcType="TIMESTAMP" property="maxDay"/>
+    <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
+      property="blockNumber"/>
+    <result column="trans_count" javaType="java.math.BigInteger" jdbcType="INTEGER"
+      property="transCount"/>
+  </resultMap>
+
+  <sql id="QUERY_ROW_COLUMN">
+		front_id frontId,front_ip frontIp,front_port frontPort,create_time createTime,modify_time modifyTime
+	</sql>
+
+  <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
+		insert into tb_group
+		(group_id,group_name,node_count,create_time)
+		values(#{groupId},#{groupName},#{nodeCount},NOW())
+		ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
+	</insert>
+
+  <delete id="remove" parameterType="java.lang.Integer">
+    delete from tb_group where group_id=#{groupId}
+  </delete>
+
+  <update id="updateStatus">
+     update tb_group set group_status=#{groupStatus},modify_time=NOW() where group_id=#{groupId}
+  </update>
+
+  <select id="getCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+    select count(1) from tb_group where 1 = 1
+    <if test="groupId != null and groupId !=''">
+      and group_id = #{groupId}
+    </if>
+    <if test="groupStatus != null and groupStatus !=''">
+      and group_status = #{groupStatus}
+    </if>
+  </select>
+
+  <select id="getList" resultMap="groupMap">
+    select * from tb_group where 1=1
+    <if test="groupStatus != null and groupStatus !=''">
+      and group_status = #{groupStatus}
+    </if>
+    order by group_id asc
+  </select>
+
+
+  <select id="queryLatestStatisticalTrans" resultMap="statisticalTransMap">
+		select a.group_id,b.maxDay,c.block_number,c.trans_count from tb_group a
+		LEFT JOIN
+		(select group_id,max(trans_day) as maxDay from tb_trans_daily GROUP BY group_id)b
+		on (a.group_id = b.group_id)
+		LEFT JOIN
+		tb_trans_daily c on(b.group_id = c.group_id and b.maxDay = c.trans_day)
+	</select>
+
+  <select id="getGeneral" resultType="com.webank.webase.node.mgr.group.entity.GroupGeneral">
+		SELECT a.group_id groupId,a.node_count nodeCount,b.contractCount
+		FROM tb_group a
+		LEFT 	JOIN
+		(
+		select group_id,count(1)
+		contractCount from tb_contract where contract_type=0 and contract_status=2 GROUP BY group_id
+		)b on(a.group_id = b.group_id)
+		where a.group_id = #{groupId}
+	</select>
+</mapper>

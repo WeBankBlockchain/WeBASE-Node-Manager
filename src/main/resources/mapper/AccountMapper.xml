@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.account.AccountMapper">
+  <resultMap id="accountMap" type="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+    <id column="account" javaType="java.lang.String" jdbcType="VARCHAR" property="account"/>
+    <result column="account_pwd" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="accountPwd"/>
+    <result column="role_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="roleId"/>
+    <result column="role_name" javaType="java.lang.String" jdbcType="VARCHAR" property="roleName"/>
+    <result column="role_name_zh" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="roleNameZh"/>
+    <result column="login_fail_time" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="loginFailTime"/>
+    <result column="account_status" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="accountStatus"/>
+    <result column="description" javaType="java.lang.String" jdbcType="INTEGER"
+      property="description"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
+
+  <sql id="NEW_ROW_COLUMN">
+		(account,account_pwd,role_id,description,create_time,modify_time)
+	</sql>
+  <sql id="QUERY_ROW_COLUMN">
+		a.account,a.account_pwd accountPwd,a.role_id roleId,a.login_fail_time loginFailTime,
+		b.role_name roleName,b.role_name_zh roleNameZh,a.account_status accountStatus,
+		a.description,a.create_time createTime,a.modify_time modifyTime
+	</sql>
+
+  <insert id="addAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+    insert into tb_account_info
+    <include refid="NEW_ROW_COLUMN"/>
+    values(#{account},#{accountPwd},#{roleId},#{description},NOW(),NOW())
+  </insert>
+
+  <update id="updateAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+		update tb_account_info set account_pwd=#{accountPwd},role_id=#{roleId},login_fail_time=#{loginFailTime},
+		account_status=#{accountStatus},description=#{description},modify_time=now()
+		where account=#{account}
+	</update>
+
+  <select id="queryByAccount" resultType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+    select
+    <include refid="QUERY_ROW_COLUMN"/>
+    from tb_account_info a left join tb_role b on(a.role_id=b.role_id) where BINARY a.account =
+    #{account}
+    limit 1
+  </select>
+
+  <select id="countOfAccount" resultType="java.lang.Integer">
+    select count(1) from tb_account_info where 1=1
+    <if test="account != null and account != ''">
+      and BINARY account = #{account}
+    </if>
+  </select>
+
+
+  <select id="listOfAccount" parameterType="com.webank.webase.node.mgr.account.entity.AccountListParam"
+    resultMap="accountMap">
+    select a.*,b.role_name,b.role_name_zh from tb_account_info a
+    left join tb_role b on(a.role_id=b.role_id)
+    where 1=1
+    <if test="param.account != null and param.account != ''">
+      and a.account = #{param.account}
+    </if>
+    <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
+      order by a.modify_time ${param.flagSortedByTime}
+    </if>
+    <if test="param.start != null and param.pageSize != null">
+      limit #{param.start},#{param.pageSize}
+    </if>
+  </select>
+
+  <delete id="deleteAccountRow" parameterType="java.lang.String">
+		delete from tb_account_info where account=#{account}
+	</delete>
+</mapper>
