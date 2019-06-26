@@ -230,7 +230,7 @@ public class GroupService {
                 List<String> groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
                 //save groupId
                 saveGroupId(gId, groupPeerList.size());
-               // frontGroupMapService.newFrontGroup(front.getFrontId(), gId);
+                frontGroupMapService.newFrontGroup(front.getFrontId(), gId);
                 //save new peers
                 savePeerList(frontIp, frontPort, gId, groupPeerList);
                 //remove invalid peers
