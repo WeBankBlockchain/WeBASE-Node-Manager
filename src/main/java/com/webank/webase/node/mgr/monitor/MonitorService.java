@@ -66,6 +66,7 @@ public class MonitorService {
     @Lazy
     private ContractService contractService;
     @Autowired
+    @Lazy
     private UserService userService;
     @Autowired
     private TransHashService transHashService;
