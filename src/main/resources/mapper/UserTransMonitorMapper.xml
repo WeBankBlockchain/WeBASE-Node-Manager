@@ -97,7 +97,8 @@
 
   <select id="monitorInterfaceList" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
     select distinct interface_name as interfaceName,
-    trans_unusual_type as transUnusualType
+    trans_unusual_type as transUnusualType,
+    modify_time
     from ${tableName}
     where 1=1
     <if test="userName != null and userName != ''">
