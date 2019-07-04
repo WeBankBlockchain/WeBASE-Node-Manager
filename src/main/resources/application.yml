@@ -50,7 +50,7 @@ constant:
   isBlockPullFromZero: false
   httpTimeOut: 5000
   aesKey: ERTadb83f9ege39k
-  cookieMaxAge: 1800
+  authTokenMaxAge: 1800
   sysContractContractdetailName: contractdetail
   sysContractUserName: user
   sysContractNodeName: node

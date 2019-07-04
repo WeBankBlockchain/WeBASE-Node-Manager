@@ -16,17 +16,21 @@
 package com.webank.webase.node.mgr.base.config;
 
 import com.webank.webase.node.mgr.base.enums.RoleType;
+import com.webank.webase.node.mgr.base.filter.TokenAuthenticationFilter;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.security.AccountDetailsService;
 import com.webank.webase.node.mgr.security.JsonAccessDeniedHandler;
 import com.webank.webase.node.mgr.security.JsonAuthenticationEntryPoint;
 import com.webank.webase.node.mgr.security.JsonLogoutSuccessHandler;
 import com.webank.webase.node.mgr.security.LoginFailHandler;
+import com.webank.webase.node.mgr.security.customizeAuth.TokenAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,6 +40,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 /**
  * security config.
@@ -76,6 +81,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .permitAll()
             .anyRequest().authenticated().and().csrf()
             .disable() // close csrf
+            .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class) //
             .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint).and().logout()
             .logoutUrl("/account/logout")
             .deleteCookies(ConstantProperties.COOKIE_JSESSIONID,
@@ -102,4 +108,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(tokenAuthenticationProvider());
+    }
+
+    @Bean
+    public AuthenticationProvider tokenAuthenticationProvider() {
+        return new TokenAuthenticationProvider();
+    }
+
+//    @Bean
+//    public AuthenticationManager authenticationManagerBean() throws Exception {
+//        return super.authenticationManagerBean();
+//    }
 }

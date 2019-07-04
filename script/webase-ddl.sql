@@ -290,3 +290,11 @@ PARTITION BY RANGE (TO_DAYS(create_time)) (
     PARTITION p9 VALUES LESS THAN (TO_DAYS('2023-07-01')),
     PARTITION p99 VALUES LESS THAN (MAXVALUE)
 );
+
+
+CREATE TABLE IF NOT EXISTS tb_token (
+  token varchar(120) NOT NULL PRIMARY KEY COMMENT 'token',
+  value varchar(50) NOT NULL COMMENT '与token相关的值（如：用户编号，图形验证码值）',
+  expire_time timestamp NOT NULL COMMENT '失效时间',
+  create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='token信息表';
