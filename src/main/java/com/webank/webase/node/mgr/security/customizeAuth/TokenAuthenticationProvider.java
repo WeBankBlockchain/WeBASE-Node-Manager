@@ -1,7 +1,9 @@
 package com.webank.webase.node.mgr.security.customizeAuth;
 
+import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.TbAccountInfo;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.token.TokenService;
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +36,23 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
     }*/
 
     @Override
-    @Transactional(noRollbackFor = BadCredentialsException.class)
+   // @Transactional(noRollbackFor = BadCredentialsException.class)
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        AbstractAuthenticationToken result = null;
         String token = authentication.getName();
-        String account = tokenService.getValueFromToken(token);
-        tokenService.updateExpireTime(token, LocalDateTime.now().plusSeconds(properties.getAuthTokenMaxAge()));
-
-        if (null == account) {
-            throw new BadCredentialsException("Invalid token");
+        String account=null;
+        try {
+         account = tokenService.getValueFromToken(token);
+           tokenService.updateExpireTime(token);
+       }catch (NodeMgrException e){
+            throw new BadCredentialsException(JSON.toJSONString(e.getRetCode()));
         }
-        result = buildAuthentication(account);
+        catch (Exception e) {
+           throw new BadCredentialsException("db");
+       }
+        if (null == account) {
+            throw new CredentialsExpiredException("Invalid token");
+        }
+        AbstractAuthenticationToken result = buildAuthentication(account);
         result.setDetails(authentication.getDetails());
         return result;
     }

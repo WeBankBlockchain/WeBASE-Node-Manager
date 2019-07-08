@@ -1,5 +1,7 @@
 package com.webank.webase.node.mgr.token;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.AesTools;
 import lombok.extern.log4j.Log4j2;
@@ -29,19 +31,17 @@ public class TokenService {
     /**
      * create token.
      */
-    public String createToken(String value, LocalDateTime expireTime) {
+    public String createToken(String value) {
         if (StringUtils.isBlank(value)) {
             log.error("fail createToken. param is null");
             return null;
         }
-        expireTime = Objects.nonNull(expireTime) ? expireTime : LocalDateTime.now().plusSeconds(properties.getAuthTokenMaxAge());
-
         String token = aesTools.aesEncrypt(UUID.randomUUID() + value);
         //save token
         TbToken tbToken = new TbToken();
         tbToken.setToken(token);
         tbToken.setValue(value);
-        tbToken.setExpireTime(expireTime);
+        tbToken.setExpireTime(LocalDateTime.now().plusSeconds(properties.getAuthTokenMaxAge()));
         tokenMapper.add(tbToken);
         return token;
     }
@@ -50,17 +50,20 @@ public class TokenService {
      * get value from token.
      */
     public String getValueFromToken(String token) {
-        Assert.requireNonEmpty(token, "invalid token");
+        Assert.requireNonEmpty(token, "token is empty");
 
         //query by token
         TbToken tbToken = tokenMapper.query(token);
         if (Objects.isNull(tbToken)) {
             log.info("fail getValueFromToken. tbToken is null");
-            return null;
+            throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
         }
-        if (LocalDateTime.now().isBefore(tbToken.getExpireTime())) {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(tbToken.getExpireTime())) {
             log.info("fail getValueFromToken. token has expire at:{}", tbToken.getExpireTime());
-            return null;
+            //delete token
+            this.deleteToken(token);
+            throw new NodeMgrException(ConstantCode.TOKEN_EXPIRE);
         }
         return tbToken.getValue();
     }
@@ -68,10 +71,9 @@ public class TokenService {
     /**
      * update token expire time.
      */
-    public void updateExpireTime(String token, LocalDateTime expireTime) {
+    public void updateExpireTime(String token) {
         Assert.requireNonEmpty(token, "token is empty");
-        expireTime = Objects.nonNull(expireTime) ? expireTime : LocalDateTime.now().plusSeconds(properties.getAuthTokenMaxAge());
-        tokenMapper.update(token, expireTime);
+        tokenMapper.update(token, LocalDateTime.now().plusSeconds(properties.getAuthTokenMaxAge()));
     }
 
     /**
