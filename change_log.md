@@ -5,8 +5,8 @@
 取消session保存登录状态，新增tb_token表保存登录token
 
 ## 准备工作
-1、更新WeBASE-Node-Manager代码到V0.5.4，并重新打包。
-2、登录mysql,运行如下脚本：
+* 1、更新WeBASE-Node-Manager代码到V0.5.4，并重新打包。
+* 2、登录mysql,运行如下脚本：
 ```ddl
 CREATE TABLE IF NOT EXISTS tb_token (
   token varchar(120) NOT NULL PRIMARY KEY COMMENT 'token',
@@ -15,3 +15,4 @@ CREATE TABLE IF NOT EXISTS tb_token (
   create_time timestamp NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='token信息表';
 ```
+* 3、重启服务WeBASE-Node-Manager即可
