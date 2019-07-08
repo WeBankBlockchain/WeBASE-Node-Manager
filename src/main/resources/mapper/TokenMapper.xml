@@ -16,7 +16,13 @@
    </insert>
 
     <delete id="delete" parameterType="java.lang.String">
-		 delete from tb_token where token = #{token} or expire_time &lt;= NOW();
+		 delete from tb_token where expire_time &lt;= NOW()
+        <if test="account != null">
+            or value = #{account}
+        </if>
+        <if test="token != null">
+            or token = #{token}
+        </if>
 	</delete>
 
     <update id="update">
