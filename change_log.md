@@ -4,9 +4,6 @@
 ## 变更内容
 取消session保存登录状态，新增tb_token表保存登录token
 
-## 前提
-WeBASE-Web 更新到V0.5.2
-
 ## 准备工作
 1、更新WeBASE-Node-Manager代码到V0.5.4，并重新打包。
 2、登录mysql,运行如下脚本：
