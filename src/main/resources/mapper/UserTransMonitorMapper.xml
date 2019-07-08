@@ -88,23 +88,15 @@
 	</select>
 
   <select id="monitorUserList" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
-    select distinct user_name as userName,
-    user_type as userType
-    from ${tableName}
-    where 1=1
-    order by modify_time
+    select distinct user_name as userName from ${tableName}
   </select>
 
   <select id="monitorInterfaceList" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
-    select distinct interface_name as interfaceName,
-    trans_unusual_type as transUnusualType,
-    modify_time
-    from ${tableName}
+    select distinct interface_name as interfaceName from ${tableName}
     where 1=1
     <if test="userName != null and userName != ''">
       and user_name = #{userName}
     </if>
-    order by modify_time
   </select>
 
   <select id="countOfMonitorTrans" parameterType="Map" resultType="java.lang.Integer">
@@ -156,22 +148,12 @@
 
   <select id="listOfUnusualUser" parameterType="Map"
     resultType="com.webank.webase.node.mgr.monitor.UnusualUserInfo">
-    select
-    t.user_name as userName,
-    sum(t.trans_count) as transCount,
-    t.trans_hashs as hashs,
-    t.modify_time as time
-    from
-    (
-    select user_name, trans_count, trans_hashs, modify_time
-    from ${tableName}
-    where user_type=1
+    select user_name as userName,sum(trans_count) as transCount, max(trans_hashs) as hashs, max(modify_time) as time
+    from ${tableName} where user_type=1
     <if test="userName != null and userName != ''">
       and user_name like CONCAT('%',#{userName},'%')
     </if>
-    order by user_name, modify_time desc
-    ) t
-    group by t.user_name
+    group by user_name
     <if test="start != null and pageSize != null">
       limit #{start},#{pageSize}
     </if>
@@ -188,23 +170,13 @@
 
   <select id="listOfUnusualContract" parameterType="Map"
     resultType="com.webank.webase.node.mgr.monitor.UnusualContractInfo">
-    select
-    t.contract_name as contractName,
-    t.contract_address as contractAddress,
-    sum(t.trans_count) as transCount,
-    t.trans_hashs as hashs,
-    t.modify_time as time
-    from
-    (
-    select contract_name, contract_address, trans_count, trans_hashs, modify_time
-    from ${tableName}
-    where trans_unusual_type=1
+    select contract_name as contractName,max(contract_address) as contractAddress,sum(trans_count) as transCount,
+    max(trans_hashs) as hashs,max(modify_time) as time
+    from ${tableName} where trans_unusual_type=1
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address like CONCAT('%',#{contractAddress},'%')
     </if>
-    order by contract_address, modify_time desc limit 10000000
-    ) t
-    group by t.contract_address
+    group by contract_name
     <if test="start != null and pageSize != null">
       limit #{start},#{pageSize}
     </if>
