@@ -50,6 +50,8 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         log.debug("login success");
 
         String accountName = authentication.getName();
+        //delete old token and save new
+        tokenService.deleteToken(null, accountName);
         String token = tokenService.createToken(accountName);
 
         // response account info

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public interface TokenMapper {
     void add(TbToken tbToken);
 
-    void delete(@Param("token") String token);
+    void delete(@Param("token") String token, @Param("account") String account);
 
     void update(@Param("token") String token, @Param("expireTime") LocalDateTime expireTime);
 

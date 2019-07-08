@@ -55,7 +55,7 @@ public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
             return;
         }
         //remove token
-        tokenService.deleteToken(token);
+        tokenService.deleteToken(token, null);
 
         log.debug("logout success");
         NodeMgrTools.responseString(response, JSON.toJSONString(ConstantCode.SUCCESS));

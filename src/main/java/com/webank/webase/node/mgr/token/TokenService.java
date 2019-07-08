@@ -62,7 +62,7 @@ public class TokenService {
         if (now.isBefore(tbToken.getExpireTime())) {
             log.info("fail getValueFromToken. token has expire at:{}", tbToken.getExpireTime());
             //delete token
-            this.deleteToken(token);
+            this.deleteToken(token, null);
             throw new NodeMgrException(ConstantCode.TOKEN_EXPIRE);
         }
         return tbToken.getValue();
@@ -79,8 +79,7 @@ public class TokenService {
     /**
      * delete token.
      */
-    public void deleteToken(String token) {
-        Assert.requireNonEmpty(token, "token is empty");
-        tokenMapper.delete(token);
+    public void deleteToken(String token, String account) {
+        tokenMapper.delete(token, account);
     }
 }
