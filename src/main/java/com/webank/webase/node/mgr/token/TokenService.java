@@ -55,12 +55,12 @@ public class TokenService {
         //query by token
         TbToken tbToken = tokenMapper.query(token);
         if (Objects.isNull(tbToken)) {
-            log.info("fail getValueFromToken. tbToken is null");
+            log.warn("fail getValueFromToken. tbToken is null");
             throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
         }
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(tbToken.getExpireTime())) {
-            log.info("fail getValueFromToken. token has expire at:{}", tbToken.getExpireTime());
+        if (now.isAfter(tbToken.getExpireTime())) {
+            log.warn("fail getValueFromToken. token has expire at:{}", tbToken.getExpireTime());
             //delete token
             this.deleteToken(token, null);
             throw new NodeMgrException(ConstantCode.TOKEN_EXPIRE);
