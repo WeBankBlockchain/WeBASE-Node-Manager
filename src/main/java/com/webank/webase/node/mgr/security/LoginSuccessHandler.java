@@ -20,7 +20,6 @@ import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.TbAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.token.TokenService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +42,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private AccountService accountService;
     @Autowired
     private TokenService tokenService;
-    @Autowired
-    private ConstantProperties properties;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -53,12 +49,8 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
             throws IOException, ServletException {
         log.debug("login success");
 
-        //   Object obj = authentication.getPrincipal();
-
-        // JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(obj));
-        //    String accountName = jsonObject.getString("username");
         String accountName = authentication.getName();
-        String token = tokenService.createToken(accountName, LocalDateTime.now().plusSeconds(properties.getAuthTokenMaxAge()));
+        String token = tokenService.createToken(accountName);
 
         // response account info
         TbAccountInfo accountInfo = accountService.queryByAccount(accountName);

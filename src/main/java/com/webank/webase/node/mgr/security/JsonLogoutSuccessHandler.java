@@ -18,7 +18,13 @@ package com.webank.webase.node.mgr.security;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.token.TokenService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -27,24 +33,50 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @Log4j2
 @Component
 public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
+    @Autowired
+    private TokenService tokenService;
+    private String TOKEN_HEADER_NAME = "Authorization";
+    private String TOKEN_START = "Token";
 
     @Override
-    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
-        Authentication authentication)
-        throws IOException, ServletException {
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
-        //session失效
-        request.getSession().invalidate();
+        //get token
+        String token;
+        try {
+            token = this.getToken(request);
+        } catch (NodeMgrException ex) {
+            NodeMgrTools.responseString(response, JSON.toJSONString(ex.getRetCode()));
+            return;
+        }
+        //remove token
+        tokenService.deleteToken(token);
 
         log.debug("logout success");
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        NodeMgrTools.responseString(response, JSON.toJSONString(ConstantCode.SUCCESS));
+    }
 
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(JSON.toJSONString(baseResponse));
+    /**
+     * get token.
+     */
+    private String getToken(HttpServletRequest request) {
+        String header = request.getHeader(TOKEN_HEADER_NAME);
+        if (StringUtils.isBlank(header)) {
+            log.error("not found token");
+            throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
+        }
+
+        String token = StringUtils.removeStart(header, TOKEN_START).trim();
+        if (StringUtils.isBlank(token)) {
+            log.error("token is empty");
+            throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
+        }
+        return token;
     }
 
 }

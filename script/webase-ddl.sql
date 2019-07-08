@@ -296,5 +296,5 @@ CREATE TABLE IF NOT EXISTS tb_token (
   token varchar(120) NOT NULL PRIMARY KEY COMMENT 'token',
   value varchar(50) NOT NULL COMMENT '与token相关的值（如：用户编号，图形验证码值）',
   expire_time timestamp NOT NULL COMMENT '失效时间',
-  create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  create_time timestamp NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='token信息表';

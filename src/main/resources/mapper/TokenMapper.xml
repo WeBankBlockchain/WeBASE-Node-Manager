@@ -16,14 +16,14 @@
    </insert>
 
     <delete id="delete" parameterType="java.lang.String">
-		 delete from tb_token where token=#{token} or expire_time &lt;= NOW();
+		 delete from tb_token where token = #{token} or expire_time &lt;= NOW();
 	</delete>
 
     <update id="update">
         update tb_token set expire_time = #{expireTime} where token = #{token}
     </update>
 
-    <select id="query">
+    <select id="query" resultMap="accountMap">
         select * from tb_token where token = #{token}
     </select>
 

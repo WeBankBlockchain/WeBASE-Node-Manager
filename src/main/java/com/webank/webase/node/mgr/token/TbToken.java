@@ -10,5 +10,5 @@ public class TbToken {
     private String token;
     private String value;
     private LocalDateTime expireTime;
-    private LocalDateTime createdTime;
+    private LocalDateTime createTime;
 }

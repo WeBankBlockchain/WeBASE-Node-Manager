@@ -67,6 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private ConstantProperties constants;
 
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler); // 无权访问 JSON 格式的数据
@@ -81,11 +82,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .permitAll()
             .anyRequest().authenticated().and().csrf()
             .disable() // close csrf
-            .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class) //
-            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint).and().logout()
+            .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class)
+            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint)
+            .and().logout()
             .logoutUrl("/account/logout")
-            .deleteCookies(ConstantProperties.COOKIE_JSESSIONID,
-                ConstantProperties.COOKIE_MGR_ACCOUNT)
             .logoutSuccessHandler(jsonLogoutSuccessHandler)
             .permitAll();
 
@@ -102,6 +102,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
+        auth.authenticationProvider(tokenAuthenticationProvider());
     }
 
     @Bean("bCryptPasswordEncoder")
@@ -109,18 +110,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(tokenAuthenticationProvider());
-    }
 
     @Bean
     public AuthenticationProvider tokenAuthenticationProvider() {
         return new TokenAuthenticationProvider();
     }
 
-//    @Bean
-//    public AuthenticationManager authenticationManagerBean() throws Exception {
-//        return super.authenticationManagerBean();
-//    }
 }
