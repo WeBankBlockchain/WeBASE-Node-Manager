@@ -16,17 +16,21 @@
 package com.webank.webase.node.mgr.base.config;
 
 import com.webank.webase.node.mgr.base.enums.RoleType;
+import com.webank.webase.node.mgr.base.filter.TokenAuthenticationFilter;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.security.AccountDetailsService;
 import com.webank.webase.node.mgr.security.JsonAccessDeniedHandler;
 import com.webank.webase.node.mgr.security.JsonAuthenticationEntryPoint;
 import com.webank.webase.node.mgr.security.JsonLogoutSuccessHandler;
 import com.webank.webase.node.mgr.security.LoginFailHandler;
+import com.webank.webase.node.mgr.security.customizeAuth.TokenAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,6 +40,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 /**
  * security config.
@@ -62,6 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private ConstantProperties constants;
 
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler); // 无权访问 JSON 格式的数据
@@ -76,10 +82,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .permitAll()
             .anyRequest().authenticated().and().csrf()
             .disable() // close csrf
-            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint).and().logout()
+            .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class)
+            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint)
+            .and().logout()
             .logoutUrl("/account/logout")
-            .deleteCookies(ConstantProperties.COOKIE_JSESSIONID,
-                ConstantProperties.COOKIE_MGR_ACCOUNT)
             .logoutSuccessHandler(jsonLogoutSuccessHandler)
             .permitAll();
 
@@ -96,10 +102,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
+        auth.authenticationProvider(tokenAuthenticationProvider());
     }
 
     @Bean("bCryptPasswordEncoder")
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
+    @Bean
+    public AuthenticationProvider tokenAuthenticationProvider() {
+        return new TokenAuthenticationProvider();
+    }
+
 }
