@@ -30,7 +30,7 @@ List springboot = [
 ]
 
 List web3jsdk = [
-        "org.fisco-bcos:web3sdk:1.2.5"
+        "org.fisco-bcos:web3sdk:2.0.4"
 ]
 
 List lombok = [
