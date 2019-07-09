@@ -7,7 +7,7 @@
 
 ## 准备工作
 * 1、更新WeBASE-Node-Manager代码到V0.5.4，并重新打包。
-* 2、如果使用旧得application.yml配置文件，则需要将cookieMaxAge更改为authTokenMaxAge
+* 2、如果使用旧的application.yml配置文件，则需要将cookieMaxAge更改为authTokenMaxAge
 * 2、登录mysql,运行如下脚本：
 ```ddl
 CREATE TABLE IF NOT EXISTS tb_token (
