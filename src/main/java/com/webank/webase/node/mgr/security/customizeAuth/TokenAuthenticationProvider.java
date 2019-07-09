@@ -15,9 +15,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class TokenAuthenticationProvider implements AuthenticationProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenAuthenticationProvider.class);
@@ -36,19 +41,18 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
     }*/
 
     @Override
-   // @Transactional(noRollbackFor = BadCredentialsException.class)
+    // @Transactional(noRollbackFor = BadCredentialsException.class)
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String token = authentication.getName();
-        String account=null;
+        String account = null;
         try {
-         account = tokenService.getValueFromToken(token);
-           tokenService.updateExpireTime(token);
-       }catch (NodeMgrException e){
+            account = tokenService.getValueFromToken(token);
+            tokenService.updateExpireTime(token);
+        } catch (NodeMgrException e) {
             throw new BadCredentialsException(JSON.toJSONString(e.getRetCode()));
+        } catch (Exception e) {
+            throw new BadCredentialsException("db");
         }
-        catch (Exception e) {
-           throw new BadCredentialsException("db");
-       }
         if (null == account) {
             throw new CredentialsExpiredException("Invalid token");
         }
@@ -66,24 +70,24 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
 //        return new TokenAuthenticationToken(user.getId(), buildAuthorities(user));
 //    }
 
-/*    private Collection<SimpleGrantedAuthority> buildAuthorities(TbAccountInfo user) {
+    private Collection<SimpleGrantedAuthority> buildAuthorities(TbAccountInfo user) {
         final Collection<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();
         List<String> authorities = getUserAuthorities(user);
         for (String authority : authorities) {
             simpleGrantedAuthorities.add(new SimpleGrantedAuthority(authority));
         }
         return simpleGrantedAuthorities;
-    }*/
+    }
 
     private AbstractAuthenticationToken buildAuthentication(String account) {
         TbAccountInfo tbAccountInfo = accountService.queryByAccount(account);
         LOGGER.info(tbAccountInfo + "****" + tbAccountInfo.getAccount());
-        return new TokenAuthenticationToken(tbAccountInfo.getAccount(), null);
+        return new TokenAuthenticationToken(tbAccountInfo.getAccount(), buildAuthorities(tbAccountInfo));
     }
 
 
-//    private List<String> getUserAuthorities(TbAccountInfo user) {
-//
-//        return Arrays.asList(user.getRoleName());
-//    }
+    private List<String> getUserAuthorities(TbAccountInfo user) {
+
+        return Arrays.asList("ROLE_" + user.getRoleName());
+    }
 }
