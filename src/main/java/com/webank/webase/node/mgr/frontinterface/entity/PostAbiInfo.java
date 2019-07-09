@@ -15,7 +15,7 @@ package com.webank.webase.node.mgr.frontinterface.entity;
 
 import java.util.List;
 import lombok.Data;
-import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 
 
 /**
