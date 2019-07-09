@@ -65,11 +65,9 @@ CREATE DATABASE IF NOT EXISTS {your_db_name} DEFAULT CHARSET utf8 COLLATE utf8_g
 
 ### 3.3.2 修改脚本配置
 进入数据库脚本目录
-shell
 cd  dist/script
 ```
 修改数据库连接信息：
-```shell
 修改数据库名称：sed -i "s/fisco-bcos-data/${your_db_name}/g" webase.sh
 修改数据库用户名：sed -i "s/defaultAccount/${your_db_account}/g" webase.sh
 修改数据库密码：sed -i "s/defaultPassword/${your_db_password}/g" webase.sh
