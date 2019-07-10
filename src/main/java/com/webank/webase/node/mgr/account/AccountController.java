@@ -17,37 +17,34 @@
 package com.webank.webase.node.mgr.account;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.controller.BaseController;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.token.TokenService;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @Log4j2
 @RestController
 @RequestMapping(value = "account")
-public class AccountController extends BaseController {
+public class AccountController {
 
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private TokenService tokenService;
 
 
     /**
@@ -59,7 +56,7 @@ public class AccountController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addAccountInfo. startTime:{} accountInfo:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(info));
+                JSON.toJSONString(info));
 
         // add account row
         accountService.addAccountRow(info);
@@ -70,7 +67,7 @@ public class AccountController extends BaseController {
         baseResponse.setData(tbAccount);
 
         log.info("end addAccountInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -79,15 +76,14 @@ public class AccountController extends BaseController {
      */
     @PutMapping(value = "/accountInfo")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse updateAccountInfo(@RequestBody AccountInfo info) throws NodeMgrException {
+    public BaseResponse updateAccountInfo(@RequestBody AccountInfo info,HttpServletRequest request) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start updateAccountInfo startTime:{} accountInfo:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(info));
+                JSON.toJSONString(info));
 
         // current
-        String currentAccount = (String) getSessionAttribute(
-            ConstantProperties.SESSION_MGR_ACCOUNT);
+        String currentAccount = getCurrentAccount(request);
 
         // update account row
         accountService.updateAccountRow(currentAccount, info);
@@ -98,8 +94,8 @@ public class AccountController extends BaseController {
         baseResponse.setData(tbAccount);
 
         log.info("end updateAccountInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(),
-            JSON.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JSON.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -109,20 +105,20 @@ public class AccountController extends BaseController {
     @GetMapping(value = "/accountList/{pageNumber}/{pageSize}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BasePageResponse queryAccountList(@PathVariable("pageNumber") Integer pageNumber,
-        @PathVariable("pageSize") Integer pageSize,
-        @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
+                                             @PathVariable("pageSize") Integer pageSize,
+                                             @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{} account:{} ",
-            startTime.toEpochMilli(), pageNumber, pageSize,
-            account);
+                startTime.toEpochMilli(), pageNumber, pageSize,
+                account);
 
         int count = accountService.countOfAccount(account);
         if (count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
-                .orElse(0);
+                    .orElse(0);
             AccountListParam param = new AccountListParam(start, pageSize, account,
-                SqlSortType.DESC.getValue());
+                    SqlSortType.DESC.getValue());
             List<TbAccountInfo> listOfAccount = accountService.listOfAccount(param);
             listOfAccount.stream().forEach(accountData -> accountData.setAccountPwd(null));
             pagesponse.setData(listOfAccount);
@@ -130,7 +126,7 @@ public class AccountController extends BaseController {
         }
 
         log.info("end queryAccountList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -140,7 +136,7 @@ public class AccountController extends BaseController {
     @DeleteMapping(value = "/{account}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deleteAccount(@PathVariable("account") String account)
-        throws NodeMgrException {
+            throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start deleteAccount. startTime:{} account:{}", startTime.toEpochMilli(), account);
@@ -148,7 +144,7 @@ public class AccountController extends BaseController {
         accountService.deleteAccountRow(account);
 
         log.info("end deleteAccount. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -156,20 +152,28 @@ public class AccountController extends BaseController {
      * update password.
      */
     @PutMapping(value = "/passwordUpdate")
-    public BaseResponse updatePassword(@RequestBody PasswordInfo info) throws NodeMgrException {
+    public BaseResponse updatePassword(@RequestBody PasswordInfo info,HttpServletRequest request) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start updatePassword startTime:{} passwordInfo:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(info));
+                JSON.toJSONString(info));
 
-        String targetAccount = (String) getSessionAttribute(ConstantProperties.SESSION_MGR_ACCOUNT);
+        String targetAccount = getCurrentAccount(request);
 
         // update account row
         accountService
-            .updatePassword(targetAccount, info.getOldAccountPwd(), info.getNewAccountPwd());
+                .updatePassword(targetAccount, info.getOldAccountPwd(), info.getNewAccountPwd());
 
         log.info("end updatePassword useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
+    }
+
+    /**
+     * get current account.
+     */
+    private String getCurrentAccount(HttpServletRequest request) {
+        String token = NodeMgrTools.getToken(request);
+        return tokenService.getValueFromToken(token);
     }
 }
