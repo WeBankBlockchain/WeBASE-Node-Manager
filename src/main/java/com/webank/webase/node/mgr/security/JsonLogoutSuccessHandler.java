@@ -40,8 +40,6 @@ import java.util.Optional;
 public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
     @Autowired
     private TokenService tokenService;
-    private String TOKEN_HEADER_NAME = "Authorization";
-    private String TOKEN_START = "Token";
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -49,7 +47,7 @@ public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
         //get token
         String token;
         try {
-            token = this.getToken(request);
+            token = NodeMgrTools.getToken(request);
         } catch (NodeMgrException ex) {
             NodeMgrTools.responseString(response, JSON.toJSONString(ex.getRetCode()));
             return;
@@ -60,23 +58,4 @@ public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
         log.debug("logout success");
         NodeMgrTools.responseString(response, JSON.toJSONString(ConstantCode.SUCCESS));
     }
-
-    /**
-     * get token.
-     */
-    private String getToken(HttpServletRequest request) {
-        String header = request.getHeader(TOKEN_HEADER_NAME);
-        if (StringUtils.isBlank(header)) {
-            log.error("not found token");
-            throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
-        }
-
-        String token = StringUtils.removeStart(header, TOKEN_START).trim();
-        if (StringUtils.isBlank(token)) {
-            log.error("token is empty");
-            throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
-        }
-        return token;
-    }
-
 }
