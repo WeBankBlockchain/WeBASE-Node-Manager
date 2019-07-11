@@ -23,7 +23,8 @@ import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import java.util.Iterator;
 import java.util.List;
-import org.bcos.web3j.crypto.Credentials;
+
+import org.fisco.bcos.web3j.crypto.Credentials;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
