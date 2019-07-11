@@ -59,7 +59,7 @@ public class AccountController extends BaseController {
     @Autowired
     private AccountService accountService;
     private static final int PICTURE_CHECK_CODE_CHAR_NUMBER = 4;
-    private static final long JWT_TOKEN_LIFE_TIME_MILLS = 60000L;//30s
+    private static final long JWT_TOKEN_LIFE_TIME_MILLS = 300000L;//5min
 
     /**
      * 获取验证码

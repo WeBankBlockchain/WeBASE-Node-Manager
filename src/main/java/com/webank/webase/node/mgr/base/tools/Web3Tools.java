@@ -16,18 +16,19 @@
 package com.webank.webase.node.mgr.base.tools;
 
 
-import static org.bcos.web3j.crypto.Keys.getAddress;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.fisco.bcos.web3j.crypto.Hash;
+import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.web3j.utils.Numeric;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.bcos.web3j.crypto.Hash;
-import org.bcos.web3j.protocol.ObjectMapperFactory;
-import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
-import org.bcos.web3j.utils.Numeric;
+
+import static org.fisco.bcos.web3j.crypto.Keys.getAddress;
 
 public class Web3Tools {
 
@@ -71,7 +72,7 @@ public class Web3Tools {
         result.append(abiDefinition.getName());
         result.append("(");
         String params = abiDefinition.getInputs().stream()
-            .map(NamedType::getType)
+            .map(AbiDefinition.NamedType::getType)
             .collect(Collectors.joining(","));
         result.append(params);
         result.append(")");
