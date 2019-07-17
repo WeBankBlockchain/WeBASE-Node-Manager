@@ -265,12 +265,12 @@ public class NodeMgrTools {
             state = address.isReachable(500);
         } catch (Exception ex) {
             log.error("fail checkServerHostConnect", ex);
-            throw new NodeMgrException(ConstantCode.SERVER_HOST_CONNECT_FAIL);
+            throw new NodeMgrException(ConstantCode.SERVER_CONNECT_FAIL);
         }
 
         if (!state) {
             log.info("host connect state:{}", state);
-            throw new NodeMgrException(ConstantCode.SERVER_HOST_CONNECT_FAIL);
+            throw new NodeMgrException(ConstantCode.SERVER_CONNECT_FAIL);
         }
     }
 
@@ -279,20 +279,20 @@ public class NodeMgrTools {
      * check host an port.
      */
     public static void checkServerConnect(String serverHost, int serverPort) {
-        //check host
-        checkServerHostConnect(serverHost);
+        // check host
+        // checkServerHostConnect(serverHost);
 
         Socket socket =null;
         try {
             //check port
-             socket = new Socket();
+            socket = new Socket();
             socket.setReceiveBufferSize(8193);
             socket.setSoTimeout(500);
             SocketAddress address = new InetSocketAddress(serverHost, serverPort);
             socket.connect(address, 1000);
         } catch (Exception ex) {
             log.error("fail checkServerConnect", ex);
-            throw new NodeMgrException(ConstantCode.SERVER_PORT_CONNECT_FAIL);
+            throw new NodeMgrException(ConstantCode.SERVER_CONNECT_FAIL);
         }finally {
             if(Objects.nonNull(socket)){
                 try {
