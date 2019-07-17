@@ -13,18 +13,17 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.entity.TbGroup;
-import com.webank.webase.node.mgr.monitor.MonitorService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.monitor.MonitorService;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
@@ -41,7 +40,7 @@ public class TransMonitorTask {
      */
     public synchronized void monitorStart() {
         Instant startTime = Instant.now();
-        log.info("start monitor. startTime:{}", startTime.toEpochMilli());
+        log.info("=== start monitor. startTime:{}", startTime.toEpochMilli());
         //get group list
         List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
@@ -60,7 +59,7 @@ public class TransMonitorTask {
             Thread.currentThread().interrupt();
         }
 
-        log.info("end monitor. useTime:{} ",
+        log.info("=== end monitor. useTime:{} ",
             Duration.between(startTime, Instant.now()).toMillis());
     }
 }

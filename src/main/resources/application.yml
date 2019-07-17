@@ -37,7 +37,7 @@ constant:
   notSupportFrontIp: localhost,127.0.0.1,0.0.0.0
 
   ###block into
-  isBlockPullFromZero: false
+  isBlockPullFromZero: true
   pullBlockSleepTime: 200
   pullBlockTaskFixedDelay: 30000
   blockRetainMax: 10000
