@@ -19,13 +19,14 @@ CREATE TABLE IF NOT EXISTS tb_group (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_front (
   front_id int(11) NOT NULL AUTO_INCREMENT COMMENT '前置服务编号',
+  node_id varchar(250) NOT NULL COMMENT '节点编号',
   front_ip varchar(16) NOT NULL COMMENT '前置服务ip',
   front_port int(11) DEFAULT NULL COMMENT '前置服务端口',
   agency varchar(32) NOT NULL COMMENT '所属机构名称',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (front_id),
-  UNIQUE KEY unique_node_base (front_ip,front_port)
+  UNIQUE KEY unique_node_id (node_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=500001 DEFAULT CHARSET=utf8 COMMENT='前置服务信息表';
 
 

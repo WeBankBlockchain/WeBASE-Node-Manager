@@ -34,7 +34,7 @@ constant:
   statisticsTransDailyCron: "0 0/1 * * * ?"
   resetGroupListCycle: 600000
   groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
-  notSupportFrontIp: localhost,127.0.0.1,0.0.0.0
+  notSupportFrontIp:
 
   ###block into
   isBlockPullFromZero: true
