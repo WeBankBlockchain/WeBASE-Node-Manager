@@ -21,6 +21,7 @@ import lombok.Data;
 @Data
 public class TbFront {
     private Integer frontId;
+    private String nodeId;
     private String frontIp;
     private Integer frontPort;
     private String agency;

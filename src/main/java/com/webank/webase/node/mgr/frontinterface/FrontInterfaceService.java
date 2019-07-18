@@ -16,25 +16,9 @@ package com.webank.webase.node.mgr.frontinterface;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PEERS;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PLIST;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_PEERS;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
-import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
-import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
-import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
-import com.webank.webase.node.mgr.monitor.ChainTransInfo;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
-import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CSYNC_STATUS;
 import java.math.BigInteger;
 import java.util.List;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,6 +28,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.block.entity.BlockInfo;
+import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
+import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
+import com.webank.webase.node.mgr.monitor.ChainTransInfo;
+import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
+import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
+import lombok.extern.log4j.Log4j2;
 
 
 @Log4j2
@@ -130,6 +127,14 @@ public class FrontInterfaceService {
     public PeerInfo[] getPeersFromSpecificFront(String frontIp, Integer frontPort,
         Integer groupId) {
         return getFromSpecificFront(groupId, frontIp, frontPort, URI_PEERS, PeerInfo[].class);
+    }
+    
+    /**
+     * get peers from specific front.
+     */
+    public SyncStatus getSyncStatusFromSpecificFront(String frontIp, Integer frontPort,
+            Integer groupId) {
+        return getFromSpecificFront(groupId, frontIp, frontPort, URI_CSYNC_STATUS, SyncStatus.class);
     }
 
     /**
