@@ -38,7 +38,7 @@ constant:
 
   ###block into
   isBlockPullFromZero: false
-  pullBlockInitCnts: 100
+  pullBlockInitCnts: 1000
   pullBlockSleepTime: 200
   pullBlockTaskFixedDelay: 30000
   blockRetainMax: 10000
