@@ -1,6 +1,6 @@
 #server config
 server:
-  port: 8080
+  port: 5001
   servlet:
     context-path: /WeBASE-Node-Manager
 
@@ -15,7 +15,7 @@ mybatis:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/fisco-bcos-data?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+    url: jdbc:mysql://127.0.0.1:3306/webasenodemanager?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
     username: defaultAccount
     password: defaultPassword
 
@@ -34,16 +34,19 @@ constant:
   statisticsTransDailyCron: "0 0/1 * * * ?"
   resetGroupListCycle: 600000
   groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
-  notSupportFrontIp: localhost,127.0.0.1,0.0.0.0
+  notSupportFrontIp:
 
   ###block into
   isBlockPullFromZero: false
+  pullBlockInitCnts: 1000
   pullBlockSleepTime: 200
   pullBlockTaskFixedDelay: 30000
   blockRetainMax: 10000
   ###receive http request
-  cookieMaxAge: 1800
+  verificationCodeMaxAge: 300
+  authTokenMaxAge: 1800
   isUseSecurity: true
+  aesKey: ERTadb83f9ege39k
   jwtSecret: S3g4HtJyg7G6Hg0Ln3g4H5Jyg7H6f9dL
   ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find
   ###front http request

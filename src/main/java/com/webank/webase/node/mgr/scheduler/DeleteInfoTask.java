@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.transaction.TransHashService;
+import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -48,7 +49,7 @@ public class DeleteInfoTask {
      */
     public void deleteInfoStart() {
         Instant startTime = Instant.now();
-        log.info("start DeleteInfoTask. startTime:{}", startTime.toEpochMilli());
+        log.info("start deleteInfoStart. startTime:{}", startTime.toEpochMilli());
         //get group list
         List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
@@ -58,7 +59,7 @@ public class DeleteInfoTask {
 
         groupList.stream().forEach(g -> deleteByGroupId(g.getGroupId()));
 
-        log.info("end deleteTransHash useTime:{}",
+        log.info("end deleteInfoStart useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
     }
 
@@ -94,7 +95,13 @@ public class DeleteInfoTask {
     private void deleteTransHash(int groupId) {
         log.info("start deleteTransHash. groupId:{}", groupId);
         try {
-            Integer removeCount = transHashService.remove(groupId, cProperties.getTransRetainMax());
+            TransListParam queryParam = new TransListParam(null, null);
+            Integer count = transHashService.queryCountOfTran(groupId, queryParam);
+            Integer removeCount = 0;
+            if (count > cProperties.getTransRetainMax().intValue()) {
+                Integer subTransNum = count - cProperties.getTransRetainMax().intValue();
+                removeCount = transHashService.remove(groupId, subTransNum);
+            }
             log.info("end deleteTransHash. groupId:{} removeCount:{}", groupId, removeCount);
         } catch (Exception ex) {
             log.info("fail deleteTransHash. groupId:{}", groupId, ex);

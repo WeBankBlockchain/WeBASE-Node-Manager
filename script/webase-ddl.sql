@@ -19,13 +19,14 @@ CREATE TABLE IF NOT EXISTS tb_group (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_front (
   front_id int(11) NOT NULL AUTO_INCREMENT COMMENT '前置服务编号',
+  node_id varchar(250) NOT NULL COMMENT '节点编号',
   front_ip varchar(16) NOT NULL COMMENT '前置服务ip',
   front_port int(11) DEFAULT NULL COMMENT '前置服务端口',
   agency varchar(32) NOT NULL COMMENT '所属机构名称',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (front_id),
-  UNIQUE KEY unique_node_base (front_ip,front_port)
+  UNIQUE KEY unique_node_id (node_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=500001 DEFAULT CHARSET=utf8 COMMENT='前置服务信息表';
 
 
@@ -195,7 +196,14 @@ CREATE TABLE IF NOT EXISTS tb_role (
 
 
 
-
-
+-- ----------------------------
+-- Table structure for tb_token
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_token (
+  token varchar(120) NOT NULL PRIMARY KEY COMMENT 'token',
+  value varchar(50) NOT NULL COMMENT '与token相关的值（如：用户编号，图形验证码值）',
+  expire_time datetime DEFAULT NULL COMMENT '失效时间',
+  create_time datetime DEFAULT NULL COMMENT '创建时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='token信息表';
 
 
