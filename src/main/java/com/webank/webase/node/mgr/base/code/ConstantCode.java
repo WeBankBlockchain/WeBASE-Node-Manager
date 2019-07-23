@@ -109,11 +109,10 @@ public class ConstantCode {
     public static final RetCode PUBLICKEY_LENGTH_ERROR = RetCode
         .mark(202050, "publicKey's length is 130,address's length is 42");
 
-    public static final RetCode SERVER_HOST_CONNECT_FAIL = RetCode
-        .mark(202051, "unKnow this host");
-
-    public static final RetCode SERVER_PORT_CONNECT_FAIL = RetCode
-        .mark(202052, "unKnow this port");
+    public static final RetCode SERVER_CONNECT_FAIL = RetCode
+        .mark(202051, "wrong host or port");
+    public static final RetCode INVALID_TOKEN = RetCode.mark(202052, "invalid token");
+    public static final RetCode TOKEN_EXPIRE = RetCode.mark(202053, "token expire");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

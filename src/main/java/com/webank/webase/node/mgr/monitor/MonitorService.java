@@ -91,6 +91,7 @@ public class MonitorService {
             do {
                 List<TbTransHash> transHashList = transHashService
                     .qureyUnStatTransHashList(groupId);
+                log.info("=== groupId:{} transHashList:{}", groupId, transHashList.size());
                 if (Objects.isNull(transHashList) || transHashList.size() == 0) {
                     log.debug("transMonitorByGroupId jump over. transHashList is empty");
                     return;
@@ -105,11 +106,11 @@ public class MonitorService {
                     if (createTime.getDayOfYear() != trans.getBlockTimestamp().getDayOfYear()
                         || start == createTime) {
                         log.info(
-                            "=========================================createTime:{} blockTimestamp:{}",
+                            "============== createTime:{} blockTimestamp:{}",
                             createTime,
                             trans.getBlockTimestamp());
                         log.info(
-                            "=========================================createData:{} blockTimestampData:{}",
+                            "============== createData:{} blockTimestampData:{}",
                             createTime.getDayOfYear(),
                             trans.getBlockTimestamp().getDayOfYear());
                         createTime = trans.getBlockTimestamp();
@@ -122,7 +123,7 @@ public class MonitorService {
                 log.debug("monitor groupId:{} useTimeSum:{}s maxTime:{}s", groupId, useTimeSum,
                     cProperties.getTransMonitorTaskFixedRate());
             } while (useTimeSum < cProperties.getTransMonitorTaskFixedRate());
-            log.debug("end monitor. groupId:{} allUseTime:{}s", groupId, useTimeSum);
+            log.info("=== end monitor. groupId:{} allUseTime:{}s", groupId, useTimeSum);
         } catch (Exception ex) {
             log.error("fail transMonitorByGroupId, group:{}", groupId, ex);
         } finally {
@@ -148,9 +149,6 @@ public class MonitorService {
         }
         return false;
     }
-
-
-
 
 
     public void updateUnusualUser(Integer groupId, String userName, String address) {

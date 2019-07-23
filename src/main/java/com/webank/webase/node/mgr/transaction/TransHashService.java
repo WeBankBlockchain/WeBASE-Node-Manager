@@ -113,9 +113,9 @@ public class TransHashService {
     /**
      * Remove trans info.
      */
-    public Integer remove(Integer groupId, BigInteger transRetainMax) {
+    public Integer remove(Integer groupId, Integer subTransNum) {
         String tableName = TableName.TRANS.getTableName(groupId);
-        Integer affectRow = transHashMapper.remove(tableName, transRetainMax, groupId);
+        Integer affectRow = transHashMapper.remove(tableName, subTransNum, groupId);
         return affectRow;
     }
 

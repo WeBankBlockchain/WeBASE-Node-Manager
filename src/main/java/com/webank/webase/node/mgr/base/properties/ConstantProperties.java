@@ -51,12 +51,14 @@ public class ConstantProperties {
 
     //block into
     private BigInteger blockRetainMax = new BigInteger("10000");
+    private BigInteger pullBlockInitCnts = new BigInteger("100");
     private Long pullBlockSleepTime = 20L; //20 mills
     private Boolean isBlockPullFromZero = false;
     private Long pullBlockTaskFixedDelay = 30000L; //30 s
 
     //receive http request
-    private Integer cookieMaxAge = 900; // seconds
+    private Integer verificationCodeMaxAge = 300; // seconds
+    private Integer authTokenMaxAge = 900; // seconds
     private Boolean isUseSecurity = true;
     private String ignoreCheckFront = null;
     private String jwtSecret;
@@ -65,6 +67,7 @@ public class ConstantProperties {
     private String frontUrl;
     private Integer contractDeployTimeOut = 30000;
     private Integer httpTimeOut = 5000;
+    private String aesKey = "a3LdMfg123C56z9r";
     private Boolean isPrivateKeyEncrypt = true;
     private Integer maxRequestFail = 3;
     private Long sleepWhenHttpMaxFail = 60000L;  //default 1min

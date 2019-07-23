@@ -40,7 +40,8 @@
         statistics_flag int(1) DEFAULT '1' COMMENT '是否已统计（1-未统计，2-已统计）',
         create_time datetime DEFAULT NULL COMMENT '创建时间',
         modify_time datetime DEFAULT NULL COMMENT '修改时间',
-        PRIMARY KEY (trans_hash)
+        PRIMARY KEY (trans_hash),
+        KEY index_flag (statistics_flag)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交易hash信息表';
   </update>
 

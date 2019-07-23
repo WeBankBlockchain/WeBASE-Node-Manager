@@ -85,6 +85,7 @@
 		  and interface_name = #{monitor.interfaceName}
 		  and trans_type = #{monitor.transType}
 		  and trans_unusual_type = #{monitor.transUnusualType}
+		limit 1
 	</select>
 
   <select id="monitorUserList" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
