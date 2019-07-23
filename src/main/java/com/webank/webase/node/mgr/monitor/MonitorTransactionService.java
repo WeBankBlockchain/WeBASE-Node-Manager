@@ -36,7 +36,7 @@ public class MonitorTransactionService {
     public void dataAddAndUpdate(int groupId, TbMonitor tbMonitor) {
         TbMonitor dbInfo = this.queryTbMonitor(groupId, tbMonitor);
         if (dbInfo == null) {
-            log.info("==============db is null, tbMonitor:{}", JSON.toJSONString(tbMonitor));
+            log.info("====== data is not exist, add tbMonitor:{}", JSON.toJSONString(tbMonitor));
             this.addRow(groupId, tbMonitor);
         } else {
             String[] txHashsArr = dbInfo.getTransHashs().split(",");
@@ -49,6 +49,7 @@ public class MonitorTransactionService {
             }
             this.updateRow(groupId, tbMonitor);
         }
+        log.debug("====== updateTransStatFlag transHash:{}", tbMonitor.getTransHashLastest());
         transHashService.updateTransStatFlag(groupId, tbMonitor.getTransHashLastest());
     }
 

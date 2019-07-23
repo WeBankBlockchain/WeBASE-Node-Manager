@@ -56,7 +56,6 @@ public class AccountDetailsService implements UserDetailsService {
         List<GrantedAuthority> list = new ArrayList<GrantedAuthority>();
         list.add(new SimpleGrantedAuthority("ROLE_" + accountRow.getRoleName()));
 
-
         User authUser = new User(account, accountRow.getAccountPwd(), list);
         return authUser;
     }

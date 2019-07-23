@@ -13,15 +13,7 @@
  */
 package com.webank.webase.node.mgr.base.filter;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
-import com.webank.webase.node.mgr.base.tools.JwtUtils;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import io.jsonwebtoken.Claims;
 import java.io.IOException;
-import java.util.Optional;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -30,11 +22,16 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.token.TokenService;
+import lombok.extern.log4j.Log4j2;
 
 
 /**
@@ -45,9 +42,9 @@ import org.springframework.stereotype.Component;
 @Order(-1001)
 @WebFilter(filterName = "validateCodeFilter", urlPatterns = "/*")
 public class ValidateCodeFilter implements Filter {
-
     @Autowired
-    private ConstantProperties constants;
+    private TokenService tokenService;
+    @Autowired
     private static final String LOGIN_URI = "/account/login";
     private static final String LOGIN_METHOD = "post";
 
@@ -67,6 +64,9 @@ public class ValidateCodeFilter implements Filter {
             } catch (NodeMgrException ex) {
                 NodeMgrTools.responseRetCodeException(rsp, ex.getRetCode());
                 return;
+            } finally {
+                //remove token
+                tokenService.deleteToken(req.getHeader("token"), null);
             }
         }
         chain.doFilter(request, response);
@@ -87,22 +87,9 @@ public class ValidateCodeFilter implements Filter {
         if (StringUtils.isBlank(tokenInHeard)) {
             throw new NodeMgrException(ConstantCode.INVALID_CHECK_CODE);
         }
-        String realCheckCode;
-        try {
-            Claims claims = JwtUtils.parseJWT(tokenInHeard, constants.getJwtSecret());
-            realCheckCode = Optional.ofNullable(claims).map(c -> c.getSubject())
-                .orElseThrow(() -> new Exception(ConstantCode.INVALID_CHECK_CODE.getMsg()));
-        } catch (Exception ex) {
-            log.warn("fail validateCode.", ex);
-            throw new NodeMgrException(ConstantCode.INVALID_CHECK_CODE);
-        }
-
-        if (StringUtils.isBlank(realCheckCode)) {
-            log.warn("fail validateCode. realCheckCode is null");
-            throw new NodeMgrException(ConstantCode.INVALID_CHECK_CODE);
-        }
-        if (!codeInRequest.equalsIgnoreCase(realCheckCode)) {
-            log.warn("fail validateCode. realCheckCode:{} codeInRequest:{}", realCheckCode,
+        String code = tokenService.getValueFromToken(tokenInHeard);
+        if (!codeInRequest.equalsIgnoreCase(code)) {
+            log.warn("fail validateCode. realCheckCode:{} codeInRequest:{}", code,
                 codeInRequest);
             throw new NodeMgrException(ConstantCode.INVALID_CHECK_CODE);
         }
