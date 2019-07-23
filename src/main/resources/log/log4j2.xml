@@ -3,7 +3,7 @@
 <Configuration monitorInterval="5" status="info">
   <!--定义日志文件 输入位置 -->
   <Properties>
-    <Property name="logPath">./logs</Property>
+    <Property name="logPath">./log</Property>
   </Properties>
   <Appenders>
       <Console name="console" target="SYSTEM_OUT">
