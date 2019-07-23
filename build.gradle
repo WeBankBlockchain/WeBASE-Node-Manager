@@ -15,7 +15,7 @@ targetCompatibility = 1.8
 // In this section you declare where to find the dependencies of your project
 repositories {
     maven {url "http://maven.aliyun.com/nexus/content/groups/public/"}
-	
+    
     maven { url 'https://dl.bintray.com/ethereum/maven/' }
     mavenLocal()
     mavenCentral()
@@ -23,33 +23,38 @@ repositories {
 
 def springboot_version="2.1.2.RELEASE"
 List springboot = [
-         "org.springframework.boot:spring-boot-starter-web:$springboot_version",
-         "org.springframework.boot:spring-boot-starter-log4j2:$springboot_version",
-         "org.springframework.boot:spring-boot-starter-security:$springboot_version",
-        // "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
+     "org.springframework.boot:spring-boot-starter-web:$springboot_version",
+     "org.springframework.boot:spring-boot-starter-log4j2:$springboot_version",
+     "org.springframework.boot:spring-boot-starter-security:$springboot_version",
+    // "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
+]
+
+List jaxb = [
+     "javax.xml.bind:jaxb-api:2.3.0",
+     "com.sun.xml.bind:jaxb-impl:2.3.0",
+     "com.sun.xml.bind:jaxb-core:2.3.0",
+     "javax.activation:activation:1.1.1"
 ]
 
 List web3jsdk = [
-        "org.fisco-bcos:web3sdk:2.0.4"
+    "org.fisco-bcos:web3sdk:2.0.4"
 ]
 
 List lombok = [
-        "org.projectlombok:lombok:1.18.2"
+    "org.projectlombok:lombok:1.18.2"
 ]
-
 
 List jwt = [
-        "io.jsonwebtoken:jjwt:0.9.1"
+    "io.jsonwebtoken:jjwt:0.9.1"
 ]
 
-
 List test = [
-       "org.springframework.boot:spring-boot-starter-test:$springboot_version"
+    "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
 
 dependencies {
-    compile springboot,web3jsdk,jwt
+    compile springboot,jaxb,web3jsdk,jwt
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile "com.alibaba:fastjson:1.2.58"
@@ -87,6 +92,7 @@ sourceSets {
 clean {
     delete 'dist'
     delete 'build'
+    delete 'log'
 }
 
 

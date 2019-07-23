@@ -13,6 +13,16 @@
  */
 package com.webank.webase.node.mgr.block;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.TableName;
@@ -21,24 +31,12 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.BlockListParam;
-import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * services for block data.
@@ -119,7 +117,15 @@ public class BlockService {
         if (cProperties.getIsBlockPullFromZero()) {
             return BigInteger.ZERO;
         } else {
-            return frontInterface.getLatestBlockNumber(groupId);
+            BigInteger initBlock = frontInterface.getLatestBlockNumber(groupId);
+            if (initBlock.compareTo(cProperties.getPullBlockInitCnts()) >= 0) {
+                initBlock = initBlock.subtract(cProperties.getPullBlockInitCnts().
+                        subtract(BigInteger.valueOf(1)));
+            } else {
+                initBlock = BigInteger.ZERO;
+            }
+            log.info("=== getNextBlockNumber init groupId:{} initBlock:{}", groupId, initBlock);
+            return initBlock;
         }
     }
 
@@ -132,11 +138,8 @@ public class BlockService {
             return null;
         }
         BigInteger bigIntegerNumber = blockInfo.getNumber();
-        LocalDateTime blockTimestamp = LocalDateTime.MIN;
-        if (bigIntegerNumber != BigInteger.ZERO) {
-            blockTimestamp = NodeMgrTools
+        LocalDateTime blockTimestamp = NodeMgrTools
                 .timestamp2LocalDateTime(Long.valueOf(blockInfo.getTimestamp()));
-        }
         int sealerIndex = Integer.parseInt(blockInfo.getSealer().substring(2), 16);
 
         List<TransactionInfo> transList = blockInfo.getTransactions();

@@ -24,6 +24,7 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
@@ -73,8 +74,6 @@ public class FrontService {
         checkNotSupportIp(frontIp);
         //check front ip and port
         NodeMgrTools.checkServerConnect(frontIp, frontPort);
-        //check front not exist
-        checkFrontNotExist(frontIp, frontPort);
         //query group list
         List<String> groupIdList = null;
         try {
@@ -83,8 +82,18 @@ public class FrontService {
             log.error("fail newFront, frontIp:{},frontPort:{}",frontIp,frontPort);
             throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
         }
+        //check front not exist
+        SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
+                frontPort, Integer.valueOf(groupIdList.get(0)));
+        FrontParam param = new FrontParam();
+        param.setNodeId(syncStatus.getNodeId());
+        int count = getFrontCount(param);
+        if (count > 0) {
+            throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
+        }
         //copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
+        tbFront.setNodeId(syncStatus.getNodeId());
         //save front info
         frontMapper.add(tbFront);
         if (tbFront.getFrontId() == null || tbFront.getFrontId() == 0) {
@@ -141,9 +150,9 @@ public class FrontService {
      * if exist:throw exception
      */
     private void checkFrontNotExist(String frontIp, int frontPort) {
+        SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, frontPort, 1);
         FrontParam param = new FrontParam();
-        param.setFrontIp(frontIp);
-        param.setFrontPort(frontPort);
+        param.setNodeId(syncStatus.getNodeId());
         int count = getFrontCount(param);
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);

@@ -5,6 +5,7 @@
 <mapper namespace="com.webank.webase.node.mgr.front.FrontMapper">
   <resultMap id="frontMap" type="com.webank.webase.node.mgr.front.entity.TbFront">
     <id column="front_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontId"/>
+    <result column="node_id" javaType="java.lang.String" jdbcType="VARCHAR"  property="nodeId"/>
     <result column="front_ip" javaType="java.lang.String" jdbcType="VARCHAR"  property="frontIp"/>
     <result column="front_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontPort"/>
     <result column="agency" javaType="java.lang.String" jdbcType="VARCHAR" property="agency"/>
@@ -18,8 +19,8 @@
 	</sql>
 
   <insert id="add">
-    insert ignore into tb_front (front_ip,front_port,agency,create_time,modify_time)
-    values(#{frontIp},#{frontPort},#{agency},NOW(),NOW())
+    insert ignore into tb_front (node_id,front_ip,front_port,agency,create_time,modify_time)
+    values(#{nodeId},#{frontIp},#{frontPort},#{agency},NOW(),NOW())
     <selectKey keyProperty="frontId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -40,11 +41,8 @@
     <if test="frontId != null and frontId !=''">
       and front_id = #{frontId}
     </if>
-    <if test="frontIp != null and frontIp !=''">
-      and front_ip = #{frontIp}
-    </if>
-    <if test="frontPort != null and frontPort !=''">
-      and front_port = #{frontPort}
+    <if test="nodeId != null and nodeId !=''">
+      and node_id = #{nodeId}
     </if>
   </select>
 
