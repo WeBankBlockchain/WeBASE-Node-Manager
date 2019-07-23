@@ -14,6 +14,24 @@
  */
 package com.webank.webase.node.mgr.account;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
@@ -27,27 +45,10 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JwtUtils;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.TokenImgGenerator;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import javax.validation.Valid;
+import com.webank.webase.node.mgr.token.TokenService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @Log4j2
 @RestController
@@ -55,11 +56,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController extends BaseController {
 
     @Autowired
-    private ConstantProperties constants;
-    @Autowired
     private AccountService accountService;
+    @Autowired
+    private TokenService tokenService;
     private static final int PICTURE_CHECK_CODE_CHAR_NUMBER = 4;
-    private static final long JWT_TOKEN_LIFE_TIME_MILLS = 300000L;//5min
 
     /**
      * 获取验证码
@@ -71,17 +71,15 @@ public class AccountController extends BaseController {
         // random code
         String checkCode = NodeMgrTools.randomString(PICTURE_CHECK_CODE_CHAR_NUMBER);
 
-        String jwtToken = JwtUtils
-            .createJwtToken(constants.getJwtSecret(), null, checkCode, JWT_TOKEN_LIFE_TIME_MILLS);
+        String token = tokenService.createToken(checkCode, 2);
         log.info("new checkCode:" + checkCode);
-
 
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         try {
             // 得到图形验证码并返回给页面
             String base64Image = TokenImgGenerator.getBase64Image(checkCode);
             ImageToken tokenData = new ImageToken();
-            tokenData.setToken(jwtToken);
+            tokenData.setToken(token);
             tokenData.setBase64Image(base64Image);
             baseResponse.setData(tokenData);
             log.info("end getPictureCheckCode. baseResponse:{}", JSON.toJSONString(baseResponse));
@@ -124,7 +122,7 @@ public class AccountController extends BaseController {
      */
     @PutMapping(value = "/accountInfo")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse updateAccountInfo(@RequestBody @Valid AccountInfo info,
+    public BaseResponse updateAccountInfo(@RequestBody @Valid AccountInfo info, HttpServletRequest request,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -133,8 +131,7 @@ public class AccountController extends BaseController {
             JSON.toJSONString(info));
 
         // current
-        String currentAccount = (String) getSessionAttribute(
-            ConstantProperties.SESSION_MGR_ACCOUNT);
+        String currentAccount = getCurrentAccount(request);
 
         // update account row
         accountService.updateAccountRow(currentAccount, info);
@@ -202,15 +199,15 @@ public class AccountController extends BaseController {
      * update password.
      */
     @PutMapping(value = "/passwordUpdate")
-    public BaseResponse updatePassword(@RequestBody @Valid PasswordInfo info, BindingResult result)
-        throws NodeMgrException {
+    public BaseResponse updatePassword(@RequestBody @Valid PasswordInfo info, HttpServletRequest request, 
+            BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start updatePassword startTime:{} passwordInfo:{}", startTime.toEpochMilli(),
             JSON.toJSONString(info));
 
-        String targetAccount = (String) getSessionAttribute(ConstantProperties.SESSION_MGR_ACCOUNT);
+        String targetAccount = getCurrentAccount(request);
 
         // update account row
         accountService
@@ -219,5 +216,13 @@ public class AccountController extends BaseController {
         log.info("end updatePassword useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
+    }
+    
+    /**
+     * get current account.
+     */
+    private String getCurrentAccount(HttpServletRequest request) {
+        String token = NodeMgrTools.getToken(request);
+        return tokenService.getValueFromToken(token);
     }
 }

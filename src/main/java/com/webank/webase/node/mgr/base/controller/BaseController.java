@@ -13,24 +13,19 @@
  */
 package com.webank.webase.node.mgr.base.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.ParamException;
-import java.util.Enumeration;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.ParamException;
 
-@Log4j2
 public class BaseController {
 
     @Autowired
     protected HttpServletRequest request;
-
 
     /**
      * check param valid result.
@@ -46,53 +41,4 @@ public class BaseController {
             throw new ParamException(ConstantCode.PARAM_EXCEPTION.getCode(), message);
         }
     }
-
-    /**
-     * set session value.
-     */
-    protected void setSessionAttribute(String key, Object obj) {
-        request.getSession().setAttribute(key, obj);
-    }
-
-    /**
-     * get attribute from session.
-     */
-    protected Object getSessionAttribute(String key) {
-        Object sessionValue = null;
-        if (StringUtils.isNoneBlank(key)) {
-            sessionValue = request.getSession().getAttribute(key);
-        }
-        return sessionValue;
-    }
-
-    /**
-     * clear all session attribute.
-     */
-    protected void clearSession() {
-        HttpSession session = request.getSession(true);
-        Enumeration<?> enumeration = session.getAttributeNames();
-        while (enumeration.hasMoreElements()) {
-            String sessionName = (String) enumeration.nextElement();
-            session.removeAttribute(sessionName);
-        }
-    }
-
-    /**
-     * clear by sessionName.
-     */
-    protected void clearSession(String clearName) {
-        if (StringUtils.isNoneBlank(clearName)) {
-            HttpSession session = request.getSession(true);
-            Enumeration<?> enumeration = session.getAttributeNames();
-            while (enumeration.hasMoreElements()) {
-                String sessionName = (String) enumeration.nextElement();
-                if (clearName.equals(sessionName)) {
-                    session.removeAttribute(sessionName);
-                }
-            }
-        } else {
-            log.warn("fail clearSession，clearName empty");
-        }
-    }
-
 }
