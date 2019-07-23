@@ -117,7 +117,15 @@ public class BlockService {
         if (cProperties.getIsBlockPullFromZero()) {
             return BigInteger.ZERO;
         } else {
-            return frontInterface.getLatestBlockNumber(groupId);
+            BigInteger initBlock = frontInterface.getLatestBlockNumber(groupId);
+            if (initBlock.compareTo(cProperties.getPullBlockInitCnts()) >= 0) {
+                initBlock = initBlock.subtract(cProperties.getPullBlockInitCnts().
+                        subtract(BigInteger.valueOf(1)));
+            } else {
+                initBlock = BigInteger.ZERO;
+            }
+            log.info("=== getNextBlockNumber init groupId:{} initBlock:{}", groupId, initBlock);
+            return initBlock;
         }
     }
 
