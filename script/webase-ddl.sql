@@ -196,7 +196,14 @@ CREATE TABLE IF NOT EXISTS tb_role (
 
 
 
-
-
+-- ----------------------------
+-- Table structure for tb_token
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_token (
+  token varchar(120) NOT NULL PRIMARY KEY COMMENT 'token',
+  value varchar(50) NOT NULL COMMENT '与token相关的值（如：用户编号，图形验证码值）',
+  expire_time datetime DEFAULT NULL COMMENT '失效时间',
+  create_time datetime DEFAULT NULL COMMENT '创建时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='token信息表';
 
 
