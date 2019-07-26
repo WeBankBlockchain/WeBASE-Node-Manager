@@ -17,7 +17,7 @@ DBUSER="defaultAccount"
 #dbPass
 PASSWD="defaultPassword"
 #dbName
-DBNAME="fisco-bcos-data"
+DBNAME="webasenodemanager"
 
 
 #connect to database then execute init
