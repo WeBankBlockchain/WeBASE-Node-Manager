@@ -118,7 +118,7 @@ public class BlockService {
             return BigInteger.ZERO;
         } else {
             BigInteger initBlock = frontInterface.getLatestBlockNumber(groupId);
-            if (initBlock.compareTo(cProperties.getPullBlockInitCnts()) >= 0) {
+            if (initBlock.compareTo(cProperties.getPullBlockInitCnts()) > 0) {
                 initBlock = initBlock.subtract(cProperties.getPullBlockInitCnts().
                         subtract(BigInteger.valueOf(1)));
             } else {
