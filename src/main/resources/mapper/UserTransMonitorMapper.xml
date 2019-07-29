@@ -171,13 +171,13 @@
 
   <select id="listOfUnusualContract" parameterType="Map"
     resultType="com.webank.webase.node.mgr.monitor.UnusualContractInfo">
-    select contract_name as contractName,max(contract_address) as contractAddress,sum(trans_count) as transCount,
+    select contract_address as contractAddress,contract_name as contractName,sum(trans_count) as transCount,
     max(trans_hashs) as hashs,max(modify_time) as time
     from ${tableName} where trans_unusual_type=1
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address like CONCAT('%',#{contractAddress},'%')
     </if>
-    group by contract_name
+    group by contract_address
     <if test="start != null and pageSize != null">
       limit #{start},#{pageSize}
     </if>

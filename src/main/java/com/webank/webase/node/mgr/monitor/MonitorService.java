@@ -143,7 +143,7 @@ public class MonitorService {
         if (unusualUserCount >= unusualMaxCount
             || unusualContractCount >= unusualMaxCount) {
             log.error(
-                "monitorHandle jump over. unusualUserCount:{} unusualUserCount:{} monitorUnusualMaxCount:{}",
+                "monitorHandle jump over. unusualUserCount:{} unusualContractCount:{} monitorUnusualMaxCount:{}",
                 unusualUserCount, unusualContractCount, unusualMaxCount);
             return true;
         }
