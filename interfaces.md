@@ -353,7 +353,7 @@
 
 #### 2.1.3 入参示例
 ```
-http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?transactionHash=0x303daa78ebe9e6f5a6d9761a8eab4bf5a0ed0b06c28764488e4716de42e1df01
+http://127.0.0.1:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?transactionHash=0x303daa78ebe9e6f5a6d9761a8eab4bf5a0ed0b06c28764488e4716de42e1df01
 ```
 
 #### 2.1.4 出参示例
@@ -2302,7 +2302,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 ```
 {
     "networkId": "300001",
-    "nodeIp": "10.107.118.176",
+    "nodeIp": "127.0.0.1",
     "nodeType": "1",
     "frontPort": "8081"
 }
