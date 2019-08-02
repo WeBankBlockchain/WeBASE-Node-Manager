@@ -145,7 +145,7 @@
         {
             "nodeP2PPort": 30303,
             "attr": "block_info",
-            "hostIp": "123.207.239.225",
+            "hostIp": "127.0.0.1",
             "metricValue": [
                 {
                     "id": 1,
@@ -276,7 +276,7 @@
         {
             "nodeP2PPort": 30307,
             "attr": "node_log",
-            "hostIp": "123.207.239.225",
+            "hostIp": "127.0.0.1",
             "metricValue": [
                 {
                     "logTime": "2018-12-12 11:33:42",
@@ -735,7 +735,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.8 | modifyTime     | LocalDateTime | 否     | 修改时间                   |
 
 #### 4.1.3 入参示例
-`http://10.107.99.149:5002/mgr/webase-node-mgr/block/blockList/300001/1/10?pkHash=`
+`http://127.0.0.1:5002/mgr/webase-node-mgr/block/blockList/300001/1/10?pkHash=`
 
 #### 4.1.4 出参示例
 * 成功：
@@ -1423,7 +1423,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.1.2.2.2 | valueList         | List\<Integer\> | 否     | 值列表                                                         |
 
 #### 6.2.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/performance/ratio/500001?gap=1&beginDate=2019-03-15T00:00:00&endDate=2019-03-15T15:26:55&contrastBeginDate=2019-03-15T00:00:00&contrastEndDate=2019-03-15T15:26:55`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/performance/ratio/500001?gap=1&beginDate=2019-03-15T00:00:00&endDate=2019-03-15T15:26:55&contrastBeginDate=2019-03-15T00:00:00&contrastEndDate=2019-03-15T15:26:55`
 
 #### 6.2.4 出参示例
 * 成功：
@@ -1527,7 +1527,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.9 | modifyTime | LocalDateTime | 否     | 记录更改时间               |
 
 #### 7.1.3 入参示例
-`http://10.107.105.18:4001/mgr/webcaf-node-mgr/nodeLog/nodeLogList/300001/500001/1/10?startTime=2019-03-12+00:00:00&endTime=2019-03-13+00:00:00`
+`http://127.0.0.1:4001/mgr/webcaf-node-mgr/nodeLog/nodeLogList/300001/500001/1/10?startTime=2019-03-12+00:00:00&endTime=2019-03-13+00:00:00`
 
 #### 7.1.4 出参示例
 * 成功：
@@ -1597,7 +1597,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.1.13 | modifyTime       | LocalDateTime | 是     | 修改时间                                      |
 
 #### 8.1.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/userList/300001`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/monitor/userList/300001`
 
 #### 8.1.4 出参示例
 * 成功：
@@ -1683,7 +1683,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.1.13 | modifyTime       | LocalDateTime | 是     | 修改时间                                      |
 
 #### 8.2.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/interfaceList/300001`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/monitor/interfaceList/300001`
 
 #### 8.2.4 出参示例
 * 成功：
@@ -1767,7 +1767,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.5.1.2 | time          | LcalDateTime   | 是     | 时间                       |
 
 #### 8.3.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/transList/300001?userName=0x5d97f8d41638a7b1b669b70b307bab6d49df8e2c&interfaceName=0x4ed3885e`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/monitor/transList/300001?userName=0x5d97f8d41638a7b1b669b70b307bab6d49df8e2c&interfaceName=0x4ed3885e`
 
 #### 8.3.4 出参示例
 * 成功：
@@ -1828,7 +1828,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.4 | time       | LocalDateTime | 是     | 时间                       |
 
 #### 8.4.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/unusualUserList/300001/1/10?userName=`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/monitor/unusualUserList/300001/1/10?userName=`
 
 #### 8.4.4 出参示例
 * 成功：
@@ -1886,7 +1886,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.5 | time            | LocalDateTime | 是     | 时间                       |
 
 #### 8.5.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/monitor/unusualContractList/300001/1/10?contractAddress=`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/monitor/unusualContractList/300001/1/10?contractAddress=`
 
 #### 8.5.4 出参示例
 ```
@@ -2003,7 +2003,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.7 | modifyTime    | LocalDateTime | 否     | 修改时间                   |
 
 #### 9.2.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/network/all`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/network/all`
 
 #### 9.2.4 出参示例
 * 成功：
@@ -2136,7 +2136,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.18 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
 #### 10.1.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/node/nodeList/300001/1/10?nodeName=`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/node/nodeList/300001/1/10?nodeName=`
 
 #### 10.1.4 出参示例
 * 成功：
@@ -2148,11 +2148,11 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
     "data": [
         {
             "nodeId": 500001,
-            "nodeName": "10.107.118.175_10303",
+            "nodeName": "127.0.0.1_10303",
             "networkId": 300001,
             "orgId": 600001,
             "orgName": "WeBank",
-            "nodeIp": "10.107.118.175",
+            "nodeIp": "127.0.0.1",
             "p2pPort": 10303,
             "rpcPort": 1545,
             "channelPort": 1821,
@@ -2217,7 +2217,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 3.18 | modifyTime  | LocalDateTime | 否     | 修改时间                                   |
 
 #### 10.2.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/node/nodeInfo/{networkId}?nodeType=1`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/node/nodeInfo/{networkId}?nodeType=1`
 
 #### 10.2.4 出参示例
 * 成功：
@@ -2227,11 +2227,11 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
     "message": "success",
     "data": {
         "nodeId": 500001,
-        "nodeName": "10.107.118.175_10303",
+        "nodeName": "127.0.0.1_10303",
         "networkId": 300001,
         "orgId": 600001,
         "orgName": "WeBank",
-        "nodeIp": "10.107.118.175",
+        "nodeIp": "127.0.0.1",
         "p2pPort": 10303,
         "rpcPort": 1545,
         "channelPort": 1821,
@@ -2317,11 +2317,11 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
     "message": "success",
     "data": {
         "nodeId": 500001,
-        "nodeName": "10.107.118.175_10303",
+        "nodeName": "127.0.0.1_10303",
         "networkId": 300001,
         "orgId": 600001,
         "orgName": "WeBank",
-        "nodeIp": "10.107.118.175",
+        "nodeIp": "127.0.0.1",
         "p2pPort": 10303,
         "rpcPort": 1545,
         "channelPort": 1821,
@@ -2382,7 +2382,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.7 | modifyTime  | LocalDateTime | 否     | 修改时间                   |
 
 ### 11.1.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/role/roleList?networkId=300001&pageNumber=&pageSize=&roleId=&roleName=`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/role/roleList?networkId=300001&pageNumber=&pageSize=&roleId=&roleName=`
 
 ### 11.1.4 出参示例
 
@@ -2750,7 +2750,7 @@ http://10.107.105.18:3001/mgr/webase-node-mgr/transaction/transList/300001/1/10?
 | 4.1.13 | modifyTime  | LocalDateTime | 否     | 修改时间                           |
 
 #### 12.5.3 入参示例
-`http://10.107.105.18:3001/mgr/webase-node-mgr/user/userList/300001/1/10?userParam=asdfvw`
+`http://127.0.0.1:3001/mgr/webase-node-mgr/user/userList/300001/1/10?userParam=asdfvw`
 
 #### 12.5.4 出参示例
 
