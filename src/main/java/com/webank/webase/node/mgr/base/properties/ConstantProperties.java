@@ -63,7 +63,7 @@ public class ConstantProperties {
     private String aesKey = "a3LdMfg123C56z9r";
 
     // COOKIE
-    private Integer cookieMaxAge = 900; // seconds
+    private Integer authTokenMaxAge = 900; // seconds
 
     // system contract
     private String sysContractContractdetailName = "contractdetail";

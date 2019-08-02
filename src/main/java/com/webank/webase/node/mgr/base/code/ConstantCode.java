@@ -180,6 +180,8 @@ public class ConstantCode {
     public static final RetCode NOT_SUPPORT_TRANS = RetCode.mark(202058, "not support transaction");
 
     public static final RetCode INVALID_NODE_ID = RetCode.mark(202059, "invalid node id");
+    public static final RetCode INVALID_TOKEN = RetCode.mark(202060, "invalid token");
+    public static final RetCode TOKEN_EXPIRE = RetCode.mark(202061, "token expire");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
