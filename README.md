@@ -24,7 +24,7 @@
 
 
 # <a id="chapter-2">2. 前提条件</a>
-| 序号  | 描述                                          | 
+| 序号  | 描述                                          |
 |-------|---------------------------------------------------|
 | 1     | fisco-bcos 1.3.7版本                       |
 | 2     | webase-front 0.5版本                          |
@@ -69,7 +69,7 @@ shell
 cd  dist/script
 ```
 修改数据库连接信息：
-```shell
+​```shell
 修改数据库名称：sed -i "s/fisco-bcos-data/${your_db_name}/g" webase.sh
 修改数据库用户名：sed -i "s/defaultAccount/${your_db_account}/g" webase.sh
 修改数据库密码：sed -i "s/defaultPassword/${your_db_password}/g" webase.sh
