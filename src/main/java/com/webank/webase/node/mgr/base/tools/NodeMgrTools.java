@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +47,8 @@ import org.apache.commons.lang3.StringUtils;
 @Log4j2
 public class NodeMgrTools {
 
+    private static final String TOKEN_HEADER_NAME = "Authorization";
+    private static final String TOKEN_START = "Token";
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_TIME_FORMAT_NO_SPACE = "yyyyMMddHHmmss";
     private static final char[] CHARS = {'2', '3', '4', '5', '6', '7', '8', '9', 'a',
@@ -265,12 +268,12 @@ public class NodeMgrTools {
             state = address.isReachable(500);
         } catch (Exception ex) {
             log.error("fail checkServerHostConnect", ex);
-            throw new NodeMgrException(ConstantCode.SERVER_HOST_CONNECT_FAIL);
+            throw new NodeMgrException(ConstantCode.SERVER_CONNECT_FAIL);
         }
 
         if (!state) {
             log.info("host connect state:{}", state);
-            throw new NodeMgrException(ConstantCode.SERVER_HOST_CONNECT_FAIL);
+            throw new NodeMgrException(ConstantCode.SERVER_CONNECT_FAIL);
         }
     }
 
@@ -279,20 +282,20 @@ public class NodeMgrTools {
      * check host an port.
      */
     public static void checkServerConnect(String serverHost, int serverPort) {
-        //check host
-        checkServerHostConnect(serverHost);
+        // check host
+        // checkServerHostConnect(serverHost);
 
         Socket socket =null;
         try {
             //check port
-             socket = new Socket();
+            socket = new Socket();
             socket.setReceiveBufferSize(8193);
             socket.setSoTimeout(500);
             SocketAddress address = new InetSocketAddress(serverHost, serverPort);
             socket.connect(address, 1000);
         } catch (Exception ex) {
             log.error("fail checkServerConnect", ex);
-            throw new NodeMgrException(ConstantCode.SERVER_PORT_CONNECT_FAIL);
+            throw new NodeMgrException(ConstantCode.SERVER_CONNECT_FAIL);
         }finally {
             if(Objects.nonNull(socket)){
                 try {
@@ -361,5 +364,57 @@ public class NodeMgrTools {
         }
     }
 
+    /**
+     * is json.
+     */
+    public static boolean isJSON(String str) {
+        boolean result;
+        try {
+            JSON.parse(str);
+            result = true;
+        } catch (Exception e) {
+            result = false;
+        }
+        return result;
+    }
 
+    /**
+     * response string.
+     */
+    public static void responseString(HttpServletResponse response, String str) {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SYSTEM_EXCEPTION);
+        if (StringUtils.isNotBlank(str)) {
+            baseResponse.setMessage(str);
+        }
+
+        RetCode retCode;
+        if (isJSON(str) && (retCode = JSONObject.parseObject(str, RetCode.class)) != null) {
+            baseResponse = new BaseResponse(retCode);
+        }
+
+        try {
+            response.getWriter().write(JSON.toJSONString(baseResponse));
+        } catch (IOException e) {
+            log.error("fail responseRetCodeException", e);
+        }
+    }
+
+
+    /**
+     * get token.
+     */
+    public static synchronized String getToken(HttpServletRequest request) {
+        String header = request.getHeader(TOKEN_HEADER_NAME);
+        if (StringUtils.isBlank(header)) {
+            log.error("not found token");
+            throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
+        }
+
+        String token = StringUtils.removeStart(header, TOKEN_START).trim();
+        if (StringUtils.isBlank(token)) {
+            log.error("token is empty");
+            throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
+        }
+        return token;
+    }
 }
