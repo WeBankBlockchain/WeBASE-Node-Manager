@@ -3,9 +3,12 @@
 <Configuration monitorInterval="5" status="info">
   <!--定义日志文件 输入位置 -->
   <Properties>
-    <Property name="logPath">./logs</Property>
+    <Property name="logPath">./log</Property>
   </Properties>
   <Appenders>
+      <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%F:%L) - %m%n" />
+        </Console>
     <!--这个会打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
     <RollingFile fileName="${logPath}/WeBASE-Node-Manager.log" filePattern="${logPath}/WeBASE-Node-Manager.log.%d{yyyy-MM-dd}.%i.log.gz"
       name="fileAppender">

@@ -15,13 +15,12 @@
  */
 package com.webank.webase.node.mgr.transaction;
 
-import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
-import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
-import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import java.math.BigInteger;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
+import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
+import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
+import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 
 /**
  * mapper about trans hash.
@@ -38,7 +37,7 @@ public interface TransHashMapper {
     List<MinMaxBlock> queryMinMaxBlock(@Param("tableName") String tableName);
 
     Integer remove(@Param("tableName") String tableName,
-        @Param("transRetainMax") BigInteger transRetainMax,@Param("groupId") Integer groupId);
+        @Param("subTransNum") Integer subTransNum,@Param("groupId") Integer groupId);
 
     List<TbTransHash> listOfUnStatTransHash(@Param("tableName") String tableName);
 
