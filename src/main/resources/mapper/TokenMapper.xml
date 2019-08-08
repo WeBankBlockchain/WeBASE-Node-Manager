@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应mapper接口 -->
+<mapper namespace="com.webank.webase.node.mgr.token.TokenMapper">
+    <resultMap id="accountMap" type="com.webank.webase.node.mgr.token.TbToken">
+        <id column="token" javaType="java.lang.String" jdbcType="VARCHAR" property="token"/>
+        <id column="value" javaType="java.lang.String" jdbcType="VARCHAR" property="value"/>
+        <result column="expire_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP" property="expireTime"/>
+        <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.webank.webase.node.mgr.token.TbToken">
+         insert into tb_token (token,value,expire_time,create_time)values(#{token},#{value},#{expireTime},now())
+   </insert>
+
+    <delete id="delete" parameterType="java.lang.String">
+		 delete from tb_token where expire_time &lt;= NOW()
+        <if test="value != null">
+            or value = #{value}
+        </if>
+        <if test="token != null">
+            or token = #{token}
+        </if>
+	</delete>
+
+    <update id="update">
+        update tb_token set expire_time = #{expireTime} where token = #{token}
+    </update>
+
+    <select id="query" resultMap="accountMap">
+        select * from tb_token where token = #{token}
+    </select>
+
+</mapper>
