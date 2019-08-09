@@ -27,7 +27,7 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 * 问：执行数据库初始化脚本抛出异常：
 ```
-ERROR 2003 (HY000): Can't connect to MySQL server on '10.0.0.52' (110)
+ERROR 2003 (HY000): Can't connect to MySQL server on '10.0.0.1' (110)
 ```
 答：mysql没有开通该帐号的远程访问权限，登录mysql，执行如下命令，其中TestUser改为你的帐号
 ```
