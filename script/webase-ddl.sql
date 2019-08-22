@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS tb_node (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_contract (
   contract_id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约编号',
-  contract_path varchar(24) NOT NULL COMMENT '合约所在目录',
-  contract_name varchar(120) NOT NULL COMMENT '合约名称',
+  contract_path varchar(24) binary NOT NULL COMMENT '合约所在目录',
+  contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
   contract_version varchar(120) DEFAULT NULL COMMENT '合约版本',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   contract_source text COMMENT '合约源码',
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS tb_trans_daily (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_user (
   user_id int(11) NOT NULL AUTO_INCREMENT COMMENT '用户编号',
-  user_name varchar(64) NOT NULL COMMENT '用户名',
+  user_name varchar(64) binary NOT NULL COMMENT '用户名',
   group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
   public_key varchar(250) NOT NULL COMMENT '公钥',
   user_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS tb_user_key_mapping (
 -- Table structure for tb_account_info
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_account_info (
-  account varchar(50) NOT NULL COMMENT '系统账号',
+  account varchar(50) binary NOT NULL COMMENT '系统账号',
   account_pwd varchar(250) NOT NULL COMMENT '登录密码',
   role_id int(11) NOT NULL COMMENT '所属角色编号',
   login_fail_time int(2) NOT NULL DEFAULT '0' COMMENT '登录失败次数,默认0，登录成功归0',
