@@ -24,60 +24,39 @@ public class PrecompiledSysConfigService {
     private FrontInterfaceService frontInterfaceService;
 
     /**
-     * get cns list
+     * get system config list
      */
-    public Object listCns(int groupId, String permissionType, String tableName, int pageSize, int pageNumber) {
-        log.debug("start listPermission. param:{}" + groupId + permissionType);
-        String uri;
+    public Object getSysConfigListService(int groupId, int pageSize, int pageNumber) {
+        log.debug("start getSysConfigListService. param:{}" + groupId);
         Map<String, String> map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
-        map.put("permissionType", permissionType);
         map.put("pageSize", String.valueOf(pageSize));
         map.put("pageNumber", String.valueOf(pageNumber));
-        if(Objects.isNull(tableName)) {
-//            uri = String.format(FrontRestTools.URI_PERMISSION, permissionType, pageSize, pageNumber);
-            uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION, map);
-        } else {
-//            uri = String.format(FrontRestTools.URI_PERMISSION, permissionType, tableName, pageSize, pageNumber);
-            map.put("tableName", tableName);
-            uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION, map);
-        }
+
+        String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_SYS_CONFIG_LIST, map);
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end listPermission. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end getSysConfigListService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 
 
     /**
-     * post permission grant
+     * post set system config
      */
 
-    public Object grantPermission(PermissionParam permissionParam) {
-        log.debug("start grantPermission. param:{}", JSON.toJSONString(permissionParam));
-        if (Objects.isNull(permissionParam)) {
-            log.info("fail grantPermission. request param is null");
+    public Object setSysConfigByKeyService(SysConfigParam sysConfigParam) {
+        log.debug("start setSysConfigByKeyService. param:{}", JSON.toJSONString(sysConfigParam));
+        if (Objects.isNull(sysConfigParam)) {
+            log.info("fail setSysConfigByKeyService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
 
         Object frontRsp = frontRestTools.postForEntity(
-                permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
-                permissionParam, Object.class);
-        log.debug("end grantPermission. frontRsp:{}", JSON.toJSONString(frontRsp));
+                sysConfigParam.getGroupId(), FrontRestTools.URI_SYS_CONFIG,
+                sysConfigParam, Object.class);
+        log.debug("end setSysConfigByKeyService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 
-    public Object revokePermission(PermissionParam permissionParam) {
-        log.debug("start revokePermission. param:{}", JSON.toJSONString(permissionParam));
-        if (Objects.isNull(permissionParam)) {
-            log.info("fail revokePermission. request param is null");
-            throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
-        }
-
-        Object frontRsp = frontRestTools.deleteForEntity(
-                permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
-                permissionParam, Object.class);
-        log.debug("end revokePermission. frontRsp:{}", JSON.toJSONString(frontRsp));
-        return frontRsp;
-    }
 }
