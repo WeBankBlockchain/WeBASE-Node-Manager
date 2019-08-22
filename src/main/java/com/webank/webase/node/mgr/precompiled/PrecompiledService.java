@@ -29,20 +29,16 @@ public class PrecompiledService {
     /**
      * get cns list
      */
-    public Object listCnsService(int groupId, String contractName, String version, int pageSize, int pageNumber) {
-        log.debug("start listCnsService. param:{}" + groupId + contractName + version);
+    public Object listCnsService(int groupId, String contractNameAndVersion, int pageSize, int pageNumber) {
+        log.debug("start listCnsService. param:{}" + groupId + contractNameAndVersion);
         String uri;
         Map<String, String> map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
-        map.put("contractName", contractName);
+        map.put("contractNameAndVersion", contractNameAndVersion);
         map.put("pageSize", String.valueOf(pageSize));
         map.put("pageNumber", String.valueOf(pageNumber));
-        if(Objects.isNull(version)) {
-            uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CNS_LIST, map);
-        } else {
-            map.put("version", version);
-            uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CNS_LIST, map);
-        }
+        uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CNS_LIST, map);
+
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
         log.debug("end listCnsService. frontRsp:{}", JSON.toJSONString(frontRsp));
@@ -79,7 +75,7 @@ public class PrecompiledService {
         }
 
         Object frontRsp = frontRestTools.postForEntity(
-                consensusHandle.getGroupId(), FrontRestTools.URI_PERMISSION,
+                consensusHandle.getGroupId(), FrontRestTools.URI_CONSENSUS,
                 consensusHandle, Object.class);
         log.debug("end nodeManageService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
@@ -97,7 +93,7 @@ public class PrecompiledService {
         }
 
         Object frontRsp = frontRestTools.deleteForEntity(
-                crudHandle.getGroupId(), FrontRestTools.URI_PERMISSION,
+                crudHandle.getGroupId(), FrontRestTools.URI_CRUD,
                 crudHandle, Object.class);
         log.debug("end crudService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
