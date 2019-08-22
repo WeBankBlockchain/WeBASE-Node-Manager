@@ -6,8 +6,6 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
-import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
-import com.webank.webase.node.mgr.precompiled.permission.PermissionParam;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,15 +30,13 @@ public class PrecompiledController extends BaseController {
     @GetMapping("/cns/list")
     public Object listCns(
             @RequestParam(defaultValue = "1") int groupId,
-            @RequestParam String contractName,
-            @RequestParam(defaultValue = "", required = false) String version,
+            @RequestParam String contractNameAndVersion,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception, NodeMgrException {
 
         Instant startTime = Instant.now();
         log.info("start listCns startTime:{}", startTime.toEpochMilli());
-
-        Object result = precompiledService.listCnsService(groupId, contractName, version, pageSize, pageNumber);
+        Object result = precompiledService.listCnsService(groupId, contractNameAndVersion, pageSize, pageNumber);
 
         log.info("end listCns useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
@@ -72,7 +68,7 @@ public class PrecompiledController extends BaseController {
                                   BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("start nodeManage startTime:{} permissionParam:{}", startTime.toEpochMilli(),
+        log.info("start nodeManage startTime:{} consensusHandle:{}", startTime.toEpochMilli(),
                 JSON.toJSONString(consensusHandle));
 
         Object res = precompiledService.nodeManageService(consensusHandle);
@@ -92,7 +88,7 @@ public class PrecompiledController extends BaseController {
                                    BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("start crud startTime:{} permissionParam:{}", startTime.toEpochMilli(),
+        log.info("start crud startTime:{} crudHandle:{}", startTime.toEpochMilli(),
                 JSON.toJSONString(crudHandle));
 
         Object res = precompiledService.crudService(crudHandle);

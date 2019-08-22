@@ -7,7 +7,6 @@ public class CnsParam {
 
     private int groupId;
     private String fromAddress;
-    private String contractName;
     private String contractNameAndVersion;
     private String version;
     // register
