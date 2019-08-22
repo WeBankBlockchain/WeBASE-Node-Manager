@@ -76,12 +76,12 @@ public class FrontRestTools {
     public static final String URI_CHAIN = "chain";
 
     public static final String URI_PERMISSION = "permission";
-    public static final String URI_CNS_LIST = "cns/list";
     public static final String URI_SYS_CONFIG_LIST = "sys/config/list";
     public static final String URI_SYS_CONFIG = "sys/config";
-    public static final String URI_CONSENSUS_LIST = "consensus/list";
-    public static final String URI_CONSENSUS = "consensus";
-    public static final String URI_CRUD = "crud";
+    public static final String URI_CNS_LIST = "precompiled/cns/list";
+    public static final String URI_CONSENSUS_LIST = "precompiled/consensus/list";
+    public static final String URI_CONSENSUS = "precompiled/consensus";
+    public static final String URI_CRUD = "precompiled/crud";
 
     //不需要在url中包含groupId的
     private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays

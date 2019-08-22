@@ -23,7 +23,7 @@ spring:
 logging:
   config: classpath:log/log4j2.xml
   level:
-    com.webank.webase.node.mgr: info
+    com.webank.webase.node.mgr: debug
 
 #constants
 constant:
