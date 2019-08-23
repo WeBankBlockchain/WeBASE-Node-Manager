@@ -17,6 +17,7 @@ import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PLIST;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_PEERS;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CSYNC_STATUS;
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GET_OBSERVER_LIST;
 import java.math.BigInteger;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -294,6 +295,17 @@ public class FrontInterfaceService {
             .getForEntity(groupId, URI_GROUP_PEERS, List.class);
         log.debug("end getGroupPeers. groupPeers:{}", JSON.toJSONString(groupPeers));
         return groupPeers;
+    }
+    
+    /**
+     * get group peers
+     */
+    public List<String> getObserverList(Integer groupId) {
+        log.debug("start getObserverList. groupId:{}", groupId);
+        List<String> observers = frontRestTools
+                .getForEntity(groupId, URI_GET_OBSERVER_LIST, List.class);
+        log.info("end getObserverList. observers:{}", JSON.toJSONString(observers));
+        return observers;
     }
 
 
