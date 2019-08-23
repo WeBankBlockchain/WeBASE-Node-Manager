@@ -198,6 +198,9 @@ public class NodeService {
             log.error("fail checkNodeStatus, consensusList is null");
             return;
         }
+        
+        // getObserverList
+        List<String> observerList = frontInterfacee.getObserverList(groupId);
 
         for (TbNode tbNode : nodeList) {
             String nodeId = tbNode.getNodeId();
@@ -212,21 +215,39 @@ public class NodeService {
                 log.info("checkNodeStatus jump over. subTime:{}", subTime);
                 return;
             }
+            
+            int nodeType = 0;   //0-consensus;1-observer
+            if (observerList != null) {
+                nodeType = observerList.stream()
+                        .filter(observer -> observer.equals(tbNode.getNodeId())).map(c -> 1).findFirst()
+                        .orElse(0);
+            }
 
             BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
             BigInteger latestView = consensusList.stream()
                 .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
                 .orElse(BigInteger.ZERO);//pbftView
-
-            if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
-                log.warn(
-                    "node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
-                    nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
-                tbNode.setNodeActive(DataStatus.INVALID.getValue());
+            
+            if (nodeType == 0) {    //0-consensus;1-observer
+                if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
+                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                        nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
+                    tbNode.setNodeActive(DataStatus.INVALID.getValue());
+                } else {
+                    tbNode.setBlockNumber(latestNumber);
+                    tbNode.setPbftView(latestView);
+                    tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+                }
             } else {
-                tbNode.setBlockNumber(latestNumber);
-                tbNode.setPbftView(latestView);
-                tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+                if (!latestNumber.equals(frontInterfacee.getLatestBlockNumber(groupId))) {
+                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                            nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
+                    tbNode.setNodeActive(DataStatus.INVALID.getValue());
+                } else {
+                    tbNode.setBlockNumber(latestNumber);
+                    tbNode.setPbftView(latestView);
+                    tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+                }
             }
 
             //update node
