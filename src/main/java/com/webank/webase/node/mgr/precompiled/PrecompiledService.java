@@ -92,7 +92,7 @@ public class PrecompiledService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
 
-        Object frontRsp = frontRestTools.deleteForEntity(
+        Object frontRsp = frontRestTools.postForEntity(
                 crudHandle.getGroupId(), FrontRestTools.URI_CRUD,
                 crudHandle, Object.class);
         log.debug("end crudService. frontRsp:{}", JSON.toJSONString(frontRsp));
