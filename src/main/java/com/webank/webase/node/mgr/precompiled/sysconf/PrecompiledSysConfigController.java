@@ -17,7 +17,7 @@ import java.time.Instant;
 
 @Log4j2
 @RestController
-@RequestMapping("sys/config")
+@RequestMapping("sys")
 public class PrecompiledSysConfigController extends BaseController {
 
     @Autowired
@@ -26,7 +26,7 @@ public class PrecompiledSysConfigController extends BaseController {
      * get system config list
      * 透传front的BaseResponse
      */
-    @GetMapping("list")
+    @GetMapping("config/list")
     public Object getSysConfigList(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
@@ -45,7 +45,7 @@ public class PrecompiledSysConfigController extends BaseController {
     /**
      * set system config by key.
      */
-    @PostMapping(value = "")
+    @PostMapping(value = "config")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object setSysConfigByKeyService(@RequestBody @Valid SysConfigParam sysConfigParam,
                                   BindingResult result) throws NodeMgrException {
