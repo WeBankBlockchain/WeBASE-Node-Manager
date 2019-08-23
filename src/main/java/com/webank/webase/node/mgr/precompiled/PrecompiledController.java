@@ -18,7 +18,7 @@ import java.time.Instant;
 
 @Log4j2
 @RestController
-@RequestMapping("")
+@RequestMapping("precompiled")
 public class PrecompiledController extends BaseController {
     @Autowired
     PrecompiledService precompiledService;
@@ -27,7 +27,7 @@ public class PrecompiledController extends BaseController {
      * get cns list
      * 透传front的BaseResponse
      */
-    @GetMapping("/cns/list")
+    @GetMapping("cns/list")
     public Object listCns(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String contractNameAndVersion,
@@ -46,7 +46,7 @@ public class PrecompiledController extends BaseController {
     /**
      * get node list with consensus status.
      */
-    @GetMapping("/consensus/list")
+    @GetMapping("consensus/list")
     public Object getNodeList(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
@@ -62,7 +62,7 @@ public class PrecompiledController extends BaseController {
         return result;
     }
 
-    @PostMapping(value = "/consensus")
+    @PostMapping(value = "consensus")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object nodeManage(@RequestBody @Valid ConsensusHandle consensusHandle,
                                   BindingResult result) throws NodeMgrException {
@@ -82,7 +82,7 @@ public class PrecompiledController extends BaseController {
     /**
      * crud control.
      */
-    @PostMapping(value = "/crud")
+    @PostMapping(value = "crud")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object crud(@RequestBody @Valid CrudHandle crudHandle,
                                    BindingResult result) throws NodeMgrException {
