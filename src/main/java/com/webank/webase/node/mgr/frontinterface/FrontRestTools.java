@@ -76,8 +76,19 @@ public class FrontRestTools {
     public static final String URI_SEND_TRANSACTION = "trans/handle";
     public static final String URI_CHAIN = "chain";
 
+    public static final String URI_PERMISSION = "permission";
+    public static final String URI_SYS_CONFIG_LIST = "sys/config/list";
+    public static final String URI_SYS_CONFIG = "sys/config";
+    public static final String URI_CNS_LIST = "precompiled/cns/list";
+    public static final String URI_CONSENSUS_LIST = "precompiled/consensus/list";
+    public static final String URI_CONSENSUS = "precompiled/consensus";
+    public static final String URI_CRUD = "precompiled/crud";
+
+    //不需要在url中包含groupId的
     private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
-        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_CONTRACT_SENDABI);
+        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_CONTRACT_SENDABI,
+                URI_PERMISSION, URI_CNS_LIST, URI_SYS_CONFIG_LIST, URI_SYS_CONFIG, URI_CONSENSUS_LIST,
+                URI_CONSENSUS, URI_CRUD);
 
 
     @Qualifier(value = "genericRestTemplate")
@@ -245,6 +256,13 @@ public class FrontRestTools {
      */
     public <T> T postForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
         return restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
+    }
+
+    /**
+     * delete from front for entity.
+     */
+    public <T> T deleteForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
+        return restTemplateExchange(groupId, uri, HttpMethod.DELETE, params, clazz);
     }
 
     /**
