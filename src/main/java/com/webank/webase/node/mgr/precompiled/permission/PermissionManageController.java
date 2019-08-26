@@ -22,7 +22,7 @@ import java.time.Instant;
 @Log4j2
 @RestController
 @RequestMapping("permission")
-public class PermissionManagerController extends BaseController {
+public class PermissionManageController extends BaseController {
     @Autowired
     PermissionManageService permissionManageService;
 
@@ -80,7 +80,7 @@ public class PermissionManagerController extends BaseController {
         log.info("start revokePermission startTime:{} permissionParam:{}", startTime.toEpochMilli(),
                 JSON.toJSONString(permissionParam));
 
-        Object res = permissionManageService.grantPermission(permissionParam);
+        Object res = permissionManageService.revokePermission(permissionParam);
 
         log.info("end revokePermission useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
