@@ -22,5 +22,6 @@
 /nbproject/private/
 /nbbuild/
 /dist/
+/log/
 /nbdist/
 /.nb-gradle/
