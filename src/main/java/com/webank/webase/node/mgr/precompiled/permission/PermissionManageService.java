@@ -24,7 +24,7 @@ public class PermissionManageService {
     private FrontInterfaceService frontInterfaceService;
 
     /**
-     * get permission list
+     * get paged permission list
      */
     public Object listPermission(int groupId, String permissionType, String tableName, int pageSize, int pageNumber) {
         log.debug("start listPermission. param:{}" + groupId + permissionType);
@@ -48,6 +48,28 @@ public class PermissionManageService {
         return frontRsp;
     }
 
+    /**
+     * get full permission list
+     */
+    public Object getPermissionFullList(int groupId, String permissionType, String tableName) {
+        log.debug("start getPermissionFullList. param:{}" + groupId + permissionType);
+        String uri;
+        Map<String, String>  map = new HashMap<>();
+        map.put("groupId", String.valueOf(groupId));
+        map.put("permissionType", permissionType);
+        if(Objects.isNull(tableName)) {
+//            uri = String.format(FrontRestTools.URI_PERMISSION, permissionType, pageSize, pageNumber);
+            uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION_FULL_LIST, map);
+        } else {
+//            uri = String.format(FrontRestTools.URI_PERMISSION, permissionType, tableName, pageSize, pageNumber);
+            map.put("tableName", tableName);
+            uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION_FULL_LIST, map);
+        }
+
+        Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
+        log.debug("end getPermissionFullList. frontRsp:{}", JSON.toJSONString(frontRsp));
+        return frontRsp;
+    }
 
     /**
      * post permission grant
