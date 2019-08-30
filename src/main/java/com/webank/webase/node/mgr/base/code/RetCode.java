@@ -24,15 +24,15 @@ import lombok.Data;
 public class RetCode {
 
     private Integer code;
-    private String msg;
+    private String message;
 
-    public RetCode(int code, String msg) {
+    public RetCode(int code, String message) {
         this.code = code;
-        this.msg = msg;
+        this.message = message;
     }
 
-    public static RetCode mark(int code, String msg) {
-        return new RetCode(code, msg);
+    public static RetCode mark(int code, String message) {
+        return new RetCode(code, message);
     }
 
     public static RetCode mark(Integer code) {

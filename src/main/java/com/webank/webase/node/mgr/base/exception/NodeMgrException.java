@@ -26,7 +26,7 @@ public class NodeMgrException extends RuntimeException {
     private RetCode retCode;
 
     public NodeMgrException(RetCode retCode) {
-        super(retCode.getMsg());
+        super(retCode.getMessage());
         this.retCode = retCode;
     }
 

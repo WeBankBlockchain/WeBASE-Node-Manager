@@ -27,7 +27,7 @@ public class PermissionManageController extends BaseController {
     PermissionManageService permissionManageService;
 
     /**
-     * get permission manager list
+     * get permission manager paged list
      * 透传front的BaseResponse
      */
     @GetMapping("")
@@ -43,7 +43,27 @@ public class PermissionManageController extends BaseController {
 
         Object result = permissionManageService.listPermission(groupId, permissionType, tableName, pageSize, pageNumber);
 
-        log.info("end queryContract useTime:{} result:{}",
+        log.info("end listPermissionManager useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * get permission manager full list
+     * 透传front的BaseResponse
+     */
+    @GetMapping("full")
+    public Object listFullPermissionManager(
+            @RequestParam(defaultValue = "1") int groupId,
+            @RequestParam String permissionType,
+            @RequestParam(defaultValue = "", required = false) String tableName) throws Exception, NodeMgrException {
+
+        Instant startTime = Instant.now();
+        log.info("start listFullPermissionManager startTime:{}", startTime.toEpochMilli());
+
+        Object result = permissionManageService.getPermissionFullList(groupId, permissionType, tableName);
+
+        log.info("end listFullPermissionManager useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
         return result;
     }
