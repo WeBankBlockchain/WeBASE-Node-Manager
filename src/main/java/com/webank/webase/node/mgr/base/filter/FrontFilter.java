@@ -55,7 +55,7 @@ public class FrontFilter implements Filter {
             if (CollectionUtils.isEmpty(list)) {
                 log.warn("fail FrontFilter. not fount any front.");
                 RetCode retCode = ConstantCode.FRONT_LIST_NOT_FOUNT;
-                String messageStr = retCode.getCode() + "_" + retCode.getMsg();
+                String messageStr = retCode.getCode() + "_" + retCode.getMessage();
                 throw new RuntimeException(messageStr);
             }
             filterChain.doFilter(request, response);
