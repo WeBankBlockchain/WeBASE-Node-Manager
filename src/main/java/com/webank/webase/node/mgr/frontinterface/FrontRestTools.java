@@ -77,6 +77,7 @@ public class FrontRestTools {
     public static final String URI_CHAIN = "chain";
 
     public static final String URI_PERMISSION = "permission";
+    public static final String URI_PERMISSION_FULL_LIST = "permission/full";
     public static final String URI_SYS_CONFIG_LIST = "sys/config/list";
     public static final String URI_SYS_CONFIG = "sys/config";
     public static final String URI_CNS_LIST = "precompiled/cns/list";
