@@ -33,8 +33,8 @@ public class MethodService {
     public void saveMethod(NewMethodInputParam newMethodInputParam) {
         List<Method> methodList = newMethodInputParam.getMethodList();
         TbMethod tbMethod = new TbMethod();
-        tbMethod.setGroupId(newMethodInputParam.getGroupId());
-
+        // tbMethod.setGroupId(newMethodInputParam.getGroupId());
+        tbMethod.setGroupId(1);
         //save each method
         for (Method method : methodList) {
             BeanUtils.copyProperties(method, tbMethod);
