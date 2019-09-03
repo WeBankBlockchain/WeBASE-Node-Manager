@@ -56,7 +56,7 @@ start(){
         echo "Server $APP_MAIN Port $SERVER_PORT is running PID($processPid)"
         echo "==============================================================================================="
     else
-        echo -n "Starting Server $APP_MAIN Port $SERVER_PORT ... "
+        echo -n "Starting Server $APP_MAIN Port $SERVER_PORT ..."
         nohup $JAVA_HOME/bin/java $JAVA_OPTS -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/node-manager.out 2>&1 &
         
         count=1
