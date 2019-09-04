@@ -16,7 +16,6 @@
 package com.webank.webase.node.mgr.method.entity;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 /**

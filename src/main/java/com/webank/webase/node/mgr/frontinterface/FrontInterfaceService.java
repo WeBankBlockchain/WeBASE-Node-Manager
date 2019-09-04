@@ -20,6 +20,7 @@ import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CSYNC
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GET_OBSERVER_LIST;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -225,6 +226,9 @@ public class FrontInterfaceService {
         throws NodeMgrException {
         log.debug("start getTransInfoByHash. groupId:{} hash:{}", groupId, hash);
         TransactionInfo trans = getTransaction(groupId, hash);
+        if (Objects.isNull(trans)) {
+            return null;
+        }
         ChainTransInfo chainTransInfo = new ChainTransInfo(trans.getFrom(),
             trans.getTo(), trans.getInput(), trans.getBlockNumber());
         log.debug("end getTransInfoByHash:{}", JSON.toJSONString(chainTransInfo));
