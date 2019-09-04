@@ -142,7 +142,7 @@ public class UserService {
 
         // check userName
         TbUser userRow = queryByName(user.getGroupId(), user.getUserName());
-        if (Objects.nonNull(userRow)) {
+        if (userRow != null) {
             log.warn("fail bindUserInfo. userName is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
@@ -152,11 +152,17 @@ public class UserService {
         }
 
         // check address
-        TbUser addressRow = queryUser(null, user.getGroupId(), null, address);
-        if (Objects.nonNull(addressRow)) {
+        TbUser addressRow = queryByAddress(address);
+        if (addressRow != null) {
             log.warn("fail bindUserInfo. address is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
+
+        // get org id
+        //   TbOrganization orgRow = organizationService
+        //       .queryOrganization(user.getGroupId(), OrgType.CURRENT.getValue());
+        //  Integer orgId = Optional.ofNullable(orgRow).map(org -> org.getOrgId())
+        //      .orElseThrow(() -> new NodeMgrException(ConstantCode.CURRENT_ORG_NOT_EXISTS));
 
         // add row
         TbUser newUserRow = new TbUser(HasPk.NONE.getValue(), user.getUserType(),
@@ -254,6 +260,12 @@ public class UserService {
         return queryUser(null, groupId, userName, null);
     }
 
+    /**
+     * query by address.
+     */
+    public TbUser queryByAddress(String address) throws NodeMgrException {
+        return queryUser(null, null, null, address);
+    }
 
     /**
      * query by userId.
@@ -304,17 +316,33 @@ public class UserService {
      */
     public PrivateKeyInfo getPrivateKey(String userAddress) throws NodeMgrException {
         log.debug("start getPrivateKey ");
-        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userAddress);
-        if (Objects.isNull(privateKeyInfoInfo)) {
-            log.error("fail getPrivateKey, invalid userAddress:{}", userAddress);
-            throw new NodeMgrException(ConstantCode.INVALID_USER);
-        }
+        // check user id
+        checkUserAddress(userAddress);
 
+        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userAddress);
         privateKeyInfoInfo.setPrivateKey(privateKeyInfoInfo.getPrivateKey());
         log.debug("end getPrivateKey,privateKeyInfoInfo:{}", JSON.toJSONString(privateKeyInfoInfo));
         return privateKeyInfoInfo;
     }
 
+    /**
+     * check userAddress.
+     */
+    public void checkUserAddress(String userAddress) throws NodeMgrException {
+        log.debug("start checkUserAddress");
+
+        if (StringUtils.isBlank(userAddress)) {
+            log.error("fail checkUserAddress, userAddress is null");
+            throw new NodeMgrException(ConstantCode.INVALID_USER);
+        }
+
+        TbUser user = queryByAddress(userAddress);
+        if (Objects.isNull(user)) {
+            log.error("fail checkUserAddress, invalid userAddress:{}", userAddress);
+            throw new NodeMgrException(ConstantCode.INVALID_USER);
+        }
+        log.debug("end checkUserAddress");
+    }
 
     /**
      * get user name by address.
