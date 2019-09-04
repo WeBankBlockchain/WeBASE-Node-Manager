@@ -36,6 +36,7 @@ public class ConstantProperties {
     public static final String COOKIE_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_C"; // cookie key---account
     public static final String SESSION_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_S"; // session key---account
     public static final String CONTRACT_NAME_ZERO = "0x00000000";
+    public static final String ADDRESS_DEPLOY = "0x0000000000000000000000000000000000000000";
     public static final String LOGIN_CHECKCODE_SESSION_KEY = "NODE_MGR_CHECK_CODE_S";
     public static final int PUBLICKEY_LENGTH = 130;
     public static final int ADDRESS_LENGTH = 42;
@@ -78,7 +79,6 @@ public class ConstantProperties {
     private Long analysisSleepTime = 200L;
     private Boolean isMonitorIgnoreUser = false;
     private Boolean isMonitorIgnoreContract = false;
-    private String cnsAddress = null;
     private Integer monitorUnusualMaxCount;
 
 }

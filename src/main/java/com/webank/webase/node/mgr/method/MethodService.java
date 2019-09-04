@@ -13,10 +13,12 @@
  */
 package com.webank.webase.node.mgr.method;
 
+import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.method.entity.Method;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,8 +35,8 @@ public class MethodService {
     public void saveMethod(NewMethodInputParam newMethodInputParam) {
         List<Method> methodList = newMethodInputParam.getMethodList();
         TbMethod tbMethod = new TbMethod();
-        // tbMethod.setGroupId(newMethodInputParam.getGroupId());
-        tbMethod.setGroupId(1);
+        tbMethod.setGroupId(newMethodInputParam.getGroupId());
+        tbMethod.setContractType(ContractType.GENERALCONTRACT.getValue());
         //save each method
         for (Method method : methodList) {
             BeanUtils.copyProperties(method, tbMethod);
@@ -45,8 +47,16 @@ public class MethodService {
     /**
      * query by methodId.
      */
-    public TbMethod getByMethodId(String methodId, int groupId) {
-        return methodMapper.getMethodById(methodId, groupId);
+    public TbMethod getByMethodId(String methodId, Integer groupId) {
+        TbMethod tbMethod = methodMapper.getMethodById(methodId, null);
+        if (Objects.nonNull(tbMethod)) {
+            if (ContractType.SYSTEMCONTRACT.getValue() == tbMethod.getContractType().intValue()) {
+                return tbMethod;
+            } else {
+                return methodMapper.getMethodById(methodId, groupId);
+            }
+        }
+        return null;
     }
 
     /**
