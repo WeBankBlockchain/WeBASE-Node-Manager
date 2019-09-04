@@ -2,30 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.webase.node.mgr.method.MethodMapper">
-  <resultMap id="methodMap" type="com.webank.webase.node.mgr.method.entity.TbMethod">
-    <id column="method_id" javaType="java.lang.String" jdbcType="VARCHAR" property="methodId"/>
-    <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
-    <result column="abi_info" javaType="java.lang.String" jdbcType="VARCHAR" property="abiInfo"/>
-    <result column="method_type" javaType="java.lang.String" jdbcType="VARCHAR"
-      property="methodType"/>
-    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
-      property="createTime"/>
-    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
-      property="modifyTime"/>
-  </resultMap>
+	<resultMap id="methodMap"
+		type="com.webank.webase.node.mgr.method.entity.TbMethod">
+		<id column="method_id" javaType="java.lang.String" jdbcType="VARCHAR"
+			property="methodId" />
+		<id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+			property="groupId" />
+		<result column="abi_info" javaType="java.lang.String" jdbcType="VARCHAR"
+			property="abiInfo" />
+		<result column="method_type" javaType="java.lang.String"
+			jdbcType="VARCHAR" property="methodType" />
+		<result column="contract_type" javaType="java.lang.Integer"
+			jdbcType="INTEGER" property="contractType" />
+		<result column="create_time" javaType="java.time.LocalDateTime"
+			jdbcType="TIMESTAMP" property="createTime" />
+		<result column="modify_time" javaType="java.time.LocalDateTime"
+			jdbcType="TIMESTAMP" property="modifyTime" />
+	</resultMap>
 
 
-  <insert id="add" parameterType="com.webank.webase.node.mgr.method.entity.TbMethod">
-      REPLACE INTO tb_method( method_id,group_id, abi_info,method_type,create_time,modify_time)
-      VALUES (#{methodId},#{groupId},#{abiInfo},#{methodType},now(),now()
-      )
-    </insert>
+	<insert id="add" parameterType="com.webank.webase.node.mgr.method.entity.TbMethod">
+		REPLACE INTO tb_method(method_id,group_id,abi_info,method_type,contract_type,create_time,modify_time)
+		VALUES (#{methodId},#{groupId},#{abiInfo},#{methodType},#{contractType},now(),now())
+	</insert>
 
-  <select id="getMethodById" resultMap="methodMap">
-    SELECT * FROM tb_method WHERE method_id = #{methodId} and group_id=#{groupId}
-  </select>
+	<select id="getMethodById" resultMap="methodMap">
+		SELECT * FROM tb_method
+		WHERE method_id = #{methodId} 
+		<if test="groupId != null and groupId != ''">
+	      and group_id = #{groupId}
+	    </if>
+		limit 1
+	</select>
 
-  <delete id="removeByGroupId" parameterType="java.lang.Integer">
-    delete from tb_method where group_id=#{groupId}
-  </delete>
+	<delete id="removeByGroupId" parameterType="java.lang.Integer">
+		delete from tb_method
+		where group_id=#{groupId}
+	</delete>
 </mapper>
