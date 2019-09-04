@@ -26,6 +26,7 @@ public class TbMethod {
     private Integer groupId;
     private String abiInfo;
     private String methodType;
+    private Integer contractType;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 }
