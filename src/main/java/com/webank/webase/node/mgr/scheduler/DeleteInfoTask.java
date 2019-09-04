@@ -22,19 +22,15 @@ import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Log4j2
 @Component
-@ConditionalOnProperty(name = "constant.isDeleteInfo", havingValue = "true")
 public class DeleteInfoTask {
 
     @Autowired
@@ -47,12 +43,6 @@ public class DeleteInfoTask {
     private ConstantProperties cProperties;
     @Autowired
     private MonitorService monitorService;
-
-
-    @Scheduled(cron = "${constant.deleteInfoCron}")
-    public void taskStart() {
-       deleteInfoStart();
-    }
 
     /**
      * start.
