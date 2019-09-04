@@ -18,7 +18,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.group.GroupService;
@@ -35,11 +34,6 @@ public class TransMonitorTask {
     @Autowired
     private GroupService groupService;
 
-
-    @Scheduled(fixedRateString = "${constant.transMonitorTaskFixedRate}")
-    public void taskStart() {
-        monitorStart();
-    }
 
     /**
      * start monitor.
