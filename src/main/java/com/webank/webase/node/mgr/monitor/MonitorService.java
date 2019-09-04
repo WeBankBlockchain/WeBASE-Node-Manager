@@ -42,6 +42,7 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.method.MethodService;
@@ -373,9 +374,32 @@ public class MonitorService {
 
         if (isDeploy(transTo)) {
             contractAddress = frontInterfacee.getAddressByHash(groupId, transHash);
-            contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
-            contractBin = removeBinFirstAndLast(contractBin);
-            contractName = getNameFromContractBin(groupId, contractBin);
+            if (ConstantProperties.ADDRESS_DEPLOY.equals(contractAddress)) {
+                contractBin = StringUtils.removeStart(transInput, "0x");
+                
+                ContractParam param = new ContractParam();
+                param.setGroupId(groupId);
+                param.setPartOfBytecodeBin(contractBin);
+                TbContract tbContract = contractService.queryContract(param);
+                
+                if (Objects.nonNull(tbContract)) {
+                    contractName = tbContract.getContractName();
+                } else {
+                    contractName = getNameFromContractBin(groupId, contractBin);
+                    transUnusualType = TransUnusualType.CONTRACT.getValue();
+                }
+            } else {
+                contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
+                contractBin = removeBinFirstAndLast(contractBin);
+                
+                List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
+                if (contractRow != null && contractRow.size() > 0) {
+                    contractName = contractRow.get(0).getContractName();
+                } else {
+                    contractName = getNameFromContractBin(groupId, contractBin);
+                    transUnusualType = TransUnusualType.CONTRACT.getValue();
+                }
+            }
             interfaceName = contractName;
         } else {    // function call
             transType = TransType.CALL.getValue();
