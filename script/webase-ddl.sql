@@ -100,6 +100,7 @@ CREATE TABLE IF NOT EXISTS tb_method(
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   abi_info text COMMENT 'abi信息',
   method_type varchar(32) COMMENT '方法类型',
+  contract_type tinyint(4) DEFAULT '0' COMMENT '合约类型(0-普通合约，1-系统合约)',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (method_id,group_id)
