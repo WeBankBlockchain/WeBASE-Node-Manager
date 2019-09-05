@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,6 +47,12 @@ public class StatisticsTransdailyTask {
     private BlockService blockService;
     @Autowired
     private TransDailyService transDailyService;
+
+
+    @Scheduled(cron = "${constant.statisticsTransDailyCron}")
+    public void taskStart() {
+        updateTransdailyData();
+    }
 
     /**
      * counting daily transaction data.
@@ -75,7 +82,7 @@ public class StatisticsTransdailyTask {
     private void traverseNetList(List<StatisticalGroupTransInfo> groupStatisticalList)
         throws NodeMgrException {
         if (groupStatisticalList == null | groupStatisticalList.size() == 0) {
-            log.error("fail updateTransdailyData. no group information exists");
+            log.warn("updateTransdailyData jump over: no group information exists");
             return;
         }
 
