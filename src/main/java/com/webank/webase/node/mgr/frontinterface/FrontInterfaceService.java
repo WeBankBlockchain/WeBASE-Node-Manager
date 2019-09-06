@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.frontinterface;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PEERS;
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_NODEID_LIST;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PLIST;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_PEERS;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CSYNC_STATUS;
@@ -121,6 +122,14 @@ public class FrontInterfaceService {
     public List<String> getGroupPeersFromSpecificFront(String frontIp, Integer frontPort,
         Integer groupId) {
         return getFromSpecificFront(groupId, frontIp, frontPort, URI_GROUP_PEERS, List.class);
+    }
+    
+    /**
+     * get NodeIDList from specific front.
+     */
+    public List<String> getNodeIDListFromSpecificFront(String frontIp, Integer frontPort,
+            Integer groupId) {
+        return getFromSpecificFront(groupId, frontIp, frontPort, URI_NODEID_LIST, List.class);
     }
 
     /**
