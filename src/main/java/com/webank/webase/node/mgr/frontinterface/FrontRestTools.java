@@ -59,6 +59,7 @@ public class FrontRestTools {
     public static final String URI_TRANS_TOTAL = "web3/transaction-total";
     public static final String URI_TRANS_BY_HASH = "web3/transaction/%1s";
     public static final String URI_GROUP_PEERS = "web3/groupPeers";
+    public static final String URI_NODEID_LIST = "web3/nodeIdList";
     public static final String URI_GROUP_PLIST = "web3/groupList";
     public static final String URI_PEERS = "web3/peers";
     public static final String URI_CONSENSUS_STATUS = "web3/consensusStatus";

@@ -227,7 +227,7 @@ public class GroupService {
                 Integer gId = Integer.valueOf(groupId);
                 allGroupSet.add(gId);
                 //peer in group
-                List<String> groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+                List<String> groupPeerList = frontInterface.getNodeIDListFromSpecificFront(frontIp, frontPort, gId);
                 //save groupId
                 saveGroupId(gId, groupPeerList.size());
                 frontGroupMapService.newFrontGroup(front.getFrontId(), gId);
