@@ -240,7 +240,14 @@ public class BlockService {
 
         //get sealer from chain.
         List<String> sealerList = frontInterface.getSealerList(groupId);
-        String sealer = sealerList.get(tbBlock.getSealerIndex());
+        String sealer = "0x0";
+        if (sealerList != null && sealerList.size() > 0) {
+            if (tbBlock.getSealerIndex() < sealerList.size()) {
+                sealer = sealerList.get(tbBlock.getSealerIndex());
+            } else {
+                sealer = sealerList.get(0);
+            }
+        }
         tbBlock.setSealer(sealer);
 
         //save sealer
