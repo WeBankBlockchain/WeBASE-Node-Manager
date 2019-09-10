@@ -13,6 +13,23 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -25,32 +42,18 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.method.MethodService;
+import com.webank.webase.node.mgr.method.entity.TbMethod;
 import com.webank.webase.node.mgr.monitor.entity.ContractMonitorResult;
 import com.webank.webase.node.mgr.monitor.entity.UserMonitorResult;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.TbUser;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 
 /**
  * MonitorService.
@@ -74,8 +77,9 @@ public class MonitorService {
     @Autowired
     private MonitorTransactionService monitorTransactionService;
     @Autowired
+    private MethodService methodService;
+    @Autowired
     private ConstantProperties cProperties;
-    private static final String DEPLOY_OR_CNS_SPLIT = ",";
 
 
     /**
@@ -364,15 +368,38 @@ public class MonitorService {
      */
     private ContractMonitorResult monitorContract(int groupId, String transHash, String transTo,
         String transInput, BigInteger blockNumber) {
-        String contractAddress, contractName, interfaceName, contractBin;
+        String contractAddress, contractName, interfaceName = "", contractBin;
         int transType = TransType.DEPLOY.getValue();
         int transUnusualType = TransUnusualType.NORMAL.getValue();
 
         if (isDeploy(transTo)) {
             contractAddress = frontInterfacee.getAddressByHash(groupId, transHash);
-            contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
-            contractBin = removeBinFirstAndLast(contractBin);
-            contractName = getNameFromContractBin(groupId, contractBin);
+            if (ConstantProperties.ADDRESS_DEPLOY.equals(contractAddress)) {
+                contractBin = StringUtils.removeStart(transInput, "0x");
+                
+                ContractParam param = new ContractParam();
+                param.setGroupId(groupId);
+                param.setPartOfBytecodeBin(contractBin);
+                TbContract tbContract = contractService.queryContract(param);
+                
+                if (Objects.nonNull(tbContract)) {
+                    contractName = tbContract.getContractName();
+                } else {
+                    contractName = getNameFromContractBin(groupId, contractBin);
+                    transUnusualType = TransUnusualType.CONTRACT.getValue();
+                }
+            } else {
+                contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
+                contractBin = removeBinFirstAndLast(contractBin);
+                
+                List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
+                if (contractRow != null && contractRow.size() > 0) {
+                    contractName = contractRow.get(0).getContractName();
+                } else {
+                    contractName = getNameFromContractBin(groupId, contractBin);
+                    transUnusualType = TransUnusualType.CONTRACT.getValue();
+                }
+            }
             interfaceName = contractName;
         } else {    // function call
             transType = TransType.CALL.getValue();
@@ -391,8 +418,15 @@ public class MonitorService {
                 }
             } else {
                 contractName = getNameFromContractBin(groupId, contractBin);
-                interfaceName = transInput.substring(0, 10);
-                transUnusualType = TransUnusualType.CONTRACT.getValue();
+                TbMethod tbMethod = methodService.getByMethodId(methodId, groupId);
+                if (Objects.nonNull(tbMethod)) {
+                    interfaceName = getInterfaceName(methodId, "[" + tbMethod.getAbiInfo() + "]");
+                    log.info("monitor methodId:{} interfaceName:{}", methodId, interfaceName);
+                }
+                if (StringUtils.isBlank(interfaceName)) {
+                    interfaceName = transInput.substring(0, 10);
+                    transUnusualType = TransUnusualType.CONTRACT.getValue();
+                }
             }
         }
 
@@ -496,16 +530,10 @@ public class MonitorService {
      * check the address is deploy.
      */
     private boolean isDeploy(String address) {
-        String cnsAddress = cProperties.getCnsAddress();
-
         if (StringUtils.isBlank(address)) {
             return false;
         }
-        if (StringUtils.isBlank(cnsAddress)) {
-            return false;
-        }
-        List<String> addressList = Arrays.asList(cnsAddress.split(DEPLOY_OR_CNS_SPLIT));
-        return addressList.contains(address);
+        return ConstantProperties.ADDRESS_DEPLOY.equals(address);
     }
 
     /**

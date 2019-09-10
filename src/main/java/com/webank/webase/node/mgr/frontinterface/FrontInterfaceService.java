@@ -14,11 +14,14 @@
 package com.webank.webase.node.mgr.frontinterface;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PEERS;
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_NODEID_LIST;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PLIST;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_PEERS;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CSYNC_STATUS;
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GET_OBSERVER_LIST;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -119,6 +122,14 @@ public class FrontInterfaceService {
     public List<String> getGroupPeersFromSpecificFront(String frontIp, Integer frontPort,
         Integer groupId) {
         return getFromSpecificFront(groupId, frontIp, frontPort, URI_GROUP_PEERS, List.class);
+    }
+    
+    /**
+     * get NodeIDList from specific front.
+     */
+    public List<String> getNodeIDListFromSpecificFront(String frontIp, Integer frontPort,
+            Integer groupId) {
+        return getFromSpecificFront(groupId, frontIp, frontPort, URI_NODEID_LIST, List.class);
     }
 
     /**
@@ -224,6 +235,9 @@ public class FrontInterfaceService {
         throws NodeMgrException {
         log.debug("start getTransInfoByHash. groupId:{} hash:{}", groupId, hash);
         TransactionInfo trans = getTransaction(groupId, hash);
+        if (Objects.isNull(trans)) {
+            return null;
+        }
         ChainTransInfo chainTransInfo = new ChainTransInfo(trans.getFrom(),
             trans.getTo(), trans.getInput(), trans.getBlockNumber());
         log.debug("end getTransInfoByHash:{}", JSON.toJSONString(chainTransInfo));
@@ -295,6 +309,17 @@ public class FrontInterfaceService {
         log.debug("end getGroupPeers. groupPeers:{}", JSON.toJSONString(groupPeers));
         return groupPeers;
     }
+    
+    /**
+     * get group peers
+     */
+    public List<String> getObserverList(Integer groupId) {
+        log.debug("start getObserverList. groupId:{}", groupId);
+        List<String> observers = frontRestTools
+                .getForEntity(groupId, URI_GET_OBSERVER_LIST, List.class);
+        log.info("end getObserverList. observers:{}", JSON.toJSONString(observers));
+        return observers;
+    }
 
 
     /**
@@ -352,4 +377,5 @@ public class FrontInterfaceService {
         log.debug("end getSystemConfigByKey. config:{}", config);
         return config;
     }
+
 }

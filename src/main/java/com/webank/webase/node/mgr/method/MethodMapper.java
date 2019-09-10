@@ -25,5 +25,5 @@ public interface MethodMapper {
 
     void removeByGroupId( @Param("groupId") int groupId);
 
-    TbMethod getMethodById(@Param("methodId") String methodId, @Param("groupId") int groupId);
+    TbMethod getMethodById(@Param("methodId") String methodId, @Param("groupId") Integer groupId);
 }

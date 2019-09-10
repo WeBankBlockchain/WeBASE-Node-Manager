@@ -36,16 +36,14 @@ public class ConstantProperties {
     public static final String COOKIE_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_C"; // cookie key---account
     public static final String SESSION_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_S"; // session key---account
     public static final String CONTRACT_NAME_ZERO = "0x00000000";
+    public static final String ADDRESS_DEPLOY = "0x0000000000000000000000000000000000000000";
     public static final String LOGIN_CHECKCODE_SESSION_KEY = "NODE_MGR_CHECK_CODE_S";
     public static final int PUBLICKEY_LENGTH = 130;
     public static final int ADDRESS_LENGTH = 42;
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
 
-    private Boolean isDeleteInfo = true;
+
     private BigInteger transRetainMax = new BigInteger("10000");
-    private String statisticsTransDailyCron = "0 0/1 * * * ?";// Execute once every minute
-    private String deleteInfoCron = "0 0/2 * * * ?";// Execute once every two minute
-    private Long resetGroupListCycle = 600000L; //10 min
     private String groupInvalidGrayscaleValue;  //y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
     private String notSupportFrontIp;
 
@@ -54,7 +52,6 @@ public class ConstantProperties {
     private BigInteger pullBlockInitCnts = new BigInteger("100");
     private Long pullBlockSleepTime = 20L; //20 mills
     private Boolean isBlockPullFromZero = false;
-    private Long pullBlockTaskFixedDelay = 30000L; //30 s
 
     //receive http request
     private Integer verificationCodeMaxAge = 300; // seconds
@@ -78,7 +75,6 @@ public class ConstantProperties {
     private Long analysisSleepTime = 200L;
     private Boolean isMonitorIgnoreUser = false;
     private Boolean isMonitorIgnoreContract = false;
-    private String cnsAddress = null;
     private Integer monitorUnusualMaxCount;
 
 }

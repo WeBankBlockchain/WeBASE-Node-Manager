@@ -63,8 +63,6 @@ constant:
   isMonitorIgnoreUser: false
   isMonitorIgnoreContract: false
   monitorUnusualMaxCount: 20
-  cnsAddress: 0x0000000000000000000000000000000000001004,0x0000000000000000000000000000000000000000
-
 
 
 # executor config
