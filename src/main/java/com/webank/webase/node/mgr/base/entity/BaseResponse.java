@@ -33,6 +33,12 @@ public class BaseResponse {
 
     public BaseResponse(RetCode retcode) {
         this.code = retcode.getCode();
-        this.message = retcode.getMsg();
+        this.message = retcode.getMessage();
+    }
+
+    public BaseResponse(RetCode retcode, Object data) {
+        this.code = retcode.getCode();
+        this.message = retcode.getMessage();
+        this.data = data;
     }
 }

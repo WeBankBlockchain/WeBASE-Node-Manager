@@ -181,6 +181,9 @@ public class ContractService {
     public List<TbContract> queryContractByBin(Integer groupId, String contractBin)
         throws NodeMgrException {
         try {
+            if (StringUtils.isEmpty(contractBin)) {
+                return null;
+            }
             List<TbContract> contractRow = contractMapper.queryContractByBin(groupId, contractBin);
             log.debug("start queryContractByBin:{}", contractBin, JSON.toJSONString(contractRow));
             return contractRow;

@@ -16,6 +16,12 @@ package com.webank.webase.node.mgr.base.tools;
 
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Map;
 
 public class HttpRequestTools {
 
@@ -26,5 +32,26 @@ public class HttpRequestTools {
         String uri = httpRequest.getRequestURI().replace("//", "/");
         String contextPath = httpRequest.getContextPath();
         return StringUtils.removeStart(uri, contextPath);
+    }
+
+
+    /**
+     * convert map to query params
+     * ex: uri:permission,
+     *     params: (groupId, 1) (address, 0x01)
+     *
+     * result: permission?groupId=1&address=0x01
+     */
+    public static String getQueryUri(String uriHead, Map<String, String> map) {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            params.add(entry.getKey(), entry.getValue());
+        }
+
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .queryParams(params).build();
+
+        return uriHead + uriComponents.toString();
     }
 }
