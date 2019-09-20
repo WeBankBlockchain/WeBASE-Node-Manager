@@ -11,4 +11,5 @@ public class PermissionParam {
     private String fromAddress;
     private String address;
     private String tableName;
+    private PermissionState permissionState;
 }

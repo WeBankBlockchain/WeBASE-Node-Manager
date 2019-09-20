@@ -27,6 +27,25 @@ public class PermissionManageController extends BaseController {
     PermissionManageService permissionManageService;
 
     /**
+     * get permission state list
+     */
+    @GetMapping("sorted")
+    public Object listPermissionMgrState(
+            @RequestParam(defaultValue = "1") int groupId,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "1") int pageNumber) throws Exception, NodeMgrException {
+
+        Instant startTime = Instant.now();
+        log.info("start listPermissionMgrState startTime:{}", startTime.toEpochMilli());
+
+        Object result = permissionManageService.listPermissionState(groupId, pageSize, pageNumber);
+
+        log.info("end listPermissionMgrState useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
      * get permission manager paged list
      * 透传front的BaseResponse
      */
@@ -71,6 +90,23 @@ public class PermissionManageController extends BaseController {
     /**
      * grant permission.
      */
+    @PostMapping(value = "sorted")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public Object updatePermission(@RequestBody @Valid PermissionParam permissionParam,
+                                  BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start updatePermission startTime:{} permissionParam:{}", startTime.toEpochMilli(),
+                JSON.toJSONString(permissionParam));
+
+        Object res = permissionManageService.updatePermissionState(permissionParam);
+
+        log.info("end updatePermission useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+
+        return res;
+    }
+
     @PostMapping(value = "")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object grantPermission(@RequestBody @Valid PermissionParam permissionParam,
