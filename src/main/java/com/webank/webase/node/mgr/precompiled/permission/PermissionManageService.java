@@ -23,6 +23,23 @@ public class PermissionManageService {
     @Autowired
     private FrontInterfaceService frontInterfaceService;
 
+
+    /**
+     * get sorted paged permission state list
+     */
+    public Object listPermissionState(int groupId, int pageSize, int pageNumber) {
+        log.debug("start listPermissionState. param:{}" + groupId);
+        String uri;
+        Map<String, String>  map = new HashMap<>();
+        map.put("groupId", String.valueOf(groupId));
+        map.put("pageSize", String.valueOf(pageSize));
+        map.put("pageNumber", String.valueOf(pageNumber));
+        uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION_SORTED_LIST, map);
+        Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
+        log.debug("end listPermissionState. frontRsp:{}", JSON.toJSONString(frontRsp));
+        return frontRsp;
+    }
+
     /**
      * get paged permission list
      */
@@ -74,6 +91,19 @@ public class PermissionManageService {
     /**
      * post permission grant
      */
+    public Object updatePermissionState(PermissionParam permissionParam) {
+        log.debug("start updatePermissionState. param:{}", JSON.toJSONString(permissionParam));
+        if (Objects.isNull(permissionParam)) {
+            log.info("fail updatePermissionState. request param is null");
+            throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
+        }
+
+        Object frontRsp = frontRestTools.postForEntity(
+                permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION_SORTED_LIST,
+                permissionParam, Object.class);
+        log.debug("end updatePermissionState. frontRsp:{}", JSON.toJSONString(frontRsp));
+        return frontRsp;
+    }
 
     public Object grantPermission(PermissionParam permissionParam) {
         log.debug("start grantPermission. param:{}", JSON.toJSONString(permissionParam));
