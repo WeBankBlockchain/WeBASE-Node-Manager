@@ -9,6 +9,8 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.page.List2Page;
 import com.webank.webase.node.mgr.base.tools.page.Map2PagedList;
 import com.webank.webase.node.mgr.base.tools.page.MapHandle;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
@@ -48,12 +50,15 @@ public class PermissionManageController extends BaseController {
         log.info("start listPermissionMgrState startTime:{}", startTime.toEpochMilli());
 
         Map<String, PermissionState> resultMap = permissionManageService.listPermissionState(groupId);
+        int totalCount = resultMap.size();
+        // 对应Map排序
+        List<MapHandle> resultList = NodeMgrTools.sortMap(resultMap);
         // Map分页
-        Map2PagedList<MapHandle> list2Page = new Map2PagedList(resultMap, pageSize, pageNumber);
+        List2Page list2Page = new List2Page(resultList, pageSize, pageNumber);
         List<MapHandle> finalList = list2Page.getPagedList();
         log.info("end listPermissionMgrState useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(finalList));
-        return new BasePageResponse(ConstantCode.SUCCESS, finalList, finalList.size());
+        return new BasePageResponse(ConstantCode.SUCCESS, finalList, totalCount);
     }
 
     /**

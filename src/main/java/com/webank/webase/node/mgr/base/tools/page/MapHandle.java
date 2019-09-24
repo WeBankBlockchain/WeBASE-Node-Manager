@@ -3,7 +3,7 @@ package com.webank.webase.node.mgr.base.tools.page;
 import lombok.Data;
 
 @Data
-public class MapHandle<T> {
+public class MapHandle{
     private String key;
     private Object data;
 

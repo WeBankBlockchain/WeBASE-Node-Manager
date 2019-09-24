@@ -30,14 +30,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.webank.webase.node.mgr.base.tools.page.MapHandle;
+import com.webank.webase.node.mgr.precompiled.permission.PermissionState;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
@@ -416,5 +414,27 @@ public class NodeMgrTools {
             throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
         }
         return token;
+    }
+
+    /**
+     * sort Mappings
+     * @param mapping
+     * @return List<MapHandle>
+     */
+    public static List<MapHandle> sortMap(Map<?, ?> mapping) {
+        List<MapHandle> list = new ArrayList<>();
+        Iterator it = mapping.keySet().iterator();
+        while (it.hasNext()) {
+            String key = it.next().toString();
+            MapHandle handle = new MapHandle(key, mapping.get(key));
+            list.add(handle);
+        }
+        Collections.sort(list, new Comparator<MapHandle>() {
+            @Override
+            public int compare(MapHandle o1, MapHandle o2) {
+                return o1.getKey().compareTo(o2.getKey());
+            }
+        });
+        return list;
     }
 }
