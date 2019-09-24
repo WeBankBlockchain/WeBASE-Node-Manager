@@ -5,10 +5,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.page.Map2PagedList;
+import com.webank.webase.node.mgr.base.tools.page.MapHandle;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.user.entity.TbUser;
+import com.webank.webase.node.mgr.user.entity.UserParam;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Log4j2
 @RestController
@@ -28,6 +36,7 @@ public class PermissionManageController extends BaseController {
 
     /**
      * get permission state list
+     * 返回user的权限状态，包含cns, sysConfig, deployAndCreate, node
      */
     @GetMapping("sorted")
     public Object listPermissionMgrState(
@@ -38,11 +47,13 @@ public class PermissionManageController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start listPermissionMgrState startTime:{}", startTime.toEpochMilli());
 
-        Object result = permissionManageService.listPermissionState(groupId, pageSize, pageNumber);
-
+        Map<String, PermissionState> resultMap = permissionManageService.listPermissionState(groupId);
+        // Map分页
+        Map2PagedList<MapHandle> list2Page = new Map2PagedList(resultMap, pageSize, pageNumber);
+        List<MapHandle> finalList = list2Page.getPagedList();
         log.info("end listPermissionMgrState useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
-        return result;
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(finalList));
+        return new BasePageResponse(ConstantCode.SUCCESS, finalList, finalList.size());
     }
 
     /**
@@ -69,6 +80,7 @@ public class PermissionManageController extends BaseController {
 
     /**
      * get permission manager full list
+     * 根据权限类型返回拥有该权限的全部user address
      * 透传front的BaseResponse
      */
     @GetMapping("full")
@@ -89,6 +101,7 @@ public class PermissionManageController extends BaseController {
 
     /**
      * grant permission.
+     * 更新用户的权限状态 包含cns, sysConfig, deployAndCreate, node
      */
     @PostMapping(value = "sorted")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
