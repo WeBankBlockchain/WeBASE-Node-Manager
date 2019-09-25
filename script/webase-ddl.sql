@@ -208,3 +208,18 @@ CREATE TABLE IF NOT EXISTS tb_token (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='token信息表';
 
 
+-- ----------------------------
+-- Table structure for tb_cert
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_cert (
+  address varchar(120) NOT NULL COMMENT '证书对应地址(唯一标记）',
+  cert_name varchar(60) NOT NULL COMMENT '证书id',
+  value varchar(2048) NOT NULL COMMENT 'cert(crt证书）的内容',
+  type varchar(20) NOT NULL COMMENT '证书类型',
+  node_id varchar(120) NOT NULL COMMENT '证书对应节点编号',
+  father varchar(120) NOT NULL COMMENT '父证书对应地址(address)',
+  validity_from datetime NOT NULL COMMENT '有效期',
+  validity_to datetime NOT NULL COMMENT '有效期',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (address)
+) ENGINE=InnoDB AUTO_INCREMENT=90000 DEFAULT CHARSET=utf8 COMMENT='证书信息表';
