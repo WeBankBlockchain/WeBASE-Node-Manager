@@ -114,6 +114,9 @@ public class ConstantCode {
     public static final RetCode INVALID_TOKEN = RetCode.mark(202052, "invalid token");
     public static final RetCode TOKEN_EXPIRE = RetCode.mark(202053, "token expire");
 
+    // 证书管理
+//    public static final RetCode ADDRESS_EMPTY = RetCode.mark(202060, "address empty");
+
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
     public static final RetCode ACCESS_DENIED = RetCode.mark(302001, "access denied");
