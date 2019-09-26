@@ -11,9 +11,9 @@ public interface CertMapper {
 
     void add(TbCert tbCert);
 
-    void delete(@Param("certId") String certId);
+    void deleteByFingerPrint(@Param("fingerPrint") String fingerPrint);
 
-    TbCert queryCertByAddress(@Param("address") String address);
+    TbCert queryCertByFingerPrint(@Param("fingerPrint") String fingerPrint);
 
     List<TbCert> listOfCert(@Param("param") CertParam param);
 
