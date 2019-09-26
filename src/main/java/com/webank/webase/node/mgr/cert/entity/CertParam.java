@@ -1,4 +1,4 @@
-package com.webank.webase.node.mgr.cert;
+package com.webank.webase.node.mgr.cert.entity;
 
 import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
 import lombok.Data;
@@ -13,9 +13,9 @@ import java.sql.Date;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class CertParam extends BaseQueryParam {
-    private String address;
-    private String type;
+    private String fingerPrint;
+    private String certType;
     private String father;
-    private Date from;
-    private Date to;
+    private String certName;
+    private Date validityFrom;
 }

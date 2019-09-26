@@ -23,7 +23,7 @@ public class CertTools {
     private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
     private final static String tail = "-----END CERTIFICATE-----\n" ;
 
-
+    private static byte[] isStore = null;
     /**
      * 获取证书类型 和 名字
      * @return
@@ -49,41 +49,18 @@ public class CertTools {
         String encoded = Base64.getEncoder().encodeToString(pubBytes);
         return encoded;
     }
-    // TODO get cert's public key
+
     public static String getCertAddress(String publicKey) {
         return Web3Tools.getAddressByPublicKey(publicKey);
     }
-    /**
-     * 解析is获取证书list
-     * @return
-     * @throws IOException
-     */
-    public static List<X509CertImpl> getCerts(String crtContent) throws IOException, CertificateException {
-        InputStream is = getStream(crtContent);
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        List<X509CertImpl> certs = (List<X509CertImpl>) cf.generateCertificates(is);
-        return certs;
-    }
-    public static X509CertImpl getCert(String crtContent) throws IOException, CertificateException {
-        InputStream is = getStream(crtContent);
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509CertImpl cert = (X509CertImpl) cf.generateCertificate(is);
-        return cert;
-    }
 
 
-    public static String getString(InputStream inputStream) throws IOException {
-        byte[] bytes = new byte[0];
-        bytes = new byte[inputStream.available()];
-        inputStream.read(bytes);
-        String str = new String(bytes);
-        return str;
-    }
 
-    public static InputStream getStream(String string) throws IOException {
-        InputStream is = new ByteArrayInputStream(string.getBytes());
-        return is;
-    }
+//    public static InputStream getStream(String string) throws IOException {
+//        InputStream is = new ByteArrayInputStream(string.getBytes());
+//        isStore = saveInputStream(is);
+//        return is;
+//    }
 
     // 0 is node ca, 1 is agency ca, 2 is chain
     public static List<String> getSingleCrtContent(String certContent) throws IOException {
@@ -101,32 +78,6 @@ public class CertTools {
         return list;
     }
 
-    public String getChainCrt() throws IOException {
-        InputStream caInput = new ClassPathResource("ca.crt").getInputStream();
-        String caStr = getString(caInput);
-        String ca = "";
-        String[] caStrArray = caStr.split(head); // 一个是空，一个是去除了head的string
-        for(int i = 0; i < caStrArray.length; i++) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
-            String[] caStrArray2 = caStrArray[i].split(tail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
-            for(int j = 0; j < caStrArray2.length; j++) {
-                ca = caStrArray2[j];
-                if(ca.length() != 0) {
-                    ca = formatStr(ca);
-                }
-            }
-        }
-        return ca;
-    }
-
-    public String getFirstCrt(String string) {
-        String[] strArray = string.split(flag);
-        return strArray[2];
-    }
-
-    public String getSecondCrt(String string) {
-        String[] strArray = string.split(flag);
-        return strArray[6];
-    }
 
     public static String formatStr(String string) {
         return string.substring(0, string.length() - 1);
