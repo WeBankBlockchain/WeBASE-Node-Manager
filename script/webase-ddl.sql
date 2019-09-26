@@ -214,12 +214,13 @@ CREATE TABLE IF NOT EXISTS tb_token (
 CREATE TABLE IF NOT EXISTS tb_cert (
   finger_print varchar(120) NOT NULL COMMENT '证书的指纹(唯一标记）',
   cert_name varchar(60) NOT NULL COMMENT '证书id',
-  content varchar(2048) NOT NULL COMMENT 'cert(crt证书）的内容',
+  content text NOT NULL COMMENT 'cert(crt证书）的内容',
   cert_type varchar(20) NOT NULL COMMENT '证书类型',
-  public_key varchar(120) NOT NULL COMMENT '证书对应节点编号(nodeid)',
+  public_key varchar(120) DEFAULT NULL COMMENT '证书对应节点编号(nodeid)',
   father varchar(120) NOT NULL COMMENT '父证书对应地址(fingerprint)',
-  validity_from date NOT NULL COMMENT '有效期',
-  validity_to date NOT NULL COMMENT '有效期',
+  validity_from date NOT NULL COMMENT '有效期开始',
+  validity_to date NOT NULL COMMENT '有效期截止',
+  modify_time date DEFAULT NULL COMMENT '修改时间',
   create_time date DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (finger_print)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='证书信息表';

@@ -10,18 +10,18 @@
 			property="certName" />
 		<result column="content" javaType="java.lang.String" jdbcType="VARCHAR"
 			property="content" />
-		<result column="cert_type" javaType="java.lang.String"
-			jdbcType="certType" property="certType" />
-		<result column="public_key" javaType="java.lang.String"
-			jdbcType="VARCHAR" property="publicKey" />
-		<result column="father" javaType="java.lang.String"
-			jdbcType="VARCHAR" property="father" />
-		<result column="validity_from" javaType="java.util.Date"
-			jdbcType="TIMESTAMP" property="validityFrom" />
-        <result column="validity_to" javaType="java.util.Date"
-                jdbcType="TIMESTAMP" property="validityTo" />
-        <result column="create_time" javaType="java.util.Date"
-                jdbcType="TIMESTAMP" property="createTime" />
+		<result column="cert_type" javaType="java.lang.String" jdbcType="VARCHAR"
+				property="certType" />
+		<result column="public_key" javaType="java.lang.String" jdbcType="VARCHAR"
+				property="publicKey" />
+		<result column="father" javaType="java.lang.String" jdbcType="VARCHAR"
+				property="father" />
+		<result column="validity_from" javaType="java.util.Date" jdbcType="TIMESTAMP"
+				property="validityFrom" />
+        <result column="validity_to" javaType="java.util.Date" jdbcType="TIMESTAMP"
+				property="validityTo" />
+        <result column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP"
+				property="createTime" />
 	</resultMap>
 
 
@@ -30,7 +30,7 @@
 		VALUES (#{fingerPrint},#{certName},#{content},#{certType},#{publicKey},#{father},#{validityFrom},#{validityTo},now())
 	</insert>
 
-	<select id="queryCertByFingerPrint" resultMap="certMap">
+	<select id="queryCertByFingerPrint" parameterType="java.lang.String" resultMap="certMap">
 		SELECT * FROM tb_cert
 		WHERE finger_print = #{fingerPrint}
 		<if test="fingerPrint != null and fingerPrint != ''">
@@ -44,30 +44,31 @@
 		where finger_print=#{fingerPrint}
 	</delete>
 
-    <select id="listOfCert" parameterType="com.webank.webase.node.mgr.cert.CertParam"
-            resultMap="certMap">
-        select a.* from tb_cert a where 1=1
-        <if test="fingerPrint != null and fingerPrint != ''">
-            and a.finger_print = #{fingerPrint}
-        </if>
-        <if test="certName != null and certName != ''">
-            and a.cert_name = #{certName}
-        </if>
-        <if test="certType != null and certType != ''">
-            and a.cert_type = #{certType}
-        </if>
-        <if test="publicKey != null and publicKey != ''">
-            and a.public_key = #{publicKey}
-        </if>
+    <update id="update" parameterType="com.webank.webase.node.mgr.cert.entity.TbCert">
         <if test="father != null and father != ''">
-            and a.father = #{father}
+            ,father = #{father}
         </if>
-        <if test="content != null and content != ''">
-            and a.content = #{content}
-        </if>
-        <if test="validityFrom != null and validityFrom != ''">
-            order by a.validity_from ${validityFrom}
-        </if>
+
+        where finger_print = #{fingerPrint}
+    </update>
+
+    <select id="listOfCert" resultMap="certMap">
+        select * from tb_cert a where 1=1
+<!--        <if test="fingerPrint != null and fingerPrint != ''">-->
+<!--            and a.finger_print = #{fingerPrint}-->
+<!--        </if>-->
+<!--        <if test="certName != null and certName != ''">-->
+<!--            and a.cert_name = #{certName}-->
+<!--        </if>-->
+<!--        <if test="certType != null and certType != ''">-->
+<!--            and a.cert_type = #{certType}-->
+<!--        </if>-->
+<!--        <if test="father != null and father != ''">-->
+<!--            and a.father = #{father}-->
+<!--        </if>-->
+<!--        <if test="validityFrom != null and validityFrom != ''">-->
+<!--            order by a.validity_from ${validityFrom}-->
+<!--        </if>-->
     </select>
 
 </mapper>
