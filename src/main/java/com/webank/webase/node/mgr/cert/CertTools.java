@@ -1,15 +1,21 @@
 package com.webank.webase.node.mgr.cert;
 
 
+import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import org.springframework.core.io.ClassPathResource;
+import sun.security.ec.ECPublicKeyImpl;
+import sun.security.x509.X509CertImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class CertTools {
@@ -23,27 +29,50 @@ public class CertTools {
      * @return
      * @throws IOException
      */
-    public String  getCertType(String subjectDN) {
-        return subjectDN.split(",")[0].split("=")[1];
+    public static String  getCertType(Principal subjectDN) {
+        return subjectDN.toString().split(",")[0].split("=")[1];
     }
-    public String  getCertName(String subjectDN) {
-        return subjectDN.split(",")[2].split("=")[1];
+    public static String  getCertName(Principal subjectDN) {
+        return subjectDN.toString().split(",")[2].split("=")[1];
     }
 
+    /**
+     * getPublicKey
+     * 获取了byte[]之后 转换成base64编码 == address?
+     * @param key
+     * @return String
+     */
+    public static String getPublicKeyString(PublicKey key) {
+        ECPublicKeyImpl pub = (ECPublicKeyImpl) key;
+        byte[] pubBytes = pub.getEncodedPublicValue();
+        //Base64 Encoded
+        String encoded = Base64.getEncoder().encodeToString(pubBytes);
+        return encoded;
+    }
+    // TODO get cert's public key
+    public static String getCertAddress(String publicKey) {
+        return Web3Tools.getAddressByPublicKey(publicKey);
+    }
     /**
      * 解析is获取证书list
      * @return
      * @throws IOException
      */
-    public List<X509Certificate> getCerts(InputStream is) throws IOException, CertificateException {
+    public static List<X509CertImpl> getCerts(String crtContent) throws IOException, CertificateException {
+        InputStream is = getStream(crtContent);
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        // agency's crt
-        List<X509Certificate> certs = (List<X509Certificate>) cf.generateCertificates(is);
+        List<X509CertImpl> certs = (List<X509CertImpl>) cf.generateCertificates(is);
         return certs;
+    }
+    public static X509CertImpl getCert(String crtContent) throws IOException, CertificateException {
+        InputStream is = getStream(crtContent);
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509CertImpl cert = (X509CertImpl) cf.generateCertificate(is);
+        return cert;
     }
 
 
-    public String getString(InputStream inputStream) throws IOException {
+    public static String getString(InputStream inputStream) throws IOException {
         byte[] bytes = new byte[0];
         bytes = new byte[inputStream.available()];
         inputStream.read(bytes);
@@ -51,18 +80,15 @@ public class CertTools {
         return str;
     }
 
-    public InputStream getStream(String string) throws IOException {
+    public static InputStream getStream(String string) throws IOException {
         InputStream is = new ByteArrayInputStream(string.getBytes());
         return is;
     }
 
-    // 0 is node ca, 1 is agency ca
-    public List<String> getNodeCrt() throws IOException {
+    // 0 is node ca, 1 is agency ca, 2 is chain
+    public static List<String> getSingleCrtContent(String certContent) throws IOException {
         List<String> list = new ArrayList<>();
-        InputStream nodeCrtInput = new ClassPathResource("node.crt").getInputStream();
-        String nodeCrtStr = getString(nodeCrtInput);
-
-        String[] nodeCrtStrArray = nodeCrtStr.split(head);
+        String[] nodeCrtStrArray = certContent.split(head);
         for(int i = 0; i < nodeCrtStrArray.length; i++) {
             String[] nodeCrtStrArray2 = nodeCrtStrArray[i].split(tail);
             for(int j = 0; j < nodeCrtStrArray2.length; j++) {
@@ -102,7 +128,7 @@ public class CertTools {
         return strArray[6];
     }
 
-    public String formatStr(String string) {
+    public static String formatStr(String string) {
         return string.substring(0, string.length() - 1);
     }
 }

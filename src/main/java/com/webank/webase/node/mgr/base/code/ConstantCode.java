@@ -115,7 +115,8 @@ public class ConstantCode {
     public static final RetCode TOKEN_EXPIRE = RetCode.mark(202053, "token expire");
 
     // 证书管理
-//    public static final RetCode ADDRESS_EMPTY = RetCode.mark(202060, "address empty");
+    public static final RetCode CERT_ERROR = RetCode.mark(202060, "获取证书失败");
+    public static final RetCode FAIL_SAVE_CERT_ERROR = RetCode.mark(202061, "保存证书失败");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
