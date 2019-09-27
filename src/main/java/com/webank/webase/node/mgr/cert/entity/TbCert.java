@@ -11,8 +11,9 @@ public class TbCert {
     private String certName;
     private String content;
     private String certType;
-    // nodeid
+    // node id=public key, 节点证书&sdk证书才有
     private String publicKey;
+    private String address;
     // 父证书地址
     private String father;
     private Date validityFrom;

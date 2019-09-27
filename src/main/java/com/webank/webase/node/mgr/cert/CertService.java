@@ -4,21 +4,20 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
-import io.netty.handler.codec.base64.Base64Encoder;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.web3j.crypto.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+// TODO impl类报错, 转编码查看一下
 import sun.security.x509.X509CertImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -37,7 +36,7 @@ public class CertService {
 
         // crt加载list
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        List<X509CertImpl> certs = CertTools.getCerts(content);
+        List<X509CertImpl> certs = getCerts(content);
         // 单个crt的原文list
         List<String> certContentList = CertTools.getSingleCrtContent(content);
         // 用于保存的实体list
@@ -55,10 +54,12 @@ public class CertService {
             String certContent = CertTools.addHeadAndTail(certContentList.get(i));
             // 判断证书类型后给pub和父子证书赋值
             String publicKeyString = "";
+            String address = "";
             String fatherCertContent = "";
             if(certType.equals("node")) {
-                // ECC has public key
+                // ECC has public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
+                address = Keys.getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
             }else if(certType.equals("agency")){ // 非节点证书，无需pub(RSA's public key)
                 fatherCertContent = findFatherCert(certImpl);
@@ -68,6 +69,7 @@ public class CertService {
             }
             // 实体赋值
             tbCert.setPublicKey(publicKeyString);
+            tbCert.setAddress(address);
             tbCert.setContent(certContent);
             tbCert.setFather(fatherCertContent);
             tbCert.setFingerPrint(fingerPrint);
@@ -93,7 +95,7 @@ public class CertService {
         certMapper.add(tbCert);
     }
 
-    public List<TbCert> getCertsList() {
+    public List<TbCert> getAllCertsList() {
         List<TbCert> certs = new ArrayList<>();
         certs = certMapper.listOfCert();
         return certs;
@@ -114,9 +116,6 @@ public class CertService {
         return cert;
     }
 
-    public void removeCertByFingerPrint(String fingerPrint) {
-        certMapper.deleteByFingerPrint(fingerPrint);
-    }
 
     /**
      * 只会更新father字段
@@ -136,7 +135,7 @@ public class CertService {
      * @return String crt's address
      */
     public String findFatherCert(X509CertImpl sonCert) throws IOException, CertificateException{
-        List<X509CertImpl> x509CertList = getAllX509Certs();
+        List<X509CertImpl> x509CertList = loadAllX509Certs();
         String result = "";
         for(int i = 0; i < x509CertList.size(); i++) {
             X509CertImpl temp = x509CertList.get(i);
@@ -160,9 +159,9 @@ public class CertService {
         List<X509CertImpl> x509CertList = new ArrayList<>();
         String fatherType = CertTools.getCertType(fatherCert.getSubjectDN());
         if(fatherType.equals(CertTools.TYPE_CHAIN)){
-            x509CertList = getAllX509CertsByType(CertTools.TYPE_AGENCY);
+            x509CertList = loadAllX509CertsByType(CertTools.TYPE_AGENCY);
         }else if(fatherType.equals(CertTools.TYPE_AGENCY)){
-            x509CertList = getAllX509CertsByType(CertTools.TYPE_NODE);
+            x509CertList = loadAllX509CertsByType(CertTools.TYPE_NODE);
         }
 
         for(int i = 0; i < x509CertList.size(); i++) {
@@ -182,14 +181,14 @@ public class CertService {
     /**
      * 获取数据库所有的cert，并转换成X509实例返回
      */
-    public List<X509CertImpl> getAllX509Certs() throws IOException, CertificateException {
+    public List<X509CertImpl> loadAllX509Certs() throws IOException, CertificateException {
         // 空参数
         CertParam param = new CertParam();
-        List<TbCert> tbCertList = getCertsList();
+        List<TbCert> tbCertList = getAllCertsList();
 
         List<X509CertImpl> x509CertList = new ArrayList<>();
         for(TbCert tbCert: tbCertList) {
-            X509CertImpl temp = CertTools.getCert(tbCert.getContent());
+            X509CertImpl temp = getCert(tbCert.getContent());
             x509CertList.add(temp);
         }
         return x509CertList;
@@ -198,7 +197,7 @@ public class CertService {
     /**
      * 获取数据库所有符合certType的证书cert，并转换成X509实例返回
      */
-    public List<X509CertImpl> getAllX509CertsByType(String certType) throws IOException, CertificateException {
+    public List<X509CertImpl> loadAllX509CertsByType(String certType) throws IOException, CertificateException {
         // 空参数
         CertParam param = new CertParam();
         param.setCertType(certType);
@@ -206,13 +205,35 @@ public class CertService {
 
         List<X509CertImpl> x509CertList = new ArrayList<>();
         for(TbCert tbCert: tbCertList) {
-            X509CertImpl temp = CertTools.getCert(tbCert.getContent());
+            X509CertImpl temp = getCert(tbCert.getContent());
             x509CertList.add(temp);
         }
         return x509CertList;
     }
 
+    /**
+     * 删除cert，同时更新证书的父证书为空
+     * @return 返回受影响的证书数
+     * TODO 如果update出错，会导致update少了一部分
+     */
+    public int removeCertByFingerPrint(String fingerPrint) {
+        int count = 0;
+        List<TbCert> list = getAllCertsList();
+        removeCert(fingerPrint);
+        for(TbCert tbCert: list) {
+            if(tbCert.getFather().equals(fingerPrint)){
+                tbCert.setFather("");
+                String sonCertFingerPrint = tbCert.getFingerPrint();
+                updateCertFather(sonCertFingerPrint, "");
+                count++;
+            }
+        }
+        return count;
+    }
 
+    public void removeCert(String fingerPrint) {
+        certMapper.deleteByFingerPrint(fingerPrint);
+    }
 
     /**
      * check Cert Address.
@@ -233,4 +254,24 @@ public class CertService {
         }
     }
 
+    /**
+     * 解析is获取证书list
+     * @return
+     * @throws IOException
+     */
+    public List<X509CertImpl> getCerts(String crtContent) throws IOException, CertificateException {
+        InputStream is = new ByteArrayInputStream(crtContent.getBytes());
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        List<X509CertImpl> certs = (List<X509CertImpl>) cf.generateCertificates(is);
+        is.close();
+        return certs;
+    }
+
+    public X509CertImpl getCert(String crtContent) throws IOException, CertificateException {
+        InputStream is = new ByteArrayInputStream(crtContent.getBytes());
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509CertImpl cert = (X509CertImpl) cf.generateCertificate(is);
+        is.close();
+        return cert;
+    }
 }
