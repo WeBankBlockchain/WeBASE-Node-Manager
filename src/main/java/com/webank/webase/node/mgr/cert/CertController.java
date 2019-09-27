@@ -6,12 +6,14 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.cert.entity.CertHandle;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.DeleteCertHandle;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,17 +30,27 @@ public class CertController extends BaseController {
     @Autowired
     CertService certService;
 
-    @GetMapping("")
+    @GetMapping("list")
     public Object getCertList() throws NodeMgrException {
         List<TbCert> list = new ArrayList<>();
         try{
-            list = certService.getCertsList();
+            list = certService.getAllCertsList();
         }catch (Exception e) {
             return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
         }
         return new BasePageResponse(ConstantCode.SUCCESS, list, list.size());
     }
 
+    @GetMapping("")
+    public Object getCertByFingerPrint(@RequestParam(required = true)String fingerPrint) throws NodeMgrException {
+        TbCert tbCert = new TbCert();
+        try{
+            tbCert = certService.getCertByFingerPrint(fingerPrint);
+        }catch (Exception e) {
+            return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
+        }
+        return new BaseResponse(ConstantCode.SUCCESS, tbCert);
+    }
     /**
      * 可能传入一个Crt包含多个crt的内容，所以调用的是saveCerts
      * @param certHandle
@@ -47,52 +59,53 @@ public class CertController extends BaseController {
      * @throws NodeMgrException
      */
     @PostMapping("")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object addCert(@RequestBody @Valid CertHandle certHandle,
                                   BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        int count = 0;
         String content = certHandle.getContent();
         if(content == null | content == "") {
-            return new BaseResponse(ConstantCode.CERT_ERROR);
+            return new BaseResponse(ConstantCode.CERT_ERROR, "content cannot be empty");
         }
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+
         Instant startTime = Instant.now();
         log.info("start addCert. startTime:{} certHandle:{}",
                 startTime.toEpochMilli(), JSON.toJSONString(certHandle));
         try {
-            certService.saveCerts(content);
+            count = certService.saveCerts(content);
         }catch (Exception e) {
             return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
         }
 
         log.info("end addCert. useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
-        return baseResponse;
+                Duration.between(startTime, Instant.now()).toMillis(), "add certs count is "+ count);
+        return new BaseResponse(ConstantCode.SUCCESS, count);
     }
 
     @DeleteMapping(value = "")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object removeCert(@RequestBody @Valid CertHandle certHandle,
                           BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        int count = 0;
         String fingerPrint = certHandle.getFingerPrint();
         if(fingerPrint == null || fingerPrint == ""){
             return new BaseResponse(ConstantCode.CERT_ERROR, "fingerPrint cannot be null");
         }
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start removeCert. startTime:{} cert's fingerprint:{}",
                 startTime.toEpochMilli(), JSON.toJSONString(fingerPrint));
 
         try {
-            certService.removeCertByFingerPrint(fingerPrint);
+            count = certService.removeCertByFingerPrint(fingerPrint);
         }catch (Exception e) {
             return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
         }
 
         log.info("end removeCert. useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
-        return baseResponse;
+                Duration.between(startTime, Instant.now()).toMillis(), "remove influence "+count+"cert's father cert");
+        return new BaseResponse(ConstantCode.SUCCESS, count);
     }
 
 
