@@ -117,7 +117,7 @@ public class ConstantCode {
     // 证书管理
     public static final RetCode CERT_ERROR = RetCode.mark(202060, "cert handle error");
     public static final RetCode FAIL_SAVE_CERT_ERROR = RetCode.mark(202061, "store cert error");
-
+    public static final RetCode CERT_FORMAT_ERROR = RetCode.mark(202060, "cert format error, must start with -----BEGIN CERTIFICATE-----\\n, end with end");
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
     public static final RetCode ACCESS_DENIED = RetCode.mark(302001, "access denied");
