@@ -4,19 +4,69 @@ import java.io.*;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
-import javax.crypto.Cipher;
 
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
+import com.webank.webase.node.mgr.cert.CertTools;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import sun.security.ec.ECPublicKeyImpl;
 import sun.security.x509.X509CertImpl;
 
+import static com.webank.webase.node.mgr.cert.CertTools.byteToHex;
+
 public class importCertTest {
     private final static String flag = "-----" ;
     private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
     private final static String tail = "-----END CERTIFICATE-----\n" ;
+
+    @Test
+    public void testPubAddress() throws IOException, CertificateException {
+        /**
+         * @param: nodeCert
+         * 只有节点证书才是ECC椭圆曲线，获取pub的方法和区块链的一致
+         * 其余的agency chain 的crt都是rsa方法，使用大素数方法计算，不一样
+         */
+        InputStream node = new ClassPathResource("online/node-single.crt").getInputStream();
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509CertImpl nodeCert = (X509CertImpl) cf.generateCertificate(node);
+        // rsa算法的公钥和ecc的不一样
+        ECPublicKeyImpl pub = (ECPublicKeyImpl) nodeCert.getPublicKey();
+        byte[] pubBytes = pub.getEncodedPublicValue();
+        String publicKey = Numeric.toHexStringNoPrefix(pubBytes);
+        String address = Keys.getAddress(publicKey);
+        byte[] addByteArray = Keys.getAddress(pubBytes);
+        System.out.println("byte[] : pub ");
+        System.out.println(pubBytes);
+        System.out.println("====================================");
+        System.out.println(publicKey); // 04e5e7efc9e8d5bed699313d5a0cd5b024b3c11811d50473b987b9429c2f6379742c88249a7a8ea64ab0e6f2b69fb8bb280454f28471e38621bea8f38be45bc42d
+        System.out.println("byte[] to pub to address ");
+        System.out.println(address); // f7b2c352e9a872d37a427601c162671202416dbc
+        System.out.println("包含开头的04");
+        System.out.println(byteToHex(addByteArray));
+    }
+
+    /**
+     * address到底需不需要传入pub的开头的两位04
+     * 答案： 不需要，公钥是128位的
+     */
+    @Test
+    public void testAddress() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+        ECKeyPair key = Keys.createEcKeyPair();
+        byte[] pubBytes = key.getPublicKey().toByteArray();
+        System.out.println("=============原生的==============");
+        System.out.println(key.getPublicKey());
+        System.out.println(Keys.getAddress(key.getPublicKey()));
+
+        System.out.println("===========通过转成hex后台获取地址============");
+        System.out.println(Numeric.toHexStringNoPrefix(key.getPublicKey()));
+        System.out.println(Keys.getAddress(Numeric.toHexStringNoPrefix(key.getPublicKey())));
+
+        System.out.println("===========通过byte[]============");
+        System.out.println(Numeric.toHexStringNoPrefix(pubBytes));
+        System.out.println(Keys.getAddress(Numeric.toHexStringNoPrefix(pubBytes)));
+    }
 
     @Test
     public void testImport() throws IOException, CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
@@ -45,32 +95,6 @@ public class importCertTest {
         agencyCert.verify(caCert.getPublicKey());
         nodeCert.verify(agencyCert.getPublicKey());
 
-        /**
-         * @param: nodeCert
-         * 只有节点证书才是ECC椭圆曲线，获取pub的方法和区块链的一致
-         * 其余的agency chain 的crt都是rsa方法，使用大素数方法计算，不一样
-         */
-        // TODO 这里的publick key是包含非公钥文字的，待提取公钥
-
-//        String address = Web3Tools.getAddressByPublicKey(caCert.getPublicKey().toString());
-            // rsa算法的公钥和ecc的不一样
-//        RSAPublicKeyImpl nodeCertPublicKeyImpl = (RSAPublicKeyImpl) nodeCert.getPublicKey();
-        ECPublicKeyImpl pub = (ECPublicKeyImpl) nodeCert.getPublicKey();
-        byte[] pubBytes = pub.getEncodedPublicValue();
-        byte[] address0 = Keys.getAddress(pubBytes);
-        String address01 = new String(address0); // value: ���V�#���4�\۶y�A�
-        //Base64 Encoded
-        String encoded = Base64.getEncoder().encodeToString(pubBytes);
-        String address = Keys.getAddress(encoded);
-        // base64之后获取
-        System.out.println("byte[] : pub ");
-        System.out.println(pubBytes);
-        System.out.println("byte[]  getAddress : pub ");
-        System.out.println(address0);
-        System.out.println("base64 to string: pub ");
-        System.out.println(encoded); // BPQsE4nEMIuRsdYHJCdIm2W3CKC9dyB8iyu8
-        System.out.println("byte[] base64 getAddress string: pub ");
-        System.out.println(address); // e4de04654c65b7e22f511334cd6361448f563c74
 
 //        BASE64Encoder base64Encoder=new BASE64Encoder();
 //        String publicKeyString = base64Encoder.encode(nodeCert.getPublicKey().getEncoded());
