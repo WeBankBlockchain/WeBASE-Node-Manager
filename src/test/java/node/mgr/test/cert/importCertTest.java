@@ -21,13 +21,16 @@ public class importCertTest {
     private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
     private final static String tail = "-----END CERTIFICATE-----\n" ;
 
+
     @Test
-    public void testPubAddress() throws IOException, CertificateException {
+    public void testPubAddress() throws IOException, CertificateException, IllegalAccessException, InstantiationException {
         /**
          * @param: nodeCert
          * 只有节点证书才是ECC椭圆曲线，获取pub的方法和区块链的一致
          * 其余的agency chain 的crt都是rsa方法，使用大素数方法计算，不一样
          */
+//        Class x509ImpClass = X509CertImpl.class;
+//        X509CertImpl cert = (X509CertImpl) x509ImpClass.newInstance();
         InputStream node = new ClassPathResource("online/node-single.crt").getInputStream();
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         X509CertImpl nodeCert = (X509CertImpl) cf.generateCertificate(node);
@@ -70,14 +73,6 @@ public class importCertTest {
 
     @Test
     public void testImport() throws IOException, CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
-//        InputStream sdkCa = new ClassPathResource("old/ca.crt").getInputStream();
-//        InputStream sdkNode = new ClassPathResource("old/node.crt").getInputStream();
-//        // sdk crt
-//        List<X509CertImpl> sdkCerts = (List<X509CertImpl>) cf.generateCertificates(sdkNode);
-//        X509CertImpl sdkNodeCrt = sdkCerts.get(0);
-//        X509CertImpl sdkAgencyCrt = sdkCerts.get(1);
-//        X509CertImpl sdkCaCert = (X509CertImpl) cf.generateCertificate(sdkCa);
-
         // read from file is
         InputStream pem = new ClassPathResource("agency/node.crt").getInputStream();
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
@@ -95,58 +90,9 @@ public class importCertTest {
         agencyCert.verify(caCert.getPublicKey());
         nodeCert.verify(agencyCert.getPublicKey());
 
-
-//        BASE64Encoder base64Encoder=new BASE64Encoder();
-//        String publicKeyString = base64Encoder.encode(nodeCert.getPublicKey().getEncoded());
-//        System.out.println("-----------------getPublicKey-after-base64-encode--------------------");
-//        System.out.println(publicKeyString);
-//        System.out.println(Web3Tools.getAddressByPublicKey(publicKeyString));
-//        System.out.println(address);
-//        System.out.println("-----------------getPublicKey--------------------");
-
-        /**
-         *   对比证书getEncoded之后 base64的值,和crt里的内容是否一致
-         *   答案: 不一致
-         */
-
-//        System.out.println("-----------------getContent-after-base64-encode--------------------");
-//        String certString = base64Encoder.encode(nodeCert.getEncoded());
-//        System.out.println(certString);
-//        System.out.println("-----------------getContent--------------------");
-        // 和sdk的对比
         /**
          *  根据subjectDN 获取证书类型，证书名字
          */
-
-//        System.out.println(nodeCert.getSubjectDN().toString().split(",")[0].split("=")[1]);
-//        System.out.println(nodeCert.getSubjectDN().toString().split(",")[2].split("=")[1]);
-//        System.out.println(address);
-//        System.out.println(agencyCert.getPublicKey().toString());
-//        System.out.println(sdkNodeCrt.getSubjectDN());
-//        System.out.println(sdkAgencyCrt.getSubjectDN());
-//        System.out.println(sdkCaCert.getSubjectDN());
-//        sdkNodeCrt.verify(sdkAgencyCrt.getPublicKey());
-        // 不同的链，verify不通过
-//        sdkNodeCrt.verify(agencyCert.getPublicKey());
-
-        /**
-         * 验签
-          */
-//        System.out.println();
-//        Signature signature = Signature.getInstance(nodeCert.getSigAlgName());
-//        signature.initVerify(nodeCert.getPublicKey());
-//        // 此处应该传入子证书
-//        // 验签： 【原文】子证书.info.encoded (update) + 父证书's pub (initVerify) ==> 与子证书的signature比对
-//        // 签发： 【原文】xx data + 父证书's pri  ==> 子证书's signature
-//        signature.update((byte[])nodeCert.get("x509"));
-//
-//        boolean tResult = signature.verify(caCert.getSignature());
-//        boolean tResult2 = signature.verify(agencyCert.getSignature());
-//        boolean tResult3 = signature.verify(nodeCert.getSignature());
-//
-//        System.out.println(tResult);
-//        System.out.println(tResult2);
-//        System.out.println(tResult3);
 
     }
 
@@ -221,25 +167,4 @@ public class importCertTest {
             return true;
         }
     }
-
-//        Certificate certificate = cf.generateCertificate(pem);
-//        X509Certificate oCert = (X509Certificate) certificate;
-//        //主体部分
-//        System.out.println("Version:"+oCert.getVersion());
-//        System.out.println("SerialNumber:"+ oCert.getSerialNumber().toString(16));
-//        System.out.println("【SigALgName】："+oCert.getSigAlgName() + "(" + oCert.getSigAlgOID() + ")");
-//        System.out.println("【getSubjectX500Principal】："+oCert.getSubjectX500Principal());
-//        System.out.println("【getIssuerX500Principal】：" + oCert.getIssuerX500Principal());
-//        System.out.println("【getNotBefore】："+oCert.getNotBefore());
-//        System.out.println("【getNotAfter】："+oCert.getNotAfter());
-//        System.out.println("【getPublicKey】：\n  "+ oCert.getPublicKey());
-//        System.out.println("【getAlgorithm】："+ oCert.getPublicKey().getAlgorithm());
-//        System.out.println("【getFormat】："+oCert.getPublicKey().getFormat());
-//
-//        PublicKey publicKey = oCert.getPublicKey();
-//        BASE64Encoder base64Encoder=new BASE64Encoder();
-//        String publicKeyString = base64Encoder.encode(publicKey.getEncoded());
-//        System.out.println("-----------------getPublicKey-after-base64-encode--------------------");
-//        System.out.println(publicKeyString);
-//        System.out.println("-----------------getPublicKey--------------------");
 }
