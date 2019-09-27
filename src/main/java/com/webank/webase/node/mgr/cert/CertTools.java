@@ -4,9 +4,10 @@ package com.webank.webase.node.mgr.cert;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
+import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.core.io.ClassPathResource;
 import sun.security.ec.ECPublicKeyImpl;
-import sun.security.x509.X509CertImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -63,35 +64,26 @@ public class CertTools {
     public static String getPublicKeyString(PublicKey key) {
         ECPublicKeyImpl pub = (ECPublicKeyImpl) key;
         byte[] pubBytes = pub.getEncodedPublicValue();
-        //Base64 Encoded
-        String encoded = Base64.getEncoder().encodeToString(pubBytes);
-        return encoded;
+        String publicKey = Numeric.toHexStringNoPrefix(pubBytes);
+        publicKey = publicKey.substring(2); //128位,去除前两位
+//        String address = Keys.getAddress(publicKey);
+        return publicKey;
+    }
+
+    public static String getAddress(PublicKey key) {
+        ECPublicKeyImpl pub = (ECPublicKeyImpl) key;
+        byte[] pubBytes = pub.getEncodedPublicValue();
+        String publicKey = Numeric.toHexStringNoPrefix(pubBytes);
+        publicKey = publicKey.substring(2); //128位
+        String address = Keys.getAddress(publicKey);
+        return address;
     }
 
     public static String getCertAddress(String publicKey) {
         return Web3Tools.getAddressByPublicKey(publicKey);
     }
 
-    /**
-     * 解析is获取证书list
-     * @return
-     * @throws IOException
-     */
-    public static List<X509CertImpl> getCerts(String crtContent) throws IOException, CertificateException {
-        InputStream is = new ByteArrayInputStream(crtContent.getBytes());
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        List<X509CertImpl> certs = (List<X509CertImpl>) cf.generateCertificates(is);
-        is.close();
-        return certs;
-    }
 
-    public static X509CertImpl getCert(String crtContent) throws IOException, CertificateException {
-        InputStream is = new ByteArrayInputStream(crtContent.getBytes());
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509CertImpl cert = (X509CertImpl) cf.generateCertificate(is);
-        is.close();
-        return cert;
-    }
 
     public static String getString(InputStream inputStream) throws IOException {
         byte[] bytes = new byte[0];
@@ -125,27 +117,22 @@ public class CertTools {
         return list;
     }
 
-
     public static String formatStr(String string) {
         return string.substring(0, string.length() - 1);
     }
 
-    public String string2Base64(String str) {
-        if(null != str){
-            Base64.Encoder encoder = Base64.getEncoder();
-            return encoder.encodeToString(str.getBytes());
+    /**
+     * byte数组转hex
+     * @param bytes
+     * @return
+     */
+    public static String byteToHex(byte[] bytes){
+        String strHex = "";
+        StringBuilder sb = new StringBuilder("");
+        for (int n = 0; n < bytes.length; n++) {
+            strHex = Integer.toHexString(bytes[n] & 0xFF);
+            sb.append((strHex.length() == 1) ? "0" + strHex : strHex); // 每个字节由两个字符表示，位数不够，高位补0
         }
-        return null;
-    }
-    public String base642Str(String str) {
-        if (null != str) {
-            Base64.Decoder decoder = Base64.getDecoder();
-            try {
-                return new String(decoder.decode(str.getBytes()), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                return null;
-            }
-        }
-        return null;
+        return sb.toString().trim();
     }
 }
