@@ -45,10 +45,7 @@
 	</delete>
 
     <update id="update" parameterType="com.webank.webase.node.mgr.cert.entity.TbCert">
-        <if test="father != null and father != ''">
-            ,father = #{father}
-        </if>
-
+        update tb_cert set father = #{father}
         where finger_print = #{fingerPrint}
     </update>
 
@@ -70,5 +67,12 @@
 <!--            order by a.validity_from ${validityFrom}-->
 <!--        </if>-->
     </select>
+
+	<select id="listOfCertByConditions" parameterType="com.webank.webase.node.mgr.cert.entity.CertParam" resultMap="certMap">
+		SELECT a.* FROM tb_cert a WHERE 1=1
+		<if test="certType != null and certType != ''">
+			and a.cert_type = #{certType}
+		</if>
+	</select>
 
 </mapper>
