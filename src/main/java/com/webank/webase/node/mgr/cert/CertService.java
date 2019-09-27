@@ -2,9 +2,9 @@ package com.webank.webase.node.mgr.cert;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
+import io.netty.handler.codec.base64.Base64Encoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,9 +14,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -25,9 +27,6 @@ public class CertService {
 
     @Autowired
     CertMapper certMapper;
-
-//    private byte[] instreamStore = null;
-//    private InputStream is = null;
     /**
      * 存进数据库中，
      * 存一个单个证书的内容
@@ -35,8 +34,10 @@ public class CertService {
      */
 
     public int saveCerts(String content) throws IOException, CertificateException {
+
         // crt加载list
-        List<X509CertImpl> certs = getCerts(content);
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        List<X509CertImpl> certs = CertTools.getCerts(content);
         // 单个crt的原文list
         List<String> certContentList = CertTools.getSingleCrtContent(content);
         // 用于保存的实体list
@@ -47,25 +48,25 @@ public class CertService {
             TbCert tbCert = new TbCert();
             X509CertImpl certImpl = certs.get(i);
             // 用SHA-1计算得出指纹
-            String fingerPrint = certImpl.getFingerprint("SHA-1").toLowerCase();
+            String fingerPrint = certImpl.getFingerprint("SHA-1");
             String certName = CertTools.getCertName(certImpl.getSubjectDN());
             String certType = CertTools.getCertType(certImpl.getSubjectDN());
-            // 获取crt的原文
-            String certContent = certContentList.get(i);
-
+            // 获取crt的原文,并加上头和尾
+            String certContent = CertTools.addHeadAndTail(certContentList.get(i));
+            // 判断证书类型后给pub和父子证书赋值
             String publicKeyString = "";
             String fatherCertContent = "";
-            // TODO 需要重复加载Cert，但是第二次利用inputstream读取string加载cert，inputstream's input为空
-//            if(certType.equals("node")) {
-//                // ECC has public key
-//                publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
-//                fatherCertContent = findFatherCert(certImpl);
-//            }else if(certType.equals("agency")){ // 非节点证书，无需pub(RSA's public key)
-//                fatherCertContent = findFatherCert(certImpl);
-//                setSonCert(certImpl);
-//            }else if(certType.equals("chain")){
-//                setSonCert(certImpl);
-//            }
+            if(certType.equals("node")) {
+                // ECC has public key
+                publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
+                fatherCertContent = findFatherCert(certImpl);
+            }else if(certType.equals("agency")){ // 非节点证书，无需pub(RSA's public key)
+                fatherCertContent = findFatherCert(certImpl);
+                setSonCert(certImpl);
+            }else if(certType.equals("chain")){
+                setSonCert(certImpl);
+            }
+            // 实体赋值
             tbCert.setPublicKey(publicKeyString);
             tbCert.setContent(certContent);
             tbCert.setFather(fatherCertContent);
@@ -98,6 +99,16 @@ public class CertService {
         return certs;
     }
 
+    /**
+     * 根据证书类型返回list
+     * @return
+     */
+    public List<TbCert> getCertListByCertType(CertParam param) {
+        List<TbCert> certs = new ArrayList<>();
+        certs = certMapper.listOfCertByConditions(param);
+        return certs;
+    }
+
     public TbCert getCertByFingerPrint(String fingerPrint) {
         TbCert cert = certMapper.queryCertByFingerPrint(fingerPrint);
         return cert;
@@ -114,6 +125,7 @@ public class CertService {
      */
     public void updateCertFather(String sonFingerPrint, String fatherFingerPrint){
         TbCert cert = certMapper.queryCertByFingerPrint(sonFingerPrint);
+        // father delete了父证书时可以为空
         cert.setFather(fatherFingerPrint);
         certMapper.update(cert);
     }
@@ -145,7 +157,14 @@ public class CertService {
      * @param fatherCert
      */
     public void setSonCert(X509CertImpl fatherCert) throws IOException, CertificateException {
-        List<X509CertImpl> x509CertList = getAllX509Certs();
+        List<X509CertImpl> x509CertList = new ArrayList<>();
+        String fatherType = CertTools.getCertType(fatherCert.getSubjectDN());
+        if(fatherType.equals(CertTools.TYPE_CHAIN)){
+            x509CertList = getAllX509CertsByType(CertTools.TYPE_AGENCY);
+        }else if(fatherType.equals(CertTools.TYPE_AGENCY)){
+            x509CertList = getAllX509CertsByType(CertTools.TYPE_NODE);
+        }
+
         for(int i = 0; i < x509CertList.size(); i++) {
             X509CertImpl temp = x509CertList.get(i);
             try{
@@ -170,11 +189,29 @@ public class CertService {
 
         List<X509CertImpl> x509CertList = new ArrayList<>();
         for(TbCert tbCert: tbCertList) {
-            X509CertImpl temp = getCert(tbCert.getContent());
+            X509CertImpl temp = CertTools.getCert(tbCert.getContent());
             x509CertList.add(temp);
         }
         return x509CertList;
     }
+
+    /**
+     * 获取数据库所有符合certType的证书cert，并转换成X509实例返回
+     */
+    public List<X509CertImpl> getAllX509CertsByType(String certType) throws IOException, CertificateException {
+        // 空参数
+        CertParam param = new CertParam();
+        param.setCertType(certType);
+        List<TbCert> tbCertList = getCertListByCertType(param);
+
+        List<X509CertImpl> x509CertList = new ArrayList<>();
+        for(TbCert tbCert: tbCertList) {
+            X509CertImpl temp = CertTools.getCert(tbCert.getContent());
+            x509CertList.add(temp);
+        }
+        return x509CertList;
+    }
+
 
 
     /**
@@ -196,58 +233,4 @@ public class CertService {
         }
     }
 
-
-    /**
-     * 解析is获取证书list
-     * @return
-     * @throws IOException
-     */
-    public List<X509CertImpl> getCerts(String crtContent) throws IOException, CertificateException {
-        InputStream is = new ByteArrayInputStream(crtContent.getBytes());
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        List<X509CertImpl> certs = (List<X509CertImpl>) cf.generateCertificates(is);
-        is.close();
-        return certs;
-    }
-    public X509CertImpl getCert(String crtContent) throws IOException, CertificateException {
-        InputStream is = new ByteArrayInputStream(crtContent.getBytes());
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509CertImpl cert = (X509CertImpl) cf.generateCertificate(is);
-        is.close();
-        return cert;
-    }
-
-//
-//    public String getString(InputStream inputStream) throws IOException {
-//        byte[] bytes = new byte[0];
-//        bytes = new byte[inputStream.available()];
-//        inputStream.read(bytes);
-//        String str = new String(bytes);
-//        return str;
-//    }
-
-
-    /**
-     * 保存流对象（输入流在第二次使用的时候会失效）
-     * 在需要用到InputStream的地方再封装成InputStream
-     * ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buf);
-     * Workbook wb = new HSSFWorkbook(byteArrayInputStream);//byteArrayInputStream 继承了InputStream，故这样用并没有问题
-     * @param ins
-     */
-//    byte[] excelByte = null;//保存excel二进制流数据
-//    excelByte = saveInputStream(info.getIns());//用字节数组保存流对象（输入流在第二次使用的时候会失效）
-//    info.setIns(new ByteArrayInputStream(excelByte))
-//    public byte[] saveInputStream(InputStream ins){
-//        byte[] buf = null;
-//        try {
-//            if(ins!=null){
-//                buf = org.apache.commons.io.IOUtils.toByteArray(ins);//ins为InputStream流
-//            }else {
-//                buf = "".getBytes();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return buf;
-//    }
 }
