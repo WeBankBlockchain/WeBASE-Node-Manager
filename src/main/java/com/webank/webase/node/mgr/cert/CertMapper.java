@@ -18,5 +18,7 @@ public interface CertMapper {
 
     List<TbCert> listOfCert();
 
+    List<TbCert> listOfCertByConditions(CertParam param);
+
     void update(TbCert tbCert);
 }
