@@ -14,6 +14,8 @@
 				property="certType" />
 		<result column="public_key" javaType="java.lang.String" jdbcType="VARCHAR"
 				property="publicKey" />
+		<result column="address" javaType="java.lang.String" jdbcType="VARCHAR"
+				property="address" />
 		<result column="father" javaType="java.lang.String" jdbcType="VARCHAR"
 				property="father" />
 		<result column="validity_from" javaType="java.util.Date" jdbcType="TIMESTAMP"
