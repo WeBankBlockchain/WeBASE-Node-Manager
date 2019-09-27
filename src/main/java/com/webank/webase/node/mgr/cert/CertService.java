@@ -4,11 +4,17 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.FrontParam;
+import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 // TODO impl类报错, 转编码查看一下
+// 因为该类是class，而不是java
 import sun.security.x509.X509CertImpl;
 
 import java.io.ByteArrayInputStream;
@@ -18,7 +24,9 @@ import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -26,12 +34,16 @@ public class CertService {
 
     @Autowired
     CertMapper certMapper;
+    @Autowired
+    private FrontInterfaceService frontInterfaceService;
+    @Autowired
+    private FrontService frontService;
     /**
      * 存进数据库中，
      * 存一个单个证书的内容
+     * 证书的格式包含开头---BEGIN---与结尾
      * 包含bare string, 以及tbCert的内容
      */
-
     public int saveCerts(String content) throws IOException, CertificateException {
 
         // crt加载list
@@ -236,15 +248,74 @@ public class CertService {
     }
 
     /**
-     * check Cert Address.
+     * pull front's cert
+     * 拉去front的节点证书
+     * 返回的是一个map，包含(chain,ca.crt), (node, xx), (agency, xx)
      */
-    public boolean certAddressExists(String address) throws NodeMgrException {
-        log.debug("start certAddressExists. address:{} ", address);
-        if (address == "") {
-            log.info("fail certAddressExists. address is empty ");
+//    @Scheduled(cron = "0/5 * * * * ?")
+    public int pullFrontNodeCrt()  {
+        // 如果已完成拉取
+        if(CertTools.pullFrontCertsDone) {
+            return 0;
+        }
+        int count = 0;
+        log.debug("start pullFrontNodeCrt. ");
+        List<TbFront> frontList = frontService.getFrontList(new FrontParam());
+        for(TbFront tbFront: frontList) {
+            Map<String, String> certs = new HashMap<>();
+            String frontIp = tbFront.getFrontIp();
+            Integer frontPort = tbFront.getFrontPort();
+            log.debug("start getCertMapFromSpecificFront. frontIp:{} , frontPort: {} ", frontIp, frontPort);
+            certs = frontInterfaceService.getCertMapFromSpecificFront(frontIp, frontPort);
+            log.debug("end getCertMapFromSpecificFront. ");
+            try{
+                saveFrontCert(certs);
+                count++;
+            }catch (Exception e) {
+                log.error(e.getMessage());
+                throw new NodeMgrException(ConstantCode.SAVING_FRONT_CERT_ERROR);
+            }
+        }
+        CertTools.pullFrontCertsDone = true;
+        return count;
+    }
+
+    private void saveFrontCert(Map<String, String> certContents) throws IOException, CertificateException {
+        log.debug("start saveFrontCert. address:{} ", certContents);
+        String chainCertContent = certContents.get(CertTools.TYPE_CHAIN);
+        String agencyCertContent = certContents.get(CertTools.TYPE_AGENCY);
+        String nodeCertContent = certContents.get(CertTools.TYPE_NODE);
+        if(!chainCertContent.equals("")) {
+            chainCertContent = CertTools.addHeadAndTail(chainCertContent);
+            log.debug("start chainCertContent. :{} ", chainCertContent);
+            saveCerts(chainCertContent);
+            log.debug("end chainCertContent. :{} ", chainCertContent);
+
+        }
+        if(!agencyCertContent.equals("")) {
+            agencyCertContent = CertTools.addHeadAndTail(agencyCertContent);
+            log.debug("start chainCertContent. :{} ", chainCertContent);
+            saveCerts(agencyCertContent);
+            log.debug("end agencyCertContent. :{} ", chainCertContent);
+        }
+        if(!nodeCertContent.equals("")) {
+            nodeCertContent = CertTools.addHeadAndTail(nodeCertContent);
+            log.debug("start chainCertContent:{} ", chainCertContent);
+            saveCerts(nodeCertContent);
+            log.debug("end nodeCertContent:{} ", chainCertContent);
+        }
+        log.debug("end saveFrontCert. address:{} ", certContents);
+    }
+    /**
+     * check Cert fingerPrint.
+     */
+    public boolean certFingerPrintExists(String fingerPrint) throws NodeMgrException {
+        log.debug("start certAddressExists. address:{} ", fingerPrint);
+        if (fingerPrint == "") {
+            log.debug("fail certAddressExists. fingerPrint is empty ");
             throw new NodeMgrException(ConstantCode.ROLE_ID_EMPTY);
         }
-        TbCert certInfo = certMapper.queryCertByFingerPrint(address);
+        TbCert certInfo = certMapper.queryCertByFingerPrint(fingerPrint);
         if (certInfo != null) {
             log.debug("end certAddressExists. ");
             return true;
