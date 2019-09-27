@@ -13,7 +13,6 @@ import org.springframework.core.io.ClassPathResource;
 import sun.security.ec.ECPublicKeyImpl;
 import sun.security.x509.X509CertImpl;
 
-
 public class importCertTest {
     private final static String flag = "-----" ;
     private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
