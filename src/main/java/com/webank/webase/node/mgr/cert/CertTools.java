@@ -32,7 +32,7 @@ public class CertTools {
     public final static String TYPE_AGENCY = "agency";
     public final static String TYPE_NODE = "node";
     // 首次启动时需要拉取
-    public static boolean pullFrontCertsDone = false;
+    public static boolean isPullFrontCertsDone = false;
     /**
      * 获取证书类型 和 名字
      * @return

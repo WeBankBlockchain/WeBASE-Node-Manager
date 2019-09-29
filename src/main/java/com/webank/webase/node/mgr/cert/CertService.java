@@ -11,10 +11,8 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-// TODO impl类报错, 转编码查看一下
-// 因为该类是class，而不是java
+// TODO 内部API，可能在将来发行版中删除
 import sun.security.x509.X509CertImpl;
 
 import java.io.ByteArrayInputStream;
@@ -69,7 +67,7 @@ public class CertService {
             String address = "";
             String fatherCertContent = "";
             if(certType.equals("node")) {
-                // ECC has public key, pub => address
+                // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = Keys.getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
@@ -109,6 +107,8 @@ public class CertService {
 
     public List<TbCert> getAllCertsList() {
         List<TbCert> certs = new ArrayList<>();
+        // 首次获取参数时，拉取front的证书
+        pullFrontNodeCrt();
         certs = certMapper.listOfCert();
         return certs;
     }
@@ -252,10 +252,9 @@ public class CertService {
      * 拉去front的节点证书
      * 返回的是一个map，包含(chain,ca.crt), (node, xx), (agency, xx)
      */
-//    @Scheduled(cron = "0/5 * * * * ?")
     public int pullFrontNodeCrt()  {
         // 如果已完成拉取
-        if(CertTools.pullFrontCertsDone) {
+        if(CertTools.isPullFrontCertsDone) {
             return 0;
         }
         int count = 0;
@@ -266,7 +265,7 @@ public class CertService {
             String frontIp = tbFront.getFrontIp();
             Integer frontPort = tbFront.getFrontPort();
             log.debug("start getCertMapFromSpecificFront. frontIp:{} , frontPort: {} ", frontIp, frontPort);
-            certs = frontInterfaceService.getCertMapFromSpecificFront(frontIp, frontPort);
+            certs = (Map<String, String>) frontInterfaceService.getCertMapFromSpecificFront(frontIp, frontPort);
             log.debug("end getCertMapFromSpecificFront. ");
             try{
                 saveFrontCert(certs);
@@ -276,7 +275,7 @@ public class CertService {
                 throw new NodeMgrException(ConstantCode.SAVING_FRONT_CERT_ERROR);
             }
         }
-        CertTools.pullFrontCertsDone = true;
+        CertTools.isPullFrontCertsDone = true;
         return count;
     }
 
@@ -294,15 +293,15 @@ public class CertService {
         }
         if(!agencyCertContent.equals("")) {
             agencyCertContent = CertTools.addHeadAndTail(agencyCertContent);
-            log.debug("start chainCertContent. :{} ", chainCertContent);
+            log.debug("start agencyCertContent. :{} ", chainCertContent);
             saveCerts(agencyCertContent);
             log.debug("end agencyCertContent. :{} ", chainCertContent);
         }
         if(!nodeCertContent.equals("")) {
             nodeCertContent = CertTools.addHeadAndTail(nodeCertContent);
-            log.debug("start chainCertContent:{} ", chainCertContent);
+            log.debug("start nodeCertContent:{} ", nodeCertContent);
             saveCerts(nodeCertContent);
-            log.debug("end nodeCertContent:{} ", chainCertContent);
+            log.debug("end nodeCertContent:{} ", nodeCertContent);
         }
         log.debug("end saveFrontCert. address:{} ", certContents);
     }

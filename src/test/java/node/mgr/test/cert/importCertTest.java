@@ -57,18 +57,21 @@ public class importCertTest {
     @Test
     public void testAddress() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         ECKeyPair key = Keys.createEcKeyPair();
+        // 用byte[]穿进去获取公钥，就会可能多出一位0
         byte[] pubBytes = key.getPublicKey().toByteArray();
         System.out.println("=============原生的==============");
-        System.out.println(key.getPublicKey());
+        System.out.println(key.getPublicKey()); //64bytes BigInteger
         System.out.println(Keys.getAddress(key.getPublicKey()));
 
-        System.out.println("===========通过转成hex后台获取地址============");
-        System.out.println(Numeric.toHexStringNoPrefix(key.getPublicKey()));
+        System.out.println("===========通过转成hex后获取地址============");
+        System.out.println(Numeric.toHexStringNoPrefix(key.getPublicKey())); //Hex后显示
         System.out.println(Keys.getAddress(Numeric.toHexStringNoPrefix(key.getPublicKey())));
 
         System.out.println("===========通过byte[]============");
-        System.out.println(Numeric.toHexStringNoPrefix(pubBytes));
+        System.out.println(Numeric.toHexStringNoPrefix(pubBytes)); // BigInteget=> byte[] => hex 多一位
         System.out.println(Keys.getAddress(Numeric.toHexStringNoPrefix(pubBytes)));
+        System.out.println("===============");
+//        System.out.println(Keys.getAddress(pubBytes));
     }
 
     @Test

@@ -52,13 +52,6 @@ public class CertController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, tbCert);
     }
 
-    @PostMapping("pull")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object pullFromFront() {
-        CertTools.pullFrontCertsDone = false;
-        int result = certService.pullFrontNodeCrt();
-        return new BaseResponse(ConstantCode.SUCCESS, result);
-    }
     /**
      * 可能传入一个Crt包含多个crt的内容，所以调用的是saveCerts
      * @param certHandle
@@ -92,7 +85,7 @@ public class CertController extends BaseController {
     }
 
     @DeleteMapping(value = "")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object removeCert(@RequestBody @Valid CertHandle certHandle,
                           BindingResult result) throws NodeMgrException {
         checkBindResult(result);
