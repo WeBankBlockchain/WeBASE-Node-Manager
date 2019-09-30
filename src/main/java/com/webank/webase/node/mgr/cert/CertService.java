@@ -104,10 +104,33 @@ public class CertService {
         certMapper.add(tbCert);
     }
 
-    public List<TbCert> getAllCertsList() {
-        List<TbCert> certs = new ArrayList<>();
+    /**
+     * 先拉取front，后返回数据库的所有帧数
+     * 先pull一次，然后再返回list
+     * @return
+     */
+    public List<TbCert> getAllCertsListAndPullFront() {
         // 首次获取参数时，拉取front的证书
-        pullFrontNodeCrt();
+        // 如果已完成拉取
+        if(!CertTools.isPullFrontCertsDone) {
+            try{
+                pullFrontNodeCrt();
+                CertTools.isPullFrontCertsDone = true;
+            }catch (Exception e) {
+                log.error("PullFrontNodeCrt error" + e.getMessage());
+            }
+        }
+
+        // 获取数据库cert list
+        return getAllCertsListService();
+    }
+
+    /**
+     * 获取数据库中所有的certs
+     * @return
+     */
+    public List<TbCert> getAllCertsListService() {
+        List<TbCert> certs = new ArrayList<>();
         certs = certMapper.listOfCert();
         return certs;
     }
@@ -195,7 +218,7 @@ public class CertService {
     public List<X509CertImpl> loadAllX509Certs() throws IOException, CertificateException {
         // 空参数
         CertParam param = new CertParam();
-        List<TbCert> tbCertList = getAllCertsList();
+        List<TbCert> tbCertList = getAllCertsListService();
 
         List<X509CertImpl> x509CertList = new ArrayList<>();
         for(TbCert tbCert: tbCertList) {
@@ -228,7 +251,7 @@ public class CertService {
      */
     public int removeCertByFingerPrint(String fingerPrint) {
         int count = 0;
-        List<TbCert> list = getAllCertsList();
+        List<TbCert> list = getAllCertsListService();
         removeCert(fingerPrint);
         for(TbCert tbCert: list) {
             if(tbCert.getFather().equals(fingerPrint)){
@@ -251,10 +274,6 @@ public class CertService {
      * 返回的是一个map，包含(chain,ca.crt), (node, xx), (agency, xx)
      */
     public int pullFrontNodeCrt()  {
-        // 如果已完成拉取
-        if(CertTools.isPullFrontCertsDone) {
-            return 0;
-        }
         int count = 0;
         log.debug("start pullFrontNodeCrt. ");
         List<TbFront> frontList = frontService.getFrontList(new FrontParam());
@@ -263,7 +282,7 @@ public class CertService {
             String frontIp = tbFront.getFrontIp();
             Integer frontPort = tbFront.getFrontPort();
             log.debug("start getCertMapFromSpecificFront. frontIp:{} , frontPort: {} ", frontIp, frontPort);
-            certs = (Map<String, String>) frontInterfaceService.getCertMapFromSpecificFront(frontIp, frontPort);
+            certs = frontInterfaceService.getCertMapFromSpecificFront(frontIp, frontPort);
             log.debug("end getCertMapFromSpecificFront. ");
             try{
                 saveFrontCert(certs);
@@ -273,7 +292,6 @@ public class CertService {
                 throw new NodeMgrException(ConstantCode.SAVING_FRONT_CERT_ERROR);
             }
         }
-        CertTools.isPullFrontCertsDone = true;
         return count;
     }
 
