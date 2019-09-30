@@ -32,7 +32,7 @@ public class CertController extends BaseController {
     public Object getCertList() throws NodeMgrException {
         List<TbCert> list = new ArrayList<>();
         try{
-            list = certService.getAllCertsList();
+            list = certService.getAllCertsListAndPullFront();
         }catch (Exception e) {
             return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
         }
