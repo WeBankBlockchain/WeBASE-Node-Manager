@@ -110,7 +110,6 @@ public class FrontInterfaceService {
      * get map's Cert Content from specific front.
      */
     public Map<String, String> getCertMapFromSpecificFront(String nodeIp, Integer frontPort) {
-//        Integer groupId = Integer.MAX_VALUE;
         int groupId = 1;
         return getFromSpecificFront(groupId, nodeIp, frontPort, URI_CERT, Map.class);
     }
