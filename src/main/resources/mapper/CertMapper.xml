@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.webase.node.mgr.cert.CertMapper">
+	<resultMap id="certMap"
+		type="com.webank.webase.node.mgr.cert.entity.TbCert">
+		<id column="finger_print" javaType="java.lang.String" jdbcType="VARCHAR"
+			property="fingerPrint" />
+		<id column="cert_name" javaType="java.lang.String" jdbcType="VARCHAR"
+			property="certName" />
+		<result column="content" javaType="java.lang.String" jdbcType="VARCHAR"
+			property="content" />
+		<result column="cert_type" javaType="java.lang.String" jdbcType="VARCHAR"
+				property="certType" />
+		<result column="public_key" javaType="java.lang.String" jdbcType="VARCHAR"
+				property="publicKey" />
+		<result column="address" javaType="java.lang.String" jdbcType="VARCHAR"
+				property="address" />
+		<result column="father" javaType="java.lang.String" jdbcType="VARCHAR"
+				property="father" />
+		<result column="validity_from" javaType="java.util.Date" jdbcType="TIMESTAMP"
+				property="validityFrom" />
+        <result column="validity_to" javaType="java.util.Date" jdbcType="TIMESTAMP"
+				property="validityTo" />
+        <result column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP"
+				property="createTime" />
+	</resultMap>
+
+
+	<insert id="add" parameterType="com.webank.webase.node.mgr.cert.entity.TbCert">
+		REPLACE INTO tb_cert(finger_print,cert_name,content,cert_type,public_key,address,father,validity_from,validity_to,create_time)
+		VALUES (#{fingerPrint},#{certName},#{content},#{certType},#{publicKey},#{address},#{father},#{validityFrom},#{validityTo},now())
+	</insert>
+
+	<select id="queryCertByFingerPrint" parameterType="java.lang.String" resultMap="certMap">
+		SELECT * FROM tb_cert
+		WHERE finger_print = #{fingerPrint}
+		<if test="fingerPrint != null and fingerPrint != ''">
+	      and finger_print = #{fingerPrint}
+	    </if>
+		limit 1
+	</select>
+
+	<delete id="deleteByFingerPrint" parameterType="java.lang.String">
+		delete from tb_cert
+		where finger_print=#{fingerPrint}
+	</delete>
+
+    <update id="update" parameterType="com.webank.webase.node.mgr.cert.entity.TbCert">
+        update tb_cert set father = #{father}
+        where finger_print = #{fingerPrint}
+    </update>
+
+    <select id="listOfCert" resultMap="certMap">
+        select * from tb_cert a where 1=1
+<!--        <if test="fingerPrint != null and fingerPrint != ''">-->
+<!--            and a.finger_print = #{fingerPrint}-->
+<!--        </if>-->
+<!--        <if test="certName != null and certName != ''">-->
+<!--            and a.cert_name = #{certName}-->
+<!--        </if>-->
+<!--        <if test="certType != null and certType != ''">-->
+<!--            and a.cert_type = #{certType}-->
+<!--        </if>-->
+<!--        <if test="father != null and father != ''">-->
+<!--            and a.father = #{father}-->
+<!--        </if>-->
+<!--        <if test="validityFrom != null and validityFrom != ''">-->
+<!--            order by a.validity_from ${validityFrom}-->
+<!--        </if>-->
+    </select>
+
+	<select id="listOfCertByConditions" parameterType="com.webank.webase.node.mgr.cert.entity.CertParam" resultMap="certMap">
+		SELECT a.* FROM tb_cert a WHERE 1=1
+		<if test="certType != null and certType != ''">
+			and a.cert_type = #{certType}
+		</if>
+	</select>
+
+</mapper>
