@@ -114,6 +114,12 @@ public class ConstantCode {
     public static final RetCode INVALID_TOKEN = RetCode.mark(202052, "invalid token");
     public static final RetCode TOKEN_EXPIRE = RetCode.mark(202053, "token expire");
 
+    // 证书管理
+    public static final RetCode CERT_ERROR = RetCode.mark(202060, "cert handle error");
+    public static final RetCode FAIL_SAVE_CERT_ERROR = RetCode.mark(202061, "store cert error");
+    public static final RetCode CERT_FORMAT_ERROR = RetCode.mark(202062, "cert format error, must start with -----BEGIN CERTIFICATE-----\\n, end with end");
+    public static final RetCode SAVING_FRONT_CERT_ERROR = RetCode.mark(202063, "saving front's cert error");
+
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
     public static final RetCode ACCESS_DENIED = RetCode.mark(302001, "access denied");

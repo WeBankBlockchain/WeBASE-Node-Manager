@@ -11,7 +11,7 @@
       property="roleNameZh"/>
     <result column="role_status" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="roleStatus"/>
-    <result column="description" javaType="java.lang.String" jdbcType="INTEGER"
+    <result column="description" javaType="java.lang.String" jdbcType="VARCHAR"
       property="description"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="createTime"/>
