@@ -17,7 +17,6 @@ import sun.security.x509.X509CertImpl;
 import static com.webank.webase.node.mgr.cert.CertTools.byteToHex;
 
 public class importCertTest {
-    private final static String flag = "-----" ;
     private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
     private final static String tail = "-----END CERTIFICATE-----\n" ;
 
@@ -29,8 +28,6 @@ public class importCertTest {
          * 只有节点证书才是ECC椭圆曲线，获取pub的方法和区块链的一致
          * 其余的agency chain 的crt都是rsa方法，使用大素数方法计算，不一样
          */
-//        Class x509ImpClass = X509CertImpl.class;
-//        X509CertImpl cert = (X509CertImpl) x509ImpClass.newInstance();
         InputStream node = new ClassPathResource("online/node-single.crt").getInputStream();
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         X509CertImpl nodeCert = (X509CertImpl) cf.generateCertificate(node);
