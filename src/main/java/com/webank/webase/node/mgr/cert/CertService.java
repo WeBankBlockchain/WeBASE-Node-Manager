@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-// TODO 内部API，可能在将来发行版中删除
 import sun.security.x509.X509CertImpl;
 
 import java.io.ByteArrayInputStream;
@@ -71,7 +70,7 @@ public class CertService {
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = Keys.getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
-            }else if(certType.equals("agency")){ // 非节点证书，无需pub(RSA's public key)
+            }else if(certType.equals("agency")){ // 非节点证书，无需公钥(RSA's public key)
                 fatherCertContent = findFatherCert(certImpl);
                 setSonCert(certImpl);
             }else if(certType.equals("chain")){
@@ -94,14 +93,14 @@ public class CertService {
             try{
                 saveCert(tbCert);
             }catch (Exception e) {
-                throw new NodeMgrException(202061, "Fail saving the " + count + " crt, please try again");
+                throw new NodeMgrException(ConstantCode.CERT_FORMAT_ERROR.getCode(), "Fail saving the " + count + " crt, please try again");
             }
         }
 
         return count;
     }
 
-    public void saveCert(TbCert tbCert) throws Exception {
+    public void saveCert(TbCert tbCert) {
         certMapper.add(tbCert);
     }
 
@@ -136,7 +135,7 @@ public class CertService {
      */
     public void updateCertFather(String sonFingerPrint, String fatherFingerPrint){
         TbCert cert = certMapper.queryCertByFingerPrint(sonFingerPrint);
-        // father delete了父证书时可以为空
+        // fatherFingerPrint可为空。因父证书被删除后，子证书的father字段为空
         cert.setFather(fatherFingerPrint);
         certMapper.update(cert);
     }
@@ -179,7 +178,7 @@ public class CertService {
         for(int i = 0; i < x509CertList.size(); i++) {
             X509CertImpl temp = x509CertList.get(i);
             try{
-                // 找儿子
+                // 找子证书
                 temp.verify(fatherCert.getPublicKey());
             }catch (Exception e) {
                 // 签名不匹配则继续
@@ -226,7 +225,6 @@ public class CertService {
     /**
      * 删除cert，同时更新证书的父证书为空
      * @return 返回受影响的证书数
-     * TODO 如果update出错，会导致update少了一部分
      */
     public int removeCertByFingerPrint(String fingerPrint) {
         int count = 0;
@@ -328,19 +326,32 @@ public class CertService {
      * 解析is获取证书list
      * @return
      * @throws IOException
+     * // TODO X509CertImpl为内部API，可能在将来发行版中删除
      */
-    public List<X509CertImpl> getCerts(String crtContent) throws IOException, CertificateException {
+    public List<X509CertImpl> getCerts(String crtContent) throws IOException {
         InputStream is = new ByteArrayInputStream(crtContent.getBytes());
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        List<X509CertImpl> certs = (List<X509CertImpl>) cf.generateCertificates(is);
+        List<X509CertImpl> certs;
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            certs = (List<X509CertImpl>) cf.generateCertificates(is);
+        }catch (CertificateException e) {
+            is.close();
+            throw new NodeMgrException(ConstantCode.CERT_ERROR.getCode(), e.getMessage());
+        }
         is.close();
         return certs;
     }
 
-    public X509CertImpl getCert(String crtContent) throws IOException, CertificateException {
+    public X509CertImpl getCert(String crtContent) throws IOException {
         InputStream is = new ByteArrayInputStream(crtContent.getBytes());
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509CertImpl cert = (X509CertImpl) cf.generateCertificate(is);
+        X509CertImpl cert;
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            cert = (X509CertImpl) cf.generateCertificate(is);
+        }catch (CertificateException e) {
+            is.close();
+            throw new NodeMgrException(ConstantCode.CERT_ERROR.getCode(), e.getMessage());
+        }
         is.close();
         return cert;
     }

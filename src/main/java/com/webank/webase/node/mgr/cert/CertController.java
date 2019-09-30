@@ -8,8 +8,6 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.cert.entity.CertHandle;
-import com.webank.webase.node.mgr.cert.entity.CertParam;
-import com.webank.webase.node.mgr.cert.entity.DeleteCertHandle;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +83,7 @@ public class CertController extends BaseController {
     }
 
     @DeleteMapping(value = "")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object removeCert(@RequestBody @Valid CertHandle certHandle,
                           BindingResult result) throws NodeMgrException {
         checkBindResult(result);
