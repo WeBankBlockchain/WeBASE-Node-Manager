@@ -112,14 +112,14 @@ public class CertService {
     public List<TbCert> getAllCertsListAndPullFront() {
         // 首次获取参数时，拉取front的证书
         // 如果已完成拉取
-        if(CertTools.isPullFrontCertsDone) {
+        if(!CertTools.isPullFrontCertsDone) {
             try{
                 pullFrontNodeCrt();
+                CertTools.isPullFrontCertsDone = true;
             }catch (Exception e) {
                 log.error("PullFrontNodeCrt error" + e.getMessage());
             }
         }
-        CertTools.isPullFrontCertsDone = true;
 
         // 获取数据库cert list
         return getAllCertsListService();
