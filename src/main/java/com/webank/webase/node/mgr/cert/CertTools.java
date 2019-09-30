@@ -58,7 +58,6 @@ public class CertTools {
 
     /**
      * getPublicKey
-     * 获取了byte[]之后 转换成base64编码 == address?
      * @param key
      * @return String
      */
@@ -66,8 +65,7 @@ public class CertTools {
         ECPublicKeyImpl pub = (ECPublicKeyImpl) key;
         byte[] pubBytes = pub.getEncodedPublicValue();
         String publicKey = Numeric.toHexStringNoPrefix(pubBytes);
-        publicKey = publicKey.substring(2); //128位,去除前两位
-//        String address = Keys.getAddress(publicKey);
+        publicKey = publicKey.substring(2); //证书byte[]为130位，只取128位，去除开头的04标记位
         return publicKey;
     }
 
@@ -79,12 +77,6 @@ public class CertTools {
         String address = Keys.getAddress(publicKey);
         return address;
     }
-
-    public static String getCertAddress(String publicKey) {
-        return Web3Tools.getAddressByPublicKey(publicKey);
-    }
-
-
 
     public static String getString(InputStream inputStream) throws IOException {
         byte[] bytes = new byte[0];
@@ -99,7 +91,7 @@ public class CertTools {
         return is;
     }
 
-    // 0 is node ca, 1 is agency ca, 2 is chain
+    // crt文件中默认首个是节点证书 0 isnode ca, 1 is agency ca, 2 is chain
     public static List<String> getSingleCrtContent(String certContent) throws IOException {
         List<String> list = new ArrayList<>();
         if(!certContent.startsWith(head)){
