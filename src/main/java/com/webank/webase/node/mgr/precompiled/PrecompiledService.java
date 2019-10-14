@@ -45,7 +45,7 @@ public class PrecompiledService {
      * get cns list
      */
     public Object listCnsService(int groupId, String contractNameAndVersion, int pageSize, int pageNumber) {
-        log.debug("start listCnsService. param:{}" + groupId + contractNameAndVersion);
+        log.info("start listCnsService. groupId:{}, contractNameAndVersion:{}" + groupId + contractNameAndVersion);
         String uri;
         Map<String, String> map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
@@ -56,7 +56,7 @@ public class PrecompiledService {
 
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end listCnsService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.info("end listCnsService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -64,7 +64,7 @@ public class PrecompiledService {
      * get node list with consensus status
      */
     public Object getNodeListService(int groupId, int pageSize, int pageNumber) {
-        log.debug("start getNodeListService. param:{}" + groupId);
+        log.info("start getNodeListService. groupId:{}" + groupId);
         String uri;
         Map<String, String> map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
@@ -73,7 +73,7 @@ public class PrecompiledService {
         uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CONSENSUS_LIST, map);
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end getNodeListService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.info("end getNodeListService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -83,7 +83,7 @@ public class PrecompiledService {
      */
 
     public Object nodeManageService(ConsensusHandle consensusHandle) {
-        log.debug("start nodeManageService. param:{}", JSON.toJSONString(consensusHandle));
+        log.info("start nodeManageService. consensusHandle:{}", JSON.toJSONString(consensusHandle));
         if (Objects.isNull(consensusHandle)) {
             log.info("fail nodeManageService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
@@ -92,7 +92,7 @@ public class PrecompiledService {
         Object frontRsp = frontRestTools.postForEntity(
                 consensusHandle.getGroupId(), FrontRestTools.URI_CONSENSUS,
                 consensusHandle, Object.class);
-        log.debug("end nodeManageService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.info("end nodeManageService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -101,7 +101,7 @@ public class PrecompiledService {
      */
 
     public Object crudService(CrudHandle crudHandle) {
-        log.debug("start crudService. param:{}", JSON.toJSONString(crudHandle));
+        log.info("start crudService. crudHandle:{}", JSON.toJSONString(crudHandle));
         if (Objects.isNull(crudHandle)) {
             log.info("fail crudService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
@@ -110,7 +110,7 @@ public class PrecompiledService {
         Object frontRsp = frontRestTools.postForEntity(
                 crudHandle.getGroupId(), FrontRestTools.URI_CRUD,
                 crudHandle, Object.class);
-        log.debug("end crudService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.info("end crudService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 }
