@@ -42,7 +42,7 @@ public class PrecompiledSysConfigService {
      * get system config list
      */
     public Object getSysConfigListService(int groupId, int pageSize, int pageNumber) {
-        log.debug("start getSysConfigListService. param:{}" + groupId);
+        log.info("start getSysConfigListService. groupId:{}", groupId);
         Map<String, String> map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
         map.put("pageSize", String.valueOf(pageSize));
@@ -51,7 +51,7 @@ public class PrecompiledSysConfigService {
         String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_SYS_CONFIG_LIST, map);
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end getSysConfigListService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.info("end getSysConfigListService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -61,7 +61,7 @@ public class PrecompiledSysConfigService {
      */
 
     public Object setSysConfigByKeyService(SysConfigParam sysConfigParam) {
-        log.debug("start setSysConfigByKeyService. param:{}", JSON.toJSONString(sysConfigParam));
+        log.info("start setSysConfigByKeyService. sysConfigParam:{}", JSON.toJSONString(sysConfigParam));
         if (Objects.isNull(sysConfigParam)) {
             log.info("fail setSysConfigByKeyService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
@@ -70,7 +70,7 @@ public class PrecompiledSysConfigService {
         Object frontRsp = frontRestTools.postForEntity(
                 sysConfigParam.getGroupId(), FrontRestTools.URI_SYS_CONFIG,
                 sysConfigParam, Object.class);
-        log.debug("end setSysConfigByKeyService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.info("end setSysConfigByKeyService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 

@@ -58,8 +58,10 @@ public class CertService {
      */
     public int saveCerts(String content) throws IOException, CertificateException {
 
+        log.info("start saveCerts.  Cert content:{}", content);
         // crt加载list
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        log.info("getCerts(load certs from content). ");
         List<X509CertImpl> certs = getCerts(content);
         // 单个crt的原文list
         List<String> certContentList = CertTools.getSingleCrtContent(content);
@@ -68,6 +70,7 @@ public class CertService {
         // 记录保存到第几个cert时报错
         int count = 0;
         for(int i = 0; i < certs.size(); i++) {
+            log.info("start save TbCert in db. cert list size:{}", certs.size());
             TbCert tbCert = new TbCert();
             X509CertImpl certImpl = certs.get(i);
             // 用SHA-1计算得出指纹
@@ -76,21 +79,23 @@ public class CertService {
             String certType = CertTools.getCertType(certImpl.getSubjectDN());
             // 获取crt的原文,并加上头和尾
             String certContent = CertTools.addHeadAndTail(certContentList.get(i));
+
             // 判断证书类型后给pub和父子证书赋值
             String publicKeyString = "";
             String address = "";
             String fatherCertContent = "";
-            if(certType.equals("node")) {
+            if(CertTools.TYPE_NODE.equals(certType)) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = Keys.getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
-            }else if(certType.equals("agency")){ // 非节点证书，无需公钥(RSA's public key)
+            }else if(CertTools.TYPE_AGENCY.equals(certType)){ // 非节点证书，无需公钥(RSA's public key)
                 fatherCertContent = findFatherCert(certImpl);
                 setSonCert(certImpl);
-            }else if(certType.equals("chain")){
+            }else if(CertTools.TYPE_CHAIN.equals(certType)){
                 setSonCert(certImpl);
             }
+
             // 实体赋值
             tbCert.setPublicKey(publicKeyString);
             tbCert.setAddress(address);
@@ -102,6 +107,8 @@ public class CertService {
             tbCert.setValidityFrom(certImpl.getNotBefore());
             tbCert.setValidityTo(certImpl.getNotAfter());
             tbCertList.add(tbCert);
+            log.info("save TbCert in db. cert entity: {}", tbCert);
+
             count++;
         }
         for(TbCert tbCert: tbCertList) {
@@ -111,13 +118,16 @@ public class CertService {
                 throw new NodeMgrException(ConstantCode.CERT_FORMAT_ERROR.getCode(), "Fail saving the " + count + " crt, please try again");
             }
         }
-
+        log.info("end saveCerts.  Cert content:{}", content);
         return count;
     }
 
     public void saveCert(TbCert tbCert) {
+        log.info(
+                "start addCert to db.  TbCert:{}", tbCert);
         certMapper.add(tbCert);
-    }
+        log.info(
+                "end addCert to db.  TbCert:{}", tbCert);}
 
     /**
      * 先拉取front，后返回数据库的所有帧数
@@ -146,7 +156,9 @@ public class CertService {
      */
     public List<TbCert> getAllCertsListService() {
         List<TbCert> certs = new ArrayList<>();
+        log.info("start getAllCertsListService.");
         certs = certMapper.listOfCert();
+        log.info("end getAllCertsListService.  Cert List: {}", certs);
         return certs;
     }
 
@@ -156,12 +168,16 @@ public class CertService {
      */
     public List<TbCert> getCertListByCertType(CertParam param) {
         List<TbCert> certs = new ArrayList<>();
+        log.info("start getCertListByCertType.");
         certs = certMapper.listOfCertByConditions(param);
+        log.info("end getCertListByCertType.  Cert List: {}", certs);
         return certs;
     }
 
     public TbCert getCertByFingerPrint(String fingerPrint) {
+        log.info("start getCertByFingerPrint. ");
         TbCert cert = certMapper.queryCertByFingerPrint(fingerPrint);
+        log.info("end getCertByFingerPrint.  Cert: {}", cert);
         return cert;
     }
 
@@ -174,8 +190,10 @@ public class CertService {
     public void updateCertFather(String sonFingerPrint, String fatherFingerPrint){
         TbCert cert = certMapper.queryCertByFingerPrint(sonFingerPrint);
         // fatherFingerPrint可为空。因父证书被删除后，子证书的father字段为空
+        log.info("start updateCertFather. cert old: {}", cert);
         cert.setFather(fatherFingerPrint);
         certMapper.update(cert);
+        log.info("end updateCertFather. cert new: {}", cert);
     }
 
     /**
@@ -205,11 +223,12 @@ public class CertService {
      * @param fatherCert
      */
     public void setSonCert(X509CertImpl fatherCert) throws IOException, CertificateException {
+        log.info("start setSonCert. Father FingerPrint:{}", fatherCert);
         List<X509CertImpl> x509CertList = new ArrayList<>();
         String fatherType = CertTools.getCertType(fatherCert.getSubjectDN());
-        if(fatherType.equals(CertTools.TYPE_CHAIN)){
+        if(CertTools.TYPE_CHAIN.equals(fatherType)){
             x509CertList = loadAllX509CertsByType(CertTools.TYPE_AGENCY);
-        }else if(fatherType.equals(CertTools.TYPE_AGENCY)){
+        }else if(CertTools.TYPE_AGENCY.equals(fatherType)){
             x509CertList = loadAllX509CertsByType(CertTools.TYPE_NODE);
         }
 
@@ -224,6 +243,7 @@ public class CertService {
             }
             String sonFingerPrint = temp.getFingerprint("SHA-1");
             updateCertFather(sonFingerPrint, fatherCert.getFingerprint("SHA-1"));
+            log.info("end setSonCert. Father FingerPrint:{}, SonFingerPrint:{}", fatherCert, sonFingerPrint);
         }
     }
 
@@ -231,6 +251,7 @@ public class CertService {
      * 获取数据库所有的cert，并转换成X509实例返回
      */
     public List<X509CertImpl> loadAllX509Certs() throws IOException, CertificateException {
+        log.info("start loadAllX509Certs.");
         // 空参数
         CertParam param = new CertParam();
         List<TbCert> tbCertList = getAllCertsListService();
@@ -240,6 +261,7 @@ public class CertService {
             X509CertImpl temp = getCert(tbCert.getContent());
             x509CertList.add(temp);
         }
+        log.info("end loadAllX509Certs. certList:{}", x509CertList);
         return x509CertList;
     }
 
@@ -265,17 +287,19 @@ public class CertService {
      * @return 返回受影响的证书数
      */
     public int removeCertByFingerPrint(String fingerPrint) {
+        log.info("start removeCertByFingerPrint. fingerPrint:{}", fingerPrint);
         int count = 0;
         List<TbCert> list = getAllCertsListService();
         removeCert(fingerPrint);
         for(TbCert tbCert: list) {
-            if(tbCert.getFather().equals(fingerPrint)){
+            if(fingerPrint.equals(tbCert.getFather())){
                 tbCert.setFather("");
                 String sonCertFingerPrint = tbCert.getFingerPrint();
                 updateCertFather(sonCertFingerPrint, "");
                 count++;
             }
         }
+        log.info("end removeCertByFingerPrint. fingerPrint:{}, count:{}", fingerPrint, count);
         return count;
     }
 
@@ -290,15 +314,15 @@ public class CertService {
      */
     public int pullFrontNodeCrt()  {
         int count = 0;
-        log.debug("start pullFrontNodeCrt. ");
+        log.info("start pullFrontNodeCrt. ");
         List<TbFront> frontList = frontService.getFrontList(new FrontParam());
         for(TbFront tbFront: frontList) {
             Map<String, String> certs = new HashMap<>();
             String frontIp = tbFront.getFrontIp();
             Integer frontPort = tbFront.getFrontPort();
-            log.debug("start getCertMapFromSpecificFront. frontIp:{} , frontPort: {} ", frontIp, frontPort);
+            log.info("start getCertMapFromSpecificFront. frontIp:{} , frontPort: {} ", frontIp, frontPort);
             certs = frontInterfaceService.getCertMapFromSpecificFront(frontIp, frontPort);
-            log.debug("end getCertMapFromSpecificFront. ");
+            log.info("end getCertMapFromSpecificFront. ");
             try{
                 saveFrontCert(certs);
                 count++;
@@ -307,50 +331,51 @@ public class CertService {
                 throw new NodeMgrException(ConstantCode.SAVING_FRONT_CERT_ERROR);
             }
         }
+        log.info("start pullFrontNodeCrt. count:{}", count);
         return count;
     }
 
     private void saveFrontCert(Map<String, String> certContents) throws IOException, CertificateException {
-        log.debug("start saveFrontCert. address:{} ", certContents);
+        log.info("start saveFrontCert. address:{} ", certContents);
         String chainCertContent = certContents.get(CertTools.TYPE_CHAIN);
         String agencyCertContent = certContents.get(CertTools.TYPE_AGENCY);
         String nodeCertContent = certContents.get(CertTools.TYPE_NODE);
-        if(!chainCertContent.equals("")) {
+        if(!"".equals(chainCertContent)) {
             chainCertContent = CertTools.addHeadAndTail(chainCertContent);
-            log.debug("start chainCertContent. :{} ", chainCertContent);
+            log.info("start chainCertContent. :{} ", chainCertContent);
             saveCerts(chainCertContent);
-            log.debug("end chainCertContent. :{} ", chainCertContent);
+            log.info("end chainCertContent. :{} ", chainCertContent);
 
         }
-        if(!agencyCertContent.equals("")) {
+        if(!"".equals(agencyCertContent)) {
             agencyCertContent = CertTools.addHeadAndTail(agencyCertContent);
-            log.debug("start agencyCertContent. :{} ", chainCertContent);
+            log.info("start agencyCertContent. :{} ", chainCertContent);
             saveCerts(agencyCertContent);
-            log.debug("end agencyCertContent. :{} ", chainCertContent);
+            log.info("end agencyCertContent. :{} ", chainCertContent);
         }
-        if(!nodeCertContent.equals("")) {
+        if(!"".equals(nodeCertContent)) {
             nodeCertContent = CertTools.addHeadAndTail(nodeCertContent);
-            log.debug("start nodeCertContent:{} ", nodeCertContent);
+            log.info("start nodeCertContent:{} ", nodeCertContent);
             saveCerts(nodeCertContent);
-            log.debug("end nodeCertContent:{} ", nodeCertContent);
+            log.info("end nodeCertContent:{} ", nodeCertContent);
         }
-        log.debug("end saveFrontCert. address:{} ", certContents);
+        log.info("end saveFrontCert. address:{} ", certContents);
     }
     /**
      * check Cert fingerPrint.
      */
     public boolean certFingerPrintExists(String fingerPrint) throws NodeMgrException {
-        log.debug("start certAddressExists. address:{} ", fingerPrint);
+        log.info("start certAddressExists. address:{} ", fingerPrint);
         if (fingerPrint == "") {
-            log.debug("fail certAddressExists. fingerPrint is empty ");
+            log.info("fail certAddressExists. fingerPrint is empty ");
             throw new NodeMgrException(ConstantCode.ROLE_ID_EMPTY);
         }
         TbCert certInfo = certMapper.queryCertByFingerPrint(fingerPrint);
         if (certInfo != null) {
-            log.debug("end certAddressExists. ");
+            log.info("end certAddressExists. ");
             return true;
         }else {
-            log.debug("end certAddressExists. ");
+            log.info("end certAddressExists. ");
             return false;
         }
     }
