@@ -16,7 +16,6 @@
 package com.webank.webase.node.mgr.cert;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
@@ -28,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.Instant;
 import sun.security.x509.X509CertImpl;
 
 import java.io.ByteArrayInputStream;
@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,15 +52,15 @@ public class CertService {
     @Autowired
     private FrontService frontService;
     /**
-     * 存进数据库中，
-     * 存一个单个证书的内容
-     * 证书的格式包含开头---BEGIN---与结尾
-     * 包含bare string, 以及tbCert的内容
+     * cert存进数据库中，
+     * 证书的格式包含开头---BEGIN---与结尾，包含bare string, 以及tbCert的内容
      * 存储一个证书load证书、存到db、更新db中子证书/父证书
      */
+
     public int saveCerts(String content) throws CertificateException {
         Instant startTime = Instant.now();
-        log.debug("start saveCerts startTime:{} Cert content:{}", startTime.toEpochMilli(), content);
+        log.debug("start saveCerts startTime:{} Cert content:{}",
+                startTime.toEpochMilli(), content);
         // crt加载list
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         List<X509CertImpl> certs = loadCertListFromCrtContent(content);
@@ -86,12 +85,13 @@ public class CertService {
             String publicKeyString = "";
             String address = "";
             String fatherCertContent = "";
+            // 非节点证书，无需公钥(RSA's public key)
             if(CertTools.TYPE_NODE.equals(certType)) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = Keys.getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
-            }else if(CertTools.TYPE_AGENCY.equals(certType)){ // 非节点证书，无需公钥(RSA's public key)
+            }else if(CertTools.TYPE_AGENCY.equals(certType)){
                 fatherCertContent = findFatherCert(certImpl);
                 setSonCert(certImpl);
             }else if(CertTools.TYPE_CHAIN.equals(certType)){

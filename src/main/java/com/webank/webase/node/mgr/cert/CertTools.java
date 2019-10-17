@@ -38,13 +38,13 @@ import java.util.Base64;
 import java.util.List;
 
 public class CertTools {
-    public final static String crtContentHead = "-----BEGIN CERTIFICATE-----\n" ;
-    public final static String crtContentTail = "-----END CERTIFICATE-----\n" ;
-    public final static String crtTailForConcat = "\n-----END CERTIFICATE-----\n" ;
+    public static final String crtContentHead = "-----BEGIN CERTIFICATE-----\n" ;
+    public static final String crtContentTail = "-----END CERTIFICATE-----\n" ;
+    public static final String crtTailForConcat = "\n-----END CERTIFICATE-----\n" ;
 
-    public final static String TYPE_CHAIN = "chain";
-    public final static String TYPE_AGENCY = "agency";
-    public final static String TYPE_NODE = "node";
+    public static final String TYPE_CHAIN = "chain";
+    public static final String TYPE_AGENCY = "agency";
+    public static final String TYPE_NODE = "node";
     // 首次启动时需要拉取
     public static boolean isPullFrontCertsDone = false;
     /**
