@@ -47,7 +47,7 @@ public class PrecompiledController extends BaseController {
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String contractNameAndVersion,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception, NodeMgrException {
+            @RequestParam(defaultValue = "1") int pageNumber) {
 
         Instant startTime = Instant.now();
         log.info("start listCns startTime:{}", startTime.toEpochMilli());
@@ -65,7 +65,7 @@ public class PrecompiledController extends BaseController {
     public Object getNodeList(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception, NodeMgrException {
+            @RequestParam(defaultValue = "1") int pageNumber) {
 
         Instant startTime = Instant.now();
         log.info("start getNodeList startTime:{}", startTime.toEpochMilli());

@@ -45,23 +45,33 @@ public class CertController extends BaseController {
 
     @GetMapping("list")
     public Object getCertList() throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getCertList startTime:{}", startTime.toEpochMilli());
         List<TbCert> list = new ArrayList<>();
         try{
-            list = certService.getAllCertsListAndPullFront();
+            list = certService.getAllCertsListAfterPull();
         }catch (Exception e) {
+            log.error("getCertList exception StackTrace:{}", e);
             return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
         }
+        log.info("end getCertList useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), list);
         return new BasePageResponse(ConstantCode.SUCCESS, list, list.size());
     }
 
     @GetMapping("")
     public Object getCertByFingerPrint(@RequestParam(required = true)String fingerPrint) throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getCertByFingerPrint startTime:{}", startTime.toEpochMilli());
         TbCert tbCert = new TbCert();
         try{
             tbCert = certService.getCertByFingerPrint(fingerPrint);
         }catch (Exception e) {
+            log.error("getCertByFingerPrint exception StackTrace:{}", e);
             return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
         }
+        log.info("end getCertByFingerPrint useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(tbCert));
         return new BaseResponse(ConstantCode.SUCCESS, tbCert);
     }
 
@@ -76,19 +86,19 @@ public class CertController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object addCert(@RequestBody @Valid CertHandle certHandle,
                                   BindingResult result) throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start addCert. startTime:{} certHandle:{}",
+                startTime.toEpochMilli(), JSON.toJSONString(certHandle));
         checkBindResult(result);
         int count = 0;
         String content = certHandle.getContent();
         if(content == null | content == "") {
             return new BaseResponse(ConstantCode.CERT_ERROR, "content cannot be empty");
         }
-
-        Instant startTime = Instant.now();
-        log.info("start addCert. startTime:{} certHandle:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(certHandle));
         try {
             count = certService.saveCerts(content);
         }catch (Exception e) {
+            log.error("addCert exception StackTrace:{}", e);
             return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
         }
 
@@ -101,19 +111,19 @@ public class CertController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object removeCert(@RequestBody @Valid CertHandle certHandle,
                           BindingResult result) throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start removeCert. startTime:{} certHandle:{}",
+                startTime.toEpochMilli(), JSON.toJSONString(certHandle));
         checkBindResult(result);
         int count = 0;
         String fingerPrint = certHandle.getFingerPrint();
         if(fingerPrint == null || fingerPrint == ""){
             return new BaseResponse(ConstantCode.CERT_ERROR, "fingerPrint cannot be null");
         }
-        Instant startTime = Instant.now();
-        log.info("start removeCert. startTime:{} cert's fingerprint:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(fingerPrint));
-
         try {
             count = certService.removeCertByFingerPrint(fingerPrint);
         }catch (Exception e) {
+            log.error("removeCert exception StackTrace:{}", e);
             return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
         }
 
