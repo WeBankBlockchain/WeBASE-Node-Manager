@@ -45,7 +45,7 @@ public class PrecompiledSysConfigController extends BaseController {
     public Object getSysConfigList(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception, NodeMgrException {
+            @RequestParam(defaultValue = "1") int pageNumber) {
 
         Instant startTime = Instant.now();
         log.info("start getSysConfigList startTime:{}", startTime.toEpochMilli());
