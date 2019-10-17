@@ -92,21 +92,8 @@ public class CertTools {
         return address;
     }
 
-    public static String getString(InputStream inputStream) throws IOException {
-        byte[] bytes = new byte[0];
-        bytes = new byte[inputStream.available()];
-        inputStream.read(bytes);
-        String str = new String(bytes);
-        return str;
-    }
-
-    public static InputStream getStream(String string) throws IOException {
-        InputStream is = new ByteArrayInputStream(string.getBytes());
-        return is;
-    }
-
     // crt文件中默认首个是节点证书 0 isnode ca, 1 is agency ca, 2 is chain
-    public static List<String> getCrtContentList(String certContent) throws IOException {
+    public static List<String> getCrtContentList(String certContent) {
         List<String> list = new ArrayList<>();
         if(!certContent.startsWith(crtContentHead)){
             throw new NodeMgrException(ConstantCode.CERT_FORMAT_ERROR);
