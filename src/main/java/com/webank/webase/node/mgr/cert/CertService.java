@@ -57,13 +57,14 @@ public class CertService {
      * 存一个单个证书的内容
      * 证书的格式包含开头---BEGIN---与结尾
      * 包含bare string, 以及tbCert的内容
+     * 存储一个证书load证书、存到db、更新db中子证书/父证书
      */
-    public int saveCerts(String content) throws IOException, CertificateException {
+    public int saveCerts(String content) throws CertificateException {
         Instant startTime = Instant.now();
         log.debug("start saveCerts startTime:{} Cert content:{}", startTime.toEpochMilli(), content);
         // crt加载list
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        List<X509CertImpl> certs = getCerts(content);
+        List<X509CertImpl> certs = loadCertListFromCrtContent(content);
         // 单个crt的原文list
         List<String> certContentList = CertTools.getCrtContentList(content);
         // 用于保存的实体list
@@ -149,14 +150,14 @@ public class CertService {
         }
 
         // 获取数据库cert list
-        return getAllCertsListService();
+        return getAllCertsListFromDB();
     }
 
     /**
      * 获取数据库中所有的certs
      * @return
      */
-    public List<TbCert> getAllCertsListService() {
+    public List<TbCert> getAllCertsListFromDB() {
         List<TbCert> certs = new ArrayList<>();
         log.debug("start getAllCertsListService.");
         certs = certMapper.listOfCert();
@@ -203,7 +204,7 @@ public class CertService {
      * @param sonCert
      * @return String crt's address
      */
-    public String findFatherCert(X509CertImpl sonCert) throws IOException, CertificateException{
+    public String findFatherCert(X509CertImpl sonCert) {
         log.debug("start findFatherCert. son cert: {}", sonCert.getFingerprint("SHA-1"));
         List<X509CertImpl> x509CertList = loadAllX509Certs();
         String result = "";
@@ -226,7 +227,7 @@ public class CertService {
      * 找到父证书所有的子证书，将子证书的father设为他自己
      * @param fatherCert
      */
-    public void setSonCert(X509CertImpl fatherCert) throws IOException, CertificateException {
+    public void setSonCert(X509CertImpl fatherCert) {
         log.debug("start setSonCert. Father FingerPrint:{}", fatherCert.getFingerprint("SHA-1"));
         List<X509CertImpl> x509CertList = new ArrayList<>();
         String fatherType = CertTools.getCertType(fatherCert.getSubjectDN());
@@ -255,15 +256,15 @@ public class CertService {
     /**
      * 获取数据库所有的cert，并转换成X509实例返回
      */
-    public List<X509CertImpl> loadAllX509Certs() throws IOException, CertificateException {
+    public List<X509CertImpl> loadAllX509Certs() {
         log.debug("start loadAllX509Certs.");
         // 空参数
         CertParam param = new CertParam();
-        List<TbCert> tbCertList = getAllCertsListService();
+        List<TbCert> tbCertList = getAllCertsListFromDB();
 
         List<X509CertImpl> x509CertList = new ArrayList<>();
         for(TbCert tbCert: tbCertList) {
-            X509CertImpl temp = getCert(tbCert.getContent());
+            X509CertImpl temp = loadSingleCertFromCrtContent(tbCert.getContent());
             x509CertList.add(temp);
         }
         log.debug("end loadAllX509Certs. certList:{}", x509CertList);
@@ -273,8 +274,8 @@ public class CertService {
     /**
      * 获取数据库所有符合certType的证书cert，并转换成X509实例返回
      */
-    public List<X509CertImpl> loadAllX509CertsByType(String certType) throws IOException, CertificateException {
-        log.debug("start loadAllX509CertsByType.");
+    public List<X509CertImpl> loadAllX509CertsByType(String certType) {
+        log.debug("start loadAllX509CertsByType.certType:{}", certType);
         // 空参数
         CertParam param = new CertParam();
         param.setCertType(certType);
@@ -282,7 +283,7 @@ public class CertService {
 
         List<X509CertImpl> x509CertList = new ArrayList<>();
         for(TbCert tbCert: tbCertList) {
-            X509CertImpl temp = getCert(tbCert.getContent());
+            X509CertImpl temp = loadSingleCertFromCrtContent(tbCert.getContent());
             x509CertList.add(temp);
         }
         log.debug("end loadAllX509CertsByType list:{}", x509CertList);
@@ -296,7 +297,7 @@ public class CertService {
     public int removeCertByFingerPrint(String fingerPrint) {
         log.debug("start removeCertByFingerPrint. fingerPrint:{}", fingerPrint);
         int count = 0;
-        List<TbCert> list = getAllCertsListService();
+        List<TbCert> list = getAllCertsListFromDB();
         removeCert(fingerPrint);
         for(TbCert tbCert: list) {
             if(fingerPrint.equals(tbCert.getFather())){
@@ -321,7 +322,7 @@ public class CertService {
      */
     public int pullFrontNodeCrt()  {
         int count = 0;
-        log.debug("start pullFrontNodeCrt. ");
+        log.debug("start pulling Front's Node Certs. ");
         List<TbFront> frontList = frontService.getFrontList(new FrontParam());
         for(TbFront tbFront: frontList) {
             Map<String, String> certs = new HashMap<>();
@@ -334,11 +335,11 @@ public class CertService {
                 saveFrontCert(certs);
                 count++;
             }catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("pulling Front's Node Certs. exception:[] ", e);
                 throw new NodeMgrException(ConstantCode.SAVING_FRONT_CERT_ERROR);
             }
         }
-        log.debug("start pullFrontNodeCrt. count:{}", count);
+        log.debug("end pulling Front's Node Certs.. count:{}", count);
         return count;
     }
 
@@ -372,17 +373,17 @@ public class CertService {
      * check Cert fingerPrint.
      */
     public boolean certFingerPrintExists(String fingerPrint) throws NodeMgrException {
-        log.debug("start certAddressExists. address:{} ", fingerPrint);
+        log.debug("start check certFingerPrintExists. fingerPrint:{} ", fingerPrint);
         if (fingerPrint == "") {
             log.debug("fail certAddressExists. fingerPrint is empty ");
             throw new NodeMgrException(ConstantCode.ROLE_ID_EMPTY);
         }
         TbCert certInfo = certMapper.queryCertByFingerPrint(fingerPrint);
         if (certInfo != null) {
-            log.debug("end certAddressExists. ");
+            log.debug("end check certFingerPrintExists. exist:{}", certInfo);
             return true;
         }else {
-            log.debug("end certAddressExists. ");
+            log.debug("end check certFingerPrintExists. exist:{}", false);
             return false;
         }
     }
@@ -393,36 +394,30 @@ public class CertService {
      * @throws IOException
      * // TODO X509CertImpl为内部API，可能在将来发行版中删除
      */
-    public List<X509CertImpl> getCerts(String crtContent) throws IOException {
-        log.debug("getCerts(load certs from content). content:{}", crtContent);
-        InputStream is = new ByteArrayInputStream(crtContent.getBytes());
+    public List<X509CertImpl> loadCertListFromCrtContent(String crtContent) {
+        log.debug("loadCertListFromCrtContent content:{}", crtContent);
         List<X509CertImpl> certs;
-        try {
+        try(InputStream is = new ByteArrayInputStream(crtContent.getBytes())) {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             certs = (List<X509CertImpl>) cf.generateCertificates(is);
-        }catch (CertificateException e) {
-            log.error("getCerts exception:[]", e);
-            is.close();
+        }catch (CertificateException | IOException e) {
+            log.error("loadCertListFromCrtContent exception:[]", e);
             throw new NodeMgrException(ConstantCode.CERT_ERROR.getCode(), e.getMessage());
         }
-        is.close();
         return certs;
     }
 
-    public X509CertImpl getCert(String crtContent) throws IOException {
-        log.debug("start get Single cert from content. content:{}", crtContent);
-        InputStream is = new ByteArrayInputStream(crtContent.getBytes());
+    public X509CertImpl loadSingleCertFromCrtContent(String crtContent) {
+        log.debug("start loadSingleCertFromCrtContent. content:{}", crtContent);
         X509CertImpl cert;
-        try {
+        try(InputStream is = new ByteArrayInputStream(crtContent.getBytes())) {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             cert = (X509CertImpl) cf.generateCertificate(is);
-        }catch (CertificateException e) {
-            log.error("get Single cert from content. Exception:[]", e);
-            is.close();
+        }catch (CertificateException | IOException e) {
+            log.error("get loadSingleCertFromCrtContent. Exception:[]", e);
             throw new NodeMgrException(ConstantCode.CERT_ERROR.getCode(), e.getMessage());
         }
-        is.close();
-        log.debug("end get Single cert from content. cert:{}", cert);
+        log.debug("end loadSingleCertFromCrtContent. cert:{}", cert);
         return cert;
     }
 }
