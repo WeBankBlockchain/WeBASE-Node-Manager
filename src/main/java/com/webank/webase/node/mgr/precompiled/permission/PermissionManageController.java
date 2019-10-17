@@ -16,21 +16,14 @@
 package com.webank.webase.node.mgr.precompiled.permission;
 
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.page.List2Page;
-import com.webank.webase.node.mgr.base.tools.page.Map2PagedList;
 import com.webank.webase.node.mgr.base.tools.page.MapHandle;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.user.entity.TbUser;
-import com.webank.webase.node.mgr.user.entity.UserParam;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +35,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Log4j2
 @RestController
@@ -59,7 +51,7 @@ public class PermissionManageController extends BaseController {
     public Object listPermissionMgrState(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception, NodeMgrException {
+            @RequestParam(defaultValue = "1") int pageNumber) {
 
         Instant startTime = Instant.now();
         log.info("start listPermissionMgrState startTime:{}", startTime.toEpochMilli());
@@ -86,7 +78,7 @@ public class PermissionManageController extends BaseController {
             @RequestParam String permissionType,
             @RequestParam(defaultValue = "", required = false) String tableName,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception, NodeMgrException {
+            @RequestParam(defaultValue = "1") int pageNumber) {
 
         Instant startTime = Instant.now();
         log.info("start listPermissionManager startTime:{}", startTime.toEpochMilli());
@@ -107,7 +99,7 @@ public class PermissionManageController extends BaseController {
     public Object listFullPermissionManager(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String permissionType,
-            @RequestParam(defaultValue = "", required = false) String tableName) throws Exception, NodeMgrException {
+            @RequestParam(defaultValue = "", required = false) String tableName) {
 
         Instant startTime = Instant.now();
         log.info("start listFullPermissionManager startTime:{}", startTime.toEpochMilli());
