@@ -38,14 +38,13 @@ import java.util.Base64;
 import java.util.List;
 
 public class CertTools {
-    private final static String flag = "-----" ;
-    private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
-    private final static String tail = "-----END CERTIFICATE-----\n" ;
-    private final static String tailForConcat = "\n-----END CERTIFICATE-----\n" ;
+    public static final String crtContentHead = "-----BEGIN CERTIFICATE-----\n" ;
+    public static final String crtContentTail = "-----END CERTIFICATE-----\n" ;
+    public static final String crtTailForConcat = "\n-----END CERTIFICATE-----\n" ;
 
-    public final static String TYPE_CHAIN = "chain";
-    public final static String TYPE_AGENCY = "agency";
-    public final static String TYPE_NODE = "node";
+    public static final String TYPE_CHAIN = "chain";
+    public static final String TYPE_AGENCY = "agency";
+    public static final String TYPE_NODE = "node";
     // 首次启动时需要拉取
     public static boolean isPullFrontCertsDone = false;
     /**
@@ -66,8 +65,8 @@ public class CertTools {
      * end ...
      */
     public static String addHeadAndTail(String certContent) {
-        String headToConcat = head;
-        String fullCert = headToConcat.concat(certContent).concat(tailForConcat);
+        String headToConcat = crtContentHead;
+        String fullCert = headToConcat.concat(certContent).concat(crtTailForConcat);
         return fullCert;
     }
 
@@ -93,28 +92,15 @@ public class CertTools {
         return address;
     }
 
-    public static String getString(InputStream inputStream) throws IOException {
-        byte[] bytes = new byte[0];
-        bytes = new byte[inputStream.available()];
-        inputStream.read(bytes);
-        String str = new String(bytes);
-        return str;
-    }
-
-    public static InputStream getStream(String string) throws IOException {
-        InputStream is = new ByteArrayInputStream(string.getBytes());
-        return is;
-    }
-
     // crt文件中默认首个是节点证书 0 isnode ca, 1 is agency ca, 2 is chain
-    public static List<String> getSingleCrtContent(String certContent) throws IOException {
+    public static List<String> getCrtContentList(String certContent) {
         List<String> list = new ArrayList<>();
-        if(!certContent.startsWith(head)){
+        if(!certContent.startsWith(crtContentHead)){
             throw new NodeMgrException(ConstantCode.CERT_FORMAT_ERROR);
         }
-        String[] nodeCrtStrArray = certContent.split(head);
+        String[] nodeCrtStrArray = certContent.split(crtContentHead);
         for(int i = 0; i < nodeCrtStrArray.length; i++) {
-            String[] nodeCrtStrArray2 = nodeCrtStrArray[i].split(tail);
+            String[] nodeCrtStrArray2 = nodeCrtStrArray[i].split(crtContentTail);
             for(int j = 0; j < nodeCrtStrArray2.length; j++) {
                 String ca = nodeCrtStrArray2[j];
                 if(ca.length() != 0) {
