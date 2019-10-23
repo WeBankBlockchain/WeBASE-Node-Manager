@@ -19,7 +19,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.TokenType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.AesTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.util.Assert;
@@ -39,8 +39,6 @@ public class TokenService {
     @Autowired
     private ConstantProperties properties;
     @Autowired
-    private AesTools aesTools;
-    @Autowired
     private TokenMapper tokenMapper;
 
 
@@ -52,7 +50,8 @@ public class TokenService {
             log.error("fail createToken. param is null");
             return null;
         }
-        String token = aesTools.aesEncrypt(UUID.randomUUID() + value);
+
+        String token = NodeMgrTools.shaEncode(UUID.randomUUID() + value);
         //save token
         TbToken tbToken = new TbToken();
         tbToken.setToken(token);
