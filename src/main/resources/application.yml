@@ -46,8 +46,6 @@ constant:
   verificationCodeMaxAge: 300
   authTokenMaxAge: 1800
   isUseSecurity: true
-  aesKey: ERTadb83f9ege39k
-  jwtSecret: S3g4HtJyg7G6Hg0Ln3g4H5Jyg7H6f9dL
   ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find
   ###front http request
   frontUrl: http://%1s:%2d/WeBASE-Front/%3s
