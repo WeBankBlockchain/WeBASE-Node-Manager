@@ -58,13 +58,11 @@ public class ConstantProperties {
     private Integer authTokenMaxAge = 900; // seconds
     private Boolean isUseSecurity = true;
     private String ignoreCheckFront = null;
-    private String jwtSecret;
 
     //front http request
     private String frontUrl;
     private Integer contractDeployTimeOut = 30000;
     private Integer httpTimeOut = 5000;
-    private String aesKey = "a3LdMfg123C56z9r";
     private Boolean isPrivateKeyEncrypt = true;
     private Integer maxRequestFail = 3;
     private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
