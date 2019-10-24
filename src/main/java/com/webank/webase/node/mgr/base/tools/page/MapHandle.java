@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.precompiled.sysconf;
+package com.webank.webase.node.mgr.base.tools.page;
 
 import lombok.Data;
 
 @Data
-public class SysConfigParam {
+public class MapHandle{
+    private String key;
+    private Object data;
 
-    private Long id;
-    private int groupId;
-    private String fromAddress;
-    private String configKey;
-    private String configValue;
+    public MapHandle(String key, Object data) {
+        this.key = key;
+        this.data = data;
+    }
 }

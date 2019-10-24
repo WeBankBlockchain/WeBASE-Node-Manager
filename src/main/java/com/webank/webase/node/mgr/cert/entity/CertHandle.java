@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.precompiled.sysconf;
+package com.webank.webase.node.mgr.cert.entity;
 
 import lombok.Data;
 
-@Data
-public class SysConfigParam {
+import javax.validation.constraints.NotBlank;
 
-    private Long id;
-    private int groupId;
-    private String fromAddress;
-    private String configKey;
-    private String configValue;
+@Data
+public class CertHandle {
+    private String content;
+    private String fingerPrint;
 }

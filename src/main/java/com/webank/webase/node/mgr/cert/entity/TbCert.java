@@ -13,16 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.precompiled.sysconf;
+package com.webank.webase.node.mgr.cert.entity;
 
 import lombok.Data;
 
-@Data
-public class SysConfigParam {
+import java.util.Date;
 
-    private Long id;
-    private int groupId;
-    private String fromAddress;
-    private String configKey;
-    private String configValue;
+@Data
+public class TbCert {
+    // Primary Key
+    private String fingerPrint;
+    private String certName;
+    private String content;
+    private String certType;
+    // node id=public key, 节点证书&sdk证书才有
+    private String publicKey;
+    private String address;
+    // 父证书地址
+    private String father;
+    private Date validityFrom;
+    private Date validityTo;
+    private Date createTime;
 }

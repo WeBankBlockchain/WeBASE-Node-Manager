@@ -79,6 +79,8 @@ public class FrontRestTools {
 
     public static final String URI_PERMISSION = "permission";
     public static final String URI_PERMISSION_FULL_LIST = "permission/full";
+    public static final String URI_PERMISSION_SORTED_LIST= "permission/sorted";
+    public static final String URI_PERMISSION_SORTED_FULL_LIST= "permission/sorted/full";
     public static final String URI_SYS_CONFIG_LIST = "sys/config/list";
     public static final String URI_SYS_CONFIG = "sys/config";
     public static final String URI_CNS_LIST = "precompiled/cns/list";
@@ -86,11 +88,13 @@ public class FrontRestTools {
     public static final String URI_CONSENSUS = "precompiled/consensus";
     public static final String URI_CRUD = "precompiled/crud";
 
+    public static final String URI_CERT = "cert";
+
     //不需要在url中包含groupId的
     private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
         .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_CONTRACT_SENDABI,
                 URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST, URI_SYS_CONFIG, URI_CONSENSUS_LIST,
-                URI_CONSENSUS, URI_CRUD);
+                URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST, URI_PERMISSION_SORTED_FULL_LIST, URI_CERT);
 
 
     @Qualifier(value = "genericRestTemplate")

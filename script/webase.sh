@@ -8,7 +8,7 @@ PORT=${2}
 
 if [[ ! $IP || ! $PORT ]] ; then
     echo "Usage: sh ${0} ip port"
-    echo "eg: sh ${0} 10.0.0.1 8501"
+    echo "eg: sh ${0} 127.0.0.1 8501"
     exit 1
 fi
 
