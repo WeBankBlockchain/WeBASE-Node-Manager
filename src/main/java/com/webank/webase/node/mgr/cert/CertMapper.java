@@ -13,16 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.precompiled.sysconf;
+package com.webank.webase.node.mgr.cert;
 
-import lombok.Data;
+import com.webank.webase.node.mgr.cert.entity.CertParam;
+import com.webank.webase.node.mgr.cert.entity.TbCert;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
-@Data
-public class SysConfigParam {
+import java.util.List;
 
-    private Long id;
-    private int groupId;
-    private String fromAddress;
-    private String configKey;
-    private String configValue;
+@Repository
+public interface CertMapper {
+
+    void add(TbCert tbCert);
+
+    void deleteByFingerPrint(@Param("fingerPrint")String fingerPrint);
+
+    TbCert queryCertByFingerPrint(@Param("fingerPrint")String fingerPrint);
+
+    List<TbCert> listOfCert();
+
+    List<TbCert> listOfCertByConditions(CertParam param);
+
+    void update(TbCert tbCert);
 }

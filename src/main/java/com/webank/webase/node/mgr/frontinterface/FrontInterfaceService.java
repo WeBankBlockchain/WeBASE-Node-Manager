@@ -13,14 +13,9 @@
  */
 package com.webank.webase.node.mgr.frontinterface;
 
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PEERS;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_NODEID_LIST;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PLIST;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_PEERS;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CSYNC_STATUS;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GET_OBSERVER_LIST;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +39,8 @@ import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import lombok.extern.log4j.Log4j2;
+
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.*;
 
 
 @Log4j2
@@ -107,6 +104,16 @@ public class FrontInterfaceService {
         log.debug("end sendAbi groupId:{} param:{}", groupId, JSON.toJSONString(param));
 
     }
+
+
+    /**
+     * get map's Cert Content from specific front.
+     */
+    public Map<String, String> getCertMapFromSpecificFront(String nodeIp, Integer frontPort) {
+        int groupId = 1;
+        return getFromSpecificFront(groupId, nodeIp, frontPort, URI_CERT, Map.class);
+    }
+
 
     /**
      * get group list from specific front.

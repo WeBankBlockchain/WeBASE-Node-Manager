@@ -1,3 +1,18 @@
+/**
+ * Copyright 2014-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.webank.webase.node.mgr.precompiled;
 
 import com.alibaba.fastjson.JSON;
@@ -32,7 +47,7 @@ public class PrecompiledController extends BaseController {
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String contractNameAndVersion,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception, NodeMgrException {
+            @RequestParam(defaultValue = "1") int pageNumber) {
 
         Instant startTime = Instant.now();
         log.info("start listCns startTime:{}", startTime.toEpochMilli());
@@ -50,7 +65,7 @@ public class PrecompiledController extends BaseController {
     public Object getNodeList(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception, NodeMgrException {
+            @RequestParam(defaultValue = "1") int pageNumber) {
 
         Instant startTime = Instant.now();
         log.info("start getNodeList startTime:{}", startTime.toEpochMilli());
