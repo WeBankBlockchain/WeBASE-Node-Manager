@@ -18,6 +18,22 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/webasenodemanager?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
     username: "defaultAccount"
     password: "defaultPassword"
+  mail:
+    # mail server configuration
+    host: smtp.163.com
+    port:
+    username: yourmail@163.com
+    password:
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.socketFactory.port: 465
+      mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
+      mail.smtp.socketFactory.fallback: false
+
 
 #log config
 logging:

@@ -6,7 +6,7 @@
 		type="com.webank.webase.node.mgr.cert.entity.TbCert">
 		<id column="finger_print" javaType="java.lang.String" jdbcType="VARCHAR"
 			property="fingerPrint" />
-		<id column="cert_name" javaType="java.lang.String" jdbcType="VARCHAR"
+		<result column="cert_name" javaType="java.lang.String" jdbcType="VARCHAR"
 			property="certName" />
 		<result column="content" javaType="java.lang.String" jdbcType="VARCHAR"
 			property="content" />
