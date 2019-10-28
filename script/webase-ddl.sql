@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
   user_type int(1) NOT NULL DEFAULT '1' COMMENT '用户类型（1-普通用户 2-系统用户）',
   address varchar(64) DEFAULT NULL COMMENT '在链上位置的hash',
   has_pk int(1) DEFAULT 1 COMMENT '是否拥有私钥信息(1-拥有，2-不拥有)',
+  email varchar(40) DEFAULT NULL COMMENT '用户邮箱',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   description varchar(250) DEFAULT NULL COMMENT '备注',

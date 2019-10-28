@@ -35,14 +35,16 @@ public class TbUser {
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
-
+    // 邮件告警的邮箱
+    // TODO 新增user时加一个可选的email配置
+    private String email;
 
     /**
      * init TbUser.
      */
     public TbUser(Integer chainIndex, Integer hasPk, Integer userType, String userName,
         Integer groupId, String address,
-        String publicKey, String description) {
+        String publicKey, String description, String email) {
         super();
         this.chainIndex = chainIndex;
         this.hasPk = hasPk;
@@ -52,6 +54,7 @@ public class TbUser {
         this.publicKey = publicKey;
         this.description = description;
         this.address = address;
+        this.email = email;
     }
 
     /**
