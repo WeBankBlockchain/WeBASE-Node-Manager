@@ -35,7 +35,7 @@ public interface AlertRuleMapper {
 
     List<TbAlertRule> listOfAlertRules();
 
-    // TODO 带分页的db查询
-    List<TbAlertRule> getPageOfAlertRules();
+//    // 带分页的db查询 只有三个，不设多个
+//    List<TbAlertRule> getPageOfAlertRules();
 
 }

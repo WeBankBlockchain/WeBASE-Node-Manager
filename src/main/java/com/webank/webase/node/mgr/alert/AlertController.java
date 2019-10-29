@@ -17,5 +17,55 @@
 
 package com.webank.webase.node.mgr.alert;
 
+import com.webank.webase.node.mgr.alert.entity.AlertRuleParam;
+import com.webank.webase.node.mgr.alert.entity.TbAlertRule;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@Log4j2
+@RestController
+@RequestMapping("alert")
 public class AlertController {
+
+
+    @Autowired
+    AlertService alertService;
+
+    @GetMapping("/{ruleId}")
+    public Object getServerConfig(@PathVariable("ruleId") int ruleId) {
+
+        TbAlertRule res = alertService.queryByRuleId(ruleId);
+        return res;
+    }
+
+    @PostMapping("")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public Object saveAlertRule(@RequestBody AlertRuleParam param) {
+        // check param
+        // 保证参数，用catch方式
+        if(param.getUserList().isEmpty()) {
+            return new BaseResponse(ConstantCode.PARAM_EXCEPTION);
+        }
+        alertService.saveAlertRule(param);
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    @PutMapping("")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public Object updateAlertRule(@RequestBody AlertRuleParam param) {
+
+        alertService.updateAlertRule(param);
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    @DeleteMapping("/{ruleId}")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public Object updateAlertRule(@PathVariable("ruleId") int ruleId) {
+
+        alertService.deleteByRuleId(ruleId);
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
 }

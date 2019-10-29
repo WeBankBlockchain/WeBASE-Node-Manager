@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.alert;
+package com.webank.webase.node.mgr.alert.mail.server.config;
 
-import com.webank.webase.node.mgr.alert.entity.TbMailServerConfig;
+import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -27,11 +27,11 @@ public interface MailServerConfigMapper {
 
     void add(TbMailServerConfig tbMailServerConfig);
 
-    void deleteByServerId(@Param("serverId") String serverId);
+    void deleteByServerId(@Param("serverId") int serverId);
 
     void update(TbMailServerConfig tbMailServerConfig);
 
-    TbMailServerConfig queryByServerId(@Param("serverId") String serverId);
+    TbMailServerConfig queryByServerId(@Param("serverId") int serverId);
 
     List<TbMailServerConfig> listOfMailServerConfig();
 }

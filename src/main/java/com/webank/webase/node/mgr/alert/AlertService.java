@@ -16,12 +16,47 @@
 
 package com.webank.webase.node.mgr.alert;
 
+import com.webank.webase.node.mgr.alert.entity.AlertRuleParam;
+import com.webank.webase.node.mgr.alert.entity.TbAlertRule;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
 public class AlertService {
 
+    @Autowired
+    AlertRuleMapper alertRuleMapper;
+
+    public void saveAlertRule(AlertRuleParam newRuleParam) {
+        TbAlertRule tbAlertRule = new TbAlertRule();
+        BeanUtils.copyProperties(newRuleParam, tbAlertRule);
+        alertRuleMapper.add(tbAlertRule);
+    }
+
+    public List<TbAlertRule> getAllAlertRules() {
+        List<TbAlertRule> resList = alertRuleMapper.listOfAlertRules();
+        return resList;
+    }
+
+    public TbAlertRule queryByRuleId(int ruleId) {
+        TbAlertRule resAlertRule = alertRuleMapper.queryByRuleId(ruleId);
+        return resAlertRule;
+    }
+
+    public void updateAlertRule(AlertRuleParam updateRuleParam) {
+        TbAlertRule tbAlertRule = new TbAlertRule();
+        BeanUtils.copyProperties(updateRuleParam, tbAlertRule);
+        alertRuleMapper.update(tbAlertRule);
+    }
+
+    public void deleteByRuleId(int ruleId) {
+        alertRuleMapper.deleteByRuleId(ruleId);
+    }
 
 }

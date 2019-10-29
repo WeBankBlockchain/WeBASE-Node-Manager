@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.alert.entity;
+package com.webank.webase.node.mgr.alert.mail.server.config.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
+ * entity for table tb_mail_server_config
  * 存储mail server的配置内容，存在表中；
  * 表为空时，读取yml中的配置内容；
  * 非空时，不同的alertRule以指定不同的mail server
  */
 
 @Data
+@NoArgsConstructor
 public class TbMailServerConfig {
     // primary key
     private Long serverId;
@@ -48,5 +53,7 @@ public class TbMailServerConfig {
     private boolean starttlsEnable;
     private boolean starttlsRequired;
 
+    private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
 
 }
