@@ -17,12 +17,13 @@
 package com.webank.webase.node.mgr.alert.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-// 建表
+@NoArgsConstructor
 public class TbAlertRule {
 
     private int ruleId;
@@ -62,7 +63,7 @@ public class TbAlertRule {
     /**
      * 告警内容中的，待填充的字段
      */
-    private List<String> contentParam;
+    private List<String> contentParamList;
 
     /**
      * 告警规则描述
@@ -93,7 +94,7 @@ public class TbAlertRule {
      * 保存该规则的告警目标邮箱地址
      * @param: allUser 全选
      */
-    private boolean allUser;
+    private boolean isAllUser;
     private List<Integer> userList;
 
 }

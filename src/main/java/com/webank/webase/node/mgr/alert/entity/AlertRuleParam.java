@@ -17,9 +17,29 @@
 package com.webank.webase.node.mgr.alert.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class AlertRuleParam {
 
-    private int ruleId;
+    private String ruleName;
+    private String alertType;
+    private long alertInterval;
+    // 用html模板组件
+    private String alertContent;
+    private List<String> contentParamList;
+    private String description;
+
+    private String lessThan;
+    private String lessAndEqual;
+    private String largerThan;
+    private String largerAndEqual;
+    private String equal;
+
+    private boolean isAllUser;
+    private List<Integer> userList;
 }
