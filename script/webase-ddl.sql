@@ -220,9 +220,51 @@ CREATE TABLE IF NOT EXISTS tb_cert (
   public_key varchar(150) DEFAULT NULL COMMENT '节点证书的公钥/编号(nodeid)',
   address varchar(50) DEFAULT NULL COMMENT '节点证书的节点地址',
   father varchar(120) NOT NULL COMMENT '父证书对应地址(fingerprint)',
-  validity_from date NOT NULL COMMENT '有效期开始',
-  validity_to date NOT NULL COMMENT '有效期截止',
-  modify_time date DEFAULT NULL COMMENT '修改时间',
-  create_time date DEFAULT NULL COMMENT '创建时间',
+  validity_from datetime NOT NULL COMMENT '有效期开始',
+  validity_to datetime NOT NULL COMMENT '有效期截止',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (finger_print)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='证书信息表';
+
+-- ----------------------------
+-- Table structure for tb_cert
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_alert_rule (
+  rule_id int(11) NOT NULL AUTO_INCREMENT COMMENT '告警规则的ID',
+  rule_name varchar(50) NOT NULL COMMENT '告警规则的命名',
+  enable bit DEFAULT 0 NULL COMMENT '是否启用规则',
+  alert_type varchar(20) NOT NULL COMMENT '告警规则的类型',
+  alert_level varchar(20) NOT NULL COMMENT '告警规则的级别',
+  alert_interval bigint NOT NULL COMMENT '告警规则的间隔时间(ms)',
+  alert_content text NOT NULL COMMENT '告警的内容（邮件内容）',
+  content_param_list text DEFAULT NULL COMMENT '告警内容中的可替代参数',
+  description varchar(50) DEFAULT NULL COMMENT '告警规则的描述',
+  is_all_user bit NOT NULL COMMENT '是否选中所有用户',
+  user_list text NOT NULL COMMENT '告警规则作用的用户列表',
+  create_time datetime DEFAULT NULL COMMENT '告警规则的创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '告警规则的修改时间',
+  less_than varchar(40) DEFAULT NULL COMMENT '告警规则：小于某个值',
+  less_and_equal varchar(40) DEFAULT NULL COMMENT '告警规则：小于等于某个值',
+  larger_than varchar(40) DEFAULT NULL COMMENT '告警规则：大于某个值',
+  larger_and_equal varchar(40) DEFAULT NULL COMMENT '告警规则：大于等于某个值',
+  equal varchar(40) DEFAULT NULL COMMENT '告警规则：等于某个值',
+  PRIMARY KEY (rule_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='告警规则表';
+
+-- ----------------------------
+-- Table structure for tb_cert
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_mail_server_config (
+  server_id int(11) NOT NULL AUTO_INCREMENT COMMENT '邮件服务器配置的ID',
+  server_name varchar(40) NOT NULL COMMENT '邮件服务器配置的命名',
+  host varchar(30) NOT NULL COMMENT '邮件服务器的主机',
+  port varchar(10) DEFAULT NULL COMMENT '邮件服务器的端口',
+  username varchar(40) NOT NULL COMMENT '邮件服务器的邮箱地址',
+  password varchar(40) NOT NULL COMMENT '邮件服务器的邮箱授权码',
+  protocol varchar(10) NOT NULL COMMENT '邮件服务器的协议',
+  default_encoding varchar(10) DEFAULT 'UTF-8' COMMENT '邮件服务器的默认编码(UTF-8)',
+  create_time datetime DEFAULT NULL COMMENT '邮件服务器配置的创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '邮件服务器配置的修改时间',
+  PRIMARY KEY (server_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件服务器配置表';
