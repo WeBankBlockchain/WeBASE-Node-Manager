@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.alert;
+package com.webank.webase.node.mgr.alert.rule;
 
-import com.webank.webase.node.mgr.alert.entity.TbAlertRule;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 

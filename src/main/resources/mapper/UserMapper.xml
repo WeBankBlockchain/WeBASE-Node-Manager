@@ -22,12 +22,14 @@
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
+    <result column="email" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="email"/>
   </resultMap>
 
   <insert id="addUserRow" parameterType="com.webank.webase.node.mgr.user.entity.TbUser">
     insert into
-    tb_user(user_name,group_id,has_pk,user_type,public_key,address,description,create_time,modify_time)
-    values(#{userName},#{groupId},#{hasPk},#{userType},#{publicKey},#{address},#{description},NOW(),NOW())
+    tb_user(user_name,group_id,has_pk,user_type,public_key,address,description,create_time,modify_time,email)
+    values(#{userName},#{groupId},#{hasPk},#{userType},#{publicKey},#{address},#{description},NOW(),NOW(),#{email})
     <selectKey keyProperty="userId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -109,7 +111,9 @@
     <if test="description != null and description != ''">
       ,description = #{description}
     </if>
-
+    <if test="email != null and email != ''">
+      ,description = #{email}
+    </if>
     where user_id = #{userId}
   </update>
 
@@ -127,7 +131,9 @@
   <select id="querySystemUser" parameterType="java.lang.Integer" resultMap="userMap">
 		select * from tb_user where user_status=1 and user_type = 2 limit 1
 	</select>
-
+  <select id="queryUserEmailByAddress" parameterType="java.lang.String">
+    select email from tb_user where group_id = #{groupId} and address = #{address}
+  </select>
 
   <delete id="deleteUser" parameterType="java.lang.Integer">
 		delete from tb_user where group_id = #{groupId}
