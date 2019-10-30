@@ -41,7 +41,7 @@ public class TbAlertRule {
     /**
      * 告警的类型：证书有效期、节点异常、审计
      */
-    private String alertType;
+    private Integer alertType;
     /**
      * 规则的级别：低、中、高、严重
      */
