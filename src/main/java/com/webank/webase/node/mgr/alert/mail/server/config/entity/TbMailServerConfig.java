@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class TbMailServerConfig {
     // primary key
-    private Long serverId;
+    private Integer serverId;
     private String serverName;
     // 邮箱服务器地址
     private String host;
@@ -46,14 +46,14 @@ public class TbMailServerConfig {
     // 默认编码
     private String defaultEncoding;
 
+    private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
+
     /**
      * properties: 安全配置项 TODO待丰富
      */
-    private boolean authentication;
-    private boolean starttlsEnable;
-    private boolean starttlsRequired;
-
-    private LocalDateTime createTime;
-    private LocalDateTime modifyTime;
+    private Boolean authentication;
+    private Boolean starttlsEnable;
+    private Boolean starttlsRequired;
 
 }

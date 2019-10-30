@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.alert.entity;
+package com.webank.webase.node.mgr.alert.rule.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ import java.util.List;
 @NoArgsConstructor
 public class TbAlertRule {
 
-    private int ruleId;
+    private Integer ruleId;
 
     /**
      * 告警规则的名字
@@ -36,7 +36,7 @@ public class TbAlertRule {
     /**
      * 是否启用
      */
-    private boolean enable;
+    private Boolean enable;
 
     /**
      * 告警的类型：证书有效期、节点异常、审计
@@ -51,7 +51,7 @@ public class TbAlertRule {
      * 出发时发送的频率
      * TODO 间隔时间下限，不能小于10分钟？
      */
-    private long alertInterval;
+    private Long alertInterval;
 
     /**
      * 告警的内容
@@ -63,7 +63,8 @@ public class TbAlertRule {
     /**
      * 告警内容中的，待填充的字段
      */
-    private List<String> contentParamList;
+//    private List<String> contentParamList;
+    private String contentParamList;
 
     /**
      * 告警规则描述
@@ -73,8 +74,8 @@ public class TbAlertRule {
     /**
      * 告警的作用时间
      */
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+//    private LocalDateTime startTime;
+//    private LocalDateTime endTime;
 
     /**
      * 告警的conditions
@@ -94,7 +95,7 @@ public class TbAlertRule {
      * 保存该规则的告警目标邮箱地址
      * @param: allUser 全选
      */
-    private boolean isAllUser;
-    private List<Integer> userList;
-
+    private Boolean isAllUser;
+//    private List<Integer> userList;
+    private String userList;
 }

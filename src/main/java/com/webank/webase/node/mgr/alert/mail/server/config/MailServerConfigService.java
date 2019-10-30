@@ -18,6 +18,8 @@ package com.webank.webase.node.mgr.alert.mail.server.config;
 
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +43,14 @@ public class MailServerConfigService {
      */
     public void saveMailServerConfig(ReqMailServerConfigParam inputParam) {
         TbMailServerConfig tbMailServerConfig = new TbMailServerConfig();
-        BeanUtils.copyProperties(inputParam, tbMailServerConfig);
-        configMapper.add(tbMailServerConfig);
+        try{
+            BeanUtils.copyProperties(inputParam, tbMailServerConfig);
+            configMapper.add(tbMailServerConfig);
+        }catch (Exception e) {
+            log.error("getAllMailServerConfig error exception:{}", e);
+            throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG_ERROR.getCode(),
+                    e.getMessage());
+        }
     }
 
     /**
@@ -58,14 +66,27 @@ public class MailServerConfigService {
      */
     public List<TbMailServerConfig> getAllMailServerConfig() {
         List<TbMailServerConfig> resList = new ArrayList<>();
-        resList = configMapper.listOfMailServerConfig();
-        return resList;
+        try {
+            resList = configMapper.listOfMailServerConfig();
+            return resList;
+        }catch (Exception e) {
+            log.error("getAllMailServerConfig error exception:{}", e);
+            throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG_ERROR.getCode(),
+                    e.getMessage());
+        }
+
     }
 
     public void updateMailServerConfig(ReqMailServerConfigParam inputParam) {
         TbMailServerConfig tbMailServerConfig = new TbMailServerConfig();
-        BeanUtils.copyProperties(inputParam, tbMailServerConfig);
-        configMapper.update(tbMailServerConfig);
+        try{
+            BeanUtils.copyProperties(inputParam, tbMailServerConfig);
+            configMapper.update(tbMailServerConfig);
+        }catch (Exception e) {
+            log.error("getAllMailServerConfig error exception:{}", e);
+            throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG_ERROR.getCode(),
+                    e.getMessage());
+        }
     }
 
     public void deleteByServerId(int serverId) {

@@ -18,11 +18,13 @@ package com.webank.webase.node.mgr.alert.mail.server.config.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
+@NoArgsConstructor
 public class ReqMailServerConfigParam {
 
+    private Integer serverId;
     private String serverName;
     // 邮箱服务器地址
     private String host;
@@ -39,7 +41,7 @@ public class ReqMailServerConfigParam {
     /**
      * properties: 安全配置项 TODO待丰富
      */
-    private boolean authentication;
-    private boolean starttlsEnable;
-    private boolean starttlsRequired;
+    private Boolean authentication;
+    private Boolean starttlsEnable;
+    private Boolean starttlsRequired;
 }

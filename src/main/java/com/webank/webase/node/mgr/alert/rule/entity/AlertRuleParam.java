@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.alert.entity;
+package com.webank.webase.node.mgr.alert.rule.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 public class AlertRuleParam {
 
+    private Integer ruleId;
     private String ruleName;
+    private Boolean enable;
     private String alertType;
-    private long alertInterval;
+    private Long alertInterval;
+    private String alertLevel;
     // 用html模板组件
     private String alertContent;
-    private List<String> contentParamList;
+    // 序列化
+    private String contentParamList;
     private String description;
+    private Boolean isAllUser;
+    // 序列化
+    private String userList;
 
     private String lessThan;
     private String lessAndEqual;
@@ -40,6 +45,4 @@ public class AlertRuleParam {
     private String largerAndEqual;
     private String equal;
 
-    private boolean isAllUser;
-    private List<Integer> userList;
 }
