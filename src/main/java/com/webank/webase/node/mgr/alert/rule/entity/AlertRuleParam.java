@@ -27,7 +27,7 @@ public class AlertRuleParam {
     private Integer ruleId;
     private String ruleName;
     private Boolean enable;
-    private String alertType;
+    private Integer alertType;
     private Long alertInterval;
     private String alertLevel;
     // 用html模板组件

@@ -234,7 +234,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_rule (
   rule_id int(11) NOT NULL AUTO_INCREMENT COMMENT '告警规则的ID',
   rule_name varchar(50) NOT NULL COMMENT '告警规则的命名',
   enable bit DEFAULT 0 NULL COMMENT '是否启用规则',
-  alert_type varchar(20) NOT NULL COMMENT '告警规则的类型',
+  alert_type tinyint(4) NOT NULL COMMENT '告警规则的类型',
   alert_level varchar(20) NOT NULL COMMENT '告警规则的级别',
   alert_interval bigint NOT NULL COMMENT '告警规则的间隔时间(ms)',
   alert_content text NOT NULL COMMENT '告警的内容（邮件内容）',

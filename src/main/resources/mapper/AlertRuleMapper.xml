@@ -10,7 +10,7 @@
             property="ruleName" />
         <result column="enable" javaType="java.lang.Boolean" jdbcType="BIT"
                 property="enable" />
-        <result column="alert_type" javaType="java.lang.String" jdbcType="VARCHAR"
+        <result column="alert_type" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="alertType" />
         <result column="alert_level" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="alertLevel" />
