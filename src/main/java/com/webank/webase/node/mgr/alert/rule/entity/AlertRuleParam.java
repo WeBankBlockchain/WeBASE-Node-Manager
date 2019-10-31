@@ -34,6 +34,7 @@ public class AlertRuleParam {
     private String alertContent;
     // 序列化
     private String contentParamList;
+
     private String description;
     private Boolean isAllUser;
     // 序列化
