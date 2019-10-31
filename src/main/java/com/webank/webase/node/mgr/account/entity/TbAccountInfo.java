@@ -34,6 +34,8 @@ public class TbAccountInfo {
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    // 邮件告警的邮箱
+    private String email;
 
     public TbAccountInfo() {
         super();
@@ -55,4 +57,16 @@ public class TbAccountInfo {
         this.description = description;
     }
 
+    /**
+     * init by account、accountPwd、roleId、description、email.
+     */
+    public TbAccountInfo(String account, String accountPwd, Integer roleId,
+                         String description, String email) {
+        super();
+        this.account = account;
+        this.accountPwd = accountPwd;
+        this.roleId = roleId;
+        this.description = description;
+        this.email = email;
+    }
 }

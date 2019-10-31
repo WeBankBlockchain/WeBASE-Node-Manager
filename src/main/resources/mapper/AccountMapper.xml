@@ -18,6 +18,8 @@
       property="accountStatus"/>
     <result column="description" javaType="java.lang.String" jdbcType="INTEGER"
       property="description"/>
+    <result column="email" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="email"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
@@ -26,23 +28,23 @@
 
 
   <sql id="NEW_ROW_COLUMN">
-		(account,account_pwd,role_id,description,create_time,modify_time)
+		(account,account_pwd,role_id,description,email,create_time,modify_time)
 	</sql>
   <sql id="QUERY_ROW_COLUMN">
 		a.account,a.account_pwd accountPwd,a.role_id roleId,a.login_fail_time loginFailTime,
 		b.role_name roleName,b.role_name_zh roleNameZh,a.account_status accountStatus,
-		a.description,a.create_time createTime,a.modify_time modifyTime
+		a.description,a.email,a.create_time createTime,a.modify_time modifyTime
 	</sql>
 
   <insert id="addAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
     insert into tb_account_info
     <include refid="NEW_ROW_COLUMN"/>
-    values(#{account},#{accountPwd},#{roleId},#{description},NOW(),NOW())
+    values(#{account},#{accountPwd},#{roleId},#{description},#{email},NOW(),NOW())
   </insert>
 
   <update id="updateAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
 		update tb_account_info set account_pwd=#{accountPwd},role_id=#{roleId},login_fail_time=#{loginFailTime},
-		account_status=#{accountStatus},description=#{description},modify_time=now()
+		account_status=#{accountStatus},description=#{description},email=#{email},modify_time=now()
 		where account=#{account}
 	</update>
 
