@@ -27,4 +27,5 @@ public class AccountInfo {
     private String accountPwd;
     @NotNull
     private Integer roleId;
+    private String email;
 }
