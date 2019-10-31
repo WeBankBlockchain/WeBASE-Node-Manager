@@ -63,9 +63,7 @@ public class TbAlertRule {
     /**
      * 告警内容中的，待填充的字段
      */
-//    private List<String> contentParamList;
     private String contentParamList;
-
     /**
      * 告警规则描述
      */

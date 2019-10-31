@@ -228,7 +228,7 @@ CREATE TABLE IF NOT EXISTS tb_cert (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='证书信息表';
 
 -- ----------------------------
--- Table structure for tb_cert
+-- Table structure for tb_alert_rule
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_alert_rule (
   rule_id int(11) NOT NULL AUTO_INCREMENT COMMENT '告警规则的ID',
@@ -237,8 +237,8 @@ CREATE TABLE IF NOT EXISTS tb_alert_rule (
   alert_type tinyint(4) NOT NULL COMMENT '告警规则的类型',
   alert_level varchar(20) NOT NULL COMMENT '告警规则的级别',
   alert_interval bigint NOT NULL COMMENT '告警规则的间隔时间(ms)',
-  alert_content text NOT NULL COMMENT '告警的内容（邮件内容）',
-  content_param_list text DEFAULT NULL COMMENT '告警内容中的可替代参数',
+  alert_content text NOT NULL COMMENT '告警邮件的内容',
+  content_param_list text DEFAULT NULL COMMENT '告警邮件内容中的可替代参数，如nodeId',
   description varchar(50) DEFAULT NULL COMMENT '告警规则的描述',
   is_all_user bit NOT NULL COMMENT '是否选中所有用户',
   user_list text NOT NULL COMMENT '告警规则作用的用户列表',
@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_rule (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='告警规则表';
 
 -- ----------------------------
--- Table structure for tb_cert
+-- Table structure for tb_mail_server_config
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_mail_server_config (
   server_id int(11) NOT NULL AUTO_INCREMENT COMMENT '邮件服务器配置的ID',
