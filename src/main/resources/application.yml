@@ -1,0 +1,88 @@
+#server config
+server:
+  port: 5001
+  servlet:
+    context-path: /WeBASE-Node-Manager
+
+
+#mybatis config
+mybatis:
+  typeAliasesPackage: com.webank.webase.node.mgr
+  mapperLocations: classpath:mapper/*.xml
+
+
+# database connection configuration
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/webasenodemanager?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+    username: "defaultAccount"
+    password: "defaultPassword"
+  mail:
+    # mail server configuration
+    host: smtp.163.com
+    port:
+    username: yourmail@xxx.com
+    # authorization code
+    password: yourpassword
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.socketFactory.port: 465
+      mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
+      mail.smtp.socketFactory.fallback: false
+
+
+#log config
+logging:
+  config: classpath:log/log4j2.xml
+  level:
+    com.webank.webase.node.mgr: info
+
+#constants
+constant:
+  ###common
+  isDeleteInfo: true
+  transRetainMax: 10000
+  deleteInfoCron: "0 0/1 * * * ?"
+  statisticsTransDailyCron: "0 0/1 * * * ?"
+  resetGroupListCycle: 600000
+  groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
+  notSupportFrontIp:
+
+  ###block into
+  isBlockPullFromZero: false
+  pullBlockInitCnts: 1000
+  pullBlockSleepTime: 200
+  pullBlockTaskFixedDelay: 30000
+  blockRetainMax: 10000
+  ###receive http request
+  verificationCodeMaxAge: 300
+  authTokenMaxAge: 1800
+  isUseSecurity: true
+  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find
+  ###front http request
+  frontUrl: http://%1s:%2d/WeBASE-Front/%3s
+  httpTimeOut: 5000
+  contractDeployTimeOut: 30000
+  isPrivateKeyEncrypt: true
+  maxRequestFail: 3
+  sleepWhenHttpMaxFail: 60000
+  ###transaction monitor
+  transMonitorTaskFixedRate: 60000  #How long does it take to start the next task after the end (second)
+  analysisSleepTime: 200
+  monitorInfoRetainMax: 10000
+  isMonitorIgnoreUser: false
+  isMonitorIgnoreContract: false
+  monitorUnusualMaxCount: 20
+
+
+# executor config
+executor:
+  corePoolSize: 3
+  maxPoolSize: 10
+  queueSize: 50
+  threadNamePrefix: "node-mgr-async-"
