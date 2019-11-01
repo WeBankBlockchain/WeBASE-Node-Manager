@@ -59,7 +59,6 @@ INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, `con
 INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval`,`alert_content`,`content_param_list`,`description`,`is_all_user`,`user_list`,`create_time`,`modify_time`,`less_than`,`less_and_equal`,`larger_than`,`larger_and_equal`,`equal`) VALUES ('证书有效期告警', 0, 3, 'high', 3600, '证书还有time过期', '["time"]', '', 0, '[targetmail@163.com]', '2019-10-29 20:02:30', '2019-10-29 20:02:30', '','','','','');
 ---- add node status alert rule template
 INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval`,`alert_content`,`content_param_list`,`description`,`is_all_user`,`user_list`,`create_time`,`modify_time`,`less_than`,`less_and_equal`,`larger_than`,`larger_and_equal`,`equal`) VALUES ('节点异常告警', 0, 1, 'high', 3600, '节点nodeId共识异常', '["nodeId"]', '', 0, '[targetmail@163.com, target2@126.com]','2019-10-29 20:02:30', '2019-10-29 20:02:30', '','','','','');
-
 ---- add audit alert rule template
 INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval`,`alert_content`,`content_param_list`,`description`,`is_all_user`,`user_list`,`create_time`,`modify_time`,`less_than`,`less_and_equal`,`larger_than`,`larger_and_equal`,`equal`) VALUES ('审计异常', 0, 2, 'high', 3600, 'auditType审计异常，请到管理页面查看具体信息', '["auditType"]', '', 0, '["targetmail@163.com", "target2@126.com"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30', '','','','','');
 
@@ -69,8 +68,6 @@ INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`ale
 -- ----------------------------
 -- add mail_server_config template
 INSERT INTO `tb_mail_server_config`(`server_name`,`host`,`port`,`username`,`password`,`protocol`,`default_encoding`,`create_time`,`modify_time`) VALUES ('Default config', 'smtp.163.com', '', 'yourmail@163.com', 'yourpassword','smtp', 'UTF-8','2019-10-29 20:02:30', '2019-10-29 20:02:30');
-
-
 
 
 

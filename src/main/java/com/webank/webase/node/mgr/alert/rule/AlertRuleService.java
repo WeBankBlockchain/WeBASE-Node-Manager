@@ -29,26 +29,30 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class AlertService {
+public class AlertRuleService {
 
     @Autowired
     AlertRuleMapper alertRuleMapper;
 
     public void saveAlertRule(AlertRuleParam newRuleParam) {
+        log.debug("start saveAlertRule AlertRuleParam newRuleParam:{}", newRuleParam);
         TbAlertRule tbAlertRule = new TbAlertRule();
         try{
             BeanUtils.copyProperties(newRuleParam, tbAlertRule);
             alertRuleMapper.add(tbAlertRule);
+            log.debug("end saveAlertRule. ");
         }catch (Exception e) {
-            log.error("saveAlertRule error: exception:{}", e);
+            log.error("saveAlertRule error: exception:[]", e);
             throw new NodeMgrException(ConstantCode.ALERT_RULE_ERROR.getCode(),
                     e.getMessage());
         }
     }
 
     public List<TbAlertRule> getAllAlertRules() {
+        log.debug("start getAllAlertRules ");
         try {
             List<TbAlertRule> resList = alertRuleMapper.listOfAlertRules();
+            log.debug("end getAllAlertRules resList:{}", resList);
             return resList;
         }catch (Exception e) {
             log.error("getAllAlertRules error: exception:{}", e);
@@ -58,27 +62,33 @@ public class AlertService {
     }
 
     public TbAlertRule queryByRuleId(int ruleId) {
+        log.debug("start queryByRuleId ruleId:{}", ruleId);
         TbAlertRule resAlertRule = alertRuleMapper.queryByRuleId(ruleId);
+        log.debug("end resAlertRule:{}", resAlertRule);
         return resAlertRule;
     }
 
     public void updateAlertRule(AlertRuleParam updateRuleParam) {
+        log.debug("start updateAlertRule updateRuleParam:{}", updateRuleParam);
         TbAlertRule tbAlertRule = new TbAlertRule();
-       try{
-           BeanUtils.copyProperties(updateRuleParam, tbAlertRule);
+        try{
+            BeanUtils.copyProperties(updateRuleParam, tbAlertRule);
             alertRuleMapper.update(tbAlertRule);
+            log.debug("end updateAlertRule. ");
         }catch (Exception e) {
-            log.error("updateAlertRule error: exception:{}", e);
+            log.error("updateAlertRule error: exception:[]", e);
             throw new NodeMgrException(ConstantCode.ALERT_RULE_ERROR.getCode(),
                     e.getMessage());
         }
     }
 
     public void deleteByRuleId(int ruleId) {
+        log.debug("start deleteByRuleId ruleId:{}", ruleId);
         try{
             alertRuleMapper.deleteByRuleId(ruleId);
+            log.debug("end deleteByRuleId. ");
         }catch (Exception e) {
-            log.error("deleteByRuleId error: exception:{}", e);
+            log.error("deleteByRuleId error: exception:[]", e);
             throw new NodeMgrException(ConstantCode.ALERT_RULE_ERROR.getCode(),
                     e.getMessage());
         }

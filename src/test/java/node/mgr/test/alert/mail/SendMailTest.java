@@ -17,13 +17,102 @@
 package node.mgr.test.alert.mail;
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.alert.mail.MailService;
+import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
+import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
+import com.webank.webase.node.mgr.alert.rule.AlertRuleTools;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class)
 public class SendMailTest {
 
+    @Autowired
+    TemplateEngine templateEngine;
+
+    @Autowired
+    AlertRuleMapper alertRuleMapper;
+
+    @Autowired
+    AlertRuleService alertRuleService;
+
+    @Autowired
+    MailService mailService;
+
+    public static final String testTitle = "WeBase-Node-Manager测试邮件，请勿回复";
+    public static final String fromMailAddress = "15889463195@163.com";
+    public static final String toMailAddress = "15889463195@163.com";
+    public static final String testContent = "【这是节点管理的测试邮件，请勿回复】";
+
+
+    /**
+     * test alert_rule
+     * INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval`,`alert_content`,`content_param_list`,`description`,`is_all_user`,`user_list`,`create_time`,`modify_time`,`less_than`,`less_and_equal`,`larger_than`,`larger_and_equal`,`equal`)
+     * VALUES ('测试告警', 0, 2, 'low', 3600, '这是测试邮件，来自from', '["from"]', '', 0, '["15889463195@163.com", "g120856@126.com"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30', '','','','','');
+     * test mail_server_config
+     * --INSERT INTO `tb_mail_server_config`(`server_name`,`host`,`port`,`username`,`password`,`protocol`,`default_encoding`,`create_time`,`modify_time`)
+     * VALUES ('Default config', 'smtp.163.com', '', '15889463195@163.com', 'youlin123456','smtp', 'UTF-8','2019-10-29 20:02:30', '2019-10-29 20:02:30');
+     *
+     */
+    @Test
+    public void testSendingByRule() {
+         mailService.sendMailByRule(4, "WeBASE-Node-Manager");
+    }
+
+    /**
+     * set fromMailAddress, toMailAddress, testTitle, using db's mail server config
+     */
+    @Test
+    public void testSending() {
+        mailService.sendMailBare(fromMailAddress, toMailAddress,
+                testTitle, testContent);
+    }
+
+
+    /**
+     * test replace content & thyme leaf's html template
+     */
+    @Test
+    public void testFinalEmailContent() {
+        TbAlertRule alertRule = alertRuleService.queryByRuleId(1);
+        System.out.println("=========alertRule=========");
+        System.out.println(JSON.toJSON(alertRule));
+
+        String emailTitle = AlertRuleTools.getAlertTypeStrFromEnum(alertRule.getAlertType());
+        System.out.println("=========emailTitle=========");
+        System.out.println(emailTitle);
+
+        String defaultEmailContent = alertRule.getAlertContent();
+        String emailContentParam2Replace = alertRule.getContentParamList();
+        // 获取替换后的email content
+        String finalEmailContent = AlertRuleTools.processMailContent(defaultEmailContent,
+                emailContentParam2Replace, testContent);
+        System.out.println("=========finalEmailContent=========");
+        System.out.println(finalEmailContent);
+
+        // thymeleaf初始化
+        Context context = new Context();
+        context.setVariable("replaceContent", finalEmailContent);
+        String emailTemplateContent = templateEngine.process("AlertEmailTemplate", context);
+        System.out.println("=========emailTemplateContent=========");
+        System.out.println(emailTemplateContent);
+    }
+
+    /**
+     * test process alertContent and contentParamList
+     * use replaceText to replace params in alertContent
+     */
     @Test
     public void testProcessEmailContent() {
         // 初始化参数

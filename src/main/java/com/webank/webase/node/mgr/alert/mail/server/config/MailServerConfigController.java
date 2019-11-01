@@ -16,6 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.mail.server.config;
 
+import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -27,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 @Log4j2
@@ -39,55 +42,101 @@ public class MailServerConfigController {
 
     @GetMapping("config/{serverId}")
     public Object getServerConfig(@PathVariable("serverId") Integer serverId) {
+        Instant startTime = Instant.now();
+        log.info("start getServerConfig. startTime:{} serverId:{}",
+                startTime.toEpochMilli(), serverId);
         TbMailServerConfig res = mailServerConfigService.queryByServerId(serverId);
+        log.info("end getServerConfig. useTime:{}, res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), res);
         return res;
     }
 
     @GetMapping("/config/list")
     public Object listServerConfig() {
+        Instant startTime = Instant.now();
+        log.info("start listServerConfig. startTime:{}",
+                startTime.toEpochMilli());
         try{
             List<TbMailServerConfig> resList = mailServerConfigService.getAllMailServerConfig();
+
+            log.info("end listServerConfig. useTime:{}, resList:{}",
+                    Duration.between(startTime, Instant.now()).toMillis(), resList);
             return new BaseResponse(ConstantCode.SUCCESS, resList);
         }catch (NodeMgrException e) {
+            log.debug("listServerConfig, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_ERROR, e.getMessage());
         }
     }
 
-    @PostMapping("config")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object saveMailServerConfig(@RequestBody ReqMailServerConfigParam param) {
-
-        try{
-            mailServerConfigService.saveMailServerConfig(param);
-            return new BaseResponse(ConstantCode.SUCCESS);
-        }catch (NodeMgrException e) {
-            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_ERROR, e.getMessage());
-        }
-    }
-
+    /**
+     * update mail server config, such as username, password etc.
+     * @param param
+     * @return
+     */
     @PutMapping("/config")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateMailServerConfig(@RequestBody ReqMailServerConfigParam param) {
+        Instant startTime = Instant.now();
+        log.info("start updateMailServerConfig. startTime:{} ReqMailServerConfigParam:{}",
+                startTime.toEpochMilli(), JSON.toJSONString(param));
         if(param.getServerId() == null) {
+            log.debug("updateMailServerConfig, error:{} ",
+                    ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
             return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
         }
         try{
             mailServerConfigService.updateMailServerConfig(param);
         }catch (NodeMgrException e) {
+            log.debug("updateMailServerConfig, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_ERROR, e.getMessage());
         }
         TbMailServerConfig res = mailServerConfigService.queryByServerId(param.getServerId());
+        log.info("end saveMailServerConfig. useTime:{}, res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), res);
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
-    @DeleteMapping("/config/{serverId}")
+
+    /**
+     * @Duplicated save mail server configuration
+     * @param param
+     * @return
+     */
+//    @PostMapping("config")
 //    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object deleteByServerId(@PathVariable("serverId") Integer serverId) {
-        try{
-            mailServerConfigService.deleteByServerId(serverId);
-            return new BaseResponse(ConstantCode.SUCCESS);
-        }catch (NodeMgrException e) {
-            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_ERROR, e.getMessage());
-        }
-    }
+//    public Object saveMailServerConfig(@RequestBody ReqMailServerConfigParam param) {
+//        Instant startTime = Instant.now();
+//        log.info("start saveMailServerConfig. startTime:{} ReqMailServerConfigParam:{}",
+//                startTime.toEpochMilli(), JSON.toJSONString(param));
+//        try{
+//            mailServerConfigService.saveMailServerConfig(param);
+//            log.info("end saveMailServerConfig. useTime:{}",
+//                    Duration.between(startTime, Instant.now()).toMillis());
+//            return new BaseResponse(ConstantCode.SUCCESS);
+//        }catch (NodeMgrException e) {
+//            log.debug("saveMailServerConfig, error, exception:[] ", e);
+//            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_ERROR, e.getMessage());
+//        }
+//    }
+
+
+    /**
+     * @Duplicated delete mail server config, no need to delete
+     */
+//    @DeleteMapping("/config/{serverId}")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    public Object deleteByServerId(@PathVariable("serverId") Integer serverId) {
+//        Instant startTime = Instant.now();
+//        log.info("start deleteByServerId. startTime:{} serverId:{}",
+//                startTime.toEpochMilli(), serverId);
+//        try{
+//            mailServerConfigService.deleteByServerId(serverId);
+//            log.info("end saveMailServerConfig. useTime:{}",
+//                    Duration.between(startTime, Instant.now()).toMillis());
+//            return new BaseResponse(ConstantCode.SUCCESS);
+//        }catch (NodeMgrException e) {
+//            log.debug("deleteByServerId, error, exception:[] ", e);
+//            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_ERROR, e.getMessage());
+//        }
+//    }
 }
