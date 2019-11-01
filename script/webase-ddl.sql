@@ -233,7 +233,7 @@ CREATE TABLE IF NOT EXISTS tb_cert (
 CREATE TABLE IF NOT EXISTS tb_alert_rule (
   rule_id int(11) NOT NULL AUTO_INCREMENT COMMENT '告警规则的ID',
   rule_name varchar(50) NOT NULL COMMENT '告警规则的命名',
-  enable bit DEFAULT 0 NULL COMMENT '是否启用规则',
+  enable bit DEFAULT 0 COMMENT '是否启用规则',
   alert_type tinyint(4) NOT NULL COMMENT '告警规则的类型',
   alert_level varchar(20) NOT NULL COMMENT '告警规则的级别',
   alert_interval bigint NOT NULL COMMENT '告警规则的间隔时间(ms)',
@@ -259,12 +259,18 @@ CREATE TABLE IF NOT EXISTS tb_mail_server_config (
   server_id int(11) NOT NULL AUTO_INCREMENT COMMENT '邮件服务器配置的ID',
   server_name varchar(40) NOT NULL COMMENT '邮件服务器配置的命名',
   host varchar(30) NOT NULL COMMENT '邮件服务器的主机',
-  port varchar(10) DEFAULT NULL COMMENT '邮件服务器的端口',
+  port int(10) DEFAULT NULL COMMENT '邮件服务器的端口',
   username varchar(40) NOT NULL COMMENT '邮件服务器的邮箱地址',
   password varchar(40) NOT NULL COMMENT '邮件服务器的邮箱授权码',
   protocol varchar(10) NOT NULL COMMENT '邮件服务器的协议',
   default_encoding varchar(10) DEFAULT 'UTF-8' COMMENT '邮件服务器的默认编码(UTF-8)',
   create_time datetime DEFAULT NULL COMMENT '邮件服务器配置的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '邮件服务器配置的修改时间',
+  authentication bit DEFAULT 1 NOT NULL COMMENT '是否开启验证',
+  starttls_enable bit DEFAULT 1 NOT NULL COMMENT '如支持，是否优先选用STARTTLS',
+  starttls_required bit DEFAULT 0 NOT NULL COMMENT '是否必须使用STARTTLS',
+  socket_factory_port int(10) DEFAULT 465 NOT NULL COMMENT 'SSL的端口',
+  socket_factory_class varchar(150) DEFAULT 'javax.net.ssl.SSLSocketFactory' NOT NULL COMMENT 'SSL选用的JAVA类',
+  socket_factory_fallback bit DEFAULT 0 NOT NULL COMMENT '是否启用SSL的fallback',
   PRIMARY KEY (server_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件服务器配置表';

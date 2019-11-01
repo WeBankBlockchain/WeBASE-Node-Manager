@@ -35,6 +35,7 @@ import org.thymeleaf.context.Context;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.List;
+import java.util.Properties;
 
 @Log4j2
 @Service
@@ -66,15 +67,38 @@ public class MailService {
     }
 
     public void refreshJavaMailSenderConfig(TbMailServerConfig latestMailServerConfig) {
+        log.debug("start refreshJavaMailSenderConfig. latestMailServerConfig:{}", latestMailServerConfig);
         mailSender.setHost(latestMailServerConfig.getHost());
-        if(latestMailServerConfig.getPort() != null && !"".equals(latestMailServerConfig.getPort())) {
+        if(latestMailServerConfig.getPort() != null ) {
             mailSender.setPort(Integer.valueOf(latestMailServerConfig.getPort()));
         }
+
         mailSender.setUsername(latestMailServerConfig.getUsername());
         mailSender.setPassword(latestMailServerConfig.getPassword());
         mailSender.setProtocol(latestMailServerConfig.getProtocol());
         // TODO 编码默认UTF-8，是否可以去除该字段
         mailSender.setDefaultEncoding(latestMailServerConfig.getDefaultEncoding());
+
+        // set JavaMailProperties such as ssl configuration
+        Properties sslProperties = new Properties();
+        sslProperties.setProperty("mail.smtp.auth",
+                String.valueOf(latestMailServerConfig.getAuthentication()));
+        sslProperties.setProperty("mail.smtp.starttls.enable",
+                String.valueOf(latestMailServerConfig.getStarttlsEnable()));
+        // if required starttls is true, set ssl configuration
+        Boolean isSTARTTLSRequired = latestMailServerConfig.getStarttlsRequired();
+        if(isSTARTTLSRequired) {
+            sslProperties.setProperty("mail.smtp.starttls.required",
+                    String.valueOf(isSTARTTLSRequired));
+            sslProperties.setProperty("mail.smtp.socketFactory.port",
+                    String.valueOf(latestMailServerConfig.getSocketFactoryPort()));
+            sslProperties.setProperty("mail.smtp.socketFactory.class",
+                    latestMailServerConfig.getSocketFactoryClass());
+            sslProperties.setProperty("mail.smtp.socketFactory.fallback",
+                    String.valueOf(latestMailServerConfig.getSocketFactoryFallback()));
+        }
+        log.debug("end refreshJavaMailSenderConfig. sslProperties:{}", sslProperties);
+        mailSender.setJavaMailProperties(sslProperties);
     }
 
     /**

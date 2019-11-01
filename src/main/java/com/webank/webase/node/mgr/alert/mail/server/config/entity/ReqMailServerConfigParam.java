@@ -28,7 +28,7 @@ public class ReqMailServerConfigParam {
     private String serverName;
     // 邮箱服务器地址
     private String host;
-    private String port;
+    private Integer port;
     // 邮箱地址
     private String username;
     // 邮箱授权码
@@ -39,9 +39,14 @@ public class ReqMailServerConfigParam {
     private String defaultEncoding;
 
     /**
-     * properties: 安全配置项 TODO待丰富
+     * properties: 安全配置项
      */
     private Boolean authentication;
     private Boolean starttlsEnable;
+
+    // STARTTLS 具体配置
     private Boolean starttlsRequired;
+    private Integer socketFactoryPort;
+    private String socketFactoryClass;
+    private Boolean socketFactoryFallback;
 }

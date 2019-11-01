@@ -10,7 +10,7 @@
                 property="serverName" />
         <result column="host" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="host" />
-        <result column="port" javaType="java.lang.String" jdbcType="VARCHAR"
+        <result column="port" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="port" />
         <result column="username" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="username" />
@@ -24,14 +24,28 @@
                 property="createTime" />
         <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
                 property="modifyTime" />
+        <result column="authentication" javaType="java.lang.Boolean" jdbcType="BIT"
+                property="authentication" />
+        <result column="starttls_enable" javaType="java.lang.Boolean" jdbcType="BIT"
+                property="starttlsEnable" />
+        <result column="starttls_required" javaType="java.lang.Boolean" jdbcType="BIT"
+                property="starttlsRequired" />
+        <result column="socket_factory_port" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="socketFactoryPort" />
+        <result column="socket_factory_class" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="socketFactoryClass" />
+        <result column="socket_factory_fallback" javaType="java.lang.Boolean" jdbcType="BIT"
+                property="socketFactoryFallback" />
     </resultMap>
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig">
         REPLACE INTO tb_mail_server_config(server_id,server_name,host,port,username,password,
-        protocol,default_encoding,create_time,modify_time)
+        protocol,default_encoding,create_time,modify_time,authentication,starttls_enable,
+        starttls_required,socket_factory_port,socket_factory_class,socket_factory_fallback)
         VALUES (#{serverId},#{serverName},#{host},#{port},#{username},#{password},
-        #{protocol},#{defaultEncoding}, now(), now())
+        #{protocol},#{defaultEncoding}, now(), now(), #{authentication},#{starttlsEnable},
+        #{starttlsRequired},#{socketFactoryPort},#{socketFactoryClass},#{socketFactoryFallback})
     </insert>
 
     <delete id="deleteByServerId" parameterType="java.lang.Integer">
@@ -61,6 +75,24 @@
         </if>
         <if test="defaultEncoding != null and defaultEncoding != ''">
             ,default_encoding = #{defaultEncoding}
+        </if>
+        <if test="authentication != null and authentication != ''">
+            ,authentication = #{authentication}
+        </if>
+        <if test="starttlsEnable != null and starttlsEnable != ''">
+            ,starttls_enable = #{starttlsEnable}
+        </if>
+        <if test="starttlsRequired != null and starttlsRequired != ''">
+            ,starttls_required = #{starttlsRequired}
+        </if>
+        <if test="socketFactoryPort != null and socketFactoryPort != ''">
+            ,socket_factory_port = #{socketFactoryPort}
+        </if>
+        <if test="socketFactoryClass != null and socketFactoryClass != ''">
+            ,socket_factory_class = #{socketFactoryClass}
+        </if>
+        <if test="socketFactoryFallback != null and socketFactoryFallback != ''">
+            ,socket_factory_fallback = #{socketFactoryFallback}
         </if>
         where server_id = #{serverId}
     </update>
