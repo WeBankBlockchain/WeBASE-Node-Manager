@@ -46,7 +46,7 @@ public class MailController {
     public static final String testContent = "这是WeBase-Node-Manager节点管理服务-邮件告警的测试邮件，请勿回复";
 
     @PostMapping("/test/{toMailAddress}")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object sendDefaultMail(@PathVariable("toMailAddress")String toMailAddress) {
         Instant startTime = Instant.now();
         log.info("start sendDefaultMail. startTime:{} toMailAddress:{}",
