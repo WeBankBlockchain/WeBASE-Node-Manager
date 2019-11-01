@@ -84,7 +84,11 @@ public class MailServerConfigService {
     }
 
     public TbMailServerConfig getLatestMailServerConfig() {
-        log.debug("start getLatestMailServerConfig ");List<TbMailServerConfig> mailServerConfigList = configMapper.listOfMailServerConfig();
+        log.debug("start getLatestMailServerConfig ");
+        List<TbMailServerConfig> mailServerConfigList = configMapper.listOfMailServerConfig();
+        if(mailServerConfigList.size() == 0) {
+            throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG_ERROR_NO_DATA_IN_DB);
+        }
         TbMailServerConfig latestMailServerConfig = mailServerConfigList.get(mailServerConfigList.size() -1 );
         log.debug("end getLatestMailServerConfig latestMailServerConfig:{}", latestMailServerConfig);
         return latestMailServerConfig;
