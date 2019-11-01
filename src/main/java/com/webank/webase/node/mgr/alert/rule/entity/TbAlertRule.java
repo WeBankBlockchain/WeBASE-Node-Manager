@@ -94,6 +94,5 @@ public class TbAlertRule {
      * @param: allUser 全选
      */
     private Boolean isAllUser;
-//    private List<Integer> userList;
     private String userList;
 }
