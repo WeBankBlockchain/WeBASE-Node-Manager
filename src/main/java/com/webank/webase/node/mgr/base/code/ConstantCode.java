@@ -125,6 +125,7 @@ public class ConstantCode {
     public static final RetCode MAIL_SERVER_CONFIG__PARAM_EMPTY = RetCode.mark(202071, "Mail server config param not match.");
     public static final RetCode ALERT_RULE_ERROR = RetCode.mark(202076, "Alert rule error.");
     public static final RetCode ALERT_RULE_PARAM_EMPTY = RetCode.mark(202077, "Alert rule param not match.");
+    public static final RetCode SEND_MAIL_ERROR = RetCode.mark(202080, "Send mail error, please check mail server configuration.");
 
 
     /* auth */

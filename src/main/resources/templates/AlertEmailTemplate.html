@@ -2,11 +2,11 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>Title</title>
+    <title>来自WeBASE-Node-Manager的告警</title>
 </head>
 <body>
-    来自WeBASE-Node-Manager的告警：<br/>
+    来自WeBASE-Node-Manager的邮件告警：<br/>
     <br/>
-    ${replaceContent}
+    <span th:text="${replaceContent}"></span>
 </body>
 </html>
