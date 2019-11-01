@@ -19,7 +19,7 @@ spring:
     username: "defaultAccount"
     password: "defaultPassword"
   mail:
-    # mail server configuration
+    # mail server default configuration
     host: smtp.163.com
     port:
     username: yourmail@xxx.com
