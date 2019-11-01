@@ -30,10 +30,11 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
-      mail.smtp.starttls.required: true
-      mail.smtp.socketFactory.port: 465
-      mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
-      mail.smtp.socketFactory.fallback: false
+      # needs STARTTLS
+      # mail.smtp.starttls.required: true
+      # mail.smtp.socketFactory.port: 465
+      # mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
+      # mail.smtp.socketFactory.fallback: false
 
 
 #log config
