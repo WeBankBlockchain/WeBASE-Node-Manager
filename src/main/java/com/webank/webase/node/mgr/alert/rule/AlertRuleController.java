@@ -133,20 +133,23 @@ public class AlertRuleController {
 
     }
 
-    @DeleteMapping("/{ruleId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object deleteAlertRuleByRuleId(@PathVariable("ruleId") Integer ruleId) {
-        Instant startTime = Instant.now();
-        log.info("start deleteAlertRuleByRuleId. startTime:{} ruleId:{}",
-                startTime.toEpochMilli(), ruleId);
-        try {
-            alertRuleService.deleteByRuleId(ruleId);
-            log.info("end toggleAlertRule. useTime:{}",
-                    Duration.between(startTime, Instant.now()).toMillis());
-            return new BaseResponse(ConstantCode.SUCCESS);
-        }catch (NodeMgrException e) {
-            log.debug("deleteAlertRuleByRuleId, error, exception:[] ", e);
-            return new BaseResponse(ConstantCode.ALERT_RULE_ERROR, e.getMessage());
-        }
-    }
+    /**
+     * @Duplicated no need to delete alert_rule for default rules only need updating
+     */
+//    @DeleteMapping("/{ruleId}")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    public Object deleteAlertRuleByRuleId(@PathVariable("ruleId") Integer ruleId) {
+//        Instant startTime = Instant.now();
+//        log.info("start deleteAlertRuleByRuleId. startTime:{} ruleId:{}",
+//                startTime.toEpochMilli(), ruleId);
+//        try {
+//            alertRuleService.deleteByRuleId(ruleId);
+//            log.info("end toggleAlertRule. useTime:{}",
+//                    Duration.between(startTime, Instant.now()).toMillis());
+//            return new BaseResponse(ConstantCode.SUCCESS);
+//        }catch (NodeMgrException e) {
+//            log.debug("deleteAlertRuleByRuleId, error, exception:[] ", e);
+//            return new BaseResponse(ConstantCode.ALERT_RULE_ERROR, e.getMessage());
+//        }
+//    }
 }

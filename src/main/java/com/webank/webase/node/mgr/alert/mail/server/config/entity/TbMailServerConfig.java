@@ -36,7 +36,7 @@ public class TbMailServerConfig {
     private String serverName;
     // 邮箱服务器地址
     private String host;
-    private String port;
+    private Integer port;
     // 邮箱地址
     private String username;
     // 邮箱授权码
@@ -50,10 +50,21 @@ public class TbMailServerConfig {
     private LocalDateTime modifyTime;
 
     /**
-     * properties: 安全配置项 TODO待丰富
+     * 以下均为SMTP的properties安全配置项 与 默认值
+     * @param authentication 是否需要验证 默认true
+     * @param starttlsEnable 支持STARTTLS时则启用 默认true
+     * @param starttlsRequired 默认false, 开启则需要配置端口、SSL类等，需保证端口可用
+     * @param socketFactory.port 不同的邮箱服务器的TLS端口，发件邮箱465, 收件IMAP为993, POP3为995
+     * @param socketFactory.class 默认javax.net.ssl.SSLSocketFactory
+     * @param socketFactory.fallback 默认false
      */
     private Boolean authentication;
     private Boolean starttlsEnable;
+
+    // STARTTLS 具体配置
     private Boolean starttlsRequired;
+    private Integer socketFactoryPort;
+    private String socketFactoryClass;
+    private Boolean socketFactoryFallback;
 
 }
