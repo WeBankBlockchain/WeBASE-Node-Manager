@@ -188,7 +188,7 @@ public class NodeService {
     /**
      * check node status
      */
-    public void checkNodeStatus(int groupId) {
+    public void checkAndUpdateNodeStatus(int groupId) {
         //get local node list
         List<TbNode> nodeList = queryByGroupId(groupId);
 

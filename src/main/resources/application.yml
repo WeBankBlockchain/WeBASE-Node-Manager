@@ -18,24 +18,6 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/webasenodemanager?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
     username: "defaultAccount"
     password: "defaultPassword"
-  mail:
-    # mail server default configuration
-    host: smtp.163.com
-    port:
-    username: yourmail@xxx.com
-    # authorization code
-    password: yourpassword
-    protocol: smtp
-    default-encoding: UTF-8
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-      # needs STARTTLS
-      # mail.smtp.starttls.required: true
-      # mail.smtp.socketFactory.port: 465
-      # mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
-      # mail.smtp.socketFactory.fallback: false
-
 
 #log config
 logging:
@@ -79,7 +61,10 @@ constant:
   isMonitorIgnoreUser: false
   isMonitorIgnoreContract: false
   monitorUnusualMaxCount: 20
-
+  ###alert mail interval
+  auditAlertMailInterval: 86400000
+  nodeAlertMailInterval: 3600000
+  certAlertMailInterval: 86400000
 
 # executor config
 executor:
