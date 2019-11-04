@@ -27,6 +27,7 @@ import com.webank.webase.node.mgr.alert.rule.AlertRuleTools;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -41,8 +43,10 @@ import java.util.Properties;
 @Service
 public class MailService {
 
-    @Autowired
+    @Autowired()
+    @Qualifier("mailSender")
     JavaMailSenderImpl mailSender;
+
     @Autowired
     TemplateEngine templateEngine;
     @Autowired
@@ -153,10 +157,23 @@ public class MailService {
             }
             log.debug("end handleAllUserEmail. ");
         }else {
-            List<String> userList = (List<String>) JSON.parse(alertRule.getUserList());
+            List<String> userList = new ArrayList<>();
+            try {
+                userList = (List<String>) JSON.parse(alertRule.getUserList());
+            }catch (Exception e) {
+                log.error("handleAllUserEmail parse error: e:[], getUserList{}",
+                        e, alertRule.getUserList());
+            }
             for(String userMailAddress: userList) {
-                sendMailBare(fromMailAddress,
-                        userMailAddress, emailTitle, emailFinalContent);
+                try {
+                    log.debug("handleAllUserEmail sending email fromMailAddress:{},fromMailAddress:{}," +
+                                    "emailTitle:{},emailFinalContent:{}",
+                            fromMailAddress, userMailAddress, emailTitle, emailFinalContent);
+                    sendMailBare(fromMailAddress,
+                            userMailAddress, emailTitle, emailFinalContent);
+                }catch (Exception e) {
+                    log.error("handleAllUserEmail send email error:[]", e);
+                }
             }
             log.debug("end handleAllUserEmail. ");
         }

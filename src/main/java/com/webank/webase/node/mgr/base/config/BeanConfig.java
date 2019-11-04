@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -92,4 +93,12 @@ public class BeanConfig {
         return executor;
     }
 
+    /**
+     * mail sender for alert mail in node\mgr\alert\mail\MailService.java
+     */
+    @Bean(name = "mailSender")
+    public JavaMailSenderImpl getMailSender() {
+        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+        return javaMailSender;
+    }
 }

@@ -63,7 +63,8 @@ public class SendMailTest {
      */
     @Test
     public void testSendingByRule() {
-         mailService.sendMailByRule(4, "WeBASE-Node-Manager");
+
+        mailService.sendMailByRule(4, "WeBASE-Node-Manager");
     }
 
     /**
@@ -133,5 +134,16 @@ public class SendMailTest {
         System.out.println(alertContent);
         System.out.println("=======result======");
         System.out.println(result);
+    }
+
+    @Test
+    public void parseString2List() {
+//        List<String> testList = new ArrayList<>();
+//        testList.add("targetmail@163.com");
+//        testList.add("yourmail@163.com");
+//        System.out.println(JSON.toJSON(testList));
+        String listStr = "[\"targetmail@163.com\",\"yourmail@163.com\"]";
+        List<String> list = (List<String>) JSON.parse(listStr);
+        System.out.println(list);
     }
 }
