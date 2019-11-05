@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -74,7 +75,7 @@ public class AuditMonitorTask {
     }
 
     private void checkUserAndContractByGroup(int groupId) {
-        log.debug("start checkUserAndContractByGroup");
+        log.debug("start checkUserAndContractByGroup groupId:{}", groupId);
         int unusualUserCount = monitorService.countOfUnusualUser(groupId, null);
         int unusualContractCount = monitorService.countOfUnusualContract(groupId, null);
         int unusualMaxCount = cProperties.getMonitorUnusualMaxCount();

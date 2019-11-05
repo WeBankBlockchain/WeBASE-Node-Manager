@@ -36,10 +36,10 @@ import org.thymeleaf.context.Context;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -146,6 +146,9 @@ public class MailService {
         // thymeleaf初始化
         Context context = new Context();
         context.setVariable("replaceContent", emailContentAfterReplace);
+        // add date in content
+        SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        context.setVariable("time", formatTool.format(new Date()));
         String emailFinalContent = templateEngine.process("AlertEmailTemplate", context);
         // 将告警发到userList，如果是全选用户
         handleAllUserEmail(alertRule, emailTitle, emailFinalContent);
