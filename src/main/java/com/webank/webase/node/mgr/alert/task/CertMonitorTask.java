@@ -55,6 +55,7 @@ public class CertMonitorTask {
     public void certAlertTaskStart() {
         checkCertValidityForAlert();
     }
+
     /**
      * scheduled task for cert validity time in alert mail
      */
@@ -78,22 +79,18 @@ public class CertMonitorTask {
                 Duration.between(startTime, Instant.now()).toMillis());
     }
 
-    private boolean checkWithin7days(Date when) {
+    private boolean checkWithin7days(Date certNotAfter) {
         // unit: ms
         long sevenDays = 1000 * 60 * 60 * 24 * 7;
         long now = Instant.now().getLong(ChronoField.MILLI_OF_SECOND);
-
-        long interval = when.getTime() - now;
+        long interval = certNotAfter.getTime() - now;
         log.info("checkWithin7days time distance:{}, sevenDays:{}",
                 interval, sevenDays);
-        if(interval >= sevenDays) {
-            // beyond
-            return false;
-        } else if(interval >= 0){
-            // within
+        if(interval < sevenDays) {
+            // within 7days or already not valid (<0)
             return true;
         } else {
-            // beyond
+            // beyond 7days
             return false;
         }
     }

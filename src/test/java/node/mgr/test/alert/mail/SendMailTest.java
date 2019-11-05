@@ -31,7 +31,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -145,5 +148,17 @@ public class SendMailTest {
         String listStr = "[\"targetmail@163.com\",\"yourmail@163.com\"]";
         List<String> list = (List<String>) JSON.parse(listStr);
         System.out.println(list);
+    }
+
+    @Test
+    public void testParseDate2Str() {
+        // add date in content
+        SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String test = "";
+        test += formatTool.format(new Date());
+        System.out.println(test);
+        String time = formatTool.format(LocalDateTime.now());
+        System.out.println(time);
+
     }
 }
