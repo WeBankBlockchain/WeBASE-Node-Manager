@@ -16,9 +16,10 @@
 
 package com.webank.webase.node.mgr.alert.rule.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -28,7 +29,8 @@ public class AlertRuleParam {
     private String ruleName;
     private Boolean enable;
     private Integer alertType;
-    private Long alertInterval;
+    // unit: s
+    private Long alertIntervalSeconds;
     private String alertLevel;
     // 用html模板组件
     private String alertContent;
@@ -46,4 +48,5 @@ public class AlertRuleParam {
     private String largerAndEqual;
     private String equal;
 
+    private LocalDateTime lastAlertTime;
 }

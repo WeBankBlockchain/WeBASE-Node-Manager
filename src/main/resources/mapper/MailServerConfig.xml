@@ -36,16 +36,19 @@
                 property="socketFactoryClass" />
         <result column="socket_factory_fallback" javaType="java.lang.Boolean" jdbcType="BIT"
                 property="socketFactoryFallback" />
+        <result column="status" javaType="java.lang.Boolean" jdbcType="BIT"
+                property="status" />
     </resultMap>
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig">
         REPLACE INTO tb_mail_server_config(server_id,server_name,host,port,username,password,
         protocol,default_encoding,create_time,modify_time,authentication,starttls_enable,
-        starttls_required,socket_factory_port,socket_factory_class,socket_factory_fallback)
+        starttls_required,socket_factory_port,socket_factory_class,socket_factory_fallback,status)
         VALUES (#{serverId},#{serverName},#{host},#{port},#{username},#{password},
         #{protocol},#{defaultEncoding}, now(), now(), #{authentication},#{starttlsEnable},
-        #{starttlsRequired},#{socketFactoryPort},#{socketFactoryClass},#{socketFactoryFallback})
+        #{starttlsRequired},#{socketFactoryPort},#{socketFactoryClass},#{socketFactoryFallback},
+        #{status})
     </insert>
 
     <delete id="deleteByServerId" parameterType="java.lang.Integer">
@@ -93,6 +96,9 @@
         </if>
         <if test="socketFactoryFallback != null and socketFactoryFallback != ''">
             ,socket_factory_fallback = #{socketFactoryFallback}
+        </if>
+        <if test="status != null and status != ''">
+            ,status = #{status}
         </if>
         where server_id = #{serverId}
     </update>
