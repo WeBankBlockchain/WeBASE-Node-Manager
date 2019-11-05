@@ -51,4 +51,5 @@ public class AlertMailTaskTest {
     public void testAuditMonitorTask() {
         auditMonitorTask.checkUserAndContractForAlert();
     }
+
 }
