@@ -233,15 +233,15 @@ CREATE TABLE IF NOT EXISTS tb_cert (
 CREATE TABLE IF NOT EXISTS tb_alert_rule (
   rule_id int(11) NOT NULL AUTO_INCREMENT COMMENT '告警规则的ID',
   rule_name varchar(50) NOT NULL COMMENT '告警规则的命名',
-  enable bit DEFAULT 0 COMMENT '是否启用规则',
+  enable bit DEFAULT 0 NOT NULL COMMENT '是否启用规则',
   alert_type tinyint(4) NOT NULL COMMENT '告警规则的类型',
   alert_level varchar(20) NOT NULL COMMENT '告警规则的级别',
-  alert_interval bigint NOT NULL COMMENT '告警规则的间隔时间(ms)',
+  alert_interval_seconds bigint NOT NULL COMMENT '告警规则的间隔时间(s)',
   alert_content text NOT NULL COMMENT '告警邮件的内容',
-  content_param_list text DEFAULT NULL COMMENT '告警邮件内容中的可替代参数，如nodeId',
+  content_param_list text NOT NULL COMMENT '告警邮件内容中的可替代参数，如nodeId',
   description varchar(50) DEFAULT NULL COMMENT '告警规则的描述',
   is_all_user bit NOT NULL COMMENT '是否选中所有用户',
-  user_list text NOT NULL COMMENT '告警规则作用的用户列表',
+  user_list text DEFAULT NULL COMMENT '告警规则作用的用户列表',
   create_time datetime DEFAULT NULL COMMENT '告警规则的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '告警规则的修改时间',
   less_than varchar(40) DEFAULT NULL COMMENT '告警规则：小于某个值',
@@ -249,6 +249,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_rule (
   larger_than varchar(40) DEFAULT NULL COMMENT '告警规则：大于某个值',
   larger_and_equal varchar(40) DEFAULT NULL COMMENT '告警规则：大于等于某个值',
   equal varchar(40) DEFAULT NULL COMMENT '告警规则：等于某个值',
+  last_alert_time datetime DEFAULT NULL COMMENT '上次告警的时间，与Interval间隔共同作用',
   PRIMARY KEY (rule_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='告警规则表';
 
@@ -272,5 +273,6 @@ CREATE TABLE IF NOT EXISTS tb_mail_server_config (
   socket_factory_port int(10) DEFAULT 465 NOT NULL COMMENT 'SSL的端口',
   socket_factory_class varchar(150) DEFAULT 'javax.net.ssl.SSLSocketFactory' NOT NULL COMMENT 'SSL选用的JAVA类',
   socket_factory_fallback bit DEFAULT 0 NOT NULL COMMENT '是否启用SSL的fallback',
+  status bit DEFAULT 0 NOT NULL COMMENT '邮件服务器是否已配置完成，0初始，1完成',
   PRIMARY KEY (server_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件服务器配置表';

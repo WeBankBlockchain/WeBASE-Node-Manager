@@ -67,4 +67,10 @@ public class TbMailServerConfig {
     private String socketFactoryClass;
     private Boolean socketFactoryFallback;
 
+    /**
+     * if edited and done, status is 1, else is 0
+     * if not done, cannot send mails
+     */
+    private Boolean status;
+
 }
