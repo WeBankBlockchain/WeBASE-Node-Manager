@@ -61,7 +61,7 @@ constant:
   isMonitorIgnoreUser: false
   isMonitorIgnoreContract: false
   monitorUnusualMaxCount: 20
-  ###alert mail interval
+  ###alert mail interval unit: ms
   auditAlertMailInterval: 6000000
   nodeAlertMailInterval: 6000000
   certAlertMailInterval: 6000000
