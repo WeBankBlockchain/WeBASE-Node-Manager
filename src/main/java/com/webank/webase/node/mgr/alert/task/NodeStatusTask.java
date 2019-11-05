@@ -35,6 +35,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
@@ -91,8 +92,13 @@ public class NodeStatusTask {
      * @param groupId
      */
     public void checkNodeStatusByGroup(int groupId) {
-        log.debug("start checkNodeStatusByGroup");
-        nodeService.checkAndUpdateNodeStatus(groupId);
+        log.debug("start checkNodeStatusByGroup groupId:{}", groupId);
+        // TODO
+        try{
+            nodeService.checkAndUpdateNodeStatus(groupId);
+        }catch (Exception e) {
+            log.error("in checkNodeStatusByGroup error: []", e);
+        }
         List<TbNode> nodeList = nodeService.queryByGroupId(groupId);
         List<String> abnormalNodeIdList = new ArrayList<>();
         nodeList.stream()
@@ -112,7 +118,7 @@ public class NodeStatusTask {
     }
 
     /**
-     * TODO 游离节点会一直报警，应该是observer和sealer异常就一直报警
+     * if node is invalid( not active) alert
      * @param node
      * @return true: is abnormal, false: normal
      */
@@ -120,49 +126,53 @@ public class NodeStatusTask {
         log.debug(" isNodeAbnormalAndAlert TbNode:{}", node);
         int groupId = node.getGroupId();
         String nodeId = node.getNodeId();
+        // TODO active变成invalid(2)，且校验节点是not remove 则触发告警。如果是remove 不触发
+        // if node is invalid(not active)
         if(node.getNodeActive() == DataStatus.INVALID.getValue()) {
-            // if node is invalid and is not "remove" type, alert mail
-            if (checkNodeTypeByNodeId(groupId, nodeId) != null) {
-                log.warn("isNodeAbnormalAndAlert abnormal node alert . groupId:{}, node:{}",
-                        groupId, nodeId);
-                return true;
-            }
-            return false;
+          //  if (checkNodeTypeByNodeId(groupId, nodeId) != null) {
+            log.warn("isNodeAbnormalAndAlert abnormal node alert . groupId:{}, node:{}",
+                    groupId, nodeId);
+            return true;
+         //   }
+          //  return false;
         }else {
             return false;
         }
     }
 
     /**
-     * get node type through precompiled api from front
+     *  TODO 游离节点不报警
+     * get nodeList by type(remove) through precompiled api from front
      * node type: [sealer(consensus), observer, remove]
      * @param groupId
      * @param nodeId
      * @return nodeId is unique, change list to single nodeId using list.get(0)
      */
-    public Node checkNodeTypeByNodeId(int groupId, String nodeId) {
-        log.debug("start checkNodeTypeByNodeId groupId:{}, nodeId:{}", groupId, nodeId);
-        Object nodeList = precompiledService.getNodeListService(groupId,
-                100, 1);
-        List<Node> nodeTypeList;
-        try {
-            // cast response from front to List<Node>
-            nodeTypeList = (List<Node>) nodeList;
-        }catch (Exception e) {
-            log.error("handleNodeAlert in getNodeListService error " +
-                    "Object cast to List<Node> error exception:[]", e);
-            return null;
-        }
-        // abnormal node must not be "remove" node（游离节点）
-        List<Node> abnormalNodeList = nodeTypeList.stream()
-                .filter(node -> node.getNodeId().equals(nodeId)
-                        && !"remove".equals(node.getNodeType()))
-                .collect(Collectors.toList());
-        if(abnormalNodeList.isEmpty()) {
-            log.error("handleNodeAlert in getNodeListService error for no such nodeId");
-            return null;
-        }
-        log.debug("end checkNodeTypeByNodeId abnormalNodeList:{}", abnormalNodeList);
-        return abnormalNodeList.get(0);
-    }
+//    public Node checkNodeNotRemove(int groupId, String nodeId) {
+//        log.debug("start checkNodeNotRemove groupId:{}, nodeId:{}", groupId, nodeId);
+//        Object nodeList = precompiledService.getNodeListService(groupId,
+//                100, 1);
+//        List<Node> nodeTypeList;
+//        try {
+//            // response is BaseResponse
+//            Map<Object, Object> response = (Map<Object, Object>) nodeList;
+//            // cast response from front to List<Node>
+//            nodeTypeList = (List<Node>) response.get("data");
+//        }catch (Exception e) {
+//            log.error("checkNodeNotRemove in getNodeListService error " +
+//                    "Object cast to List<Node> error nodeList:{},exception:[]", e, nodeList);
+//            return null;
+//        }
+//        // abnormal node must not be "remove" node（游离节点）
+//        List<Node> abnormalNodeList = nodeTypeList.stream()
+//                .filter(node -> node.getNodeId().equals(nodeId)
+//                        && !"remove".equals(node.getNodeType()))
+//                .collect(Collectors.toList());
+//        if(abnormalNodeList.isEmpty()) {
+//            log.error("handleNodeAlert in getNodeListService error for no such nodeId");
+//            return null;
+//        }
+//        log.debug("end checkNodeNotRemove abnormalNodeList:{}", abnormalNodeList);
+//        return abnormalNodeList.get(0);
+//    }
 }
