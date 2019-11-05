@@ -14,8 +14,8 @@
                 property="alertType" />
         <result column="alert_level" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="alertLevel" />
-        <result column="alert_interval" javaType="java.lang.Long" jdbcType="BIGINT"
-                property="alertInterval" />
+        <result column="alert_interval_seconds" javaType="java.lang.Long" jdbcType="BIGINT"
+                property="alertIntervalSeconds" />
         <result column="alert_content" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="alertContent" />
         <result column="content_param_list" javaType="java.lang.String" jdbcType="VARCHAR"
@@ -40,16 +40,20 @@
                 property="largerAndEqual" />
         <result column="equal" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="equal" />
+        <result column="last_alert_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                property="lastAlertTime" />
     </resultMap>
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule">
-        REPLACE INTO tb_alert_rule(rule_name,enable,alert_type,alert_level,alert_interval,
+        REPLACE INTO tb_alert_rule(rule_name,enable,alert_type,alert_level,alert_interval_seconds,
         alert_content,content_param_list,description,is_all_user,user_list,
-        create_time, modify_time,less_than,less_and_equal,larger_than,larger_and_equal,equal)
-        VALUES (#{ruleName},#{enable},#{alertType},#{alertLevel},#{alertInterval},
+        create_time, modify_time,less_than,less_and_equal,larger_than,larger_and_equal,equal,
+        last_alert_time)
+        VALUES (#{ruleName},#{enable},#{alertType},#{alertLevel},#{alertIntervalSeconds},
         #{alertContent},#{contentParamList},#{description},#{isAllUser},#{userList},now(),now(),
-        #{lessThan},#{lessAndEqual},#{largerThan},#{largerAndEqual},#{equal})
+        #{lessThan},#{lessAndEqual},#{largerThan},#{largerAndEqual},#{equal},
+        #{lastAlertTime})
     </insert>
 
 
@@ -72,8 +76,8 @@
         <if test="alertLevel != null and alertLevel != ''">
             ,alert_level = #{alertLevel}
         </if>
-        <if test="alertInterval != null and alertInterval != ''">
-            ,alert_interval = #{alertInterval}
+        <if test="alertIntervalSeconds != null and alertIntervalSeconds != ''">
+            ,alert_interval_seconds = #{alertIntervalSeconds}
         </if>
         <if test="alertContent != null and alertContent != ''">
             ,alert_content = #{alertContent}
@@ -103,6 +107,9 @@
         </if>
         <if test="equal != null and equal != ''">
             ,equal = #{equal}
+        </if>
+        <if test="lastAlertTime != null and lastAlertTime != ''">
+            ,last_alert_time = #{lastAlertTime}
         </if>
         where rule_id = #{ruleId}
     </update>

@@ -35,6 +35,10 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -114,7 +118,23 @@ public class MailService {
 
         log.debug("start sendMailByRule ruleId:{},replacementText:{}",
                 ruleId, replacementText);
+        TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
+        // if mail server not config
+        if(!latestMailServerConfig.getStatus()) {
+            log.error("end sendMailByRule for server config not done:{}", latestMailServerConfig);
+            return;
+        }
         TbAlertRule alertRule = alertRuleMapper.queryByRuleId(ruleId);
+        // if not activated
+        if(!alertRule.getEnable()) {
+            log.debug("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
+            return;
+        }
+        // last time alert by now, if within interval, not send
+        if(isWithinAlertIntervalByNow(alertRule)) {
+            log.debug("end sendMailByRule non-sending mail for beyond alert interval:{}", alertRule);
+            return;
+        }
         String emailTitle = AlertRuleTools.getAlertTypeStrFromEnum(alertRule.getAlertType());
 
         String defaultEmailContent = alertRule.getAlertContent();
@@ -129,6 +149,7 @@ public class MailService {
         String emailFinalContent = templateEngine.process("AlertEmailTemplate", context);
         // 将告警发到userList，如果是全选用户
         handleAllUserEmail(alertRule, emailTitle, emailFinalContent);
+        alertRule.setLastAlertTime(LocalDateTime.now());
         log.debug("end sendMailByRule. ");
     }
 
@@ -204,6 +225,29 @@ public class MailService {
         }
         log.debug("end sendMailBare MimeMessage:{}", message);
         mailSender.send(message);
+    }
+
+    /**
+     * calculate interval time form lastAlertTime
+     */
+    public boolean isWithinAlertIntervalByNow(TbAlertRule tbAlertRule) {
+        LocalDateTime lastAlertTime = tbAlertRule.getLastAlertTime();
+        // first time alert
+        if(lastAlertTime == null) {
+            return false;
+        }
+        Long alertInterval = tbAlertRule.getAlertIntervalSeconds();
+        alertInterval *= 1000;
+
+        LocalDateTime now = LocalDateTime.now();
+        Long actualInterval = Timestamp.valueOf(now).getTime()
+                - Timestamp.valueOf(lastAlertTime).getTime();
+
+        if(actualInterval < alertInterval) {
+            return true;
+        }else {
+            return false;
+        }
     }
 
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.webank.webase.node.mgr.alert.rule;
 
 import com.alibaba.fastjson.JSON;

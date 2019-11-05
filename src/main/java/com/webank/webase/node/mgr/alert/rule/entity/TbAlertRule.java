@@ -49,9 +49,10 @@ public class TbAlertRule {
 
     /**
      * 出发时发送的频率
-     * TODO 间隔时间下限，不能小于10分钟？
+     * unit: s
+     * needed switch to ms for calculating
      */
-    private Long alertInterval;
+    private Long alertIntervalSeconds;
 
     /**
      * 告警的内容
@@ -95,4 +96,9 @@ public class TbAlertRule {
      */
     private Boolean isAllUser;
     private String userList;
+
+    /**
+     * 上次告警的时间，与alertInterval告警频率共同作用
+     */
+    private LocalDateTime lastAlertTime;
 }
