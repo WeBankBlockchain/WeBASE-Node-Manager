@@ -122,7 +122,7 @@ public class AlertRuleController {
         try{
             alertRuleService.updateAlertRule(param);
         }catch (NodeMgrException e) {
-            log.debug("toggleAlertRule, error, exception:[] ", e);
+            log.debug("toggleAlertRule error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_RULE_ERROR, e.getMessage());
         }
         TbAlertRule res = alertRuleService.queryByRuleId(param.getRuleId());

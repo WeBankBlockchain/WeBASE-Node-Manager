@@ -8,7 +8,7 @@
             property="ruleId" />
         <result column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"
             property="ruleName" />
-        <result column="enable" javaType="java.lang.Boolean" jdbcType="BIT"
+        <result column="enable" javaType="java.lang.Boolean" jdbcType="TINYINT"
                 property="enable" />
         <result column="alert_type" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="alertType" />
@@ -22,7 +22,7 @@
                 property="contentParamList" />
         <result column="description" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="description" />
-        <result column="is_all_user" javaType="java.lang.Boolean" jdbcType="BIT"
+        <result column="is_all_user" javaType="java.lang.Boolean" jdbcType="TINYINT"
                 property="isAllUser" />
         <result column="user_list" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="userList" />
@@ -81,7 +81,8 @@
         </if>
         <if test="alertContent != null and alertContent != ''">
             ,alert_content = #{alertContent}
-        </if><if test="contentParamList != null and contentParamList != ''">
+        </if>
+        <if test="contentParamList != null and contentParamList != ''">
             ,content_param_list = #{contentParamList}
         </if>
         <if test="description != null and description != ''">
