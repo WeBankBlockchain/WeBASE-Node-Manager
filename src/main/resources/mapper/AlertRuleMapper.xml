@@ -67,7 +67,7 @@
         <if test="ruleName != null and ruleName != ''">
             ,rule_name = #{ruleName}
         </if>
-        <if test="enable != null and enable != ''">
+        <if test="enable != null">
             ,enable = #{enable}
         </if>
         <if test="alertType != null and alertType != ''">
