@@ -40,13 +40,15 @@ public class ReqMailServerConfigParam {
 
     /**
      * properties: 安全配置项
+     * Boolean: authentication starttlsEnable starttlsRequired socketFactoryFallback
+     * 0-off, 1-on
      */
-    private Boolean authentication;
-    private Boolean starttlsEnable;
+    private Integer authentication;
+    private Integer starttlsEnable;
 
     // STARTTLS 具体配置
-    private Boolean starttlsRequired;
+    private Integer starttlsRequired;
     private Integer socketFactoryPort;
     private String socketFactoryClass;
-    private Boolean socketFactoryFallback;
+    private Integer socketFactoryFallback;
 }
