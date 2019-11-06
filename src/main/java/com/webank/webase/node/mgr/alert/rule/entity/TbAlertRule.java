@@ -36,7 +36,7 @@ public class TbAlertRule {
     /**
      * 是否启用
      */
-    private Boolean enable;
+    private Integer enable;
 
     /**
      * 告警的类型：证书有效期、节点异常、审计
@@ -94,7 +94,7 @@ public class TbAlertRule {
      * 保存该规则的告警目标邮箱地址
      * @param: allUser 全选
      */
-    private Boolean isAllUser;
+    private Integer isAllUser;
     private String userList;
 
     /**

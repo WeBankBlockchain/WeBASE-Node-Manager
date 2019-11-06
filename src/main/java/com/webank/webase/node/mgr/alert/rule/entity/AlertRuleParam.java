@@ -27,7 +27,7 @@ public class AlertRuleParam {
 
     private Integer ruleId;
     private String ruleName;
-    private Boolean enable;
+    private Integer enable;
     private Integer alertType;
     // unit: s
     private Long alertIntervalSeconds;
@@ -38,7 +38,7 @@ public class AlertRuleParam {
     private String contentParamList;
 
     private String description;
-    private Boolean isAllUser;
+    private Integer isAllUser;
     // 序列化
     private String userList;
 

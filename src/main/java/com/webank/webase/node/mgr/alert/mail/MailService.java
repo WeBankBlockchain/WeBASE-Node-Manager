@@ -25,6 +25,7 @@ import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerCo
 import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleTools;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
+import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -78,7 +79,7 @@ public class MailService {
         log.debug("start refreshJavaMailSenderConfig. latestMailServerConfig:{}", latestMailServerConfig);
         mailSender.setHost(latestMailServerConfig.getHost());
         if(latestMailServerConfig.getPort() != null ) {
-            mailSender.setPort(Integer.valueOf(latestMailServerConfig.getPort()));
+            mailSender.setPort(latestMailServerConfig.getPort());
         }
 
         mailSender.setUsername(latestMailServerConfig.getUsername());
@@ -89,12 +90,14 @@ public class MailService {
 
         // set JavaMailProperties such as ssl configuration
         Properties sslProperties = new Properties();
+        Boolean isAuthEnable = latestMailServerConfig.getAuthentication() == EnableStatus.ON.getValue();
         sslProperties.setProperty("mail.smtp.auth",
-                String.valueOf(latestMailServerConfig.getAuthentication()));
+                String.valueOf(isAuthEnable));
+        Boolean isSTARTTLSEnable = latestMailServerConfig.getStarttlsEnable() == EnableStatus.ON.getValue();
         sslProperties.setProperty("mail.smtp.starttls.enable",
-                String.valueOf(latestMailServerConfig.getStarttlsEnable()));
+                String.valueOf(isSTARTTLSEnable));
         // if required starttls is true, set ssl configuration
-        Boolean isSTARTTLSRequired = latestMailServerConfig.getStarttlsRequired();
+        Boolean isSTARTTLSRequired = (latestMailServerConfig.getStarttlsRequired() == EnableStatus.ON.getValue()) ;
         if(isSTARTTLSRequired) {
             sslProperties.setProperty("mail.smtp.starttls.required",
                     String.valueOf(isSTARTTLSRequired));
@@ -102,8 +105,9 @@ public class MailService {
                     String.valueOf(latestMailServerConfig.getSocketFactoryPort()));
             sslProperties.setProperty("mail.smtp.socketFactory.class",
                     latestMailServerConfig.getSocketFactoryClass());
+            Boolean isUsingFallback = latestMailServerConfig.getSocketFactoryFallback() == EnableStatus.ON.getValue();
             sslProperties.setProperty("mail.smtp.socketFactory.fallback",
-                    String.valueOf(latestMailServerConfig.getSocketFactoryFallback()));
+                    String.valueOf(isUsingFallback));
         }
         log.debug("end refreshJavaMailSenderConfig. sslProperties:{}", sslProperties);
         mailSender.setJavaMailProperties(sslProperties);
@@ -120,13 +124,13 @@ public class MailService {
                 ruleId, replacementText);
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         // if mail server not config
-        if(!latestMailServerConfig.getStatus()) {
+        if(latestMailServerConfig.getStatus() == EnableStatus.OFF.getValue()) {
             log.error("end sendMailByRule for server config not done:{}", latestMailServerConfig);
             return;
         }
         TbAlertRule alertRule = alertRuleMapper.queryByRuleId(ruleId);
         // if not activated
-        if(!alertRule.getEnable()) {
+        if(alertRule.getEnable() == EnableStatus.OFF.getValue()) {
             log.debug("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
             return;
         }
@@ -169,7 +173,7 @@ public class MailService {
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         String fromMailAddress = latestMailServerConfig.getUsername();
         // 将告警发到userList，如果是全选用户
-        if(alertRule.getIsAllUser()){
+        if(alertRule.getIsAllUser() == EnableStatus.ON.getValue()){
             AccountListParam accountListParam = new AccountListParam();
             List<TbAccountInfo> allAccountList = accountMapper.listOfAccount(accountListParam);
             for(TbAccountInfo accountInfo: allAccountList) {
