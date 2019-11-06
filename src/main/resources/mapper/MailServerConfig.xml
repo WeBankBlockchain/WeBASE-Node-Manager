@@ -24,19 +24,19 @@
                 property="createTime" />
         <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
                 property="modifyTime" />
-        <result column="authentication" javaType="java.lang.Boolean" jdbcType="BIT"
+        <result column="authentication" javaType="java.lang.Integer" jdbcType="Integer"
                 property="authentication" />
-        <result column="starttls_enable" javaType="java.lang.Boolean" jdbcType="BIT"
+        <result column="starttls_enable" javaType="java.lang.Integer" jdbcType="Integer"
                 property="starttlsEnable" />
-        <result column="starttls_required" javaType="java.lang.Boolean" jdbcType="BIT"
+        <result column="starttls_required" javaType="java.lang.Integer" jdbcType="Integer"
                 property="starttlsRequired" />
         <result column="socket_factory_port" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="socketFactoryPort" />
         <result column="socket_factory_class" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="socketFactoryClass" />
-        <result column="socket_factory_fallback" javaType="java.lang.Boolean" jdbcType="BIT"
+        <result column="socket_factory_fallback" javaType="java.lang.Integer" jdbcType="Integer"
                 property="socketFactoryFallback" />
-        <result column="status" javaType="java.lang.Boolean" jdbcType="BIT"
+        <result column="status" javaType="java.lang.Integer" jdbcType="Integer"
                 property="status" />
     </resultMap>
 

@@ -51,26 +51,27 @@ public class TbMailServerConfig {
 
     /**
      * 以下均为SMTP的properties安全配置项 与 默认值
-     * @param authentication 是否需要验证 默认true
-     * @param starttlsEnable 支持STARTTLS时则启用 默认true
+     * @param authentication 是否需要验证 默认true 0-off, 1-on
+     * @param starttlsEnable 支持STARTTLS时则启用 默认true 0-off, 1-on
      * @param starttlsRequired 默认false, 开启则需要配置端口、SSL类等，需保证端口可用
      * @param socketFactory.port 不同的邮箱服务器的TLS端口，发件邮箱465, 收件IMAP为993, POP3为995
      * @param socketFactory.class 默认javax.net.ssl.SSLSocketFactory
-     * @param socketFactory.fallback 默认false
+     * @param socketFactory.fallback 默认false 0-off, 1-on
      */
-    private Boolean authentication;
-    private Boolean starttlsEnable;
+    private Integer authentication;
+    private Integer starttlsEnable;
 
     // STARTTLS 具体配置
-    private Boolean starttlsRequired;
+    private Integer starttlsRequired;
     private Integer socketFactoryPort;
     private String socketFactoryClass;
-    private Boolean socketFactoryFallback;
+    private Integer socketFactoryFallback;
 
     /**
+     * 0-off, 1-on
      * if edited and done, status is 1, else is 0
      * if not done, cannot send mails
      */
-    private Boolean status;
+    private Integer status;
 
 }
