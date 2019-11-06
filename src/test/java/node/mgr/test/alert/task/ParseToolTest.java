@@ -38,6 +38,10 @@ public class ParseToolTest {
     @Autowired
     PrecompiledService precompiledService;
 
+    /**
+     * Front's response is {code=0,message=xx,data=[{xx=xx,xx=xx}]}
+     * Data type is LinkedHashMap
+     */
     @Test
     public void testParseResponseFromFromt() {
         int groupId = 1;
@@ -51,21 +55,11 @@ public class ParseToolTest {
         System.out.println(after);
         System.out.println(after.get("data"));
         // transfer to list
-        List<Node> list = (List<Node>) after.get("data");
+        List<LinkedHashMap<String, String>> temp = (List<LinkedHashMap<String, String>>) after.get("data");
+//        List<Node> list = (List<Node>) after.get("data"); cast to Node fail
         System.out.println("=========list========");
-        System.out.println(list);
-        System.out.println(list.get(0));
-
-//        List<Node> nodeTypeList;
-//        // response is BaseResponse
-//        Map<Object, Object> response = (Map<Object, Object>) nodeList;
-//        // cast response from front to List<Node>
-//        nodeTypeList = (List<Node>) response.get("data");
-//
-//        // abnormal node must not be "remove" node（游离节点）
-//        List<Node> abnormalNodeList = nodeTypeList.stream()
-//                .filter(node -> node.getNodeId().equals(nodeId)
-//                        && !"remove".equals(node.getNodeType()))
-//                .collect(Collectors.toList());
+        System.out.println(temp);
+        System.out.println(temp.get(0).get("nodeId"));
+        System.out.println(temp.get(0).get("nodeType"));
     }
 }

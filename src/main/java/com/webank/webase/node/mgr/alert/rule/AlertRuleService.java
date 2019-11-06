@@ -73,6 +73,7 @@ public class AlertRuleService {
         TbAlertRule tbAlertRule = new TbAlertRule();
         try{
             BeanUtils.copyProperties(updateRuleParam, tbAlertRule);
+            log.debug("updateAlertRule tbAlertRule:{}", tbAlertRule);
             alertRuleMapper.update(tbAlertRule);
             log.debug("end updateAlertRule. ");
         }catch (Exception e) {
