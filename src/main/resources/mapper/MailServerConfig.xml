@@ -79,13 +79,13 @@
         <if test="defaultEncoding != null and defaultEncoding != ''">
             ,default_encoding = #{defaultEncoding}
         </if>
-        <if test="authentication != null and authentication != ''">
+        <if test="authentication != null">
             ,authentication = #{authentication}
         </if>
-        <if test="starttlsEnable != null and starttlsEnable != ''">
+        <if test="starttlsEnable != null">
             ,starttls_enable = #{starttlsEnable}
         </if>
-        <if test="starttlsRequired != null and starttlsRequired != ''">
+        <if test="starttlsRequired != null">
             ,starttls_required = #{starttlsRequired}
         </if>
         <if test="socketFactoryPort != null and socketFactoryPort != ''">
@@ -94,10 +94,10 @@
         <if test="socketFactoryClass != null and socketFactoryClass != ''">
             ,socket_factory_class = #{socketFactoryClass}
         </if>
-        <if test="socketFactoryFallback != null and socketFactoryFallback != ''">
+        <if test="socketFactoryFallback != null">
             ,socket_factory_fallback = #{socketFactoryFallback}
         </if>
-        <if test="status != null and status != ''">
+        <if test="status != null">
             ,status = #{status}
         </if>
         where server_id = #{serverId}
