@@ -25,9 +25,13 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Date;
 
 @Log4j2
 @RestController
@@ -38,9 +42,10 @@ public class MailController {
     MailService mailService;
     @Autowired
     MailServerConfigService mailServerConfigService;
+    @Autowired
+    TemplateEngine templateEngine;
 
     public static final String testTitle = "WeBase-Node-Manager测试邮件，请勿回复";
-    public static final String testContent = "这是WeBase-Node-Manager节点管理服务-邮件告警的测试邮件，请勿回复";
 
     @PostMapping("/test/{toMailAddress}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
@@ -51,9 +56,15 @@ public class MailController {
         // get latest mail config
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         String fromMailAddress = latestMailServerConfig.getUsername();
+        Context context = new Context();
+        // add date in content
+        SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        context.setVariable("time", formatTool.format(new Date()));
+        String emailFinalContent = templateEngine.process("AlertEmailForTest", context);
+
         try {
             mailService.sendMailBare(fromMailAddress, toMailAddress,
-                    testTitle, testContent);
+                    testTitle, emailFinalContent);
             log.info("end sendDefaultMail. useTime:{}",
                     Duration.between(startTime, Instant.now()).toMillis());
             return new BaseResponse(ConstantCode.SUCCESS);
