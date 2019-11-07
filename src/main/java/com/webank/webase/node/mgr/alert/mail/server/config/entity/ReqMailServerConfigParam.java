@@ -51,4 +51,7 @@ public class ReqMailServerConfigParam {
     private Integer socketFactoryPort;
     private String socketFactoryClass;
     private Integer socketFactoryFallback;
+
+    // 启用、禁用邮箱服务 0-关闭 1-启用
+    private Integer status;
 }

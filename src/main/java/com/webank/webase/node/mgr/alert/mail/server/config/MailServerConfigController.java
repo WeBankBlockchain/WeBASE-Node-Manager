@@ -48,7 +48,7 @@ public class MailServerConfigController {
         TbMailServerConfig res = mailServerConfigService.queryByServerId(serverId);
         log.info("end getServerConfig. useTime:{}, res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), res);
-        return res;
+        return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
     @GetMapping("/config/list")

@@ -51,7 +51,7 @@ public class AuditMonitorTask {
     /**
      * set scheduler's interval
      */
-    @Scheduled(fixedDelayString = "${constant.auditAlertMailInterval}")
+    @Scheduled(fixedDelayString = "${constant.auditMonitorTaskFixedDelay}")
     public void auditAlertTaskStart() {
         checkUserAndContractForAlert();
     }
