@@ -100,8 +100,6 @@ public class MailServerConfigService {
         TbMailServerConfig tbMailServerConfig = new TbMailServerConfig();
         try{
             BeanUtils.copyProperties(inputParam, tbMailServerConfig);
-            // set mail server config is true
-            tbMailServerConfig.setStatus(EnableStatus.ON.getValue());
             configMapper.update(tbMailServerConfig);
             log.debug("end updateMailServerConfig. ");
         }catch (Exception e) {

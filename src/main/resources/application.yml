@@ -23,7 +23,7 @@ spring:
 logging:
   config: classpath:log/log4j2.xml
   level:
-    com.webank.webase.node.mgr: info
+    com.webank.webase.node.mgr: debug
 
 #constants
 constant:
@@ -61,10 +61,10 @@ constant:
   isMonitorIgnoreUser: false
   isMonitorIgnoreContract: false
   monitorUnusualMaxCount: 20
-  ###alert mail interval unit: ms
-  auditAlertMailInterval: 6000000
-  nodeAlertMailInterval: 6000000
-  certAlertMailInterval: 6000000
+  ###alert mail monitor task interval unit: ms
+  auditMonitorTaskFixedDelay: 86400000
+  nodeStatusMonitorTaskFixedDelay: 86400000
+  certMonitorTaskFixedDelay: 86400000
 
 # executor config
 executor:

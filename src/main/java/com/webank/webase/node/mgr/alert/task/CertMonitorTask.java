@@ -51,7 +51,7 @@ public class CertMonitorTask {
     /**
      * set scheduler's interval
      */
-    @Scheduled(fixedDelayString = "${constant.certAlertMailInterval}")
+    @Scheduled(fixedDelayString = "${constant.nodeStatusMonitorTaskFixedDelay}")
     public void certAlertTaskStart() {
         checkCertValidityForAlert();
     }

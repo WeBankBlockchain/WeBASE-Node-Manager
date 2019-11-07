@@ -244,6 +244,7 @@ public class MailService {
             return false;
         }
         Long alertInterval = tbAlertRule.getAlertIntervalSeconds();
+        // unit s => ms
         alertInterval *= 1000;
 
         LocalDateTime now = LocalDateTime.now();
