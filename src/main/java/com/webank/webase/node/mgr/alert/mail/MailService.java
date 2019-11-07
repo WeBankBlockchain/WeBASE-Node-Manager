@@ -84,35 +84,44 @@ public class MailService {
 
         mailSender.setUsername(latestMailServerConfig.getUsername());
         mailSender.setPassword(latestMailServerConfig.getPassword());
-        mailSender.setProtocol(latestMailServerConfig.getProtocol());
-        // TODO 编码默认UTF-8，是否可以去除该字段
         mailSender.setDefaultEncoding(latestMailServerConfig.getDefaultEncoding());
 
-        // set JavaMailProperties such as ssl configuration
-        Properties sslProperties = new Properties();
-        Boolean isAuthEnable = latestMailServerConfig.getAuthentication() == EnableStatus.ON.getValue();
-        sslProperties.setProperty("mail.smtp.auth",
-                String.valueOf(isAuthEnable));
-        Boolean isSTARTTLSEnable = latestMailServerConfig.getStarttlsEnable() == EnableStatus.ON.getValue();
-        sslProperties.setProperty("mail.smtp.starttls.enable",
-                String.valueOf(isSTARTTLSEnable));
-        // if required starttls is true, set ssl configuration
-        Boolean isSTARTTLSRequired = (latestMailServerConfig.getStarttlsRequired() == EnableStatus.ON.getValue()) ;
-        if(isSTARTTLSRequired) {
-            sslProperties.setProperty("mail.smtp.starttls.required",
-                    String.valueOf(isSTARTTLSRequired));
-            sslProperties.setProperty("mail.smtp.socketFactory.port",
-                    String.valueOf(latestMailServerConfig.getSocketFactoryPort()));
-            sslProperties.setProperty("mail.smtp.socketFactory.class",
-                    latestMailServerConfig.getSocketFactoryClass());
-            Boolean isUsingFallback = latestMailServerConfig.getSocketFactoryFallback() == EnableStatus.ON.getValue();
-            sslProperties.setProperty("mail.smtp.socketFactory.fallback",
-                    String.valueOf(isUsingFallback));
-        }
+        mailSender.setProtocol(latestMailServerConfig.getProtocol());
+
+        Properties sslProperties = initJavaMailProperties(latestMailServerConfig);
         log.debug("end refreshJavaMailSenderConfig. sslProperties:{}", sslProperties);
         mailSender.setJavaMailProperties(sslProperties);
+
     }
 
+    /**
+     * set " + protocolName + "/pop3/imap java mailsender configuration
+     */
+    private Properties initJavaMailProperties(TbMailServerConfig latestMailServerConfig) {
+        // set SMTP JavaMailProperties such as ssl configuration
+        Properties sslProperties = new Properties();
+        Boolean isAuthEnable = latestMailServerConfig.getAuthentication() == EnableStatus.ON.getValue();
+        Boolean isSTARTTLSEnable = latestMailServerConfig.getStarttlsEnable() == EnableStatus.ON.getValue();
+        String protocolName = latestMailServerConfig.getProtocol().toLowerCase();
+        sslProperties.setProperty("mail." + protocolName + ".auth",
+                String.valueOf(isAuthEnable));
+        sslProperties.setProperty("mail." + protocolName + ".starttls.enable",
+                String.valueOf(isSTARTTLSEnable));
+        // if required starttls is true, set ssl configuration
+        Boolean isSTARTTLSRequired = (latestMailServerConfig.getStarttlsRequired() == EnableStatus.ON.getValue());
+        if (isSTARTTLSRequired) {
+            sslProperties.setProperty("mail." + protocolName + ".starttls.required",
+                    String.valueOf(isSTARTTLSRequired));
+            sslProperties.setProperty("mail." + protocolName + ".socketFactory.port",
+                    String.valueOf(latestMailServerConfig.getSocketFactoryPort()));
+            sslProperties.setProperty("mail." + protocolName + ".socketFactory.class",
+                    latestMailServerConfig.getSocketFactoryClass());
+            Boolean isUsingFallback = latestMailServerConfig.getSocketFactoryFallback() == EnableStatus.ON.getValue();
+            sslProperties.setProperty("mail." + protocolName + ".socketFactory.fallback",
+                    String.valueOf(isUsingFallback));
+        }
+        return sslProperties;
+    }
     /**
      * @param ruleId 用户选择一条rule，从db获取
      * @param replacementText 实际值的参数，用于替代emailContent中的变量

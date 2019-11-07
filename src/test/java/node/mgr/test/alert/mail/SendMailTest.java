@@ -75,8 +75,11 @@ public class SendMailTest {
      */
     @Test
     public void testSending() {
+        // add date in content
+        SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String date = formatTool.format(new Date());
         mailService.sendMailBare(fromMailAddress, toMailAddress,
-                testTitle, testContent);
+                testTitle, testContent + "\n " + date);
     }
 
 
