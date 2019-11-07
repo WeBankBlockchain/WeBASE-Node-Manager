@@ -36,16 +36,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
 
 /**
  * cannot connect to node triggers alert mail
  */
 @Log4j2
 @Component
-public class NodeStatusTask {
+public class NodeStatusMonitorTask {
 
     @Autowired
     private NodeService nodeService;
@@ -56,7 +54,7 @@ public class NodeStatusTask {
     @Autowired
     private MailService alertMailService;
 
-    @Scheduled(fixedDelayString = "${constant.nodeAlertMailInterval}")
+    @Scheduled(fixedDelayString = "${constant.certMonitorTaskFixedDelay}")
     public void nodeAlertTaskStart() {
         checkAllNodeStatusForAlert();
     }

@@ -19,7 +19,7 @@ package node.mgr.test.alert.task;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.alert.task.AuditMonitorTask;
 import com.webank.webase.node.mgr.alert.task.CertMonitorTask;
-import com.webank.webase.node.mgr.alert.task.NodeStatusTask;
+import com.webank.webase.node.mgr.alert.task.NodeStatusMonitorTask;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class AlertMailTaskTest {
 
     @Autowired
-    NodeStatusTask nodeStatusTask;
+    NodeStatusMonitorTask nodeStatusMonitorTask;
     @Autowired
     CertMonitorTask certMonitorTask;
     @Autowired
@@ -39,7 +39,7 @@ public class AlertMailTaskTest {
 
     @Test
     public void testNodeStatusTask() {
-        nodeStatusTask.checkAllNodeStatusForAlert();
+        nodeStatusMonitorTask.checkAllNodeStatusForAlert();
     }
 
     @Test

@@ -76,8 +76,8 @@ public class ConstantProperties {
     private Integer monitorUnusualMaxCount;
 
     // alert mail interval
-    private Integer auditAlertMailInterval;
-    private Integer nodeAlertMailInterval;
-    private Integer certAlertMailInterval;
+    private Integer auditMonitorTaskFixedDelay;
+    private Integer nodeStatusMonitorTaskFixedDelay;
+    private Integer certMonitorTaskFixedDelay;
 
 }
