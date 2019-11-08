@@ -20,6 +20,7 @@ import com.webank.webase.node.mgr.alert.mail.server.config.MailServerConfigServi
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,11 @@ public class MailController {
         context.setVariable("time", formatTool.format(new Date()));
         String emailFinalContent = templateEngine.process("AlertEmailForTest", context);
 
+        if(latestMailServerConfig.getStatus() == EnableStatus.OFF.getValue()) {
+            log.info("end sendDefaultMail for status is off. useTime:{}",
+                    Duration.between(startTime, Instant.now()).toMillis());
+            return new BaseResponse(ConstantCode.SEND_MAIL_ERROR_FOR_SERVER_IS_OFF);
+        }
         try {
             mailService.sendMailBare(fromMailAddress, toMailAddress,
                     testTitle, emailFinalContent);
