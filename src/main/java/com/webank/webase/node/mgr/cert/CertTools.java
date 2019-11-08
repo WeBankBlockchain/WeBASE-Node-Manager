@@ -45,6 +45,7 @@ public class CertTools {
     public static final String TYPE_CHAIN = "chain";
     public static final String TYPE_AGENCY = "agency";
     public static final String TYPE_NODE = "node";
+    public static final String TYPE_SDK = "sdk";
     // 首次启动时需要拉取
     public static boolean isPullFrontCertsDone = false;
     /**
