@@ -339,12 +339,12 @@ public class CertService {
                 throw new NodeMgrException(ConstantCode.SAVING_FRONT_CERT_ERROR);
             }
         }
-        log.debug("end pulling Front's Node Certs.. count:{}", count);
+        log.debug("end pulling Front's Node Certs.. front count:{}", count);
         return count;
     }
 
     private void saveFrontCert(Map<String, String> certContents) throws CertificateException {
-        log.debug("start saveFrontCert. address:{} ", certContents);
+        log.debug("start saveFrontCert. certContents:{} ", certContents);
         String chainCertContent = certContents.get(CertTools.TYPE_CHAIN);
         String agencyCertContent = certContents.get(CertTools.TYPE_AGENCY);
         String nodeCertContent = certContents.get(CertTools.TYPE_NODE);
@@ -353,7 +353,7 @@ public class CertService {
         handleSaveFrontCertStr(agencyCertContent);
         handleSaveFrontCertStr(nodeCertContent);
         handleSaveFrontCertStr(sdkCertContent);
-        log.debug("end saveFrontCert. address:{} ", certContents);
+        log.debug("end saveFrontCert. certContents:{} ", certContents);
     }
 
     /**
@@ -366,7 +366,7 @@ public class CertService {
             certStr = CertTools.addHeadAndTail(certStr);
             log.debug("start handleSaveFrontCertStr:{} ", certStr);
             saveCerts(certStr);
-            log.debug("end nodeCertContent:{} ", certStr);
+            log.debug("end handleSaveFrontCertStr:{} ", certStr);
         }
     }
 

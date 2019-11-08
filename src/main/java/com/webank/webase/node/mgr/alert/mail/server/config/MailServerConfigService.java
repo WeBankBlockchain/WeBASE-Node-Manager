@@ -19,7 +19,6 @@ package com.webank.webase.node.mgr.alert.mail.server.config;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
