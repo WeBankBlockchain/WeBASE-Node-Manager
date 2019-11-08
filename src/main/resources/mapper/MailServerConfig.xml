@@ -38,17 +38,24 @@
                 property="socketFactoryFallback" />
         <result column="status" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="status" />
+        <result column="connection_timeout" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="connectionTimeout" />
+        <result column="timeout" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="timeout" />
+        <result column="write_timeout" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="writeTimeout" />
     </resultMap>
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig">
         REPLACE INTO tb_mail_server_config(server_id,server_name,host,port,username,password,
         protocol,default_encoding,create_time,modify_time,authentication,starttls_enable,
-        starttls_required,socket_factory_port,socket_factory_class,socket_factory_fallback,status)
+        starttls_required,socket_factory_port,socket_factory_class,socket_factory_fallback,status,
+        connection_timeout,timeout,write_timeout)
         VALUES (#{serverId},#{serverName},#{host},#{port},#{username},#{password},
         #{protocol},#{defaultEncoding}, now(), now(), #{authentication},#{starttlsEnable},
         #{starttlsRequired},#{socketFactoryPort},#{socketFactoryClass},#{socketFactoryFallback},
-        #{status})
+        #{status},#{connectionTimeout},#{timeout},#{writeTimeout})
     </insert>
 
     <delete id="deleteByServerId" parameterType="java.lang.Integer">
@@ -100,14 +107,20 @@
         <if test="status != null">
             ,status = #{status}
         </if>
+        <if test="connectionTimeout != null and connectionTimeout != ''">
+            ,connection_timeout = #{connectionTimeout}
+        </if>
+        <if test="timeout != null and timeout != ''">
+            ,timeout = #{timeout}
+        </if>
+        <if test="writeTimeout != null and writeTimeout != ''">
+            ,write_timeout = #{writeTimeout}
+        </if>
         where server_id = #{serverId}
     </update>
 
     <select id="listOfMailServerConfig" resultMap="mailServerConfigMap">
         select * from tb_mail_server_config a where 1=1
-        <!--        <if test="fingerPrint != null and fingerPrint != ''">-->
-        <!--            and a.finger_print = #{fingerPrint}-->
-        <!--        </if>-->
     </select>
 
     <select id="queryByServerId" parameterType="java.lang.Integer"

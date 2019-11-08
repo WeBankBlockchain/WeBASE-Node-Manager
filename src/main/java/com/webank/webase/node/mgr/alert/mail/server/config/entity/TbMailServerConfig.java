@@ -74,4 +74,13 @@ public class TbMailServerConfig {
      */
     private Integer status;
 
+    /**
+     *  time out config
+     * @timeout: read timeout, read from host;
+     * @connectionTimeout: connect to host timeout;
+     * @writeTimeout: write timeout
+     */
+    private Integer timeout;
+    private Integer connectionTimeout;
+    private Integer writeTimeout;
 }
