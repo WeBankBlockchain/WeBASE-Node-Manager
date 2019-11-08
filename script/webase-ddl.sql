@@ -274,5 +274,8 @@ CREATE TABLE IF NOT EXISTS tb_mail_server_config (
   socket_factory_class varchar(150) DEFAULT 'javax.net.ssl.SSLSocketFactory' NOT NULL COMMENT 'SSL选用的JAVA类',
   socket_factory_fallback tinyint(4) DEFAULT 0 NOT NULL COMMENT '是否启用SSL的fallback, 0:false, 1:true',
   status tinyint(4) DEFAULT 0 NOT NULL COMMENT '邮件服务器是否已配置完成，0初始，1完成',
+  connection_timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的连接超时值',
+  timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的通用超时值',
+  write_timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的写超时值',
   PRIMARY KEY (server_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件服务器配置表';
