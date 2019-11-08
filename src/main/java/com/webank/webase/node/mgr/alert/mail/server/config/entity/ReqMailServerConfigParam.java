@@ -54,4 +54,8 @@ public class ReqMailServerConfigParam {
 
     // 启用、禁用邮箱服务 0-关闭 1-启用
     private Integer status;
+    // timeout settings
+    private Integer timeout;
+    private Integer connectionTimeout;
+    private Integer writeTimeout;
 }
