@@ -107,6 +107,12 @@ public class MailService {
                 String.valueOf(isAuthEnable));
         sslProperties.setProperty("mail." + protocolName + ".starttls.enable",
                 String.valueOf(isSTARTTLSEnable));
+        // 设置接收超时时间、读取超时时间、写入超时时间
+        // TODO 加字段到DB
+        sslProperties.setProperty("mail." + protocolName + ".connectiontimeout", "10000");
+        sslProperties.setProperty("mail." + protocolName + ".timeout", "5000");
+        sslProperties.setProperty("mail." + protocolName + ".writetimeout", "5000");
+
         // if required starttls is true, set ssl configuration
         Boolean isSTARTTLSRequired = (latestMailServerConfig.getStarttlsRequired() == EnableStatus.ON.getValue());
         if (isSTARTTLSRequired) {
