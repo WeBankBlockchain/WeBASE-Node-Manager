@@ -25,7 +25,6 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Keys;
-import org.omg.CORBA.PUBLIC_MEMBER;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
