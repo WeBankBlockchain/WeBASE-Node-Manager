@@ -75,4 +75,9 @@ public class ConstantProperties {
     private Boolean isMonitorIgnoreContract = false;
     private Integer monitorUnusualMaxCount;
 
+    // alert mail interval
+    private Integer auditMonitorTaskFixedDelay;
+    private Integer nodeStatusMonitorTaskFixedDelay;
+    private Integer certMonitorTaskFixedDelay;
+
 }
