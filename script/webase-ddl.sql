@@ -173,6 +173,7 @@ CREATE TABLE IF NOT EXISTS tb_account_info (
   login_fail_time int(2) NOT NULL DEFAULT '0' COMMENT '登录失败次数,默认0，登录成功归0',
   account_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-未更新密码 2-正常） 默认1',
   description text COMMENT '备注',
+  email varchar(40) DEFAULT NULL COMMENT '用户邮箱',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (account)
@@ -219,9 +220,62 @@ CREATE TABLE IF NOT EXISTS tb_cert (
   public_key varchar(150) DEFAULT NULL COMMENT '节点证书的公钥/编号(nodeid)',
   address varchar(50) DEFAULT NULL COMMENT '节点证书的节点地址',
   father varchar(120) NOT NULL COMMENT '父证书对应地址(fingerprint)',
-  validity_from date NOT NULL COMMENT '有效期开始',
-  validity_to date NOT NULL COMMENT '有效期截止',
-  modify_time date DEFAULT NULL COMMENT '修改时间',
-  create_time date DEFAULT NULL COMMENT '创建时间',
+  validity_from datetime NOT NULL COMMENT '有效期开始',
+  validity_to datetime NOT NULL COMMENT '有效期截止',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (finger_print)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='证书信息表';
+
+-- ----------------------------
+-- Table structure for tb_alert_rule
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_alert_rule (
+  rule_id int(11) NOT NULL AUTO_INCREMENT COMMENT '告警规则的ID',
+  rule_name varchar(50) NOT NULL COMMENT '告警规则的命名',
+  enable tinyint(4) DEFAULT 0 NOT NULL COMMENT '是否启用规则, 0:false, 1:true',
+  alert_type tinyint(4) NOT NULL COMMENT '告警规则的类型, 1-节点, 2-审计, 3-证书',
+  alert_level varchar(20) NOT NULL COMMENT '告警规则的级别',
+  alert_interval_seconds bigint NOT NULL COMMENT '告警规则的间隔时间(s)',
+  alert_content text NOT NULL COMMENT '告警邮件的内容',
+  content_param_list text NOT NULL COMMENT '告警邮件内容中的可替代参数，如nodeId',
+  description varchar(50) DEFAULT NULL COMMENT '告警规则的描述',
+  is_all_user tinyint(4) DEFAULT 0 NOT NULL COMMENT '是否选中所有用户, 0:false, 1:true',
+  user_list text DEFAULT NULL COMMENT '告警规则作用的用户列表',
+  create_time datetime DEFAULT NULL COMMENT '告警规则的创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '告警规则的修改时间',
+  less_than varchar(40) DEFAULT NULL COMMENT '告警规则：小于某个值',
+  less_and_equal varchar(40) DEFAULT NULL COMMENT '告警规则：小于等于某个值',
+  larger_than varchar(40) DEFAULT NULL COMMENT '告警规则：大于某个值',
+  larger_and_equal varchar(40) DEFAULT NULL COMMENT '告警规则：大于等于某个值',
+  equal varchar(40) DEFAULT NULL COMMENT '告警规则：等于某个值',
+  last_alert_time datetime DEFAULT NULL COMMENT '上次告警的时间，与Interval间隔共同作用',
+  PRIMARY KEY (rule_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='告警规则表';
+
+-- ----------------------------
+-- Table structure for tb_mail_server_config
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_mail_server_config (
+  server_id int(11) NOT NULL AUTO_INCREMENT COMMENT '邮件服务器配置的ID',
+  server_name varchar(40) NOT NULL COMMENT '邮件服务器配置的命名',
+  host varchar(30) NOT NULL COMMENT '邮件服务器的主机',
+  port int(10) DEFAULT NULL COMMENT '邮件服务器的端口',
+  username varchar(40) NOT NULL COMMENT '邮件服务器的邮箱地址',
+  password varchar(40) NOT NULL COMMENT '邮件服务器的邮箱授权码',
+  protocol varchar(10) NOT NULL COMMENT '邮件服务器的协议',
+  default_encoding varchar(10) DEFAULT 'UTF-8' COMMENT '邮件服务器的默认编码(UTF-8)',
+  create_time datetime DEFAULT NULL COMMENT '邮件服务器配置的创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '邮件服务器配置的修改时间',
+  authentication tinyint(4) DEFAULT 1 NOT NULL COMMENT '是否开启验证, 0:false, 1:true',
+  starttls_enable tinyint(4) DEFAULT 1 NOT NULL COMMENT '如支持，是否优先选用STARTTLS, 0:false, 1:true',
+  starttls_required tinyint(4) DEFAULT 0 NOT NULL COMMENT '是否必须使用STARTTLS, 0:false, 1:true',
+  socket_factory_port int(10) DEFAULT 465 NOT NULL COMMENT 'SSL的端口',
+  socket_factory_class varchar(150) DEFAULT 'javax.net.ssl.SSLSocketFactory' NOT NULL COMMENT 'SSL选用的JAVA类',
+  socket_factory_fallback tinyint(4) DEFAULT 0 NOT NULL COMMENT '是否启用SSL的fallback, 0:false, 1:true',
+  status tinyint(4) DEFAULT 0 NOT NULL COMMENT '邮件服务器是否已配置完成，0初始，1完成',
+  connection_timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的连接超时值',
+  timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的通用超时值',
+  write_timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的写超时值',
+  PRIMARY KEY (server_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件服务器配置表';

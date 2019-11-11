@@ -18,23 +18,14 @@ package com.webank.webase.node.mgr.cert;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
-import org.springframework.core.io.ClassPathResource;
 import sun.security.ec.ECPublicKeyImpl;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.security.PublicKey;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 public class CertTools {
@@ -45,6 +36,7 @@ public class CertTools {
     public static final String TYPE_CHAIN = "chain";
     public static final String TYPE_AGENCY = "agency";
     public static final String TYPE_NODE = "node";
+    public static final String TYPE_SDK = "sdk";
     // 首次启动时需要拉取
     public static boolean isPullFrontCertsDone = false;
     /**
