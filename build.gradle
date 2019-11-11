@@ -26,7 +26,9 @@ List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-log4j2:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
-    // "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
+     "org.springframework.boot:spring-boot-starter-mail:$springboot_version",
+     "org.springframework.boot:spring-boot-starter-thymeleaf:$springboot_version"
+     // "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
 ]
 
 List jaxb = [

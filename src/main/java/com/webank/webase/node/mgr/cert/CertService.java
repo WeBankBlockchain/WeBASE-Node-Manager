@@ -339,36 +339,37 @@ public class CertService {
                 throw new NodeMgrException(ConstantCode.SAVING_FRONT_CERT_ERROR);
             }
         }
-        log.debug("end pulling Front's Node Certs.. count:{}", count);
+        log.debug("end pulling Front's Node Certs.. front count:{}", count);
         return count;
     }
 
-    private void saveFrontCert(Map<String, String> certContents) throws IOException, CertificateException {
-        log.debug("start saveFrontCert. address:{} ", certContents);
+    private void saveFrontCert(Map<String, String> certContents) throws CertificateException {
+        log.debug("start saveFrontCert. certContents:{} ", certContents);
         String chainCertContent = certContents.get(CertTools.TYPE_CHAIN);
         String agencyCertContent = certContents.get(CertTools.TYPE_AGENCY);
         String nodeCertContent = certContents.get(CertTools.TYPE_NODE);
-        if(!"".equals(chainCertContent)) {
-            chainCertContent = CertTools.addHeadAndTail(chainCertContent);
-            log.debug("start chainCertContent. :{} ", chainCertContent);
-            saveCerts(chainCertContent);
-            log.debug("end chainCertContent. :{} ", chainCertContent);
-
-        }
-        if(!"".equals(agencyCertContent)) {
-            agencyCertContent = CertTools.addHeadAndTail(agencyCertContent);
-            log.debug("start agencyCertContent. :{} ", chainCertContent);
-            saveCerts(agencyCertContent);
-            log.debug("end agencyCertContent. :{} ", chainCertContent);
-        }
-        if(!"".equals(nodeCertContent)) {
-            nodeCertContent = CertTools.addHeadAndTail(nodeCertContent);
-            log.debug("start nodeCertContent:{} ", nodeCertContent);
-            saveCerts(nodeCertContent);
-            log.debug("end nodeCertContent:{} ", nodeCertContent);
-        }
-        log.debug("end saveFrontCert. address:{} ", certContents);
+        String sdkCertContent = certContents.get(CertTools.TYPE_SDK);
+        handleSaveFrontCertStr(chainCertContent);
+        handleSaveFrontCertStr(agencyCertContent);
+        handleSaveFrontCertStr(nodeCertContent);
+        handleSaveFrontCertStr(sdkCertContent);
+        log.debug("end saveFrontCert. certContents:{} ", certContents);
     }
+
+    /**
+     * handle saving Cert bare string
+     * @param certStr
+     * @throws CertificateException
+     */
+    public void handleSaveFrontCertStr(String certStr) throws CertificateException {
+        if(!"".equals(certStr)) {
+            certStr = CertTools.addHeadAndTail(certStr);
+            log.debug("start handleSaveFrontCertStr:{} ", certStr);
+            saveCerts(certStr);
+            log.debug("end handleSaveFrontCertStr:{} ", certStr);
+        }
+    }
+
     /**
      * check Cert fingerPrint.
      */

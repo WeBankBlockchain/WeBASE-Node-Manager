@@ -22,8 +22,10 @@ import lombok.Data;
  */
 @Data
 public class Node {
-    private Integer groupId;
-    private String nodeIp;
-    private Integer nodeType;
-    private Integer frontPort;
+    private String nodeId;
+    private String nodeType;
+//    private Integer groupId;
+//    private String nodeIp;
+//    private Integer nodeType;
+//    private Integer frontPort;
 }
