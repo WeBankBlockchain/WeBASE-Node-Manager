@@ -21,12 +21,14 @@ import com.webank.webase.node.mgr.account.AccountMapper;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.alert.mail.server.config.MailServerConfigService;
+import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleTools;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -63,50 +65,75 @@ public class MailService {
 
     /**
      * Java Mail Sender Implement config
-     *
      * Server config replace default config in yml
-     * use the last one in table tb_mail_server_config as @Param latest MailServerConfig
+     * use the last one in db's table 'tb_mail_server_config' in @Param latestMailServerConfig
      */
-    public void configJavaMailSenderFromDB() {
-        log.debug("start configJavaMailSenderFromDB. ");
+    public void refreshJavaMailSenderConfigFromDB() {
+        log.debug("start refreshJavaMailSenderConfigFromDB. ");
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         // refresh Java mail sender config
-        refreshJavaMailSenderConfig(latestMailServerConfig);
-        log.debug("end configJavaMailSenderFromDB latestMailServerConfig:{}", latestMailServerConfig);
-    }
-
-    public void refreshJavaMailSenderConfig(TbMailServerConfig latestMailServerConfig) {
-        log.debug("start refreshJavaMailSenderConfig. latestMailServerConfig:{}", latestMailServerConfig);
-        mailSender.setHost(latestMailServerConfig.getHost());
-        if(latestMailServerConfig.getPort() != null ) {
-            mailSender.setPort(latestMailServerConfig.getPort());
-        }
-
-        mailSender.setUsername(latestMailServerConfig.getUsername());
-        mailSender.setPassword(latestMailServerConfig.getPassword());
-        mailSender.setDefaultEncoding(latestMailServerConfig.getDefaultEncoding());
-
-        mailSender.setProtocol(latestMailServerConfig.getProtocol());
-
-        Properties sslProperties = initJavaMailProperties(latestMailServerConfig);
-        log.debug("end refreshJavaMailSenderConfig. sslProperties:{}", sslProperties);
-        mailSender.setJavaMailProperties(sslProperties);
-
+        initJavaMailSenderConfig(latestMailServerConfig);
+        log.debug("end refreshJavaMailSenderConfigFromDB latestMailServerConfig:{}", latestMailServerConfig);
     }
 
     /**
+     * Java Mail Sender Implement config
+     * Server config replace default config in yml
+     * use the configs from web's request body @Param reqMailServerConfigParam
+     *
+     * web's config has been check in MailController,
+     * but @protocol and @sslProperties need checkout and if empty,
+     * init it from db's config, see function @initJavaMailProperties and @checkMailServerConfigAndInit
+     */
+    public void refreshJavaMailSenderConfigFromWeb(ReqMailServerConfigParam reqMailServerConfigParam) {
+        log.debug("start refreshJavaMailSenderConfigFromWeb. ");
+        // init empty param from db
+        ReqMailServerConfigParam reqConfigParamAfterInit = checkMailServerConfigAndInit(reqMailServerConfigParam);
+
+        TbMailServerConfig tempMailServerConfigFromWeb = new TbMailServerConfig();
+        BeanUtils.copyProperties(reqConfigParamAfterInit, tempMailServerConfigFromWeb);
+        // refresh Java mail sender config
+        initJavaMailSenderConfig(tempMailServerConfigFromWeb);
+        log.debug("end refreshJavaMailSenderConfigFromWeb tempMailServerConfigFromWeb:{}", tempMailServerConfigFromWeb);
+    }
+
+    /**
+     * latestMailServerConfig might come from db or web
+     * @param latestMailServerConfig
+     */
+    public void initJavaMailSenderConfig(TbMailServerConfig latestMailServerConfig) {
+        log.debug("start refreshJavaMailSenderConfig. latestMailServerConfig:{}", latestMailServerConfig);
+        mailSender.setHost(latestMailServerConfig.getHost());
+        mailSender.setPort(latestMailServerConfig.getPort());
+        Boolean isAuthEnable = latestMailServerConfig.getAuthentication() == EnableStatus.ON.getValue();
+        if(isAuthEnable) {
+            mailSender.setUsername(latestMailServerConfig.getUsername());
+            mailSender.setPassword(latestMailServerConfig.getPassword());
+        }
+        mailSender.setDefaultEncoding(latestMailServerConfig.getDefaultEncoding());
+        mailSender.setProtocol(latestMailServerConfig.getProtocol());
+        // init properties
+        Properties sslProperties = initJavaMailProperties(latestMailServerConfig);
+        log.debug("end refreshJavaMailSenderConfig. sslProperties:{}", sslProperties);
+        mailSender.setJavaMailProperties(sslProperties);
+    }
+
+    /**
+     * set properties of JavaMailSender's config
      * set " + protocolName + "/pop3/imap java mailsender configuration
      */
     private Properties initJavaMailProperties(TbMailServerConfig latestMailServerConfig) {
+
         // set SMTP JavaMailProperties such as ssl configuration
         Properties sslProperties = new Properties();
         Boolean isAuthEnable = latestMailServerConfig.getAuthentication() == EnableStatus.ON.getValue();
-        Boolean isSTARTTLSEnable = latestMailServerConfig.getStarttlsEnable() == EnableStatus.ON.getValue();
         String protocolName = latestMailServerConfig.getProtocol().toLowerCase();
         sslProperties.setProperty("mail." + protocolName + ".auth",
                 String.valueOf(isAuthEnable));
+        Boolean isSTARTTLSEnable = latestMailServerConfig.getStarttlsEnable() == EnableStatus.ON.getValue();;
         sslProperties.setProperty("mail." + protocolName + ".starttls.enable",
                 String.valueOf(isSTARTTLSEnable));
+
         // 设置读取超时时间，连接超时时间、、写入超时时间
         sslProperties.setProperty("mail." + protocolName + ".timeout",
                 String.valueOf(latestMailServerConfig.getTimeout()));
@@ -140,13 +167,13 @@ public class MailService {
         log.debug("start sendMailByRule ruleId:{},replacementText:{}",
                 ruleId, replacementText);
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
-        // if mail server not config
-        if(latestMailServerConfig.getStatus() == EnableStatus.OFF.getValue()) {
+        // if mail server not turn ON
+        if(latestMailServerConfig.getEnable() == EnableStatus.OFF.getValue()) {
             log.error("end sendMailByRule for server config not done:{}", latestMailServerConfig);
             return;
         }
         TbAlertRule alertRule = alertRuleMapper.queryByRuleId(ruleId);
-        // if not activated
+        // if alert not activated
         if(alertRule.getEnable() == EnableStatus.OFF.getValue()) {
             log.debug("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
             return;
@@ -234,7 +261,7 @@ public class MailService {
         log.debug("start sendMailBare from:{},to:{},emailTitle:{},emailFinalContent:{}",
                 from, to, emailTitle, emailFinalContent);
         // refresh java mail sender config from db, cover yml's config
-        configJavaMailSenderFromDB();
+        refreshJavaMailSenderConfigFromDB();
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = null;
         try {
@@ -268,11 +295,51 @@ public class MailService {
         Long actualInterval = Timestamp.valueOf(now).getTime()
                 - Timestamp.valueOf(lastAlertTime).getTime();
 
-        if(actualInterval < alertInterval) {
-            return true;
-        }else {
-            return false;
+        return actualInterval < alertInterval;
+
+    }
+
+    /**
+     * init empty param from db
+     * @param reqMailServerConfigParam
+     * @return param after fill up with db's config
+     */
+    public ReqMailServerConfigParam checkMailServerConfigAndInit(ReqMailServerConfigParam reqMailServerConfigParam) {
+        TbMailServerConfig configFromDB = mailServerConfigService.getLatestMailServerConfig();
+
+        if(reqMailServerConfigParam.getProtocol() == null) {
+            reqMailServerConfigParam.setProtocol(configFromDB.getProtocol());
         }
+        if(reqMailServerConfigParam.getDefaultEncoding() == null) {
+            reqMailServerConfigParam.setDefaultEncoding(configFromDB.getDefaultEncoding());
+        }
+        if(reqMailServerConfigParam.getStarttlsEnable() == null) {
+            reqMailServerConfigParam.setStarttlsEnable(configFromDB.getStarttlsEnable());
+        }
+        if(reqMailServerConfigParam.getConnectionTimeout() == null) {
+            reqMailServerConfigParam.setConnectionTimeout(configFromDB.getConnectionTimeout());
+        }
+        if(reqMailServerConfigParam.getTimeout() == null) {
+            reqMailServerConfigParam.setTimeout(configFromDB.getTimeout());
+        }
+        if(reqMailServerConfigParam.getWriteTimeout() == null) {
+            reqMailServerConfigParam.setWriteTimeout(configFromDB.getWriteTimeout());
+        }
+        if(reqMailServerConfigParam.getStarttlsRequired() == null) {
+            reqMailServerConfigParam.setStarttlsRequired(configFromDB.getStarttlsRequired());
+        }else if(reqMailServerConfigParam.getStarttlsRequired() == EnableStatus.ON.getValue()) {
+            // init socket ssl config from db
+            if(reqMailServerConfigParam.getSocketFactoryClass() == null) {
+                reqMailServerConfigParam.setSocketFactoryClass(configFromDB.getSocketFactoryClass());
+            }
+            if(reqMailServerConfigParam.getSocketFactoryFallback() == null) {
+                reqMailServerConfigParam.setSocketFactoryFallback(configFromDB.getSocketFactoryFallback());
+            }
+            if(reqMailServerConfigParam.getSocketFactoryPort() == null) {
+                reqMailServerConfigParam.setSocketFactoryPort(configFromDB.getSocketFactoryPort());
+            }
+        }
+        return reqMailServerConfigParam;
     }
 
 }
