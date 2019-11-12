@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_rule (
   alert_content text NOT NULL COMMENT '告警邮件的内容',
   content_param_list text NOT NULL COMMENT '告警邮件内容中的可替代参数，如nodeId',
   description varchar(50) DEFAULT NULL COMMENT '告警规则的描述',
-  is_all_user tinyint(4) DEFAULT 0 NOT NULL COMMENT '是否选中所有用户, 0:false, 1:true',
+  is_all_user tinyint(4) DEFAULT 0 COMMENT '是否选中所有用户, 0:false, 1:true',
   user_list text DEFAULT NULL COMMENT '告警规则作用的用户列表',
   create_time datetime DEFAULT NULL COMMENT '告警规则的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '告警规则的修改时间',
@@ -260,22 +260,38 @@ CREATE TABLE IF NOT EXISTS tb_mail_server_config (
   server_id int(11) NOT NULL AUTO_INCREMENT COMMENT '邮件服务器配置的ID',
   server_name varchar(40) NOT NULL COMMENT '邮件服务器配置的命名',
   host varchar(30) NOT NULL COMMENT '邮件服务器的主机',
-  port int(10) DEFAULT NULL COMMENT '邮件服务器的端口',
+  port int(10) DEFAULT '25' NOT NULL COMMENT '邮件服务器的端口',
   username varchar(40) NOT NULL COMMENT '邮件服务器的邮箱地址',
   password varchar(40) NOT NULL COMMENT '邮件服务器的邮箱授权码',
   protocol varchar(10) NOT NULL COMMENT '邮件服务器的协议',
-  default_encoding varchar(10) DEFAULT 'UTF-8' COMMENT '邮件服务器的默认编码(UTF-8)',
+  default_encoding varchar(10) DEFAULT 'UTF-8' NOT NULL COMMENT '邮件服务器的默认编码(UTF-8)',
   create_time datetime DEFAULT NULL COMMENT '邮件服务器配置的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '邮件服务器配置的修改时间',
   authentication tinyint(4) DEFAULT 1 NOT NULL COMMENT '是否开启验证, 0:false, 1:true',
   starttls_enable tinyint(4) DEFAULT 1 NOT NULL COMMENT '如支持，是否优先选用STARTTLS, 0:false, 1:true',
-  starttls_required tinyint(4) DEFAULT 0 NOT NULL COMMENT '是否必须使用STARTTLS, 0:false, 1:true',
-  socket_factory_port int(10) DEFAULT 465 NOT NULL COMMENT 'SSL的端口',
-  socket_factory_class varchar(150) DEFAULT 'javax.net.ssl.SSLSocketFactory' NOT NULL COMMENT 'SSL选用的JAVA类',
-  socket_factory_fallback tinyint(4) DEFAULT 0 NOT NULL COMMENT '是否启用SSL的fallback, 0:false, 1:true',
-  status tinyint(4) DEFAULT 0 NOT NULL COMMENT '邮件服务器是否已配置完成，0初始，1完成',
+  starttls_required tinyint(4) DEFAULT 0 COMMENT '是否必须使用STARTTLS, 0:false, 1:true',
+  socket_factory_port int(10) DEFAULT 465 COMMENT 'SSL的端口',
+  socket_factory_class varchar(150) DEFAULT 'javax.net.ssl.SSLSocketFactory' COMMENT 'SSL选用的JAVA类',
+  socket_factory_fallback tinyint(4) DEFAULT 0 COMMENT '是否启用SSL的fallback, 0:false, 1:true',
+  enable tinyint(4) DEFAULT 0 NOT NULL COMMENT '邮件服务器是否已配置完成，0初始，1完成',
   connection_timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的连接超时值',
   timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的通用超时值',
   write_timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的写超时值',
   PRIMARY KEY (server_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件服务器配置表';
+
+-- ----------------------------
+-- Table structure for tb_alert_log
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_alert_log (
+  log_id int(11) NOT NULL AUTO_INCREMENT COMMENT '告警日志的编号',
+  alert_type tinyint(4) NOT NULL COMMENT '告警日志的类型, 1-节点, 2-审计, 3-证书',
+  alert_level tinyint(4) NOT NULL COMMENT '告警日志的告警等级：1-high, 2-middle, 3-low',
+  alert_content text NOT NULL COMMENT '告警日志的内容',
+  description text DEFAULT NULL COMMENT '告警日志的描述',
+  status tinyint(4) NOT NULL DEFAULT '0' COMMENT '告警日志的状态：0-未处理，1-已处理',
+  create_time datetime DEFAULT NULL COMMENT '告警日志的创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '告警日志的修改时间',
+  PRIMARY KEY (log_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='告警日志表';
+
