@@ -72,7 +72,7 @@ public class TbMailServerConfig {
      * if edited and done, status is 1, else is 0
      * if not done, cannot send mails
      */
-    private Integer status;
+    private Integer enable;
 
     /**
      *  time out config

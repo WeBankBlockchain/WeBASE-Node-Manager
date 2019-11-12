@@ -102,7 +102,7 @@ public class MailServerConfigService {
             configMapper.update(tbMailServerConfig);
             log.debug("end updateMailServerConfig. ");
         }catch (Exception e) {
-            log.error("getAllMailServerConfig error exception:{}", e);
+            log.error("updateMailServerConfig error exception:[]", e);
             throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG_ERROR.getCode(),
                     e.getMessage());
         }
