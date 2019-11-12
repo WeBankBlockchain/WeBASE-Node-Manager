@@ -35,12 +35,14 @@ public class AlertLogService {
     @Autowired
     AlertLogMapper alertLogMapper;
 
-    public void saveAlertLog(AlertLog alertLog) {
-        log.debug("start saveAlertLog alertLog:{}", alertLog);
-        if(alertLog.getStatus() == null) {
-            alertLog.setStatus(EnableStatus.OFF.getValue());
+    public void saveAlertLog(ReqAlertLogParam inputParam) {
+        log.debug("start saveAlertLog alertLog:{}", inputParam);
+        if(inputParam.getStatus() == null) {
+            inputParam.setStatus(EnableStatus.OFF.getValue());
         }
+        AlertLog alertLog = new AlertLog();
         try{
+            BeanUtils.copyProperties(inputParam, alertLog);
             alertLogMapper.add(alertLog);
             log.debug("end saveAlertLog. ");
         }catch (Exception e) {
@@ -76,7 +78,9 @@ public class AlertLogService {
         log.debug("start updateAlertLog ReqAlertLogParam inputParam:{}", inputParam);
         AlertLog alertLog = new AlertLog();
         try{
-            BeanUtils.copyProperties(inputParam, alertLog);
+            // only change status
+            alertLog.setStatus(inputParam.getStatus());
+            alertLog.setLogId(inputParam.getLogId());
             alertLogMapper.update(alertLog);
             log.debug("end updateAlertLog. ");
         }catch (Exception e) {

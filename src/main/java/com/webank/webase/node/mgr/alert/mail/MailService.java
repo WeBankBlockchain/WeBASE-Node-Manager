@@ -24,7 +24,7 @@ import com.webank.webase.node.mgr.alert.mail.server.config.MailServerConfigServi
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
-import com.webank.webase.node.mgr.alert.rule.AlertRuleTools;
+import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import lombok.extern.log4j.Log4j2;
@@ -82,7 +82,7 @@ public class MailService {
      * use the configs from web's request body @Param reqMailServerConfigParam
      *
      * web's config has been check in MailController,
-     * but @protocol and @sslProperties need checkout and if empty,
+     * but @protocol and @sslProperties need check if empty,
      * init it from db's config, see function @initJavaMailProperties and @checkMailServerConfigAndInit
      */
     public void refreshJavaMailSenderConfigFromWeb(ReqMailServerConfigParam reqMailServerConfigParam) {
