@@ -61,10 +61,10 @@ constant:
   isMonitorIgnoreUser: false
   isMonitorIgnoreContract: false
   monitorUnusualMaxCount: 20
-  ###alert mail monitor task interval unit: ms
-  auditMonitorTaskFixedDelay: 86400000
-  nodeStatusMonitorTaskFixedDelay: 86400000
-  certMonitorTaskFixedDelay: 86400000
+  ###alert mail monitor task interval: 5mins unit: ms
+  auditMonitorTaskFixedDelay: 300000
+  nodeStatusMonitorTaskFixedDelay: 300000
+  certMonitorTaskFixedDelay: 300000
 
 # executor config
 executor:
