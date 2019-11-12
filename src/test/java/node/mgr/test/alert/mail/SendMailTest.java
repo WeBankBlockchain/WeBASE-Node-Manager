@@ -21,7 +21,7 @@ import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.alert.mail.MailService;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
-import com.webank.webase.node.mgr.alert.rule.AlertRuleTools;
+import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
