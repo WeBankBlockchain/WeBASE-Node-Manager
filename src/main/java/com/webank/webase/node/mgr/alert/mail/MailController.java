@@ -62,7 +62,7 @@ public class MailController {
      * @return
      */
     @PostMapping("/test/{toMailAddress}")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object sendTestMail(@PathVariable("toMailAddress")String toMailAddress,
                                   @RequestBody ReqMailServerConfigParam reqMailServerConfigParam) {
         Instant startTime = Instant.now();
@@ -83,11 +83,6 @@ public class MailController {
         context.setVariable("time", formatTool.format(new Date()));
         String emailFinalContent = templateEngine.process("AlertEmailForTest", context);
 
-        if(reqMailServerConfigParam.getEnable() == EnableStatus.OFF.getValue()) {
-            log.info("end sendDefaultMail for status is off. useTime:{}",
-                    Duration.between(startTime, Instant.now()).toMillis());
-            return new BaseResponse(ConstantCode.SEND_MAIL_ERROR_FOR_SERVER_IS_OFF);
-        }
         try {
             mailService.sendMailBare(fromMailAddress, toMailAddress,
                     testTitle, emailFinalContent);
@@ -103,7 +98,7 @@ public class MailController {
     public void checkParamEmpty(ReqMailServerConfigParam reqMailServerConfigParam) {
         log.debug("start checkParamEmpty reqMailServerConfigParam:{}", reqMailServerConfigParam);
         if(reqMailServerConfigParam.getServerId() == null || reqMailServerConfigParam.getPort() == null ||
-        reqMailServerConfigParam.getAuthentication() == null || reqMailServerConfigParam.getEnable() == null ||
+        reqMailServerConfigParam.getAuthentication() == null ||
                 StringUtils.isEmpty(reqMailServerConfigParam.getHost())) {
             log.error("error checkParamEmpty reqMailServerConfigParam:{}", reqMailServerConfigParam);
             throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);

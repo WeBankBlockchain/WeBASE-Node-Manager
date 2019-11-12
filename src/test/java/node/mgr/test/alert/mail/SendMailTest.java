@@ -66,8 +66,8 @@ public class SendMailTest {
      */
     @Test
     public void testSendingByRule() {
-
-        mailService.sendMailByRule(4, "WeBASE-Node-Manager");
+        // make sure mail server config is enabled
+        mailService.sendMailByRule(3, "WeBASE-Node-Manager in Test");
     }
 
     /**
@@ -78,6 +78,7 @@ public class SendMailTest {
         // add date in content
         SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date = formatTool.format(new Date());
+        mailService.refreshJavaMailSenderConfigFromDB();
         mailService.sendMailBare(fromMailAddress, toMailAddress,
                 testTitle, testContent + "\n " + date);
     }

@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import javax.mail.MessagingException;
@@ -86,7 +87,8 @@ public class MailService {
      * init it from db's config, see function @initJavaMailProperties and @checkMailServerConfigAndInit
      */
     public void refreshJavaMailSenderConfigFromWeb(ReqMailServerConfigParam reqMailServerConfigParam) {
-        log.debug("start refreshJavaMailSenderConfigFromWeb. ");
+        log.debug("start refreshJavaMailSenderConfigFromWeb. reqMailServerConfigParam:{}",
+                reqMailServerConfigParam);
         // init empty param from db
         ReqMailServerConfigParam reqConfigParamAfterInit = checkMailServerConfigAndInit(reqMailServerConfigParam);
 
@@ -102,7 +104,7 @@ public class MailService {
      * @param latestMailServerConfig
      */
     public void initJavaMailSenderConfig(TbMailServerConfig latestMailServerConfig) {
-        log.debug("start refreshJavaMailSenderConfig. latestMailServerConfig:{}", latestMailServerConfig);
+        log.debug("start initJavaMailSenderConfig. latestMailServerConfig:{}", latestMailServerConfig);
         mailSender.setHost(latestMailServerConfig.getHost());
         mailSender.setPort(latestMailServerConfig.getPort());
         Boolean isAuthEnable = latestMailServerConfig.getAuthentication() == EnableStatus.ON.getValue();
@@ -114,7 +116,7 @@ public class MailService {
         mailSender.setProtocol(latestMailServerConfig.getProtocol());
         // init properties
         Properties sslProperties = initJavaMailProperties(latestMailServerConfig);
-        log.debug("end refreshJavaMailSenderConfig. sslProperties:{}", sslProperties);
+        log.debug("end initJavaMailSenderConfig. sslProperties:{}", sslProperties);
         mailSender.setJavaMailProperties(sslProperties);
     }
 
@@ -169,7 +171,7 @@ public class MailService {
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         // if mail server not turn ON
         if(latestMailServerConfig.getEnable() == EnableStatus.OFF.getValue()) {
-            log.error("end sendMailByRule for server config not done:{}", latestMailServerConfig);
+            log.error("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
             return;
         }
         TbAlertRule alertRule = alertRuleMapper.queryByRuleId(ruleId);
@@ -181,6 +183,11 @@ public class MailService {
         // last time alert by now, if within interval, not send
         if(isWithinAlertIntervalByNow(alertRule)) {
             log.debug("end sendMailByRule non-sending mail for beyond alert interval:{}", alertRule);
+            return;
+        }
+        if(StringUtils.isEmpty(alertRule.getUserList()) ||
+        "[\"targetmail@qq.com\"]".equals(alertRule.getUserList())) {
+            log.error("end sendMailByRule for no receive mail address:{}", alertRule);
             return;
         }
         String emailTitle = AlertRuleTools.getAlertTypeStrFromEnum(alertRule.getAlertType());
@@ -198,9 +205,19 @@ public class MailService {
         SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         context.setVariable("time", formatTool.format(new Date()));
         String emailFinalContent = templateEngine.process("AlertEmailTemplate", context);
+
+        // refresh JavaMailSender's config from db
+        refreshJavaMailSenderConfigFromDB();
         // 将告警发到userList，如果是全选用户
         handleAllUserEmail(alertRule, emailTitle, emailFinalContent);
+        // update alert rule's last alertTime
+//        TbAlertRule updateAlertTime = new TbAlertRule();
+//        updateAlertTime.setRuleId(alertRule.getRuleId());
+//        updateAlertTime.setLastAlertTime(LocalDateTime.now());
         alertRule.setLastAlertTime(LocalDateTime.now());
+        log.debug("sendMailByRule update alert rule's last alert time updateAlertTime:{}",
+                alertRule);
+        alertRuleMapper.update(alertRule);
         log.debug("end sendMailByRule. ");
     }
 
@@ -261,7 +278,7 @@ public class MailService {
         log.debug("start sendMailBare from:{},to:{},emailTitle:{},emailFinalContent:{}",
                 from, to, emailTitle, emailFinalContent);
         // refresh java mail sender config from db, cover yml's config
-        refreshJavaMailSenderConfigFromDB();
+//        refreshJavaMailSenderConfigFromDB();
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = null;
         try {
