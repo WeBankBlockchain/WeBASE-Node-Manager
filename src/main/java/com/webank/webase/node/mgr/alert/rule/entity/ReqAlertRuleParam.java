@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class AlertRuleParam {
+public class ReqAlertRuleParam {
 
     private Integer ruleId;
     private String ruleName;

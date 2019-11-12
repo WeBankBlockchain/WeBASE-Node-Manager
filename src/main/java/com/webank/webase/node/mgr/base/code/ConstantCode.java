@@ -129,7 +129,7 @@ public class ConstantCode {
     public static final RetCode SEND_MAIL_ERROR = RetCode.mark(202080, "Send mail error, please check mail server configuration.");
     public static final RetCode SEND_MAIL_ERROR_FOR_SERVER_IS_OFF = RetCode.mark(202081, "Send mail error, please enable mail server before send.");
     public static final RetCode ALERT_LOG_ERROR = RetCode.mark(202086, "Alert log error.");
-    public static final RetCode ALERT_LOG_PARAM_EMPTY = RetCode.mark(202087, "Alert log param empty.");
+    public static final RetCode ALERT_LOG_PARAM_EMPTY = RetCode.mark(202087, "Alert log param: status/logId is empty.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
