@@ -109,7 +109,7 @@
         <if test="equal != null and equal != ''">
             ,equal = #{equal}
         </if>
-        <if test="lastAlertTime != null and lastAlertTime != ''">
+        <if test="lastAlertTime != null">
             ,last_alert_time = #{lastAlertTime}
         </if>
         where rule_id = #{ruleId}
