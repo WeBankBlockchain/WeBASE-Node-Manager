@@ -36,8 +36,8 @@
                 property="socketFactoryClass" />
         <result column="socket_factory_fallback" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="socketFactoryFallback" />
-        <result column="status" javaType="java.lang.Integer" jdbcType="INTEGER"
-                property="status" />
+        <result column="enable" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="enable" />
         <result column="connection_timeout" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="connectionTimeout" />
         <result column="timeout" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -50,12 +50,12 @@
     <insert id="add" parameterType="com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig">
         REPLACE INTO tb_mail_server_config(server_id,server_name,host,port,username,password,
         protocol,default_encoding,create_time,modify_time,authentication,starttls_enable,
-        starttls_required,socket_factory_port,socket_factory_class,socket_factory_fallback,status,
+        starttls_required,socket_factory_port,socket_factory_class,socket_factory_fallback,enable,
         connection_timeout,timeout,write_timeout)
         VALUES (#{serverId},#{serverName},#{host},#{port},#{username},#{password},
         #{protocol},#{defaultEncoding}, now(), now(), #{authentication},#{starttlsEnable},
         #{starttlsRequired},#{socketFactoryPort},#{socketFactoryClass},#{socketFactoryFallback},
-        #{status},#{connectionTimeout},#{timeout},#{writeTimeout})
+        #{enable},#{connectionTimeout},#{timeout},#{writeTimeout})
     </insert>
 
     <delete id="deleteByServerId" parameterType="java.lang.Integer">
@@ -104,8 +104,8 @@
         <if test="socketFactoryFallback != null">
             ,socket_factory_fallback = #{socketFactoryFallback}
         </if>
-        <if test="status != null">
-            ,status = #{status}
+        <if test="enable != null">
+            ,enable = #{enable}
         </if>
         <if test="connectionTimeout != null and connectionTimeout != ''">
             ,connection_timeout = #{connectionTimeout}
