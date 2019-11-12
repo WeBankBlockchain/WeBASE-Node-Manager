@@ -67,15 +67,15 @@ public class AlertLogController {
      * @return
      */
     @PutMapping("")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateAlertLog(@RequestBody ReqAlertLogParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertLog. startTime:{} ReqAlertLogParam:{}",
                 startTime.toEpochMilli(), JSON.toJSONString(param));
         if(param.getStatus() == null || param.getLogId() == null) {
             log.debug("updateAlertLog, error:{} ",
-                    ConstantCode.ALERT_RULE_PARAM_EMPTY);
-            return new BaseResponse(ConstantCode.ALERT_RULE_PARAM_EMPTY);
+                    ConstantCode.ALERT_LOG_PARAM_EMPTY);
+            return new BaseResponse(ConstantCode.ALERT_LOG_PARAM_EMPTY);
         }
         try{
             alertLogService.updateAlertLog(param);
@@ -101,7 +101,7 @@ public class AlertLogController {
     }
 
     @PostMapping("")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object saveAlertLog(@RequestBody ReqAlertLogParam param) {
         Instant startTime = Instant.now();
         log.info("start saveAlertLog. startTime:{} ReqAlertLogParam:{}",
@@ -110,13 +110,11 @@ public class AlertLogController {
                 StringUtils.isEmpty(param.getAlertLevel()) ||
                 StringUtils.isEmpty(param.getAlertType())) {
             log.debug("saveAlertLog, error:{} ",
-                    ConstantCode.ALERT_RULE_PARAM_EMPTY);
-            return new BaseResponse(ConstantCode.ALERT_RULE_PARAM_EMPTY);
+                    ConstantCode.ALERT_LOG_PARAM_EMPTY);
+            return new BaseResponse(ConstantCode.ALERT_LOG_PARAM_EMPTY);
         }
-        AlertLog alertLog = new AlertLog();
         try{
-            BeanUtils.copyProperties(param, alertLog);
-            alertLogService.saveAlertLog(alertLog);
+            alertLogService.saveAlertLog(param);
         }catch (NodeMgrException e) {
             log.debug("saveAlertLog, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());

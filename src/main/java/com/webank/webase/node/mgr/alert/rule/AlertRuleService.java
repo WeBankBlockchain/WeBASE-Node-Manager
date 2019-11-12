@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.rule;
 
-import com.webank.webase.node.mgr.alert.rule.entity.AlertRuleParam;
+import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -34,8 +34,9 @@ public class AlertRuleService {
     @Autowired
     AlertRuleMapper alertRuleMapper;
 
-    public void saveAlertRule(AlertRuleParam newRuleParam) {
+    public void saveAlertRule(ReqAlertRuleParam newRuleParam) {
         log.debug("start saveAlertRule AlertRuleParam newRuleParam:{}", newRuleParam);
+        checkAndInitAlertRule(newRuleParam);
         TbAlertRule tbAlertRule = new TbAlertRule();
         try{
             BeanUtils.copyProperties(newRuleParam, tbAlertRule);
@@ -68,7 +69,7 @@ public class AlertRuleService {
         return resAlertRule;
     }
 
-    public void updateAlertRule(AlertRuleParam updateRuleParam) {
+    public void updateAlertRule(ReqAlertRuleParam updateRuleParam) {
         log.debug("start updateAlertRule updateRuleParam:{}", updateRuleParam);
         TbAlertRule tbAlertRule = new TbAlertRule();
         try{
@@ -95,4 +96,13 @@ public class AlertRuleService {
         }
     }
 
+    private void checkAndInitAlertRule(ReqAlertRuleParam inputParam) {
+        if(inputParam.getEnable() == null) {
+            inputParam.setEnable(0);
+        }
+        if(inputParam.getIsAllUser() == null) {
+            inputParam.setIsAllUser(0);
+        }
+
+    }
 }

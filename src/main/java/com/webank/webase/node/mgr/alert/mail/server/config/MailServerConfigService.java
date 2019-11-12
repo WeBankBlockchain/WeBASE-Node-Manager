@@ -19,11 +19,13 @@ package com.webank.webase.node.mgr.alert.mail.server.config;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,7 @@ public class MailServerConfigService {
      */
     public void saveMailServerConfig(ReqMailServerConfigParam inputParam) {
         log.debug("start saveMailServerConfig ReqMailServerConfigParam inputParam:{}", inputParam);
+        checkAndInitMailServerConfig(inputParam);
         TbMailServerConfig tbMailServerConfig = new TbMailServerConfig();
         try{
             BeanUtils.copyProperties(inputParam, tbMailServerConfig);
@@ -115,4 +118,42 @@ public class MailServerConfigService {
 
     }
 
+    private void checkAndInitMailServerConfig(ReqMailServerConfigParam inputParam) {
+        if(inputParam.getEnable() == null) {
+            inputParam.setEnable(EnableStatus.OFF.getValue());
+        }
+        if(inputParam.getPort() == null) {
+            inputParam.setPort(25);
+        }
+        if(StringUtils.isEmpty(inputParam.getDefaultEncoding())) {
+            inputParam.setDefaultEncoding("UTF-8");
+        }
+        if(inputParam.getAuthentication() == null) {
+            inputParam.setAuthentication(EnableStatus.ON.getValue());
+        }
+        if(inputParam.getStarttlsEnable() == null) {
+            inputParam.setStarttlsEnable(EnableStatus.ON.getValue());
+        }
+        if(inputParam.getStarttlsRequired() == null) {
+            inputParam.setStarttlsRequired(EnableStatus.OFF.getValue());
+        }
+        if(inputParam.getSocketFactoryFallback() == null) {
+            inputParam.setEnable(EnableStatus.OFF.getValue());
+        }
+        if(inputParam.getSocketFactoryPort() == null) {
+            inputParam.setSocketFactoryPort(465);
+        }
+        if(StringUtils.isEmpty(inputParam.getSocketFactoryClass())) {
+            inputParam.setSocketFactoryClass("javax.net.ssl.SSLSocketFactory");
+        }
+        if(inputParam.getTimeout() == null) {
+            inputParam.setTimeout(5000);
+        }
+        if(inputParam.getConnectionTimeout() == null) {
+            inputParam.setConnectionTimeout(5000);
+        }
+        if(inputParam.getWriteTimeout() == null) {
+            inputParam.setWriteTimeout(5000);
+        }
+    }
 }
