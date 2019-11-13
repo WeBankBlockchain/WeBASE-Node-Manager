@@ -28,7 +28,6 @@ import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeParam;
 import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 
@@ -127,7 +126,7 @@ public class FrontService {
                 nodeService.addNodeInfo(group, newPeer);
             }
             // add sealer(consensus node) and observer in nodeList
-            List<PeerInfo> sealerAndObserverList = getSealerAndObserverList(group);
+            List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(group);
             sealerAndObserverList.stream()
                     .forEach(peerInfo -> {
                         NodeParam checkParam = new NodeParam();
@@ -148,20 +147,6 @@ public class FrontService {
         return tbFront;
     }
 
-    /**
-     * add sealer and observer in NodeList
-     * return: List<String> nodeIdList
-     */
-    public List<PeerInfo> getSealerAndObserverList(int groupId) {
-        log.debug("start getSealerAndObserverList groupId:{}", groupId);
-        List<String> sealerList = frontInterface.getSealerList(groupId);
-        List<String> observerList = frontInterface.getObserverList(groupId);
-        List<PeerInfo> resList = new ArrayList<>();
-        sealerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
-        observerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
-        log.debug("end getSealerAndObserverList resList:{}", resList);
-        return resList;
-    }
 
 
 
