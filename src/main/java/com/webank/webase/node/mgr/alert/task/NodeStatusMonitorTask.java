@@ -101,6 +101,7 @@ public class NodeStatusMonitorTask {
         List<String> abnormalNodeIdList = new ArrayList<>();
         nodeList.stream()
             .forEach(node -> {
+                // check whether node is invalid
                 if(isNodeAbnormalAndNotRemove(node)) {
                     abnormalNodeIdList.add(node.getNodeId());
                 }
