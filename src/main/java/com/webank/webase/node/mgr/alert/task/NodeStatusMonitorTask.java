@@ -54,7 +54,7 @@ public class NodeStatusMonitorTask {
     @Autowired
     private MailService alertMailService;
 
-    @Scheduled(fixedDelayString = "${constant.certMonitorTaskFixedDelay}")
+    @Scheduled(fixedDelayString = "${constant.nodeStatusMonitorTaskFixedDelay}")
     public void nodeAlertTaskStart() {
         checkAllNodeStatusForAlert();
     }
