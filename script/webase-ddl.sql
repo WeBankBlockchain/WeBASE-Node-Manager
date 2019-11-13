@@ -235,7 +235,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_rule (
   rule_name varchar(50) NOT NULL COMMENT '告警规则的命名',
   enable tinyint(4) DEFAULT 0 NOT NULL COMMENT '是否启用规则, 0:false, 1:true',
   alert_type tinyint(4) NOT NULL COMMENT '告警规则的类型, 1-节点, 2-审计, 3-证书',
-  alert_level varchar(20) NOT NULL COMMENT '告警规则的级别',
+  alert_level tinyint(4) NOT NULL COMMENT '告警规则的级别, 1-高, 2-中, 3-低',
   alert_interval_seconds bigint NOT NULL COMMENT '告警规则的间隔时间(s)',
   alert_content text NOT NULL COMMENT '告警邮件的内容',
   content_param_list text NOT NULL COMMENT '告警邮件内容中的可替代参数，如nodeId',

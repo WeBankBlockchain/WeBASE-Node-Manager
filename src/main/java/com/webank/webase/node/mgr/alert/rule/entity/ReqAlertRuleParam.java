@@ -31,7 +31,7 @@ public class ReqAlertRuleParam {
     private Integer alertType;
     // unit: s
     private Long alertIntervalSeconds;
-    private String alertLevel;
+    private Integer alertLevel;
     // 用html模板组件
     private String alertContent;
     // 序列化
