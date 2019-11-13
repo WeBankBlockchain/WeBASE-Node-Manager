@@ -267,7 +267,7 @@ public class CertService {
             X509CertImpl temp = loadSingleCertFromCrtContent(tbCert.getContent());
             x509CertList.add(temp);
         }
-        log.debug("end loadAllX509Certs. certList:{}", x509CertList);
+        log.debug("end loadAllX509Certs. ");
         return x509CertList;
     }
 
