@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class AlertRuleParam {
+public class ReqAlertRuleParam {
 
     private Integer ruleId;
     private String ruleName;
@@ -31,7 +31,7 @@ public class AlertRuleParam {
     private Integer alertType;
     // unit: s
     private Long alertIntervalSeconds;
-    private String alertLevel;
+    private Integer alertLevel;
     // 用html模板组件
     private String alertContent;
     // 序列化

@@ -12,7 +12,7 @@
                 property="enable" />
         <result column="alert_type" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="alertType" />
-        <result column="alert_level" javaType="java.lang.String" jdbcType="VARCHAR"
+        <result column="alert_level" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="alertLevel" />
         <result column="alert_interval_seconds" javaType="java.lang.Long" jdbcType="BIGINT"
                 property="alertIntervalSeconds" />
@@ -109,7 +109,7 @@
         <if test="equal != null and equal != ''">
             ,equal = #{equal}
         </if>
-        <if test="lastAlertTime != null and lastAlertTime != ''">
+        <if test="lastAlertTime != null">
             ,last_alert_time = #{lastAlertTime}
         </if>
         where rule_id = #{ruleId}

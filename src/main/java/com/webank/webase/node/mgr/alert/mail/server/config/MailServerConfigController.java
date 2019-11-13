@@ -70,6 +70,7 @@ public class MailServerConfigController {
 
     /**
      * update mail server config, such as username, password etc.
+     * if param is empty, ignore and not update
      * @param param
      * @return
      */
@@ -91,7 +92,7 @@ public class MailServerConfigController {
             return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_ERROR, e.getMessage());
         }
         TbMailServerConfig res = mailServerConfigService.queryByServerId(param.getServerId());
-        log.info("end saveMailServerConfig. useTime:{}, res:{}",
+        log.info("end updateMailServerConfig. useTime:{}, res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), res);
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }

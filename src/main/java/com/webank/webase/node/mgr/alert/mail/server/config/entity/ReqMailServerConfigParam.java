@@ -16,7 +16,6 @@
 
 package com.webank.webase.node.mgr.alert.mail.server.config.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -53,7 +52,7 @@ public class ReqMailServerConfigParam {
     private Integer socketFactoryFallback;
 
     // 启用、禁用邮箱服务 0-关闭 1-启用
-    private Integer status;
+    private Integer enable;
     // timeout settings
     private Integer timeout;
     private Integer connectionTimeout;

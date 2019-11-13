@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.alert.rule;
+package com.webank.webase.node.mgr.base.tools;
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
@@ -60,4 +61,5 @@ public class AlertRuleTools {
 
         return emailContentAfterReplace;
     }
+
 }
