@@ -327,7 +327,14 @@ public class FrontInterfaceService {
         log.info("end getObserverList. observers:{}", JSON.toJSONString(observers));
         return observers;
     }
-
+    /**
+     * get observer list from specific front
+     */
+    public List<String> getObserverListFromSpecificFront(String frontIp, Integer frontPort,
+                                                       Integer groupId) {
+        return getFromSpecificFront(groupId, frontIp, frontPort,
+                FrontRestTools.URI_GET_OBSERVER_LIST, List.class);
+    }
 
     /**
      * get consensusStatus
@@ -372,7 +379,14 @@ public class FrontInterfaceService {
         log.debug("end getSealerList. getSealerList:{}", JSON.toJSONString(getSealerList));
         return getSealerList;
     }
-
+    /**
+     * get sealer list from specific front
+     */
+    public List<String> getSealerListFromSpecificFront(String frontIp, Integer frontPort,
+                                                     Integer groupId) {
+        return getFromSpecificFront(groupId, frontIp, frontPort,
+                FrontRestTools.URI_GET_SEALER_LIST, List.class);
+    }
 
     /**
      * get config by key
