@@ -126,20 +126,7 @@ public class FrontService {
                 nodeService.addNodeInfo(group, newPeer);
             }
             // add sealer(consensus node) and observer in nodeList
-            List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(group);
-            sealerAndObserverList.stream()
-                    .forEach(peerInfo -> {
-                        NodeParam checkParam = new NodeParam();
-                        checkParam.setGroupId(group);
-                        checkParam.setNodeId(peerInfo.getNodeId());
-                        int existedNodeCount = nodeService.countOfNode(checkParam);
-                        log.debug("addSealerAndObserver peerInfo:{},existedNodeCount:{}",
-                                peerInfo, existedNodeCount);
-                        // TODO 判断有问题
-                        if(existedNodeCount == 0) {
-                            nodeService.addNodeInfo(group, peerInfo);
-                        }
-                    });
+            refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
         }
 
         //clear cache
@@ -147,8 +134,29 @@ public class FrontService {
         return tbFront;
     }
 
-
-
+    /**
+     * add sealer(consensus node) and observer in nodeList
+     * @param groupId
+     */
+    public void refreshSealerAndObserverInNodeList(String frontIp, int frontPort, int groupId) {
+        List<String> sealerList = frontInterface.getSealerListFromSpecificFront(frontIp, frontPort, groupId);
+        List<String> observerList = frontInterface.getObserverListFromSpecificFront(frontIp, frontPort, groupId);
+        List<PeerInfo> sealerAndObserverList = new ArrayList<>();
+        sealerList.stream().forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
+        observerList.stream().forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
+        sealerAndObserverList.stream()
+                .forEach(peerInfo -> {
+                    NodeParam checkParam = new NodeParam();
+                    checkParam.setGroupId(groupId);
+                    checkParam.setNodeId(peerInfo.getNodeId());
+                    int existedNodeCount = nodeService.countOfNode(checkParam);
+                    log.debug("addSealerAndObserver peerInfo:{},existedNodeCount:{}",
+                            peerInfo, existedNodeCount);
+                    if(existedNodeCount == 0) {
+                        nodeService.addNodeInfo(groupId, peerInfo);
+                    }
+                });
+    }
 
     /**
      * check not support ip.
