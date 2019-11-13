@@ -16,10 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
-import com.webank.webase.node.mgr.alert.log.AlertLogService;
-import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
 import com.webank.webase.node.mgr.alert.mail.MailService;
-import com.webank.webase.node.mgr.base.enums.AlertLevelType;
 import com.webank.webase.node.mgr.base.enums.AlertRuleType;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
