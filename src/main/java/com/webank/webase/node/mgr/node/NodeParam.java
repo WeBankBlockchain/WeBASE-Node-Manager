@@ -27,7 +27,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class NodeParam extends BaseQueryParam {
     private Integer groupId;
-    private Integer nodeId;
+    private String nodeId;
     private Integer p2pPort;
     private String nodeName;
     private String nodeIp;
