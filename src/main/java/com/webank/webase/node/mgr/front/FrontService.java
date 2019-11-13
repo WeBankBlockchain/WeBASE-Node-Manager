@@ -27,10 +27,14 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeService;
+import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -121,12 +125,36 @@ public class FrontService {
                     .findFirst().orElseGet(() -> new PeerInfo(nodeId));
                 nodeService.addNodeInfo(group, newPeer);
             }
+            // add sealer(consensus node) and observer in nodeList
+            List<PeerInfo> sealerAndObserverList = getSealerAndObserverList(group);
+            sealerAndObserverList.stream()
+                    .forEach(peerInfo -> {
+                        TbNode checkExistNode = nodeService.queryByNodeId(peerInfo.getNodeId());
+                        if(checkExistNode == null) {
+                            nodeService.addNodeInfo(group, peerInfo);
+                        }
+                    });
         }
 
         //clear cache
         frontGroupMapCache.clearMapList();
         return tbFront;
     }
+
+    /**
+     * add sealer and observer in NodeList
+     * return: List<String> nodeIdList
+     */
+    public List<PeerInfo> getSealerAndObserverList(int groupId) {
+        List<String> sealerList = frontInterface.getSealerList(groupId);
+        List<String> observerList = frontInterface.getObserverList(groupId);
+        List<PeerInfo> resList = new ArrayList<>();
+        sealerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
+        observerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
+        return resList;
+    }
+
+
 
     /**
      * check not support ip.
