@@ -76,7 +76,7 @@ public class NodeStatusMonitorTask {
                 .forEach(group -> checkNodeStatusByGroup(group.getGroupId()));
 
 //        try {
-//            latch.await();//5min
+//            latch.await();
 //        } catch (InterruptedException ex) {
 //            log.error("InterruptedException", ex);
 //            Thread.currentThread().interrupt();

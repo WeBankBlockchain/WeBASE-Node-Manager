@@ -121,7 +121,7 @@ public class NodeService {
     /**
      * query node info.
      */
-    public TbNode queryByNodeId(Integer nodeId) throws NodeMgrException {
+    public TbNode queryByNodeId(String nodeId) throws NodeMgrException {
         log.debug("start queryNode nodeId:{}", nodeId);
         try {
             TbNode nodeRow = nodeMapper.queryByNodeId(nodeId);
@@ -238,7 +238,7 @@ public class NodeService {
                     tbNode.setPbftView(latestView);
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
                 }
-            } else {
+            } else { //observer
                 if (!latestNumber.equals(frontInterfacee.getLatestBlockNumber(groupId))) {
                     log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                             nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
