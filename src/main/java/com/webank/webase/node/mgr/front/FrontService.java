@@ -26,6 +26,7 @@ import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.node.NodeParam;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
@@ -129,8 +130,14 @@ public class FrontService {
             List<PeerInfo> sealerAndObserverList = getSealerAndObserverList(group);
             sealerAndObserverList.stream()
                     .forEach(peerInfo -> {
-                        TbNode checkExistNode = nodeService.queryByNodeId(peerInfo.getNodeId());
-                        if(checkExistNode == null) {
+                        NodeParam checkParam = new NodeParam();
+                        checkParam.setGroupId(group);
+                        checkParam.setNodeId(peerInfo.getNodeId());
+                        int existedNodeCount = nodeService.countOfNode(checkParam);
+                        log.debug("addSealerAndObserver peerInfo:{},existedNodeCount:{}",
+                                peerInfo, existedNodeCount);
+                        // TODO 判断有问题
+                        if(existedNodeCount == 0) {
                             nodeService.addNodeInfo(group, peerInfo);
                         }
                     });
@@ -146,11 +153,13 @@ public class FrontService {
      * return: List<String> nodeIdList
      */
     public List<PeerInfo> getSealerAndObserverList(int groupId) {
+        log.debug("start getSealerAndObserverList groupId:{}", groupId);
         List<String> sealerList = frontInterface.getSealerList(groupId);
         List<String> observerList = frontInterface.getObserverList(groupId);
         List<PeerInfo> resList = new ArrayList<>();
         sealerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
         observerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
+        log.debug("end getSealerAndObserverList resList:{}", resList);
         return resList;
     }
 
