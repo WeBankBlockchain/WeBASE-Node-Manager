@@ -297,10 +297,20 @@ public class GroupService {
         if (CollectionUtils.isEmpty(localNodes)) {
             return;
         }
-
-        //remove invalid node
-        localNodes.stream().filter(node -> !groupPeerList.contains(node.getNodeId()))
+        //remove node that's not in groupPeerList and not in sealer/observer list
+        localNodes.stream().filter(node -> !groupPeerList.contains(node.getNodeId())
+                && checkSealerAndObserverListNotContains(groupId, node.getNodeId()))
                 .forEach(n -> nodeService.deleteByNodeAndGroupId(n.getNodeId(), groupId));
+    }
+
+    private boolean checkSealerAndObserverListNotContains(int groupId, String nodeId) {
+        List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(groupId);
+        for(PeerInfo peerInfo: sealerAndObserverList){
+            if(nodeId.equals(peerInfo.getNodeId())){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
