@@ -17,7 +17,7 @@
 package com.webank.webase.node.mgr.alert.rule;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.alert.rule.entity.AlertRuleParam;
+import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -88,7 +88,7 @@ public class AlertRuleController {
 
     @PutMapping("")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object updateAlertRule(@RequestBody AlertRuleParam param) {
+    public Object updateAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertRule. startTime:{} AlertRuleParam:{}",
                 startTime.toEpochMilli(), JSON.toJSONString(param));
@@ -111,7 +111,7 @@ public class AlertRuleController {
 
     @PutMapping("/toggle")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object toggleAlertRule(@RequestBody AlertRuleParam param) {
+    public Object toggleAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start toggleAlertRule. startTime:{} AlertRuleParam:{}",
                 startTime.toEpochMilli(), JSON.toJSONString(param));

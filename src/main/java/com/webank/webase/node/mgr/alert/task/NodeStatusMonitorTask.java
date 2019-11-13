@@ -54,7 +54,7 @@ public class NodeStatusMonitorTask {
     @Autowired
     private MailService alertMailService;
 
-    @Scheduled(fixedDelayString = "${constant.certMonitorTaskFixedDelay}")
+    @Scheduled(fixedDelayString = "${constant.nodeStatusMonitorTaskFixedDelay}")
     public void nodeAlertTaskStart() {
         checkAllNodeStatusForAlert();
     }
@@ -75,12 +75,12 @@ public class NodeStatusMonitorTask {
         groupList.stream()
                 .forEach(group -> checkNodeStatusByGroup(group.getGroupId()));
 
-        try {
-            latch.await();//5min
-        } catch (InterruptedException ex) {
-            log.error("InterruptedException", ex);
-            Thread.currentThread().interrupt();
-        }
+//        try {
+//            latch.await();//5min
+//        } catch (InterruptedException ex) {
+//            log.error("InterruptedException", ex);
+//            Thread.currentThread().interrupt();
+//        }
 
         log.info("end checkAllNodeStatusForAlert useTime:{} ",
                 Duration.between(startTime, Instant.now()).toMillis());

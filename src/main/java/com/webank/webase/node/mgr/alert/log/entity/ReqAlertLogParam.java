@@ -1,29 +1,37 @@
 /**
  * Copyright 2014-2019 the original author or authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.base.tools.page;
+
+package com.webank.webase.node.mgr.alert.log.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+/**
+ * handle request from web
+ */
 @Data
-public class MapHandle{
-    private String key;
-    private Object data;
-
-    public MapHandle(String key, Object data) {
-        this.key = key;
-        this.data = data;
-    }
+@NoArgsConstructor
+public class ReqAlertLogParam {
+    private Integer logId;
+    private Integer alertType;
+    private Integer alertLevel;
+    private String alertContent;
+    private String description;
+    /**
+     * 0-未处理，1-已处理
+     */
+    private Integer status;
 }

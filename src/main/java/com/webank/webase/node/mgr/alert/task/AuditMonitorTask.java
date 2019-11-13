@@ -46,7 +46,6 @@ public class AuditMonitorTask {
     private FrontGroupMapCache frontGroupMapCache;
     @Autowired
     private MailService alertMailService;
-
     /**
      * set scheduler's interval
      */
@@ -83,19 +82,19 @@ public class AuditMonitorTask {
                 && unusualContractCount >= unusualMaxCount) {
             log.warn("audit alert. unusualUserCount:{},unusualMaxCount:{}, monitorUnusualMaxCount:{}",
                     unusualUserCount, unusualMaxCount, unusualMaxCount);
-            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(),
-                    "群组group " + groupId + "的异常用户数/异常合约数超出最大值："
-                            + unusualContractCount + "/" + unusualContractCount);
+            String alertContent = "群组group " + groupId + "的异常用户数/异常合约数超出最大值："
+                    + unusualContractCount + "/" + unusualContractCount;
+            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContent);
         }else if (unusualUserCount >= unusualMaxCount) {
             log.warn("audit alert. unusualUserCount:{} monitorUnusualMaxCount:{}",
                     unusualUserCount, unusualMaxCount);
-            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(),
-                    "群组group " + groupId + "的异常用户数超出最大值：" + unusualContractCount);
+            String alertContent = "群组group " + groupId + "的异常用户数超出最大值：" + unusualContractCount;
+            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContent);
         }else if (unusualContractCount >= unusualMaxCount) {
             log.warn("audit alert. unusualContractCount:{} monitorUnusualMaxCount:{}",
                     unusualContractCount, unusualMaxCount);
-            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(),
-                    "群组group " + groupId + "的异常合约数超出最大值：" + unusualContractCount);
+            String alertContent = "群组group " + groupId + "的异常合约数超出最大值：" + unusualContractCount;
+            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContent);
         }
         log.debug("end checkUserAndContractByGroup");
 
