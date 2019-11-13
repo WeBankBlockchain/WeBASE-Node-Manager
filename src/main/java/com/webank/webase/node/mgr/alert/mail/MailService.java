@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.account.AccountMapper;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
+import com.webank.webase.node.mgr.alert.log.AlertLogService;
 import com.webank.webase.node.mgr.alert.mail.server.config.MailServerConfigService;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
@@ -63,6 +64,8 @@ public class MailService {
     MailServerConfigService mailServerConfigService;
     @Autowired
     AccountMapper accountMapper;
+    @Autowired
+    AlertLogService alertLogService;
 
     /**
      * Java Mail Sender Implement config
@@ -192,13 +195,14 @@ public class MailService {
         }
         String emailTitle = AlertRuleTools.getAlertTypeStrFromEnum(alertRule.getAlertType());
 
+        // handle email alert content
         String defaultEmailContent = alertRule.getAlertContent();
         String emailContentParam2Replace = alertRule.getContentParamList();
         // 替换变量param后的emailContent
         String emailContentAfterReplace = AlertRuleTools.processMailContent(defaultEmailContent,
                 emailContentParam2Replace, replacementText);
 
-        // thymeleaf初始化
+        //init thymeleaf email template
         Context context = new Context();
         context.setVariable("replaceContent", emailContentAfterReplace);
         // add date in content
@@ -206,16 +210,17 @@ public class MailService {
         context.setVariable("time", formatTool.format(new Date()));
         String emailFinalContent = templateEngine.process("AlertEmailTemplate", context);
 
+        // save alert to log
+        alertLogService.saveAlertLogByRuleAndContent(alertRule.getAlertLevel(),
+                alertRule.getAlertType(), emailContentAfterReplace);
+
         // refresh JavaMailSender's config from db
         refreshJavaMailSenderConfigFromDB();
         // 将告警发到userList，如果是全选用户
         handleAllUserEmail(alertRule, emailTitle, emailFinalContent);
         // update alert rule's last alertTime
-//        TbAlertRule updateAlertTime = new TbAlertRule();
-//        updateAlertTime.setRuleId(alertRule.getRuleId());
-//        updateAlertTime.setLastAlertTime(LocalDateTime.now());
         alertRule.setLastAlertTime(LocalDateTime.now());
-        log.debug("sendMailByRule update alert rule's last alert time updateAlertTime:{}",
+        log.debug("sendMailByRule update alert rule's lastAlertTime updateAlertTime:{}",
                 alertRule);
         alertRuleMapper.update(alertRule);
         log.debug("end sendMailByRule. ");

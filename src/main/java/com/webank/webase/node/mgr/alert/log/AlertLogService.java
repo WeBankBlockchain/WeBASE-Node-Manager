@@ -18,6 +18,7 @@ package com.webank.webase.node.mgr.alert.log;
 
 import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
 import com.webank.webase.node.mgr.alert.log.entity.ReqAlertLogParam;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -47,6 +48,24 @@ public class AlertLogService {
             log.debug("end saveAlertLog. ");
         }catch (Exception e) {
             log.error("saveAlertLog error exception:[]", e);
+            throw new NodeMgrException(ConstantCode.ALERT_LOG_ERROR.getCode(),
+                    e.getMessage());
+        }
+    }
+
+    public void saveAlertLogByRuleAndContent(int alertLevel, int alertType, String alertContentInEmail) {
+        log.debug("start saveAlertLogByRuleAndContent alertLevel:{},alertType:{} alertContentInEmail:{}",
+                alertLevel, alertType, alertContentInEmail);
+        AlertLog alertLog = new AlertLog();
+        alertLog.setStatus(EnableStatus.OFF.getValue());
+        alertLog.setAlertLevel(alertLevel);
+        alertLog.setAlertType(alertType);
+        alertLog.setAlertContent(alertContentInEmail);
+        try{
+            alertLogMapper.add(alertLog);
+            log.debug("end saveAlertLogByRuleAndContent. ");
+        }catch (Exception e) {
+            log.error("saveAlertLogByRuleAndContent error exception:[]", e);
             throw new NodeMgrException(ConstantCode.ALERT_LOG_ERROR.getCode(),
                     e.getMessage());
         }
