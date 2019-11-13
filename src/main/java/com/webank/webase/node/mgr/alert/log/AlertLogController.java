@@ -19,15 +19,11 @@ package com.webank.webase.node.mgr.alert.log;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
 import com.webank.webase.node.mgr.alert.log.entity.ReqAlertLogParam;
-import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
-import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
@@ -42,7 +38,7 @@ import java.util.List;
 @RequestMapping("log")
 public class AlertLogController {
     @Autowired
-    AlertLogService alertLogService;
+    private AlertLogService alertLogService;
 
     @GetMapping("/list")
     public Object listAlertLog() {

@@ -42,9 +42,9 @@ public class TbAlertRule {
      */
     private Integer alertType;
     /**
-     * 规则的级别：低、中、高、严重
+     * 规则的级别：3-低、2-中、1-高
      */
-    private String alertLevel;
+    private Integer alertLevel;
 
     /**
      * 出发时发送的频率

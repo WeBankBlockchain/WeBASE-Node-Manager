@@ -56,11 +56,11 @@ INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, `con
 -- 6、init tb_alert_rule
 -- ----------------------------
 ---- add node status alert rule template
-INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`is_all_user`,`user_list`,`create_time`,`modify_time`) VALUES ('节点异常告警', 0, 1, 'high', 3600, '{nodeId}节点异常，请到“节点管理”页面查看具体信息', '[\"{nodeId}\"]', 0, '[\"targetmail@qq.com\"]','2019-10-29 20:02:30', '2019-10-29 20:02:30');
+INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`is_all_user`,`user_list`,`create_time`,`modify_time`) VALUES ('节点异常告警', 0, 1, 1, 3600, '{nodeId}节点异常，请到“节点管理”页面查看具体信息', '[\"{nodeId}\"]', 0, '[\"targetmail@qq.com\"]','2019-10-29 20:02:30', '2019-10-29 20:02:30');
 ---- add audit alert rule template
-INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`is_all_user`,`user_list`,`create_time`,`modify_time`) VALUES ('审计异常', 0, 2, 'high', 3600, '审计异常：{auditType}，请到“交易审计”页面查看具体信息', '[\"{auditType}\"]', 0, '[\"targetmail@qq.com\"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30');
+INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`is_all_user`,`user_list`,`create_time`,`modify_time`) VALUES ('审计异常', 0, 2, 1, 3600, '审计异常：{auditType}，请到“交易审计”页面查看具体信息', '[\"{auditType}\"]', 0, '[\"targetmail@qq.com\"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30');
 -- add cert alert rule template
-INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`is_all_user`,`user_list`,`create_time`,`modify_time`) VALUES ('证书有效期告警', 0, 3, 'high', 3600, '证书将在{time}过期，请到“证书管理”页面查看具体信息', '[\"{time}\"]', 0, '[\"targetmail@qq.com\"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30');
+INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`is_all_user`,`user_list`,`create_time`,`modify_time`) VALUES ('证书有效期告警', 0, 3, 1, 3600, '证书将在{time}过期，请到“证书管理”页面查看具体信息', '[\"{time}\"]', 0, '[\"targetmail@qq.com\"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30');
 
 
 -- ----------------------------
