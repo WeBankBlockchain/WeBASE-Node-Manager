@@ -60,7 +60,7 @@ public class PullBlockInfoTask {
                 .forEach(group -> blockService.pullBlockByGroupId(latch, group.getGroupId()));
 
         try {
-            latch.await();//5min
+            latch.await();
         } catch (InterruptedException ex) {
             log.error("InterruptedException", ex);
             Thread.currentThread().interrupt();
