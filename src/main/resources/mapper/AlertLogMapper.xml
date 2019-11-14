@@ -54,8 +54,20 @@
         where log_id = #{logId}
     </update>
 
-    <select id="listOfAlertLog" resultMap="alertLogMap">
-        select * from tb_alert_log a where 1=1
+    <select id="listOfAlertLog" parameterType="com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam"
+            resultMap="alertLogMap">
+        select a.* from tb_alert_log a
+        where 1=1
+        <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
+            order by a.create_time ${param.flagSortedByTime}
+        </if>
+        <if test="param.start != null and param.pageSize != null">
+            limit #{param.start},#{param.pageSize}
+        </if>
+    </select>
+
+    <select id="countOfLog" resultType="java.lang.Integer">
+        select count(1) from tb_alert_log where 1=1
     </select>
 
     <select id="queryByLogId" parameterType="java.lang.Integer"

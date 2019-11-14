@@ -16,22 +16,20 @@
 
 package com.webank.webase.node.mgr.alert.log.entity;
 
+import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-/**
- * handle request from web
- */
 @Data
 @NoArgsConstructor
-public class ReqAlertLogParam {
-    private Integer logId;
-    private Integer alertType;
-    private Integer alertLevel;
-    private String alertContent;
-    private String description;
-    /**
-     * 0-未处理，1-已处理
-     */
-    private Integer status;
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class ReqLogListParam extends BaseQueryParam {
+
+    public ReqLogListParam(Integer start, Integer pageSize,
+                           String flagSortedByTime) {
+        super(start, pageSize, flagSortedByTime);
+    }
 }
