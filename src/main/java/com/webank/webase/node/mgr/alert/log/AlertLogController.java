@@ -18,20 +18,23 @@ package com.webank.webase.node.mgr.alert.log;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
-import com.webank.webase.node.mgr.alert.log.entity.ReqAlertLogParam;
+import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
+import com.webank.webase.node.mgr.alert.log.entity.ReqLogParam;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Log4j2
 @RestController
@@ -40,17 +43,22 @@ public class AlertLogController {
     @Autowired
     private AlertLogService alertLogService;
 
-    @GetMapping("/list")
-    public Object listAlertLog() {
+    @GetMapping("/list/{pageNumber}/{pageSize}")
+    public Object listAlertLog(@PathVariable("pageNumber") Integer pageNumber,
+                               @PathVariable("pageSize") Integer pageSize) {
         Instant startTime = Instant.now();
-        log.info("start listAlertLog. startTime:{}",
-                startTime.toEpochMilli());
+        log.info("start listAlertLog. startTime:{},pageNumber:{},pageSize:{}",
+                startTime.toEpochMilli(), pageNumber, pageSize);
         try{
-            List<AlertLog> resList = alertLogService.getAllAlertLog();
-
+            int count = alertLogService.countOfLog();
+            Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
+                    .orElse(0);
+            ReqLogListParam param = new ReqLogListParam(start, pageSize,
+                    SqlSortType.DESC.getValue());
+            List<AlertLog> resList = alertLogService.getAllAlertLog(param);
             log.info("end listAlertLog. useTime:{}, resList:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), resList);
-            return new BaseResponse(ConstantCode.SUCCESS, resList);
+            return new BasePageResponse(ConstantCode.SUCCESS, resList, count);
         }catch (NodeMgrException e) {
             log.debug("listAlertLog, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());
@@ -64,7 +72,7 @@ public class AlertLogController {
      */
     @PutMapping("")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object updateAlertLog(@RequestBody ReqAlertLogParam param) {
+    public Object updateAlertLog(@RequestBody ReqLogParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertLog. startTime:{} ReqAlertLogParam:{}",
                 startTime.toEpochMilli(), JSON.toJSONString(param));
@@ -96,28 +104,29 @@ public class AlertLogController {
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
-    @PostMapping("")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object saveAlertLog(@RequestBody ReqAlertLogParam param) {
-        Instant startTime = Instant.now();
-        log.info("start saveAlertLog. startTime:{} ReqAlertLogParam:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(param));
-        if(StringUtils.isEmpty(param.getAlertContent()) ||
-                StringUtils.isEmpty(param.getAlertLevel()) ||
-                StringUtils.isEmpty(param.getAlertType())) {
-            log.debug("saveAlertLog, error:{} ",
-                    ConstantCode.ALERT_LOG_PARAM_EMPTY);
-            return new BaseResponse(ConstantCode.ALERT_LOG_PARAM_EMPTY);
-        }
-        try{
-            alertLogService.saveAlertLog(param);
-        }catch (NodeMgrException e) {
-            log.debug("saveAlertLog, error, exception:[] ", e);
-            return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());
-        }
-        log.info("end saveAlertLog. useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        return new BaseResponse(ConstantCode.SUCCESS);
-    }
+    // Duplicated: only for test
+//    @PostMapping("")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    public Object saveAlertLog(@RequestBody ReqLogParam param) {
+//        Instant startTime = Instant.now();
+//        log.info("start saveAlertLog. startTime:{} ReqAlertLogParam:{}",
+//                startTime.toEpochMilli(), JSON.toJSONString(param));
+//        if(StringUtils.isEmpty(param.getAlertContent()) ||
+//                StringUtils.isEmpty(param.getAlertLevel()) ||
+//                StringUtils.isEmpty(param.getAlertType())) {
+//            log.debug("saveAlertLog, error:{} ",
+//                    ConstantCode.ALERT_LOG_PARAM_EMPTY);
+//            return new BaseResponse(ConstantCode.ALERT_LOG_PARAM_EMPTY);
+//        }
+//        try{
+//            alertLogService.saveAlertLog(param);
+//        }catch (NodeMgrException e) {
+//            log.debug("saveAlertLog, error, exception:[] ", e);
+//            return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());
+//        }
+//        log.info("end saveAlertLog. useTime:{}",
+//                Duration.between(startTime, Instant.now()).toMillis());
+//        return new BaseResponse(ConstantCode.SUCCESS);
+//    }
 
 }

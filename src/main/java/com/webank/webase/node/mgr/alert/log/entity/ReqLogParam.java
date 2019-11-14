@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.alert.log;
+package com.webank.webase.node.mgr.alert.log.entity;
 
-import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
-import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-@Repository
-public interface AlertLogMapper {
-
-    List<AlertLog> listOfAlertLog(@Param("param") ReqLogListParam param);
-
-    Integer countOfLog();
-
-    AlertLog queryByLogId(@Param("logId") int logId);
-
-    void add(AlertLog alertLog);
-
-    void update(AlertLog alertLog);
-
-    void deleteByLogId(@Param("logId") int logId);
-
+/**
+ * handle request from web
+ */
+@Data
+@NoArgsConstructor
+public class ReqLogParam {
+    private Integer logId;
+    private Integer alertType;
+    private Integer alertLevel;
+    private String alertContent;
+    private String description;
+    /**
+     * 0-未处理，1-已处理
+     */
+    private Integer status;
 }
