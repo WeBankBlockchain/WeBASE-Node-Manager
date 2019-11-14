@@ -17,8 +17,6 @@
 package com.webank.webase.node.mgr.alert.log;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.account.entity.AccountListParam;
-import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
 import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
 import com.webank.webase.node.mgr.alert.log.entity.ReqLogParam;
@@ -31,7 +29,6 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
