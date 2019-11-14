@@ -27,6 +27,7 @@ import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class NodeService {
     @Autowired
     private NodeMapper nodeMapper;
     @Autowired
-    private FrontInterfaceService frontInterfacee;
+    private FrontInterfaceService frontInterface;
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
 
     /**
@@ -121,7 +122,7 @@ public class NodeService {
     /**
      * query node info.
      */
-    public TbNode queryByNodeId(Integer nodeId) throws NodeMgrException {
+    public TbNode queryByNodeId(String nodeId) throws NodeMgrException {
         log.debug("start queryNode nodeId:{}", nodeId);
         try {
             TbNode nodeRow = nodeMapper.queryByNodeId(nodeId);
@@ -200,7 +201,7 @@ public class NodeService {
         }
         
         // getObserverList
-        List<String> observerList = frontInterfacee.getObserverList(groupId);
+        List<String> observerList = frontInterface.getObserverList(groupId);
 
         for (TbNode tbNode : nodeList) {
             String nodeId = tbNode.getNodeId();
@@ -238,8 +239,8 @@ public class NodeService {
                     tbNode.setPbftView(latestView);
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
                 }
-            } else {
-                if (!latestNumber.equals(frontInterfacee.getLatestBlockNumber(groupId))) {
+            } else { //observer
+                if (!latestNumber.equals(frontInterface.getLatestBlockNumber(groupId))) {
                     log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                             nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
                     tbNode.setNodeActive(DataStatus.INVALID.getValue());
@@ -261,7 +262,7 @@ public class NodeService {
      * get latest number of peer on chain.
      */
     private BigInteger getBlockNumberOfNodeOnChain(int groupId, String nodeId) {
-        SyncStatus syncStatus = frontInterfacee.getSyncStatus(groupId);
+        SyncStatus syncStatus = frontInterface.getSyncStatus(groupId);
         if (nodeId.equals(syncStatus.getNodeId())) {
             return syncStatus.getBlockNumber();
         }
@@ -276,7 +277,7 @@ public class NodeService {
      * get peer of consensusStatus
      */
     private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
-        String consensusStatusJson = frontInterfacee.getConsensusStatus(groupId);
+        String consensusStatusJson = frontInterface.getConsensusStatus(groupId);
         if (StringUtils.isBlank(consensusStatusJson)) {
             return null;
         }
@@ -293,5 +294,20 @@ public class NodeService {
             }).collect(Collectors.toList());
         return JSONArray
             .parseArray(JSON.toJSONString(dataIsList.get(0)), PeerOfConsensusStatus.class);
+    }
+
+    /**
+     * add sealer and observer in NodeList
+     * return: List<String> nodeIdList
+     */
+    public List<PeerInfo> getSealerAndObserverList(int groupId) {
+        log.debug("start getSealerAndObserverList groupId:{}", groupId);
+        List<String> sealerList = frontInterface.getSealerList(groupId);
+        List<String> observerList = frontInterface.getObserverList(groupId);
+        List<PeerInfo> resList = new ArrayList<>();
+        sealerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
+        observerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
+        log.debug("end getSealerAndObserverList resList:{}", resList);
+        return resList;
     }
 }
