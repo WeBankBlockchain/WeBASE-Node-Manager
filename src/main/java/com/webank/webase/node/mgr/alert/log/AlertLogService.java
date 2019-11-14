@@ -17,8 +17,8 @@
 package com.webank.webase.node.mgr.alert.log;
 
 import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
-import com.webank.webase.node.mgr.alert.log.entity.ReqAlertLogParam;
-import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
+import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
+import com.webank.webase.node.mgr.alert.log.entity.ReqLogParam;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -36,7 +36,7 @@ public class AlertLogService {
     @Autowired
     AlertLogMapper alertLogMapper;
 
-    public void saveAlertLog(ReqAlertLogParam inputParam) {
+    public void saveAlertLog(ReqLogParam inputParam) {
         log.debug("start saveAlertLog alertLog:{}", inputParam);
         if(inputParam.getStatus() == null) {
             inputParam.setStatus(EnableStatus.OFF.getValue());
@@ -78,11 +78,15 @@ public class AlertLogService {
         return resAlertLog;
     }
 
-    public List<AlertLog> getAllAlertLog() {
+    /**
+     * get all logs in
+     * @return
+     */
+    public List<AlertLog> getAllAlertLog(ReqLogListParam pageParam) {
         log.debug("start getAllAlertLog ");
         List<AlertLog> resList = new ArrayList<>();
         try {
-            resList = alertLogMapper.listOfAlertLog();
+            resList = alertLogMapper.listOfAlertLog(pageParam);
             log.debug("end getAllAlertLog resList:{}", resList);
             return resList;
         }catch (Exception e) {
@@ -92,8 +96,21 @@ public class AlertLogService {
         }
     }
 
+    public int countOfLog() {
+        log.debug("start countOfLog ");
+        try {
+            int count = alertLogMapper.countOfLog();
+            log.debug("end countOfLog count:{}", count);
+            return count;
+        }catch (Exception e) {
+            log.error("countOfLog error exception:[]", e);
+            throw new NodeMgrException(ConstantCode.ALERT_LOG_ERROR.getCode(),
+                    e.getMessage());
+        }
+    }
 
-    public void updateAlertLog(ReqAlertLogParam inputParam) {
+
+    public void updateAlertLog(ReqLogParam inputParam) {
         log.debug("start updateAlertLog ReqAlertLogParam inputParam:{}", inputParam);
         AlertLog alertLog = new AlertLog();
         try{
