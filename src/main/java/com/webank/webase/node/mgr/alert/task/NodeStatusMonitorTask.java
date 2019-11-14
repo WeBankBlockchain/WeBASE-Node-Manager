@@ -75,13 +75,6 @@ public class NodeStatusMonitorTask {
         groupList.stream()
                 .forEach(group -> checkNodeStatusByGroup(group.getGroupId()));
 
-//        try {
-//            latch.await();
-//        } catch (InterruptedException ex) {
-//            log.error("InterruptedException", ex);
-//            Thread.currentThread().interrupt();
-//        }
-
         log.info("end checkAllNodeStatusForAlert useTime:{} ",
                 Duration.between(startTime, Instant.now()).toMillis());
     }
@@ -102,7 +95,7 @@ public class NodeStatusMonitorTask {
         nodeList.stream()
             .forEach(node -> {
                 // check whether node is invalid
-                if(isNodeAbnormalAndNotRemove(node)) {
+                if(isNodeInvalid(node)) {
                     abnormalNodeIdList.add(node.getNodeId());
                 }
             });
@@ -122,15 +115,15 @@ public class NodeStatusMonitorTask {
      * @param node
      * @return true: is abnormal, false: normal
      */
-    public boolean isNodeAbnormalAndNotRemove(TbNode node) {
-        log.debug(" isNodeAbnormalAndAlert TbNode:{}", node);
+    public boolean isNodeInvalid(TbNode node) {
+        log.debug(" isNodeInvalid TbNode:{}", node);
         int groupId = node.getGroupId();
         String nodeId = node.getNodeId();
         // if node is invalid and nodeType isn't remove
         if(node.getNodeActive() == DataStatus.INVALID.getValue()) {
             if (checkAbnormalNodeIsNotRemove(groupId, nodeId) != null) {
                 // abnormal node's nodeType is consensus(sealer) or observer
-                log.warn("isNodeAbnormalAndAlert abnormal node alert . groupId:{}, node:{}",
+                log.warn("isNodeInvalid checkAbnormalNodeIsNotRemove. groupId:{}, node:{}",
                         groupId, nodeId);
                 return true;
             }
@@ -156,16 +149,17 @@ public class NodeStatusMonitorTask {
             // abnormal node's nodeType cannot be "remove"（游离节点）
             if(nodeId.equals(node.getNodeId())
                     && !"remove".equals(node.getNodeType())) {
-                log.debug("end checkAbnormalNodeIsNotRemove abnormal node(not 'remove'):{}", node);
+                log.debug("end checkAbnormalNodeIsNotRemove not 'remove':{}", node);
                 return node;
             }
+            log.debug("in checkAbnormalNodeIsNotRemove node:{}", node);
         }
         log.debug("end checkAbnormalNodeIsNotRemove abnormal nodes are all 'remove' node");
         return null;
     }
 
     /**
-     *
+     * getNodeListWithType from front
      * @param groupId
      * @return [{nodeId=xxx,nodeType=xxx}, {..}]
      */
