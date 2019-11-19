@@ -23,7 +23,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.pagetools.List2Page;
-import com.webank.webase.node.mgr.base.tools.pagetools.MapHandle;
+import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +36,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Permission contoller
+ * grant or revoke administrator and get administrators on chain
+ */
 @Log4j2
 @RestController
 @RequestMapping("permission")

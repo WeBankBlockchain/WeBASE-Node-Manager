@@ -31,6 +31,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Precompiled common service
+ * including management of CNS, node consensus status, CRUD
+ */
 @Log4j2
 @Service
 public class PrecompiledService {
