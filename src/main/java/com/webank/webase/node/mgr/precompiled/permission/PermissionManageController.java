@@ -36,6 +36,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Permission contoller
+ * grant or revoke administrator and get administrators on chain
+ */
 @Log4j2
 @RestController
 @RequestMapping("permission")

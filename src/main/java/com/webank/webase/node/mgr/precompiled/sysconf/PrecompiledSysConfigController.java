@@ -30,6 +30,10 @@ import javax.validation.Valid;
 import java.time.Duration;
 import java.time.Instant;
 
+/**
+ * System config value controller
+ * manage tx_count and gas_limit
+ */
 @Log4j2
 @RestController
 @RequestMapping("sys")
