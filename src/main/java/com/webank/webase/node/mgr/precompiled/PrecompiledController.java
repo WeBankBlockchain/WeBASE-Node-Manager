@@ -31,6 +31,10 @@ import javax.validation.Valid;
 import java.time.Duration;
 import java.time.Instant;
 
+/**
+ * Precompiled common controller
+ * including management of CNS, node consensus status, CRUD
+ */
 @Log4j2
 @RestController
 @RequestMapping("precompiled")
