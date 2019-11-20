@@ -27,6 +27,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Alert Type Configuration Service
+ */
 @Slf4j
 @Service
 public class AlertRuleService {
