@@ -19,6 +19,9 @@ package com.webank.webase.node.mgr.alert.mail.server.config.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Handle PUT request from web to mail server's config
+ */
 @Data
 @NoArgsConstructor
 public class ReqMailServerConfigParam {
