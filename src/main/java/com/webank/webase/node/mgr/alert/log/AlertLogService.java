@@ -30,6 +30,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Alert log related with AlertRule
+ * when alerts, log creates while sending alert mail
+ */
 @Log4j2
 @Service
 public class AlertLogService {
