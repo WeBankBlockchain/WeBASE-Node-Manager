@@ -31,7 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Config Mail Server for Mail Alert
+ * Mail Server Configuration for Mail Alert
+ * MailService using the latest MailServerConfig as configuration
  */
 
 @Log4j2

@@ -21,6 +21,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity of alert type configuration
+ * related with tb_alert_rule
+ */
 @Data
 @NoArgsConstructor
 public class TbAlertRule {
