@@ -29,7 +29,6 @@ import sun.security.x509.X509CertImpl;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoField;
 import java.util.Date;
 import java.util.List;
 
@@ -82,7 +81,7 @@ public class CertMonitorTask {
     private boolean checkWithin7days(Date certNotAfter) {
         // unit: ms
         long sevenDays = 1000 * 60 * 60 * 24 * 7;
-        long now = Instant.now().getLong(ChronoField.MILLI_OF_SECOND);
+        long now = Instant.now().toEpochMilli();
         long interval = certNotAfter.getTime() - now;
         log.info("checkWithin7days time distance:{}, sevenDays:{}",
                 interval, sevenDays);

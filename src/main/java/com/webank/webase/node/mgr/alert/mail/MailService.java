@@ -48,6 +48,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * Send mail Service including config JavaMailSender and mail content
+ */
 @Log4j2
 @Service
 public class MailService {

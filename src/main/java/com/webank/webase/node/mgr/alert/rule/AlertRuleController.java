@@ -32,6 +32,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Alert Type Configuration Controller
+ */
 @Log4j2
 @RestController
 @RequestMapping("alert")

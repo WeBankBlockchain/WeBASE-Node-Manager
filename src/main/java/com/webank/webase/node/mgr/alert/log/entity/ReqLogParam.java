@@ -20,7 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * handle request from web
+ * handle PUT request from web to update log's status
  */
 @Data
 @NoArgsConstructor
