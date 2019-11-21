@@ -22,6 +22,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * Handle GET request from web to get paged list of logs
+ */
 @Data
 @NoArgsConstructor
 @ToString(callSuper = true)

@@ -21,6 +21,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Handle PUT request from web to update alert type configs' value
+ */
 @Data
 @NoArgsConstructor
 public class ReqAlertRuleParam {

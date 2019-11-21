@@ -36,6 +36,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * AlertLog Controller for get/update logs
+ */
 @Log4j2
 @RestController
 @RequestMapping("log")
