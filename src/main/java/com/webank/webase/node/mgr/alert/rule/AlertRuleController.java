@@ -23,9 +23,11 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import jnr.ffi.Struct;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -118,8 +120,12 @@ public class AlertRuleController {
         Instant startTime = Instant.now();
         log.info("start toggleAlertRule. startTime:{} AlertRuleParam:{}",
                 startTime.toEpochMilli(), JSON.toJSONString(param));
-
         if(param.getRuleId() == null || param.getEnable() == null) {
+            return new BaseResponse(ConstantCode.ALERT_RULE_PARAM_EMPTY);
+        }
+        boolean isUserListEmpty = alertRuleService
+                .checkUserListIsEmptyByRuleId(param.getRuleId());
+        if(isUserListEmpty) {
             return new BaseResponse(ConstantCode.ALERT_RULE_PARAM_EMPTY);
         }
         try{
