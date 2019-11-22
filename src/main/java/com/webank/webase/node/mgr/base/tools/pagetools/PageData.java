@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.base.tools.page;
+package com.webank.webase.node.mgr.base.tools.pagetools;
 
 import java.util.List;
 
+/**
+ * data unit of page in List2Page tool
+ * @param <T>
+ */
 public class PageData<T> {
     //当前页
     private int pageIndex;

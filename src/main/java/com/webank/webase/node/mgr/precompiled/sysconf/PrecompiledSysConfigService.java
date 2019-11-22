@@ -29,6 +29,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * System config service
+ */
 @Log4j2
 @Service
 public class PrecompiledSysConfigService {

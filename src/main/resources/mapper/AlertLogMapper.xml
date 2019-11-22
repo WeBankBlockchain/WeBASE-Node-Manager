@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.webase.node.mgr.alert.log.AlertLogMapper">
+    <resultMap id="alertLogMap"
+               type="com.webank.webase.node.mgr.alert.log.entity.AlertLog">
+        <id column="log_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+            property="logId" />
+        <result column="alert_type" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="alertType" />
+        <result column="alert_level" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="alertLevel" />
+        <result column="alert_content" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="alertContent" />
+        <result column="description" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="description" />
+        <result column="status" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="status" />
+        <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                property="createTime" />
+        <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                property="modifyTime" />
+    </resultMap>
+
+
+    <insert id="add" parameterType="com.webank.webase.node.mgr.alert.log.entity.AlertLog">
+        REPLACE INTO tb_alert_log(alert_type,alert_level,alert_content,description,status,
+        create_time,modify_time)
+        VALUES (#{alertType},#{alertLevel},#{alertContent},#{description},#{status}, now(), now())
+    </insert>
+
+    <delete id="deleteByLogId" parameterType="java.lang.Integer">
+        delete from tb_alert_log
+        where log_id = #{logId}
+    </delete>
+
+    <update id="update" parameterType="com.webank.webase.node.mgr.alert.log.entity.AlertLog">
+        update tb_alert_log set modify_time = now()
+        <if test="alertType != null and alertType != ''">
+            ,alert_type = #{alertType}
+        </if>
+        <if test="alertLevel != null and alertLevel != ''">
+            ,alert_level = #{alertLevel}
+        </if>
+        <if test="alertContent != null and alertContent != ''">
+            ,alert_content = #{alertContent}
+        </if>
+        <if test="description != null and description != ''">
+            ,description = #{description}
+        </if>
+        <if test="status != null">
+            ,status = #{status}
+        </if>
+        where log_id = #{logId}
+    </update>
+
+    <select id="listOfAlertLog" parameterType="com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam"
+            resultMap="alertLogMap">
+        select a.* from tb_alert_log a
+        where 1=1
+        <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
+            order by a.create_time ${param.flagSortedByTime}
+        </if>
+        <if test="param.start != null and param.pageSize != null">
+            limit #{param.start},#{param.pageSize}
+        </if>
+    </select>
+
+    <select id="countOfLog" resultType="java.lang.Integer">
+        select count(1) from tb_alert_log where 1=1
+    </select>
+
+    <select id="queryByLogId" parameterType="java.lang.Integer"
+            resultMap="alertLogMap">
+        SELECT a.* FROM tb_alert_log a
+        WHERE log_id = #{logId}
+        limit 1
+    </select>
+
+</mapper>

@@ -109,7 +109,6 @@
     <if test="description != null and description != ''">
       ,description = #{description}
     </if>
-
     where user_id = #{userId}
   </update>
 
@@ -127,7 +126,6 @@
   <select id="querySystemUser" parameterType="java.lang.Integer" resultMap="userMap">
 		select * from tb_user where user_status=1 and user_type = 2 limit 1
 	</select>
-
 
   <delete id="deleteUser" parameterType="java.lang.Integer">
 		delete from tb_user where group_id = #{groupId}

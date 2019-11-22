@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.webase.node.mgr.alert.mail.server.config.MailServerConfigMapper">
+    <resultMap id="mailServerConfigMap"
+               type="com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig">
+        <id column="server_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+            property="serverId" />
+        <result column="server_name" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="serverName" />
+        <result column="host" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="host" />
+        <result column="port" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="port" />
+        <result column="username" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="username" />
+        <result column="password" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="password" />
+        <result column="protocol" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="protocol" />
+        <result column="default_encoding" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="defaultEncoding" />
+        <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                property="createTime" />
+        <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                property="modifyTime" />
+        <result column="authentication" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="authentication" />
+        <result column="starttls_enable" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="starttlsEnable" />
+        <result column="starttls_required" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="starttlsRequired" />
+        <result column="socket_factory_port" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="socketFactoryPort" />
+        <result column="socket_factory_class" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="socketFactoryClass" />
+        <result column="socket_factory_fallback" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="socketFactoryFallback" />
+        <result column="enable" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="enable" />
+        <result column="connection_timeout" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="connectionTimeout" />
+        <result column="timeout" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="timeout" />
+        <result column="write_timeout" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="writeTimeout" />
+    </resultMap>
+
+
+    <insert id="add" parameterType="com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig">
+        REPLACE INTO tb_mail_server_config(server_id,server_name,host,port,username,password,
+        protocol,default_encoding,create_time,modify_time,authentication,starttls_enable,
+        starttls_required,socket_factory_port,socket_factory_class,socket_factory_fallback,enable,
+        connection_timeout,timeout,write_timeout)
+        VALUES (#{serverId},#{serverName},#{host},#{port},#{username},#{password},
+        #{protocol},#{defaultEncoding}, now(), now(), #{authentication},#{starttlsEnable},
+        #{starttlsRequired},#{socketFactoryPort},#{socketFactoryClass},#{socketFactoryFallback},
+        #{enable},#{connectionTimeout},#{timeout},#{writeTimeout})
+    </insert>
+
+    <delete id="deleteByServerId" parameterType="java.lang.Integer">
+        delete from tb_mail_server_config
+        where server_id = #{serverId}
+    </delete>
+
+    <update id="update" parameterType="com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig">
+        update tb_mail_server_config set modify_time = now()
+        <if test="serverName != null and serverName != ''">
+            ,server_name = #{serverName}
+        </if>
+        <if test="host != null and host != ''">
+            ,host = #{host}
+        </if>
+        <if test="port != null and port != ''">
+            ,port = #{port}
+        </if>
+        <if test="username != null and username != ''">
+            ,username = #{username}
+        </if>
+        <if test="password != null and password != ''">
+            ,password = #{password}
+        </if>
+        <if test="protocol != null and protocol != ''">
+            ,protocol = #{protocol}
+        </if>
+        <if test="defaultEncoding != null and defaultEncoding != ''">
+            ,default_encoding = #{defaultEncoding}
+        </if>
+        <if test="authentication != null">
+            ,authentication = #{authentication}
+        </if>
+        <if test="starttlsEnable != null">
+            ,starttls_enable = #{starttlsEnable}
+        </if>
+        <if test="starttlsRequired != null">
+            ,starttls_required = #{starttlsRequired}
+        </if>
+        <if test="socketFactoryPort != null and socketFactoryPort != ''">
+            ,socket_factory_port = #{socketFactoryPort}
+        </if>
+        <if test="socketFactoryClass != null and socketFactoryClass != ''">
+            ,socket_factory_class = #{socketFactoryClass}
+        </if>
+        <if test="socketFactoryFallback != null">
+            ,socket_factory_fallback = #{socketFactoryFallback}
+        </if>
+        <if test="enable != null">
+            ,enable = #{enable}
+        </if>
+        <if test="connectionTimeout != null and connectionTimeout != ''">
+            ,connection_timeout = #{connectionTimeout}
+        </if>
+        <if test="timeout != null and timeout != ''">
+            ,timeout = #{timeout}
+        </if>
+        <if test="writeTimeout != null and writeTimeout != ''">
+            ,write_timeout = #{writeTimeout}
+        </if>
+        where server_id = #{serverId}
+    </update>
+
+    <select id="listOfMailServerConfig" resultMap="mailServerConfigMap">
+        select * from tb_mail_server_config a where 1=1
+    </select>
+
+    <select id="queryByServerId" parameterType="java.lang.Integer"
+            resultMap="mailServerConfigMap">
+        SELECT a.* FROM tb_mail_server_config a
+        WHERE server_id = #{serverId}
+        limit 1
+    </select>
+
+</mapper>
