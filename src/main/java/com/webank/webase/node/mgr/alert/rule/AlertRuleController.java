@@ -26,6 +26,7 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -118,8 +119,9 @@ public class AlertRuleController {
         Instant startTime = Instant.now();
         log.info("start toggleAlertRule. startTime:{} AlertRuleParam:{}",
                 startTime.toEpochMilli(), JSON.toJSONString(param));
-
-        if(param.getRuleId() == null || param.getEnable() == null) {
+        // must have at least one email address in UserList
+        if(param.getRuleId() == null || param.getEnable() == null ||
+                StringUtils.isEmpty(param.getUserList())) {
             return new BaseResponse(ConstantCode.ALERT_RULE_PARAM_EMPTY);
         }
         try{
