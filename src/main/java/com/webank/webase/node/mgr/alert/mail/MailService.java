@@ -191,8 +191,8 @@ public class MailService {
             log.debug("end sendMailByRule non-sending mail for beyond alert interval:{}", alertRule);
             return;
         }
-        if(StringUtils.isEmpty(alertRule.getUserList()) ||
-        "[\"targetmail@qq.com\"]".equals(alertRule.getUserList())) {
+        // if userList is empty or default email
+        if(StringUtils.isEmpty(alertRule.getUserList())) {
             log.error("end sendMailByRule for no receive mail address:{}", alertRule);
             return;
         }
