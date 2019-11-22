@@ -85,7 +85,7 @@ public class AccountService {
 
         String accountStr = accountInfo.getAccount();
         Integer roleId = accountInfo.getRoleId();
-
+        String email = accountInfo.getEmail();
         // check account
         accountNotExist(accountStr);
         // check role id
@@ -93,7 +93,7 @@ public class AccountService {
         // encode password
         String encryptStr = passwordEncoder.encode(accountInfo.getAccountPwd());
         // add account row
-        TbAccountInfo rowInfo = new TbAccountInfo(accountStr, encryptStr, roleId, null);
+        TbAccountInfo rowInfo = new TbAccountInfo(accountStr, encryptStr, roleId, null, email);
         Integer affectRow = accountMapper.addAccountRow(rowInfo);
 
         // check result
@@ -111,7 +111,6 @@ public class AccountService {
             JSON.toJSONString(accountInfo));
 
         String accountStr = accountInfo.getAccount();
-
         // check account
         accountExist(accountStr);
 
@@ -128,6 +127,7 @@ public class AccountService {
             }
         }
         accountRow.setRoleId(accountInfo.getRoleId());
+        accountRow.setEmail(accountInfo.getEmail());
         //accountRow.setDescription(accountInfo.getDescription());
 
         // update account info

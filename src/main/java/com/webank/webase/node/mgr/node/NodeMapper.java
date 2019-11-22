@@ -48,7 +48,7 @@ public interface NodeMapper {
     /**
      * query node info.
      */
-    TbNode queryByNodeId(@Param("nodeId") Integer nodeId);
+    TbNode queryByNodeId(@Param("nodeId") String nodeId);
 
     /**
      * update node info.

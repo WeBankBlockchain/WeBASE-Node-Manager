@@ -235,6 +235,8 @@ public class GroupService {
                 savePeerList(frontIp, frontPort, gId, groupPeerList);
                 //remove invalid peers
                 removeInvalidPeer(gId, groupPeerList);
+                //refresh: add sealer and observer no matter validity
+                frontService.refreshSealerAndObserverInNodeList(frontIp, frontPort, gId);
                 //check node status
                 //nodeService.checkNodeStatus(gId);
             }
@@ -297,10 +299,23 @@ public class GroupService {
         if (CollectionUtils.isEmpty(localNodes)) {
             return;
         }
-
-        //remove invalid node
-        localNodes.stream().filter(node -> !groupPeerList.contains(node.getNodeId()))
+        //remove node that's not in groupPeerList and not in sealer/observer list
+        localNodes.stream().filter(node -> !groupPeerList.contains(node.getNodeId())
+                && !checkSealerAndObserverListContains(groupId, node.getNodeId()))
                 .forEach(n -> nodeService.deleteByNodeAndGroupId(n.getNodeId(), groupId));
+    }
+
+    private boolean checkSealerAndObserverListContains(int groupId, String nodeId) {
+        log.debug("checkSealerAndObserverListNotContains nodeId:{},groupId:{}",
+                nodeId, groupId);
+        //get sealer and observer on chain
+        List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(groupId);
+        for(PeerInfo peerInfo: sealerAndObserverList){
+            if(nodeId.equals(peerInfo.getNodeId())){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

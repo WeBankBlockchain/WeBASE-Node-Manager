@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.webase.node.mgr.alert.rule.AlertRuleMapper">
+    <resultMap id="alertRuleMap"
+               type="com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule">
+        <id column="rule_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+            property="ruleId" />
+        <result column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"
+            property="ruleName" />
+        <result column="enable" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="enable" />
+        <result column="alert_type" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="alertType" />
+        <result column="alert_level" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="alertLevel" />
+        <result column="alert_interval_seconds" javaType="java.lang.Long" jdbcType="BIGINT"
+                property="alertIntervalSeconds" />
+        <result column="alert_content" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="alertContent" />
+        <result column="content_param_list" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="contentParamList" />
+        <result column="description" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="description" />
+        <result column="is_all_user" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="isAllUser" />
+        <result column="user_list" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="userList" />
+        <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                property="createTime" />
+        <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                property="modifyTime" />
+        <result column="less_than" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="lessThan" />
+        <result column="less_and_equal" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="lessAndEqual" />
+        <result column="larger_than" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="largerThan" />
+        <result column="larger_and_equal" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="largerAndEqual" />
+        <result column="equal" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="equal" />
+        <result column="last_alert_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+                property="lastAlertTime" />
+    </resultMap>
+
+
+    <insert id="add" parameterType="com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule">
+        REPLACE INTO tb_alert_rule(rule_name,enable,alert_type,alert_level,alert_interval_seconds,
+        alert_content,content_param_list,description,is_all_user,user_list,
+        create_time, modify_time,less_than,less_and_equal,larger_than,larger_and_equal,equal,
+        last_alert_time)
+        VALUES (#{ruleName},#{enable},#{alertType},#{alertLevel},#{alertIntervalSeconds},
+        #{alertContent},#{contentParamList},#{description},#{isAllUser},#{userList},now(),now(),
+        #{lessThan},#{lessAndEqual},#{largerThan},#{largerAndEqual},#{equal},
+        #{lastAlertTime})
+    </insert>
+
+
+    <delete id="deleteByRuleId" parameterType="java.lang.Integer">
+        delete from tb_alert_rule
+        where rule_id = #{ruleId}
+    </delete>
+
+    <update id="update" parameterType="com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule">
+        update tb_alert_rule set modify_time = now()
+        <if test="ruleName != null and ruleName != ''">
+            ,rule_name = #{ruleName}
+        </if>
+        <if test="enable != null">
+            ,enable = #{enable}
+        </if>
+        <if test="alertType != null and alertType != ''">
+            ,alert_type = #{alertType}
+        </if>
+        <if test="alertLevel != null and alertLevel != ''">
+            ,alert_level = #{alertLevel}
+        </if>
+        <if test="alertIntervalSeconds != null and alertIntervalSeconds != ''">
+            ,alert_interval_seconds = #{alertIntervalSeconds}
+        </if>
+        <if test="alertContent != null and alertContent != ''">
+            ,alert_content = #{alertContent}
+        </if>
+        <if test="contentParamList != null and contentParamList != ''">
+            ,content_param_list = #{contentParamList}
+        </if>
+        <if test="description != null and description != ''">
+            ,description = #{description}
+        </if>
+        <if test="isAllUser != null and isAllUser != ''">
+            ,is_all_user = #{isAllUser}
+        </if>
+        <if test="userList != null and userList != ''">
+            ,user_list = #{userList}
+        </if>
+        <if test="lessThan != null and lessThan != ''">
+            ,less_than = #{lessThan}
+        </if>
+        <if test="lessAndEqual != null and lessAndEqual != ''">
+            ,less_and_equal = #{lessAndEqual}
+        </if>
+        <if test="largerThan != null and largerThan != ''">
+            ,larger_than = #{largerThan}
+        </if>
+        <if test="largerAndEqual != null and largerAndEqual != ''">
+            ,larger_and_equal = #{largerAndEqual}
+        </if>
+        <if test="equal != null and equal != ''">
+            ,equal = #{equal}
+        </if>
+        <if test="lastAlertTime != null">
+            ,last_alert_time = #{lastAlertTime}
+        </if>
+        where rule_id = #{ruleId}
+    </update>
+
+    <select id="listOfAlertRules" resultMap="alertRuleMap">
+        select * from tb_alert_rule a where 1=1
+        <!--        <if test="fingerPrint != null and fingerPrint != ''">-->
+        <!--            and a.finger_print = #{fingerPrint}-->
+        <!--        </if>-->
+    </select>
+
+    <select id="queryByRuleId" parameterType="java.lang.Integer" resultMap="alertRuleMap">
+        SELECT * FROM tb_alert_rule
+        WHERE rule_id = #{ruleId}
+        limit 1
+    </select>
+
+</mapper>

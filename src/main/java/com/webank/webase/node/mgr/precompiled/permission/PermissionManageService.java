@@ -30,6 +30,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+/**
+ * Permission manage service
+ * grant or revoke administrator and get administrators on chain
+ */
 @Log4j2
 @Service
 public class PermissionManageService {

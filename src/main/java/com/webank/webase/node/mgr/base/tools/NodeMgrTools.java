@@ -34,8 +34,7 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.webase.node.mgr.base.tools.page.MapHandle;
-import com.webank.webase.node.mgr.precompiled.permission.PermissionState;
+import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
