@@ -192,8 +192,7 @@ public class MailService {
             return;
         }
         // if userList is empty or default email
-        if(StringUtils.isEmpty(alertRule.getUserList()) ||
-        "[\"targetmail@qq.com\"]".equals(alertRule.getUserList())) {
+        if(StringUtils.isEmpty(alertRule.getUserList())) {
             log.error("end sendMailByRule for no receive mail address:{}", alertRule);
             return;
         }
