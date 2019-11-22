@@ -18,6 +18,9 @@ package node.mgr.test.node;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
+import com.webank.webase.node.mgr.node.NodeService;
+import com.webank.webase.node.mgr.node.TbNode;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +45,8 @@ public class NodeControllerTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+    @Autowired
+    private NodeService nodeService;
 
     @Before
     public void setUp() throws Exception {
@@ -54,5 +59,12 @@ public class NodeControllerTest {
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
         System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testQueryNodeId() {
+        TbNode tbNode = nodeService.queryByNodeId("e5e7efc9e8d5bed699313d5a0cd5b024b3c11811d50473b987b9429c2f6379742c88249a7a8ea64ab0e6f2b69fb8bb280454f28471e38621bea8f38be45bc42d");
+        System.out.println(tbNode);
+        Assert.assertNull(tbNode);
     }
 }

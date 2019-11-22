@@ -52,16 +52,19 @@ INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, `con
 INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, `contract_type`, `create_time`, `modify_time`) VALUES ('0x20586031', 0, '{\"constant\":true,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"}],\"name\":\"queryByName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}', 'function', 1, '2019-09-02 16:32:30', '2019-09-02 16:32:30');
 INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, `contract_type`, `create_time`, `modify_time`) VALUES ('0x44590a7e', 0, '{\"constant\":false,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}', 'function', 1, '2019-09-02 16:32:30', '2019-09-02 16:32:30');
 
+-- ----------------------------
+-- 6、init tb_alert_rule
+-- ----------------------------
+---- add node status alert rule template
+INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`create_time`,`modify_time`) VALUES ('节点异常告警', 0, 1, 1, 3600, '{nodeId}节点异常，请到“节点管理”页面查看具体信息', '[\"{nodeId}\"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30');
+---- add audit alert rule template
+INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`create_time`,`modify_time`) VALUES ('审计异常', 0, 2, 1, 3600, '审计异常：{auditType}，请到“交易审计”页面查看具体信息', '[\"{auditType}\"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30');
+-- add cert alert rule template
+INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`create_time`,`modify_time`) VALUES ('证书有效期告警', 0, 3, 1, 3600, '证书将在{time}过期，请到“证书管理”页面查看具体信息', '[\"{time}\"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30');
 
 
-
-
-
-
-
-
-
-
-
-
-
+-- ----------------------------
+-- 7、init tb_mail_server_config
+-- ----------------------------
+-- add mail_server_config template
+INSERT INTO `tb_mail_server_config`(`server_name`,`host`,`port`,`username`,`password`,`protocol`,`default_encoding`,`create_time`,`modify_time`,`authentication`,`starttls_enable`,`starttls_required`,`socket_factory_port`,`socket_factory_class`,`socket_factory_fallback`,`enable`) VALUES ('Default config', 'smtp.qq.com', '25', 'yourmail@qq.com', 'yourpassword','smtp', 'UTF-8','2019-10-29 20:02:30', '2019-10-29 20:02:30', 1, 1, 0, 465, 'javax.net.ssl.SSLSocketFactory', 0, 0);

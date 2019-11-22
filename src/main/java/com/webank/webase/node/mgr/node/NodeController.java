@@ -64,7 +64,7 @@ public class NodeController {
         queryParam.setNodeName(nodeName);
 
         //check node status before query
-        nodeService.checkNodeStatus(groupId);
+        nodeService.checkAndUpdateNodeStatus(groupId);
         Integer count = nodeService.countOfNode(queryParam);
         if (count != null && count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)

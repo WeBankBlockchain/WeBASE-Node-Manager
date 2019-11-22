@@ -202,9 +202,12 @@ public class FrontRestTools {
      */
     private String buildFrontUrl(ArrayList<FrontGroup> list, String uri, HttpMethod httpMethod) {
         Collections.shuffle(list);//random one
+        log.info("====================map list:{}",JSON.toJSONString(list));
         Iterator<FrontGroup> iterator = list.iterator();
         while (iterator.hasNext()) {
             FrontGroup frontGroup = iterator.next();
+            log.info("============frontGroup:{}",JSON.toJSONString(frontGroup));
+
             uri = uriAddGroupId(frontGroup.getGroupId(), uri);//append groupId to uri
             String url = String
                 .format(cproperties.getFrontUrl(), frontGroup.getFrontIp(),
