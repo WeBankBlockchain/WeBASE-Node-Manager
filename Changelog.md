@@ -8,7 +8,8 @@ v1.2.1 (2019-11-22)
 
 **Fix**
 - 优化：sh脚本支持secp256k1
-- 优化：升级gradle-wrapper为v6.0.1
+- 优化：升级fastjson为1.2.60, gradle-wrapper为v6.0.1
+- 优化：precompiled节点列表接口增加离线的共识/观察节点
 
 **兼容性**
 - 支持FISCO-BCOS v2.0.0-rc1 版本
