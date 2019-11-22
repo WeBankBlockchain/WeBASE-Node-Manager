@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -106,6 +107,10 @@ public class AlertRuleService {
         if(inputParam.getIsAllUser() == null) {
             inputParam.setIsAllUser(0);
         }
+    }
 
+    public boolean checkUserListIsEmptyByRuleId(int ruleId) {
+        TbAlertRule tbAlertRule = alertRuleMapper.queryByRuleId(ruleId);
+        return StringUtils.isEmpty(tbAlertRule.getUserList()));
     }
 }
