@@ -18,8 +18,11 @@ package com.webank.webase.node.mgr.alert.task;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.alert.mail.MailService;
+import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.AlertRuleType;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.node.Node;
@@ -53,6 +56,8 @@ public class NodeStatusMonitorTask {
     private PrecompiledService precompiledService;
     @Autowired
     private MailService alertMailService;
+    @Autowired
+    private AlertRuleService alertRuleService;
 
     @Scheduled(fixedDelayString = "${constant.nodeStatusMonitorTaskFixedDelay}")
     public void nodeAlertTaskStart() {
@@ -65,13 +70,19 @@ public class NodeStatusMonitorTask {
     public synchronized void checkAllNodeStatusForAlert() {
         Instant startTime = Instant.now();
         log.info("start checkAllNodeStatusForAlert startTime:{}", startTime.toEpochMilli());
+        //check last alert time, if within interval, not send
+        TbAlertRule alertRule = alertRuleService.queryByRuleId(AlertRuleType.NODE_ALERT.getValue());
+        if(AlertRuleTools.isWithinAlertIntervalByNow(alertRule)) {
+            log.debug("end checkAllNodeStatusForAlert non-sending mail" +
+                    " for beyond alert interval:{}", alertRule);
+            return;
+        }
+
         List<FrontGroup> groupList = frontGroupMapCache.getAllMap();
         if (groupList == null || groupList.size() == 0) {
             log.warn("checkNodeStatusForAlert jump over: not found any group");
             return;
         }
-
-        CountDownLatch latch = new CountDownLatch(groupList.size());
         groupList.stream()
                 .forEach(group -> checkNodeStatusByGroup(group.getGroupId()));
 
