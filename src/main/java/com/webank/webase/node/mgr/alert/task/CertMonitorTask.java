@@ -17,8 +17,11 @@
 package com.webank.webase.node.mgr.alert.task;
 
 import com.webank.webase.node.mgr.alert.mail.MailService;
+import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.AlertRuleType;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.cert.CertService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,8 @@ public class CertMonitorTask {
     private ConstantProperties cProperties;
     @Autowired
     private MailService alertMailService;
+    @Autowired
+    private AlertRuleService alertRuleService;
 
     /**
      * set scheduler's interval
@@ -61,6 +66,13 @@ public class CertMonitorTask {
     public synchronized void checkCertValidityForAlert() {
         Instant startTime = Instant.now();
         log.info("start checkCertValidityForAlert startTime:{}", startTime.toEpochMilli());
+        //check last alert time, if within interval, not send
+        TbAlertRule alertRule = alertRuleService.queryByRuleId(AlertRuleType.CERT_ALERT.getValue());
+        if(AlertRuleTools.isWithinAlertIntervalByNow(alertRule)) {
+            log.debug("end checkCertValidityForAlert non-sending mail" +
+                    " for beyond alert interval:{}", alertRule);
+            return;
+        }
         List<X509CertImpl> certList = certService.loadAllX509Certs();
         certList.stream()
             .forEach(cert -> {
