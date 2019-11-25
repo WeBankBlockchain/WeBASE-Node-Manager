@@ -81,8 +81,9 @@ public class CertMonitorTask {
                     log.warn("cert validity alert. certNotAfter:{}",
                             certNotAfter);
                     SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String fingerPrint = cert.getFingerprint("SHA-1");
                     alertMailService.sendMailByRule(AlertRuleType.CERT_ALERT.getValue(),
-                            formatTool.format(certNotAfter));
+                    formatTool.format(certNotAfter) + "(证书指纹:{" + fingerPrint + "})");
                 }
             });
 
