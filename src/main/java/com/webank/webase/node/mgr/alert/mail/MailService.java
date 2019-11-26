@@ -187,10 +187,11 @@ public class MailService {
             return;
         }
         // last time alert by now, if within interval, not send
-        if(isWithinAlertIntervalByNow(alertRule)) {
-            log.debug("end sendMailByRule non-sending mail for beyond alert interval:{}", alertRule);
-            return;
-        }
+        // TODO 告警间隔时间的刷新放到遍历group异常的for循环外面
+//        if(isWithinAlertIntervalByNow(alertRule)) {
+//            log.debug("end sendMailByRule non-sending mail for beyond alert interval:{}", alertRule);
+//            return;
+//        }
         // if userList is empty or default email
         if(StringUtils.isEmpty(alertRule.getUserList())) {
             log.error("end sendMailByRule for no receive mail address:{}", alertRule);
@@ -303,26 +304,6 @@ public class MailService {
         mailSender.send(message);
     }
 
-    /**
-     * calculate interval time form lastAlertTime
-     */
-    public boolean isWithinAlertIntervalByNow(TbAlertRule tbAlertRule) {
-        LocalDateTime lastAlertTime = tbAlertRule.getLastAlertTime();
-        // first time alert
-        if(lastAlertTime == null) {
-            return false;
-        }
-        Long alertInterval = tbAlertRule.getAlertIntervalSeconds();
-        // unit s => ms
-        alertInterval *= 1000;
-
-        LocalDateTime now = LocalDateTime.now();
-        Long actualInterval = Timestamp.valueOf(now).getTime()
-                - Timestamp.valueOf(lastAlertTime).getTime();
-
-        return actualInterval < alertInterval;
-
-    }
 
     /**
      * init empty param from db

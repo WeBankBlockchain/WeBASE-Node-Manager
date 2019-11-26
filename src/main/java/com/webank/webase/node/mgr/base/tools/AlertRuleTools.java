@@ -18,8 +18,11 @@ package com.webank.webase.node.mgr.base.tools;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import lombok.extern.log4j.Log4j2;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +63,27 @@ public class AlertRuleTools {
         }
 
         return emailContentAfterReplace;
+    }
+
+    /**
+     * calculate interval time form lastAlertTime
+     */
+    public static boolean isWithinAlertIntervalByNow(TbAlertRule tbAlertRule) {
+        LocalDateTime lastAlertTime = tbAlertRule.getLastAlertTime();
+        // first time alert
+        if(lastAlertTime == null) {
+            return false;
+        }
+        Long alertInterval = tbAlertRule.getAlertIntervalSeconds();
+        // unit s => ms
+        alertInterval *= 1000;
+
+        LocalDateTime now = LocalDateTime.now();
+        Long actualInterval = Timestamp.valueOf(now).getTime()
+                - Timestamp.valueOf(lastAlertTime).getTime();
+
+        return actualInterval < alertInterval;
+
     }
 
 }
