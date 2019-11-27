@@ -72,3 +72,7 @@ executor:
   maxPoolSize: 10
   queueSize: 50
   threadNamePrefix: "node-mgr-async-"
+
+sdk:
+  encryptType: 1 # 1:guomi, 0:standard
+

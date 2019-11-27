@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -497,6 +498,7 @@ public class MonitorService {
             List<AbiDefinition> abiList = Web3Tools.loadContractDefinition(contractAbi);
             for (AbiDefinition abiDefinition : abiList) {
                 if ("function".equals(abiDefinition.getType())) {
+                    // support guomi sm3
                     String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
                     if (methodId.equals(buildMethodId)) {
                         interfaceName = abiDefinition.getName();
