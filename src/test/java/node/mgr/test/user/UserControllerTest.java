@@ -14,17 +14,14 @@
 package node.mgr.test.user;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
-import java.util.Iterator;
-import java.util.List;
 
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -138,7 +135,8 @@ public class UserControllerTest {
 
     @Test
     public void testGenerateKey() throws Exception {
-       Credentials credentials = Credentials.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+        // guomi use GenCredential
+       Credentials credentials = GenCredential.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
         System.out.println( credentials.getAddress());
         System.out.println( credentials.getEcKeyPair().getPrivateKey().toString(16));
         System.out.println(  credentials.getEcKeyPair().getPublicKey().toString(16));
