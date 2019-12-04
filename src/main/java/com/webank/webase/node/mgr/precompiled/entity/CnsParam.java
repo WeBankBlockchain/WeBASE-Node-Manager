@@ -27,4 +27,5 @@ public class CnsParam {
     // register
     private String contractAddress;
     private String abi;
+//    private Boolean useAes;
 }
