@@ -21,11 +21,11 @@ import lombok.Data;
  */
 @Data
 public class TbMethod {
-
     private String methodId;
     private Integer groupId;
     private String abiInfo;
     private String methodType;
+    // general contract and precompiled contract
     private Integer contractType;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
