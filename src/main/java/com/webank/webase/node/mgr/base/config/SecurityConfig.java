@@ -97,6 +97,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(tokenAuthenticationProvider());
     }
 
+    // TODO guomi 使用web3sdk进行hash，可以自动切换sha/sm3 但需要集成PasswordEncoder
     @Bean("bCryptPasswordEncoder")
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

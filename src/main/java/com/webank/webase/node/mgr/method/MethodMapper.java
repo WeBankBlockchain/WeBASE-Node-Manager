@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.method;
 
 
 import com.webank.webase.node.mgr.method.entity.TbMethod;
+import com.webank.webase.node.mgr.method.entity.MethodUpdateParam;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -23,7 +24,9 @@ public interface MethodMapper {
 
     void add(TbMethod tbMethod);
 
-    void removeByGroupId( @Param("groupId") int groupId);
+    void removeByGroupId(@Param("groupId") int groupId);
 
     TbMethod getMethodById(@Param("methodId") String methodId, @Param("groupId") Integer groupId);
+
+    void updateMethodId(MethodUpdateParam methodUpdateParam);
 }
