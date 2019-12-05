@@ -15,7 +15,6 @@ package com.webank.webase.node.mgr.method;
 
 
 import com.webank.webase.node.mgr.method.entity.TbMethod;
-import com.webank.webase.node.mgr.method.entity.MethodUpdateParam;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
