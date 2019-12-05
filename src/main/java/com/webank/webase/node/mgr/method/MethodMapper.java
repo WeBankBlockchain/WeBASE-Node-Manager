@@ -28,5 +28,4 @@ public interface MethodMapper {
 
     TbMethod getMethodById(@Param("methodId") String methodId, @Param("groupId") Integer groupId);
 
-    void updateMethodId(MethodUpdateParam methodUpdateParam);
 }
