@@ -16,9 +16,11 @@
 
 package com.webank.webase.node.mgr.base.tools;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.fisco.bcos.web3j.crypto.gm.sm3.SM3Digest;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class SM3PasswordEncoder implements PasswordEncoder {
@@ -28,7 +30,9 @@ public class SM3PasswordEncoder implements PasswordEncoder {
 
     public String encode(CharSequence rawPassword) {
         SM3Digest sm3Digest = new SM3Digest();
-        return sm3Digest.hash(rawPassword.toString());
+        byte[] pwdInput = rawPassword.toString().getBytes();
+        byte[] hashed = sm3Digest.hash(pwdInput);
+        return Numeric.toHexString(hashed);
     }
 
     /**

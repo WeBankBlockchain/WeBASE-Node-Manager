@@ -14,31 +14,23 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.base.config;
+package com.webank.webase.node.mgr.gm;
 
-
-import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * guomi configuration in web3sdk
+ * return encrypt type to web 0 is standard, 1 is guomi
  */
-@Data
-@Configuration
-@ConfigurationProperties(prefix = "sdk")
-public class EncryptTypeConfig {
-    // 0:standard, 1:guomi
-    private int encryptType;
-
-    /**
-     * 覆盖EncryptType构造函数，不能写getEncrytType()
-     * @return
-     */
-    @Bean(name = "encryptType")
-    public EncryptType EncryptType() {
-        return new EncryptType(encryptType);
+@Log4j2
+@RestController
+@RequestMapping(value = "encrypt")
+public class EncryptTypeController {
+    @GetMapping("")
+    public Integer getEncryptType() {
+        return EncryptType.encryptType;
     }
 }
