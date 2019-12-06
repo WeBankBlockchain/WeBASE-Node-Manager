@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -101,10 +102,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     // TODO guomi 使用web3sdk进行hash，可以自动切换sha/sm3 但需要集成PasswordEncoder
     @Bean("bCryptPasswordEncoder")
+    @DependsOn("encryptType")
     public PasswordEncoder passwordEncoder() {
-//        if(EncryptType.encryptType == 1){
-//            return new SM3PasswordEncoder();
-//        }
+        if(EncryptType.encryptType == 1){
+            return new SM3PasswordEncoder();
+        }
         return new BCryptPasswordEncoder();
     }
 
