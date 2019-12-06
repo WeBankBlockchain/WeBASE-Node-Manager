@@ -3,7 +3,7 @@
 -- 1、init tb_account_info data   admin/Abcd1234 // 国密版 sm3.hash(Abcd123)
 -- ----------------------------
 --INSERT INTO tb_account_info (account,account_pwd,role_id,create_time,modify_time)values('admin', '$2a$10$F/aEB1iEx/FvVh0fMn6L/uyy.PkpTy8Kd9EdbqLGo7Bw7eCivpq.m',100000,now(),now());
-INSERT INTO tb_account_info (account,account_pwd,role_id,create_time,modify_time)values('admin', '0xa9c64b024e038c7f7d11474e92446b0796ac2cd839d7e25c5defe1f41c52cfea',100000,now(),now());
+INSERT INTO tb_account_info (account,account_pwd,role_id,create_time,modify_time)values('admingm', '0x764d66bb690ee71e2f7e076cbe25f79f0559c2c8b4c07e3658b02b6f4ad40e38',100000,now(),now());
 
 
 -- ----------------------------
