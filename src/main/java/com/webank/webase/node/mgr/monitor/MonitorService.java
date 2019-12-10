@@ -450,9 +450,9 @@ public class MonitorService {
     private UserMonitorResult monitorUser(int groupId, String userAddress) {
         String userName = userService.queryUserNameByAddress(groupId, userAddress);
 
-        if (StringUtils.isBlank(userName)) {
-            userName = getSystemUserName(userAddress);
-        }
+//        if (StringUtils.isBlank(userName)) {
+//            userName = getSystemUserName(userAddress);
+//        }
 
         int userType = MonitorUserType.NORMAL.getValue();
         if (StringUtils.isBlank(userName)) {
@@ -472,14 +472,14 @@ public class MonitorService {
     /**
      * get systemUser name.
      */
-    private String getSystemUserName(String address) {
-        if (StringUtils.isBlank(address)) {
-            return null;
-        }
-        TbUser user = userService.getSystemUser();
-        return Optional.ofNullable(user).filter(u -> address.equals(u.getAddress()))
-            .map(u1 -> u1.getUserName()).orElse(null);
-    }
+//    private String getSystemUserName(String address) {
+//        if (StringUtils.isBlank(address)) {
+//            return null;
+//        }
+//        TbUser user = userService.getSystemUser();
+//        return Optional.ofNullable(user).filter(u -> address.equals(u.getAddress()))
+//            .map(u1 -> u1.getUserName()).orElse(null);
+//    }
 
 
 
