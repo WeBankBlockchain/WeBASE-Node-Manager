@@ -2,5 +2,3 @@
 
 source webase-ddl.sql;
 source webase-dml.sql;
-# guomi replace standard dml.sql
-#source webase-dml-gm.sql;
