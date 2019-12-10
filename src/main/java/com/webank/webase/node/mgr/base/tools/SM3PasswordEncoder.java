@@ -46,12 +46,12 @@ public class SM3PasswordEncoder implements PasswordEncoder {
             logger.warn("Empty encoded password");
             return false;
         }
-
-        return checkPwd(rawPassword.toString(), encodedPassword);
+        String plainText = encode(rawPassword);
+        return checkPwd(plainText, encodedPassword);
     }
 
-    private boolean checkPwd(String plainedText, String hashed) {
-        char[] caa = plainedText.toCharArray();
+    private boolean checkPwd(String plainText, String hashed) {
+        char[] caa = plainText.toCharArray();
         char[] cab = hashed.toCharArray();
 
         if (caa.length != cab.length) {
