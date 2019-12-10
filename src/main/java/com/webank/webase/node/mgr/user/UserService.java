@@ -330,9 +330,9 @@ public class UserService {
     /**
      * get systemUser.
      */
-    public TbUser getSystemUser() {
-        return userMapper.querySystemUser();
-    }
+//    public TbUser getSystemUser() {
+//        return userMapper.querySystemUser();
+//    }
 
     /**
      * delete by groupId.
