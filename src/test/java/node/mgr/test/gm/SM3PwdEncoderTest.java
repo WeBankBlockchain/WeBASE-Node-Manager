@@ -17,6 +17,7 @@
 package node.mgr.test.gm;
 
 import org.fisco.bcos.web3j.crypto.Hash;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,25 +34,20 @@ public class SM3PwdEncoderTest extends TestBase {
     @Qualifier("bCryptPasswordEncoder")
     @Autowired
     PasswordEncoder bcEncoder;
-
+    public static final String pwdSM3Of123 = "0x02a05d18fc27f898c4e5815ad7696891772303dc47d5390d0dd71edc07df39ac";
+    
     @Test
     public void testCrypt() {
-        String rawPWd = "Abcd1234";
-        // Abcd1234: 0xa9c64b024e038c7f7d11474e92446b0796ac2cd839d7e25c5defe1f41c52cfea
+        String rawPWd = "123";
         String pwdSM3  = passwordEncoder.encode(rawPWd);
-//        String pwdBC = bcEncoder.encode(rawPWd);
         System.out.println(pwdSM3);
-//        System.out.println(pwdBC);
-        // pwdSM3 = "0xfa0935a1bbef35be054f266d2d0fa48571c6254e312d65df085b2f7117c0c148";
-        // pwdBC = "$2a$10$xl4/AgmzZe1LYo9zABpUZuHpmUp.4a7NO58osbATMsr8FyOHLsKfe";
+        Assert.assertTrue(passwordEncoder.matches(rawPWd, pwdSM3Of123));
     }
-
-    public static final String pwdSM3 = "0xfa0935a1bbef35be054f266d2d0fa48571c6254e312d65df085b2f7117c0c148";
 
     @Test
     public void testPwdMatches() {
         String raw = passwordEncoder.encode("123");
-        boolean res = passwordEncoder.matches(raw, pwdSM3);
+        boolean res = passwordEncoder.matches(raw, pwdSM3Of123);
         System.out.println(res);
         System.out.println(Hash.sha3("123"));
 
