@@ -23,4 +23,5 @@ public class CrudHandle {
     private int groupId;
     private String fromAddress;
     private String sql;
+    private Boolean useAes;
 }

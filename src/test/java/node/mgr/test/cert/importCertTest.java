@@ -20,7 +20,7 @@
 //import java.security.cert.*;
 //import java.util.*;
 //
-//import com.webank.webase.node.mgr.cert.CertTools;
+//import com.webank.webase.node.mgr.base.tools.CertTools;
 //import org.fisco.bcos.web3j.crypto.ECKeyPair;
 //import org.fisco.bcos.web3j.crypto.Keys;
 //import org.fisco.bcos.web3j.utils.Numeric;
@@ -29,7 +29,7 @@
 //import sun.security.ec.ECPublicKeyImpl;
 //import sun.security.x509.X509CertImpl;
 //
-//import static com.webank.webase.node.mgr.cert.CertTools.byteToHex;
+//import static com.webank.webase.node.mgr.base.tools.CertTools.byteToHex;
 //
 //public class importCertTest {
 //    private final static String head = "-----BEGIN CERTIFICATE-----\n" ;

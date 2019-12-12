@@ -80,7 +80,7 @@ public interface UserMapper {
     /**
      * query system User.
      */
-    TbUser querySystemUser();
+//    TbUser querySystemUser();
 
     /**
      * delete user.
