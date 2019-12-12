@@ -23,8 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.validation.constraints.AssertTrue;
-
 public class SM3PwdEncoderTest extends TestBase {
 
     @Qualifier("sm3PasswordEncoder")
@@ -35,7 +33,7 @@ public class SM3PwdEncoderTest extends TestBase {
     @Autowired
     PasswordEncoder bcEncoder;
     public static final String pwdSM3Of123 = "0x02a05d18fc27f898c4e5815ad7696891772303dc47d5390d0dd71edc07df39ac";
-    
+
     @Test
     public void testCrypt() {
         String rawPWd = "123";
