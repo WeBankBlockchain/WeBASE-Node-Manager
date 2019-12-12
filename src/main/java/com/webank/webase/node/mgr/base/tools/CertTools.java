@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.cert;
+package com.webank.webase.node.mgr.base.tools;
 
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;

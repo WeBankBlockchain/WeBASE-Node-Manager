@@ -17,8 +17,11 @@
 package com.webank.webase.node.mgr.alert.task;
 
 import com.webank.webase.node.mgr.alert.mail.MailService;
+import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.AlertRuleType;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.monitor.MonitorService;
@@ -46,6 +49,9 @@ public class AuditMonitorTask {
     private FrontGroupMapCache frontGroupMapCache;
     @Autowired
     private MailService alertMailService;
+    @Autowired
+    private AlertRuleService alertRuleService;
+
     /**
      * set scheduler's interval
      */
@@ -60,6 +66,13 @@ public class AuditMonitorTask {
     public synchronized void checkUserAndContractForAlert() {
         Instant startTime = Instant.now();
         log.info("start checkUserAndContractForAlert startTime:{}", startTime.toEpochMilli());
+        //check last alert time, if within interval, not send
+        TbAlertRule alertRule = alertRuleService.queryByRuleId(AlertRuleType.AUDIT_ALERT.getValue());
+        if(AlertRuleTools.isWithinAlertIntervalByNow(alertRule)) {
+            log.debug("end checkUserAndContractForAlert non-sending mail" +
+                    " for beyond alert interval:{}", alertRule);
+            return;
+        }
         List<FrontGroup> groupList = frontGroupMapCache.getAllMap();
         if (groupList == null || groupList.size() == 0) {
             log.warn("checkUserAndContractForAlert jump over: not found any group");

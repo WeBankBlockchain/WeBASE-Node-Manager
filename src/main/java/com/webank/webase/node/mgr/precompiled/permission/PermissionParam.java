@@ -27,4 +27,5 @@ public class PermissionParam {
     private String address;
     private String tableName;
     private PermissionState permissionState;
+    private Boolean useAes;
 }

@@ -90,7 +90,9 @@ public class PrecompiledService {
             log.error("fail nodeManageService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-
+        if(Objects.isNull(consensusHandle.getUseAes())) {
+            consensusHandle.setUseAes(false);
+        }
         Object frontRsp = frontRestTools.postForEntity(
                 consensusHandle.getGroupId(), FrontRestTools.URI_CONSENSUS,
                 consensusHandle, Object.class);
@@ -108,7 +110,9 @@ public class PrecompiledService {
             log.error("fail crudService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-
+        if(Objects.isNull(crudHandle.getUseAes())) {
+            crudHandle.setUseAes(false);
+        }
         Object frontRsp = frontRestTools.postForEntity(
                 crudHandle.getGroupId(), FrontRestTools.URI_CRUD,
                 crudHandle, Object.class);
