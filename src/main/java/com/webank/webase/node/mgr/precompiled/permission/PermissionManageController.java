@@ -35,6 +35,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Permission contoller
@@ -127,7 +128,6 @@ public class PermissionManageController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start updatePermission startTime:{} permissionParam:{}", startTime.toEpochMilli(),
                 JSON.toJSONString(permissionParam));
-
         Object res = permissionManageService.updatePermissionState(permissionParam);
 
         log.info("end updatePermission useTime:{} result:{}",

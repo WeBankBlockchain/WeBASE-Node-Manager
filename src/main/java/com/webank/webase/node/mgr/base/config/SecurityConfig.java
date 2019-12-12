@@ -13,10 +13,13 @@
  */
 package com.webank.webase.node.mgr.base.config;
 
+import com.webank.webase.node.mgr.base.tools.SM3PasswordEncoder;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -72,7 +75,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .successHandler(loginSuccessHandler) // if login success
             .failureHandler(loginfailHandler) // if login fail
             .and().authorizeRequests()
-            .antMatchers("/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**")
+            .antMatchers("/account/login", "/account/pictureCheckCode",
+                    "/login","/user/privateKey/**", "/encrypt")
             .permitAll()
             .anyRequest().authenticated().and().csrf()
             .disable() // close csrf
@@ -97,11 +101,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(tokenAuthenticationProvider());
     }
 
+    // TODO guomi 使用web3sdk进行hash，可以自动切换sha/sm3 但需要集成PasswordEncoder
     @Bean("bCryptPasswordEncoder")
+    @DependsOn("encryptType")
     public PasswordEncoder passwordEncoder() {
+        if(EncryptType.encryptType == 1){
+            return new SM3PasswordEncoder();
+        }
         return new BCryptPasswordEncoder();
     }
-    
+
+    @Bean("sm3PasswordEncoder")
+    public PasswordEncoder getSM3PasswordEncoder() {
+        return new SM3PasswordEncoder();
+    }
+
     @Bean
     public AuthenticationProvider tokenAuthenticationProvider() {
         return new TokenAuthenticationProvider();
