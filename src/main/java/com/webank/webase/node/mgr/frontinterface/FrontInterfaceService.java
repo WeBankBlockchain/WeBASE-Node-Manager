@@ -124,6 +124,7 @@ public class FrontInterfaceService {
         return getFromSpecificFront(groupId, nodeIp, frontPort, URI_GROUP_PLIST, List.class);
     }
 
+
     /**
      * get groupPeers from specific front.
      */
@@ -398,6 +399,17 @@ public class FrontInterfaceService {
         String config = frontRestTools.getForEntity(groupId, uri, String.class);
         log.debug("end getSystemConfigByKey. config:{}", config);
         return config;
+    }
+
+    /**
+     * get front's encryptType
+     */
+    public Integer getEncryptTypeFromSpecificFront(String nodeIp, Integer frontPort) {
+        log.debug("start getEncryptTypeFromSpecificFront. nodeIp:{},frontPort:{}", nodeIp, frontPort);
+        Integer groupId = Integer.MAX_VALUE;
+        int encryptType = getFromSpecificFront(groupId, nodeIp, frontPort, URI_ENCRYPT_TYPE, Integer.class);
+        log.debug("end getEncryptTypeFromSpecificFront. encryptType:{}", encryptType);
+        return encryptType;
     }
 
 }
