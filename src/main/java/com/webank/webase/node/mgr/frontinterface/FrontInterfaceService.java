@@ -405,9 +405,11 @@ public class FrontInterfaceService {
      * get front's encryptType
      */
     public Integer getEncryptTypeFromSpecificFront(String nodeIp, Integer frontPort) {
-        log.debug("start getEncryptTypeFromSpecificFront. nodeIp:{},frontPort:{}", nodeIp, frontPort);
+        log.debug("start getEncryptTypeFromSpecificFront. nodeIp:{},frontPort:{}",
+                nodeIp, frontPort);
         Integer groupId = Integer.MAX_VALUE;
-        int encryptType = getFromSpecificFront(groupId, nodeIp, frontPort, URI_ENCRYPT_TYPE, Integer.class);
+        int encryptType = getFromSpecificFront(groupId, nodeIp, frontPort,
+                URI_ENCRYPT_TYPE, Integer.class);
         log.debug("end getEncryptTypeFromSpecificFront. encryptType:{}", encryptType);
         return encryptType;
     }

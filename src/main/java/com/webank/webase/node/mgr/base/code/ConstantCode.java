@@ -117,23 +117,30 @@ public class ConstantCode {
     // 证书管理
     public static final RetCode CERT_ERROR = RetCode.mark(202060, "cert handle error");
     public static final RetCode FAIL_SAVE_CERT_ERROR = RetCode.mark(202061, "store cert error");
-    public static final RetCode CERT_FORMAT_ERROR = RetCode.mark(202062, "cert format error, must start with -----BEGIN CERTIFICATE-----\\n, end with end");
+    public static final RetCode CERT_FORMAT_ERROR = RetCode.mark(202062,
+            "cert format error, must start with -----BEGIN CERTIFICATE-----\\n, end with end");
     public static final RetCode SAVING_FRONT_CERT_ERROR = RetCode.mark(202063, "saving front's cert error");
 
     // 邮件告警错误
     public static final RetCode MAIL_SERVER_CONFIG_ERROR = RetCode.mark(202070, "Mail server config error.");
-    public static final RetCode MAIL_SERVER_CONFIG__PARAM_EMPTY = RetCode.mark(202071, "Mail server config param empty/not match.");
-    public static final RetCode MAIL_SERVER_CONFIG_ERROR_NO_DATA_IN_DB = RetCode.mark(202072, "Mail server config error, db's server config is empty");
+    public static final RetCode MAIL_SERVER_CONFIG__PARAM_EMPTY = RetCode.mark(202071,
+            "Mail server config param empty/not match.");
+    public static final RetCode MAIL_SERVER_CONFIG_ERROR_NO_DATA_IN_DB = RetCode.mark(202072,
+            "Mail server config error, db's server config is empty");
     public static final RetCode ALERT_RULE_ERROR = RetCode.mark(202076, "Alert rule error.");
     public static final RetCode ALERT_RULE_PARAM_EMPTY = RetCode.mark(202077, "Alert rule param not match.");
-    public static final RetCode SEND_MAIL_ERROR = RetCode.mark(202080, "Send mail error, please check mail server configuration.");
-    public static final RetCode SEND_MAIL_ERROR_FOR_SERVER_IS_OFF = RetCode.mark(202081, "Send mail error, please enable mail server before send.");
+    public static final RetCode SEND_MAIL_ERROR = RetCode.mark(202080,
+            "Send mail error, please check mail server configuration.");
+    public static final RetCode SEND_MAIL_ERROR_FOR_SERVER_IS_OFF = RetCode.mark(202081,
+            "Send mail error, please enable mail server before send.");
     public static final RetCode ALERT_LOG_ERROR = RetCode.mark(202086, "Alert log error.");
-    public static final RetCode ALERT_LOG_PARAM_EMPTY = RetCode.mark(202087, "Alert log param: status/logId is empty.");
+    public static final RetCode ALERT_LOG_PARAM_EMPTY = RetCode.mark(202087,
+            "Alert log param: status/logId is empty.");
 
     /* guomi exception */
     public static final RetCode UPDATE_METHOD_ID_GM_ERROR = RetCode.mark(202090, "Update guomi methodId error");
-    public static final RetCode ENCRYPT_TYPE_NOT_MATCH = RetCode.mark(202091, "Front's encrypt type not matches with nodemgr");
+    public static final RetCode ENCRYPT_TYPE_NOT_MATCH = RetCode.mark(202091,
+            "Front's encrypt type not matches with nodemgr");
 
 
     /* auth */
