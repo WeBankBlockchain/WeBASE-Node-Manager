@@ -22,7 +22,6 @@ import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 /**
  * guomi configuration in web3sdk

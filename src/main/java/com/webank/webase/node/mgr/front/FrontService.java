@@ -91,8 +91,9 @@ public class FrontService {
         }
         // check front's encrypt type same as nodemgr(guomi or standard)
         int encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort);
-        if(encryptType != EncryptType.encryptType) {
-            log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{},local encryptType not match:{}",
+        if (encryptType != EncryptType.encryptType) {
+            log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{}," +
+                            "local encryptType not match:{}",
                     frontIp, frontPort, encryptType, EncryptType.encryptType);
             throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
         }
