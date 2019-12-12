@@ -133,6 +133,8 @@ public class ConstantCode {
 
     /* guomi exception */
     public static final RetCode UPDATE_METHOD_ID_GM_ERROR = RetCode.mark(202090, "Update guomi methodId error");
+    public static final RetCode ENCRYPT_TYPE_NOT_MATCH = RetCode.mark(202091, "Front's encrypt type not matches with nodemgr");
+
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

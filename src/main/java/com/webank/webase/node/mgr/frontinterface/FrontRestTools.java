@@ -89,12 +89,13 @@ public class FrontRestTools {
     public static final String URI_CRUD = "precompiled/crud";
 
     public static final String URI_CERT = "cert";
+    public static final String URI_ENCRYPT_TYPE = "encrypt";
 
     //不需要在url中包含groupId的
     private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
         .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_CONTRACT_SENDABI,
                 URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST, URI_SYS_CONFIG, URI_CONSENSUS_LIST,
-                URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST, URI_PERMISSION_SORTED_FULL_LIST, URI_CERT);
+                URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST, URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE);
 
 
     @Qualifier(value = "genericRestTemplate")
