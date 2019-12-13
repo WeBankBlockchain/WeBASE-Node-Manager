@@ -419,12 +419,14 @@ public class FrontInterfaceService {
     /**
      * generate group.
      */
-    public GroupHandleResult generateGroup(int groupId, GenerateGroupInfo param) {
-        log.debug("start generateGroup groupId:{} param:{}", groupId, JSON.toJSONString(param));
+    public GroupHandleResult generateGroup(int groupId, String frontIp, Integer frontPort,
+            GenerateGroupInfo param) {
+        log.debug("start generateGroup groupId:{} frontIp:{} frontPort:{} param:{}", groupId,
+                JSON.toJSONString(param));
 
-        GroupHandleResult groupHandleResult = frontRestTools.postForEntity(groupId,
-                FrontRestTools.URI_GENERATE_GROUP, param, GroupHandleResult.class);
-        
+        GroupHandleResult groupHandleResult = requestSpecificFront(groupId, frontIp, frontPort,
+                HttpMethod.POST, FrontRestTools.URI_GENERATE_GROUP, param, GroupHandleResult.class);
+
         log.debug("end generateGroup groupId:{} param:{}", groupId, JSON.toJSONString(param));
         return groupHandleResult;
     }
@@ -432,13 +434,15 @@ public class FrontInterfaceService {
     /**
      * start group.
      */
-    public GroupHandleResult startGroup(Integer groupId, Integer startGroupId) {
-        log.debug("start startGroup groupId:{} startGroupId:{}", groupId, startGroupId);
-        
+    public GroupHandleResult startGroup(Integer groupId, String frontIp, Integer frontPort,
+            Integer startGroupId) {
+        log.debug("start startGroup groupId:{} frontIp:{} frontPort:{} startGroupId:{}", groupId,
+                startGroupId);
+
         String uri = String.format(FrontRestTools.URI_START_GROUP, startGroupId);
         GroupHandleResult groupHandleResult =
-                frontRestTools.getForEntity(groupId, uri, GroupHandleResult.class);
-        
+                getFromSpecificFront(groupId, frontIp, frontPort, uri, GroupHandleResult.class);
+
         log.debug("end startGroup");
         return groupHandleResult;
     }
