@@ -38,6 +38,7 @@ import java.util.List;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,6 +88,14 @@ public class FrontService {
         } catch (Exception e) {
             log.error("fail newFront, frontIp:{},frontPort:{}",frontIp,frontPort);
             throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
+        // check front's encrypt type same as nodemgr(guomi or standard)
+        int encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort);
+        if (encryptType != EncryptType.encryptType) {
+            log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{}," +
+                            "local encryptType not match:{}",
+                    frontIp, frontPort, encryptType, EncryptType.encryptType);
+            throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
         }
         //check front not exist
         SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
