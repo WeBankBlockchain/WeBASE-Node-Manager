@@ -25,6 +25,8 @@ import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -80,7 +82,7 @@ public class CertService {
             String certName = CertTools.getCertName(certImpl.getSubjectDN());
             String certType = CertTools.getCertType(certImpl.getSubjectDN());
             // 获取crt的原文,并加上头和尾
-            String certContent = CertTools.addHeadAndTail(certContentList.get(i));
+            String certContent = CertTools.addCertHeadAndTail(certContentList.get(i));
 
             // 判断证书类型后给pub和父子证书赋值
             String publicKeyString = "";
@@ -349,12 +351,15 @@ public class CertService {
         String chainCertContent = certContents.get(CertTools.TYPE_CHAIN);
         String agencyCertContent = certContents.get(CertTools.TYPE_AGENCY);
         String nodeCertContent = certContents.get(CertTools.TYPE_NODE);
+        // guomi encrypt node cert
+        String encryptNodeCertContent = certContents.get(CertTools.TYPE_ENCRYPT_NODE);
         String sdkCertContent = certContents.get(CertTools.TYPE_SDK);
         handleSaveFrontCertStr(chainCertContent);
         handleSaveFrontCertStr(agencyCertContent);
         handleSaveFrontCertStr(nodeCertContent);
+        handleSaveFrontCertStr(encryptNodeCertContent);
         handleSaveFrontCertStr(sdkCertContent);
-        log.debug("end saveFrontCert. certContents:{} ", certContents);
+        log.debug("end saveFrontCert. certContents:{} ");
     }
 
     /**
@@ -363,8 +368,8 @@ public class CertService {
      * @throws CertificateException
      */
     public void handleSaveFrontCertStr(String certStr) throws CertificateException {
-        if(!"".equals(certStr)) {
-            certStr = CertTools.addHeadAndTail(certStr);
+        if(StringUtils.isNotEmpty(certStr)) {
+            certStr = CertTools.addCertHeadAndTail(certStr);
             log.debug("start handleSaveFrontCertStr:{} ", certStr);
             saveCerts(certStr);
             log.debug("end handleSaveFrontCertStr:{} ", certStr);
