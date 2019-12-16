@@ -60,9 +60,9 @@ public class SendMailTest {
 
     /**
      * test alert_rule
-     * INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval`,`alert_content`,`content_param_list`,`description`,`is_all_user`,`user_list`,`create_time`,`modify_time`,`less_than`,`less_and_equal`,`larger_than`,`larger_and_equal`,`equal`)VALUES ('测试告警', 0, 2, 'low', 3600, '这是测试邮件，来自from', '["from"]', '', 0, '["15889463195@163.com", "g120856@126.com"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30', '','','','','');
+     * INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval`,`alert_content`,`content_param_list`,`description`,`is_all_user`,`user_list`,`create_time`,`modify_time`,`less_than`,`less_and_equal`,`larger_than`,`larger_and_equal`,`equal`)VALUES ('测试告警', 0, 2, 'low', 3600, '这是测试邮件，来自from', '["from"]', '', 0, '["15889463195@163.com"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30', '','','','','');
      * test mail_server_config
-     * INSERT INTO `tb_mail_server_config`(`server_name`,`host`,`username`,`password`,`protocol`,`default_encoding`,`create_time`,`modify_time`,`authentication`,`starttls_enable`,`starttls_required`,`socket_factory_port`,`socket_factory_class`,`socket_factory_fallback`) VALUES ('Default config', 'smtp.163.com', '15889463195@163.com', 'youlin123456','smtp', 'UTF-8','2019-10-29 20:02:30', '2019-10-29 20:02:30', 1, 1, 0, 465, 'javax.net.ssl.SSLSocketFactory', 0);     *
+     * INSERT INTO `tb_mail_server_config`(`server_name`,`host`,`username`,`password`,`protocol`,`default_encoding`,`create_time`,`modify_time`,`authentication`,`starttls_enable`,`starttls_required`,`socket_factory_port`,`socket_factory_class`,`socket_factory_fallback`) VALUES ('Default config', 'smtp.163.com', '15889463195@163.com', '','smtp', 'UTF-8','2019-10-29 20:02:30', '2019-10-29 20:02:30', 1, 1, 0, 465, 'javax.net.ssl.SSLSocketFactory', 0);     *
      */
     @Test
     public void testSendingByRule() {
