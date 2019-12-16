@@ -37,6 +37,8 @@ public class CertTools {
     public static final String TYPE_AGENCY = "agency";
     public static final String TYPE_NODE = "node";
     public static final String TYPE_SDK = "sdk";
+    // 2019/12: support guomi
+    public static final String TYPE_ENCRYPT_NODE = "ennode";
     // 首次启动时需要拉取
     public static boolean isPullFrontCertsDone = false;
     /**
@@ -56,7 +58,7 @@ public class CertTools {
      * begin ...
      * end ...
      */
-    public static String addHeadAndTail(String certContent) {
+    public static String addCertHeadAndTail(String certContent) {
         String headToConcat = crtContentHead;
         String fullCert = headToConcat.concat(certContent).concat(crtTailForConcat);
         return fullCert;
