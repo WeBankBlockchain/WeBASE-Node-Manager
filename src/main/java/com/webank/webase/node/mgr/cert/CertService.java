@@ -409,14 +409,12 @@ public class CertService {
         log.debug("loadCertListFromCrtContent content:{}", crtContent);
         List<X509Certificate> certs;
         try(InputStream is = new ByteArrayInputStream(crtContent.getBytes())) {
-            if(EncryptType.encryptType == 1) {
-                org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
-                        new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
-                certs = (List<X509Certificate>) factory.engineGenerateCertificates(is).stream().collect(Collectors.toList());
-            } else {
-                CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                certs = (List<X509Certificate>) cf.generateCertificates(is);
-            }
+
+            org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
+                    new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
+            certs = (List<X509Certificate>) factory.engineGenerateCertificates(is).stream().collect(Collectors.toList());
+//            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+//            certs = (List<X509Certificate>) cf.generateCertificates(is);
         }catch (CertificateException | IOException e) {
             log.error("loadCertListFromCrtContent exception:[]", e);
             throw new NodeMgrException(ConstantCode.CERT_ERROR.getCode(), e.getMessage());
@@ -429,15 +427,9 @@ public class CertService {
         log.debug("start loadSingleCertFromCrtContent. content:{}", crtContent);
         X509Certificate cert;
         try(InputStream is = new ByteArrayInputStream(crtContent.getBytes())) {
-            if(EncryptType.encryptType == 1) {
-                org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
-                        new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
-                cert = (X509Certificate) factory.engineGenerateCertificate(is);
-            } else {
-                CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                cert = (X509Certificate) cf.generateCertificate(is);
-            }
-
+            org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
+                    new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
+            cert = (X509Certificate) factory.engineGenerateCertificate(is);
         }catch (CertificateException | IOException e) {
             log.error("get loadSingleCertFromCrtContent. Exception:[]", e);
             throw new NodeMgrException(ConstantCode.CERT_ERROR.getCode(), e.getMessage());

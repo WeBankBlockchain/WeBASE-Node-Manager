@@ -20,7 +20,9 @@ import java.security.*;
 import java.security.cert.*;
 import java.util.*;
 
+import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import io.jsonwebtoken.lang.Assert;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
@@ -31,7 +33,11 @@ import sun.security.ec.ECPublicKeyImpl;
 import static com.webank.webase.node.mgr.base.tools.CertTools.byteToHex;
 
 /**
- * test load non-guomi cert
+ * test load non-guomi cert and guomi cert
+ * using java.security.cert.CertificateFactory getInstance("X.509");
+ * 2019/12
+ * replace java.security.cert.CertificateFactory
+ * with org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory
  */
 public class ImportCertTest {
     private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
@@ -184,5 +190,27 @@ public class ImportCertTest {
             System.out.println("Error checking Certificate Validity.  See admin.");
             return true;
         }
+    }
+
+    /**
+     * import guomi node cert list
+     * @throws CertificateEncodingException
+     */
+    @Test
+    public void testLoadCertList() throws CertificateException, IOException {
+        // need gmnode.crt file
+        InputStream nodes = new ClassPathResource("notgmnode.crt").getInputStream();
+        org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
+                new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
+        List<X509Certificate> certs = (List<X509Certificate>) factory.engineGenerateCertificates(nodes);
+        Assert.notNull(certs);
+        certs.stream().forEach(c -> {
+            System.out.println(c.getSubjectDN());
+            try {
+                System.out.println(NodeMgrTools.getCertFingerPrint(c.getEncoded()));
+            } catch (CertificateEncodingException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
