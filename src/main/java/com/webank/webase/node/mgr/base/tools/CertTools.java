@@ -18,6 +18,7 @@ package com.webank.webase.node.mgr.base.tools;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
 import sun.security.ec.ECPublicKeyImpl;
@@ -41,6 +42,9 @@ public class CertTools {
     public static final String TYPE_ENCRYPT_NODE = "ennode";
     // 首次启动时需要拉取
     public static boolean isPullFrontCertsDone = false;
+
+    // public key in hex length
+    public static final int PUBLIC_KEY_IN_HEX_LENGTH = 128;
     /**
      * 获取证书类型 和 名字
      * @return
@@ -72,20 +76,17 @@ public class CertTools {
      * @return String
      */
     public static String getPublicKeyString(PublicKey key) {
-        ECPublicKeyImpl pub = (ECPublicKeyImpl) key;
-        byte[] pubBytes = pub.getEncodedPublicValue();
-        String publicKey = Numeric.toHexStringNoPrefix(pubBytes);
-        publicKey = publicKey.substring(2); //证书byte[]为130位，只取128位，去除开头的04标记位
+        //        ECPublicKeyImpl pub = (ECPublicKeyImpl) key;
+        BCECPublicKey bcecPublicKey = (BCECPublicKey) key;
+        byte[] bcecPubBytes = bcecPublicKey.getEncoded();
+        String publicKey = Numeric.toHexStringNoPrefix(bcecPubBytes);
+        publicKey = publicKey.substring(publicKey.length() - PUBLIC_KEY_IN_HEX_LENGTH); //只取后128位
         return publicKey;
     }
 
     public static String getAddress(PublicKey key) {
-        ECPublicKeyImpl pub = (ECPublicKeyImpl) key;
-        byte[] pubBytes = pub.getEncodedPublicValue();
-        String publicKey = Numeric.toHexStringNoPrefix(pubBytes);
-        publicKey = publicKey.substring(2); //128位
-        String address = Keys.getAddress(publicKey);
-        return address;
+        String publicKey = getPublicKeyString(key);
+        return Keys.getAddress(publicKey);
     }
 
     // crt文件中默认首个是节点证书 0 isnode ca, 1 is agency ca, 2 is chain
