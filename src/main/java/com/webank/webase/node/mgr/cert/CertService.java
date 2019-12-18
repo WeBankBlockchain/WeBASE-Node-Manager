@@ -91,9 +91,10 @@ public class CertService {
             String publicKeyString = "";
             String address = "";
             String fatherCertContent = "";
-            // 非节点证书，无需公钥(RSA's public key)
-            if(CertTools.TYPE_NODE.equals(certType) ||
-                    CertTools.TYPE_ENCRYPT_NODE.equals(certType)) {
+            // node cert has PublicKey and Address:
+            // standard: type=node;  guomi: type=encrypt_node, type=sdk&&name=sdk
+            if(CertTools.TYPE_NODE.equals(certType) || CertTools.TYPE_ENCRYPT_NODE.equals(certType) ||
+                    (CertTools.TYPE_SDK.equals(certType) && CertTools.TYPE_SDK.equals(certName))) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = Keys.getAddress(publicKeyString);
