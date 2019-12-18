@@ -45,11 +45,13 @@ public class CertTools {
      * 获取证书类型 和 名字
      * @return
      * @throws IOException
+     * //standard:
+     * //gm: CN=node0,O=fiscobcos,OU=agency
      */
-    public static String  getCertType(Principal subjectDN) {
+    public static String  getCertName(Principal subjectDN) {
         return subjectDN.toString().split(",")[0].split("=")[1];
     }
-    public static String  getCertName(Principal subjectDN) {
+    public static String  getCertType(Principal subjectDN) {
         return subjectDN.toString().split(",")[2].split("=")[1];
     }
 
