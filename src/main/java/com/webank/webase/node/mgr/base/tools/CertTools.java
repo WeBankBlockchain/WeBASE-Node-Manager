@@ -37,9 +37,12 @@ public class CertTools {
     public static final String TYPE_CHAIN = "chain";
     public static final String TYPE_AGENCY = "agency";
     public static final String TYPE_NODE = "node";
-    public static final String TYPE_SDK = "sdk";
-    // 2019/12: support guomi
+    // 2019/12: support guomi, double cert mechanism
     public static final String TYPE_ENCRYPT_NODE = "ennode";
+    public static final String TYPE_SDK_CHAIN = "sdkca";
+    public static final String TYPE_SDK_AGENCY = "sdkagency";
+    // cert name: sdk ,type: node or sdk
+    public static final String TYPE_SDK_NODE = "sdknode";
     // 首次启动时需要拉取
     public static boolean isPullFrontCertsDone = false;
 
