@@ -33,7 +33,7 @@ import static com.webank.webase.node.mgr.base.tools.CertTools.byteToHex;
 /**
  * test load non-guomi cert
  */
-public class importCertTest {
+public class ImportCertTest {
     private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
     private final static String tail = "-----END CERTIFICATE-----\n" ;
 

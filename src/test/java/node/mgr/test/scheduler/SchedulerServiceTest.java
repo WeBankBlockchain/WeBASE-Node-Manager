@@ -11,40 +11,43 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package node.mgr.test.FrontGroupMap;
+package node.mgr.test.scheduler;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
-import java.util.List;
+import com.webank.webase.node.mgr.scheduler.PullBlockInfoTask;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
+import com.webank.webase.node.mgr.scheduler.TransMonitorTask;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class FrontGroupMapServiceTest {
+public class SchedulerServiceTest {
 
     @Autowired
-    private FrontGroupMapService frontGroupMapService;
+    private PullBlockInfoTask pullBlockInfoTask;
+    @Autowired
+    private ResetGroupListTask resetGroupListTask;
+    @Autowired
+    private TransMonitorTask transMonitorTask;
 
     @Test
-    public void getListTest() {
-        MapListParam param = new MapListParam();
-        param.setGroupId(2);
-        List<FrontGroup> list = frontGroupMapService.getList(param);
-        assert (list != null);
-        System.out.println(JSON.toJSONString(list));
+    public void pullBlockInfoTaskTest() {
+        pullBlockInfoTask.pullBlockStart();
     }
 
     @Test
-    public void listByGroupIdTest() {
-        List<FrontGroup> list = frontGroupMapService.listByGroupId(2);
-        assert (list != null);
-        System.out.println(JSON.toJSONString(list));
+    public void resetGroupListTest() {
+        resetGroupListTask.resetGroupList();
     }
+
+    @Test
+    public void transMonitorTest() {
+        transMonitorTask.monitorStart();
+    }
+
 }
