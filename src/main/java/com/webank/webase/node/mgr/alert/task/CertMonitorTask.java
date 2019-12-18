@@ -22,13 +22,15 @@ import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.AlertRuleType;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.CertService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import sun.security.x509.X509CertImpl;
 
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -73,7 +75,7 @@ public class CertMonitorTask {
                     " for beyond alert interval:{}", alertRule);
             return;
         }
-        List<X509CertImpl> certList = certService.loadAllX509Certs();
+        List<X509Certificate> certList = certService.loadAllX509Certs();
         certList.stream()
             .forEach(cert -> {
                 Date certNotAfter = cert.getNotAfter();
@@ -81,7 +83,12 @@ public class CertMonitorTask {
                     log.warn("cert validity alert. certNotAfter:{}",
                             certNotAfter);
                     SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String fingerPrint = cert.getFingerprint("SHA-1");
+                    String fingerPrint = null;
+                    try {
+                        fingerPrint = NodeMgrTools.getCertFingerPrint(cert.getEncoded());
+                    } catch (CertificateEncodingException e) {
+                        e.printStackTrace();
+                    }
                     alertMailService.sendMailByRule(AlertRuleType.CERT_ALERT.getValue(),
                     formatTool.format(certNotAfter) + "(证书指纹:{" + fingerPrint + "})");
                 }

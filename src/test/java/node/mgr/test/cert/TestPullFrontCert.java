@@ -29,7 +29,7 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class testPullFrontCert {
+public class TestPullFrontCert {
     @Autowired
     CertService certService;
 
