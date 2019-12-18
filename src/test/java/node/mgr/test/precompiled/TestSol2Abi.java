@@ -19,7 +19,7 @@ import org.bouncycastle.crypto.digests.KeccakDigest;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 import org.junit.Test;
 
-public class testSol2Abi {
+public class TestSol2Abi {
 
     // according to web3sdk
     @Test
