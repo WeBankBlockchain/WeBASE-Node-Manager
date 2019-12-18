@@ -41,7 +41,6 @@ import java.io.IOException;
 
 import java.io.InputStream;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
