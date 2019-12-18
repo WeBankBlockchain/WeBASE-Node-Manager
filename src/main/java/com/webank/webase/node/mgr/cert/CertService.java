@@ -92,7 +92,8 @@ public class CertService {
             String address = "";
             String fatherCertContent = "";
             // 非节点证书，无需公钥(RSA's public key)
-            if(CertTools.TYPE_NODE.equals(certType)) {
+            if(CertTools.TYPE_NODE.equals(certType) ||
+                    CertTools.TYPE_ENCRYPT_NODE.equals(certType)) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = Keys.getAddress(publicKeyString);
