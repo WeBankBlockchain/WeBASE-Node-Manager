@@ -91,9 +91,9 @@ public class CertService {
             String address = "";
             String fatherCertContent = "";
             // node cert has PublicKey and Address:
-            // standard: type=node;  guomi: type=encrypt_node, type=sdk&&name=sdk
+            // standard: type=node;  guomi: type = node || type=encrypt_node || type=sdk&&name=sdk
             if(CertTools.TYPE_NODE.equals(certType) || CertTools.TYPE_ENCRYPT_NODE.equals(certType) ||
-                    (CertTools.TYPE_SDK.equals(certType) && CertTools.TYPE_SDK.equals(certName))) {
+                    ("sdk".equals(certType) && "sdk".equals(certName))) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = Keys.getAddress(publicKeyString);
@@ -357,13 +357,19 @@ public class CertService {
         String nodeCertContent = certContents.get(CertTools.TYPE_NODE);
         // guomi encrypt node cert
         String encryptNodeCertContent = certContents.get(CertTools.TYPE_ENCRYPT_NODE);
-        String sdkCertContent = certContents.get(CertTools.TYPE_SDK);
+        String sdkChainCertContent = certContents.get(CertTools.TYPE_SDK_CHAIN);
+        String sdkAgencyCertContent = certContents.get(CertTools.TYPE_SDK_AGENCY);
+        String sdkNodeCertContent = certContents.get(CertTools.TYPE_SDK_NODE);
+        // fisco's cert
         handleSaveFrontCertStr(chainCertContent);
         handleSaveFrontCertStr(agencyCertContent);
         handleSaveFrontCertStr(nodeCertContent);
         handleSaveFrontCertStr(encryptNodeCertContent);
-        handleSaveFrontCertStr(sdkCertContent);
-        log.debug("end saveFrontCert. certContents:{} ");
+        //sdk's cert
+        handleSaveFrontCertStr(sdkChainCertContent);
+        handleSaveFrontCertStr(sdkAgencyCertContent);
+        handleSaveFrontCertStr(sdkNodeCertContent);
+        log.debug("end saveFrontCert. certContents. ");
     }
 
     /**
@@ -407,12 +413,13 @@ public class CertService {
      */
     public List<X509Certificate> loadCertListFromCrtContent(String crtContent) {
         log.debug("loadCertListFromCrtContent content:{}", crtContent);
-        List<X509Certificate> certs;
+        List<X509Certificate> certs = new ArrayList<>();
         try(InputStream is = new ByteArrayInputStream(crtContent.getBytes())) {
 
             org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
                     new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
-            certs = (List<X509Certificate>) factory.engineGenerateCertificates(is).stream().collect(Collectors.toList());
+            factory.engineGenerateCertificates(is).stream()
+                    .forEach(c-> certs.add((X509Certificate)c));
 //            CertificateFactory cf = CertificateFactory.getInstance("X.509");
 //            certs = (List<X509Certificate>) cf.generateCertificates(is);
         }catch (CertificateException | IOException e) {
