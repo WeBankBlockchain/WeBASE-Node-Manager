@@ -39,6 +39,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Hash;
+import org.fisco.bcos.web3j.utils.Numeric;
 
 /**
  * common method.
@@ -210,6 +211,25 @@ public class NodeMgrTools {
                 log.error("shaEncode getHashValue fail:", e);
                 return null;
             }
+        }
+    }
+
+    /**
+     * get x509 cert's fingerprint
+     * Hash using: SHA-1
+      * @param byteArray
+     * @return
+     */
+    public static String getCertFingerPrint(byte[] byteArray) {
+        byte[] hashResult;
+        MessageDigest sha = null;
+        try {
+            sha = MessageDigest.getInstance("SHA-1");
+            hashResult = sha.digest(byteArray);
+            return Numeric.toHexStringNoPrefix(hashResult).toUpperCase();
+        } catch (Exception e) {
+            log.error("shaEncode getCertFingerPrint fail:", e);
+            return null;
         }
     }
     /**
