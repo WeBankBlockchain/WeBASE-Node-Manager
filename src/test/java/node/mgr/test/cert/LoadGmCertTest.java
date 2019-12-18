@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 public class LoadGmCertTest extends TestBase{
     @Autowired
@@ -44,4 +45,5 @@ public class LoadGmCertTest extends TestBase{
         System.out.println(certificate.getSubjectDN());
         System.out.println(NodeMgrTools.getCertFingerPrint(certificate.getEncoded()));
     }
+
 }
