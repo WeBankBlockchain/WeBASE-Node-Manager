@@ -90,7 +90,8 @@ public class CertMonitorTask {
                         e.printStackTrace();
                     }
                     alertMailService.sendMailByRule(AlertRuleType.CERT_ALERT.getValue(),
-                    formatTool.format(certNotAfter) + "(证书指纹:{" + fingerPrint + "})");
+            formatTool.format(certNotAfter) + "(证书指纹:{" + fingerPrint + "})",
+                    formatTool.format(certNotAfter) + "(cert fingerprint:{" + fingerPrint + "})");
                 }
             });
 

@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.alert.mail.MailService;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
+import com.webank.webase.node.mgr.alert.task.AuditMonitorTask;
 import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import org.junit.Test;
@@ -53,6 +54,9 @@ public class SendMailTest {
     @Autowired
     MailService mailService;
 
+    @Autowired
+    AuditMonitorTask auditMonitorTask;
+
     public static final String testTitle = "WeBase-Node-Manager测试邮件，请勿回复";
     public static final String fromMailAddress = "15889463195@163.com";
     public static final String toMailAddress = "15889463195@163.com";
@@ -66,10 +70,18 @@ public class SendMailTest {
      */
     @Test
     public void testSendingByRule() {
-        // make sure mail server config is enabled
-        mailService.sendMailByRule(3, "WeBASE-Node-Manager in Test");
+        // make sure mail server config is enabled, userList is not empty
+        mailService.sendMailByRule(3, "WeBASE-Node-Manager in Test", null);
     }
-
+    @Test
+    public void testEnglishMail() {
+        String zh = "TEST 2019-12-19" + "(证书指纹:{" + "8D222" + "})";
+        String en = "TEST 2019-12-19" + "(cert fingerprint:{" + "8D222" + "})";
+        // make sure mail server config is enabled
+        mailService.sendMailByRule(1, zh, en);
+        mailService.sendMailByRule(2, zh, en);
+        mailService.sendMailByRule(3, zh, en);
+    }
     /**
      * set fromMailAddress, toMailAddress, testTitle, using db's mail server config
      */
@@ -164,5 +176,14 @@ public class SendMailTest {
         String time = formatTool.format(LocalDateTime.now());
         System.out.println(time);
 
+    }
+
+    /**
+     * task triggers sending alert mail by rule
+     */
+    @Test
+    public void testSendingByRuleInTask() {
+        // make sure mail server config is enabled
+        auditMonitorTask.auditAlertTaskStart();
     }
 }

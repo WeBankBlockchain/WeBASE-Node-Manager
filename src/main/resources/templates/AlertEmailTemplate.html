@@ -2,12 +2,14 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>来自WeBASE-Node-Manager的告警</title>
+    <title>WeBASE-Node-Manager Alert Mail(邮件告警)</title>
 </head>
 <body>
-    来自WeBASE-Node-Manager的邮件告警：<br/>
+    WeBASE-Node-Manager邮件告警(Alert Mail): <br/>
     <br/>
     <span th:text="${replaceContent}"></span>
+    <br/>
+    <span th:text="${replaceContentEn}"></span> <br/>
     <br/>
     <span th:text="${time}"></span>
 </body>

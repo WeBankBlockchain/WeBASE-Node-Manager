@@ -115,8 +115,8 @@ public class NodeStatusMonitorTask {
                     JSON.toJSONString(abnormalNodeIdList), groupId);
             // send node alert mail
             alertMailService.sendMailByRule(AlertRuleType.NODE_ALERT.getValue(),
-                    "群组group " + groupId + "的共识/观察节点nodeId："
-                            + JSON.toJSONString(abnormalNodeIdList));
+                "群组group " + groupId + "的共识/观察节点nodeId：" + JSON.toJSONString(abnormalNodeIdList),
+                "group " + groupId + "'s sealer/observer nodes nodeId: " + JSON.toJSONString(abnormalNodeIdList));
         }
         log.debug("end checkNodeStatusByGroup");
     }

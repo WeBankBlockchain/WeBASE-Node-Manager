@@ -169,8 +169,11 @@ public class MailService {
      * @param ruleId 用户选择一条rule，从db获取
      * @param replacementText 实际值的参数，用于替代emailContent中的变量
      *                        如0x22实际nodeId替代节点告警的nodeId变量,
+     * alert mail content comes from db's default alert_rule,
+     * using @param replace variable in alert_rule,
+     * then fill in resources/templates/xx.html's variable
      */
-    public void sendMailByRule(int ruleId, String replacementText) {
+    public void sendMailByRule(int ruleId, String replacementText, String descriptionReplace) {
 
         log.debug("start sendMailByRule ruleId:{},replacementText:{}",
                 ruleId, replacementText);
@@ -187,7 +190,7 @@ public class MailService {
             return;
         }
         // last time alert by now, if within interval, not send
-        // TODO 告警间隔时间的刷新放到遍历group异常的for循环外面
+        // 告警间隔时间的刷新放到遍历group异常的for循环外面
 //        if(isWithinAlertIntervalByNow(alertRule)) {
 //            log.debug("end sendMailByRule non-sending mail for beyond alert interval:{}", alertRule);
 //            return;
@@ -198,17 +201,24 @@ public class MailService {
             return;
         }
         String emailTitle = AlertRuleTools.getAlertTypeStrFromEnum(alertRule.getAlertType());
-
-        // handle email alert content
+        /* handle email alert content */
+        // default content
         String defaultEmailContent = alertRule.getAlertContent();
+
+        // params to be replaced
         String emailContentParam2Replace = alertRule.getContentParamList();
-        // 替换变量param后的emailContent
         String emailContentAfterReplace = AlertRuleTools.processMailContent(defaultEmailContent,
                 emailContentParam2Replace, replacementText);
+        // support english
+        String defaultEmailContentEnglish = alertRule.getDescription();
+        String emailContentAfterReplaceEnglish = AlertRuleTools.processMailContent(defaultEmailContentEnglish,
+                emailContentParam2Replace, descriptionReplace);
 
         //init thymeleaf email template
         Context context = new Context();
         context.setVariable("replaceContent", emailContentAfterReplace);
+        // support english
+        context.setVariable("replaceContentEn", emailContentAfterReplaceEnglish);
         // add date in content
         SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         context.setVariable("time", formatTool.format(new Date()));
@@ -230,12 +240,12 @@ public class MailService {
         log.debug("end sendMailByRule. ");
     }
 
-    /**
-     * handle email sending to multiple users or sending to all user
-     * @param alertRule
-     * @param emailTitle
-     * @param emailFinalContent
-     */
+        /**
+         * handle email sending to multiple users or sending to all user
+         * @param alertRule
+         * @param emailTitle
+         * @param emailFinalContent
+         */
     public void handleAllUserEmail(TbAlertRule alertRule, String emailTitle, String emailFinalContent) {
         log.debug("start handleAllUserEmail alertRule:{},emailTitle:{},emailFinalContent:{}",
                 emailTitle, emailTitle, emailFinalContent);

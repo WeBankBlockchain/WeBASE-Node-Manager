@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_rule (
   alert_interval_seconds bigint NOT NULL COMMENT '告警规则的间隔时间(s)',
   alert_content text NOT NULL COMMENT '告警邮件的内容',
   content_param_list text NOT NULL COMMENT '告警邮件内容中的可替代参数，如nodeId',
-  description varchar(50) DEFAULT NULL COMMENT '告警规则的描述',
+  description text DEFAULT NULL COMMENT '告警规则的描述',
   is_all_user tinyint(4) DEFAULT 0 COMMENT '是否选中所有用户, 0:false, 1:true',
   user_list text DEFAULT NULL COMMENT '告警规则作用的用户列表',
   create_time datetime DEFAULT NULL COMMENT '告警规则的创建时间',
