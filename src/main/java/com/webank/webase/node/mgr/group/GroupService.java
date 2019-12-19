@@ -117,6 +117,8 @@ public class GroupService {
             log.error("fail startGroup startGroupId:{} code:{}", startGroupId, code);
             throw new NodeMgrException(code, groupHandleResult.getMessage());
         }
+        // refresh front
+        frontInterface.refreshFront(frontIp, frontPort);
     }
 
     /**

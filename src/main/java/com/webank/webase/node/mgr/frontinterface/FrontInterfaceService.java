@@ -445,4 +445,14 @@ public class FrontInterfaceService {
         log.debug("end startGroup");
         return groupHandleResult;
     }
+    
+    /**
+     * refresh front.
+     */
+    public void refreshFront(String frontIp, Integer frontPort) {
+        log.debug("start refreshFront groupId:{} frontIp:{} frontPort:{} ", frontIp, frontPort);
+        Integer groupId = Integer.MAX_VALUE;
+        getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_REFRESH_FRONT, Object.class);
+        log.debug("end refreshFront");
+    }
 }
