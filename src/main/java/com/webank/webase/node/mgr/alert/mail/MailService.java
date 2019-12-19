@@ -173,7 +173,7 @@ public class MailService {
      * using @param replace variable in alert_rule,
      * then fill in resources/templates/xx.html's variable
      */
-    public void sendMailByRule(int ruleId, String replacementText, String descriptionReplace) {
+    public void sendMailByRule(int ruleId, String replacementText) {
 
         log.debug("start sendMailByRule ruleId:{},replacementText:{}",
                 ruleId, replacementText);
@@ -209,16 +209,76 @@ public class MailService {
         String emailContentParam2Replace = alertRule.getContentParamList();
         String emailContentAfterReplace = AlertRuleTools.processMailContent(defaultEmailContent,
                 emailContentParam2Replace, replacementText);
-        // support english
-        String defaultEmailContentEnglish = alertRule.getDescription();
-        String emailContentAfterReplaceEnglish = AlertRuleTools.processMailContent(defaultEmailContentEnglish,
-                emailContentParam2Replace, descriptionReplace);
 
         //init thymeleaf email template
         Context context = new Context();
         context.setVariable("replaceContent", emailContentAfterReplace);
-        // support english
-        context.setVariable("replaceContentEn", emailContentAfterReplaceEnglish);
+        // add date in content
+        SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        context.setVariable("time", formatTool.format(new Date()));
+        String emailFinalContent = templateEngine.process("AlertEmailTemplate", context);
+
+        // save alert to log
+        alertLogService.saveAlertLogByRuleAndContent(alertRule.getAlertLevel(),
+                alertRule.getAlertType(), emailContentAfterReplace);
+
+        // refresh JavaMailSender's config from db
+        refreshJavaMailSenderConfigFromDB();
+        // 将告警发到userList，如果是全选用户
+        handleAllUserEmail(alertRule, emailTitle, emailFinalContent);
+        // update alert rule's last alertTime
+        alertRule.setLastAlertTime(LocalDateTime.now());
+        log.debug("sendMailByRule update alert rule's lastAlertTime updateAlertTime:{}",
+                alertRule);
+        alertRuleMapper.update(alertRule);
+        log.debug("end sendMailByRule. ");
+    }
+
+    /**
+     * support List of replacement
+     * @param ruleId
+     * @param replacementTextList
+     */
+    public void sendMailByRule(int ruleId, List<String> replacementTextList) {
+
+        log.debug("start sendMailByRule ruleId:{},replacementTextList:{}",
+                ruleId, replacementTextList);
+        TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
+        // if mail server not turn ON
+        if(latestMailServerConfig.getEnable() == EnableStatus.OFF.getValue()) {
+            log.error("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
+            return;
+        }
+        TbAlertRule alertRule = alertRuleMapper.queryByRuleId(ruleId);
+        // if alert not activated
+        if(alertRule.getEnable() == EnableStatus.OFF.getValue()) {
+            log.debug("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
+            return;
+        }
+        // last time alert by now, if within interval, not send
+        // 告警间隔时间的刷新放到遍历group异常的for循环外面
+//        if(isWithinAlertIntervalByNow(alertRule)) {
+//            log.debug("end sendMailByRule non-sending mail for beyond alert interval:{}", alertRule);
+//            return;
+//        }
+        // if userList is empty or default email
+        if(StringUtils.isEmpty(alertRule.getUserList())) {
+            log.error("end sendMailByRule for no receive mail address:{}", alertRule);
+            return;
+        }
+        String emailTitle = AlertRuleTools.getAlertTypeStrFromEnum(alertRule.getAlertType());
+        /* handle email alert content */
+        // default content
+        String defaultEmailContent = alertRule.getAlertContent();
+
+        // params to be replaced
+        String emailContentParam2Replace = alertRule.getContentParamList();
+        String emailContentAfterReplace = AlertRuleTools.processMailContent(defaultEmailContent,
+                emailContentParam2Replace, replacementTextList);
+
+        //init thymeleaf email template
+        Context context = new Context();
+        context.setVariable("replaceContent", emailContentAfterReplace);
         // add date in content
         SimpleDateFormat formatTool=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         context.setVariable("time", formatTool.format(new Date()));
