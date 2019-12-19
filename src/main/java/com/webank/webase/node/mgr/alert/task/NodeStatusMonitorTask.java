@@ -113,10 +113,11 @@ public class NodeStatusMonitorTask {
         if(!abnormalNodeIdList.isEmpty()) {
             log.warn("start  node abnormal mail alert nodeIds:{} in groupId:{}",
                     JSON.toJSONString(abnormalNodeIdList), groupId);
+            List<String> alertContentList = new ArrayList<>();
+            alertContentList.add("群组group " + groupId + "的共识/观察节点nodeId：" + JSON.toJSONString(abnormalNodeIdList));
+            alertContentList.add("group " + groupId + "'s sealer/observer nodes nodeId: " + JSON.toJSONString(abnormalNodeIdList));
             // send node alert mail
-            alertMailService.sendMailByRule(AlertRuleType.NODE_ALERT.getValue(),
-                "群组group " + groupId + "的共识/观察节点nodeId：" + JSON.toJSONString(abnormalNodeIdList),
-                "group " + groupId + "'s sealer/observer nodes nodeId: " + JSON.toJSONString(abnormalNodeIdList));
+            alertMailService.sendMailByRule(AlertRuleType.NODE_ALERT.getValue(), alertContentList);
         }
         log.debug("end checkNodeStatusByGroup");
     }

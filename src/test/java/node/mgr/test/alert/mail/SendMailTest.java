@@ -71,16 +71,23 @@ public class SendMailTest {
     @Test
     public void testSendingByRule() {
         // make sure mail server config is enabled, userList is not empty
-        mailService.sendMailByRule(3, "WeBASE-Node-Manager in Test", null);
+        mailService.sendMailByRule(3, "WeBASE-Node-Manager in Test");
     }
+
+    /**
+     * testSendingMailByRule with ReplacementList
+     */
     @Test
-    public void testEnglishMail() {
+    public void testSendingMailByRuleAndReplacementList() {
         String zh = "TEST 2019-12-19" + "(证书指纹:{" + "8D222" + "})";
         String en = "TEST 2019-12-19" + "(cert fingerprint:{" + "8D222" + "})";
+        List<String> list = new ArrayList<>();
+        list.add(zh);
+        list.add(en);
         // make sure mail server config is enabled
-        mailService.sendMailByRule(1, zh, en);
-        mailService.sendMailByRule(2, zh, en);
-        mailService.sendMailByRule(3, zh, en);
+        mailService.sendMailByRule(1, list);
+        mailService.sendMailByRule(2, list);
+        mailService.sendMailByRule(3, list);
     }
     /**
      * set fromMailAddress, toMailAddress, testTitle, using db's mail server config
