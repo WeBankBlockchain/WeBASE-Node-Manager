@@ -20,7 +20,6 @@ import java.security.*;
 import java.security.cert.*;
 import java.util.*;
 
-import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import io.jsonwebtoken.lang.Assert;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
@@ -199,7 +198,7 @@ public class ImportCertTest {
     @Test
     public void testLoadCertList() throws CertificateException, IOException {
         // need gmnode.crt file
-        InputStream nodes = new ClassPathResource("notgmnode.crt").getInputStream();
+        InputStream nodes = new ClassPathResource("sdk_node.crt").getInputStream();
         org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
                 new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
         List<X509Certificate> certs = (List<X509Certificate>) factory.engineGenerateCertificates(nodes);
