@@ -71,6 +71,7 @@ public class FrontRestTools {
     public static final String URI_GET_OBSERVER_LIST = "web3/observerList";
     public static final String URI_GENERATE_GROUP = "web3/generateGroup";
     public static final String URI_START_GROUP = "web3/startGroup/%1s";
+    public static final String URI_REFRESH_FRONT = "web3/refresh";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey?useAes=%1b";
