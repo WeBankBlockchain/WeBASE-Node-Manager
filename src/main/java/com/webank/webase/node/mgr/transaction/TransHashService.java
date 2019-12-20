@@ -27,9 +27,12 @@ import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+import io.netty.util.internal.ObjectUtil;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -89,6 +92,31 @@ public class TransHashService {
             return count;
         } catch (RuntimeException ex) {
             log.error("fail queryCountOfTran. queryParam:{}", JSON.toJSONString(queryParam), ex);
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+    }
+
+    /**
+     * get transaction in highest block
+     * @param groupId
+     * @return number of block height
+     * @throws NodeMgrException
+     */
+    public Integer queryLatestTransBlockNum(int groupId, TransListParam param)
+            throws NodeMgrException {
+        log.debug("start queryApproximateCount. groupId:{}", groupId);
+        String tableName = TableName.TRANS.getTableName(groupId);
+        try {
+            TbTransHash latestBlockTrans = transHashMapper.getLatestBlockTrans(tableName, param);
+            if(Objects.isNull(latestBlockTrans)) {
+                return 0;
+            }
+            Integer highestBlockNum = latestBlockTrans.getBlockNumber().intValue();
+            log.info("end queryApproximateCount. groupId:{} latestBlockTrans:{}",
+                    groupId, latestBlockTrans);
+            return highestBlockNum;
+        } catch (RuntimeException ex) {
+            log.error("fail queryApproximateCount. groupId:{}", groupId, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
