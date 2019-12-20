@@ -21,6 +21,8 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
@@ -45,7 +47,8 @@ public class TransHashController {
 
     @Autowired
     private TransHashService transHashService;
-
+    @Autowired
+    private GroupService groupService;
 
 
     /**
@@ -67,8 +70,11 @@ public class TransHashController {
 
         TransListParam queryParam = new TransListParam(transHash, blockNumber);
 
-        Integer count = transHashService.queryCountOfTran(groupId, queryParam);
-        if (count != null && count > 0) {
+//        Integer count = transHashService.queryCountOfTran(groupId, queryParam);
+        Integer txCountOnChain = groupService.queryGroupGeneral(groupId).getTransactionCount().intValue();
+        // whether matched trans is empty
+        Integer isTransExist = transHashService.queryLatestTransBlockNum(groupId, queryParam);
+        if (isTransExist > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
             queryParam.setStart(start);
@@ -76,7 +82,8 @@ public class TransHashController {
             queryParam.setFlagSortedByBlock(SqlSortType.DESC.getValue());
             List<TbTransHash> transList = transHashService.queryTransList(groupId,queryParam);
             pageResponse.setData(transList);
-            pageResponse.setTotalCount(count);
+            // on chain tx count
+            pageResponse.setTotalCount(txCountOnChain);
         } else {
             List<TbTransHash> transList = transHashService.getTransListFromChain(groupId,transHash,blockNumber);
             //result

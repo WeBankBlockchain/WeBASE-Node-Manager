@@ -46,4 +46,6 @@ public interface TransHashMapper {
         @Param("shardingItem") Integer shardingItem);
 
     void updateTransStatFlag(@Param("tableName") String tableName,@Param("transHash") String transHash);
+
+    TbTransHash getLatestBlockTrans(@Param("tableName") String tableName, @Param("param") TransListParam param);
 }
