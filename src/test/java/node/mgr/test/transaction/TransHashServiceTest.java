@@ -2,6 +2,7 @@ package node.mgr.test.transaction;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.transaction.TransHashMapper;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.math.BigInteger;
@@ -11,6 +12,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +41,8 @@ public class TransHashServiceTest {
     @Autowired
     private TransHashService transHashService;
     private Integer groupId = 300001;
-
+    @Autowired
+    private TransHashMapper transHashMapper;
 
     @Test
     public void getTransListFromChain() {
@@ -49,4 +53,10 @@ public class TransHashServiceTest {
         System.out.println(JSON.toJSONString(trans));
     }
 
+    @Test
+    public void getApproximateCount() {
+        TransListParam param = new TransListParam();
+        TbTransHash count = transHashMapper.getLatestBlockTrans("tb_trans_hash_1", param);
+        System.out.println(count);
+    }
 }
