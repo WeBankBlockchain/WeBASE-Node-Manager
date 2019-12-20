@@ -6,12 +6,7 @@ import com.webank.webase.node.mgr.transaction.TransHashMapper;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import org.junit.Test;
@@ -56,7 +51,7 @@ public class TransHashServiceTest {
     @Test
     public void getApproximateCount() {
         TransListParam param = new TransListParam();
-        TbTransHash count = transHashMapper.getLatestBlockTrans("tb_trans_hash_1", param);
+        List<TbTransHash> count = transHashMapper.getLatestBlockTrans("tb_trans_hash_1", param);
         System.out.println(count);
     }
 }

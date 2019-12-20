@@ -47,5 +47,5 @@ public interface TransHashMapper {
 
     void updateTransStatFlag(@Param("tableName") String tableName,@Param("transHash") String transHash);
 
-    TbTransHash getLatestBlockTrans(@Param("tableName") String tableName, @Param("param") TransListParam param);
+    List<TbTransHash> getLatestBlockTrans(@Param("tableName") String tableName, @Param("param") TransListParam param);
 }
