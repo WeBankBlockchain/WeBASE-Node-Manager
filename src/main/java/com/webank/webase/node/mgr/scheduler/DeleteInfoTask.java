@@ -106,6 +106,7 @@ public class DeleteInfoTask {
         log.info("start deleteTransHash. groupId:{}", groupId);
         try {
             TransListParam queryParam = new TransListParam(null, null);
+            // TODO select count(1) cost a log of time
             Integer count = transHashService.queryCountOfTran(groupId, queryParam);
             Integer removeCount = 0;
             if (count > cProperties.getTransRetainMax().intValue()) {

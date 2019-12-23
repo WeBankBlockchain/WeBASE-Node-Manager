@@ -70,11 +70,11 @@ public class TransHashController {
 
         TransListParam queryParam = new TransListParam(transHash, blockNumber);
 
-//        Integer count = transHashService.queryCountOfTran(groupId, queryParam);
-        Integer txCountOnChain = groupService.queryGroupGeneral(groupId).getTransactionCount().intValue();
+        Integer count = transHashService.queryCountOfTran(groupId, queryParam);
+//        Integer txCountOnChain = groupService.queryGroupGeneral(groupId).getTransactionCount().intValue();
         // whether matched trans is empty
-        Integer isTransExist = transHashService.queryLatestTransBlockNum(groupId, queryParam);
-        if (isTransExist > 0) {
+//        Integer isTransExist = transHashService.queryLatestTransBlockNum(groupId, queryParam);
+        if (count != null && count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
             queryParam.setStart(start);
@@ -83,7 +83,7 @@ public class TransHashController {
             List<TbTransHash> transList = transHashService.queryTransList(groupId,queryParam);
             pageResponse.setData(transList);
             // on chain tx count
-            pageResponse.setTotalCount(txCountOnChain);
+            pageResponse.setTotalCount(count);
         } else {
             List<TbTransHash> transList = transHashService.getTransListFromChain(groupId,transHash,blockNumber);
             //result
