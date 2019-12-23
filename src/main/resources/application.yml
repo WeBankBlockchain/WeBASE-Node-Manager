@@ -36,7 +36,7 @@ constant:
   groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
   notSupportFrontIp:
 
-  ###block into
+  ###block info (pulling data from chain)
   isBlockPullFromZero: false
   pullBlockInitCnts: 1000
   pullBlockSleepTime: 200
@@ -66,7 +66,7 @@ constant:
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
 
-# executor config
+# executor config for pulling data from chain
 executor:
   corePoolSize: 3
   maxPoolSize: 10
