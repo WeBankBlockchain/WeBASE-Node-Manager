@@ -100,24 +100,24 @@ public class TransHashService {
      * @return number of block height
      * @throws NodeMgrException
      */
-    public Integer queryLatestTransBlockNum(int groupId, TransListParam param)
-            throws NodeMgrException {
-        log.debug("start queryApproximateCount. groupId:{}", groupId);
-        String tableName = TableName.TRANS.getTableName(groupId);
-        try {
-            List<TbTransHash> latestBlockTrans = transHashMapper.getLatestBlockTrans(tableName, param);
-            if(latestBlockTrans.size() == 0) {
-                return 0;
-            }
-            Integer highestBlockNum = latestBlockTrans.get(0).getBlockNumber().intValue();
-            log.info("end queryApproximateCount. groupId:{} latestBlockTrans:{}",
-                    groupId, latestBlockTrans);
-            return highestBlockNum;
-        } catch (RuntimeException ex) {
-            log.error("fail queryApproximateCount. groupId:{}", groupId, ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-    }
+//    public Integer queryLatestTransBlockNum(int groupId, TransListParam param)
+//            throws NodeMgrException {
+//        log.debug("start queryApproximateCount. groupId:{}", groupId);
+//        String tableName = TableName.TRANS.getTableName(groupId);
+//        try {
+//            List<TbTransHash> latestBlockTrans = transHashMapper.getLatestBlockTrans(tableName, param);
+//            if(latestBlockTrans.size() == 0) {
+//                return 0;
+//            }
+//            Integer highestBlockNum = latestBlockTrans.get(0).getBlockNumber().intValue();
+//            log.info("end queryApproximateCount. groupId:{} latestBlockTrans:{}",
+//                    groupId, latestBlockTrans);
+//            return highestBlockNum;
+//        } catch (RuntimeException ex) {
+//            log.error("fail queryApproximateCount. groupId:{}", groupId, ex);
+//            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+//        }
+//    }
 
     /**
      * query min and max block number.

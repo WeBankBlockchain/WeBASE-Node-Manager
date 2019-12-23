@@ -6,6 +6,9 @@ import com.webank.webase.node.mgr.transaction.TransHashMapper;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
@@ -48,10 +51,16 @@ public class TransHashServiceTest {
         System.out.println(JSON.toJSONString(trans));
     }
 
+    /**
+     * TODO optimize getCount's time
+     */
     @Test
-    public void getApproximateCount() {
+    public void getCountTimeCost() {
         TransListParam param = new TransListParam();
-        List<TbTransHash> count = transHashMapper.getLatestBlockTrans("tb_trans_hash_1", param);
+        Instant start = Instant.now();
+        System.out.println("start: " + start.toEpochMilli());
+        Integer count = transHashMapper.getCount("tb_trans_hash_1", param);
         System.out.println(count);
+        System.out.println(Duration.between(start, Instant.now()).toMillis());
     }
 }
