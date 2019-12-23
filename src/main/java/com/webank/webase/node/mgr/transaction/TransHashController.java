@@ -30,6 +30,7 @@ import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
@@ -60,8 +61,7 @@ public class TransHashController {
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "transactionHash", required = false) String transHash,
-        @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
-        throws NodeMgrException, Exception {
+        @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber) {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info(
@@ -88,7 +88,8 @@ public class TransHashController {
             // on chain tx count
             pageResponse.setTotalCount(count);
         } else {
-            List<TbTransHash> transList = transHashService.getTransListFromChain(groupId,transHash,blockNumber);
+            List<TbTransHash> transList = new ArrayList<>();
+            transList = transHashService.getTransListFromChain(groupId,transHash,blockNumber);
             //result
             if (transList.size() > 0) {
                 pageResponse.setData(transList);
