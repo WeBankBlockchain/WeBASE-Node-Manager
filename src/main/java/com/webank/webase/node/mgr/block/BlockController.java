@@ -61,8 +61,13 @@ public class BlockController {
                 + "pkHash:{} blockNumber:{}",
             startTime.toEpochMilli(), groupId,
             pageNumber, pageSize, pkHash, blockNumber);
-
-        int count = blockService.queryCountOfBlock(groupId, pkHash, blockNumber);
+        int count;
+        // if query all block's count
+        if(StringUtils.isNotEmpty(pkHash) || blockNumber != null) {
+            count = blockService.queryCountOfBlockByMinus(groupId);
+        } else {
+            count = blockService.queryCountOfBlock(groupId, pkHash, blockNumber);
+        }
         if (count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
