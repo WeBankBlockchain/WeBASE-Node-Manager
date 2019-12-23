@@ -63,7 +63,7 @@ public class BlockController {
             pageNumber, pageSize, pkHash, blockNumber);
         int count;
         // if query all block's count
-        if(StringUtils.isNotEmpty(pkHash) || blockNumber != null) {
+        if(StringUtils.isEmpty(pkHash) || blockNumber == null) {
             count = blockService.queryCountOfBlockByMinus(groupId);
         } else {
             count = blockService.queryCountOfBlock(groupId, pkHash, blockNumber);
