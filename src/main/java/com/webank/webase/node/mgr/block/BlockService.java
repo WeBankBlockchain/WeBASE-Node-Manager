@@ -230,6 +230,19 @@ public class BlockService {
         }
     }
 
+    public int queryCountOfBlockByMinus(Integer groupId) {
+        log.debug("start queryCountOfBlockByMinus groupId:{}", groupId);
+        try {
+            int count = blockmapper
+                    .getBlockCountByMinMax(TableName.BLOCK.getTableName(groupId));
+            log.info("end queryCountOfBlockByMinus groupId:{} count:{}", groupId, count);
+            return count;
+        } catch (RuntimeException ex) {
+            log.error("fail queryCountOfBlockByMinus groupId:{},exception:{}", groupId, ex);
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+    }
+
     /**
      * get sealer by index.
      */
