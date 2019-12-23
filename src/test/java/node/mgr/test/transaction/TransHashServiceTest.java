@@ -63,4 +63,10 @@ public class TransHashServiceTest {
         System.out.println(count);
         System.out.println(Duration.between(start, Instant.now()).toMillis());
     }
+
+    @Test
+    public void queryCountOfTranByMinus() {
+        int count = transHashService.queryCountOfTranByMinus(1);
+        System.out.println(count);
+    }
 }
