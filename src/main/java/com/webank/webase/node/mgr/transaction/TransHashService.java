@@ -31,6 +31,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.core.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
@@ -217,12 +219,14 @@ public class TransHashService {
         if (transList.size() == 0 && blockNumber != null) {
             List<TransactionInfo> transInBlock = frontInterface
                     .getTransByBlockNumber(groupId, blockNumber);
-            transInBlock.stream().forEach(tran -> {
-                TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getFrom(),
-                        tran.getTo(), tran.getBlockNumber(),
-                        null);
-                transList.add(tbTransHash);
-            });
+            if(transInBlock != null && transInBlock.size() != 0) {
+                transInBlock.stream().forEach(tran -> {
+                    TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getFrom(),
+                            tran.getTo(), tran.getBlockNumber(),
+                            null);
+                    transList.add(tbTransHash);
+                });
+            }
         }
         log.debug("end getTransListFromChain.");
         return transList;

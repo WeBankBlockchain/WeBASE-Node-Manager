@@ -86,7 +86,13 @@ public class BlockController {
                 log.debug(
                     "did not find block,request from front. pkHash:{} groupId:{}",
                     pkHash, groupId);
-                blockInfo = blockService.getblockFromFrontByHash(groupId, pkHash);
+                try {
+                    blockInfo = blockService.getblockFromFrontByHash(groupId, pkHash);
+                }catch (NodeMgrException e) {
+                    log.debug("queryBlockList did not find block from front(chain).e:[]", e);
+                    pageResponse.setData(null);
+                    pageResponse.setTotalCount(0);
+                }
             }
             if (blockInfo != null) {
                 TbBlock tbBlock = BlockService.chainBlock2TbBlock(blockInfo);
