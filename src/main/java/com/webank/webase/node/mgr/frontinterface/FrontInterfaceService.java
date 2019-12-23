@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -412,6 +412,14 @@ public class FrontInterfaceService {
                 URI_ENCRYPT_TYPE, Integer.class);
         log.debug("end getEncryptTypeFromSpecificFront. encryptType:{}", encryptType);
         return encryptType;
+    }
+
+    public String getClientVersion(String frontIp, Integer frontPort,
+                                   Integer groupId) {
+        log.debug("start getClientVersion. groupId:{}", groupId);
+        NodeVersion.Version clientVersion = getFromSpecificFront(groupId, frontIp, frontPort, URI_GET_CLIENT_VERSION, NodeVersion.Version.class);
+        log.debug("end getClientVersion. consensusStatus:{}", clientVersion);
+        return clientVersion.getVersion();
     }
 
 }
