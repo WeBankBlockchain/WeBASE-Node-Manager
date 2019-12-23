@@ -33,6 +33,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,13 +68,14 @@ public class TransHashController {
             "start queryTransList. startTime:{} groupId:{} pageNumber:{} pageSize:{} "
                 + "transaction:{}",
             startTime.toEpochMilli(), groupId, pageNumber, pageSize, transHash);
-
         TransListParam queryParam = new TransListParam(transHash, blockNumber);
-
-        Integer count = transHashService.queryCountOfTran(groupId, queryParam);
-//        Integer txCountOnChain = groupService.queryGroupGeneral(groupId).getTransactionCount().intValue();
-        // whether matched trans is empty
-//        Integer isTransExist = transHashService.queryLatestTransBlockNum(groupId, queryParam);
+        Integer count;
+        // if param's empty, getCount by minus between max and min
+        if(StringUtils.isEmpty(transHash) && blockNumber == null) {
+            count = transHashService.queryCountOfTranByMinus(groupId);
+        } else {
+            count = transHashService.queryCountOfTran(groupId, queryParam);
+        }
         if (count != null && count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
