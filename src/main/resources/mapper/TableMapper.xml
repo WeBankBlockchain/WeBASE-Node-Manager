@@ -33,6 +33,7 @@
   <update id="createTransHash" parameterType="java.lang.String">
     CREATE TABLE IF NOT EXISTS ${tableName} (
         trans_hash varchar(128) NOT NULL COMMENT '交易hash',
+        trans_number bigint NOT NULL AUTO_INCREMENT COMMENT '交易数',
         block_number bigint(25) NOT NULL COMMENT '所属区块',
         trans_from varchar(64) DEFAULT NULL COMMENT 'from',
         trans_to varchar(64) DEFAULT NULL COMMENT 'to',
