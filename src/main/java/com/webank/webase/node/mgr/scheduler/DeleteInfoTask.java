@@ -32,6 +32,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * delete block/trans/monitorTrans data task
+ */
 @Log4j2
 @Component
 @ConditionalOnProperty(name = "constant.isDeleteInfo", havingValue = "true")
