@@ -28,10 +28,11 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * get block info from chain.
+ * including tb_block and tb_trans (block contains trans)
  */
 @Log4j2
 @Component
-public class PullBlockInfoTask {
+public class PullBlockTransTask {
 
     @Autowired
     private BlockService blockService;
