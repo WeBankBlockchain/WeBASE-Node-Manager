@@ -50,7 +50,7 @@ public class TokenService {
             log.error("fail createToken. param is null");
             return null;
         }
-
+        // support guomi
         String token = NodeMgrTools.shaEncode(UUID.randomUUID() + value);
         //save token
         TbToken tbToken = new TbToken();
