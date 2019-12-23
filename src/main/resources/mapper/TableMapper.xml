@@ -43,7 +43,8 @@
         modify_time datetime DEFAULT NULL COMMENT '修改时间',
         PRIMARY KEY (trans_hash),
         KEY index_flag (statistics_flag),
-        KEY index_number (block_number)
+        KEY index_number (block_number),
+        KEY index_trans_num (trans_number)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交易hash信息表';
   </update>
 
