@@ -106,9 +106,12 @@ public class FrontService {
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
         }
+        String clientVersion = frontInterface.getClientVersion(frontIp,
+                frontPort, Integer.valueOf(groupIdList.get(0)));
         //copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         tbFront.setNodeId(syncStatus.getNodeId());
+        tbFront.setClientVersion(clientVersion);
         //save front info
         frontMapper.add(tbFront);
         if (tbFront.getFrontId() == null || tbFront.getFrontId() == 0) {
@@ -251,5 +254,12 @@ public class FrontService {
         resetGroupListTask.asyncResetGroupList();
         //clear cache
         frontGroupMapCache.clearMapList();
+    }
+
+    public void setFrontEncryptType(List<TbFront> list) {
+
+        list.stream().forEach(front -> {
+
+        });
     }
 }
