@@ -39,17 +39,17 @@
     </if>
   </select>
 
-  <select id="getLatestBlockTrans" parameterType="com.webank.webase.node.mgr.transaction.entity.TransListParam"
-          resultMap="transHashMap">
-    select * from ${tableName} where 1=1
-    <if test="param.transHash != null and param.transHash != ''">
-      and trans_hash = #{param.transHash}
-    </if>
-    <if test="param.blockNumber != null">
-      and block_number = #{param.blockNumber}
-    </if>
-    order by block_number desc limit 1
-  </select>
+<!--  <select id="getLatestBlockTrans" parameterType="com.webank.webase.node.mgr.transaction.entity.TransListParam"-->
+<!--          resultMap="transHashMap">-->
+<!--    select * from ${tableName} where 1=1-->
+<!--    <if test="param.transHash != null and param.transHash != ''">-->
+<!--      and trans_hash = #{param.transHash}-->
+<!--    </if>-->
+<!--    <if test="param.blockNumber != null">-->
+<!--      and block_number = #{param.blockNumber}-->
+<!--    </if>-->
+<!--    order by block_number desc limit 1-->
+<!--  </select>-->
 
   <select id="getList" parameterType="com.webank.webase.node.mgr.transaction.entity.TransListParam"
     resultMap="transHashMap">
