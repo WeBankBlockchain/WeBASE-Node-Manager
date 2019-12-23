@@ -74,6 +74,7 @@ public class TransHashController {
         if(StringUtils.isEmpty(transHash) && blockNumber == null) {
             count = transHashService.queryCountOfTranByMinus(groupId);
         } else {
+            // TODO select count(1) in InnoDb is slow when data gets large
             count = transHashService.queryCountOfTran(groupId, queryParam);
         }
         if (count != null && count > 0) {
