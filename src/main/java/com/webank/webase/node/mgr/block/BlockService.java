@@ -40,6 +40,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * services for block data.
+ * including pull block from chain and block service
  */
 @Log4j2
 @Service
@@ -59,6 +60,7 @@ public class BlockService {
 
     /**
      * get block from chain by groupId
+     * ThreadPool configuration in /base/config/BeanConfig
      */
     @Async(value = "mgrAsyncExecutor")
     public void pullBlockByGroupId(CountDownLatch latch, int groupId) {
