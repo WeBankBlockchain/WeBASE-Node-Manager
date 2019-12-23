@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -90,6 +91,30 @@ public class TransHashService {
             return count;
         } catch (RuntimeException ex) {
             log.error("fail queryCountOfTran. queryParam:{}", JSON.toJSONString(queryParam), ex);
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+    }
+
+    /**
+     * query count of trans by minus max and min trans_number
+     */
+    public Integer queryCountOfTranByMinus(int groupId)
+            throws NodeMgrException {
+        log.debug("start queryCountOfTranByMinus.");
+        String tableName = TableName.TRANS.getTableName(groupId);
+        try {
+            Integer count = transHashMapper.getCountByMinMax(tableName);
+            log.info("end queryCountOfTranByMinus. count:{}",  count);
+            return count;
+        } catch (BadSqlGrammarException ex) {
+            // TODO v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
+            log.error("fail queryCountOfTranByMinus. ", ex);
+            log.info("restart from queryCountOfTranByMinus to queryCountOfTran: {}", ex.getCause());
+            TransListParam queryParam = new TransListParam(null, null);
+            Integer count = queryCountOfTran(groupId, queryParam);
+            return count;
+        } catch (RuntimeException ex) {
+            log.error("fail queryCountOfTran. ", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
