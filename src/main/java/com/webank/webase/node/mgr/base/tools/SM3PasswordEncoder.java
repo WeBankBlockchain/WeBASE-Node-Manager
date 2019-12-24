@@ -16,13 +16,15 @@
 
 package com.webank.webase.node.mgr.base.tools;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.fisco.bcos.web3j.crypto.gm.sm3.SM3Digest;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * PasswordEncoder using guomi sm3 encrypt
+ */
 public class SM3PasswordEncoder implements PasswordEncoder {
     private final Log logger = LogFactory.getLog(getClass());
 

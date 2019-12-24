@@ -34,6 +34,7 @@ import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -76,6 +77,7 @@ public class CertMonitorTask {
             return;
         }
         List<X509Certificate> certList = certService.loadAllX509Certs();
+        List<String> alertContentList = new ArrayList<>();
         certList.stream()
             .forEach(cert -> {
                 Date certNotAfter = cert.getNotAfter();
@@ -89,8 +91,9 @@ public class CertMonitorTask {
                     } catch (CertificateEncodingException e) {
                         e.printStackTrace();
                     }
-                    alertMailService.sendMailByRule(AlertRuleType.CERT_ALERT.getValue(),
-                    formatTool.format(certNotAfter) + "(证书指纹:{" + fingerPrint + "})");
+                    alertContentList.add(formatTool.format(certNotAfter) + "(证书指纹:{" + fingerPrint + "})");
+                    alertContentList.add(formatTool.format(certNotAfter) + "(cert fingerprint:{" + fingerPrint + "})");
+                    alertMailService.sendMailByRule(AlertRuleType.CERT_ALERT.getValue(), alertContentList);
                 }
             });
 

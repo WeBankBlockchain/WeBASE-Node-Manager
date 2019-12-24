@@ -27,10 +27,14 @@ import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.core.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -92,6 +96,55 @@ public class TransHashService {
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
+
+    /**
+     * query count of trans by minus max and min trans_number
+     */
+    public Integer queryCountOfTranByMinus(int groupId)
+            throws NodeMgrException {
+        log.debug("start queryCountOfTranByMinus.");
+        String tableName = TableName.TRANS.getTableName(groupId);
+        try {
+            Integer count = transHashMapper.getCountByMinMax(tableName);
+            log.info("end queryCountOfTranByMinus. count:{}",  count);
+            return count;
+        } catch (BadSqlGrammarException ex) {
+            // TODO v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
+            log.error("fail queryCountOfTranByMinus. ", ex);
+            log.info("restart from queryCountOfTranByMinus to queryCountOfTran: {}", ex.getCause());
+            TransListParam queryParam = new TransListParam(null, null);
+            Integer count = queryCountOfTran(groupId, queryParam);
+            return count;
+        } catch (RuntimeException ex) {
+            log.error("fail queryCountOfTran. ", ex);
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+    }
+
+    /**
+     * get transaction in highest block
+     * @param groupId
+     * @return number of block height
+     * @throws NodeMgrException
+     */
+//    public Integer queryLatestTransBlockNum(int groupId, TransListParam param)
+//            throws NodeMgrException {
+//        log.debug("start queryApproximateCount. groupId:{}", groupId);
+//        String tableName = TableName.TRANS.getTableName(groupId);
+//        try {
+//            List<TbTransHash> latestBlockTrans = transHashMapper.getLatestBlockTrans(tableName, param);
+//            if(latestBlockTrans.size() == 0) {
+//                return 0;
+//            }
+//            Integer highestBlockNum = latestBlockTrans.get(0).getBlockNumber().intValue();
+//            log.info("end queryApproximateCount. groupId:{} latestBlockTrans:{}",
+//                    groupId, latestBlockTrans);
+//            return highestBlockNum;
+//        } catch (RuntimeException ex) {
+//            log.error("fail queryApproximateCount. groupId:{}", groupId, ex);
+//            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+//        }
+//    }
 
     /**
      * query min and max block number.
@@ -166,12 +219,14 @@ public class TransHashService {
         if (transList.size() == 0 && blockNumber != null) {
             List<TransactionInfo> transInBlock = frontInterface
                     .getTransByBlockNumber(groupId, blockNumber);
-            transInBlock.stream().forEach(tran -> {
-                TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getFrom(),
-                        tran.getTo(), tran.getBlockNumber(),
-                        null);
-                transList.add(tbTransHash);
-            });
+            if(transInBlock != null && transInBlock.size() != 0) {
+                transInBlock.stream().forEach(tran -> {
+                    TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getFrom(),
+                            tran.getTo(), tran.getBlockNumber(),
+                            null);
+                    transList.add(tbTransHash);
+                });
+            }
         }
         log.debug("end getTransListFromChain.");
         return transList;
