@@ -349,6 +349,7 @@ public class MonitorService {
             tbMonitor.setTransCount(1);
             tbMonitor.setCreateTime(createTime);
             tbMonitor.setModifyTime(trans.getBlockTimestamp());
+            //refresh transaction audit
             monitorTransactionService.dataAddAndUpdate(groupId, tbMonitor);
         } catch (Exception ex) {
             log.error("transaction:{} analysis fail...", trans.getTransHash(), ex);
