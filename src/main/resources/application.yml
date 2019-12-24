@@ -31,7 +31,7 @@ constant:
   isUseSecurity: true   # login's authorization
   verificationCodeMaxAge: 300
   authTokenMaxAge: 1800
-  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find
+  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find,,/group/generate,/group/start
   ###front http request
   frontUrl: http://%1s:%2d/WeBASE-Front/%3s
   httpTimeOut: 5000
@@ -55,18 +55,6 @@ constant:
   pullBlockSleepTime: 200
   pullBlockTaskFixedDelay: 30000
   blockRetainMax: 10000
-  ###receive http request
-  verificationCodeMaxAge: 300
-  authTokenMaxAge: 1800
-  isUseSecurity: true
-  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find,/group/generate,/group/start
-  ###front http request
-  frontUrl: http://%1s:%2d/WeBASE-Front/%3s
-  httpTimeOut: 5000
-  contractDeployTimeOut: 30000
-  isPrivateKeyEncrypt: true
-  maxRequestFail: 3
-  sleepWhenHttpMaxFail: 60000
   ###transaction monitor
   transMonitorTaskFixedRate: 60000  #How long does it take to start the next task after the end (second)
   analysisSleepTime: 200
