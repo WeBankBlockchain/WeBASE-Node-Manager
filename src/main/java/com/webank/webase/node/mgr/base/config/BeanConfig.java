@@ -78,7 +78,10 @@ public class BeanConfig {
         return factory;
     }
 
-
+    /**
+     * pull block and trans from chain
+     * @return
+     */
     @Bean
     public ThreadPoolTaskExecutor mgrAsyncExecutor() {
         log.info("start mgrAsyncExecutor init..");

@@ -16,15 +16,15 @@
 package com.webank.webase.node.mgr.base.enums;
 
 public enum RoleType {
-    ADMIN("admin"), VISITOR("visitor");
+    ADMIN(100000), VISITOR(100001);
 
-    private String value;
+    private Integer value;
 
-    private RoleType(String value) {
+    private RoleType(Integer value) {
         this.value = value;
     }
 
-    public String getValue() {
+    public Integer getValue() {
         return this.value;
     }
 }

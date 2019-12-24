@@ -13,14 +13,20 @@
  */
 package com.webank.webase.node.mgr.frontinterface;
 
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CERT;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CSYNC_STATUS;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_ENCRYPT_TYPE;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GET_OBSERVER_LIST;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PEERS;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_GROUP_PLIST;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_NODEID_LIST;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_PEERS;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -414,6 +420,14 @@ public class FrontInterfaceService {
                 getFromSpecificFront(groupId, nodeIp, frontPort, URI_ENCRYPT_TYPE, Integer.class);
         log.debug("end getEncryptTypeFromSpecificFront. encryptType:{}", encryptType);
         return encryptType;
+    }
+
+    public String getClientVersion(String frontIp, Integer frontPort,
+                                   Integer groupId) {
+        log.debug("start getClientVersion. groupId:{}", groupId);
+        NodeVersion.Version clientVersion = getFromSpecificFront(groupId, frontIp, frontPort, URI_GET_CLIENT_VERSION, NodeVersion.Version.class);
+        log.debug("end getClientVersion. consensusStatus:{}", clientVersion);
+        return clientVersion.getVersion();
     }
 
     /**

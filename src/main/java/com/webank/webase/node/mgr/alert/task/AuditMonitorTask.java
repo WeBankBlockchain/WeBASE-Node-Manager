@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -91,23 +92,34 @@ public class AuditMonitorTask {
         int unusualContractCount = monitorService.countOfUnusualContract(groupId, null);
         int unusualMaxCount = cProperties.getMonitorUnusualMaxCount();
         // 异常用户数、异常合约数超出
+        List<String> alertContentList = new ArrayList<>();
         if (unusualUserCount >= unusualMaxCount
                 && unusualContractCount >= unusualMaxCount) {
             log.warn("audit alert. unusualUserCount:{},unusualMaxCount:{}, monitorUnusualMaxCount:{}",
                     unusualUserCount, unusualMaxCount, unusualMaxCount);
             String alertContent = "群组group " + groupId + "的异常用户数/异常合约数超出最大值："
                     + unusualContractCount + "/" + unusualContractCount;
-            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContent);
+            String alertContentEn = "group " + groupId + "'s number of abnormal users/contracts exceeds: "
+                    + unusualContractCount + "/" + unusualContractCount;
+            alertContentList.add(alertContent);
+            alertContentList.add(alertContentEn);
+            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContentList);
         }else if (unusualUserCount >= unusualMaxCount) {
             log.warn("audit alert. unusualUserCount:{} monitorUnusualMaxCount:{}",
                     unusualUserCount, unusualMaxCount);
             String alertContent = "群组group " + groupId + "的异常用户数超出最大值：" + unusualContractCount;
-            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContent);
+            String alertContentEn = "group " + groupId + "'s number of abnormal users exceeds: " + unusualContractCount;
+            alertContentList.add(alertContent);
+            alertContentList.add(alertContentEn);
+            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContentList);
         }else if (unusualContractCount >= unusualMaxCount) {
             log.warn("audit alert. unusualContractCount:{} monitorUnusualMaxCount:{}",
                     unusualContractCount, unusualMaxCount);
             String alertContent = "群组group " + groupId + "的异常合约数超出最大值：" + unusualContractCount;
-            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContent);
+            String alertContentEn = "group " + groupId + "'s number of abnormal contracts exceeds: " + unusualContractCount;
+            alertContentList.add(alertContent);
+            alertContentList.add(alertContentEn);
+            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContentList);
         }
         log.debug("end checkUserAndContractByGroup");
 

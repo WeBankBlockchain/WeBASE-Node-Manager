@@ -21,6 +21,8 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
@@ -28,9 +30,11 @@ import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +49,8 @@ public class TransHashController {
 
     @Autowired
     private TransHashService transHashService;
-
+    @Autowired
+    private GroupService groupService;
 
 
     /**
@@ -56,18 +61,22 @@ public class TransHashController {
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "transactionHash", required = false) String transHash,
-        @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
-        throws NodeMgrException, Exception {
+        @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber) {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info(
             "start queryTransList. startTime:{} groupId:{} pageNumber:{} pageSize:{} "
                 + "transaction:{}",
             startTime.toEpochMilli(), groupId, pageNumber, pageSize, transHash);
-
         TransListParam queryParam = new TransListParam(transHash, blockNumber);
-
-        Integer count = transHashService.queryCountOfTran(groupId, queryParam);
+        Integer count;
+        // if param's empty, getCount by minus between max and min
+        if(StringUtils.isEmpty(transHash) && blockNumber == null) {
+            count = transHashService.queryCountOfTranByMinus(groupId);
+        } else {
+            // TODO select count(1) in InnoDb is slow when data gets large
+            count = transHashService.queryCountOfTran(groupId, queryParam);
+        }
         if (count != null && count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
@@ -76,9 +85,11 @@ public class TransHashController {
             queryParam.setFlagSortedByBlock(SqlSortType.DESC.getValue());
             List<TbTransHash> transList = transHashService.queryTransList(groupId,queryParam);
             pageResponse.setData(transList);
+            // on chain tx count
             pageResponse.setTotalCount(count);
         } else {
-            List<TbTransHash> transList = transHashService.getTransListFromChain(groupId,transHash,blockNumber);
+            List<TbTransHash> transList = new ArrayList<>();
+            transList = transHashService.getTransListFromChain(groupId,transHash,blockNumber);
             //result
             if (transList.size() > 0) {
                 pageResponse.setData(transList);

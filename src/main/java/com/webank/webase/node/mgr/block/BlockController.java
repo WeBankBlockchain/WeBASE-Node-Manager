@@ -61,8 +61,13 @@ public class BlockController {
                 + "pkHash:{} blockNumber:{}",
             startTime.toEpochMilli(), groupId,
             pageNumber, pageSize, pkHash, blockNumber);
-
-        int count = blockService.queryCountOfBlock(groupId, pkHash, blockNumber);
+        int count;
+        // if query all block's count
+        if(StringUtils.isEmpty(pkHash) && blockNumber == null) {
+            count = blockService.queryCountOfBlockByMinus(groupId);
+        } else {
+            count = blockService.queryCountOfBlock(groupId, pkHash, blockNumber);
+        }
         if (count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
@@ -81,7 +86,13 @@ public class BlockController {
                 log.debug(
                     "did not find block,request from front. pkHash:{} groupId:{}",
                     pkHash, groupId);
-                blockInfo = blockService.getblockFromFrontByHash(groupId, pkHash);
+                try {
+                    blockInfo = blockService.getblockFromFrontByHash(groupId, pkHash);
+                }catch (NodeMgrException e) {
+                    log.debug("queryBlockList did not find block from front(chain).e:[]", e);
+                    pageResponse.setData(null);
+                    pageResponse.setTotalCount(0);
+                }
             }
             if (blockInfo != null) {
                 TbBlock tbBlock = BlockService.chainBlock2TbBlock(blockInfo);

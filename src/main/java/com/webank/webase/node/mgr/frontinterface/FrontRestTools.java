@@ -69,6 +69,7 @@ public class FrontRestTools {
     public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
     public static final String URI_GET_SEALER_LIST = "web3/sealerList";
     public static final String URI_GET_OBSERVER_LIST = "web3/observerList";
+    public static final String URI_GET_CLIENT_VERSION = "web3/clientVersion";
     public static final String URI_GENERATE_GROUP = "web3/generateGroup";
     public static final String URI_START_GROUP = "web3/startGroup/%1s";
     public static final String URI_REFRESH_FRONT = "web3/refresh";
