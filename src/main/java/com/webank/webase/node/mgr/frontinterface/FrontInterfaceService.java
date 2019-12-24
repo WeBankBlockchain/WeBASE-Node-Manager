@@ -41,20 +41,7 @@ import com.webank.webase.node.mgr.monitor.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
 
 
 @Log4j2
@@ -125,7 +112,7 @@ public class FrontInterfaceService {
      */
     public Map<String, String> getCertMapFromSpecificFront(String nodeIp, Integer frontPort) {
         int groupId = 1;
-        return getFromSpecificFront(groupId, nodeIp, frontPort, URI_CERT, Map.class);
+        return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_CERT, Map.class);
     }
 
 
@@ -134,7 +121,7 @@ public class FrontInterfaceService {
      */
     public List<String> getGroupListFromSpecificFront(String nodeIp, Integer frontPort) {
         Integer groupId = Integer.MAX_VALUE;
-        return getFromSpecificFront(groupId, nodeIp, frontPort, URI_GROUP_PLIST, List.class);
+        return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_GROUP_PLIST, List.class);
     }
 
 
@@ -143,7 +130,7 @@ public class FrontInterfaceService {
      */
     public List<String> getGroupPeersFromSpecificFront(String frontIp, Integer frontPort,
             Integer groupId) {
-        return getFromSpecificFront(groupId, frontIp, frontPort, URI_GROUP_PEERS, List.class);
+        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_GROUP_PEERS, List.class);
     }
 
     /**
@@ -151,7 +138,7 @@ public class FrontInterfaceService {
      */
     public List<String> getNodeIDListFromSpecificFront(String frontIp, Integer frontPort,
             Integer groupId) {
-        return getFromSpecificFront(groupId, frontIp, frontPort, URI_NODEID_LIST, List.class);
+        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_NODEID_LIST, List.class);
     }
 
     /**
@@ -159,7 +146,7 @@ public class FrontInterfaceService {
      */
     public PeerInfo[] getPeersFromSpecificFront(String frontIp, Integer frontPort,
             Integer groupId) {
-        return getFromSpecificFront(groupId, frontIp, frontPort, URI_PEERS, PeerInfo[].class);
+        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_PEERS, PeerInfo[].class);
     }
 
     /**
@@ -167,7 +154,7 @@ public class FrontInterfaceService {
      */
     public SyncStatus getSyncStatusFromSpecificFront(String frontIp, Integer frontPort,
             Integer groupId) {
-        return getFromSpecificFront(groupId, frontIp, frontPort, URI_CSYNC_STATUS,
+        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_CSYNC_STATUS,
                 SyncStatus.class);
     }
 
@@ -175,7 +162,7 @@ public class FrontInterfaceService {
      * get peers.
      */
     public PeerInfo[] getPeers(Integer groupId) {
-        return frontRestTools.getForEntity(groupId, URI_PEERS, PeerInfo[].class);
+        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_PEERS, PeerInfo[].class);
     }
 
     /**
@@ -320,7 +307,7 @@ public class FrontInterfaceService {
      */
     public List<String> getGroupPeers(Integer groupId) {
         log.debug("start getGroupPeers. groupId:{}", groupId);
-        List<String> groupPeers = frontRestTools.getForEntity(groupId, URI_GROUP_PEERS, List.class);
+        List<String> groupPeers = frontRestTools.getForEntity(groupId, FrontRestTools.URI_GROUP_PEERS, List.class);
         log.debug("end getGroupPeers. groupPeers:{}", JSON.toJSONString(groupPeers));
         return groupPeers;
     }
@@ -331,7 +318,7 @@ public class FrontInterfaceService {
     public List<String> getObserverList(Integer groupId) {
         log.debug("start getObserverList. groupId:{}", groupId);
         List<String> observers =
-                frontRestTools.getForEntity(groupId, URI_GET_OBSERVER_LIST, List.class);
+                frontRestTools.getForEntity(groupId, FrontRestTools.URI_GET_OBSERVER_LIST, List.class);
         log.info("end getObserverList. observers:{}", JSON.toJSONString(observers));
         return observers;
     }
@@ -417,7 +404,7 @@ public class FrontInterfaceService {
                 frontPort);
         Integer groupId = Integer.MAX_VALUE;
         int encryptType =
-                getFromSpecificFront(groupId, nodeIp, frontPort, URI_ENCRYPT_TYPE, Integer.class);
+                getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_ENCRYPT_TYPE, Integer.class);
         log.debug("end getEncryptTypeFromSpecificFront. encryptType:{}", encryptType);
         return encryptType;
     }
@@ -425,7 +412,7 @@ public class FrontInterfaceService {
     public String getClientVersion(String frontIp, Integer frontPort,
                                    Integer groupId) {
         log.debug("start getClientVersion. groupId:{}", groupId);
-        NodeVersion.Version clientVersion = getFromSpecificFront(groupId, frontIp, frontPort, URI_GET_CLIENT_VERSION, NodeVersion.Version.class);
+        NodeVersion.Version clientVersion = getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_GET_CLIENT_VERSION, NodeVersion.Version.class);
         log.debug("end getClientVersion. consensusStatus:{}", clientVersion);
         return clientVersion.getVersion();
     }
