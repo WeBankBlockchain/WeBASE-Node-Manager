@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Timed tasks for counting daily transaction data.
+ * using in web's charts
  */
 @Log4j2
 @Component

@@ -2,15 +2,16 @@ package node.mgr.test.transaction;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.transaction.TransHashMapper;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,8 @@ public class TransHashServiceTest {
     @Autowired
     private TransHashService transHashService;
     private Integer groupId = 300001;
-
+    @Autowired
+    private TransHashMapper transHashMapper;
 
     @Test
     public void getTransListFromChain() {
@@ -49,4 +51,22 @@ public class TransHashServiceTest {
         System.out.println(JSON.toJSONString(trans));
     }
 
+    /**
+     * TODO optimize getCount's time
+     */
+    @Test
+    public void getCountTimeCost() {
+        TransListParam param = new TransListParam();
+        Instant start = Instant.now();
+        System.out.println("start: " + start.toEpochMilli());
+        Integer count = transHashMapper.getCount("tb_trans_hash_1", param);
+        System.out.println(count);
+        System.out.println(Duration.between(start, Instant.now()).toMillis());
+    }
+
+    @Test
+    public void queryCountOfTranByMinus() {
+        int count = transHashService.queryCountOfTranByMinus(1);
+        System.out.println(count);
+    }
 }

@@ -25,6 +25,8 @@ public class TbFront {
     private String frontIp;
     private Integer frontPort;
     private String agency;
+    // node version
+    private String clientVersion;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 }

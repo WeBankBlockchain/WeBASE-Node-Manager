@@ -40,6 +40,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * services for block data.
+ * including pull block from chain and block service
  */
 @Log4j2
 @Service
@@ -59,6 +60,7 @@ public class BlockService {
 
     /**
      * get block from chain by groupId
+     * ThreadPool configuration in /base/config/BeanConfig
      */
     @Async(value = "mgrAsyncExecutor")
     public void pullBlockByGroupId(CountDownLatch latch, int groupId) {
@@ -226,6 +228,19 @@ public class BlockService {
             return count;
         } catch (RuntimeException ex) {
             log.error("fail countOfBlock groupId:{} pkHash:{}", groupId, pkHash, ex);
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+    }
+
+    public int queryCountOfBlockByMinus(Integer groupId) {
+        log.debug("start queryCountOfBlockByMinus groupId:{}", groupId);
+        try {
+            int count = blockmapper
+                    .getBlockCountByMinMax(TableName.BLOCK.getTableName(groupId));
+            log.info("end queryCountOfBlockByMinus groupId:{} count:{}", groupId, count);
+            return count;
+        } catch (RuntimeException ex) {
+            log.error("fail queryCountOfBlockByMinus groupId:{},exception:{}", groupId, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
