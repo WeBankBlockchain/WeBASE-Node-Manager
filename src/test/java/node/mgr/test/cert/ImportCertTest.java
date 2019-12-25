@@ -164,15 +164,6 @@ public class ImportCertTest {
         System.out.println("指纹");
         System.out.println(finger);
         return finger;
-//        private static String getThumbprint(X509Certificate cert)
-//            throws NoSuchAlgorithmException, CertificateEncodingException {
-//            MessageDigest md = MessageDigest.getInstance("SHA-1");
-//            byte[] der = cert.getEncoded();
-//            md.update(der);
-//            byte[] digest = md.digest();
-//            String digestHex = DatatypeConverter.printHexBinary(digest);
-//            return digestHex.toLowerCase();
-//        }
     }
 
     public static boolean isExpired2(X509Certificate cert) {
