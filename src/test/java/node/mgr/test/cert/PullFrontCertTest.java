@@ -19,6 +19,7 @@ package node.mgr.test.cert;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
+import io.jsonwebtoken.lang.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class TestPullFrontCert {
+public class PullFrontCertTest {
     @Autowired
     CertService certService;
 
@@ -37,6 +38,7 @@ public class TestPullFrontCert {
     public void testPullFront() {
         certService.pullFrontNodeCrt();
         List<TbCert> list = certService.getAllCertsListFromDB();
+        Assert.notNull(list, "pull certs failed. ");
         for(TbCert cert: list) {
             System.out.println(cert);
         }
