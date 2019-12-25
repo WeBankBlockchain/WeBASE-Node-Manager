@@ -27,12 +27,9 @@ import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.core.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
@@ -107,16 +104,19 @@ public class TransHashService {
         try {
             Integer count = transHashMapper.getCountByMinMax(tableName);
             log.info("end queryCountOfTranByMinus. count:{}",  count);
+            if (count == null) {
+                return 0;
+            }
             return count;
         } catch (BadSqlGrammarException ex) {
             // TODO v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
             log.error("fail queryCountOfTranByMinus. ", ex);
-            log.info("restart from queryCountOfTranByMinus to queryCountOfTran: {}", ex.getCause());
+            log.info("restart from queryCountOfTranByMinus to queryCountOfTran: []", ex.getCause());
             TransListParam queryParam = new TransListParam(null, null);
             Integer count = queryCountOfTran(groupId, queryParam);
             return count;
         } catch (RuntimeException ex) {
-            log.error("fail queryCountOfTran. ", ex);
+            log.error("fail queryCountOfTranByMinus. ", ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
