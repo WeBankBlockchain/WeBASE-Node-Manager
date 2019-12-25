@@ -43,7 +43,7 @@ public class CertTools {
     public static final String TYPE_SDK_AGENCY = "sdkagency";
     // cert name: sdk ,type: node or sdk
     public static final String TYPE_SDK_NODE = "sdknode";
-    // 首次启动时需要拉取
+    // pull flag: 首次启动时需要拉取Front与节点的证书
     public static boolean isPullFrontCertsDone = false;
 
     // public key in hex length
