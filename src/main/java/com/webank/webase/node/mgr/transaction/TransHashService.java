@@ -106,8 +106,11 @@ public class TransHashService {
         log.debug("start queryCountOfTranByMinus.");
         String tableName = TableName.TRANS.getTableName(groupId);
         try {
-            int count = transHashMapper.getCountByMinMax(tableName);
+            Integer count = transHashMapper.getCountByMinMax(tableName);
             log.info("end queryCountOfTranByMinus. count:{}",  count);
+            if (count == null) {
+                return 0;
+            }
             return count;
         } catch (BadSqlGrammarException ex) {
             // TODO v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
