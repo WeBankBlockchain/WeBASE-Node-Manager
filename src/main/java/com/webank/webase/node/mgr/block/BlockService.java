@@ -217,14 +217,17 @@ public class BlockService {
     /**
      * query count of block.
      */
-    public int queryCountOfBlock(Integer groupId, String pkHash, BigInteger blockNumber)
+    public Integer queryCountOfBlock(Integer groupId, String pkHash, BigInteger blockNumber)
         throws NodeMgrException {
         log.debug("start countOfBlock groupId:{} pkHash:{} blockNumber:{}", groupId, pkHash,
             blockNumber);
         try {
-            int count = blockmapper
+            Integer count = blockmapper
                 .getCount(TableName.BLOCK.getTableName(groupId), pkHash, blockNumber);
             log.info("end countOfBlock groupId:{} pkHash:{} count:{}", groupId, pkHash, count);
+            if(count == null) {
+                return 0;
+            }
             return count;
         } catch (RuntimeException ex) {
             log.error("fail countOfBlock groupId:{} pkHash:{}", groupId, pkHash, ex);
@@ -232,12 +235,15 @@ public class BlockService {
         }
     }
 
-    public int queryCountOfBlockByMinus(Integer groupId) {
+    public Integer queryCountOfBlockByMinus(Integer groupId) {
         log.debug("start queryCountOfBlockByMinus groupId:{}", groupId);
         try {
-            int count = blockmapper
+            Integer count = blockmapper
                     .getBlockCountByMinMax(TableName.BLOCK.getTableName(groupId));
             log.info("end queryCountOfBlockByMinus groupId:{} count:{}", groupId, count);
+            if(count == null) {
+                return 0;
+            }
             return count;
         } catch (RuntimeException ex) {
             log.error("fail queryCountOfBlockByMinus groupId:{},exception:{}", groupId, ex);
