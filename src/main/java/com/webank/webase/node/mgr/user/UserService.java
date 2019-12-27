@@ -74,7 +74,7 @@ public class UserService {
         // check userName
         TbUser userRow = queryByName(user.getGroupId(), user.getUserName());
         if (userRow != null) {
-            log.warn("fail addUserIndo. user info already exists");
+            log.warn("fail addUserInfo. user info already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
 
