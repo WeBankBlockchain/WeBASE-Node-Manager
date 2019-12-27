@@ -283,6 +283,7 @@ public class NodeService {
     private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
         String consensusStatusJson = frontInterface.getConsensusStatus(groupId);
         if (StringUtils.isBlank(consensusStatusJson)) {
+            log.debug("getPeerOfConsensusStatus is null: {}", consensusStatusJson);
             return null;
         }
         JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
