@@ -17,6 +17,8 @@ package com.webank.webase.node.mgr.cert;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.CertTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
 import com.webank.webase.node.mgr.front.FrontService;
@@ -24,22 +26,26 @@ import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.time.Instant;
-import sun.security.x509.X509CertImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import java.io.InputStream;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -62,8 +68,7 @@ public class CertService {
         log.debug("start saveCerts startTime:{} Cert content:{}",
                 startTime.toEpochMilli(), content);
         // crt加载list
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        List<X509CertImpl> certs = loadCertListFromCrtContent(content);
+        List<X509Certificate> certs = loadCertListFromCrtContent(content);
         // 单个crt的原文list
         List<String> certContentList = CertTools.getCrtContentList(content);
         // 用于保存的实体list
@@ -73,20 +78,22 @@ public class CertService {
         log.debug("saveCerts start save TbCert in db. cert list size:{}", certs.size());
         for(int i = 0; i < certs.size(); i++) {
             TbCert tbCert = new TbCert();
-            X509CertImpl certImpl = certs.get(i);
+            X509Certificate certImpl = certs.get(i);
             // 用SHA-1计算得出指纹
-            String fingerPrint = certImpl.getFingerprint("SHA-1");
+            String fingerPrint = NodeMgrTools.getCertFingerPrint(certImpl.getEncoded());
             String certName = CertTools.getCertName(certImpl.getSubjectDN());
             String certType = CertTools.getCertType(certImpl.getSubjectDN());
             // 获取crt的原文,并加上头和尾
-            String certContent = CertTools.addHeadAndTail(certContentList.get(i));
+            String certContent = CertTools.addCertHeadAndTail(certContentList.get(i));
 
             // 判断证书类型后给pub和父子证书赋值
             String publicKeyString = "";
             String address = "";
             String fatherCertContent = "";
-            // 非节点证书，无需公钥(RSA's public key)
-            if(CertTools.TYPE_NODE.equals(certType)) {
+            // node cert has PublicKey and Address:
+            // standard: type=node;  guomi: type = node || type=encrypt_node || type=sdk&&name=sdk
+            if(CertTools.TYPE_NODE.equals(certType) || CertTools.TYPE_ENCRYPT_NODE.equals(certType) ||
+                    ("sdk".equals(certType) && "sdk".equals(certName))) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = Keys.getAddress(publicKeyString);
@@ -204,12 +211,12 @@ public class CertService {
      * @param sonCert
      * @return String crt's address
      */
-    public String findFatherCert(X509CertImpl sonCert) {
-        log.debug("start findFatherCert. son cert: {}", sonCert.getFingerprint("SHA-1"));
-        List<X509CertImpl> x509CertList = loadAllX509Certs();
+    public String findFatherCert(X509Certificate sonCert) throws CertificateEncodingException {
+        log.debug("start findFatherCert. son cert: {}", NodeMgrTools.getCertFingerPrint(sonCert.getEncoded()));
+        List<X509Certificate> x509CertList = loadAllX509Certs();
         String result = "";
         for(int i = 0; i < x509CertList.size(); i++) {
-            X509CertImpl temp = x509CertList.get(i);
+            X509Certificate temp = x509CertList.get(i);
             try{
                 sonCert.verify(temp.getPublicKey());
             }catch (Exception e) {
@@ -217,7 +224,7 @@ public class CertService {
                 continue;
             }
             // 返回指纹
-            result = temp.getFingerprint("SHA-1");
+            result = NodeMgrTools.getCertFingerPrint(temp.getEncoded());
         }
         log.debug("end findFatherCert. find one FatherCert's finerPrint:{}", result);
         return result;
@@ -227,9 +234,9 @@ public class CertService {
      * 找到父证书所有的子证书，将子证书的father设为他自己
      * @param fatherCert
      */
-    public void setSonCert(X509CertImpl fatherCert) {
-        log.debug("start setSonCert. Father FingerPrint:{}", fatherCert.getFingerprint("SHA-1"));
-        List<X509CertImpl> x509CertList = new ArrayList<>();
+    public void setSonCert(X509Certificate fatherCert) throws CertificateEncodingException {
+        log.debug("start setSonCert. Father FingerPrint:{}", NodeMgrTools.getCertFingerPrint(fatherCert.getEncoded()));
+        List<X509Certificate> x509CertList = new ArrayList<>();
         String fatherType = CertTools.getCertType(fatherCert.getSubjectDN());
         if(CertTools.TYPE_CHAIN.equals(fatherType)){
             x509CertList = loadAllX509CertsByType(CertTools.TYPE_AGENCY);
@@ -238,7 +245,7 @@ public class CertService {
         }
 
         for(int i = 0; i < x509CertList.size(); i++) {
-            X509CertImpl temp = x509CertList.get(i);
+            X509Certificate temp = x509CertList.get(i);
             try{
                 // 找子证书
                 temp.verify(fatherCert.getPublicKey());
@@ -246,25 +253,25 @@ public class CertService {
                 // 签名不匹配则继续
                 continue;
             }
-            String sonFingerPrint = temp.getFingerprint("SHA-1");
-            updateCertFather(sonFingerPrint, fatherCert.getFingerprint("SHA-1"));
+            String sonFingerPrint = NodeMgrTools.getCertFingerPrint(temp.getEncoded());
+            updateCertFather(sonFingerPrint, NodeMgrTools.getCertFingerPrint(fatherCert.getEncoded()));
             log.debug("end setSonCert. Father FingerPrint:{}, SonFingerPrint:{}",
-                    fatherCert.getFingerprint("SHA-1"), sonFingerPrint);
+                    NodeMgrTools.getCertFingerPrint(fatherCert.getEncoded()), sonFingerPrint);
         }
     }
 
     /**
      * 获取数据库所有的cert，并转换成X509实例返回
      */
-    public List<X509CertImpl> loadAllX509Certs() {
+    public List<X509Certificate> loadAllX509Certs() {
         log.debug("start loadAllX509Certs.");
         // 空参数
         CertParam param = new CertParam();
         List<TbCert> tbCertList = getAllCertsListFromDB();
 
-        List<X509CertImpl> x509CertList = new ArrayList<>();
+        List<X509Certificate> x509CertList = new ArrayList<>();
         for(TbCert tbCert: tbCertList) {
-            X509CertImpl temp = loadSingleCertFromCrtContent(tbCert.getContent());
+            X509Certificate temp = loadSingleCertFromCrtContent(tbCert.getContent());
             x509CertList.add(temp);
         }
         log.debug("end loadAllX509Certs. ");
@@ -274,16 +281,16 @@ public class CertService {
     /**
      * 获取数据库所有符合certType的证书cert，并转换成X509实例返回
      */
-    public List<X509CertImpl> loadAllX509CertsByType(String certType) {
+    public List<X509Certificate> loadAllX509CertsByType(String certType) {
         log.debug("start loadAllX509CertsByType.certType:{}", certType);
         // 空参数
         CertParam param = new CertParam();
         param.setCertType(certType);
         List<TbCert> tbCertList = getCertListByCertType(param);
 
-        List<X509CertImpl> x509CertList = new ArrayList<>();
+        List<X509Certificate> x509CertList = new ArrayList<>();
         for(TbCert tbCert: tbCertList) {
-            X509CertImpl temp = loadSingleCertFromCrtContent(tbCert.getContent());
+            X509Certificate temp = loadSingleCertFromCrtContent(tbCert.getContent());
             x509CertList.add(temp);
         }
         log.debug("end loadAllX509CertsByType list:{}", x509CertList);
@@ -348,12 +355,21 @@ public class CertService {
         String chainCertContent = certContents.get(CertTools.TYPE_CHAIN);
         String agencyCertContent = certContents.get(CertTools.TYPE_AGENCY);
         String nodeCertContent = certContents.get(CertTools.TYPE_NODE);
-        String sdkCertContent = certContents.get(CertTools.TYPE_SDK);
+        // guomi encrypt node cert
+        String encryptNodeCertContent = certContents.get(CertTools.TYPE_ENCRYPT_NODE);
+        String sdkChainCertContent = certContents.get(CertTools.TYPE_SDK_CHAIN);
+        String sdkAgencyCertContent = certContents.get(CertTools.TYPE_SDK_AGENCY);
+        String sdkNodeCertContent = certContents.get(CertTools.TYPE_SDK_NODE);
+        // fisco's cert
         handleSaveFrontCertStr(chainCertContent);
         handleSaveFrontCertStr(agencyCertContent);
         handleSaveFrontCertStr(nodeCertContent);
-        handleSaveFrontCertStr(sdkCertContent);
-        log.debug("end saveFrontCert. certContents:{} ", certContents);
+        handleSaveFrontCertStr(encryptNodeCertContent);
+        //sdk's cert
+        handleSaveFrontCertStr(sdkChainCertContent);
+        handleSaveFrontCertStr(sdkAgencyCertContent);
+        handleSaveFrontCertStr(sdkNodeCertContent);
+        log.debug("end saveFrontCert. certContents. ");
     }
 
     /**
@@ -362,8 +378,8 @@ public class CertService {
      * @throws CertificateException
      */
     public void handleSaveFrontCertStr(String certStr) throws CertificateException {
-        if(!"".equals(certStr)) {
-            certStr = CertTools.addHeadAndTail(certStr);
+        if(StringUtils.isNotEmpty(certStr)) {
+            certStr = CertTools.addCertHeadAndTail(certStr);
             log.debug("start handleSaveFrontCertStr:{} ", certStr);
             saveCerts(certStr);
             log.debug("end handleSaveFrontCertStr:{} ", certStr);
@@ -393,32 +409,38 @@ public class CertService {
      * 解析is获取证书list
      * @return
      * @throws IOException
-     * // TODO X509CertImpl为内部API，可能在将来发行版中删除
      */
-    public List<X509CertImpl> loadCertListFromCrtContent(String crtContent) {
+    public List<X509Certificate> loadCertListFromCrtContent(String crtContent) {
         log.debug("loadCertListFromCrtContent content:{}", crtContent);
-        List<X509CertImpl> certs;
+        List<X509Certificate> certs = new ArrayList<>();
         try(InputStream is = new ByteArrayInputStream(crtContent.getBytes())) {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            certs = (List<X509CertImpl>) cf.generateCertificates(is);
+
+            org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
+                    new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
+            factory.engineGenerateCertificates(is).stream()
+                    .forEach(c-> certs.add((X509Certificate)c));
+//            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+//            certs = (List<X509Certificate>) cf.generateCertificates(is);
         }catch (CertificateException | IOException e) {
             log.error("loadCertListFromCrtContent exception:[]", e);
             throw new NodeMgrException(ConstantCode.CERT_ERROR.getCode(), e.getMessage());
         }
+        log.debug("end loadCertListFromCrtContent. certs:{}", certs);
         return certs;
     }
 
-    public X509CertImpl loadSingleCertFromCrtContent(String crtContent) {
+    public X509Certificate loadSingleCertFromCrtContent(String crtContent) {
         log.debug("start loadSingleCertFromCrtContent. content:{}", crtContent);
-        X509CertImpl cert;
+        X509Certificate cert;
         try(InputStream is = new ByteArrayInputStream(crtContent.getBytes())) {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            cert = (X509CertImpl) cf.generateCertificate(is);
+            org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
+                    new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
+            cert = (X509Certificate) factory.engineGenerateCertificate(is);
         }catch (CertificateException | IOException e) {
             log.error("get loadSingleCertFromCrtContent. Exception:[]", e);
             throw new NodeMgrException(ConstantCode.CERT_ERROR.getCode(), e.getMessage());
         }
         log.debug("end loadSingleCertFromCrtContent. cert:{}", cert);
-        return cert;
+        return (X509Certificate)cert;
     }
 }

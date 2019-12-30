@@ -11,43 +11,40 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package node.mgr.test.Scheduler;
+package node.mgr.test.frontgroupmap;
 
+import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.scheduler.PullBlockInfoTask;
-import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
-import com.webank.webase.node.mgr.scheduler.TransMonitorTask;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class SchedulerServiceTest {
+public class FrontGroupMapServiceTest {
 
     @Autowired
-    private PullBlockInfoTask pullBlockInfoTask;
-    @Autowired
-    private ResetGroupListTask resetGroupListTask;
-    @Autowired
-    private TransMonitorTask transMonitorTask;
+    private FrontGroupMapService frontGroupMapService;
 
     @Test
-    public void pullBlockInfoTaskTest() {
-        pullBlockInfoTask.pullBlockStart();
+    public void getListTest() {
+        MapListParam param = new MapListParam();
+        param.setGroupId(2);
+        List<FrontGroup> list = frontGroupMapService.getList(param);
+        assert (list != null);
+        System.out.println(JSON.toJSONString(list));
     }
 
     @Test
-    public void resetGroupListTest() {
-        resetGroupListTask.resetGroupList();
+    public void listByGroupIdTest() {
+        List<FrontGroup> list = frontGroupMapService.listByGroupId(2);
+        assert (list != null);
+        System.out.println(JSON.toJSONString(list));
     }
-
-    @Test
-    public void transMonitorTest() {
-        transMonitorTask.monitorStart();
-    }
-
 }

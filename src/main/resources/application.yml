@@ -23,10 +23,23 @@ spring:
 logging:
   config: classpath:log/log4j2.xml
   level:
-    com.webank.webase.node.mgr: debug
+    com.webank.webase.node.mgr: info
 
 #constants
 constant:
+  ###http request
+  isUseSecurity: true   # login's authorization
+  verificationCodeMaxAge: 300
+  authTokenMaxAge: 1800
+  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find,,/group/generate,/group/start
+  ###front http request
+  frontUrl: http://%1s:%2d/WeBASE-Front/%3s
+  httpTimeOut: 5000
+  contractDeployTimeOut: 30000
+  isPrivateKeyEncrypt: true
+  maxRequestFail: 3
+  sleepWhenHttpMaxFail: 60000
+
   ###common
   isDeleteInfo: true
   transRetainMax: 10000
@@ -36,24 +49,12 @@ constant:
   groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
   notSupportFrontIp:
 
-  ###block into
+  ###block info (pulling data from chain)
   isBlockPullFromZero: false
   pullBlockInitCnts: 1000
   pullBlockSleepTime: 200
   pullBlockTaskFixedDelay: 30000
   blockRetainMax: 10000
-  ###receive http request
-  verificationCodeMaxAge: 300
-  authTokenMaxAge: 1800
-  isUseSecurity: true
-  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find
-  ###front http request
-  frontUrl: http://%1s:%2d/WeBASE-Front/%3s
-  httpTimeOut: 5000
-  contractDeployTimeOut: 30000
-  isPrivateKeyEncrypt: true
-  maxRequestFail: 3
-  sleepWhenHttpMaxFail: 60000
   ###transaction monitor
   transMonitorTaskFixedRate: 60000  #How long does it take to start the next task after the end (second)
   analysisSleepTime: 200
@@ -66,9 +67,13 @@ constant:
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
 
-# executor config
+# executor config for pulling data from chain
 executor:
   corePoolSize: 3
   maxPoolSize: 10
   queueSize: 50
   threadNamePrefix: "node-mgr-async-"
+
+sdk:
+  encryptType: 0 # 1:guomi, 0:standard
+

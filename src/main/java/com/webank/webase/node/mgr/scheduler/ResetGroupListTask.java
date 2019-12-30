@@ -21,6 +21,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * refresh group list
+ */
 @Log4j2
 @Component
 public class ResetGroupListTask {

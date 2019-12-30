@@ -13,10 +13,13 @@
  */
 package com.webank.webase.node.mgr.base.config;
 
+import com.webank.webase.node.mgr.base.tools.SM3PasswordEncoder;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -72,7 +75,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .successHandler(loginSuccessHandler) // if login success
             .failureHandler(loginfailHandler) // if login fail
             .and().authorizeRequests()
-            .antMatchers("/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**")
+            .antMatchers("/account/login", "/account/pictureCheckCode",
+                    "/login","/user/privateKey/**", "/encrypt")
             .permitAll()
             .anyRequest().authenticated().and().csrf()
             .disable() // close csrf
@@ -98,10 +102,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean("bCryptPasswordEncoder")
+    @DependsOn("encryptType")
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
+
     @Bean
     public AuthenticationProvider tokenAuthenticationProvider() {
         return new TokenAuthenticationProvider();

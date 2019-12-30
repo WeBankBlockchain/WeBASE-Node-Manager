@@ -47,7 +47,8 @@ public class NodeService {
     private NodeMapper nodeMapper;
     @Autowired
     private FrontInterfaceService frontInterface;
-    private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
+    // interval of check node status
+    private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 7500L;
 
     /**
      * add new node data.
@@ -188,6 +189,7 @@ public class NodeService {
 
     /**
      * check node status
+     *
      */
     public void checkAndUpdateNodeStatus(int groupId) {
         //get local node list
@@ -230,6 +232,7 @@ public class NodeService {
                 .orElse(BigInteger.ZERO);//pbftView
             
             if (nodeType == 0) {    //0-consensus;1-observer
+                // if local block number and pbftView equals chain's, invalid
                 if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
                     log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                         nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
@@ -240,6 +243,7 @@ public class NodeService {
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
                 }
             } else { //observer
+                // if latest block number not equal, invalid
                 if (!latestNumber.equals(frontInterface.getLatestBlockNumber(groupId))) {
                     log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                             nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
@@ -250,7 +254,7 @@ public class NodeService {
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
                 }
             }
-
+            tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
         }
@@ -279,6 +283,7 @@ public class NodeService {
     private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
         String consensusStatusJson = frontInterface.getConsensusStatus(groupId);
         if (StringUtils.isBlank(consensusStatusJson)) {
+            log.debug("getPeerOfConsensusStatus is null: {}", consensusStatusJson);
             return null;
         }
         JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);

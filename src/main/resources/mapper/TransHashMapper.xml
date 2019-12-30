@@ -39,6 +39,9 @@
     </if>
   </select>
 
+  <select id="getCountByMinMax" resultType="java.lang.Integer">
+    select max(trans_number) - min(trans_number) from ${tableName}
+  </select>
 
   <select id="getList" parameterType="com.webank.webase.node.mgr.transaction.entity.TransListParam"
     resultMap="transHashMap">
@@ -88,5 +91,5 @@
         update ${tableName}
         set statistics_flag = 2
         where trans_hash = #{transHash}
-    </update>
+   </update>
 </mapper>
