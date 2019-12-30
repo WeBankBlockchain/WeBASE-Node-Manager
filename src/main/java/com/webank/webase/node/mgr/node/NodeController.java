@@ -67,7 +67,7 @@ public class NodeController {
         try{
             nodeService.checkAndUpdateNodeStatus(groupId);
         }catch (Exception e) {
-            log.error("queryNodeList checkAndUpdateNodeStatus error: []", e);
+            log.error("queryNodeList checkAndUpdateNodeStatus groupId:{}, error: []", groupId, e);
         }
         Integer count = nodeService.countOfNode(queryParam);
         if (count != null && count > 0) {
