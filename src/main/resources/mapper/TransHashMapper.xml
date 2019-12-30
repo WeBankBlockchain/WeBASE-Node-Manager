@@ -40,7 +40,7 @@
   </select>
 
   <select id="getCountByMinMax" resultType="java.lang.Integer">
-    select max(trans_number) - min(trans_number) from ${tableName}
+    select max(trans_number) - min(trans_number) + 1 from ${tableName}
   </select>
 
   <select id="getList" parameterType="com.webank.webase.node.mgr.transaction.entity.TransListParam"
