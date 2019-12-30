@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -38,6 +39,7 @@ import java.util.List;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -88,6 +90,14 @@ public class FrontService {
             log.error("fail newFront, frontIp:{},frontPort:{}",frontIp,frontPort);
             throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
         }
+        // check front's encrypt type same as nodemgr(guomi or standard)
+        int encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort);
+        if (encryptType != EncryptType.encryptType) {
+            log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{}," +
+                            "local encryptType not match:{}",
+                    frontIp, frontPort, encryptType, EncryptType.encryptType);
+            throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
+        }
         //check front not exist
         SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
                 frontPort, Integer.valueOf(groupIdList.get(0)));
@@ -97,9 +107,12 @@ public class FrontService {
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
         }
+        String clientVersion = frontInterface.getClientVersion(frontIp,
+                frontPort, Integer.valueOf(groupIdList.get(0)));
         //copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         tbFront.setNodeId(syncStatus.getNodeId());
+        tbFront.setClientVersion(clientVersion);
         //save front info
         frontMapper.add(tbFront);
         if (tbFront.getFrontId() == null || tbFront.getFrontId() == 0) {
@@ -130,7 +143,8 @@ public class FrontService {
             //add sealer(consensus node) and observer in nodeList
              refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
         }
-
+        // pull cert from new front and its node
+        CertTools.isPullFrontCertsDone = false;
         //clear cache
         frontGroupMapCache.clearMapList();
         return tbFront;
@@ -242,5 +256,12 @@ public class FrontService {
         resetGroupListTask.asyncResetGroupList();
         //clear cache
         frontGroupMapCache.clearMapList();
+    }
+
+    public void setFrontEncryptType(List<TbFront> list) {
+
+        list.stream().forEach(front -> {
+
+        });
     }
 }

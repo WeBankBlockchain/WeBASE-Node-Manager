@@ -19,7 +19,7 @@
     CREATE TABLE IF NOT EXISTS ${tableName}(
         pk_hash varchar(128) NOT NULL COMMENT '块hash值',
         block_timestamp datetime NOT NULL COMMENT '出块时间',
-        block_number bigint(20) NOT NULL COMMENT '快高',
+        block_number bigint(25) NOT NULL COMMENT '块高',
         sealer_index int(4) NOT NULL  COMMENT '打包节点索引',
         sealer varchar(250) DEFAULT NULL  COMMENT '打包节点',
         trans_count bigint(20) DEFAULT '0' COMMENT '块包含的交易数',
@@ -33,6 +33,7 @@
   <update id="createTransHash" parameterType="java.lang.String">
     CREATE TABLE IF NOT EXISTS ${tableName} (
         trans_hash varchar(128) NOT NULL COMMENT '交易hash',
+        trans_number bigint(25) NOT NULL AUTO_INCREMENT COMMENT '交易数',
         block_number bigint(25) NOT NULL COMMENT '所属区块',
         trans_from varchar(64) DEFAULT NULL COMMENT 'from',
         trans_to varchar(64) DEFAULT NULL COMMENT 'to',
@@ -41,7 +42,9 @@
         create_time datetime DEFAULT NULL COMMENT '创建时间',
         modify_time datetime DEFAULT NULL COMMENT '修改时间',
         PRIMARY KEY (trans_hash),
-        KEY index_flag (statistics_flag)
+        KEY index_flag (statistics_flag),
+        KEY index_number (block_number),
+        KEY index_trans_num (trans_number)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交易hash信息表';
   </update>
 

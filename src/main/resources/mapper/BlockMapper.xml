@@ -71,6 +71,10 @@
     </if>
   </select>
 
+  <select id="getBlockCountByMinMax" resultType="java.lang.Integer">
+    select  max(block_number) - min(block_number) + 1 from ${tableName}
+  </select>
+
   <delete id="remove">
     DELETE tb from ${tableName} as tb,(SELECT max(block_number) maxBlock FROM ${tableName}) AS tmp
     where tb.block_number &lt;= tmp.maxBlock - ${blockRetainMax}

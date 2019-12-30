@@ -37,6 +37,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.crypto.Hash;
+import org.fisco.bcos.web3j.utils.Numeric;
 
 /**
  * common method.
@@ -169,13 +172,6 @@ public class NodeMgrTools {
      * encode String by sha.
      */
     public static String shaEncode(String inStr) {
-        MessageDigest sha = null;
-        try {
-            sha = MessageDigest.getInstance("SHA-256");
-        } catch (Exception e) {
-            log.info("shaEncode fail:", e);
-            return "";
-        }
 
         byte[] byteArray = new byte[0];
         try {
@@ -184,10 +180,10 @@ public class NodeMgrTools {
             log.warn("shaEncode fail:", e);
             return null;
         }
-        byte[] md5Bytes = sha.digest(byteArray);
+        byte[] hashValue = getHashValue(byteArray);
         StringBuffer hexValue = new StringBuffer();
-        for (int i = 0; i < md5Bytes.length; i++) {
-            int val = ((int) md5Bytes[i]) & 0xff;
+        for (int i = 0; i < hashValue.length; i++) {
+            int val = ((int) hashValue[i]) & 0xff;
             if (val < 16) {
                 hexValue.append("0");
             }
@@ -196,6 +192,46 @@ public class NodeMgrTools {
         return hexValue.toString();
     }
 
+    /**
+     * get hash value
+     * type: sha256 or sm3
+     */
+    public static byte[] getHashValue(byte[] byteArray) {
+        byte[] hashResult;
+        if(EncryptType.encryptType == 1) {
+           hashResult = Hash.sha3(byteArray);
+           return hashResult;
+        } else {
+            MessageDigest sha = null;
+            try {
+                sha = MessageDigest.getInstance("SHA-256");
+                hashResult = sha.digest(byteArray);
+                return hashResult;
+            } catch (Exception e) {
+                log.error("shaEncode getHashValue fail:", e);
+                return null;
+            }
+        }
+    }
+
+    /**
+     * get x509 cert's fingerprint
+     * Hash using: SHA-1
+      * @param byteArray
+     * @return
+     */
+    public static String getCertFingerPrint(byte[] byteArray) {
+        byte[] hashResult;
+        MessageDigest sha = null;
+        try {
+            sha = MessageDigest.getInstance("SHA-1");
+            hashResult = sha.digest(byteArray);
+            return Numeric.toHexStringNoPrefix(hashResult).toUpperCase();
+        } catch (Exception e) {
+            log.error("shaEncode getCertFingerPrint fail:", e);
+            return null;
+        }
+    }
     /**
      * sort list and convert to String.
      */
@@ -435,5 +471,18 @@ public class NodeMgrTools {
             }
         });
         return list;
+    }
+    
+    /**
+     * parseHexStr2Int.
+     * 
+     * @param str str
+     * @return
+     */
+    public static int parseHexStr2Int(String str) {
+        if (StringUtils.isBlank(str)) {
+            return 0;
+        }
+        return Integer.parseInt(str.substring(2), 16);
     }
 }

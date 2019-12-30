@@ -17,8 +17,11 @@
 package com.webank.webase.node.mgr.alert.task;
 
 import com.webank.webase.node.mgr.alert.mail.MailService;
+import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.AlertRuleType;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.monitor.MonitorService;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,6 +50,9 @@ public class AuditMonitorTask {
     private FrontGroupMapCache frontGroupMapCache;
     @Autowired
     private MailService alertMailService;
+    @Autowired
+    private AlertRuleService alertRuleService;
+
     /**
      * set scheduler's interval
      */
@@ -60,6 +67,13 @@ public class AuditMonitorTask {
     public synchronized void checkUserAndContractForAlert() {
         Instant startTime = Instant.now();
         log.info("start checkUserAndContractForAlert startTime:{}", startTime.toEpochMilli());
+        //check last alert time, if within interval, not send
+        TbAlertRule alertRule = alertRuleService.queryByRuleId(AlertRuleType.AUDIT_ALERT.getValue());
+        if(AlertRuleTools.isWithinAlertIntervalByNow(alertRule)) {
+            log.debug("end checkUserAndContractForAlert non-sending mail" +
+                    " for beyond alert interval:{}", alertRule);
+            return;
+        }
         List<FrontGroup> groupList = frontGroupMapCache.getAllMap();
         if (groupList == null || groupList.size() == 0) {
             log.warn("checkUserAndContractForAlert jump over: not found any group");
@@ -78,23 +92,34 @@ public class AuditMonitorTask {
         int unusualContractCount = monitorService.countOfUnusualContract(groupId, null);
         int unusualMaxCount = cProperties.getMonitorUnusualMaxCount();
         // 异常用户数、异常合约数超出
+        List<String> alertContentList = new ArrayList<>();
         if (unusualUserCount >= unusualMaxCount
                 && unusualContractCount >= unusualMaxCount) {
             log.warn("audit alert. unusualUserCount:{},unusualMaxCount:{}, monitorUnusualMaxCount:{}",
                     unusualUserCount, unusualMaxCount, unusualMaxCount);
             String alertContent = "群组group " + groupId + "的异常用户数/异常合约数超出最大值："
                     + unusualContractCount + "/" + unusualContractCount;
-            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContent);
+            String alertContentEn = "group " + groupId + "'s number of abnormal users/contracts exceeds: "
+                    + unusualContractCount + "/" + unusualContractCount;
+            alertContentList.add(alertContent);
+            alertContentList.add(alertContentEn);
+            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContentList);
         }else if (unusualUserCount >= unusualMaxCount) {
             log.warn("audit alert. unusualUserCount:{} monitorUnusualMaxCount:{}",
                     unusualUserCount, unusualMaxCount);
             String alertContent = "群组group " + groupId + "的异常用户数超出最大值：" + unusualContractCount;
-            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContent);
+            String alertContentEn = "group " + groupId + "'s number of abnormal users exceeds: " + unusualContractCount;
+            alertContentList.add(alertContent);
+            alertContentList.add(alertContentEn);
+            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContentList);
         }else if (unusualContractCount >= unusualMaxCount) {
             log.warn("audit alert. unusualContractCount:{} monitorUnusualMaxCount:{}",
                     unusualContractCount, unusualMaxCount);
             String alertContent = "群组group " + groupId + "的异常合约数超出最大值：" + unusualContractCount;
-            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContent);
+            String alertContentEn = "group " + groupId + "'s number of abnormal contracts exceeds: " + unusualContractCount;
+            alertContentList.add(alertContent);
+            alertContentList.add(alertContentEn);
+            alertMailService.sendMailByRule(AlertRuleType.AUDIT_ALERT.getValue(), alertContentList);
         }
         log.debug("end checkUserAndContractByGroup");
 

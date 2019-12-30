@@ -19,18 +19,26 @@ package com.webank.webase.node.mgr.base.tools;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.fisco.bcos.web3j.crypto.Hash;
+import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.gm.sm3.SM3Digest;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.web3j.utils.Strings;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.fisco.bcos.web3j.crypto.Keys.getAddress;
-
 public class Web3Tools {
+
+    static final int PUBLIC_KEY_SIZE = 64;
+
+    public static final int ADDRESS_SIZE = 160;
+    public static final int ADDRESS_LENGTH_IN_HEX = ADDRESS_SIZE >> 2;
+
+    static final int PUBLIC_KEY_LENGTH_IN_HEX = PUBLIC_KEY_SIZE << 1;
 
     /*   public static SignatureData stringToSignatureData(String signatureData) {
         byte[] byte_3 = Numeric.hexStringToByteArray(signatureData);
@@ -50,8 +58,14 @@ public class Web3Tools {
         return Numeric.toHexString(byte_3, 0, byte_3.length, false);
     }*/
 
+    /**
+     * get address from public key
+     * 2019/11/27 support guomi
+     * @param publicKey
+     * @return
+     */
     public static String getAddressByPublicKey(String publicKey) {
-        String address = "0x" + getAddress(publicKey);
+        String address = "0x" + Keys.getAddress(publicKey);
         return address;
     }
 
@@ -65,20 +79,31 @@ public class Web3Tools {
     }
 
     /**
-     * get methodId.
+     * get methodId after hash
      */
     public static String buildMethodId(AbiDefinition abiDefinition) {
+        byte[] inputs = getMethodIdBytes(abiDefinition);
+        // 2019/11/27 support guomi
+        byte[] hash = Hash.sha3(inputs);
+        return Numeric.toHexString(hash).substring(0, 10);
+    }
+
+    /**
+     * get methodId bytes from AbiDefinition
+     * @return byte[]
+     */
+    public static byte[] getMethodIdBytes(AbiDefinition abiDefinition) {
         StringBuilder result = new StringBuilder();
         result.append(abiDefinition.getName());
         result.append("(");
         String params = abiDefinition.getInputs().stream()
-            .map(AbiDefinition.NamedType::getType)
-            .collect(Collectors.joining(","));
+                .map(AbiDefinition.NamedType::getType)
+                .collect(Collectors.joining(","));
         result.append(params);
         result.append(")");
 
         byte[] inputs = result.toString().getBytes();
-        byte[] hash = Hash.sha3(inputs);
-        return Numeric.toHexString(hash).substring(0, 10);
+        return inputs;
     }
+
 }

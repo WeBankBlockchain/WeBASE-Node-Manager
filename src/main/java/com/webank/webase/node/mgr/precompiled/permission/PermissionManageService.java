@@ -139,7 +139,7 @@ public class PermissionManageService {
     }
 
     /**
-     * post permission grant
+     * repost permission grant
      */
     public Object updatePermissionState(PermissionParam permissionParam) {
         log.debug("start updatePermissionState. permissionParam:{}", JSON.toJSONString(permissionParam));
@@ -147,7 +147,9 @@ public class PermissionManageService {
             log.error("fail updatePermissionState. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-
+        if(Objects.isNull(permissionParam.getUseAes())) {
+            permissionParam.setUseAes(false);
+        }
         Object frontRsp = frontRestTools.postForEntity(
                 permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION_SORTED_LIST,
                 permissionParam, Object.class);
@@ -161,7 +163,9 @@ public class PermissionManageService {
             log.error("fail grantPermission. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-
+        if(Objects.isNull(permissionParam.getUseAes())) {
+            permissionParam.setUseAes(false);
+        }
         Object frontRsp = frontRestTools.postForEntity(
                 permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
                 permissionParam, Object.class);
@@ -175,7 +179,9 @@ public class PermissionManageService {
             log.error("fail revokePermission. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-
+        if(Objects.isNull(permissionParam.getUseAes())) {
+            permissionParam.setUseAes(false);
+        }
         Object frontRsp = frontRestTools.deleteForEntity(
                 permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
                 permissionParam, Object.class);
