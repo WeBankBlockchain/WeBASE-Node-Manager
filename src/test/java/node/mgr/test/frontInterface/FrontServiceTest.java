@@ -25,6 +25,9 @@ import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +46,7 @@ public class FrontServiceTest {
     private String transHash = "0x1d99fdfa84b90d9478f09b722bb85b7d804e6b4d0273ec94fa4418c56a415211";
     private String blockHash = "0x337eb77084c0e6b09c508cc0f7dbc125af459c2aab19b9ca43c731ffc9fe604f";
     private String frontIp = "localhost";
-    private Integer frontPort = 8081;
+    private Integer frontPort = 5002;
 
     @Test
     public void getContractCodeTest() {
@@ -163,5 +166,12 @@ public class FrontServiceTest {
         String config = frontInterface.getSystemConfigByKey(groupId, key);
         assert (config != null);
         System.out.println(config);
+    }
+
+    @Test
+    public void getClientVersion() {
+        String clientVersion = frontInterface.getClientVersion(frontIp, frontPort, groupId);
+        System.out.println(clientVersion);
+        assert (StringUtils.isNotEmpty(clientVersion));
     }
 }

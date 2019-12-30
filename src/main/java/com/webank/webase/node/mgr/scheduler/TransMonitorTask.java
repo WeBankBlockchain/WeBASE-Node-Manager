@@ -26,6 +26,9 @@ import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * using in async monitor
+ */
 @Log4j2
 @Component
 public class TransMonitorTask {

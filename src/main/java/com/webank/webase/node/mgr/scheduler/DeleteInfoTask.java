@@ -32,6 +32,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * delete block/trans/monitorTrans data task
+ */
 @Log4j2
 @Component
 @ConditionalOnProperty(name = "constant.isDeleteInfo", havingValue = "true")
@@ -105,8 +108,9 @@ public class DeleteInfoTask {
     private void deleteTransHash(int groupId) {
         log.info("start deleteTransHash. groupId:{}", groupId);
         try {
-            TransListParam queryParam = new TransListParam(null, null);
-            Integer count = transHashService.queryCountOfTran(groupId, queryParam);
+//            TransListParam queryParam = new TransListParam(null, null);
+//            Integer count = transHashService.queryCountOfTran(groupId, queryParam);
+            Integer count = transHashService.queryCountOfTranByMinus(groupId);
             Integer removeCount = 0;
             if (count > cProperties.getTransRetainMax().intValue()) {
                 Integer subTransNum = count - cProperties.getTransRetainMax().intValue();

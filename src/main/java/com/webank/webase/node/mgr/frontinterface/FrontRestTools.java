@@ -69,6 +69,10 @@ public class FrontRestTools {
     public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
     public static final String URI_GET_SEALER_LIST = "web3/sealerList";
     public static final String URI_GET_OBSERVER_LIST = "web3/observerList";
+    public static final String URI_GET_CLIENT_VERSION = "web3/clientVersion";
+    public static final String URI_GENERATE_GROUP = "web3/generateGroup";
+    public static final String URI_START_GROUP = "web3/startGroup/%1s";
+    public static final String URI_REFRESH_FRONT = "web3/refresh";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey?useAes=%1b";
@@ -89,12 +93,14 @@ public class FrontRestTools {
     public static final String URI_CRUD = "precompiled/crud";
 
     public static final String URI_CERT = "cert";
+    public static final String URI_ENCRYPT_TYPE = "encrypt";
 
     //不需要在url中包含groupId的
     private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
         .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_CONTRACT_SENDABI,
-                URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST, URI_SYS_CONFIG, URI_CONSENSUS_LIST,
-                URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST, URI_PERMISSION_SORTED_FULL_LIST, URI_CERT);
+                URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
+                URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
+                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE);
 
 
     @Qualifier(value = "genericRestTemplate")
@@ -308,6 +314,7 @@ public class FrontRestTools {
             } catch (HttpStatusCodeException e) {
                 JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
                 log.error("http request fail. error:{}", JSON.toJSONString(error));
+                // TODO check nullpointer of 'error.getInteger("code")'
                 throw new NodeMgrException(error.getInteger("code"),
                     error.getString("errorMessage"));
             }
