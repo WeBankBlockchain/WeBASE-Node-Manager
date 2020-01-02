@@ -15,6 +15,7 @@
 - 优化：删除sql脚本默认数据中的systemUser
 - bugfix: 修复触发告警间隔时间不生效问题
 - bugifx: 修复start.sh启动时间过长的问题
+- bugfix：通过`block_number`, `trans_number`获取数据表中区块数与交易数，修复数据量过大时，getCount耗时过长问题
 
 **兼容性**
 - 支持FISCO-BCOS v2.0.0-rc1 版本
