@@ -409,7 +409,6 @@ public class CertService {
      * 解析is获取证书list
      * @return
      * @throws IOException
-     * // TODO X509Certificate为内部API，可能在将来发行版中删除
      */
     public List<X509Certificate> loadCertListFromCrtContent(String crtContent) {
         log.debug("loadCertListFromCrtContent content:{}", crtContent);

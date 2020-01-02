@@ -1,4 +1,36 @@
-v1.2.1 (2019-11-22)
+### v1.2.2 (2020-01-02)
+
+**Add**
+- 支持国密
+  - 支持sm2, sm3
+  - sql脚本增加国密版（交易审计支持国密）
+  - 新增`/encrypt`接口判断国密
+  - 证书管理支持国密证书
+- 邮件告警支持中英文
+- 动态生成的交易数据表`trans_hash_xx`增加自增的`trans_number`字段
+
+**Fix**
+- bugfix：precompiled api加入`useAes`字段，默认为false
+- 优化：web3sdk升级至v2.2.0
+- 优化：删除sql脚本默认数据中的systemUser
+- bugfix: 修复触发告警间隔时间不生效问题
+- bugifx: 修复start.sh启动时间过长的问题
+- bugfix：通过`block_number`, `trans_number`获取数据表中区块数与交易数，修复数据量过大时，getCount耗时过长问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 及以上版本
+- WeBASE-Web v1.2.2
+- WeBASE-Front v1.2.2
+- WeBASE-Sign v1.2.2
+- WeBASE-Transaction v1.2.2
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
+### v1.2.1 (2019-11-22)
 
 **Add**
 - 邮件服务接口
@@ -22,7 +54,7 @@ v1.2.1 (2019-11-22)
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
 
 
-v1.2.0 (2019-10-29)
+### v1.2.0 (2019-10-29)
 
 **Add**
 - 证书管理接口
@@ -39,7 +71,7 @@ v1.2.0 (2019-10-29)
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
 
 
-v1.1.0 (2019-09-9)
+### v1.1.0 (2019-09-09)
 
 **Add**
 - 查询cns

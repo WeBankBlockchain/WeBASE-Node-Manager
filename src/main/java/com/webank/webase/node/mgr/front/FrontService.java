@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -142,7 +143,8 @@ public class FrontService {
             //add sealer(consensus node) and observer in nodeList
              refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
         }
-
+        // pull cert from new front and its node
+        CertTools.isPullFrontCertsDone = false;
         //clear cache
         frontGroupMapCache.clearMapList();
         return tbFront;
