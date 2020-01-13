@@ -26,6 +26,7 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.GroupHandleResult;
@@ -86,7 +87,6 @@ public class GroupService {
     /**
      * generate group.
      * 
-     * @param req info
      * @return
      */
     public void generateGroup(GenerateGroupInfo generateGroupInfo, String frontIp, Integer frontPort) {
@@ -104,7 +104,6 @@ public class GroupService {
     /**
      * start group.
      * 
-     * @param nodeId
      * @param startGroupId
      */
     public void startGroup(Integer startGroupId, String frontIp, Integer frontPort) {
@@ -258,6 +257,20 @@ public class GroupService {
             List<String> groupIdList;
             try {
                 groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+                // fix refresh group in front
+                MapListParam mapListParam = new MapListParam();
+                mapListParam.setFrontId(front.getFrontId());
+                int groupIdCountLocal = frontGroupMapService.getCount(mapListParam);
+                if (groupIdCountLocal != groupIdList.size()) {
+                    log.debug("refreshFront for group count not match. " +
+                                    "frontId:{},groupIdCountLocal:{},groupIdList:{}",
+                            front.getFrontId(), groupIdCountLocal, groupIdList.size());
+                    frontInterface.refreshFront(frontIp, frontPort);
+                    // get groupIdList again
+                    groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+                    log.debug("after refreshFront frontId:{},groupIdCountLocal:{},groupIdList:{}",
+                            front.getFrontId(), groupIdCountLocal, groupIdList.size());
+                }
             } catch (Exception ex) {
                 log.error("fail getGroupListFromSpecificFront.", ex);
                 continue;
