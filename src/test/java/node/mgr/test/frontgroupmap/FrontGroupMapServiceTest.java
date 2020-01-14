@@ -47,4 +47,11 @@ public class FrontGroupMapServiceTest {
         assert (list != null);
         System.out.println(JSON.toJSONString(list));
     }
+
+    @Test
+    public void getCountTest() {
+        int groupIdCountLocal = frontGroupMapService.getCount(new MapListParam());
+        assert (groupIdCountLocal >= 0);
+        System.out.println(groupIdCountLocal);
+    }
 }
