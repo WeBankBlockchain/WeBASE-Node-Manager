@@ -174,4 +174,9 @@ public class FrontServiceTest {
         System.out.println(clientVersion);
         assert (StringUtils.isNotEmpty(clientVersion));
     }
+
+    @Test
+    public void refreshFrontTest() {
+        frontInterface.refreshFront(frontIp, frontPort);
+    }
 }
