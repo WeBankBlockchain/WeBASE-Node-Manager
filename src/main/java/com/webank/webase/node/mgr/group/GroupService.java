@@ -257,20 +257,6 @@ public class GroupService {
             List<String> groupIdList;
             try {
                 groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
-                // fix refresh group in front
-                MapListParam mapListParam = new MapListParam();
-                mapListParam.setFrontId(front.getFrontId());
-                int groupIdCountLocal = frontGroupMapService.getCount(mapListParam);
-                if (groupIdCountLocal != groupIdList.size()) {
-                    log.debug("refreshFront for group count not match. " +
-                                    "frontId:{},groupIdCountLocal:{},groupIdList:{}",
-                            front.getFrontId(), groupIdCountLocal, groupIdList.size());
-                    frontInterface.refreshFront(frontIp, frontPort);
-                    // get groupIdList again
-                    groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
-                    log.debug("after refreshFront frontId:{},groupIdCountLocal:{},groupIdList:{}",
-                            front.getFrontId(), groupIdCountLocal, groupIdList.size());
-                }
             } catch (Exception ex) {
                 log.error("fail getGroupListFromSpecificFront.", ex);
                 continue;
