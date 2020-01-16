@@ -1,0 +1,5 @@
+linter:
+  pmd_java:
+    dir: src
+    encoding: Shift_JIS
+    min_priority: 2
