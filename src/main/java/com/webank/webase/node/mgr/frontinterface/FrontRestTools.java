@@ -236,7 +236,7 @@ public class FrontRestTools {
      */
     public static HttpEntity buildHttpEntity(Object param) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         String paramStr = null;
         if (Objects.nonNull(param)) {
             paramStr = JSON.toJSONString(param);
