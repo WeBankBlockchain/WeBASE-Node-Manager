@@ -18,12 +18,12 @@ package node.mgr.test.cert;
 
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import io.jsonwebtoken.lang.Assert;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Test;
+import org.springframework.util.Assert;
 import sun.security.ec.ECPublicKeyImpl;
 
 import java.io.ByteArrayInputStream;
@@ -87,7 +87,7 @@ public class BCCertTest {
         System.out.println("guomi node fingerPrint");
         String fingerPrint = NodeMgrTools.getCertFingerPrint(cert.getEncoded());
         System.out.println(fingerPrint);
-        Assert.notNull(fingerPrint);
+        Assert.notNull(fingerPrint, "finer print null");
     }
 
     @Test
