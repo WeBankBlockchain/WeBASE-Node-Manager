@@ -25,5 +25,4 @@ public class SysConfigParam {
     private String fromAddress;
     private String configKey;
     private String configValue;
-    private Boolean useAes;
 }
