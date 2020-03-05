@@ -19,12 +19,12 @@ package node.mgr.test.cert;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
-import io.jsonwebtoken.lang.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
