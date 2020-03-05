@@ -78,8 +78,8 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
 
-        String keyUri = String
-            .format(FrontRestTools.URI_KEY_PAIR, constants.getIsPrivateKeyEncrypt());
+        String keyUri = FrontRestTools.URI_KEY_PAIR;
+            // .format(FrontRestTools.URI_KEY_PAIR, constants.getIsPrivateKeyEncrypt());
         KeyPair keyPair = frontRestTools
             .getForEntity(groupId, keyUri, KeyPair.class);
         String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
