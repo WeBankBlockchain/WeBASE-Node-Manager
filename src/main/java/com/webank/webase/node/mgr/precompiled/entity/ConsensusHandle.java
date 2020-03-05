@@ -24,5 +24,4 @@ public class ConsensusHandle {
     private String nodeType;
     private String fromAddress;
     private String nodeId;
-    private Boolean useAes;
 }
