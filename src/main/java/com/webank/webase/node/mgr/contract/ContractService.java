@@ -222,7 +222,7 @@ public class  ContractService {
         params.put("abiInfo", JSONArray.parseArray(inputParam.getContractAbi()));
         params.put("bytecodeBin", inputParam.getBytecodeBin());
         params.put("funcParam", inputParam.getConstructorParams());
-        params.put("useAes", constants.getIsPrivateKeyEncrypt());
+        // params.put("useAes", constants.getIsPrivateKeyEncrypt());
 
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
@@ -279,7 +279,7 @@ public class  ContractService {
         //send transaction
         TransactionParam transParam = new TransactionParam();
         BeanUtils.copyProperties(param, transParam);
-        transParam.setUseAes(constants.getIsPrivateKeyEncrypt());
+        // transParam.setUseAes(constants.getIsPrivateKeyEncrypt());
 
         Object frontRsp = frontRestTools
             .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, transParam,

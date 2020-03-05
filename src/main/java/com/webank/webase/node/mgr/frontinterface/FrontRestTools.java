@@ -75,7 +75,7 @@ public class FrontRestTools {
     public static final String URI_REFRESH_FRONT = "web3/refresh";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
-    public static final String URI_KEY_PAIR = "privateKey?useAes=%1b";
+    public static final String URI_KEY_PAIR = "privateKey";
     public static final String URI_CONTRACT_DEPLOY = "contract/deploy";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
     public static final String URI_SEND_TRANSACTION = "trans/handle";

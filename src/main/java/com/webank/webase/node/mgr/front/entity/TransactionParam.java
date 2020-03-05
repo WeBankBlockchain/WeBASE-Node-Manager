@@ -34,6 +34,5 @@ public class TransactionParam {
     @NotBlank
     private String funcName;
     private String contractAddress;
-    private Boolean useAes;
     private List<Object> funcParam;
 }
