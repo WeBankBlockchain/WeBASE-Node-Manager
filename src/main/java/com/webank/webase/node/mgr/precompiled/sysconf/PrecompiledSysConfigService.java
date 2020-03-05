@@ -68,9 +68,6 @@ public class PrecompiledSysConfigService {
             log.error("fail setSysConfigByKeyService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        if(Objects.isNull(sysConfigParam.getUseAes())) {
-            sysConfigParam.setUseAes(false);
-        }
         Object frontRsp = frontRestTools.postForEntity(
                 sysConfigParam.getGroupId(), FrontRestTools.URI_SYS_CONFIG,
                 sysConfigParam, Object.class);
