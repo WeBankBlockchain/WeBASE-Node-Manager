@@ -271,7 +271,7 @@ public class  ContractService {
 
         //check contractId
         verifyContractIdExist(param.getContractId(), param.getGroupId());
-        //send abi
+        //send abi to front
         sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
         //check contract deploy
         verifyContractDeploy(param.getContractId(), param.getGroupId());
@@ -279,7 +279,6 @@ public class  ContractService {
         //send transaction
         TransactionParam transParam = new TransactionParam();
         BeanUtils.copyProperties(param, transParam);
-        // transParam.setUseAes(constants.getIsPrivateKeyEncrypt());
 
         Object frontRsp = frontRestTools
             .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, transParam,
