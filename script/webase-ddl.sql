@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS tb_front (
 
 
 -- ----------------------------
--- Table structure for tb_user_key_mapping
+-- Table structure for tb_front_group_map
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_front_group_map (
   map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
@@ -148,19 +148,20 @@ CREATE TABLE IF NOT EXISTS tb_user (
 
 
 -- ----------------------------
+-- @Deprecated: not save privateKey anymore
 -- Table structure for tb_user_key_mapping
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_user_key_mapping (
-  map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
-  user_id int(11) NOT NULL COMMENT '用户编号',
-  group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
-  private_key text NOT NULL COMMENT '私钥',
-  map_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
-  create_time datetime DEFAULT NULL COMMENT '创建时间',
-  modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (map_id),
-  UNIQUE KEY unique_id (user_id)
-) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='用户私钥映射表';
+--CREATE TABLE IF NOT EXISTS tb_user_key_mapping (
+--  map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+--  user_id int(11) NOT NULL COMMENT '用户编号',
+--  group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
+--  private_key text NOT NULL COMMENT '私钥',
+--  map_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
+--  create_time datetime DEFAULT NULL COMMENT '创建时间',
+--  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+--  PRIMARY KEY (map_id),
+--  UNIQUE KEY unique_id (user_id)
+--) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='用户私钥映射表';
 
 
 
