@@ -20,7 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * param of send transaction.
+ * param of send transaction to front
  */
 @Data
 @NoArgsConstructor
