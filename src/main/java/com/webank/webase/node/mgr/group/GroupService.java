@@ -415,8 +415,9 @@ public class GroupService {
         groupMapper.remove(groupId);
         //remove mapping.
         frontGroupMapService.removeByGroupId(groupId);
-        //remove user and key
-        userService.deleteByGroupId(groupId);
+        // @Deprecated: not save privateKey anymore
+        // remove user and key
+        // userService.deleteByGroupId(groupId);
         //remove contract
         contractService.deleteByGroupId(groupId);
         //remove method
