@@ -111,7 +111,7 @@ public class BCCertTest {
         System.out.println(cert);
         // guomi's EC curve not match X509CertImpl
         List<X509Certificate> certs = (List<X509Certificate>) cf.generateCertificates(new ByteArrayInputStream(cert.getBytes()));
-        Assert.notNull(certs);
+        Assert.notNull(certs, "certs are null");
 
         if (certs.size() != 0) {
             System.out.println("===standard cert");
@@ -147,8 +147,8 @@ public class BCCertTest {
         publicKey = publicKey.substring(publicKey.length() - 128); //证书byte[]为130位，只取128位，去除开头的04标记位
         System.out.println(publicKey);// 7853896f4e4b0891c5954d5b3f77325e39720718ec8e1a5608e4e8774bddb0dcdd63a98dad6c276603173674c477f2269e7abb1e7b8b1e9b9c852c27ad7c0814
 
-        Assert.isTrue(publicKeyBC.equals(publicKey));
-        Assert.isTrue(publicKeyBC.equals(CertTools.getPublicKeyString(bcecPublicKey)));
+        Assert.isTrue(publicKeyBC.equals(publicKey), "public key not equal");
+        Assert.isTrue(publicKeyBC.equals(CertTools.getPublicKeyString(bcecPublicKey)), "public key not equal");
     }
 
 }
