@@ -22,6 +22,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * param of send transaction from web
+ */
 @Data
 @NoArgsConstructor
 @ToString(callSuper = true)
