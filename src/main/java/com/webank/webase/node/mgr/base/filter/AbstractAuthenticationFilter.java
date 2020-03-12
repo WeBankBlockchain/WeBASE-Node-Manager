@@ -30,6 +30,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 
+import static com.webank.webase.node.mgr.base.tools.NodeMgrTools.TOKEN_HEADER_NAME;
+
 public abstract class AbstractAuthenticationFilter extends OncePerRequestFilter {
     private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
     private AuthenticationManager authenticationManager;
@@ -41,7 +43,7 @@ public abstract class AbstractAuthenticationFilter extends OncePerRequestFilter 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-        final String header = request.getHeader("Authorization");
+        final String header = request.getHeader(TOKEN_HEADER_NAME);
 
         if (header == null || !header.startsWith(getHeaderPrefix())) {
             chain.doFilter(request, response);
