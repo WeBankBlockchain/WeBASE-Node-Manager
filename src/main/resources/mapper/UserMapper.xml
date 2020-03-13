@@ -115,5 +115,8 @@
 		delete from tb_user where group_id = #{groupId}
 	</delete>
 
+  <delete id="deleteByAddress" parameterType="java.lang.String">
+    delete from tb_user where address = #{address}
+  </delete>
 
 </mapper>
