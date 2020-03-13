@@ -76,6 +76,7 @@ public class FrontRestTools {
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey?userName=%s";
+    public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
     public static final String URI_CONTRACT_DEPLOY = "contract/deploy";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
     public static final String URI_SEND_TRANSACTION = "trans/handle";
@@ -100,8 +101,8 @@ public class FrontRestTools {
 
     //不需要在url的前面添加groupId的
     private static final List<String> URI_NOT_PREPEND_GROUP_ID = Arrays
-        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_CONTRACT_SENDABI,
-                URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
+        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
+                URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
                 URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE);
 
