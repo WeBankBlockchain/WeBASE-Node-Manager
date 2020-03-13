@@ -70,4 +70,6 @@ public interface UserMapper {
      */
     void deleteUser(@Param("groupId") Integer groupId);
 
+    void deleteByAddress(@Param("address") String address);
+
 }

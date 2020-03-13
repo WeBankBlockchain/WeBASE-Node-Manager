@@ -141,7 +141,8 @@ CREATE TABLE IF NOT EXISTS tb_user (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   description varchar(250) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (user_id),
-  UNIQUE KEY unique_name (group_id,user_name)
+  UNIQUE KEY unique_name (group_id,user_name),
+  KEY index_address (address)
 ) ENGINE=InnoDB AUTO_INCREMENT=700001 DEFAULT CHARSET=utf8 COMMENT='用户信息表';
 
 
