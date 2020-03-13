@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
+import com.webank.webase.node.mgr.user.entity.KeyPair;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -499,4 +500,11 @@ public class FrontInterfaceService {
 		resList.forEach(info -> info.setFrontInfo(frontIp));
 		return resList;
 	}
+
+	public List<KeyPair> getKeyStoreList(Integer groupId, String frontIp, Integer frontPort) {
+        List data = getFromSpecificFront(groupId, frontIp, frontPort,
+                FrontRestTools.URI_KEY_PAIR_LOCAL_KEYSTORE, List.class);
+        List<KeyPair> resList = JSON.parseArray(JSON.toJSONString(data), KeyPair.class);
+        return resList;
+    }
 }
