@@ -79,7 +79,6 @@ public class UserService {
         String keyUri = String.format(FrontRestTools.URI_KEY_PAIR, user.getUserName());
         KeyPair keyPair = frontRestTools
             .getForEntity(groupId, keyUri, KeyPair.class);
-        String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
         String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
         String address = Optional.ofNullable(keyPair).map(k -> k.getAddress()).orElse(null);
 
@@ -251,6 +250,13 @@ public class UserService {
     }
 
     /**
+     * query by group id and address.
+     */
+    public TbUser queryByAddress(int groupId, String address) throws NodeMgrException {
+        return queryUser(null, groupId, null, address);
+    }
+
+    /**
      * update user info.
      */
     public void updateUser(UpdateUserInputParam user) throws NodeMgrException {
@@ -299,4 +305,9 @@ public class UserService {
         return userName;
     }
 
+    public void deleteByAddress(String address) throws NodeMgrException{
+        log.debug("deleteByAddress address:{} ", address);
+        userMapper.deleteByAddress(address);
+        log.debug("end deleteByAddress");
+    }
 }
