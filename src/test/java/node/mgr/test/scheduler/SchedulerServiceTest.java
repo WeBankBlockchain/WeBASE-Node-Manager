@@ -15,6 +15,7 @@ package node.mgr.test.scheduler;
 
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.scheduler.PullBlockTransTask;
+import com.webank.webase.node.mgr.scheduler.PullKeyStoreTask;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.scheduler.TransMonitorTask;
 import org.junit.Test;
@@ -34,6 +35,8 @@ public class SchedulerServiceTest {
     private ResetGroupListTask resetGroupListTask;
     @Autowired
     private TransMonitorTask transMonitorTask;
+    @Autowired
+    private PullKeyStoreTask pullKeyStoreTask;
 
     @Test
     public void pullBlockInfoTaskTest() {
@@ -50,4 +53,8 @@ public class SchedulerServiceTest {
         transMonitorTask.monitorStart();
     }
 
+    @Test
+    public void setPullKeyStoreTest() {
+        pullBlockTransTask.pullBlockStart();
+    }
 }
