@@ -31,6 +31,8 @@ import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +77,11 @@ public class UserService {
             log.warn("fail addUserInfo. user info already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
-        // rm useAes
-        String keyUri = String.format(FrontRestTools.URI_KEY_PAIR, user.getUserName());
+        // add user by webase-front->webase-sign
+        String signUserId = UUID.randomUUID().toString().replaceAll("-","");
+        // group id as appId
+        String appId = user.getGroupId().toString();
+        String keyUri = String.format(FrontRestTools.URI_KEY_PAIR, user.getUserName(), signUserId, appId);
         KeyPair keyPair = frontRestTools
             .getForEntity(groupId, keyUri, KeyPair.class);
         String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
@@ -91,6 +96,8 @@ public class UserService {
         TbUser newUserRow = new TbUser(HasPk.HAS.getValue(), user.getUserType(), user.getUserName(),
             groupId, address, publicKey,
             user.getDescription());
+        newUserRow.setSignUserId(signUserId);
+        newUserRow.setAppId(appId);
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {
             log.warn("affect 0 rows of tb_user");
@@ -228,13 +235,6 @@ public class UserService {
     }
 
     /**
-     * query by groupId.
-     */
-    public TbUser queryBygroupId(Integer groupId) throws NodeMgrException {
-        return queryUser(null, groupId, null, null);
-    }
-
-    /**
      * query by userName.
      */
     public TbUser queryByName(int groupId, String userName) throws NodeMgrException {
@@ -252,8 +252,9 @@ public class UserService {
     /**
      * query by group id and address.
      */
-    public TbUser queryByAddress(int groupId, String address) throws NodeMgrException {
-        return queryUser(null, groupId, null, address);
+    public String getSignUserIdByAddress(int groupId, String address) throws NodeMgrException {
+        TbUser user = queryUser(null, groupId, null, address);
+        return user.getSignUserId();
     }
 
     /**
