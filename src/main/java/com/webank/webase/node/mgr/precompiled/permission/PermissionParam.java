@@ -24,6 +24,7 @@ public class PermissionParam {
     private int groupId;
     private String permissionType;
     private String fromAddress;
+    private String signUserId;
     private String address;
     private String tableName;
     private PermissionState permissionState;
