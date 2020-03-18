@@ -34,6 +34,11 @@ public class TbUser {
     private Integer chainIndex;
     private Integer userType;
     private String address;
+    private String signUserId;
+    /**
+     * temporarily use groupId as appId
+     */
+    private String appId;
     @Deprecated
     private Integer hasPk;
     private String description;
