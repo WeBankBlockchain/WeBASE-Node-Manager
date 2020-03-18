@@ -147,8 +147,11 @@ public class PermissionManageService {
             log.error("fail updatePermissionState. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
+        int groupId = permissionParam.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, permissionParam.getFromAddress());
+        permissionParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.postForEntity(
-                permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION_SORTED_LIST,
+                groupId, FrontRestTools.URI_PERMISSION_SORTED_LIST,
                 permissionParam, Object.class);
         log.debug("end updatePermissionState. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
@@ -160,8 +163,11 @@ public class PermissionManageService {
             log.error("fail grantPermission. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
+        int groupId = permissionParam.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, permissionParam.getFromAddress());
+        permissionParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.postForEntity(
-                permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
+                groupId, FrontRestTools.URI_PERMISSION,
                 permissionParam, Object.class);
         log.debug("end grantPermission. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
@@ -173,8 +179,11 @@ public class PermissionManageService {
             log.error("fail revokePermission. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
+        int groupId = permissionParam.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, permissionParam.getFromAddress());
+        permissionParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.deleteForEntity(
-                permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
+                groupId, FrontRestTools.URI_PERMISSION,
                 permissionParam, Object.class);
         log.debug("end revokePermission. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
