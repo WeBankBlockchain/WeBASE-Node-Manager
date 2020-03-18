@@ -32,4 +32,8 @@ import lombok.ToString;
 public class TransactionInputParam extends TransactionParam {
     @NotNull
     private Integer contractId;
+    /**
+     * user address, identify signUserId
+     */
+    private String user;
 }

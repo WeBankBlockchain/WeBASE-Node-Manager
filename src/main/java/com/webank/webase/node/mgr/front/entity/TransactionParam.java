@@ -28,7 +28,7 @@ public class TransactionParam {
 
     @NotNull
     private Integer groupId;
-    private String user;
+    private String signUserId;
     @NotBlank
     private String contractName;
     @NotBlank
