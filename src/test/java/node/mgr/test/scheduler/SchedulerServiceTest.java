@@ -53,8 +53,4 @@ public class SchedulerServiceTest {
         transMonitorTask.monitorStart();
     }
 
-    @Test
-    public void setPullKeyStoreTest() {
-        pullBlockTransTask.pullBlockStart();
-    }
 }
