@@ -29,6 +29,7 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.user.UserService;
 import io.netty.channel.local.LocalAddress;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,8 @@ public class  ContractService {
     private MonitorService monitorService;
     @Autowired
     private FrontInterfaceService frontInterface;
+    @Autowired
+    private UserService userService;
     @Autowired
     private ConstantProperties constants;
     private static final int CONTRACT_ADDRESS_LENGTH = 42;
@@ -214,19 +218,19 @@ public class  ContractService {
         }
 
         // deploy param
+        String signUserId = userService.getSignUserIdByAddress(groupId, inputParam.getUser());
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
-        params.put("user", inputParam.getUser());
+        params.put("signUserId", signUserId);
         params.put("contractName", contractName);
         // params.put("version", version);
         params.put("abiInfo", JSONArray.parseArray(inputParam.getContractAbi()));
         params.put("bytecodeBin", inputParam.getBytecodeBin());
         params.put("funcParam", inputParam.getConstructorParams());
-        // params.put("useAes", constants.getIsPrivateKeyEncrypt());
 
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
-            FrontRestTools.URI_CONTRACT_DEPLOY, params, String.class);
+            FrontRestTools.URI_CONTRACT_DEPLOY_WITH_SIGN, params, String.class);
         if (StringUtils.isBlank(contractAddress)) {
             log.error("fail deploy, contractAddress is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
@@ -279,9 +283,10 @@ public class  ContractService {
         //send transaction
         TransactionParam transParam = new TransactionParam();
         BeanUtils.copyProperties(param, transParam);
-
+        String signUserId = userService.getSignUserIdByAddress(param.getGroupId(), param.getUser());
+        transParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools
-            .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, transParam,
+            .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION_WITH_SIGN, transParam,
                 Object.class);
         log.debug("end sendTransaction. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
