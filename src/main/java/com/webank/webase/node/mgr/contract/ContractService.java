@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
@@ -274,16 +275,22 @@ public class  ContractService {
         }
 
         //check contractId
-        verifyContractIdExist(param.getContractId(), param.getGroupId());
+        TbContract contract = verifyContractIdExist(param.getContractId(), param.getGroupId());
         //send abi to front
         sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
         //check contract deploy
         verifyContractDeploy(param.getContractId(), param.getGroupId());
 
+        // if constant, signUserId is useless
+        AbiDefinition funcAbi = Web3Tools.getAbiDefinition(param.getFuncName(), contract.getContractAbi());
+        String signUserId = "empty";
+        if (!funcAbi.isConstant()) {
+            signUserId = userService.getSignUserIdByAddress(param.getGroupId(), param.getUser());
+        }
+
         //send transaction
         TransactionParam transParam = new TransactionParam();
         BeanUtils.copyProperties(param, transParam);
-        String signUserId = userService.getSignUserIdByAddress(param.getGroupId(), param.getUser());
         transParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools
             .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION_WITH_SIGN, transParam,
