@@ -66,8 +66,6 @@ constant:
   auditMonitorTaskFixedDelay: 300000
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
-  ###pull front keystore task interval: 30mins unit: ms
-  pullKeyStoreTaskFixedDelay: 300000
 
 # executor config for pulling data from chain
 executor:

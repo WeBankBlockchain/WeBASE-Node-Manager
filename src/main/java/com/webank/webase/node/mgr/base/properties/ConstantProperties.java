@@ -80,6 +80,4 @@ public class ConstantProperties {
     private Integer nodeStatusMonitorTaskFixedDelay;
     private Integer certMonitorTaskFixedDelay;
 
-    // pull key store interval
-    private Integer pullKeyStoreTaskFixedDelay;
 }
