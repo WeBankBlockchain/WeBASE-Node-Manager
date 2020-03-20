@@ -34,5 +34,6 @@ public class TransactionParam {
     @NotBlank
     private String funcName;
     private String contractAddress;
+    private List<Object> contractAbi;
     private List<Object> funcParam;
 }
