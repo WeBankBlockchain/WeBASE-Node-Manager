@@ -15,9 +15,7 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import com.webank.webase.node.mgr.user.entity.PrivateKeyInfo;
 import com.webank.webase.node.mgr.user.entity.TbUser;
-import com.webank.webase.node.mgr.user.entity.TbUserKeyMap;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -56,16 +54,6 @@ public interface UserMapper {
     Integer updateUser(TbUser tbuser);
 
     /**
-     * add new user_key_map data.
-     */
-    Integer addUserKeyMapRow(TbUserKeyMap tbUserKeyMap);
-
-    /**
-     * query private key by userAddress.
-     */
-    PrivateKeyInfo queryPrivateKey(String userAddress);
-
-    /**
      * query max chainIndex of user.
      */
     String queryUserNameByAddress(@Param("groupId") Integer groupId,
@@ -78,17 +66,10 @@ public interface UserMapper {
                                   @Param("address") String address);
 
     /**
-     * query system User.
-     */
-//    TbUser querySystemUser();
-
-    /**
      * delete user.
      */
     void deleteUser(@Param("groupId") Integer groupId);
 
-    /**
-     * delete user_key map
-     */
-    void deleteUserKeyMap(@Param("groupId") Integer groupId);
+    void deleteByAddress(@Param("address") String address);
+
 }

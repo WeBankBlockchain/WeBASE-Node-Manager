@@ -24,7 +24,10 @@ import lombok.Data;
  * receive contract info entity.
  */
 @Data
-public class DeployInputParam{
+public class DeployInputParam {
+    /**
+     * user's address, to identify signUserId
+     */
     @NotBlank
     private String user;
     @NotNull

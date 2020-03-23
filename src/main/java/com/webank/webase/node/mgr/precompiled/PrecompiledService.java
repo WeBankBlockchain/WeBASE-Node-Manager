@@ -23,6 +23,7 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
+import com.webank.webase.node.mgr.user.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,8 @@ public class PrecompiledService {
     private FrontRestTools frontRestTools;
     @Autowired
     private FrontInterfaceService frontInterfaceService;
+    @Autowired
+    private UserService userService;
 
     /**
      * get cns list /{groupId}/{pathValue} /a?groupId=xx
@@ -90,11 +93,11 @@ public class PrecompiledService {
             log.error("fail nodeManageService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        if(Objects.isNull(consensusHandle.getUseAes())) {
-            consensusHandle.setUseAes(false);
-        }
+        int groupId = consensusHandle.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, consensusHandle.getFromAddress());
+        consensusHandle.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.postForEntity(
-                consensusHandle.getGroupId(), FrontRestTools.URI_CONSENSUS,
+                groupId, FrontRestTools.URI_CONSENSUS,
                 consensusHandle, Object.class);
         log.debug("end nodeManageService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
@@ -110,11 +113,11 @@ public class PrecompiledService {
             log.error("fail crudService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        if(Objects.isNull(crudHandle.getUseAes())) {
-            crudHandle.setUseAes(false);
-        }
+        int groupId = crudHandle.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, crudHandle.getFromAddress());
+        crudHandle.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.postForEntity(
-                crudHandle.getGroupId(), FrontRestTools.URI_CRUD,
+                groupId, FrontRestTools.URI_CRUD,
                 crudHandle, Object.class);
         log.debug("end crudService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;

@@ -23,4 +23,8 @@ public class KeyPair {
     private String privateKey;
     private String publicKey;
     private String address;
+    /**
+     * for pull user from front
+     */
+    private String userName;
 }
