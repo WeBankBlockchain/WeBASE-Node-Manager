@@ -56,8 +56,6 @@ public class UserService {
     @Lazy
     @Autowired
     private MonitorService monitorService;
-    @Autowired
-    private ConstantProperties constants;
 
     /**
      * add new user data.

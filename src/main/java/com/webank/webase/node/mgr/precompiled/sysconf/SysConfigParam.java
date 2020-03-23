@@ -15,7 +15,6 @@
  */
 package com.webank.webase.node.mgr.precompiled.sysconf;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 @Data

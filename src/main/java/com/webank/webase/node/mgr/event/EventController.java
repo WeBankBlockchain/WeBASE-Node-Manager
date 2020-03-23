@@ -43,7 +43,7 @@ import java.util.List;
 public class EventController {
 
 	@Autowired
-	EventService eventService;
+	private EventService eventService;
 
 	/**
 	 * get new block event register info

@@ -31,8 +31,6 @@ import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.user.UserService;
-import io.netty.channel.local.LocalAddress;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,8 +62,6 @@ public class  ContractService {
     private FrontInterfaceService frontInterface;
     @Autowired
     private UserService userService;
-    @Autowired
-    private ConstantProperties constants;
     private static final int CONTRACT_ADDRESS_LENGTH = 42;
 
     /**
