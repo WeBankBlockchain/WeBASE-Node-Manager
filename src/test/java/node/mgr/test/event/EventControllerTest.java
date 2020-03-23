@@ -54,7 +54,7 @@ public class EventControllerTest {
 		resultActions.
 				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
-		System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+//		System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
 	}
 
 	@Test
@@ -64,6 +64,6 @@ public class EventControllerTest {
 		resultActions.
 				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
-		System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+//		System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
 	}
 }
