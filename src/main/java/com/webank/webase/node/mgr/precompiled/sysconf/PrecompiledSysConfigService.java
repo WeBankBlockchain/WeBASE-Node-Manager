@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.user.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,8 @@ public class PrecompiledSysConfigService {
     private FrontRestTools frontRestTools;
     @Autowired
     private FrontInterfaceService frontInterfaceService;
+    @Autowired
+    private UserService userService;
 
     /**
      * get system config list
@@ -68,11 +71,11 @@ public class PrecompiledSysConfigService {
             log.error("fail setSysConfigByKeyService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        if(Objects.isNull(sysConfigParam.getUseAes())) {
-            sysConfigParam.setUseAes(false);
-        }
+        int groupId = sysConfigParam.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, sysConfigParam.getFromAddress());
+        sysConfigParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.postForEntity(
-                sysConfigParam.getGroupId(), FrontRestTools.URI_SYS_CONFIG,
+                groupId, FrontRestTools.URI_SYS_CONFIG,
                 sysConfigParam, Object.class);
         log.debug("end setSysConfigByKeyService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;

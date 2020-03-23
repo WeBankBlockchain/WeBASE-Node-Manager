@@ -22,6 +22,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * param of send transaction from web
+ */
 @Data
 @NoArgsConstructor
 @ToString(callSuper = true)
@@ -29,4 +32,8 @@ import lombok.ToString;
 public class TransactionInputParam extends TransactionParam {
     @NotNull
     private Integer contractId;
+    /**
+     * user address, identify signUserId
+     */
+    private String user;
 }
