@@ -18,12 +18,12 @@ package node.mgr.test.cert;
 
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import io.jsonwebtoken.lang.Assert;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Test;
+import org.springframework.util.Assert;
 import sun.security.ec.ECPublicKeyImpl;
 
 import java.io.ByteArrayInputStream;
@@ -87,7 +87,7 @@ public class BCCertTest {
         System.out.println("guomi node fingerPrint");
         String fingerPrint = NodeMgrTools.getCertFingerPrint(cert.getEncoded());
         System.out.println(fingerPrint);
-        Assert.notNull(fingerPrint);
+        Assert.notNull(fingerPrint, "finer print null");
     }
 
     @Test
@@ -111,7 +111,7 @@ public class BCCertTest {
         System.out.println(cert);
         // guomi's EC curve not match X509CertImpl
         List<X509Certificate> certs = (List<X509Certificate>) cf.generateCertificates(new ByteArrayInputStream(cert.getBytes()));
-        Assert.notNull(certs);
+        Assert.notNull(certs, "certs are null");
 
         if (certs.size() != 0) {
             System.out.println("===standard cert");
@@ -147,8 +147,8 @@ public class BCCertTest {
         publicKey = publicKey.substring(publicKey.length() - 128); //证书byte[]为130位，只取128位，去除开头的04标记位
         System.out.println(publicKey);// 7853896f4e4b0891c5954d5b3f77325e39720718ec8e1a5608e4e8774bddb0dcdd63a98dad6c276603173674c477f2269e7abb1e7b8b1e9b9c852c27ad7c0814
 
-        Assert.isTrue(publicKeyBC.equals(publicKey));
-        Assert.isTrue(publicKeyBC.equals(CertTools.getPublicKeyString(bcecPublicKey)));
+        Assert.isTrue(publicKeyBC.equals(publicKey), "public key not equal");
+        Assert.isTrue(publicKeyBC.equals(CertTools.getPublicKeyString(bcecPublicKey)), "public key not equal");
     }
 
 }

@@ -14,9 +14,12 @@
 package com.webank.webase.node.mgr.frontinterface;
 
 import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
+import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
+import com.webank.webase.node.mgr.user.entity.KeyPair;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,8 @@ import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import lombok.extern.log4j.Log4j2;
+
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CONTAIN_GROUP_ID;
 
 
 @Log4j2
@@ -436,7 +441,8 @@ public class FrontInterfaceService {
      * start group.
      */
     public GroupHandleResult startGroup(String frontIp, Integer frontPort, Integer startGroupId) {
-        log.debug("start startGroup frontIp:{} frontPort:{} startGroupId:{}", startGroupId);
+        log.debug("start startGroup frontIp:{} frontPort:{} startGroupId:{}",
+                frontIp, frontPort, startGroupId);
 
         Integer groupId = Integer.MAX_VALUE;
         String uri = String.format(FrontRestTools.URI_START_GROUP, startGroupId);
@@ -451,9 +457,51 @@ public class FrontInterfaceService {
      * refresh front.
      */
     public void refreshFront(String frontIp, Integer frontPort) {
-        log.debug("start refreshFront groupId:{} frontIp:{} frontPort:{} ", frontIp, frontPort);
+        log.debug("start refreshFront frontIp:{} frontPort:{} ", frontIp, frontPort);
         Integer groupId = Integer.MAX_VALUE;
         getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_REFRESH_FRONT, Object.class);
         log.debug("end refreshFront");
+    }
+
+    /**
+     * get new block info list
+     */
+    public List<NewBlockEventInfo> getNewBlockEventInfo(String frontIp, Integer frontPort, Integer groupId) {
+        log.debug("start getNewBlockEventInfo frontIp:{} frontPort:{} groupId:{}",
+                frontIp, frontPort, groupId);
+        String newBlockInfoURI = FrontRestTools.URI_NEW_BLOCK_EVENT_INFO_LIST + "/" + groupId;
+        URI_CONTAIN_GROUP_ID.add(newBlockInfoURI);
+        BasePageResponse response = getFromSpecificFront(groupId, frontIp, frontPort, newBlockInfoURI,
+                BasePageResponse.class);
+        if (response.getData() == null) {
+            return new ArrayList<>();
+        }
+        List<NewBlockEventInfo> data = (List<NewBlockEventInfo>) response.getData();
+        List<NewBlockEventInfo> resList = JSON.parseArray(JSON.toJSONString(data), NewBlockEventInfo.class);
+        resList.forEach(info -> info.setFrontInfo(frontIp));
+        return resList;
+    }
+
+	public List<ContractEventInfo> getContractEventInfo(String frontIp, Integer frontPort, Integer groupId) {
+		log.debug("start getContractEventInfo frontIp:{} frontPort:{} groupId:{}",
+				frontIp, frontPort, groupId);
+		String contractEventInfoURI = FrontRestTools.URI_CONTRACT_EVENT_INFO_LIST + "/" + groupId;
+		URI_CONTAIN_GROUP_ID.add(contractEventInfoURI);
+		BasePageResponse response = getFromSpecificFront(groupId, frontIp, frontPort, contractEventInfoURI,
+				BasePageResponse.class);
+		if (response.getData() == null) {
+			return new ArrayList<>();
+		}
+		List<ContractEventInfo> data = (List<ContractEventInfo>) response.getData();
+		List<ContractEventInfo> resList = JSON.parseArray(JSON.toJSONString(data), ContractEventInfo.class);
+		resList.forEach(info -> info.setFrontInfo(frontIp));
+		return resList;
+	}
+
+	public List<KeyPair> getKeyStoreList(Integer groupId, String frontIp, Integer frontPort) {
+        List data = getFromSpecificFront(groupId, frontIp, frontPort,
+                FrontRestTools.URI_KEY_PAIR_LOCAL_KEYSTORE, List.class);
+        List<KeyPair> resList = JSON.parseArray(JSON.toJSONString(data), KeyPair.class);
+        return resList;
     }
 }

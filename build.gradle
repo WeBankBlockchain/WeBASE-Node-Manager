@@ -47,8 +47,11 @@ List lombok = [
     "org.projectlombok:lombok:1.18.2"
 ]
 
-List jwt = [
-    "io.jsonwebtoken:jjwt:0.9.1"
+List jackson = [
+    "com.fasterxml.jackson.core:jackson-databind:2.10.0",
+    "com.fasterxml.jackson.module:jackson-module-parameter-names:2.10.0",
+    "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.0",
+    "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0"
 ]
 
 List test = [
@@ -57,7 +60,7 @@ List test = [
 
 
 dependencies {
-    compile springboot,jaxb,web3jsdk,jwt
+    compile springboot,jaxb,web3jsdk,jackson
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile "com.alibaba:fastjson:1.2.60"

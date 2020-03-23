@@ -22,10 +22,10 @@ public class CnsParam {
 
     private int groupId;
     private String fromAddress;
+    private String signUserId;
     private String contractNameAndVersion;
     private String version;
     // register
     private String contractAddress;
     private String abi;
-//    private Boolean useAes;
 }
