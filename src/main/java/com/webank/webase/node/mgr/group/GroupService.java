@@ -74,8 +74,6 @@ public class GroupService {
     @Autowired
     private NodeService nodeService;
     @Autowired
-    private UserService userService;
-    @Autowired
     private ContractService contractService;
     @Autowired
     private MethodService methodService;
