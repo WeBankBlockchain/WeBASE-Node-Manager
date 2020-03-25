@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
   user_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
   user_type int(1) NOT NULL DEFAULT '1' COMMENT '用户类型（1-普通用户 2-系统用户）',
   address varchar(64) DEFAULT NULL COMMENT '在链上位置的hash',
-  sign_user_id varchar(64) NOT NULL COMMENT '签名服务中的user的业务id',
+  sign_user_id varchar(64) DEFAULT NULL COMMENT '签名服务中的user的业务id',
   app_id varchar(64) DEFAULT NULL COMMENT '区块链应用的编号',
   has_pk int(1) DEFAULT 1 COMMENT '是否拥有私钥信息(1-拥有，2-不拥有)',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
