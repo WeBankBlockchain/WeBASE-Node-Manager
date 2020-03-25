@@ -54,7 +54,7 @@ public class NewBlockEventInfo {
 	private String queueName;
 
 	/**
-	 * concat queueName + "_" + event/block as routing key
+	 * concat appId + "_" + event/block + "_" + randomUUIDString as routing key
 	 */
 	private String routingKey;
 
