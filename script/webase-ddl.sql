@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
 -- @Deprecated: not save privateKey anymore
 -- Table structure for tb_user_key_mapping
 -- ----------------------------
---CREATE TABLE IF NOT EXISTS tb_user_key_mapping (
+-- CREATE TABLE IF NOT EXISTS tb_user_key_mapping (
 --  map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
 --  user_id int(11) NOT NULL COMMENT '用户编号',
 --  group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
 --  modify_time datetime DEFAULT NULL COMMENT '修改时间',
 --  PRIMARY KEY (map_id),
 --  UNIQUE KEY unique_id (user_id)
---) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='用户私钥映射表';
+-- ) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='用户私钥映射表';
 
 
 
