@@ -34,6 +34,9 @@ public class ContractEventInfo {
 	private Integer groupId;
 	private String exchangeName;
 	private String queueName;
+	/**
+	 * concat appId + "_" + event/block + "_" + randomUUIDString as routing key
+	 */
 	private String routingKey;
 	/**
 	 * EventLogUserParams info
