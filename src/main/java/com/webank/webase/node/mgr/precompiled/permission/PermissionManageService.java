@@ -148,7 +148,7 @@ public class PermissionManageService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
         if(Objects.isNull(permissionParam.getUseAes())) {
-            permissionParam.setUseAes(false);
+            permissionParam.setUseAes(true);
         }
         Object frontRsp = frontRestTools.postForEntity(
                 permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION_SORTED_LIST,
@@ -164,7 +164,7 @@ public class PermissionManageService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
         if(Objects.isNull(permissionParam.getUseAes())) {
-            permissionParam.setUseAes(false);
+            permissionParam.setUseAes(true);
         }
         Object frontRsp = frontRestTools.postForEntity(
                 permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
@@ -180,7 +180,7 @@ public class PermissionManageService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
         if(Objects.isNull(permissionParam.getUseAes())) {
-            permissionParam.setUseAes(false);
+            permissionParam.setUseAes(true);
         }
         Object frontRsp = frontRestTools.deleteForEntity(
                 permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
