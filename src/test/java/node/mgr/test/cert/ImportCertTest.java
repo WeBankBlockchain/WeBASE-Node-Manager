@@ -21,12 +21,12 @@ import java.security.cert.*;
 import java.util.*;
 
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import io.jsonwebtoken.lang.Assert;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.Assert;
 import sun.security.ec.ECPublicKeyImpl;
 
 import static com.webank.webase.node.mgr.base.tools.CertTools.byteToHex;
@@ -193,7 +193,7 @@ public class ImportCertTest {
         org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
                 new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
         List<X509Certificate> certs = (List<X509Certificate>) factory.engineGenerateCertificates(nodes);
-        Assert.notNull(certs);
+        Assert.notNull(certs,"certs null");
         certs.stream().forEach(c -> {
             System.out.println(c.getSubjectDN());
             try {

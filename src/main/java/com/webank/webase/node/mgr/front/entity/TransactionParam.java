@@ -20,7 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * param of send transaction.
+ * param of send transaction to front
  */
 @Data
 @NoArgsConstructor
@@ -28,12 +28,12 @@ public class TransactionParam {
 
     @NotNull
     private Integer groupId;
-    private String user;
+    private String signUserId;
     @NotBlank
     private String contractName;
     @NotBlank
     private String funcName;
     private String contractAddress;
-    private Boolean useAes;
+    private List<Object> contractAbi;
     private List<Object> funcParam;
 }

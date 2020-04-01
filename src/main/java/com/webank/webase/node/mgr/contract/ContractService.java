@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
@@ -29,8 +30,7 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.monitor.MonitorService;
-import io.netty.channel.local.LocalAddress;
-import java.time.Instant;
+import com.webank.webase.node.mgr.user.UserService;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +61,7 @@ public class  ContractService {
     @Autowired
     private FrontInterfaceService frontInterface;
     @Autowired
-    private ConstantProperties constants;
+    private UserService userService;
     private static final int CONTRACT_ADDRESS_LENGTH = 42;
 
     /**
@@ -214,19 +214,19 @@ public class  ContractService {
         }
 
         // deploy param
+        String signUserId = userService.getSignUserIdByAddress(groupId, inputParam.getUser());
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
-        params.put("user", inputParam.getUser());
+        params.put("signUserId", signUserId);
         params.put("contractName", contractName);
         // params.put("version", version);
         params.put("abiInfo", JSONArray.parseArray(inputParam.getContractAbi()));
         params.put("bytecodeBin", inputParam.getBytecodeBin());
         params.put("funcParam", inputParam.getConstructorParams());
-        params.put("useAes", constants.getIsPrivateKeyEncrypt());
 
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
-            FrontRestTools.URI_CONTRACT_DEPLOY, params, String.class);
+            FrontRestTools.URI_CONTRACT_DEPLOY_WITH_SIGN, params, String.class);
         if (StringUtils.isBlank(contractAddress)) {
             log.error("fail deploy, contractAddress is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
@@ -270,19 +270,25 @@ public class  ContractService {
         }
 
         //check contractId
-        verifyContractIdExist(param.getContractId(), param.getGroupId());
-        //send abi
+        TbContract contract = verifyContractIdExist(param.getContractId(), param.getGroupId());
+        //send abi to front
         sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
         //check contract deploy
         verifyContractDeploy(param.getContractId(), param.getGroupId());
 
+        // if constant, signUserId is useless
+        AbiDefinition funcAbi = Web3Tools.getAbiDefinition(param.getFuncName(), contract.getContractAbi());
+        String signUserId = "empty";
+        if (!funcAbi.isConstant()) {
+            signUserId = userService.getSignUserIdByAddress(param.getGroupId(), param.getUser());
+        }
+
         //send transaction
         TransactionParam transParam = new TransactionParam();
         BeanUtils.copyProperties(param, transParam);
-        transParam.setUseAes(constants.getIsPrivateKeyEncrypt());
-
+        transParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools
-            .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION, transParam,
+            .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION_WITH_SIGN, transParam,
                 Object.class);
         log.debug("end sendTransaction. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;

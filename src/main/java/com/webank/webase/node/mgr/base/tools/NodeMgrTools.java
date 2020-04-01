@@ -47,7 +47,7 @@ import org.fisco.bcos.web3j.utils.Numeric;
 @Log4j2
 public class NodeMgrTools {
 
-    private static final String TOKEN_HEADER_NAME = "Authorization";
+    public static final String TOKEN_HEADER_NAME = "AuthorizationToken";
     private static final String TOKEN_START = "Token";
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_TIME_FORMAT_NO_SPACE = "yyyyMMddHHmmss";

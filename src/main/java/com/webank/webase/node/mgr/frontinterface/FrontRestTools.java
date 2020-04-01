@@ -75,10 +75,11 @@ public class FrontRestTools {
     public static final String URI_REFRESH_FRONT = "web3/refresh";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
-    public static final String URI_KEY_PAIR = "privateKey?useAes=%1b";
-    public static final String URI_CONTRACT_DEPLOY = "contract/deploy";
+    public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s";
+    public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
+    public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
-    public static final String URI_SEND_TRANSACTION = "trans/handle";
+    public static final String URI_SEND_TRANSACTION_WITH_SIGN = "trans/handleWithSign";
     public static final String URI_CHAIN = "chain";
 
     public static final String URI_PERMISSION = "permission";
@@ -95,13 +96,17 @@ public class FrontRestTools {
     public static final String URI_CERT = "cert";
     public static final String URI_ENCRYPT_TYPE = "encrypt";
 
-    //不需要在url中包含groupId的
-    private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
-        .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_CONTRACT_SENDABI,
-                URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
+    public static final String URI_CONTRACT_EVENT_INFO_LIST = "event/contractEvent/list";
+    public static final String URI_NEW_BLOCK_EVENT_INFO_LIST = "event/newBlockEvent/list";
+
+    //不需要在url的前面添加groupId的
+    private static final List<String> URI_NOT_PREPEND_GROUP_ID = Arrays
+        .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
+                URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
                 URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE);
 
+    public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 
     @Qualifier(value = "genericRestTemplate")
     @Autowired
@@ -127,8 +132,9 @@ public class FrontRestTools {
 
         final String tempUri = uri.contains("?") ? uri.substring(0, uri.indexOf("?")) : uri;
 
-        long count = URI_NOT_CONTAIN_GROUP_ID.stream().filter(u -> u.contains(tempUri)).count();
-        if (count > 0) {
+        long countNotAppend = URI_NOT_PREPEND_GROUP_ID.stream().filter(u -> u.contains(tempUri)).count();
+        long countNotContain = URI_CONTAIN_GROUP_ID.stream().filter(u -> u.contains(tempUri)).count();
+        if (countNotAppend > 0 || countNotContain > 0) {
             return uri;
         }
         return groupId + "/" + uri;
@@ -236,7 +242,7 @@ public class FrontRestTools {
      */
     public static HttpEntity buildHttpEntity(Object param) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         String paramStr = null;
         if (Objects.nonNull(param)) {
             paramStr = JSON.toJSONString(param);
@@ -252,7 +258,7 @@ public class FrontRestTools {
         if (StringUtils.isBlank(uri)) {
             return null;
         }
-        if (uri.contains(URI_CONTRACT_DEPLOY)) {
+        if (uri.contains(URI_CONTRACT_DEPLOY_WITH_SIGN)) {
             return deployRestTemplate;
         }
         return genericRestTemplate;

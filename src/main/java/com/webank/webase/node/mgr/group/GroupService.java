@@ -26,6 +26,7 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.GroupHandleResult;
@@ -73,8 +74,6 @@ public class GroupService {
     @Autowired
     private NodeService nodeService;
     @Autowired
-    private UserService userService;
-    @Autowired
     private ContractService contractService;
     @Autowired
     private MethodService methodService;
@@ -86,7 +85,6 @@ public class GroupService {
     /**
      * generate group.
      * 
-     * @param req info
      * @return
      */
     public void generateGroup(GenerateGroupInfo generateGroupInfo, String frontIp, Integer frontPort) {
@@ -104,7 +102,6 @@ public class GroupService {
     /**
      * start group.
      * 
-     * @param nodeId
      * @param startGroupId
      */
     public void startGroup(Integer startGroupId, String frontIp, Integer frontPort) {
@@ -117,8 +114,8 @@ public class GroupService {
             log.error("fail startGroup startGroupId:{} code:{}", startGroupId, code);
             throw new NodeMgrException(code, groupHandleResult.getMessage());
         }
-        // refresh front
-        frontInterface.refreshFront(frontIp, frontPort);
+        // @Deprecated: already refresh in front when start a group
+        // frontInterface.refreshFront(frontIp, frontPort);
     }
 
     /**
@@ -416,8 +413,9 @@ public class GroupService {
         groupMapper.remove(groupId);
         //remove mapping.
         frontGroupMapService.removeByGroupId(groupId);
-        //remove user and key
-        userService.deleteByGroupId(groupId);
+        // @Deprecated: not save privateKey anymore
+        // remove user and key
+        // userService.deleteByGroupId(groupId);
         //remove contract
         contractService.deleteByGroupId(groupId);
         //remove method

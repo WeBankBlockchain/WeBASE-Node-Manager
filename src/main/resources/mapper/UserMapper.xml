@@ -16,6 +16,8 @@
     <result column="public_key" javaType="java.lang.String" jdbcType="VARCHAR"
       property="publicKey"/>
     <result column="address" javaType="java.lang.String" jdbcType="VARCHAR" property="address"/>
+    <result column="sign_user_id" javaType="java.lang.String" jdbcType="VARCHAR" property="signUserId"/>
+    <result column="app_id" javaType="java.lang.String" jdbcType="VARCHAR" property="appId"/>
     <result column="description" javaType="java.lang.String" jdbcType="VARCHAR"
       property="description"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
@@ -26,8 +28,10 @@
 
   <insert id="addUserRow" parameterType="com.webank.webase.node.mgr.user.entity.TbUser">
     insert into
-    tb_user(user_name,group_id,has_pk,user_type,public_key,address,description,create_time,modify_time)
-    values(#{userName},#{groupId},#{hasPk},#{userType},#{publicKey},#{address},#{description},NOW(),NOW())
+    tb_user(user_name,group_id,has_pk,user_type,public_key,address,sign_user_id,app_id,description,
+    create_time,modify_time)
+    values(#{userName},#{groupId},#{hasPk},#{userType},#{publicKey},#{address},#{signUserId},#{appId},
+    #{description}, NOW(),NOW())
     <selectKey keyProperty="userId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -95,15 +99,6 @@
     limit 1
   </select>
 
-
-  <insert id="addUserKeyMapRow" parameterType="com.webank.webase.node.mgr.user.entity.TbUserKeyMap">
-    insert into
-    tb_user_key_mapping(user_id,group_id,private_key,create_time,modify_time)values(#{userId},#{groupId},#{privateKey},NOW(),NOW())
-    <selectKey keyProperty="mapId" order="AFTER" resultType="java.lang.Integer">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
-  </insert>
-
   <update id="updateUser" parameterType="com.webank.webase.node.mgr.user.entity.TbUser">
     update tb_user set modify_time = now()
     <if test="description != null and description != ''">
@@ -112,13 +107,6 @@
     where user_id = #{userId}
   </update>
 
-
-  <select id="queryPrivateKey" parameterType="java.lang.String"
-    resultType="com.webank.webase.node.mgr.user.entity.PrivateKeyInfo">
-		select a.address,b.private_key privateKey from tb_user a left join tb_user_key_mapping b on(a.user_id=b.user_id)
-		where
-		b.map_status=1 and a.address = #{userAddress}
-	</select>
 
   <select id="queryUserNameByAddress" resultType="java.lang.String">
 		select user_name from tb_user where group_id = #{groupId} and address = #{address}
@@ -131,8 +119,8 @@
 		delete from tb_user where group_id = #{groupId}
 	</delete>
 
-  <delete id="deleteUserKeyMap" parameterType="java.lang.Integer">
-		delete from tb_user_key_mapping where group_id = #{groupId}
-	</delete>
+  <delete id="deleteByAddress" parameterType="java.lang.String">
+    delete from tb_user where address = #{address}
+  </delete>
 
 </mapper>
