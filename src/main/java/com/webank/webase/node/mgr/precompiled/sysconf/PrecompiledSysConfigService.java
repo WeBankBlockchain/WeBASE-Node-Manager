@@ -69,7 +69,7 @@ public class PrecompiledSysConfigService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
         if(Objects.isNull(sysConfigParam.getUseAes())) {
-            sysConfigParam.setUseAes(false);
+            sysConfigParam.setUseAes(true);
         }
         Object frontRsp = frontRestTools.postForEntity(
                 sysConfigParam.getGroupId(), FrontRestTools.URI_SYS_CONFIG,

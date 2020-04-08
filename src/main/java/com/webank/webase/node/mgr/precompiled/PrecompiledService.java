@@ -91,7 +91,7 @@ public class PrecompiledService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
         if(Objects.isNull(consensusHandle.getUseAes())) {
-            consensusHandle.setUseAes(false);
+            consensusHandle.setUseAes(true);
         }
         Object frontRsp = frontRestTools.postForEntity(
                 consensusHandle.getGroupId(), FrontRestTools.URI_CONSENSUS,
@@ -111,7 +111,7 @@ public class PrecompiledService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
         if(Objects.isNull(crudHandle.getUseAes())) {
-            crudHandle.setUseAes(false);
+            crudHandle.setUseAes(true);
         }
         Object frontRsp = frontRestTools.postForEntity(
                 crudHandle.getGroupId(), FrontRestTools.URI_CRUD,
