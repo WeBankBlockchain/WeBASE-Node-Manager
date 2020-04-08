@@ -60,7 +60,7 @@ dependencies {
     compile springboot,jaxb,web3jsdk,jwt
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
-    compile "com.alibaba:fastjson:1.2.60"
+    compile "com.alibaba:fastjson:1.2.67"
     compile "mysql:mysql-connector-java:8.0.13"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
