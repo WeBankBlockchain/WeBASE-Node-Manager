@@ -56,7 +56,13 @@
 		delete from tb_front_group_map where group_id = #{groupId}
 	</delete>
 
-  <delete id="removeByFrontId" parameterType="java.lang.Integer">
-		delete from tb_front_group_map where front_id = #{frontId}
-	</delete>
+    <delete id="removeByFrontId" parameterType="java.lang.Integer">
+        delete from tb_front_group_map where front_id = #{frontId}
+    </delete>
+
+    <delete id="removeInvalidMap">
+        delete a.* from tb_front_group_map a
+        where NOT EXISTS(select * from tb_front b where a.front_id=b.front_id)
+        or NOT EXISTS(select * from tb_group c where a.group_id=c.group_id)
+    </delete>
 </mapper>
