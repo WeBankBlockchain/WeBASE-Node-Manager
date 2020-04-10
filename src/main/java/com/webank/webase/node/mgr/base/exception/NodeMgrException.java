@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.base.exception;
 
+import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.RetCode;
 
 /**
@@ -30,8 +31,19 @@ public class NodeMgrException extends RuntimeException {
         this.retCode = retCode;
     }
 
+    public NodeMgrException(RetCode RetCode, Throwable cause) {
+        super(RetCode.getMessage(), cause);
+        retCode.setMessage(JSON.toJSONString(cause.getMessage()));
+        this.retCode = RetCode;
+    }
+
     public NodeMgrException(int code, String msg) {
         super(msg);
+        this.retCode = new RetCode(code, msg);
+    }
+
+    public NodeMgrException(int code, String msg, Throwable cause) {
+        super(msg, cause);
         this.retCode = new RetCode(code, msg);
     }
 
