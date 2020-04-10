@@ -17,6 +17,8 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,9 +76,14 @@ public class FrontInterfaceService {
             HttpEntity entity = FrontRestTools.buildHttpEntity(param);// build entity
             ResponseEntity<T> response = genericRestTemplate.exchange(url, method, entity, clazz);
             return response.getBody();
-        } catch (HttpStatusCodeException e) {
-            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-            throw new NodeMgrException(error.getInteger("code"), error.getString("errorMessage"));
+        } catch (HttpStatusCodeException ex) {
+            JSONObject error = JSONObject.parseObject(ex.getResponseBodyAsString());
+            log.error("http request fail. error:{}", JSON.toJSONString(error));
+            if (error.containsKey("code") && error.containsKey("errorMessage")) {
+                throw new NodeMgrException(error.getInteger("code"),
+                        error.getString("errorMessage"));
+            }
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
         }
     }
 
