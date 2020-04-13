@@ -311,12 +311,21 @@ public class FrontRestTools {
                 }
                 log.info("continue next front", ex);
                 continue;
-            } catch (HttpStatusCodeException e) {
-                JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
+            } catch (HttpStatusCodeException ex) {
+//                JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
+//                log.error("http request fail. error:{}", JSON.toJSONString(error));
+//                // TODO check nullpointer of 'error.getInteger("code")'
+//                throw new NodeMgrException(error.getInteger("code"),
+//                    error.getString("errorMessage"));
+
+
+                JSONObject error = JSONObject.parseObject(ex.getResponseBodyAsString());
                 log.error("http request fail. error:{}", JSON.toJSONString(error));
-                // TODO check nullpointer of 'error.getInteger("code")'
-                throw new NodeMgrException(error.getInteger("code"),
-                    error.getString("errorMessage"));
+                if (error.containsKey("code") && error.containsKey("errorMessage")) {
+                    throw new NodeMgrException(error.getInteger("code"),
+                            error.getString("errorMessage"), ex);
+                }
+                throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
             }
         }
         return null;
