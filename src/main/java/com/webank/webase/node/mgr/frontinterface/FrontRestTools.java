@@ -11,6 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.webank.webase.node.mgr.frontinterface;
 
 import com.alibaba.fastjson.JSON;
@@ -83,8 +84,8 @@ public class FrontRestTools {
 
     public static final String URI_PERMISSION = "permission";
     public static final String URI_PERMISSION_FULL_LIST = "permission/full";
-    public static final String URI_PERMISSION_SORTED_LIST= "permission/sorted";
-    public static final String URI_PERMISSION_SORTED_FULL_LIST= "permission/sorted/full";
+    public static final String URI_PERMISSION_SORTED_LIST = "permission/sorted";
+    public static final String URI_PERMISSION_SORTED_FULL_LIST = "permission/sorted/full";
     public static final String URI_SYS_CONFIG_LIST = "sys/config/list";
     public static final String URI_SYS_CONFIG = "sys/config";
     public static final String URI_CNS_LIST = "precompiled/cns/list";
@@ -99,8 +100,9 @@ public class FrontRestTools {
     private static final List<String> URI_NOT_CONTAIN_GROUP_ID = Arrays
         .asList(URI_CONTRACT_DEPLOY, URI_SEND_TRANSACTION, URI_KEY_PAIR, URI_CONTRACT_SENDABI,
                 URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
-                URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
-                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE);
+                URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD,
+                URI_PERMISSION_SORTED_LIST, URI_PERMISSION_SORTED_FULL_LIST,
+                URI_CERT, URI_ENCRYPT_TYPE);
 
 
     @Qualifier(value = "genericRestTemplate")
@@ -180,7 +182,7 @@ public class FrontRestTools {
 
 
     /**
-     * build key description: frontIp$frontPort example: 2651654951545$8081
+     * build key description: frontIp$frontPort example: 2651654951545$8081.
      */
     private String buildKey(String url, String methodType) {
         return url.hashCode() + "$" + methodType;
@@ -188,7 +190,7 @@ public class FrontRestTools {
 
 
     /**
-     * delete key of map
+     * delete key of map.
      */
     private static void deleteKeyOfMap(Map<String, FailInfo> map, String rkey) {
         log.info("start deleteKeyOfMap. rkey:{} map:{}", rkey, JSON.toJSONString(map));
@@ -232,7 +234,7 @@ public class FrontRestTools {
     }
 
     /**
-     * build httpEntity
+     * build httpEntity.
      */
     public static HttpEntity buildHttpEntity(Object param) {
         HttpHeaders headers = new HttpHeaders();
@@ -298,7 +300,8 @@ public class FrontRestTools {
             try {
                 HttpEntity entity = buildHttpEntity(param);// build entity
                 if (null == restTemplate) {
-                    log.error("fail restTemplateExchange, rest is null. groupId:{} uri:{}", groupId,uri);
+                    log.error("fail restTemplateExchange, rest is null. groupId:{} uri:{}",
+                            groupId,uri);
                     throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
                 }
                 ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
@@ -312,13 +315,6 @@ public class FrontRestTools {
                 log.info("continue next front", ex);
                 continue;
             } catch (HttpStatusCodeException ex) {
-//                JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-//                log.error("http request fail. error:{}", JSON.toJSONString(error));
-//                // TODO check nullpointer of 'error.getInteger("code")'
-//                throw new NodeMgrException(error.getInteger("code"),
-//                    error.getString("errorMessage"));
-
-
                 JSONObject error = JSONObject.parseObject(ex.getResponseBodyAsString());
                 log.error("http request fail. error:{}", JSON.toJSONString(error));
                 if (error.containsKey("code") && error.containsKey("errorMessage")) {
