@@ -1,10 +1,10 @@
-### v1.2.4 (2020-04-08)
+### v1.2.4 (2020-04-14)
 
 **Fix**
 - bugifx: 升级fastjson v1.2.67
 - bugifx: 请求体headers中token字段由“Authorization”改成“AuthorizationToken”
 - bugifx: Precompiled预编译相关接口中的useAes默认为false，改为默认true
-- bugifx: 发交易接口在前后端增加contractAbi字段，修复合约重载函数的问题
+- bugifx: 发交易接口在前后端增加contractAbi字段，修复合约重载函数与CNS获取abi失败的问题
 
 **兼容性**
 - 支持FISCO-BCOS v2.0.0-rc1 版本
