@@ -2,9 +2,9 @@
 
 APP_MAIN=com.webank.webase.node.mgr.Application
 CLASSPATH='conf/:apps/*:lib/*'
-CURRENT_DIR=`pwd`
-LOG_DIR=${CURRENT_DIR}/log
-CONF_DIR=${CURRENT_DIR}/conf
+CURRENT_DIR=`pwd`/
+LOG_DIR=${CURRENT_DIR}log
+CONF_DIR=${CURRENT_DIR}conf
 ARIAL_DIR=${CONF_DIR}/Arial
 
 SERVER_PORT=$(cat $CONF_DIR/application.yml| grep "port" | awk '{print $2}'| sed 's/\r//')

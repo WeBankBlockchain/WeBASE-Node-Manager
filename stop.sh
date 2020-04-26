@@ -1,8 +1,8 @@
 #!/bin/bash
 
 APP_MAIN=com.webank.webase.node.mgr.Application
-CURRENT_DIR=`pwd`
-CONF_DIR=${CURRENT_DIR}/conf
+CURRENT_DIR=`pwd`/
+CONF_DIR=${CURRENT_DIR}conf
 
 SERVER_PORT=$(cat $CONF_DIR/application.yml| grep "port" | awk '{print $2}'| sed 's/\r//')
 if [ ${SERVER_PORT}"" = "" ];then
