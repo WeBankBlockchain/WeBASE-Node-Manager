@@ -26,7 +26,6 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
-import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.GroupHandleResult;
@@ -40,17 +39,18 @@ import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import com.webank.webase.node.mgr.user.UserService;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 /**
  * services for group data.
@@ -81,10 +81,10 @@ public class GroupService {
     private TransDailyService transDailyService;
     @Autowired
     private ConstantProperties constants;
-    
+
     /**
      * generate group.
-     * 
+     *
      * @return
      */
     public void generateGroup(GenerateGroupInfo generateGroupInfo, String frontIp, Integer frontPort) {
@@ -98,10 +98,10 @@ public class GroupService {
             throw new NodeMgrException(code, groupHandleResult.getMessage());
         }
     }
-    
+
     /**
      * start group.
-     * 
+     *
      * @param startGroupId
      */
     public void startGroup(Integer startGroupId, String frontIp, Integer frontPort) {
@@ -280,6 +280,8 @@ public class GroupService {
 
         //check group status
         checkGroupStatusAndRemoveInvalidGroup(allGroupSet);
+        //remove invalid group
+        frontGroupMapService.removeInvalidFrontGroupMap();
         //clear cache
         frontGroupMapCache.clearMapList();
 
@@ -346,8 +348,8 @@ public class GroupService {
                 nodeId, groupId);
         //get sealer and observer on chain
         List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(groupId);
-        for(PeerInfo peerInfo: sealerAndObserverList){
-            if(nodeId.equals(peerInfo.getNodeId())){
+        for (PeerInfo peerInfo : sealerAndObserverList) {
+            if (nodeId.equals(peerInfo.getNodeId())) {
                 return true;
             }
         }
