@@ -23,6 +23,6 @@ public class ConsensusHandle {
     private int groupId;
     private String nodeType;
     private String fromAddress;
+    private String signUserId;
     private String nodeId;
-    private Boolean useAes;
 }

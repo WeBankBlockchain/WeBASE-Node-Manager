@@ -23,8 +23,8 @@ import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.AlertRuleType;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.Node;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
@@ -39,7 +39,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * cannot connect to node triggers alert mail
@@ -51,7 +50,7 @@ public class NodeStatusMonitorTask {
     @Autowired
     private NodeService nodeService;
     @Autowired
-    private FrontGroupMapCache frontGroupMapCache;
+    private GroupService groupService;
     @Autowired
     private PrecompiledService precompiledService;
     @Autowired
@@ -78,7 +77,7 @@ public class NodeStatusMonitorTask {
             return;
         }
 
-        List<FrontGroup> groupList = frontGroupMapCache.getAllMap();
+        List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
             log.warn("checkNodeStatusForAlert jump over: not found any group");
             return;

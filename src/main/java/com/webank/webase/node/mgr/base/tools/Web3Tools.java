@@ -17,12 +17,15 @@ package com.webank.webase.node.mgr.base.tools;
 
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.crypto.gm.sm3.SM3Digest;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.web3j.tx.txdecode.ConstantProperties;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.fisco.bcos.web3j.utils.Strings;
 
@@ -106,4 +109,23 @@ public class Web3Tools {
         return inputs;
     }
 
+    /**
+     * get AbiDefinition by Function name
+     * @param funName
+     * @param contractAbi
+     * @return
+     */
+    public static AbiDefinition getAbiDefinition(String funName, String contractAbi) {
+        JSONArray abiArr = JSONArray.parseArray(contractAbi);
+        AbiDefinition result = null;
+        for (Object object : abiArr) {
+            AbiDefinition abiDefinition = JSON.parseObject(object.toString(), AbiDefinition.class);
+            if (ConstantProperties.TYPE_FUNCTION.equals(abiDefinition.getType())
+                    && funName.equals(abiDefinition.getName())) {
+                result = abiDefinition;
+                break;
+            }
+        }
+        return result;
+    }
 }
