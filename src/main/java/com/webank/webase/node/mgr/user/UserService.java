@@ -25,14 +25,14 @@ import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
-import com.webank.webase.node.mgr.user.entity.PrivateKeyInfo;
 import com.webank.webase.node.mgr.user.entity.TbUser;
-import com.webank.webase.node.mgr.user.entity.TbUserKeyMap;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +56,6 @@ public class UserService {
     @Lazy
     @Autowired
     private MonitorService monitorService;
-    @Autowired
-    private ConstantProperties constants;
 
     /**
      * add new user data.
@@ -77,43 +75,37 @@ public class UserService {
             log.warn("fail addUserInfo. user info already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
-
-        String keyUri = String
-            .format(FrontRestTools.URI_KEY_PAIR, constants.getIsPrivateKeyEncrypt());
+        // add user by webase-front->webase-sign
+        String signUserId = UUID.randomUUID().toString().replaceAll("-","");
+        // group id as appId
+        String appId = user.getGroupId().toString();
+        String keyUri = String.format(FrontRestTools.URI_KEY_PAIR, user.getUserName(), signUserId, appId);
         KeyPair keyPair = frontRestTools
             .getForEntity(groupId, keyUri, KeyPair.class);
-        String privateKey = Optional.ofNullable(keyPair).map(k -> k.getPrivateKey()).orElse(null);
         String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
         String address = Optional.ofNullable(keyPair).map(k -> k.getAddress()).orElse(null);
 
-        if (StringUtils.isAnyBlank(privateKey, publicKey, address)) {
-            log.warn("get key pair fail. privateKey:{} publicKey:{} address:{}", privateKey,
-                publicKey, address);
-            throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
+        if (StringUtils.isAnyBlank(publicKey, address)) {
+            log.warn("get key pair fail. publicKey:{} address:{}", publicKey, address);
+            throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL);
         }
 
         // add row
         TbUser newUserRow = new TbUser(HasPk.HAS.getValue(), user.getUserType(), user.getUserName(),
             groupId, address, publicKey,
             user.getDescription());
+        newUserRow.setSignUserId(signUserId);
+        newUserRow.setAppId(appId);
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {
             log.warn("affect 0 rows of tb_user");
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
-        Integer userId = newUserRow.getUserId();
-
-        // add user_key_mapping info
-        TbUserKeyMap newMapRow = new TbUserKeyMap(userId, groupId, privateKey);
-        Integer affectMapRow = userMapper.addUserKeyMapRow(newMapRow);
-        if (affectMapRow == 0) {
-            log.warn("affect 0 rows of tb_user_key_map");
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
         // update monitor unusual user's info
         monitorService.updateUnusualUser(groupId, user.getUserName(), address);
 
+        Integer userId = newUserRow.getUserId();
         log.debug("end addNodeInfo userId:{}", userId);
         return userId;
     }
@@ -241,13 +233,6 @@ public class UserService {
     }
 
     /**
-     * query by groupId.
-     */
-    public TbUser queryBygroupId(Integer groupId) throws NodeMgrException {
-        return queryUser(null, groupId, null, null);
-    }
-
-    /**
      * query by userName.
      */
     public TbUser queryByName(int groupId, String userName) throws NodeMgrException {
@@ -260,6 +245,14 @@ public class UserService {
      */
     public TbUser queryByUserId(Integer userId) throws NodeMgrException {
         return queryUser(userId, null, null, null);
+    }
+
+    /**
+     * query by group id and address.
+     */
+    public String getSignUserIdByAddress(int groupId, String address) throws NodeMgrException {
+        TbUser user = queryUser(null, groupId, null, address);
+        return user.getSignUserId();
     }
 
     /**
@@ -299,22 +292,6 @@ public class UserService {
         log.debug("end updateOrtanization");
     }
 
-    /**
-     * get private key.
-     */
-    public PrivateKeyInfo getPrivateKey(String userAddress) throws NodeMgrException {
-        log.debug("start getPrivateKey ");
-        PrivateKeyInfo privateKeyInfoInfo = userMapper.queryPrivateKey(userAddress);
-        if (Objects.isNull(privateKeyInfoInfo)) {
-            log.error("fail getPrivateKey, invalid userAddress:{}", userAddress);
-            throw new NodeMgrException(ConstantCode.INVALID_USER);
-        }
-
-        privateKeyInfoInfo.setPrivateKey(privateKeyInfoInfo.getPrivateKey());
-        log.debug("end getPrivateKey,privateKeyInfoInfo:{}", JSON.toJSONString(privateKeyInfoInfo));
-        return privateKeyInfoInfo;
-    }
-
 
     /**
      * get user name by address.
@@ -327,23 +304,9 @@ public class UserService {
         return userName;
     }
 
-    /**
-     * get systemUser.
-     */
-//    public TbUser getSystemUser() {
-//        return userMapper.querySystemUser();
-//    }
-
-    /**
-     * delete by groupId.
-     */
-    public void deleteByGroupId(int groupId) {
-        if (groupId == 0) {
-            return;
-        }
-        //delete user
-        userMapper.deleteUser(groupId);
-        //delete map
-        userMapper.deleteUserKeyMap(groupId);
+    public void deleteByAddress(String address) throws NodeMgrException{
+        log.debug("deleteByAddress address:{} ", address);
+        userMapper.deleteByAddress(address);
+        log.debug("end deleteByAddress");
     }
 }
