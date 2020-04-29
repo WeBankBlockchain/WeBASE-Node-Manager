@@ -30,6 +30,7 @@ public class SM3PasswordEncoder implements PasswordEncoder {
 
     public SM3PasswordEncoder() {}
 
+    @Override
     public String encode(CharSequence rawPassword) {
         SM3Digest sm3Digest = new SM3Digest();
         byte[] pwdInput = rawPassword.toString().getBytes();
@@ -43,6 +44,7 @@ public class SM3PasswordEncoder implements PasswordEncoder {
      * @param encodedPassword
      * @return
      */
+    @Override
     public boolean matches(CharSequence rawPassword, String encodedPassword){
         if (encodedPassword == null || encodedPassword.length() == 0) {
             logger.warn("Empty encoded password");

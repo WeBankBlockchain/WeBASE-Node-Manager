@@ -19,6 +19,9 @@ import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * save user's address, userName, groupId etc.
+ */
 @Data
 @NoArgsConstructor
 public class TbUser {
@@ -31,6 +34,12 @@ public class TbUser {
     private Integer chainIndex;
     private Integer userType;
     private String address;
+    private String signUserId;
+    /**
+     * temporarily use groupId as appId
+     */
+    private String appId;
+    @Deprecated
     private Integer hasPk;
     private String description;
     private LocalDateTime createTime;

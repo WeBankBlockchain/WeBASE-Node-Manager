@@ -21,6 +21,9 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * bind public user to import
+ */
 @Data
 @NoArgsConstructor
 public class BindUserInputParam {

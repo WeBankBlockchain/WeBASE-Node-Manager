@@ -22,6 +22,6 @@ import lombok.Data;
 public class CrudHandle {
     private int groupId;
     private String fromAddress;
+    private String signUserId;
     private String sql;
-    private Boolean useAes;
 }
