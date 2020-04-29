@@ -20,10 +20,11 @@ import com.webank.webase.node.mgr.alert.mail.MailService;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.AlertRuleType;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class AuditMonitorTask {
     @Autowired
     private ConstantProperties cProperties;
     @Autowired
-    private FrontGroupMapCache frontGroupMapCache;
+    private GroupService groupService;
     @Autowired
     private MailService alertMailService;
     @Autowired
@@ -74,7 +75,7 @@ public class AuditMonitorTask {
                     " for beyond alert interval:{}", alertRule);
             return;
         }
-        List<FrontGroup> groupList = frontGroupMapCache.getAllMap();
+        List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
             log.warn("checkUserAndContractForAlert jump over: not found any group");
             return;

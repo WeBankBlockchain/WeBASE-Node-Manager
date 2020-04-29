@@ -77,9 +77,9 @@ public class CertMonitorTask {
             return;
         }
         List<X509Certificate> certList = certService.loadAllX509Certs();
-        List<String> alertContentList = new ArrayList<>();
         certList.stream()
             .forEach(cert -> {
+                List<String> alertContentList = new ArrayList<>();
                 Date certNotAfter = cert.getNotAfter();
                 if(checkWithin7days(certNotAfter)){
                     log.warn("cert validity alert. certNotAfter:{}",
