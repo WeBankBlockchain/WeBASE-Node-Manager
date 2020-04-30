@@ -215,7 +215,7 @@ public class NodeService {
             Duration duration = Duration.between(modifyTime, LocalDateTime.now());
             Long subTime = duration.toMillis();
             if (subTime < CHECK_NODE_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
-                log.info("checkNodeStatus jump over. subTime:{}", subTime);
+                log.warn("checkNodeStatus jump over. subTime:{}", subTime);
                 return;
             }
             
