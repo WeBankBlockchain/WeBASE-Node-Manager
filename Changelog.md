@@ -1,3 +1,50 @@
+### v1.3.0(2020-04-29)
+
+**Add**
+- 新增链上事件通知的GET接口
+- 不再保存私钥在数据库中，私钥与交易签名由节点前置通过**WeBASE-Sign**进行私钥创建与交易签名
+- 私钥接口中，不再返回私钥`privateKey`，仅返回`signUserId`、`address`等
+- 预编译合约接口由WeBASE-Sign签名后调用
+- `tb_user`表新增`signUserId`和`appId`字段，移除表`tb_user_key_map`
+- 签名服务的`userId`改为`signUserId`, 接口中的`useAes`默认为true，不再需要传入值
+
+**Fix**
+- 升级依赖包log4j, fastjson, jackson，移除Jwt
+- 统一HTTP请求为UTF-8
+- 优化启动脚本
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 及以上版本
+- WeBASE-Web v1.2.2+
+- WeBASE-Front v1.2.2+
+- WeBASE-Sign v1.2.2+
+- WeBASE-Transaction v1.2.2+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+### v1.2.4 (2020-04-14)
+
+**Fix**
+- bugifx: 升级fastjson v1.2.67
+- bugifx: 请求体headers中token字段由“Authorization”改成“AuthorizationToken”
+- bugifx: Precompiled预编译相关接口中的useAes默认为false，改为默认true
+- bugifx: 发交易接口在前后端增加contractAbi字段，修复合约重载函数与CNS获取abi失败的问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 及以上版本
+- WeBASE-Web v1.2.2+
+- WeBASE-Node-Manager v1.2.2+
+- WeBASE-Sign v1.2.2+
+- WeBASE-Transaction v1.2.2+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.2.2 (2020-01-02)
 
 **Add**
