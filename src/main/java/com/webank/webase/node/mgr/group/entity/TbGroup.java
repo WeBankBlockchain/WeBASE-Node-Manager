@@ -35,10 +35,17 @@ public class TbGroup {
     private BigInteger transCount = BigInteger.ZERO;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    private String description;
+    private Integer groupType;
 
-    public TbGroup(Integer groupId, String groupName,Integer nodeCount){
+    public TbGroup(Integer groupId, String groupName, Integer nodeCount,
+                   String description, Integer groupType) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
+        this.description = description;
+        this.groupType = groupType;
     }
+
+
 }

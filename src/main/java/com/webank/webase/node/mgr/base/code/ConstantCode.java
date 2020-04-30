@@ -143,6 +143,9 @@ public class ConstantCode {
     public static final RetCode ENCRYPT_TYPE_NOT_MATCH = RetCode.mark(202091,
             "Front's encrypt type not matches with nodemgr");
 
+    /* dynamic group manage */
+    public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");
+    public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node front not exists");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

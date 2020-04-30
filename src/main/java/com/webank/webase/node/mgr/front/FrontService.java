@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.front;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
@@ -128,8 +129,9 @@ public class FrontService {
             PeerInfo[] peerArr = frontInterface
                 .getPeersFromSpecificFront(frontIp, frontPort, group);
             List<PeerInfo> peerList = Arrays.asList(peerArr);
-            //add groupId
-            groupService.saveGroupId(group, groupPeerList.size());
+            //add group
+            groupService.saveGroup(group, groupPeerList.size(), "synchronous",
+                    GroupType.SYNC.getValue());
             //save front group map
             frontGroupMapService.newFrontGroup(tbFront.getFrontId(), group);
             //save nodes
@@ -234,6 +236,16 @@ public class FrontService {
             return null;
         }
         return frontMapper.getById(frontId);
+    }
+
+    /**
+     * query front by nodeId.
+     */
+    public TbFront getByNodeId(String nodeId) {
+        if (StringUtils.isBlank(nodeId)) {
+            return null;
+        }
+        return frontMapper.getByNodeId(nodeId);
     }
 
     /**

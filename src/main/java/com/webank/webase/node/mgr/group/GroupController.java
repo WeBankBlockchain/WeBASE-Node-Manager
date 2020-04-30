@@ -21,8 +21,7 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.group.entity.GroupGeneral;
-import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.group.entity.*;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.scheduler.StatisticsTransdailyTask;
 import com.webank.webase.node.mgr.transdaily.SeventDaysTrans;
@@ -58,43 +57,7 @@ public class GroupController extends BaseController {
     private StatisticsTransdailyTask statisticsTask;
     @Autowired
     private ResetGroupListTask resetGroupListTask;
-
-    /**
-     * generate group.
-     */
-    @PostMapping("/generate/{frontIp}/{frontPort}")
-    public BaseResponse generateGroup(@RequestBody @Valid GenerateGroupInfo req,
-            @PathVariable("frontIp") String frontIp, @PathVariable("frontPort") Integer frontPort,
-            BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        Instant startTime = Instant.now();
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        log.info("start generateGroup startTime:{} groupId:{}", startTime.toEpochMilli(),
-                req.getGenerateGroupId());
-        groupService.generateGroup(req, frontIp, frontPort);
-        log.info("end getGroupGeneral useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
-    /**
-     * start group.
-     */
-    @GetMapping("/start/{startGroupId}/{frontIp}/{frontPort}")
-    public BaseResponse startGroup(@PathVariable("startGroupId") Integer startGroupId,
-            @PathVariable("frontIp") String frontIp, @PathVariable("frontPort") Integer frontPort)
-            throws NodeMgrException {
-        Instant startTime = Instant.now();
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        log.info("start startGroup startTime:{} groupId:{}", startTime.toEpochMilli(),
-                startGroupId);
-        groupService.startGroup(startGroupId, frontIp, frontPort);
-        log.info("end startGroup useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(baseResponse));
-        return baseResponse;
-    }
+    
 
     /**
      * get group general.
@@ -172,5 +135,94 @@ public class GroupController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JSON.toJSONString(pagesponse));
         return pagesponse;
+    }
+
+    /**
+     * generate group to single node.
+     */
+    @PostMapping("/generate/{nodeId}")
+    public BaseResponse generateToSingleNode(@PathVariable("nodeId") String nodeId,
+                                             @RequestBody @Valid ReqGenerateGroup req,
+                                             BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start generateToSingleNode startTime:{} nodeId:{}", startTime.toEpochMilli(),
+                nodeId);
+        TbGroup tbGroup = groupService.generateToSingleNode(nodeId, req);
+        baseResponse.setData(tbGroup);
+        log.info("end generateToSingleNode useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return baseResponse;
+    }
+
+    /**
+     * generate group.
+     */
+    @PostMapping("/generate")
+    public BaseResponse generateGroup(@RequestBody @Valid ReqGenerateGroup req,
+                                      BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start generateGroup startTime:{} groupId:{}", startTime.toEpochMilli(),
+                req.getGenerateGroupId());
+        TbGroup tbGroup = groupService.generateGroup(req);
+        baseResponse.setData(tbGroup);
+        log.info("end generateGroup useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return baseResponse;
+    }
+
+    /**
+     * operate group.
+     */
+    @PostMapping("/operate/{nodeId}")
+    public Object operateGroup(@PathVariable("nodeId") String nodeId, @RequestBody @Valid ReqOperateGroup req,
+                               BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        Integer groupId = req.getGenerateGroupId();
+        String type = req.getType();
+        log.info("start operateGroup startTime:{} groupId:{}", startTime.toEpochMilli(), groupId);
+
+        Object groupHandleResult = groupService.operateGroup(nodeId, groupId, type);
+        log.info("end operateGroup useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JSON.toJSONString(groupHandleResult));
+        return groupHandleResult;
+    }
+
+    /**
+     * batch start group.
+     */
+    @PostMapping("/batchStart")
+    public BaseResponse batchStartGroup(@RequestBody @Valid ReqBatchStartGroup req, BindingResult result)
+            throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start batchStartGroup startTime:{} groupId:{}", startTime.toEpochMilli(),
+                req.getGenerateGroupId());
+        groupService.batchStartGroup(req);
+        log.info("end batchStartGroup useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JSON.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * update group.
+     */
+    @GetMapping("/update")
+    public BaseResponse updateGroup() throws NodeMgrException {
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start updateGroup startTime:{}", startTime.toEpochMilli());
+        groupService.resetGroupList();
+        log.info("end updateGroup useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JSON.toJSONString(baseResponse));
+        return baseResponse;
     }
 }
