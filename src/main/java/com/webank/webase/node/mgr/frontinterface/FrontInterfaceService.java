@@ -446,16 +446,14 @@ public class FrontInterfaceService {
     /**
      * start group.
      */
-    public GroupHandleResult startGroup(String frontIp, Integer frontPort, Integer startGroupId) {
-        log.debug("start startGroup frontIp:{} frontPort:{} startGroupId:{}",
-                frontIp, frontPort, startGroupId);
+    public Object operateGroup(String frontIp, Integer frontPort, Integer groupId, String type) {
+        log.debug("start operateGroup frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
+                groupId);
+        String uri = String.format(FrontRestTools.URI_OPERATE_GROUP, type);
+        Object groupHandleResult =
+                getFromSpecificFront(groupId, frontIp, frontPort, uri, Object.class);
 
-        Integer groupId = Integer.MAX_VALUE;
-        String uri = String.format(FrontRestTools.URI_START_GROUP, startGroupId);
-        GroupHandleResult groupHandleResult =
-                getFromSpecificFront(groupId, frontIp, frontPort, uri, GroupHandleResult.class);
-
-        log.debug("end startGroup");
+        log.debug("end operateGroup");
         return groupHandleResult;
     }
     
