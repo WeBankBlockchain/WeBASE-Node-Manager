@@ -3,15 +3,16 @@
 -- Table structure for tb_group
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_group (
-        group_id int(11) NOT NULL COMMENT '群组ID',
-        group_name varchar(64) NOT NULL COMMENT '群组名字',
-        group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常）',
-        node_count int DEFAULT '0' COMMENT '群组下节点数',
-        group_desc varchar(1024) COMMENT '群组描述',
-        create_time datetime DEFAULT NULL COMMENT '创建时间',
-        modify_time datetime DEFAULT NULL COMMENT '修改时间',
-        PRIMARY KEY (group_id)
-    ) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8;
+    group_id int(11) NOT NULL COMMENT '群组ID',
+    group_name varchar(64) NOT NULL COMMENT '群组名字',
+    group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常）',
+    node_count int DEFAULT '0' COMMENT '群组下节点数',
+    description varchar(1024) COMMENT '群组描述',
+    group_type int COMMENT '群组类型（1-拉取，2-动态创建）',
+    create_time datetime DEFAULT NULL COMMENT '创建时间',
+    modify_time datetime DEFAULT NULL COMMENT '修改时间',
+    PRIMARY KEY (group_id)
+) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8;
 
 
 -- ----------------------------

@@ -31,4 +31,6 @@ public interface FrontMapper {
     List<TbFront> getList(FrontParam param);
 
     TbFront getById(@Param("frontId") int frontId);
+
+    TbFront getByNodeId(@Param("nodeId") String nodeId);
 }
