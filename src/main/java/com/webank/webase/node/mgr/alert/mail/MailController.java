@@ -71,7 +71,7 @@ public class MailController {
         try{
             checkParamEmpty(reqMailServerConfigParam);
         }catch (NodeMgrException e){
-            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
+            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
         }
         // get configuration from web and refresh JavaMailSender
         mailService.refreshJavaMailSenderConfigFromWeb(reqMailServerConfigParam);
@@ -101,13 +101,13 @@ public class MailController {
         reqMailServerConfigParam.getAuthentication() == null ||
                 StringUtils.isEmpty(reqMailServerConfigParam.getHost())) {
             log.error("error checkParamEmpty reqMailServerConfigParam:{}", reqMailServerConfigParam);
-            throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
+            throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
         }
         if(reqMailServerConfigParam.getAuthentication() == EnableStatus.ON.getValue()) {
             if(StringUtils.isEmpty(reqMailServerConfigParam.getUsername()) ||
                     StringUtils.isEmpty(reqMailServerConfigParam.getPassword())) {
                 log.error("error checkParamEmpty in auth reqMailServerConfigParam:{}", reqMailServerConfigParam);
-                throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
+                throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
             }
         }
         log.debug("end checkParamEmpty reqMailServerConfigParam:{}", reqMailServerConfigParam);
