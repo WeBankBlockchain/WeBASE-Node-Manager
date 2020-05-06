@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS tb_method(
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (method_id,group_id)
-) COMMENT='方法解析信息表' ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='方法解析信息表';
 
 
 
@@ -301,4 +301,21 @@ CREATE TABLE IF NOT EXISTS tb_alert_log (
   modify_time datetime DEFAULT NULL COMMENT '告警日志的修改时间',
   PRIMARY KEY (log_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='告警日志表';
+
+-- ----------------------------
+-- Table structure for tb_abi, unrelated with tb_contract
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_abi (
+  abi_id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约ABI的编号',
+  group_id int(11) NOT NULL COMMENT '合约ABI所属群组的编号',
+  contract_name varchar(120) NOT NULL COMMENT '合约ABI的合约名',
+  contract_address varchar(64) NOT NULL COMMENT '合约ABI的合约地址',
+  contract_abi text NOT NULL COMMENT '合约ABI的内容',
+  contract_bin text NOT NULL COMMENT '合约ABI的runtime-bin',
+  create_time datetime DEFAULT NULL COMMENT '合约ABI的创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '合约ABI的修改时间'
+  PRIMARY KEY (abi_id),
+  UNIQUE KEY unique_address (group_id,contract_address)
+  UNIQUE KEY unique_name (group_id,contract_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约ABI表';
 
