@@ -143,6 +143,13 @@ public class ConstantCode {
     public static final RetCode ENCRYPT_TYPE_NOT_MATCH = RetCode.mark(202091,
             "Front's encrypt type not matches with nodemgr");
 
+    // abi import
+    public static final RetCode CONTRACT_ADDRESS_ALREADY_EXISTS = RetCode.mark(202096, "contract address already exists");
+    public static final RetCode ABI_INFO_NOT_EXISTS = RetCode.mark(202097, "abi info of this id not exists");
+    public static final RetCode PARAM_FAIL_ABI_INVALID = RetCode.mark(202098, "Contract abi invalid, please check abi");
+    public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(202099, "Abi Id cannot be empty");
+    public static final RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(202100, "contractAddress is null");
+
     /* dynamic group manage */
     public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");
     public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node front not exists");
