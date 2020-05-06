@@ -86,8 +86,8 @@ public class MailServerConfigController {
                 startTime.toEpochMilli(), JSON.toJSONString(param));
         if(param.getServerId() == null) {
             log.debug("updateMailServerConfig, error:{} ",
-                    ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
-            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
+                    ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
+            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
         }
         try{
             mailServerConfigService.updateMailServerConfig(param);
