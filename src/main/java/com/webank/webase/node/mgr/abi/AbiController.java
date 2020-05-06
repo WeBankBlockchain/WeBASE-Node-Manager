@@ -19,6 +19,7 @@ package com.webank.webase.node.mgr.abi;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.abi.entity.ReqAbiListParam;
+import com.webank.webase.node.mgr.abi.entity.ReqDelAbi;
 import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
@@ -45,20 +46,23 @@ public class AbiController extends BaseController {
 	@Autowired
 	AbiService abiService;
 
-	@GetMapping("/list/{pageNumber}/{pageSize}")
-	public Object listAbi(@PathVariable("pageNumber") Integer pageNumber,
-						   @PathVariable("pageSize") Integer pageSize) {
+	@GetMapping("/list/{groupId}/{pageNumber}/{pageSize}")
+	public Object listAbi(
+			@PathVariable("groupId") Integer groupId,
+			@PathVariable("pageNumber") Integer pageNumber,
+			@PathVariable("pageSize") Integer pageSize) {
 		Instant startTime = Instant.now();
 		if (pageNumber < 1 || pageSize <= 0) {
 			return new BaseResponse(ConstantCode.PARAM_EXCEPTION);
 		}
-		log.info("start listAbi. startTime:{},pageNumber:{},pageSize:{}",
-				startTime.toEpochMilli(), pageNumber, pageSize);
+		log.info("start listAbi. startTime:{},groupId:{},pageNumber:{},pageSize:{}",
+				startTime.toEpochMilli(), groupId, pageNumber, pageSize);
 
 		Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
 				.orElse(0);
 		ReqAbiListParam param = new ReqAbiListParam(start, pageSize,
 				SqlSortType.DESC.getValue());
+		param.setGroupId(groupId);
 		List<AbiInfo> resList = abiService.getListByGroupId(param);
 		// total count
 		int count = abiService.countOfAbi();
@@ -80,7 +84,7 @@ public class AbiController extends BaseController {
 	}
 
 	@PostMapping("")
-	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
 	public Object saveAbi(@Valid @RequestBody ReqImportAbi param, BindingResult result) {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
@@ -97,7 +101,7 @@ public class AbiController extends BaseController {
 	 * @return
 	 */
 	@PutMapping("")
-	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
 	public Object updateAbi(@RequestBody ReqImportAbi param, BindingResult result) {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
@@ -113,5 +117,14 @@ public class AbiController extends BaseController {
 		return new BaseResponse(ConstantCode.SUCCESS, res);
 	}
 
-
+	@DeleteMapping("")
+	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+	public BaseResponse deleteAbi(@Valid @RequestBody ReqDelAbi param, BindingResult result) {
+		checkBindResult(result);
+		Integer abiId = param.getAbiId();
+		log.debug("start deleteAbi. abiId:{}", abiId);
+		abiService.delete(abiId);
+		log.debug("end deleteAbi");
+		return new BaseResponse(ConstantCode.SUCCESS);
+	}
 }

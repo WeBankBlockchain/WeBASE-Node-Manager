@@ -23,7 +23,7 @@
     </resultMap>
 
 
-    <insert id="add" parameterType="com.webank.webase.node.mgr.abi.entity.ReqImportAbi">
+    <insert id="add" parameterType="com.webank.webase.node.mgr.abi.entity.AbiInfo">
         REPLACE INTO tb_abi(group_id,contract_name,contract_address,contract_abi,contract_bin,
         create_time,modify_time)
         VALUES (#{groupId},#{contractName},#{contractAddress},#{contractAbi},#{contractBin}, now(), now())
@@ -34,7 +34,7 @@
         where abi_id = #{abiId}
     </delete>
 
-    <update id="update" parameterType="com.webank.webase.node.mgr.abi.entity.ReqImportAbi">
+    <update id="update" parameterType="com.webank.webase.node.mgr.abi.entity.AbiInfo">
         update tb_abi set modify_time = now()
         <if test="contractName != null and contractName != ''">
             ,contract_name = #{contractName}
@@ -54,8 +54,7 @@
     <select id="listOfAbi" parameterType="com.webank.webase.node.mgr.abi.entity.ReqAbiListParam"
             resultMap="abiMap">
         select a.* from tb_abi a
-        where 1=1
-        ,group_id = #{groupId}
+        where 1=1 and group_id = #{param.groupId}
         <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
             order by a.create_time ${param.flagSortedByTime}
         </if>
