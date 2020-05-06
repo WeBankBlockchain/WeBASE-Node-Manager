@@ -69,7 +69,7 @@ public class AlertRuleController {
                     Duration.between(startTime, Instant.now()).toMillis(), resList);
             return new BaseResponse(ConstantCode.SUCCESS, resList);
         }catch (NodeMgrException e) {
-            log.debug("listAlertRules, error, exception:[] ", e);
+            log.error("listAlertRules, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_RULE_ERROR, e.getMessage());
         }
     }
@@ -103,7 +103,7 @@ public class AlertRuleController {
         try{
             alertRuleService.updateAlertRule(param);
         }catch (NodeMgrException e) {
-            log.debug("updateAlertRule, error, exception:[] ", e);
+            log.error("updateAlertRule, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_RULE_ERROR, e.getMessage());
         }
         TbAlertRule res = alertRuleService.queryByRuleId(param.getRuleId());
@@ -131,7 +131,7 @@ public class AlertRuleController {
         try{
             alertRuleService.updateAlertRule(param);
         }catch (NodeMgrException e) {
-            log.debug("toggleAlertRule error, exception:[] ", e);
+            log.error("toggleAlertRule error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_RULE_ERROR, e.getMessage());
         }
         TbAlertRule res = alertRuleService.queryByRuleId(param.getRuleId());

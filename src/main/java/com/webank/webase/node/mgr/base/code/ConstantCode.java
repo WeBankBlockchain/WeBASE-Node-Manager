@@ -124,7 +124,7 @@ public class ConstantCode {
 
     // 邮件告警错误
     public static final RetCode MAIL_SERVER_CONFIG_ERROR = RetCode.mark(202070, "Mail server config error.");
-    public static final RetCode MAIL_SERVER_CONFIG__PARAM_EMPTY = RetCode.mark(202071,
+    public static final RetCode MAIL_SERVER_CONFIG_PARAM_EMPTY = RetCode.mark(202071,
             "Mail server config param empty/not match.");
     public static final RetCode MAIL_SERVER_CONFIG_ERROR_NO_DATA_IN_DB = RetCode.mark(202072,
             "Mail server config error, db's server config is empty");
