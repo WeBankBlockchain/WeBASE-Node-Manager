@@ -17,6 +17,7 @@
 package com.webank.webase.node.mgr.abi.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
  * entity for table tb_abi to store raw contract abi
  */
 @Data
+@NoArgsConstructor
 public class AbiInfo {
 	private Integer abiId;
 	private Integer groupId;
