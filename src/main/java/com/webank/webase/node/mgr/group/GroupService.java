@@ -466,6 +466,7 @@ public class GroupService {
      * @param req
      */
     public void batchStartGroup(ReqBatchStartGroup req) {
+        log.debug("start batchStartGroup:{}", req);
         Integer groupId = req.getGenerateGroupId();
         // check id
         checkGroupIdValid(groupId);
@@ -482,6 +483,7 @@ public class GroupService {
         }
         // refresh
         resetGroupList();
+        log.debug("end batchStartGroup.");
     }
 
 
