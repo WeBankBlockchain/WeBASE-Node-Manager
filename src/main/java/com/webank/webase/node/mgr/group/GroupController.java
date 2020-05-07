@@ -203,6 +203,7 @@ public class GroupController extends BaseController {
      * batch start group.(start group to all front
      */
     @PostMapping("/batchStart")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse batchStartGroup(@RequestBody @Valid ReqBatchStartGroup req, BindingResult result)
             throws NodeMgrException {
         checkBindResult(result);
