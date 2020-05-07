@@ -152,7 +152,7 @@ public class ConstantCode {
 
     /* dynamic group manage */
     public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");
-    public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node front not exists");
+    public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node's front not exists");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
