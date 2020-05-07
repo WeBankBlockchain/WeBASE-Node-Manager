@@ -67,7 +67,7 @@ public class AbiControllerTest {
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.post("/abi")
 						.content(JSON.toJSONString(abiInsert))
-						.contentType(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON_UTF8)
 		);
 		resultActions
 				.andExpect(MockMvcResultMatchers.status().isOk())
@@ -84,7 +84,7 @@ public class AbiControllerTest {
 		String url = String.format("/abi/%1s", abiId);
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.get(url)
-						.contentType(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON_UTF8)
 		);
 		resultActions.
 				andExpect(MockMvcResultMatchers.status().isOk()).
@@ -99,7 +99,7 @@ public class AbiControllerTest {
 		String url = String.format("/abi/list/%1s/%2s/%3s", groupId, pageNumber, pageSize);
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.get(url)
-						.contentType(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON_UTF8)
 		);
 		resultActions.
 				andExpect(MockMvcResultMatchers.status().isOk()).
@@ -124,7 +124,7 @@ public class AbiControllerTest {
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.put("/abi")
 						.content(JSON.toJSONString(abiUpdate))
-						.contentType(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON_UTF8)
 		);
 		resultActions.
 				andExpect(MockMvcResultMatchers.status().isOk()).

@@ -58,7 +58,7 @@ public class FrontControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post( "/front/new").
             content(JSON.toJSONString(param)).
-            contentType(MediaType.APPLICATION_JSON)
+            contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
