@@ -84,7 +84,7 @@ public class AbiController extends BaseController {
 	}
 
 	@PostMapping("")
-//	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
 	public Object saveAbi(@Valid @RequestBody ReqImportAbi param, BindingResult result) {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
@@ -101,7 +101,7 @@ public class AbiController extends BaseController {
 	 * @return
 	 */
 	@PutMapping("")
-//	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
 	public Object updateAbi(@RequestBody ReqImportAbi param, BindingResult result) {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
