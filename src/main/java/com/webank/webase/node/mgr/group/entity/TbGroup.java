@@ -29,6 +29,9 @@ public class TbGroup {
 
     private Integer groupId;
     private String groupName;
+    /**
+     * 1-normal, 2-invalid
+     */
     private Integer groupStatus;
     private Integer nodeCount;
     private BigInteger latestBlock = BigInteger.ZERO;
@@ -47,5 +50,13 @@ public class TbGroup {
         this.groupType = groupType;
     }
 
-
+    public TbGroup(Integer groupId, String groupName, Integer nodeCount,
+                   String description, Integer groupType, Integer groupStatus) {
+        this.groupId = groupId;
+        this.groupName = groupName;
+        this.nodeCount = nodeCount;
+        this.description = description;
+        this.groupType = groupType;
+        this.groupStatus = groupStatus;
+    }
 }
