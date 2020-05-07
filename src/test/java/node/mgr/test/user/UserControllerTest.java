@@ -63,7 +63,7 @@ public class UserControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/userInfo").
             content(JSON.toJSONString(newUser)).
-            contentType(MediaType.APPLICATION_JSON)
+            contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
@@ -80,7 +80,7 @@ public class UserControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put("/user/userInfo").
             content(JSON.toJSONString(updateUser)).
-            contentType(MediaType.APPLICATION_JSON)
+            contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
@@ -100,7 +100,7 @@ public class UserControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/bind").
             content(JSON.toJSONString(newUser)).
-            contentType(MediaType.APPLICATION_JSON)
+            contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
