@@ -20,6 +20,7 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.group.entity.*;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
@@ -33,6 +34,7 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -138,9 +140,10 @@ public class GroupController extends BaseController {
     }
 
     /**
-     * generate group to single node.
+     * generate group to single node(single front)
      */
     @PostMapping("/generate/{nodeId}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse generateToSingleNode(@PathVariable("nodeId") String nodeId,
                                              @RequestBody @Valid ReqGenerateGroup req,
                                              BindingResult result) throws NodeMgrException {
@@ -157,9 +160,10 @@ public class GroupController extends BaseController {
     }
 
     /**
-     * generate group.
+     * generate group to all front(all node)
      */
     @PostMapping("/generate")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse generateGroup(@RequestBody @Valid ReqGenerateGroup req,
                                       BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -175,9 +179,11 @@ public class GroupController extends BaseController {
     }
 
     /**
-     * operate group.
+     * operate group to single front.
+     * (start, stop, remove, recover, getStatus)
      */
     @PostMapping("/operate/{nodeId}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object operateGroup(@PathVariable("nodeId") String nodeId, @RequestBody @Valid ReqOperateGroup req,
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -194,7 +200,7 @@ public class GroupController extends BaseController {
     }
 
     /**
-     * batch start group.
+     * batch start group.(start group to all front
      */
     @PostMapping("/batchStart")
     public BaseResponse batchStartGroup(@RequestBody @Valid ReqBatchStartGroup req, BindingResult result)
