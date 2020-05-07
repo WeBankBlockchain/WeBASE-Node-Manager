@@ -215,7 +215,7 @@ public class GroupService {
                 List<String> groupPeerList = frontInterface.getNodeIDListFromSpecificFront(frontIp, frontPort, gId);
                 // save group
                 saveGroup(gId, groupPeerList.size(), "synchronous",
-                        GroupType.SYNC.getValue());
+                        GroupType.SYNC.getValue(), DataStatus.NORMAL.getValue());
                 frontGroupMapService.newFrontGroup(front.getFrontId(), gId);
                 //save new peers
                 savePeerList(frontIp, frontPort, gId, groupPeerList);
@@ -399,9 +399,9 @@ public class GroupService {
         BeanUtils.copyProperties(req, generateGroupInfo);
         frontInterface.generateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(),
                 generateGroupInfo);
-        // save group
+        // save group, saved as invalid status until start
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
-                req.getDescription(), GroupType.MANUAL.getValue());
+                req.getDescription(), GroupType.MANUAL.getValue(), DataStatus.INVALID.getValue());
         return tbGroup;
     }
 
@@ -428,9 +428,9 @@ public class GroupService {
             frontInterface.generateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(),
                     generateGroupInfo);
         }
-        // save group
+        // save group, saved as invalid status until start
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
-                req.getDescription(), GroupType.MANUAL.getValue());
+                req.getDescription(), GroupType.MANUAL.getValue(), DataStatus.INVALID.getValue());
         return tbGroup;
     }
 
@@ -453,7 +453,7 @@ public class GroupService {
         Object groupHandleResult = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
 
-        // refresh
+        // refresh group status
         resetGroupList();
 
         // return
@@ -481,7 +481,7 @@ public class GroupService {
             frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
                     "start");
         }
-        // refresh
+        // refresh group status
         resetGroupList();
         log.debug("end batchStartGroup.");
     }
@@ -492,14 +492,15 @@ public class GroupService {
      */
     @Transactional
     public TbGroup saveGroup(int groupId, int nodeCount, String description,
-                             int groupType) {
+                             int groupType, int groupStatus) {
         if (groupId == 0) {
             return null;
         }
         // save group id
         String groupName = "group" + groupId;
         TbGroup tbGroup =
-                new TbGroup(groupId, groupName, nodeCount, description, groupType);
+                new TbGroup(groupId, groupName, nodeCount, description,
+                        groupType, groupStatus);
         groupMapper.save(tbGroup);
         // create table by group id
         tableService.newTableByGroupId(groupId);
