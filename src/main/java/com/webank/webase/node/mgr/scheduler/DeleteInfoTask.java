@@ -34,6 +34,7 @@ import java.util.List;
 
 /**
  * delete block/trans/monitorTrans data task
+ * not synchronized cause deleting is rapid and cycle is long
  */
 @Log4j2
 @Component

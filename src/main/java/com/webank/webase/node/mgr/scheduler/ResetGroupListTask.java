@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * refresh group list
+ * not synchronized cause resetting is rapid and cycle is long
  */
 @Log4j2
 @Component
