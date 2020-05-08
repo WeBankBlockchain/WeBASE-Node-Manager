@@ -95,7 +95,7 @@ public class GroupController extends BaseController {
     }
 
     /**
-     * query all group.
+     * query all normal group.
      */
     @GetMapping("/all")
     public BasePageResponse getAllGroup() throws NodeMgrException {
