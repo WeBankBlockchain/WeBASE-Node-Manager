@@ -106,7 +106,8 @@ public class ExceptionsHandler {
         log.warn("catch RuntimeException", exc);
         // 默认系统异常
         RetCode retCode = ConstantCode.SYSTEM_EXCEPTION;
-
+        // v1.3.1 增加异常细节
+        retCode.setMessage(exc.getMessage());
         BaseResponse bre = new BaseResponse(retCode);
         log.warn("system RuntimeException return:{}", JSON.toJSONString(bre));
         return bre;
