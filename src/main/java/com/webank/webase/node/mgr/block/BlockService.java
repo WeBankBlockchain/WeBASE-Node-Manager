@@ -87,6 +87,7 @@ public class BlockService {
         } catch (Exception ex) {
             log.error("fail pullBlockByGroupId. groupId:{} ", groupId, ex);
         }finally {
+            // finish one group, count down
             latch.countDown();
         }
         log.debug("end pullBlockByGroupId groupId:{}", groupId);
