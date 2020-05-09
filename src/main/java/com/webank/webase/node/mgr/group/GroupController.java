@@ -21,7 +21,6 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.group.entity.*;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.scheduler.StatisticsTransdailyTask;
@@ -95,7 +94,7 @@ public class GroupController extends BaseController {
     }
 
     /**
-     * query all normal group.
+     * query all normal group without invalid group(suspend, removed)
      */
     @GetMapping("/all")
     public BasePageResponse getAllGroup() throws NodeMgrException {
@@ -115,6 +114,29 @@ public class GroupController extends BaseController {
         resetGroupListTask.asyncResetGroupList();
 
         log.info("end getAllGroup useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JSON.toJSONString(pagesponse));
+        return pagesponse;
+    }
+
+    @GetMapping("/all/invalid")
+    public BasePageResponse getAllGroupIncludeInvalidGroup() throws NodeMgrException {
+        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start getAllGroupIncludeInvalidGroup startTime:{}", startTime.toEpochMilli());
+
+        // get group list include invalid status
+        int count = groupService.countOfGroup(null, null);
+        if (count > 0) {
+            List<TbGroup> groupList = groupService.getGroupList(null);
+            pagesponse.setTotalCount(count);
+            pagesponse.setData(groupList);
+        }
+
+        // reset group
+        resetGroupListTask.asyncResetGroupList();
+
+        log.info("end getAllGroupIncludeInvalidGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JSON.toJSONString(pagesponse));
         return pagesponse;

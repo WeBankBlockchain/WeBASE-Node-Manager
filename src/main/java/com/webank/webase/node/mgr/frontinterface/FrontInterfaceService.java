@@ -18,6 +18,7 @@ import java.util.*;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
@@ -446,15 +447,20 @@ public class FrontInterfaceService {
     /**
      * start group.
      */
-    public Object operateGroup(String frontIp, Integer frontPort, Integer groupId, String type) {
+    public BaseResponse operateGroup(String frontIp, Integer frontPort, Integer groupId, String type) {
         log.debug("start operateGroup frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
                 groupId);
         String uri = String.format(FrontRestTools.URI_OPERATE_GROUP, type);
-        Object groupHandleResult =
-                getFromSpecificFront(groupId, frontIp, frontPort, uri, Object.class);
-
+        BaseResponse response =
+                getFromSpecificFront(groupId, frontIp, frontPort, uri, BaseResponse.class);
+//        GroupOperateStatus result = new GroupOperateStatus();
+//        if (Objects.nonNull(response.getData())) {
+//            result.setCode(String.valueOf(0));
+//            result.setMessage(response.getMessage());
+//            result.setStatus(response.getData().toString());
+//        }
         log.debug("end operateGroup");
-        return groupHandleResult;
+        return response;
     }
     
     /**

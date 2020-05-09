@@ -357,42 +357,45 @@ public class NodeMgrTools {
 
 
     /**
-     * check target time is valid.
+     * check target time if within time period
      *
-     * @param dateTime target time.
+     * @param lastTime target time.
      * @param validLength y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid;
-     * example1:1d;example2:n
+     * example1: 1d; example2:n
      */
-    public static boolean isDateTimeInValid(LocalDateTime dateTime, String validLength) {
-        log.debug("start isDateTimeInValid. dateTime:{} validLength:{}", dateTime, validLength);
+    public static boolean isWithinPeriod(LocalDateTime lastTime, String validLength) {
+        log.debug("start isWithinTime. dateTime:{} validLength:{}", lastTime, validLength);
         if ("n".equals(validLength)) {
             return true;
         }
-        if (Objects.isNull(dateTime) || StringUtils.isBlank(validLength)
+        if (Objects.isNull(lastTime) || StringUtils.isBlank(validLength)
             || validLength.length() < 2) {
             return false;
         }
-
+        // example: 2d (2 day)
+        // 2
         String lifeStr = validLength.substring(0, validLength.length() - 1);
         if (!StringUtils.isNumeric(lifeStr)) {
-            log.warn("fail isDateTimeInValid");
-            throw new RuntimeException("fail isDateTimeInValid. validLength is error");
+            log.warn("fail isWithinTime");
+            throw new RuntimeException("fail isWithinTime. validLength is error");
         }
-        int lifeValue = Integer.valueOf(lifeStr);
+        int lifeValue = Integer.parseInt(lifeStr);
+        // d
         String lifeUnit = validLength.substring(validLength.length() - 1);
-
+        // now is day 2, last time is day 1, 2 - 1 = 1 < 2 true
+        // now is day 3, last time is day 1, 3 - 1 = 2 < 2 false, not within
         LocalDateTime now = LocalDateTime.now();
         switch (lifeUnit) {
             case "y":
-                return dateTime.getYear() - now.getYear() < lifeValue;
+                return now.getYear() - lastTime.getYear() < lifeValue;
             case "M":
-                return dateTime.getMonthValue() - now.getMonthValue() < lifeValue;
+                return now.getMonthValue() - lastTime.getMonthValue() < lifeValue;
             case "d":
-                return dateTime.getDayOfMonth() - now.getDayOfMonth() < lifeValue;
+                return  now.getDayOfMonth() - lastTime.getDayOfMonth() < lifeValue;
             case "m":
-                return dateTime.getMinute() - now.getMinute() < lifeValue;
+                return now.getMinute() - lastTime.getMinute() < lifeValue;
             default:
-                log.warn("fail isDateTimeInValid lifeUnit:{}", lifeUnit);
+                log.warn("fail isWithinTime lifeUnit:{}", lifeUnit);
                 return false;
         }
     }

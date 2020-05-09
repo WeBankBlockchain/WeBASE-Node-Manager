@@ -95,7 +95,7 @@ public class FrontGroupMapService {
     }
 
     /**
-     * remove invalid map info.
+     * remove group that not in tb_front or tb_group
      */
     public void removeInvalidFrontGroupMap() {
         frontGroupMapMapper.removeInvalidMap();
