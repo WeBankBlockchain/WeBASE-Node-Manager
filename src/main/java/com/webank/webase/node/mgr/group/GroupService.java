@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -47,10 +48,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * services for group data.
@@ -211,7 +209,7 @@ public class GroupService {
             for (String groupId : groupIdList) {
                 Integer gId = Integer.valueOf(groupId);
                 allGroupSet.add(gId);
-                //peer in group
+                // peer in group
                 List<String> groupPeerList = frontInterface.getNodeIDListFromSpecificFront(frontIp, frontPort, gId);
                 // save group
                 saveGroup(gId, groupPeerList.size(), "synchronous",
@@ -228,9 +226,10 @@ public class GroupService {
             }
         }
 
-        //check group status
+        // check group status
+        // if beyond gray period, remove invalid group, else, not remove
         checkGroupStatusAndRemoveInvalidGroup(allGroupSet);
-        //remove invalid group
+        // remove front_group_map that not in tb_front or tb_group
         frontGroupMapService.removeInvalidFrontGroupMap();
         //clear cache
         frontGroupMapCache.clearMapList();
@@ -272,7 +271,7 @@ public class GroupService {
         }
 
         //remove each group
-        allGroup.stream().forEach(group -> removeByGroupId(group.getGroupId()));
+        allGroup.stream().forEach(group -> removeAllDataByGroupId(group.getGroupId()));
     }
 
     /**
@@ -323,24 +322,25 @@ public class GroupService {
             int localGroupId = localGroup.getGroupId();
             long count = allGroupOnChain.stream().filter(id -> id == localGroupId).count();
             try {
+                // found groupId in groupOnChain
                 if (count > 0) {
-                    log.warn("group is valid, localGroupId:{}", localGroupId);
+                    log.warn("group is normal, localGroupId:{}", localGroupId);
                     //update NORMAL
                     updateGroupStatus(localGroupId, DataStatus.NORMAL.getValue());
                     continue;
                 }
-
-                if (!NodeMgrTools.isDateTimeInValid(localGroup.getModifyTime(),
+                // check from last modifyTime if within gray period
+                if (!NodeMgrTools.isWithinPeriod(localGroup.getModifyTime(),
                         constants.getGroupInvalidGrayscaleValue())) {
                     log.warn("remove group, localGroup:{}", JSON.toJSONString(localGroup));
                     //remove group
-                    removeByGroupId(localGroupId);
+                    removeAllDataByGroupId(localGroupId);
                     continue;
                 }
-
+                // if not found in groupOnChain
                 log.warn("group is invalid, localGroupId:{}", localGroupId);
                 if (DataStatus.NORMAL.getValue() == localGroup.getGroupStatus()) {
-                    //update invalid
+                    // update invalid
                     updateGroupStatus(localGroupId, DataStatus.INVALID.getValue());
                     continue;
                 }
@@ -357,7 +357,7 @@ public class GroupService {
     /**
      * remove by groupId.
      */
-    private void removeByGroupId(int groupId) {
+    private void removeAllDataByGroupId(int groupId) {
         if (groupId == 0) {
             return;
         }
@@ -365,9 +365,6 @@ public class GroupService {
         groupMapper.remove(groupId);
         //remove mapping.
         frontGroupMapService.removeByGroupId(groupId);
-        // @Deprecated: not save privateKey anymore
-        // remove user and key
-        // userService.deleteByGroupId(groupId);
         //remove contract
         contractService.deleteByGroupId(groupId);
         //remove method
@@ -450,14 +447,13 @@ public class GroupService {
             throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
         }
         // request front to operate
-        Object groupHandleResult = frontInterface.operateGroup(tbFront.getFrontIp(),
+        Object groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
-
-        // refresh group status
+        // refresh group status, not remove tb_group if within gray period (yaml-groupInvalidGrayscaleValue)
         resetGroupList();
 
         // return
-        return groupHandleResult;
+        return groupOperateStatus;
     }
 
     /**
@@ -486,6 +482,33 @@ public class GroupService {
         log.debug("end batchStartGroup.");
     }
 
+//    /**
+//     * batch get group's status
+//     *
+//     * @param req
+//     */
+//    public List<String> batchStatusGroup(ReqBatchStartGroup req) {
+//        log.debug("start batchStatusGroup:{}", req);
+//        Integer groupId = req.getGenerateGroupId();
+//        // check id
+//        checkGroupIdValid(groupId);
+//        List<String> groupStatusList = new ArrayList<>();
+//        for (String nodeId : req.getNodeList()) {
+//            // get front
+//            TbFront tbFront = frontService.getByNodeId(nodeId);
+//            if (tbFront == null) {
+//                log.error("fail batchStatusGroup node not exists.");
+//                throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
+//            }
+//            // request front to start
+//            BaseResponse response = frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
+//                    "getStatus");
+//            if ()
+//        }
+//        // refresh group status
+//        resetGroupList();
+//        log.debug("end batchStatusGroup.");
+//    }
 
     /**
      * save group id
