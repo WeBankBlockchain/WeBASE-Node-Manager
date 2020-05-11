@@ -15,7 +15,6 @@ package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -30,7 +29,6 @@ import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.frontinterface.entity.GroupHandleResult;
 import com.webank.webase.node.mgr.group.entity.*;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.node.NodeService;
@@ -38,7 +36,6 @@ import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
-import com.webank.webase.node.mgr.user.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -460,15 +457,18 @@ public class GroupService {
      * list groupStatus Of each node of NodeList
      * @param nodeIdList
      * @param groupIdList
-     * @return map of <nodeId,<groupId, status>>
+     * @return GroupStatusInfo
      */
-    public Map<String, Map<Integer, String>> listGroupStatus(List<String> nodeIdList, List<Integer> groupIdList) {
-        Map<String, Map<Integer, String>> groupStatusMapList = new HashMap<>(nodeIdList.size());
+    public List<RspGroupStatus> listGroupStatus(List<String> nodeIdList, List<Integer> groupIdList) {
+        List<RspGroupStatus> resList = new ArrayList<>(nodeIdList.size());
         for (String nodeId : nodeIdList) {
-            Map<Integer, String> resMap = getGroupStatus(nodeId, groupIdList);
-            groupStatusMapList.put(nodeId, resMap);
+            Map<String, String> statusMap = new HashMap<>();
+            statusMap = getGroupStatus(nodeId, groupIdList);
+
+            RspGroupStatus rspGroupStatus = new RspGroupStatus(nodeId, statusMap);
+            resList.add(rspGroupStatus);
         }
-        return groupStatusMapList;
+        return resList;
     }
 
     /**
@@ -477,14 +477,14 @@ public class GroupService {
      * @param groupIdList
      * @return map of <groupId, status>
      */
-    private Map<Integer, String> getGroupStatus(String nodeId, List<Integer> groupIdList) {
+    private Map<String, String> getGroupStatus(String nodeId, List<Integer> groupIdList) {
         // get front
         TbFront tbFront = frontService.getByNodeId(nodeId);
         if (tbFront == null) {
             log.error("fail getGroupStatus node front not exists.");
             throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
         }
-        Map<Integer, String> statusRes = frontInterface.queryGroupStatus(tbFront.getFrontIp(),
+        Map<String, String> statusRes = frontInterface.queryGroupStatus(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), nodeId, groupIdList);
         return statusRes;
     }
