@@ -227,7 +227,7 @@ public class GroupController extends BaseController {
      * @return map of <nodeId,<groupId, status>>
      */
     @PostMapping("/queryGroupStatus/list")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse getGroupStatusList(@Valid @RequestBody ReqGroupStatus reqGroupStatus) throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
