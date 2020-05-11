@@ -461,7 +461,7 @@ public class FrontInterfaceService {
     /**
      * query group status list
      */
-    public Map<Integer, String> queryGroupStatus(String frontIp, Integer frontPort, String nodeId, List<Integer> groupIdList) {
+    public Map<String, String> queryGroupStatus(String frontIp, Integer frontPort, String nodeId, List<Integer> groupIdList) {
         log.debug("start queryGroupStatusList frontIp:{} frontPort:{} nodeId:{} groupIdList:{}",
                 frontIp, frontPort, nodeId, groupIdList);
         int uselessGroupId = 1;
@@ -470,7 +470,7 @@ public class FrontInterfaceService {
         BaseResponse response = requestSpecificFront(uselessGroupId, frontIp, frontPort,
                         HttpMethod.POST, FrontRestTools.URI_QUERY_GROUP_STATUS, param, BaseResponse.class);
         log.debug("end queryGroupStatusList");
-        return (Map<Integer, String>) response.getData();
+        return (Map<String, String>) response.getData();
     }
     
     /**

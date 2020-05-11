@@ -31,7 +31,6 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -237,9 +236,9 @@ public class GroupController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         log.info("start getGroupStatusMap startTime:{}", startTime.toEpochMilli());
         List<String> nodeIdList = reqGroupStatus.getNodeIdList();
-        Map<String, Map<Integer, String>> res = groupService.listGroupStatus(nodeIdList,
+        List<RspGroupStatus> resList = groupService.listGroupStatus(nodeIdList,
                 reqGroupStatus.getGroupIdList());
-        baseResponse.setData(res);
+        baseResponse.setData(resList);
         log.info("end getGroupStatusMap useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JSON.toJSONString(baseResponse));
