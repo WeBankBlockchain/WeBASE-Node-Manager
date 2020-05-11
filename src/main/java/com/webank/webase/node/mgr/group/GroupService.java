@@ -457,6 +457,39 @@ public class GroupService {
     }
 
     /**
+     * list groupStatus Of each node of NodeList
+     * @param nodeIdList
+     * @param groupIdList
+     * @return map of <nodeId,<groupId, status>>
+     */
+    public Map<String, Map<Integer, String>> listGroupStatus(List<String> nodeIdList, List<Integer> groupIdList) {
+        Map<String, Map<Integer, String>> groupStatusMapList = new HashMap<>(nodeIdList.size());
+        for (String nodeId : nodeIdList) {
+            Map<Integer, String> resMap = getGroupStatus(nodeId, groupIdList);
+            groupStatusMapList.put(nodeId, resMap);
+        }
+        return groupStatusMapList;
+    }
+
+    /**
+     * getGroupStatus of single node's sight
+     * @param nodeId
+     * @param groupIdList
+     * @return map of <groupId, status>
+     */
+    private Map<Integer, String> getGroupStatus(String nodeId, List<Integer> groupIdList) {
+        // get front
+        TbFront tbFront = frontService.getByNodeId(nodeId);
+        if (tbFront == null) {
+            log.error("fail getGroupStatus node front not exists.");
+            throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
+        }
+        Map<Integer, String> statusRes = frontInterface.queryGroupStatus(tbFront.getFrontIp(),
+                tbFront.getFrontPort(), nodeId, groupIdList);
+        return statusRes;
+    }
+
+    /**
      * batch start group.
      *
      * @param req
@@ -481,34 +514,6 @@ public class GroupService {
         resetGroupList();
         log.debug("end batchStartGroup.");
     }
-
-//    /**
-//     * batch get group's status
-//     *
-//     * @param req
-//     */
-//    public List<String> batchStatusGroup(ReqBatchStartGroup req) {
-//        log.debug("start batchStatusGroup:{}", req);
-//        Integer groupId = req.getGenerateGroupId();
-//        // check id
-//        checkGroupIdValid(groupId);
-//        List<String> groupStatusList = new ArrayList<>();
-//        for (String nodeId : req.getNodeList()) {
-//            // get front
-//            TbFront tbFront = frontService.getByNodeId(nodeId);
-//            if (tbFront == null) {
-//                log.error("fail batchStatusGroup node not exists.");
-//                throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
-//            }
-//            // request front to start
-//            BaseResponse response = frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
-//                    "getStatus");
-//            if ()
-//        }
-//        // refresh group status
-//        resetGroupList();
-//        log.debug("end batchStatusGroup.");
-//    }
 
     /**
      * save group id

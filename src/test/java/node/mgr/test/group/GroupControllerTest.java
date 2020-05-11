@@ -18,6 +18,7 @@ package node.mgr.test.group;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
+import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
 import com.webank.webase.node.mgr.group.entity.ReqOperateGroup;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,8 +71,19 @@ public class GroupControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/all"));
         resultActions.
-            andExpect(MockMvcResultMatchers.status().isOk()).
-            andDo(MockMvcResultHandlers.print());
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+
+    @Test
+    public void testGetAllInvalidIncluded() throws Exception {
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/all/invalidIncluded"));
+        resultActions.
+//                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
         System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
 
@@ -148,4 +160,27 @@ public class GroupControllerTest {
         System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
 
+    @Test
+    public void testGroupStatusList() throws Exception {
+        ReqGroupStatus param = new ReqGroupStatus();
+        List<Integer> groupIdList = new ArrayList<>();
+        groupIdList.add(2020);
+        groupIdList.add(3);
+        groupIdList.add(1);
+        groupIdList.add(2021);
+        groupIdList.add(2023);
+        param.setGroupIdList(groupIdList);
+        List<String> nodeIdList = new ArrayList<>();
+        nodeIdList.add(targetNodeId);
+        param.setNodeIdList(nodeIdList);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .post("/group/queryGroupStatus/list")
+                .content(JSON.toJSONString(param))
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+        );
+        resultActions.
+//                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
 }

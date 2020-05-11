@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
+import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
@@ -453,14 +454,23 @@ public class FrontInterfaceService {
         String uri = String.format(FrontRestTools.URI_OPERATE_GROUP, type);
         BaseResponse response =
                 getFromSpecificFront(groupId, frontIp, frontPort, uri, BaseResponse.class);
-//        GroupOperateStatus result = new GroupOperateStatus();
-//        if (Objects.nonNull(response.getData())) {
-//            result.setCode(String.valueOf(0));
-//            result.setMessage(response.getMessage());
-//            result.setStatus(response.getData().toString());
-//        }
         log.debug("end operateGroup");
         return response;
+    }
+
+    /**
+     * query group status list
+     */
+    public Map<Integer, String> queryGroupStatus(String frontIp, Integer frontPort, String nodeId, List<Integer> groupIdList) {
+        log.debug("start queryGroupStatusList frontIp:{} frontPort:{} nodeId:{} groupIdList:{}",
+                frontIp, frontPort, nodeId, groupIdList);
+        int uselessGroupId = 1;
+        Map<String, Object> param = new HashMap<>(1);
+        param.put("groupIdList", groupIdList);
+        BaseResponse response = requestSpecificFront(uselessGroupId, frontIp, frontPort,
+                        HttpMethod.POST, FrontRestTools.URI_QUERY_GROUP_STATUS, param, BaseResponse.class);
+        log.debug("end queryGroupStatusList");
+        return (Map<Integer, String>) response.getData();
     }
     
     /**
