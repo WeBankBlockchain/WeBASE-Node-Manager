@@ -30,6 +30,7 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +120,7 @@ public class GroupController extends BaseController {
         return pagesponse;
     }
 
-    @GetMapping("/all/invalid")
+    @GetMapping("/all/invalidIncluded")
     public BasePageResponse getAllGroupIncludeInvalidGroup() throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -219,6 +220,26 @@ public class GroupController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JSON.toJSONString(groupHandleResult));
         return groupHandleResult;
+    }
+
+    /**
+     * query group status list
+     * @return map of <nodeId,<groupId, status>>
+     */
+    @PostMapping("/queryGroupStatus/list")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse getGroupStatusList(@Valid @RequestBody ReqGroupStatus reqGroupStatus) throws NodeMgrException {
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start getGroupStatusMap startTime:{}", startTime.toEpochMilli());
+        List<String> nodeIdList = reqGroupStatus.getNodeIdList();
+        Map<String, Map<Integer, String>> res = groupService.listGroupStatus(nodeIdList,
+                reqGroupStatus.getGroupIdList());
+        baseResponse.setData(res);
+        log.info("end getGroupStatusMap useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JSON.toJSONString(baseResponse));
+        return baseResponse;
     }
 
     /**
