@@ -31,7 +31,8 @@ import java.util.Map;
 public class RspGroupStatus {
 	private String nodeId;
 	/**
-	 * <groupId, status> status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
+	 * <groupId, status>
+	 *     status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
 	 */
 	private Map<String, String> groupStatusMap;
 }
