@@ -80,9 +80,9 @@ public class GroupControllerTest {
     @Test
     public void testGetAllInvalidIncluded() throws Exception {
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/all/invalidIncluded"));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/all/invalidIncluded/1/5"));
         resultActions.
-//                andExpect(MockMvcResultMatchers.status().isOk()).
+                andExpect(MockMvcResultMatchers.status().isOk()).
                 andDo(MockMvcResultHandlers.print());
         System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
