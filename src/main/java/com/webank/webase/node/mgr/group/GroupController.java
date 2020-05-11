@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.pagetools.List2Page;
 import com.webank.webase.node.mgr.group.entity.*;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.scheduler.StatisticsTransdailyTask;
@@ -120,8 +121,9 @@ public class GroupController extends BaseController {
         return pagesponse;
     }
 
-    @GetMapping("/all/invalidIncluded")
-    public BasePageResponse getAllGroupIncludeInvalidGroup() throws NodeMgrException {
+    @GetMapping("/all/invalidIncluded/{pageNumber}/{pageSize}")
+    public BasePageResponse getAllGroupIncludeInvalidGroup(@PathVariable("pageNumber") Integer pageNumber,
+                                                           @PathVariable("pageSize") Integer pageSize) throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start getAllGroupIncludeInvalidGroup startTime:{}", startTime.toEpochMilli());
@@ -130,6 +132,8 @@ public class GroupController extends BaseController {
         int count = groupService.countOfGroup(null, null);
         if (count > 0) {
             List<TbGroup> groupList = groupService.getGroupList(null);
+            List2Page list2Page = new List2Page(groupList, pageSize, pageNumber);
+            pagesponse.setData(list2Page.getPagedList());
             pagesponse.setTotalCount(count);
             pagesponse.setData(groupList);
         }
