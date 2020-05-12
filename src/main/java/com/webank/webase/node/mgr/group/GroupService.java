@@ -558,7 +558,7 @@ public class GroupService {
         TbGroup tbGroup =
                 new TbGroup(groupId, groupName, nodeCount, description,
                         groupType, groupStatus);
-        tbGroup.setGroupTimestamp(String.valueOf(timestamp));
+        tbGroup.setGroupTimestamp(timestamp.toString(10));
         tbGroup.setNodeIdList(JSON.toJSONString(nodeIdList));
         groupMapper.save(tbGroup);
         // create table by group id
