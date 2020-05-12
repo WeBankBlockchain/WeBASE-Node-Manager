@@ -19,7 +19,6 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -322,8 +321,8 @@ public class GroupService {
             int localGroupId = localGroup.getGroupId();
             long count = allGroupOnChain.stream().filter(id -> id == localGroupId).count();
             try {
-                // found groupId in groupOnChain
-                if (count > 0) {
+                // found groupId in groupOnChain, local status is invalid, set as normal
+                if (count > 0 && localGroup.getGroupStatus() != DataStatus.NORMAL.getValue()) {
                     log.warn("group is normal, localGroupId:{}", localGroupId);
                     //update NORMAL
                     updateGroupStatus(localGroupId, DataStatus.NORMAL.getValue());
@@ -338,7 +337,7 @@ public class GroupService {
 //                    removeAllDataByGroupId(localGroupId);
 //                    continue;
 //                }
-                // if not found in groupOnChain
+                // if not found in groupOnChain and local status is normal, set as invalid
                 log.warn("group is invalid, localGroupId:{}", localGroupId);
                 if (DataStatus.NORMAL.getValue() == localGroup.getGroupStatus()) {
                     // update invalid
