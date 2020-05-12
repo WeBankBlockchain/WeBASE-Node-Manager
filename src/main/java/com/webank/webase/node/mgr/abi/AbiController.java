@@ -117,11 +117,9 @@ public class AbiController extends BaseController {
 		return new BaseResponse(ConstantCode.SUCCESS, res);
 	}
 
-	@DeleteMapping("")
+	@DeleteMapping("/{abiId}")
 	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-	public BaseResponse deleteAbi(@Valid @RequestBody ReqDelAbi param, BindingResult result) {
-		checkBindResult(result);
-		Integer abiId = param.getAbiId();
+	public BaseResponse deleteAbi(@PathVariable("abiId") Integer abiId) {
 		log.debug("start deleteAbi. abiId:{}", abiId);
 		abiService.delete(abiId);
 		log.debug("end deleteAbi");
