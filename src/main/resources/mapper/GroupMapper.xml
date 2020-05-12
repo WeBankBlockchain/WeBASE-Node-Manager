@@ -71,8 +71,13 @@
     order by group_id asc
   </select>
 
+    <select id="getGroupById" resultMap="groupMap">
+        select * from tb_group
+        where group_id = #{groupId}
+    </select>
 
-  <select id="queryLatestStatisticalTrans" resultMap="statisticalTransMap">
+
+    <select id="queryLatestStatisticalTrans" resultMap="statisticalTransMap">
 		select a.group_id,b.maxDay,c.block_number,c.trans_count from tb_group a
 		LEFT JOIN
 		(select group_id,max(trans_day) as maxDay from tb_trans_daily GROUP BY group_id)b
