@@ -36,12 +36,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller for processing group information.
@@ -274,6 +269,21 @@ public class GroupController extends BaseController {
         log.info("start updateGroup startTime:{}", startTime.toEpochMilli());
         groupService.resetGroupList();
         log.info("end updateGroup useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JSON.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * delete all group's data(trans, contract, node etc.)
+     */
+    @DeleteMapping("/{groupId}")
+    public BaseResponse deleteGroupData(@PathVariable("groupId") Integer groupId) {
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.warn("start deleteGroupData startTime:{}", startTime.toEpochMilli());
+        groupService.removeAllDataByGroupId(groupId);
+        log.warn("end deleteGroupData useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JSON.toJSONString(baseResponse));
         return baseResponse;

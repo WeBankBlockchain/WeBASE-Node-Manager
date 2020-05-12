@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -207,10 +208,14 @@ public class GroupService {
                 Integer gId = Integer.valueOf(groupId);
                 allGroupSet.add(gId);
                 // peer in group
-                List<String> groupPeerList = frontInterface.getNodeIDListFromSpecificFront(frontIp, frontPort, gId);
-                // save group
-                saveGroup(gId, groupPeerList.size(), "synchronous",
-                        GroupType.SYNC.getValue(), DataStatus.NORMAL.getValue());
+                List<String> groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+                // check group not existed or node count differs
+                TbGroup checkGroup = getGroupById(gId);
+                if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
+                    // save group
+                    saveGroup(gId, groupPeerList.size(), "synchronous",
+                            GroupType.SYNC.getValue(), DataStatus.NORMAL.getValue());
+                }
                 frontGroupMapService.newFrontGroup(front.getFrontId(), gId);
                 //save new peers
                 savePeerList(frontIp, frontPort, gId, groupPeerList);
@@ -218,14 +223,11 @@ public class GroupService {
                 removeInvalidPeer(gId, groupPeerList);
                 //refresh: add sealer and observer no matter validity
                 frontService.refreshSealerAndObserverInNodeList(frontIp, frontPort, gId);
-                //check node status
-                //nodeService.checkNodeStatus(gId);
             }
         }
 
         // check group status
-        // if beyond gray period, remove invalid group, else, not remove
-        checkGroupStatusAndRemoveInvalidGroup(allGroupSet);
+        checkAndUpdateGroupStatus(allGroupSet);
         // remove front_group_map that not in tb_front or tb_group
         frontGroupMapService.removeInvalidFrontGroupMap();
         //clear cache
@@ -236,7 +238,7 @@ public class GroupService {
     }
 
     /**
-     * save new peers.
+     * save new peers that not in group peers
      */
     private void savePeerList(String frontIp, Integer frontPort, int groupId, List<String> groupPeerList) {
         //get all local nodes
@@ -303,9 +305,9 @@ public class GroupService {
     }
 
     /**
-     * check group status.
+     * check group status and Update
      */
-    private void checkGroupStatusAndRemoveInvalidGroup(Set<Integer> allGroupOnChain) {
+    private void checkAndUpdateGroupStatus(Set<Integer> allGroupOnChain) {
         if (CollectionUtils.isEmpty(allGroupOnChain)) {
             return;
         }
@@ -326,14 +328,15 @@ public class GroupService {
                     updateGroupStatus(localGroupId, DataStatus.NORMAL.getValue());
                     continue;
                 }
+                // v1.3.1: removed by api, not aumotically
                 // check from last modifyTime if within gray period
-                if (!NodeMgrTools.isWithinPeriod(localGroup.getModifyTime(),
-                        constants.getGroupInvalidGrayscaleValue())) {
-                    log.warn("remove group, localGroup:{}", JSON.toJSONString(localGroup));
-                    //remove group
-                    removeAllDataByGroupId(localGroupId);
-                    continue;
-                }
+//                if (!NodeMgrTools.isWithinPeriod(localGroup.getModifyTime(),
+//                        constants.getGroupInvalidGrayscaleValue())) {
+//                    log.warn("remove group, localGroup:{}", JSON.toJSONString(localGroup));
+//                    //remove group
+//                    removeAllDataByGroupId(localGroupId);
+//                    continue;
+//                }
                 // if not found in groupOnChain
                 log.warn("group is invalid, localGroupId:{}", localGroupId);
                 if (DataStatus.NORMAL.getValue() == localGroup.getGroupStatus()) {
@@ -352,12 +355,14 @@ public class GroupService {
 
 
     /**
-     * remove by groupId.
+     * remove all data by groupId.
+     * included: tb_group, tb_front_group_map, group contract/trans, group method, group node etc.
      */
-    private void removeAllDataByGroupId(int groupId) {
+    protected void removeAllDataByGroupId(int groupId) {
         if (groupId == 0) {
             return;
         }
+        log.warn("removeAllDataByGroupId! groupId:{}", groupId);
         //remove groupId.
         groupMapper.remove(groupId);
         //remove mapping.
@@ -372,6 +377,7 @@ public class GroupService {
         transDailyService.deleteByGroupId(groupId);
         //drop table.
         tableService.dropTableByGroupId(groupId);
+        log.warn("end removeAllDataByGroupId");
     }
 
     /**
@@ -395,7 +401,8 @@ public class GroupService {
                 generateGroupInfo);
         // save group, saved as invalid status until start
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
-                req.getDescription(), GroupType.MANUAL.getValue(), DataStatus.INVALID.getValue());
+                req.getDescription(), GroupType.MANUAL.getValue(), DataStatus.INVALID.getValue(),
+                req.getTimestamp(), req.getNodeList());
         return tbGroup;
     }
 
@@ -407,7 +414,9 @@ public class GroupService {
      */
     public TbGroup generateGroup(ReqGenerateGroup req) {
         Integer generateGroupId = req.getGenerateGroupId();
-        checkGroupIdExisted(generateGroupId);
+        if (checkGroupIdExisted(generateGroupId)) {
+            throw new NodeMgrException(ConstantCode.GROUP_ID_EXISTS);
+        }
 
         for (String nodeId : req.getNodeList()) {
             // get front
@@ -424,7 +433,8 @@ public class GroupService {
         }
         // save group, saved as invalid status until start
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
-                req.getDescription(), GroupType.MANUAL.getValue(), DataStatus.INVALID.getValue());
+                req.getDescription(), GroupType.MANUAL.getValue(), DataStatus.INVALID.getValue(),
+                req.getTimestamp(), req.getNodeList());
         return tbGroup;
     }
 
@@ -535,10 +545,29 @@ public class GroupService {
         return tbGroup;
     }
 
+    @Transactional
+    public TbGroup saveGroup(int groupId, int nodeCount, String description, int groupType,
+                             int groupStatus, BigInteger timestamp, List<String> nodeIdList) {
+        if (groupId == 0) {
+            return null;
+        }
+        // save group id
+        String groupName = "group" + groupId;
+        TbGroup tbGroup =
+                new TbGroup(groupId, groupName, nodeCount, description,
+                        groupType, groupStatus);
+        tbGroup.setTimestamp(String.valueOf(timestamp));
+        tbGroup.setNodeIdList(JSON.toJSONString(nodeIdList));
+        groupMapper.save(tbGroup);
+        // create table by group id
+        tableService.newTableByGroupId(groupId);
+        return tbGroup;
+    }
+
     /**
      * Check the validity of the groupId.
      */
-    public void checkGroupIdExisted(Integer groupId) throws NodeMgrException {
+    public boolean checkGroupIdExisted(Integer groupId) throws NodeMgrException {
         log.debug("start checkGroupIdExisted groupId:{}", groupId);
 
         if (groupId == null) {
@@ -549,9 +578,10 @@ public class GroupService {
         Integer groupCount = countOfGroup(groupId, null);
         log.debug("checkGroupIdExisted groupId:{} groupCount:{}", groupId, groupCount);
         if (groupCount != null && groupCount > 0) {
-            throw new NodeMgrException(ConstantCode.GROUP_ID_EXISTS);
+            return true;
         }
         log.debug("end checkGroupIdExisted");
+        return false;
     }
 
     /**
@@ -571,6 +601,11 @@ public class GroupService {
             throw new NodeMgrException(ConstantCode.INVALID_GROUP_ID);
         }
         log.debug("end checkGroupIdValid");
+    }
+
+    public TbGroup getGroupById(Integer groupId) {
+        log.debug("getGroupById groupId:{}", groupId);
+        return groupMapper.getGroupById(groupId);
     }
 
 }
