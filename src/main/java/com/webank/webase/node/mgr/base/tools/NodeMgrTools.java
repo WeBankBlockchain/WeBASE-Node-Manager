@@ -496,23 +496,23 @@ public class NodeMgrTools {
         if (StringUtils.isBlank(contractBin)) {
             return null;
         }
-        contractBin = removeFirstStr(contractBin, "0x");
-        if (contractBin.length() > removaLastLength) {
-            contractBin = contractBin.substring(0, contractBin.length() - removaLastLength);
+        String contractBinResult = removeFirstStr(contractBin, "0x");
+        if (contractBinResult.length() > removaLastLength) {
+            contractBinResult = contractBinResult.substring(0, contractBinResult.length() - removaLastLength);
         }
-        return contractBin;
+        return contractBinResult;
     }
 
     /**
      * remove fist string.
      */
-    public static String removeFirstStr(String constant, String target) {
-        if (StringUtils.isBlank(constant) || StringUtils.isBlank(target)) {
-            return constant;
+    public static String removeFirstStr(String input, String target) {
+        if (StringUtils.isBlank(input) || StringUtils.isBlank(target)) {
+            return input;
         }
-        if (constant.startsWith(target)) {
-            constant = StringUtils.removeStart(constant, target);
+        if (input.startsWith(target)) {
+            input = StringUtils.removeStart(input, target);
         }
-        return constant;
+        return input;
     }
 }
