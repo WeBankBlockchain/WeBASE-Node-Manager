@@ -16,6 +16,10 @@
       property="description"/>
     <result column="group_type" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="groupType"/>
+    <result column="group_timestamp" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="groupTimestamp"/>
+    <result column="node_id_list" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="nodeIdList"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"

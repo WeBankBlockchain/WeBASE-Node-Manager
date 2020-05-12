@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS tb_group (
     node_count int DEFAULT '0' COMMENT '群组下节点数',
     description varchar(1024) COMMENT '群组描述',
     group_type int COMMENT '群组类型（1-拉取，2-动态创建）',
+    group_timestamp varchar(64) COMMENT '群组创世块时间戳',
+    node_id_list text COMMENT '群组成员节点的ID',
     create_time datetime DEFAULT NULL COMMENT '创建时间',
     modify_time datetime DEFAULT NULL COMMENT '修改时间',
     PRIMARY KEY (group_id)
