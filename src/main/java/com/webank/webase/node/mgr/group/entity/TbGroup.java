@@ -43,7 +43,7 @@ public class TbGroup {
     /**
      * group.x.genesis timestamp
      */
-    private String timestamp;
+    private String groupTimestamp;
     /**
      * group peers nodeid
      */
