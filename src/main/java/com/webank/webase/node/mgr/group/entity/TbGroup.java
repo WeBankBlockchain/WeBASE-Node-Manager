@@ -40,6 +40,14 @@ public class TbGroup {
     private LocalDateTime modifyTime;
     private String description;
     private Integer groupType;
+    /**
+     * group.x.genesis timestamp
+     */
+    private String timestamp;
+    /**
+     * group peers nodeid
+     */
+    private String nodeIdList;
 
     public TbGroup(Integer groupId, String groupName, Integer nodeCount,
                    String description, Integer groupType) {
