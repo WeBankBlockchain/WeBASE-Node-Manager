@@ -123,6 +123,7 @@ public class GroupService {
 
     /**
      * Check the validity of the groupId.
+     * @throws NodeMgrException INVALID_GROUP_ID
      */
     public void checkGroupId(Integer groupId) throws NodeMgrException {
         log.debug("start checkGroupId groupId:{}", groupId);
@@ -362,6 +363,7 @@ public class GroupService {
         if (groupId == 0) {
             return;
         }
+        checkGroupId(groupId);
         log.warn("removeAllDataByGroupId! groupId:{}", groupId);
         //remove groupId.
         groupMapper.remove(groupId);
@@ -508,7 +510,7 @@ public class GroupService {
         log.debug("start batchStartGroup:{}", req);
         Integer groupId = req.getGenerateGroupId();
         // check id
-        checkGroupIdValid(groupId);
+        checkGroupId(groupId);
         for (String nodeId : req.getNodeList()) {
             // get front
             TbFront tbFront = frontService.getByNodeId(nodeId);
@@ -582,25 +584,6 @@ public class GroupService {
         }
         log.debug("end checkGroupIdExisted");
         return false;
-    }
-
-    /**
-     * Check the validity of the groupId.
-     */
-    public void checkGroupIdValid(Integer groupId) throws NodeMgrException {
-        log.debug("start checkGroupIdValid groupId:{}", groupId);
-
-        if (groupId == null) {
-            log.error("fail checkGroupIdValid groupId is null");
-            throw new NodeMgrException(ConstantCode.GROUP_ID_NULL);
-        }
-
-        Integer groupCount = countOfGroup(groupId, null);
-        log.debug("checkGroupIdValid groupId:{} groupCount:{}", groupId, groupCount);
-        if (groupCount == null || groupCount == 0) {
-            throw new NodeMgrException(ConstantCode.INVALID_GROUP_ID);
-        }
-        log.debug("end checkGroupIdValid");
     }
 
     public TbGroup getGroupById(Integer groupId) {
