@@ -319,27 +319,19 @@ public class GroupService {
 
         for (TbGroup localGroup : allLocalGroup) {
             int localGroupId = localGroup.getGroupId();
-            long count = allGroupOnChain.stream().filter(id -> id == localGroupId).count();
+            long count = 0;
+            count = allGroupOnChain.stream().filter(id -> id == localGroupId).count();
             try {
                 // found groupId in groupOnChain, local status is invalid, set as normal
-                if (count > 0 && localGroup.getGroupStatus() != DataStatus.NORMAL.getValue()) {
+                if (count > 0 && localGroup.getGroupStatus() == DataStatus.INVALID.getValue()) {
                     log.warn("group is normal, localGroupId:{}", localGroupId);
                     //update NORMAL
                     updateGroupStatus(localGroupId, DataStatus.NORMAL.getValue());
                     continue;
                 }
-                // v1.3.1: removed by api, not aumotically
-                // check from last modifyTime if within gray period
-//                if (!NodeMgrTools.isWithinPeriod(localGroup.getModifyTime(),
-//                        constants.getGroupInvalidGrayscaleValue())) {
-//                    log.warn("remove group, localGroup:{}", JSON.toJSONString(localGroup));
-//                    //remove group
-//                    removeAllDataByGroupId(localGroupId);
-//                    continue;
-//                }
                 // if not found in groupOnChain and local status is normal, set as invalid
                 log.warn("group is invalid, localGroupId:{}", localGroupId);
-                if (DataStatus.NORMAL.getValue() == localGroup.getGroupStatus()) {
+                if (count == 0 && DataStatus.NORMAL.getValue() == localGroup.getGroupStatus()) {
                     // update invalid
                     updateGroupStatus(localGroupId, DataStatus.INVALID.getValue());
                     continue;
