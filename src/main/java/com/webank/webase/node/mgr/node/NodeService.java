@@ -315,4 +315,11 @@ public class NodeService {
         log.debug("end getSealerAndObserverList resList:{}", resList);
         return resList;
     }
+
+    public List<String> getNodeIdListService(int groupId) {
+        log.debug("start getSealerAndObserverList groupId:{}", groupId);
+        List<String> nodeIdList = frontInterface.getNodeIdList(groupId);
+        log.debug("end getSealerAndObserverList nodeIdList:{}", nodeIdList);
+        return nodeIdList;
+    }
 }

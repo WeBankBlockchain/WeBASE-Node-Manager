@@ -524,4 +524,9 @@ public class FrontInterfaceService {
         List<KeyPair> resList = JSON.parseArray(JSON.toJSONString(data), KeyPair.class);
         return resList;
     }
+
+    public List<String> getNodeIdList(int groupId) {
+        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_NODEID_LIST, List.class);
+
+    }
 }
