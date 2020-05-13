@@ -127,7 +127,7 @@ public class FrontService {
             Integer group = Integer.valueOf(groupId);
             //peer in group
             List<String> groupPeerList = frontInterface
-                .getNodeIDListFromSpecificFront(frontIp, frontPort, group);
+                .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
             //get peers on chain
             PeerInfo[] peerArr = frontInterface
                 .getPeersFromSpecificFront(frontIp, frontPort, group);
