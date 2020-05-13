@@ -324,16 +324,17 @@ public class GroupService {
             try {
                 // found groupId in groupOnChain, local status is invalid, set as normal
                 if (count > 0 && localGroup.getGroupStatus() == DataStatus.INVALID.getValue()) {
-                    log.warn("group is normal, localGroupId:{}", localGroupId);
+                    log.info("group is normal, localGroupId:{}", localGroupId);
                     //update NORMAL
                     updateGroupStatus(localGroupId, DataStatus.NORMAL.getValue());
                     continue;
                 }
                 // if not found in groupOnChain and local status is normal, set as invalid
-                log.warn("group is invalid, localGroupId:{}", localGroupId);
+
                 if (count == 0 && DataStatus.NORMAL.getValue() == localGroup.getGroupStatus()) {
                     // update invalid
-                    updateGroupStatus(localGroupId, DataStatus.INVALID.getValue());
+					log.warn("group is invalid, localGroupId:{}", localGroupId);
+					updateGroupStatus(localGroupId, DataStatus.INVALID.getValue());
                     continue;
                 }
 
