@@ -21,7 +21,6 @@ import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.abi.AbiService;
 import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.abi.entity.ReqAbiListParam;
-import com.webank.webase.node.mgr.abi.entity.ReqDelAbi;
 import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import org.junit.Assert;

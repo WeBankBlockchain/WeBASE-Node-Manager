@@ -19,7 +19,6 @@ package com.webank.webase.node.mgr.abi;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.abi.entity.ReqAbiListParam;
-import com.webank.webase.node.mgr.abi.entity.ReqDelAbi;
 import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
