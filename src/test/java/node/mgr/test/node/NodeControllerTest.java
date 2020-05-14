@@ -70,7 +70,7 @@ public class NodeControllerTest {
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.get("/node/nodeIdList/2"));
         resultActions.
-//                andExpect(MockMvcResultMatchers.status().isOk()).
+                andExpect(MockMvcResultMatchers.status().isOk()).
                 andDo(MockMvcResultHandlers.print());
         System.out.println("======================response:"
                 +resultActions.andReturn().getResponse().getContentAsString());

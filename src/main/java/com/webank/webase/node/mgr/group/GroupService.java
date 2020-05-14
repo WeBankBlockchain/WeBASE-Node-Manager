@@ -358,14 +358,15 @@ public class GroupService {
             log.warn("checkGroupGenesisSame not found any front.");
             return;
 		}
-		List<TbGroup> allGroupList = getGroupList(null);
-		if (allGroupList.isEmpty()) {
+		List<TbGroup> allNormalGroupList = getGroupList(GroupStatus.NORMAL.getValue());
+		if (allNormalGroupList.isEmpty()) {
             log.warn("checkGroupGenesisSame not found any group of front.");
             return;
 		}
 
-		for (TbGroup tbGroup : allGroupList) {
+		for (TbGroup tbGroup : allNormalGroupList) {
 			int groupId = tbGroup.getGroupId();
+            log.error("checkGroupGenesisSame groupId:{}",groupId);
             String lastBlockHash = "";
             for (TbFront front : frontList) {
 				String frontIp = front.getFrontIp();
@@ -373,7 +374,9 @@ public class GroupService {
 				// check genesis block
                 BlockInfo genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
                         frontPort, groupId, BigInteger.ZERO);
-
+                if (genesisBlock == null) {
+                    continue;
+                }
                 if (!"".equals(lastBlockHash) && !lastBlockHash.equals(genesisBlock.getHash())) {
                     log.warn("checkGroupGenesisSame genesis block hash conflicts with other group," +
                             " groupId:{}, frontId:{}", groupId, front.getFrontId());
