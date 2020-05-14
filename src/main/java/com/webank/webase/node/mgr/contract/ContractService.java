@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.contract;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.node.mgr.abi.AbiService;
+import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -277,15 +278,16 @@ public class  ContractService {
             // get abi by contract
             TbContract contract = verifyContractIdExist(param.getContractId(), param.getGroupId());
             contractAbiStr = contract.getContractAbi();
+            //send abi to front
+            sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
+            //check contract deploy
+            verifyContractDeploy(param.getContractId(), param.getGroupId());
         } else {
-            // send tx by abi, no need to check abi exist in db
-            contractAbiStr = JSON.toJSONString(param.getContractAbi());
+            // send tx by abi
+            // get from db and it's deployed
+            AbiInfo abiInfo = abiService.getAbiByGroupIdAndAddress(param.getGroupId(), param.getContractAddress());
+            contractAbiStr = abiInfo.getContractAbi();
         }
-
-        //send abi to front
-        sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
-        //check contract deploy
-        verifyContractDeploy(param.getContractId(), param.getGroupId());
 
         // if constant, signUserId is useless
         AbiDefinition funcAbi = Web3Tools.getAbiDefinition(param.getFuncName(), contractAbiStr);
