@@ -171,6 +171,15 @@ public class FrontInterfaceService {
                 SyncStatus.class);
     }
 
+    public BlockInfo getBlockByNumberFromSpecificFront(String frontIp, Integer frontPort,
+													   Integer groupId, BigInteger blockNumber) {
+		log.debug("start getBlockByNumberFromSpecificFront frontIp:{},frontPort{}," +
+				" groupId:{} blockNumber:{}", frontIp, frontPort, groupId, blockNumber);
+		String uri = String.format(FrontRestTools.URI_BLOCK_BY_NUMBER, blockNumber);
+		BlockInfo blockInfo = getFromSpecificFront(groupId, frontIp, frontPort, uri, BlockInfo.class);
+		return blockInfo;
+	}
+
     /**
      * get peers.
      */
