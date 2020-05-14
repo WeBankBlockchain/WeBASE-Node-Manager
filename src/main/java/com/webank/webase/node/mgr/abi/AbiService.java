@@ -135,6 +135,14 @@ public class AbiService {
 		}
 	}
 
+	public AbiInfo getAbiByGroupIdAndAddress(Integer groupId, String contractAddress) {
+		AbiInfo abiInfo = abiMapper.queryByGroupIdAndAddress(groupId, contractAddress);
+		if (Objects.isNull(abiInfo)) {
+			throw new NodeMgrException(ConstantCode.ABI_INFO_NOT_EXISTS);
+		}
+		return abiInfo;
+	}
+
 	/**
 	 * check address is valid.
 	 * @return address's runtime bin
