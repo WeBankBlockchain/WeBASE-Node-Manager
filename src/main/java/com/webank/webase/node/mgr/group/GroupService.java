@@ -237,7 +237,8 @@ public class GroupService {
                 Duration.between(startTime, Instant.now()).toMillis());
     }
 
-    /**
+
+	/**
      * save new peers that not in group peers
      */
     private void savePeerList(String frontIp, Integer frontPort, int groupId, List<String> groupPeerList) {
@@ -346,6 +347,32 @@ public class GroupService {
         }
     }
 
+	/**
+	 * check group's genesis block the same from each front
+	 */
+//	private void checkGroupGenesisSame() {
+//		//get all front
+//		List<TbFront> frontList = frontService.getFrontList(new FrontParam());
+//		if (frontList == null || frontList.size() == 0) {
+//			log.info("not fount any front, start remove all group");
+//			//remove all group   TODO
+//			// removeAllGroup();
+//			return;
+//		}
+//		List<TbGroup> allGroupList = getGroupList(null);
+//		if (allGroupList.isEmpty()) {
+//			return;
+//		}
+//
+//		for (TbGroup tbGroup : allGroupList) {
+//			int groupId = tbGroup.getGroupId();
+//			for (TbFront front : frontList) {
+//				String frontIp = front.getFrontIp();
+//				int frontPort = front.getFrontPort();
+//
+//			}
+//		}
+//	}
 
     /**
      * remove all data by groupId.

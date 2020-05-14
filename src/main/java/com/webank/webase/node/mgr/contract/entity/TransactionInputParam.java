@@ -24,13 +24,14 @@ import lombok.ToString;
 
 /**
  * param of send transaction from web
+ * support send by contract api and abi api
  */
 @Data
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TransactionInputParam extends TransactionParam {
-    @NotNull
+
     private Integer contractId;
     /**
      * user address, identify signUserId
