@@ -26,10 +26,13 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -89,14 +92,28 @@ public class NodeMgrTools {
     /**
      * convert timestamp to localDateTime.
      */
-    public static LocalDateTime timestamp2LocalDateTime(Long inputTime) {
-        if (inputTime == null) {
-            log.warn("timestamp2LocalDateTime fail. inputTime is null");
+    public static LocalDateTime timestamp2LocalDateTime(Long inputTimeStamp) {
+        if (inputTimeStamp == null) {
+            log.warn("timestamp2LocalDateTime fail. inputTimeStamp is null");
             return null;
         }
-        Instant instant = Instant.ofEpochMilli(inputTime);
+        Instant instant = Instant.ofEpochMilli(inputTimeStamp);
         ZoneId zone = ZoneId.systemDefault();
         return LocalDateTime.ofInstant(instant, zone);
+//        Timestamp time = new Timestamp(inputTimeStamp);
+//        return time.toLocalDateTime();
+    }
+    /**
+     * LocalDateTime to timestamp
+     */
+    public static Long localDateTime2Timestamp(LocalDateTime inputDateTime) {
+        if (inputDateTime == null) {
+            log.warn("localDateTime2Timestamp fail. inputDateTime is null");
+            return null;
+        }
+//        Timestamp time = Timestamp.valueOf(inputDateTime);
+//        return time.getTime();
+        return inputDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 
     /**

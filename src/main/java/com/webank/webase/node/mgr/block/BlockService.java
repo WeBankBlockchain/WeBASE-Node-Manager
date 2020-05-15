@@ -307,4 +307,36 @@ public class BlockService {
     public BlockInfo getblockFromFrontByHash(int groupId, String pkHash) {
         return frontInterface.getblockByHash(groupId, pkHash);
     }
+
+    /**
+     * get smallest block height in local db
+	 *
+     */
+    public TbBlock getSmallestBlockInfo(int groupId) {
+        BigInteger smallestHeight = getSmallestBlockHeight(groupId);
+        if (smallestHeight == null) {
+        	log.debug("getSmallestBlockInfo groupId:{} has no block local", groupId);
+        	return null;
+		}
+        return getBlockByBlockNumber(groupId, smallestHeight);
+    }
+
+    /**
+     * get block of smallest height in local db
+     * @param groupId
+     */
+    public BigInteger getSmallestBlockHeight(int groupId) {
+        return blockmapper.getSmallestBlockNumber(TableName.BLOCK.getTableName(groupId));
+    }
+
+    /**
+     * get local tbBlock by blockNumber
+     * @param groupId
+     * @param blockNumber
+     * @return TbBlock
+     */
+    public TbBlock getBlockByBlockNumber(int groupId, BigInteger blockNumber) {
+        return blockmapper.getBlockByBlockNumber(TableName.BLOCK.getTableName(groupId),
+                blockNumber);
+    }
 }
