@@ -19,7 +19,10 @@ import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
+import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -46,6 +49,7 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -77,7 +81,8 @@ public class GroupService {
     private TransDailyService transDailyService;
     @Autowired
     private ConstantProperties constants;
-
+    @Autowired
+    private BlockService blockService;
 
     /**
      * query count of group.
@@ -226,8 +231,10 @@ public class GroupService {
 
         // check group status(normal or maintaining)
         checkAndUpdateGroupStatus(allGroupSet);
-        // check group's genesis block same(check dirty data of different chain)
-        checkGroupGenesisSame();
+        // check group's genesis block same with each other
+        checkGroupGenesisSameWithEach();
+        // check group if has dirty data
+        checkSameChainDataWithLocal();
         // remove front_group_map that not in tb_front or tb_group
         frontGroupMapService.removeInvalidFrontGroupMap();
         //clear cache
@@ -348,25 +355,24 @@ public class GroupService {
     }
 
 	/**
-	 * check group's genesis block the same with each other
+	 * check group's genesis block the same with each other on chain
 	 */
-	private void checkGroupGenesisSame() {
-	    log.info("start checkGroupGenesisSame.");
-		//get all front
+	private void checkGroupGenesisSameWithEach() {
+	    log.info("start checkGroupGenesisSameWithEach.");
+		// get all front
 		List<TbFront> frontList = frontService.getFrontList(new FrontParam());
 		if (frontList == null || frontList.size() == 0) {
-            log.warn("checkGroupGenesisSame not found any front.");
+            log.warn("checkGroupGenesisSameWithEach not found any front.");
             return;
 		}
 		List<TbGroup> allNormalGroupList = getGroupList(GroupStatus.NORMAL.getValue());
 		if (allNormalGroupList.isEmpty()) {
-            log.warn("checkGroupGenesisSame not found any group of front.");
+            log.warn("checkGroupGenesisSameWithEach not found any group of front.");
             return;
 		}
 
 		for (TbGroup tbGroup : allNormalGroupList) {
 			int groupId = tbGroup.getGroupId();
-            log.error("checkGroupGenesisSame groupId:{}",groupId);
             String lastBlockHash = "";
             for (TbFront front : frontList) {
 				String frontIp = front.getFrontIp();
@@ -378,17 +384,69 @@ public class GroupService {
                     continue;
                 }
                 if (!"".equals(lastBlockHash) && !lastBlockHash.equals(genesisBlock.getHash())) {
-                    log.warn("checkGroupGenesisSame genesis block hash conflicts with other group," +
+                    log.warn("checkGroupGenesisSameWithEach genesis block hash conflicts with other group," +
                             " groupId:{}, frontId:{}", groupId, front.getFrontId());
-                    updateGroupStatus(groupId, GroupStatus.CONFLICT.getValue());
+                    updateGroupStatus(groupId, GroupStatus.CONFLICT_GROUP_GENESIS.getValue());
                 }
                 lastBlockHash = genesisBlock.getHash();
-                log.debug("checkGroupGenesisSame, groupId:{}, frontId:{}, genesis blockHash:{}",
+                log.debug("checkGroupGenesisSameWithEach, groupId:{}, frontId:{}, genesis blockHash:{}",
                         groupId, front.getFrontId(), lastBlockHash);
 			}
 		}
 	}
 
+    /**
+     * check local block's hash same with blockHash on chain
+     * group status abnormal cases:
+     * @case1 rebuild chain(different genesis),
+     * @case2 drop group data and restart chain(same genesis), when local smallest block height greater than 0, mark as CONFLICT
+     */
+    private void checkSameChainDataWithLocal() {
+        log.info("start checkSameChainData.");
+        // get all group
+        List<TbGroup> allNormalGroupList = getGroupList(GroupStatus.NORMAL.getValue());
+        if (allNormalGroupList.isEmpty()) {
+            log.warn("checkSameChainData not found any group of front.");
+            return;
+        }
+
+        for (TbGroup tbGroup : allNormalGroupList) {
+            int groupId = tbGroup.getGroupId();
+            // find smallest block from db of group
+            TbBlock smallestBlockLocal = blockService.getSmallestBlockInfo(groupId);
+            // if no block in local db
+            if (smallestBlockLocal == null) {
+                continue;
+            }
+            BigInteger blockHeightLocal = smallestBlockLocal.getBlockNumber();
+            Long blockTimestampLocal = NodeMgrTools.localDateTime2Timestamp(smallestBlockLocal.getBlockTimestamp());
+
+            // get same height block from chain, contrast block hash
+            BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumber(groupId, blockHeightLocal);
+            // if no block in each node, not same chain
+            if (smallestBlockOnChain == null) {
+                log.warn("checkSameChainDataWithLocal block of {} on chain not exists, " +
+                        "conflict with local block of same height", blockHeightLocal);
+                updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
+                continue;
+            }
+            Long blockTimestampOnChain = Long.valueOf(smallestBlockOnChain.getTimestamp());
+            // drop nano second
+            blockTimestampOnChain = Math.round(blockTimestampOnChain / 1000.00)  * 1000;
+            log.debug("checkSameChainData groupId:{},blockHeight:{},localTime:{},chainTime:{} ",
+                    groupId, blockHeightLocal, blockTimestampLocal, blockTimestampOnChain);
+            // check same timestamp, the same chain
+            if (blockTimestampLocal.compareTo(blockTimestampOnChain) != 0) {
+                log.warn("checkSameChainDataWithLocal block of {} on chain conflicts with local block data",
+                        blockHeightLocal);
+                updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
+                continue;
+            } else {
+                updateGroupStatus(groupId, GroupStatus.NORMAL.getValue());
+            }
+        }
+
+    }
 
 
     /**
