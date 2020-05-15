@@ -87,6 +87,17 @@ public class GroupControllerTest {
         System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
 
+    @Test
+    public void testGetAllInvalid() throws Exception {
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/all/4"));
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+
     /**
      * dynamic group manage
      */
