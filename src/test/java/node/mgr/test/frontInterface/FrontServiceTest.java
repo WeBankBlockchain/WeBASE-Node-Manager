@@ -72,8 +72,8 @@ public class FrontServiceTest {
 
     @Test
     public void getBlockByNumberTest() {
-        BlockInfo blockInfo = frontInterface.getBlockByNumber(groupId, blockNumber);
-        assert (blockInfo != null);
+        BlockInfo blockInfo = frontInterface.getBlockByNumber(groupId, new BigInteger("1000"));
+//        assert (blockInfo != null);
         System.out.println(JSON.toJSONString(blockInfo));
     }
 
