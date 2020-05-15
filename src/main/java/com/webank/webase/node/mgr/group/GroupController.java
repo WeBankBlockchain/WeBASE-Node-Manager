@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.pagetools.List2Page;
@@ -99,9 +100,9 @@ public class GroupController extends BaseController {
         log.info("start getAllGroup startTime:{}", startTime.toEpochMilli());
 
         // get group list
-        int count = groupService.countOfGroup(null, DataStatus.NORMAL.getValue());
+        int count = groupService.countOfGroup(null, GroupStatus.NORMAL.getValue());
         if (count > 0) {
-            List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
+            List<TbGroup> groupList = groupService.getGroupList(GroupStatus.NORMAL.getValue());
             pagesponse.setTotalCount(count);
             pagesponse.setData(groupList);
         }
@@ -115,6 +116,13 @@ public class GroupController extends BaseController {
         return pagesponse;
     }
 
+    /**
+     * get all group include invalid group status
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     * @throws NodeMgrException
+     */
     @GetMapping("/all/invalidIncluded/{pageNumber}/{pageSize}")
     public BasePageResponse getAllGroupIncludeInvalidGroup(@PathVariable("pageNumber") Integer pageNumber,
                                                            @PathVariable("pageSize") Integer pageSize) throws NodeMgrException {
@@ -138,6 +146,32 @@ public class GroupController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JSON.toJSONString(pagesponse));
         return pagesponse;
+    }
+
+    @GetMapping("/all/{groupStatus}")
+    public BaseResponse getAllGroupOfStatus(@PathVariable("groupStatus") Integer groupStatus) throws NodeMgrException {
+        if (groupStatus > GroupStatus.CONFLICT_LOCAL_DATA.getValue()
+                || groupStatus < GroupStatus.NORMAL.getValue()) {
+            return new BaseResponse(ConstantCode.INVALID_PARAM_INFO);
+        }
+        BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start getAllGroupOfStatus startTime:{}", startTime.toEpochMilli());
+
+        // get group list
+        int count = groupService.countOfGroup(null, groupStatus);
+        if (count > 0) {
+            List<TbGroup> groupList = groupService.getGroupList(groupStatus);
+            response.setData(groupList);
+        }
+
+        // reset group
+        resetGroupListTask.asyncResetGroupList();
+
+        log.info("end getAllGroupOfStatus useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JSON.toJSONString(response));
+        return response;
     }
 
     /**
