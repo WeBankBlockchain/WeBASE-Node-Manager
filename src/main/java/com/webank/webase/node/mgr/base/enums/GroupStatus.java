@@ -29,9 +29,13 @@ public enum GroupStatus {
 		 */
 		MAINTAINING(2),
 		/**
-		 * invalid for group data conflicts etc.
+		 * invalid for different front's group data conflicts with each other, need to remove invalid front
 		 */
-		CONFLICT(3);
+		CONFLICT_GROUP_GENESIS(3),
+		/**
+		 * invalid for db's group data conflicts with chain, need to delete data
+		 */
+		CONFLICT_LOCAL_DATA(4);
 
 		private int value;
 
