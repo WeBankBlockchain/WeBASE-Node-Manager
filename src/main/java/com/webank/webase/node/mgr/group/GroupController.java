@@ -129,7 +129,6 @@ public class GroupController extends BaseController {
             List2Page list2Page = new List2Page(groupList, pageSize, pageNumber);
             pagesponse.setData(list2Page.getPagedList());
             pagesponse.setTotalCount(count);
-            pagesponse.setData(groupList);
         }
 
         // reset group
