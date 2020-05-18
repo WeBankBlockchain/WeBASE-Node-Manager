@@ -67,12 +67,19 @@ constant:
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
 
-# executor config for pulling data from chain
+# executor config for async pulling data from chain
 executor:
   corePoolSize: 3
   maxPoolSize: 10
   queueSize: 50
   threadNamePrefix: "node-mgr-async-"
+
+# scheduler config for sync scheduled task
+scheduler:
+  poolSize: 5
+  threadNamePrefix: "node-mgr-task-"
+  awaitTerminationSeconds: 60
+  waitForTasksToCompleteOnShutdown: true
 
 sdk:
   encryptType: 0 # 1:guomi, 0:standard

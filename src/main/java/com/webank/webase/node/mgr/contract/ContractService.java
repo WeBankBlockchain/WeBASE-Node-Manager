@@ -15,6 +15,8 @@ package com.webank.webase.node.mgr.contract;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.webank.webase.node.mgr.abi.AbiService;
+import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -63,7 +65,8 @@ public class  ContractService {
     @Autowired
     private UserService userService;
     private static final int CONTRACT_ADDRESS_LENGTH = 42;
-
+    @Autowired
+    private AbiService abiService;
     /**
      * add new contract data.
      */
@@ -269,15 +272,25 @@ public class  ContractService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
 
-        //check contractId
-        TbContract contract = verifyContractIdExist(param.getContractId(), param.getGroupId());
-        //send abi to front
-        sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
-        //check contract deploy
-        verifyContractDeploy(param.getContractId(), param.getGroupId());
+        // check contractId
+        String contractAbiStr = "";
+        if (param.getContractId() != null) {
+            // get abi by contract
+            TbContract contract = verifyContractIdExist(param.getContractId(), param.getGroupId());
+            contractAbiStr = contract.getContractAbi();
+            //send abi to front
+            sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
+            //check contract deploy
+            verifyContractDeploy(param.getContractId(), param.getGroupId());
+        } else {
+            // send tx by abi
+            // get from db and it's deployed
+            AbiInfo abiInfo = abiService.getAbiByGroupIdAndAddress(param.getGroupId(), param.getContractAddress());
+            contractAbiStr = abiInfo.getContractAbi();
+        }
 
         // if constant, signUserId is useless
-        AbiDefinition funcAbi = Web3Tools.getAbiDefinition(param.getFuncName(), contract.getContractAbi());
+        AbiDefinition funcAbi = Web3Tools.getAbiDefinition(param.getFuncName(), contractAbiStr);
         String signUserId = "empty";
         if (!funcAbi.isConstant()) {
             signUserId = userService.getSignUserIdByAddress(param.getGroupId(), param.getUser());

@@ -92,7 +92,7 @@ public class ContractControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/contract/save").
             content(JSON.toJSONString(testUpdate)).
-            contentType(MediaType.APPLICATION_JSON)
+            contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
@@ -123,7 +123,7 @@ public class ContractControllerTest {
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/deploy").
                 content(JSON.toJSONString(deployInputParam)).
-                contentType(MediaType.APPLICATION_JSON)
+                contentType(MediaType.APPLICATION_JSON_UTF8)
             );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
@@ -147,7 +147,7 @@ public class ContractControllerTest {
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/contractList").
                 content(JSON.toJSONString(param)).
-                contentType(MediaType.APPLICATION_JSON)
+                contentType(MediaType.APPLICATION_JSON_UTF8)
             );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
@@ -167,7 +167,7 @@ public class ContractControllerTest {
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/findByPartOfBytecodeBin").
                 content(JSON.toJSONString(param)).
-                contentType(MediaType.APPLICATION_JSON)
+                contentType(MediaType.APPLICATION_JSON_UTF8)
             );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
@@ -199,7 +199,7 @@ public class ContractControllerTest {
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/transaction").
                 content(JSON.toJSONString(param)).
-                contentType(MediaType.APPLICATION_JSON)
+                contentType(MediaType.APPLICATION_JSON_UTF8)
             );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).

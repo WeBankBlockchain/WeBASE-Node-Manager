@@ -15,6 +15,8 @@ package com.webank.webase.node.mgr.front;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
@@ -27,6 +29,7 @@ import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeParam;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
@@ -36,6 +39,7 @@ import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -123,13 +127,18 @@ public class FrontService {
             Integer group = Integer.valueOf(groupId);
             //peer in group
             List<String> groupPeerList = frontInterface
-                .getNodeIDListFromSpecificFront(frontIp, frontPort, group);
+                .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
             //get peers on chain
             PeerInfo[] peerArr = frontInterface
                 .getPeersFromSpecificFront(frontIp, frontPort, group);
             List<PeerInfo> peerList = Arrays.asList(peerArr);
-            //add groupId
-            groupService.saveGroupId(group, groupPeerList.size());
+            //add group
+            // check group not existed or node count differs
+            TbGroup checkGroup = groupService.getGroupById(group);
+            if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
+                groupService.saveGroup(group, groupPeerList.size(), "synchronous",
+                        GroupType.SYNC.getValue(), DataStatus.NORMAL.getValue());
+            }
             //save front group map
             frontGroupMapService.newFrontGroup(tbFront.getFrontId(), group);
             //save nodes
@@ -234,6 +243,16 @@ public class FrontService {
             return null;
         }
         return frontMapper.getById(frontId);
+    }
+
+    /**
+     * query front by nodeId.
+     */
+    public TbFront getByNodeId(String nodeId) {
+        if (StringUtils.isBlank(nodeId)) {
+            return null;
+        }
+        return frontMapper.getByNodeId(nodeId);
     }
 
     /**

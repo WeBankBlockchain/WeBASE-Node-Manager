@@ -64,4 +64,15 @@ public class NodeControllerTest {
         System.out.println(tbNode);
         Assert.assertNull(tbNode);
     }
+
+    @Test
+    public void testGetNodeIdList() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(MockMvcRequestBuilders.get("/node/nodeIdList/2"));
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("======================response:"
+                +resultActions.andReturn().getResponse().getContentAsString());
+    }
 }
