@@ -425,14 +425,15 @@ public class GroupService {
             BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumber(groupId, blockHeightLocal);
             // if no block in each node, not same chain
             if (smallestBlockOnChain == null) {
-                log.warn("checkSameChainDataWithLocal block of {} on chain not exists, " +
+                log.warn("checkSameChainDataWithLocal block of height: {} on chain not exists, " +
                         "conflict with local block of same height", blockHeightLocal);
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
             }
             Long blockTimestampOnChain = Long.valueOf(smallestBlockOnChain.getTimestamp());
             // drop nano second
-            blockTimestampOnChain = Math.round(blockTimestampOnChain / 1000.00)  * 1000;
+            Double floorValue = Math.floor(blockTimestampOnChain / 1000.00)  * 1000;
+            blockTimestampOnChain = floorValue.longValue();
             log.debug("checkSameChainData groupId:{},blockHeight:{},localTime:{},chainTime:{} ",
                     groupId, blockHeightLocal, blockTimestampLocal, blockTimestampOnChain);
             // check same timestamp, the same chain
