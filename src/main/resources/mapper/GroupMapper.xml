@@ -12,6 +12,14 @@
       property="groupStatus"/>
     <result column="node_count" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="nodeCount"/>
+    <result column="description" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="description"/>
+    <result column="group_type" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupType"/>
+    <result column="group_timestamp" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="groupTimestamp"/>
+    <result column="node_id_list" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="nodeIdList"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
@@ -36,8 +44,9 @@
 
   <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
 		insert into tb_group
-		(group_id,group_name,node_count,create_time)
-		values(#{groupId},#{groupName},#{nodeCount},NOW())
+		(group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time)
+		values(#{groupId},#{groupName},#{nodeCount},#{description},#{groupType},#{groupStatus},
+      #{groupTimestamp},#{nodeIdList},NOW())
 		ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
 	</insert>
 
@@ -67,8 +76,13 @@
     order by group_id asc
   </select>
 
+    <select id="getGroupById" resultMap="groupMap">
+        select * from tb_group
+        where group_id = #{groupId}
+    </select>
 
-  <select id="queryLatestStatisticalTrans" resultMap="statisticalTransMap">
+
+    <select id="queryLatestStatisticalTrans" resultMap="statisticalTransMap">
 		select a.group_id,b.maxDay,c.block_number,c.trans_count from tb_group a
 		LEFT JOIN
 		(select group_id,max(trans_day) as maxDay from tb_trans_daily GROUP BY group_id)b

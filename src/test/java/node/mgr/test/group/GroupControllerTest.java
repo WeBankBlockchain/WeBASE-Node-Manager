@@ -15,12 +15,17 @@
  */
 package node.mgr.test.group;
 
+import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
+import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
+import com.webank.webase.node.mgr.group.entity.ReqOperateGroup;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,11 +36,18 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
 public class GroupControllerTest {
     private MockMvc mockMvc;
+    private String targetNodeId = "dd7a2964007d583b719412d86dab9dcf773c61bccab18cb646cd480973de0827cc94fa84f33982285701c8b7a7f465a69e980126a77e8353981049831b550f5c";
+    private Integer newGroupId = 2022;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -59,9 +71,127 @@ public class GroupControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/all"));
         resultActions.
-            andExpect(MockMvcResultMatchers.status().isOk()).
-            andDo(MockMvcResultHandlers.print());
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
         System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
 
+
+    @Test
+    public void testGetAllInvalidIncluded() throws Exception {
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/all/invalidIncluded/1/5"));
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testGetAllInvalid() throws Exception {
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/all/4"));
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+
+    /**
+     * dynamic group manage
+     */
+    @Test
+    public void testGenerateSingle() throws Exception {
+        List<String> nodeList = new ArrayList<>();
+        nodeList.add(targetNodeId);
+
+        ReqGenerateGroup param = new ReqGenerateGroup();
+        param.setGenerateGroupId(newGroupId);
+        param.setTimestamp(BigInteger.valueOf(new Date().getTime()));
+        param.setNodeList(nodeList);
+        param.setDescription("test");
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/group/generate/" + targetNodeId).
+                content(JSON.toJSONString(param)).
+                contentType(MediaType.APPLICATION_JSON_UTF8)
+        );
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testGenerate() throws Exception {
+        List<String> nodeList = new ArrayList<>();
+        nodeList.add(targetNodeId);
+
+        ReqGenerateGroup param = new ReqGenerateGroup();
+        param.setGenerateGroupId(newGroupId);
+        param.setTimestamp(BigInteger.valueOf(new Date().getTime()));
+        param.setNodeList(nodeList);
+        param.setDescription("test");
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post( "/group/generate").
+                content(JSON.toJSONString(param)).
+                contentType(MediaType.APPLICATION_JSON_UTF8)
+        );
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testOperate() throws Exception {
+        ReqOperateGroup param = new ReqOperateGroup();
+        param.setGenerateGroupId(newGroupId);
+        param.setType("start");
+//        param.setType("getStatus");
+//        param.setType("stop");
+//        param.setType("recover");
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .post("/group/operate/" + targetNodeId).
+                content(JSON.toJSONString(param)).
+                contentType(MediaType.APPLICATION_JSON_UTF8)
+        );
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/group/update"));
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testGroupStatusList() throws Exception {
+        ReqGroupStatus param = new ReqGroupStatus();
+        List<Integer> groupIdList = new ArrayList<>();
+        groupIdList.add(2020);
+        groupIdList.add(3);
+        groupIdList.add(1);
+        groupIdList.add(2021);
+        groupIdList.add(2023);
+        param.setGroupIdList(groupIdList);
+        List<String> nodeIdList = new ArrayList<>();
+        nodeIdList.add(targetNodeId);
+        param.setNodeIdList(nodeIdList);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .post("/group/queryGroupStatus/list")
+                .content(JSON.toJSONString(param))
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+        );
+        resultActions.
+//                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
 }

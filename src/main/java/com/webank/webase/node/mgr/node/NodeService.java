@@ -215,7 +215,7 @@ public class NodeService {
             Duration duration = Duration.between(modifyTime, LocalDateTime.now());
             Long subTime = duration.toMillis();
             if (subTime < CHECK_NODE_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
-                log.info("checkNodeStatus jump over. subTime:{}", subTime);
+                log.warn("checkNodeStatus jump over. subTime:{}", subTime);
                 return;
             }
             
@@ -314,5 +314,12 @@ public class NodeService {
         observerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
         log.debug("end getSealerAndObserverList resList:{}", resList);
         return resList;
+    }
+
+    public List<String> getNodeIdListService(int groupId) {
+        log.debug("start getSealerAndObserverList groupId:{}", groupId);
+        List<String> nodeIdList = frontInterface.getNodeIdList(groupId);
+        log.debug("end getSealerAndObserverList nodeIdList:{}", nodeIdList);
+        return nodeIdList;
     }
 }

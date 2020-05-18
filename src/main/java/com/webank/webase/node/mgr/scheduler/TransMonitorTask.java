@@ -28,6 +28,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * using in async monitor
+ * 交易审计
  */
 @Log4j2
 @Component
@@ -56,7 +57,7 @@ public class TransMonitorTask {
             log.info("monitor jump over .not found any group");
             return;
         }
-
+        // count down group, make sure all group's transMonitor finished
         CountDownLatch latch = new CountDownLatch(groupList.size());
         groupList.stream()
             .forEach(group -> monitorService.transMonitorByGroupId(latch, group.getGroupId()));

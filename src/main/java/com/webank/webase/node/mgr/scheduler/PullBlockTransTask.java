@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * get block info from chain.
+ * get block info and trans info from chain.
  * including tb_block and tb_trans (block contains trans)
  */
 @Log4j2
@@ -55,7 +55,7 @@ public class PullBlockTransTask {
             log.warn("pullBlock jump over: not found any group");
             return;
         }
-
+        // count down group, make sure all group's pullBlock finished
         CountDownLatch latch = new CountDownLatch(groupList.size());
         groupList.stream()
                 .forEach(group -> blockService.pullBlockByGroupId(latch, group.getGroupId()));
