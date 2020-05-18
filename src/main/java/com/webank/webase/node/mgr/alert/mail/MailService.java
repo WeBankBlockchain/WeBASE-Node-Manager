@@ -180,21 +180,15 @@ public class MailService {
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         // if mail server not turn ON
         if(latestMailServerConfig.getEnable() == EnableStatus.OFF.getValue()) {
-            log.error("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
+            log.warn("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
             return;
         }
         TbAlertRule alertRule = alertRuleMapper.queryByRuleId(ruleId);
         // if alert not activated
         if(alertRule.getEnable() == EnableStatus.OFF.getValue()) {
-            log.debug("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
+            log.warn("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
             return;
         }
-        // last time alert by now, if within interval, not send
-        // 告警间隔时间的刷新放到遍历group异常的for循环外面
-//        if(isWithinAlertIntervalByNow(alertRule)) {
-//            log.debug("end sendMailByRule non-sending mail for beyond alert interval:{}", alertRule);
-//            return;
-//        }
         // if userList is empty or default email
         if(StringUtils.isEmpty(alertRule.getUserList())) {
             log.error("end sendMailByRule for no receive mail address:{}", alertRule);
@@ -246,13 +240,13 @@ public class MailService {
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         // if mail server not turn ON
         if(latestMailServerConfig.getEnable() == EnableStatus.OFF.getValue()) {
-            log.error("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
+            log.warn("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
             return;
         }
         TbAlertRule alertRule = alertRuleMapper.queryByRuleId(ruleId);
         // if alert not activated
         if(alertRule.getEnable() == EnableStatus.OFF.getValue()) {
-            log.debug("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
+            log.warn("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
             return;
         }
         // last time alert by now, if within interval, not send
@@ -329,7 +323,7 @@ public class MailService {
             try {
                 userList = (List<String>) JSON.parse(alertRule.getUserList());
             }catch (Exception e) {
-                log.error("handleAllUserEmail parse error: e:[], getUserList{}",
+                log.error("handleAllUserEmail parse error: e:{}, getUserList{}",
                         e, alertRule.getUserList());
             }
             for(String userMailAddress: userList) {

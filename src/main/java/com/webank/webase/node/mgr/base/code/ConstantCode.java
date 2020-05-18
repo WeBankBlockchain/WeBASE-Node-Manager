@@ -124,7 +124,7 @@ public class ConstantCode {
 
     // 邮件告警错误
     public static final RetCode MAIL_SERVER_CONFIG_ERROR = RetCode.mark(202070, "Mail server config error.");
-    public static final RetCode MAIL_SERVER_CONFIG__PARAM_EMPTY = RetCode.mark(202071,
+    public static final RetCode MAIL_SERVER_CONFIG_PARAM_EMPTY = RetCode.mark(202071,
             "Mail server config param empty/not match.");
     public static final RetCode MAIL_SERVER_CONFIG_ERROR_NO_DATA_IN_DB = RetCode.mark(202072,
             "Mail server config error, db's server config is empty");
@@ -143,6 +143,16 @@ public class ConstantCode {
     public static final RetCode ENCRYPT_TYPE_NOT_MATCH = RetCode.mark(202091,
             "Front's encrypt type not matches with nodemgr");
 
+    // abi import
+    public static final RetCode CONTRACT_ADDRESS_ALREADY_EXISTS = RetCode.mark(202096, "contract address already exists");
+    public static final RetCode ABI_INFO_NOT_EXISTS = RetCode.mark(202097, "abi info of this id not exists");
+    public static final RetCode PARAM_FAIL_ABI_INVALID = RetCode.mark(202098, "Contract abi invalid, please check abi");
+    public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(202099, "Abi Id cannot be empty");
+    public static final RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(202100, "contractAddress is null");
+
+    /* dynamic group manage */
+    public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");
+    public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node's front not exists");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

@@ -29,16 +29,42 @@ public class TbGroup {
 
     private Integer groupId;
     private String groupName;
+    /**
+     * 1-normal, 2-invalid
+     */
     private Integer groupStatus;
     private Integer nodeCount;
     private BigInteger latestBlock = BigInteger.ZERO;
     private BigInteger transCount = BigInteger.ZERO;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    private String description;
+    private Integer groupType;
+    /**
+     * group.x.genesis timestamp
+     */
+    private String groupTimestamp;
+    /**
+     * group peers nodeid
+     */
+    private String nodeIdList;
 
-    public TbGroup(Integer groupId, String groupName,Integer nodeCount){
+    public TbGroup(Integer groupId, String groupName, Integer nodeCount,
+                   String description, Integer groupType) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
+        this.description = description;
+        this.groupType = groupType;
+    }
+
+    public TbGroup(Integer groupId, String groupName, Integer nodeCount,
+                   String description, Integer groupType, Integer groupStatus) {
+        this.groupId = groupId;
+        this.groupName = groupName;
+        this.nodeCount = nodeCount;
+        this.description = description;
+        this.groupType = groupType;
+        this.groupStatus = groupStatus;
     }
 }

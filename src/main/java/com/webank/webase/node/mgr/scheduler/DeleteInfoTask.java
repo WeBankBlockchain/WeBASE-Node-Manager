@@ -34,6 +34,7 @@ import java.util.List;
 
 /**
  * delete block/trans/monitorTrans data task
+ * related: yml-constant-transRetainMax
  */
 @Log4j2
 @Component

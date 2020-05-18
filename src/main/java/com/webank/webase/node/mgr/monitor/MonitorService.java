@@ -97,7 +97,7 @@ public class MonitorService {
                 List<TbTransHash> transHashList = transHashService
                     .qureyUnStatTransHashList(groupId);
                 log.info("=== groupId:{} transHashList:{}", groupId, transHashList.size());
-                if (Objects.isNull(transHashList) || transHashList.size() == 0) {
+                if (transHashList.size() == 0) {
                     log.debug("transMonitorByGroupId jump over. transHashList is empty");
                     return;
                 }
@@ -133,6 +133,7 @@ public class MonitorService {
             log.error("fail transMonitorByGroupId, group:{}", groupId, ex);
         } finally {
             if (Objects.nonNull(latch)) {
+                // finish one group, count down
                 latch.countDown();
             }
         }
