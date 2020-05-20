@@ -419,27 +419,25 @@ public class GroupService {
                 continue;
             }
             BigInteger blockHeightLocal = smallestBlockLocal.getBlockNumber();
-            Long blockTimestampLocal = NodeMgrTools.localDateTime2Timestamp(smallestBlockLocal.getBlockTimestamp());
+			String blockHashLocal = smallestBlockLocal.getPkHash();
 
             // get same height block from chain, contrast block hash
             BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumber(groupId, blockHeightLocal);
             // if no block in each node, not same chain
             if (smallestBlockOnChain == null) {
-                log.warn("checkSameChainDataWithLocal block of height: {} on chain not exists, " +
-                        "conflict with local block of same height", blockHeightLocal);
+                log.warn("checkSameChainDataWithLocal groupId: {} block of height: {} on chain not exists, " +
+                        "conflict with local block of same height", groupId, blockHeightLocal);
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
             }
-            Long blockTimestampOnChain = Long.valueOf(smallestBlockOnChain.getTimestamp());
-            // drop nano second
-            Double floorValue = Math.floor(blockTimestampOnChain / 1000.00)  * 1000;
-            blockTimestampOnChain = floorValue.longValue();
-            log.debug("checkSameChainData groupId:{},blockHeight:{},localTime:{},chainTime:{} ",
-                    groupId, blockHeightLocal, blockTimestampLocal, blockTimestampOnChain);
-            // check same timestamp, the same chain
-            if (blockTimestampLocal.compareTo(blockTimestampOnChain) != 0) {
-                log.warn("checkSameChainDataWithLocal block of {} on chain conflicts with local block data",
-                        blockHeightLocal);
+			String blockHashOnChain = smallestBlockOnChain.getHash();
+            log.debug("checkSameChainData groupId:{},blockHeight:{},localHash:{},chainHash:{} ",
+                    groupId, blockHeightLocal, blockHashLocal, blockHashOnChain);
+            // check same block hash, the same chain
+            if (!blockHashLocal.equals(blockHashOnChain)) {
+                log.warn("checkSameChainDataWithLocal group: {} block of height:{} on chain " +
+								"conflicts with local block data",
+                        groupId, blockHeightLocal);
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
             } else {
