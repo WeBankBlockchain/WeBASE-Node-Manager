@@ -13,9 +13,10 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.block.BlockService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,7 +38,7 @@ public class PullBlockTransTask {
     @Autowired
     private BlockService blockService;
     @Autowired
-    private FrontGroupMapCache frontGroupMapCache;
+    private GroupService groupService;
 
     @Scheduled(fixedDelayString = "${constant.pullBlockTaskFixedDelay}")
     public void taskStart() {
@@ -50,7 +51,7 @@ public class PullBlockTransTask {
     public synchronized void pullBlockStart() {
         Instant startTime = Instant.now();
         log.info("start pullBLock startTime:{}", startTime.toEpochMilli());
-        List<FrontGroup> groupList = frontGroupMapCache.getAllMap();
+        List<TbGroup> groupList = groupService.getGroupList(GroupStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
             log.warn("pullBlock jump over: not found any group");
             return;
