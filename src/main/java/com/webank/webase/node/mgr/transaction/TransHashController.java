@@ -22,7 +22,6 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
