@@ -20,6 +20,9 @@ import java.math.BigInteger;
 import java.util.List;
 import lombok.Data;
 
+/**
+ * transaction receipt entity
+ */
 @Data
 public class TransReceipt {
 
