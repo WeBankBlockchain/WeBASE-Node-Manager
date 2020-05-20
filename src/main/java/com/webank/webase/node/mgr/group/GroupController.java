@@ -123,9 +123,10 @@ public class GroupController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
-    @GetMapping("/all/invalidIncluded/{pageNumber}/{pageSize}")
-    public BasePageResponse getAllGroupIncludeInvalidGroup(@PathVariable("pageNumber") Integer pageNumber,
-                                                           @PathVariable("pageSize") Integer pageSize) throws NodeMgrException {
+    @GetMapping({"/all/invalidIncluded/{pageNumber}/{pageSize}",
+            "/all/invalidIncluded"})
+    public BasePageResponse getAllGroupIncludeInvalidGroup(@PathVariable(value = "pageNumber",required = false) Integer pageNumber,
+                                                           @PathVariable(value = "pageSize", required = false) Integer pageSize) throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start getAllGroupIncludeInvalidGroup startTime:{}", startTime.toEpochMilli());
@@ -134,11 +135,15 @@ public class GroupController extends BaseController {
         int count = groupService.countOfGroup(null, null);
         if (count > 0) {
             List<TbGroup> groupList = groupService.getGroupList(null);
-            List2Page list2Page = new List2Page(groupList, pageSize, pageNumber);
-            pagesponse.setData(list2Page.getPagedList());
-            pagesponse.setTotalCount(count);
+            if (pageNumber == null && pageSize == null) {
+                pagesponse.setData(groupList);
+                pagesponse.setTotalCount(count);
+            } else {
+                List2Page list2Page = new List2Page(groupList, pageSize, pageNumber);
+                pagesponse.setData(list2Page.getPagedList());
+                pagesponse.setTotalCount(count);
+            }
         }
-
         // reset group
         resetGroupListTask.asyncResetGroupList();
 
