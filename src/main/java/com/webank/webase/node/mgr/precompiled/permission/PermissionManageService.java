@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.precompiled.permission;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
@@ -25,6 +26,7 @@ import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -97,8 +99,8 @@ public class PermissionManageService {
     /**
      * get paged permission list
      */
-    public Object listPermission(int groupId, String permissionType, String tableName, int pageSize, int pageNumber) {
-        log.debug("start listPermission. groupId:{}, permissionType:{}" , groupId , permissionType);
+    public Object listPermissionPaged(int groupId, String permissionType, String tableName, int pageSize, int pageNumber) {
+        log.debug("start listPermissionPaged. groupId:{}, permissionType:{}" , groupId , permissionType);
         String uri;
         Map<String, String>  map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
@@ -113,15 +115,15 @@ public class PermissionManageService {
         }
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end listPermission. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end listPermissionPaged. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 
     /**
      * get full permission list
      */
-    public Object getPermissionFullList(int groupId, String permissionType, String tableName) {
-        log.debug("start getPermissionFullList. groupId:{}, permissionType:{}" , groupId , permissionType);
+    public BasePageResponse listPermissionFull(int groupId, String permissionType, String tableName) {
+        log.debug("start listPermissionFull. groupId:{}, permissionType:{}" , groupId , permissionType);
         String uri;
         Map<String, String>  map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
@@ -132,9 +134,8 @@ public class PermissionManageService {
             map.put("tableName", tableName);
             uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION_FULL_LIST, map);
         }
-
-        Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end getPermissionFullList. frontRsp:{}", JSON.toJSONString(frontRsp));
+        BasePageResponse frontRsp = frontRestTools.getForEntity(groupId, uri, BasePageResponse.class);
+        log.debug("end listPermissionFull. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
 

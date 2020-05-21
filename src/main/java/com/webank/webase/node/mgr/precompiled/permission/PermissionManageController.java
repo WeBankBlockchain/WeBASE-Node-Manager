@@ -88,7 +88,7 @@ public class PermissionManageController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start listPermissionManager startTime:{}", startTime.toEpochMilli());
 
-        Object result = permissionManageService.listPermission(groupId, permissionType, tableName, pageSize, pageNumber);
+        Object result = permissionManageService.listPermissionPaged(groupId, permissionType, tableName, pageSize, pageNumber);
 
         log.info("end listPermissionManager useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
@@ -109,7 +109,7 @@ public class PermissionManageController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start listFullPermissionManager startTime:{}", startTime.toEpochMilli());
 
-        Object result = permissionManageService.getPermissionFullList(groupId, permissionType, tableName);
+        Object result = permissionManageService.listPermissionFull(groupId, permissionType, tableName);
 
         log.info("end listFullPermissionManager useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));

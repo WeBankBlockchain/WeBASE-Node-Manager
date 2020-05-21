@@ -505,7 +505,7 @@ public class FrontInterfaceService {
         if (response.getData() == null) {
             return new ArrayList<>();
         }
-        List<NewBlockEventInfo> data = (List<NewBlockEventInfo>) response.getData();
+        List data = (List) response.getData();
         List<NewBlockEventInfo> resList = JSON.parseArray(JSON.toJSONString(data), NewBlockEventInfo.class);
         resList.forEach(info -> info.setFrontInfo(frontIp));
         return resList;
@@ -521,7 +521,7 @@ public class FrontInterfaceService {
 		if (response.getData() == null) {
 			return new ArrayList<>();
 		}
-		List<ContractEventInfo> data = (List<ContractEventInfo>) response.getData();
+		List data = (List) response.getData();
 		List<ContractEventInfo> resList = JSON.parseArray(JSON.toJSONString(data), ContractEventInfo.class);
 		resList.forEach(info -> info.setFrontInfo(frontIp));
 		return resList;

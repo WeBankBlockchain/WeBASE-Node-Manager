@@ -257,7 +257,8 @@ public class GroupService {
         //save new nodes
         for (String nodeId : groupPeerList) {
             long count = localNodeList.stream().filter(
-                    ln -> groupId == ln.getGroupId() && nodeId.equals(ln.getNodeId())).count();
+                    ln -> nodeId.equals(ln.getNodeId()) && groupId == ln.getGroupId()).count();
+            // local node not contains this one:
             if (count == 0) {
                 PeerInfo newPeer = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
                         .findFirst().orElseGet(() -> new PeerInfo(nodeId));
@@ -381,6 +382,7 @@ public class GroupService {
                 BlockInfo genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
                         frontPort, groupId, BigInteger.ZERO);
                 if (genesisBlock == null) {
+                    log.warn("checkGroupGenesisSameWithEach getGenesisBlock is null");
                     continue;
                 }
                 if (!"".equals(lastBlockHash) && !lastBlockHash.equals(genesisBlock.getHash())) {
@@ -416,6 +418,7 @@ public class GroupService {
             TbBlock smallestBlockLocal = blockService.getSmallestBlockInfo(groupId);
             // if no block in local db
             if (smallestBlockLocal == null) {
+                log.warn("checkSameChainDataWithLocal smallestBlockLocal is null");
                 continue;
             }
             BigInteger blockHeightLocal = smallestBlockLocal.getBlockNumber();
@@ -441,6 +444,7 @@ public class GroupService {
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
             } else {
+                log.warn("checkSameChainDataWithLocal set groupId:{} as normal", groupId);
                 updateGroupStatus(groupId, GroupStatus.NORMAL.getValue());
             }
         }
