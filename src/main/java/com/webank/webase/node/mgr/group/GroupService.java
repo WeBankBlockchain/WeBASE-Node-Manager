@@ -257,7 +257,8 @@ public class GroupService {
         //save new nodes
         for (String nodeId : groupPeerList) {
             long count = localNodeList.stream().filter(
-                    ln -> groupId == ln.getGroupId() && nodeId.equals(ln.getNodeId())).count();
+                    ln -> nodeId.equals(ln.getNodeId()) && groupId == ln.getGroupId()).count();
+            // local node not contains this one:
             if (count == 0) {
                 PeerInfo newPeer = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
                         .findFirst().orElseGet(() -> new PeerInfo(nodeId));
