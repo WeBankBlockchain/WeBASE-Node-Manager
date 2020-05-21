@@ -381,6 +381,7 @@ public class GroupService {
                 BlockInfo genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
                         frontPort, groupId, BigInteger.ZERO);
                 if (genesisBlock == null) {
+                    log.warn("checkGroupGenesisSameWithEach getGenesisBlock is null");
                     continue;
                 }
                 if (!"".equals(lastBlockHash) && !lastBlockHash.equals(genesisBlock.getHash())) {
@@ -416,6 +417,7 @@ public class GroupService {
             TbBlock smallestBlockLocal = blockService.getSmallestBlockInfo(groupId);
             // if no block in local db
             if (smallestBlockLocal == null) {
+                log.warn("checkSameChainDataWithLocal smallestBlockLocal is null");
                 continue;
             }
             BigInteger blockHeightLocal = smallestBlockLocal.getBlockNumber();
@@ -441,6 +443,7 @@ public class GroupService {
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
             } else {
+                log.warn("checkSameChainDataWithLocal set groupId:{} as normal", groupId);
                 updateGroupStatus(groupId, GroupStatus.NORMAL.getValue());
             }
         }
