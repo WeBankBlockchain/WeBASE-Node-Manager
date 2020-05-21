@@ -32,6 +32,9 @@ public class ConstantCode {
     public static final RetCode SYSTEM_EXCEPTION = RetCode.mark(102000, "system exception");
     public static final RetCode SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL = RetCode.mark(102000, "system exception: please check front");
 
+    /* front error code */
+    public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied");
+
     /**
      * Business exception.
      */
