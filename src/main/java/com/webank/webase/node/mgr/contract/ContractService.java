@@ -18,28 +18,29 @@ import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.node.mgr.abi.AbiService;
 import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
 import com.webank.webase.node.mgr.user.UserService;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class  ContractService {
 
+    private static final int CONTRACT_ADDRESS_LENGTH = 42;
+    private static final String PERMISSION_TYPE_DEPLOY_AND_CREATE = "deployAndCreate";
+
     @Autowired
     private ContractMapper contractMapper;
     @Autowired
@@ -64,9 +68,11 @@ public class  ContractService {
     private FrontInterfaceService frontInterface;
     @Autowired
     private UserService userService;
-    private static final int CONTRACT_ADDRESS_LENGTH = 42;
     @Autowired
     private AbiService abiService;
+    @Autowired
+    private PermissionManageService permissionManageService;
+
     /**
      * add new contract data.
      */
@@ -202,8 +208,11 @@ public class  ContractService {
     public TbContract deployContract(DeployInputParam inputParam) throws NodeMgrException {
         log.info("start deployContract. inputParam:{}", JSON.toJSONString(inputParam));
         int groupId = inputParam.getGroupId();
+
+        // check deploy permission
+        checkDeployPermission(groupId, inputParam.getUser());
+
         String contractName = inputParam.getContractName();
-        // String version = Instant.now().toEpochMilli() + "";
         //check contract
         verifyContractNotDeploy(inputParam.getContractId(), inputParam.getGroupId());
         //check contractName
@@ -217,7 +226,9 @@ public class  ContractService {
         }
 
         // deploy param
+        // get signUserId
         String signUserId = userService.getSignUserIdByAddress(groupId, inputParam.getUser());
+
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
         params.put("signUserId", signUserId);
@@ -428,4 +439,34 @@ public class  ContractService {
         contract.setDescription("address add by sendAbi");
         contractMapper.update(contract);
     }
+
+    /**
+     * check user deploy permission
+     */
+    private void checkDeployPermission(int groupId, String userAddress) {
+        // get deploy permission list
+        List<PermissionInfo> deployUserList = new ArrayList<>();
+        BasePageResponse response = permissionManageService.listPermissionFull(groupId, PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
+        if (response.getCode() != 0) {
+            log.error("checkDeployPermission get permission list error");
+            return;
+        } else {
+            List listData = (List) response.getData();
+            deployUserList = JSON.parseArray(JSON.toJSONString(listData), PermissionInfo.class);
+        }
+
+        // check user in the list,
+        if (deployUserList.isEmpty()) {
+            return;
+        } else {
+            long count = 0;
+            count = deployUserList.stream().filter( admin -> userAddress.equals(admin.getAddress())).count();
+            // if not in the list, permission denied
+            if (count == 0) {
+                log.error("checkDeployPermission permission denied for user:{}", userAddress);
+                throw new NodeMgrException(ConstantCode.PERMISSION_DENIED);
+            }
+        }
+    }
+
 }
