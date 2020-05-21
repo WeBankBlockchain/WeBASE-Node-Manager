@@ -79,6 +79,7 @@ public class FrontRestTools {
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
+    public static final String URI_KEY_PAIR_IMPORT_WITH_SIGN = "privateKey/importWithSign";
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
     public static final String URI_SEND_TRANSACTION_WITH_SIGN = "trans/handleWithSign";

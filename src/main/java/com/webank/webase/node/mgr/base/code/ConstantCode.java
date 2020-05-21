@@ -34,6 +34,8 @@ public class ConstantCode {
 
     /* front error code */
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied");
+    public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
+    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201233, "Pem file content error");
 
     /**
      * Business exception.
