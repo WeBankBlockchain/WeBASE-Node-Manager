@@ -231,10 +231,10 @@ public class GroupService {
 
         // check group status(normal or maintaining)
         checkAndUpdateGroupStatus(allGroupSet);
-        // check group's genesis block same with each other
-        checkGroupGenesisSameWithEach();
         // check group if has dirty data
         checkSameChainDataWithLocal();
+        // check group's genesis block same with each other
+        checkGroupGenesisSameWithEach();
         // remove front_group_map that not in tb_front or tb_group
         frontGroupMapService.removeInvalidFrontGroupMap();
         //clear cache
@@ -429,8 +429,8 @@ public class GroupService {
             BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumber(groupId, blockHeightLocal);
             // if no block in each node, not same chain
             if (smallestBlockOnChain == null) {
-                log.info("smallestBlockOnChain groupId: {} height: {} return null, " +
-                        "please check groupStatus", groupId, blockHeightLocal);
+                log.info("smallestBlockOnChain groupId: {} height: {} return null block, " +
+                        "please check group's node", groupId, blockHeightLocal);
                 // null block not means conflict
                 // updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
@@ -440,9 +440,8 @@ public class GroupService {
                     groupId, blockHeightLocal, blockHashLocal, blockHashOnChain);
             // check same block hash, the same chain
             if (!blockHashLocal.equals(blockHashOnChain)) {
-                log.warn("checkSameChainDataWithLocal group: {} block of height:{} on chain " +
-								"conflicts with local block data",
-                        groupId, blockHeightLocal);
+                log.warn("checkSameChainDataWithLocal blockHashOnChain conflicts with local block data " +
+                                "groupId: {} height:{} on chain ", groupId, blockHeightLocal);
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
             } else {

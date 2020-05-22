@@ -238,7 +238,7 @@ public class FrontInterfaceService {
         try {
             blockInfo = frontRestTools.getForEntity(groupId, uri, BlockInfo.class);
         } catch (Exception ex) {
-            log.info("fail getBlockByNumber,exception:{}", ex);
+            log.error("fail getBlockByNumber,exception:[]", ex);
         }
         log.debug("end getBlockByNumber");
         return blockInfo;
