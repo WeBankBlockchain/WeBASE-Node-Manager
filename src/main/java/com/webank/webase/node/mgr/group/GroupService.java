@@ -407,13 +407,13 @@ public class GroupService {
     private void checkSameChainDataWithLocal() {
         log.info("start checkSameChainData.");
         // get all group
-        List<TbGroup> allNormalGroupList = getGroupList(null);
-        if (allNormalGroupList.isEmpty()) {
+        List<TbGroup> allGroupList = getGroupList(null);
+        if (allGroupList.isEmpty()) {
             log.warn("checkSameChainData not found any group of front.");
             return;
         }
 
-        for (TbGroup tbGroup : allNormalGroupList) {
+        for (TbGroup tbGroup : allGroupList) {
             int groupId = tbGroup.getGroupId();
             // find smallest block from db of group
             TbBlock smallestBlockLocal = blockService.getSmallestBlockInfo(groupId);
@@ -444,7 +444,8 @@ public class GroupService {
                                 "groupId: {} height:{} on chain ", groupId, blockHeightLocal);
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
-            } else {
+            } else if (tbGroup.getGroupStatus() == GroupStatus.CONFLICT_LOCAL_DATA.getValue()){
+                // if old group is conflict, now normal, set as normal
                 log.info("checkSameChainDataWithLocal set groupId:{} as normal", groupId);
                 updateGroupStatus(groupId, GroupStatus.NORMAL.getValue());
             }
