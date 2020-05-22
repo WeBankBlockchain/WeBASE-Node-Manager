@@ -429,9 +429,10 @@ public class GroupService {
             BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumber(groupId, blockHeightLocal);
             // if no block in each node, not same chain
             if (smallestBlockOnChain == null) {
-                log.warn("checkSameChainDataWithLocal groupId: {} block of height: {} on chain not exists, " +
-                        "conflict with local block of same height", groupId, blockHeightLocal);
-                updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
+                log.info("smallestBlockOnChain groupId: {} height: {} return null, " +
+                        "please check groupStatus", groupId, blockHeightLocal);
+                // null block not means conflict
+                // updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
             }
 			String blockHashOnChain = smallestBlockOnChain.getHash();
