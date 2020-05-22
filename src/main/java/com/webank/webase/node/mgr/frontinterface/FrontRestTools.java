@@ -32,6 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import com.webank.webase.node.mgr.group.GroupService;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,7 +304,7 @@ public class FrontRestTools {
         ArrayList<FrontGroup> list = new ArrayList<>(frontList);
         RestTemplate restTemplate = caseRestemplate(uri);
 
-        while (list != null && list.size() > 0) {
+        while (list.size() > 0) {
             String url = buildFrontUrl(list, uri, method);//build url
             try {
                 HttpEntity entity = buildHttpEntity(param);// build entity

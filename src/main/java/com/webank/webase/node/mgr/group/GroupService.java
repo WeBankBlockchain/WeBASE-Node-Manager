@@ -690,4 +690,11 @@ public class GroupService {
         return groupMapper.getGroupById(groupId);
     }
 
+    /**
+     * get status of group
+     * @return groupStatus
+     */
+    public Integer getGroupStatus(Integer groupId) {
+        return getGroupById(groupId).getGroupStatus();
+    }
 }
