@@ -27,6 +27,7 @@ import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.user.entity.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.*;
 
 import lombok.extern.log4j.Log4j2;
@@ -362,14 +363,18 @@ public class UserService {
         P12Manager p12Manager = new P12Manager();
         String privateKey;
         try {
+            p12Manager.setPassword(p12Password);
             p12Manager.load(p12File.getInputStream(), p12Password);
             privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
-        }catch (Exception e) {
+        } catch ( IOException e) {
             log.error("importKeyStoreFromP12 error:[]", e);
             if (e.getMessage().contains("password")) {
                 throw new NodeMgrException(ConstantCode.P12_PASSWORD_ERROR);
             }
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
+        } catch (Exception e) {
+            log.error("importKeyStoreFromP12 error:[]", e);
+            throw new NodeMgrException(ConstantCode.P12_FILE_ERROR.getCode(), e.getMessage());
         }
         // pem's privateKey encoded here
         String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
