@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.user;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HasPk;
+import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -30,12 +31,14 @@ import java.util.*;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * services for user data.
@@ -76,7 +79,7 @@ public class UserService {
         // group id as appId
         String appId = groupId.toString();
 
-        // request sign
+        // request sign or not
         KeyPair keyPair;
         if (StringUtils.isNotBlank(privateKeyEncoded)) {
             Map<String, Object> param = new HashMap<>();
@@ -84,8 +87,8 @@ public class UserService {
             param.put("appId", appId);
             // already encoded privateKey
             param.put("privateKey", privateKeyEncoded);
-            keyPair = frontRestTools.postForEntity(groupId, FrontRestTools.URI_KEY_PAIR_IMPORT_WITH_SIGN,
-                    param, KeyPair.class);
+            keyPair = frontRestTools.postForEntity(groupId,
+                    FrontRestTools.URI_KEY_PAIR_IMPORT_WITH_SIGN, param, KeyPair.class);
         } else {
             String keyUri = String.format(FrontRestTools.URI_KEY_PAIR, userName, signUserId, appId);
             keyPair = frontRestTools.getForEntity(groupId, keyUri, KeyPair.class);
@@ -340,6 +343,37 @@ public class UserService {
         // store local and save in sign
         Integer userId = addUserInfo(reqImportPem.getGroupId(), reqImportPem.getUserName(),
                 reqImportPem.getDescription(), reqImportPem.getUserType(), privateKeyEncoded);
+        return userId;
+    }
+
+    /**
+     * import keystore info from p12 file input stream and its password
+     * @param p12File
+     * @param p12Password
+     * @param userName
+     * @return KeyStoreInfo
+     */
+    public Integer importKeyStoreFromP12(MultipartFile p12File, String p12Password, Integer groupId,
+                                         String userName, String description) {
+        P12Manager p12Manager = new P12Manager();
+        String privateKey;
+        try {
+            p12Manager.load(p12File.getInputStream(), p12Password);
+            privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
+        }catch (Exception e) {
+            log.error("importKeyStoreFromP12 error:[]", e);
+            if (e.getMessage().contains("password")) {
+                throw new NodeMgrException(ConstantCode.P12_PASSWORD_ERROR);
+            }
+            throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
+        }
+        // pem's privateKey encoded here
+        String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
+
+        // store local and save in sign
+        Integer userId = addUserInfo(groupId, userName, description, UserType.GENERALUSER.getValue(),
+                privateKeyEncoded);
+
         return userId;
     }
 }

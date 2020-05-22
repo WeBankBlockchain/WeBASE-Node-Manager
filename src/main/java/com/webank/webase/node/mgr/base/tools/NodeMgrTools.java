@@ -537,4 +537,12 @@ public class NodeMgrTools {
         }
         return Base64.getEncoder().encodeToString(input.getBytes());
     }
+
+    /**
+     * 只包含中文
+     */
+    public static boolean notContainsChinese(String input) {
+        String regex = "[^\\u4e00-\\u9fa5]+";
+        return input.matches(regex);
+    }
 }
