@@ -159,6 +159,9 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(202099, "Abi Id cannot be empty");
     public static final RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(202100, "contractAddress is null");
 
+    public static final RetCode USER_NOT_EXIST = RetCode.mark(202110, "User's signUserId not exist");
+
+
     /* dynamic group manage */
     public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");
     public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node's front not exists");
