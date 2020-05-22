@@ -50,7 +50,7 @@ public class PullBlockTransTask {
      */
     public synchronized void pullBlockStart() {
         Instant startTime = Instant.now();
-        log.info("start pullBLock startTime:{}", startTime.toEpochMilli());
+        log.debug("start pullBLock startTime:{}", startTime.toEpochMilli());
         List<TbGroup> groupList = groupService.getGroupList(GroupStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
             log.warn("pullBlock jump over: not found any group");
@@ -68,7 +68,7 @@ public class PullBlockTransTask {
             Thread.currentThread().interrupt();
         }
 
-        log.info("end pullBLock useTime:{} ",
+        log.debug("end pullBLock useTime:{} ",
                 Duration.between(startTime, Instant.now()).toMillis());
     }
 }

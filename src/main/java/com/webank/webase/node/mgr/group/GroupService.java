@@ -256,11 +256,13 @@ public class GroupService {
         List<PeerInfo> peerList = Arrays.asList(peerArr);
         //save new nodes
         for (String nodeId : groupPeerList) {
+            // if local hash node, count = 1
             long count = localNodeList.stream().filter(
                     ln -> nodeId.equals(ln.getNodeId()) && groupId == ln.getGroupId()).count();
+            // TODO remove
             log.error("=========== savePeerList:{}", count);
             // local node not contains this one:
-            if (count == 0) {
+            if (count != 1) {
                 PeerInfo newPeer = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
                         .findFirst().orElseGet(() -> new PeerInfo(nodeId));
                 nodeService.addNodeInfo(groupId, newPeer);
@@ -296,9 +298,12 @@ public class GroupService {
             return;
         }
         //remove node that's not in groupPeerList and not in sealer/observer list
-        localNodes.stream().filter(node -> !groupPeerList.contains(node.getNodeId())
-                && !checkSealerAndObserverListContains(groupId, node.getNodeId()))
-                .forEach(n -> nodeService.deleteByNodeAndGroupId(n.getNodeId(), groupId));
+        localNodes.stream()
+                .filter(node ->
+                        !groupPeerList.contains(node.getNodeId())
+                    && !checkSealerAndObserverListContains(groupId, node.getNodeId()))
+                .forEach(n ->
+                        nodeService.deleteByNodeAndGroupId(n.getNodeId(), groupId));
     }
 
     private boolean checkSealerAndObserverListContains(int groupId, String nodeId) {
