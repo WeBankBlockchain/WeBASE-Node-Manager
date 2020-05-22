@@ -367,13 +367,13 @@ public class GroupService {
             log.warn("checkGroupGenesisSameWithEach not found any front.");
             return;
 		}
-		List<TbGroup> allNormalGroupList = getGroupList(GroupStatus.NORMAL.getValue());
-		if (allNormalGroupList.isEmpty()) {
+		List<TbGroup> allGroupList = getGroupList(null);
+		if (allGroupList.isEmpty()) {
             log.warn("checkGroupGenesisSameWithEach not found any group of front.");
             return;
 		}
 
-		for (TbGroup tbGroup : allNormalGroupList) {
+		for (TbGroup tbGroup : allGroupList) {
 			int groupId = tbGroup.getGroupId();
             String lastBlockHash = "";
             for (TbFront front : frontList) {
@@ -383,7 +383,7 @@ public class GroupService {
                 BlockInfo genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
                         frontPort, groupId, BigInteger.ZERO);
                 if (genesisBlock == null) {
-                    log.warn("checkGroupGenesisSameWithEach getGenesisBlock is null");
+                    log.debug("checkGroupGenesisSameWithEach getGenesisBlock is null");
                     continue;
                 }
                 if (!"".equals(lastBlockHash) && !lastBlockHash.equals(genesisBlock.getHash())) {
@@ -419,7 +419,7 @@ public class GroupService {
             TbBlock smallestBlockLocal = blockService.getSmallestBlockInfo(groupId);
             // if no block in local db
             if (smallestBlockLocal == null) {
-                log.warn("checkSameChainDataWithLocal groupId {} smallestBlockLocal is null", groupId);
+                log.debug("checkSameChainDataWithLocal groupId {} smallestBlockLocal is null", groupId);
                 continue;
             }
             BigInteger blockHeightLocal = smallestBlockLocal.getBlockNumber();
@@ -445,7 +445,7 @@ public class GroupService {
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
                 continue;
             } else {
-                log.warn("checkSameChainDataWithLocal set groupId:{} as normal", groupId);
+                log.info("checkSameChainDataWithLocal set groupId:{} as normal", groupId);
                 updateGroupStatus(groupId, GroupStatus.NORMAL.getValue());
             }
         }
