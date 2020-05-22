@@ -14,9 +14,12 @@
 package com.webank.webase.node.mgr.frontgroupmap.entity;
 
 
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.webank.webase.node.mgr.group.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +28,8 @@ public class FrontGroupMapCache {
 
     @Autowired
     private FrontGroupMapService mapService;
+    @Autowired
+    private GroupService groupService;
 
     private static List<FrontGroup> mapList;
 
@@ -52,7 +57,10 @@ public class FrontGroupMapCache {
         if (list == null) {
             return null;
         }
-        List<FrontGroup> map = list.stream().filter(m -> groupId == m.getGroupId())
+        // filter all FrontGroup which groupStatus is normal
+        List<FrontGroup> map = list.stream()
+            .filter(m -> groupId == m.getGroupId()
+                    && GroupStatus.NORMAL.getValue() == groupService.getGroupStatus(groupId))
             .collect(Collectors.toList());
         return map;
     }
