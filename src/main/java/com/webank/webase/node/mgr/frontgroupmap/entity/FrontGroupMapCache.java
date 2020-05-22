@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.webank.webase.node.mgr.group.GroupService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Log4j2
 @Component
 public class FrontGroupMapCache {
 
@@ -55,6 +57,7 @@ public class FrontGroupMapCache {
     public List<FrontGroup> getMapListByGroupId(int groupId) {
         List<FrontGroup> list = getAllMap();
         if (list == null) {
+            log.warn("getMapListByGroupId getAllMap is null.");
             return null;
         }
         // filter all FrontGroup which groupStatus is normal
