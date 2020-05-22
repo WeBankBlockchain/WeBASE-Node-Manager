@@ -407,7 +407,7 @@ public class GroupService {
     private void checkSameChainDataWithLocal() {
         log.info("start checkSameChainData.");
         // get all group
-        List<TbGroup> allNormalGroupList = getGroupList(GroupStatus.NORMAL.getValue());
+        List<TbGroup> allNormalGroupList = getGroupList(null);
         if (allNormalGroupList.isEmpty()) {
             log.warn("checkSameChainData not found any group of front.");
             return;
@@ -419,7 +419,7 @@ public class GroupService {
             TbBlock smallestBlockLocal = blockService.getSmallestBlockInfo(groupId);
             // if no block in local db
             if (smallestBlockLocal == null) {
-                log.warn("checkSameChainDataWithLocal smallestBlockLocal is null");
+                log.warn("checkSameChainDataWithLocal groupId {} smallestBlockLocal is null", groupId);
                 continue;
             }
             BigInteger blockHeightLocal = smallestBlockLocal.getBlockNumber();
