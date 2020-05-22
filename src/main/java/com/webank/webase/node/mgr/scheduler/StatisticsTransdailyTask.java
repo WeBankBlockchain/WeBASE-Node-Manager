@@ -60,7 +60,7 @@ public class StatisticsTransdailyTask {
      */
     public synchronized void updateTransdailyData() {
         Instant startTime = Instant.now();
-        log.info("start updateTransdailyData startTime:{}", startTime.toEpochMilli());
+        log.debug("start updateTransdailyData startTime:{}", startTime.toEpochMilli());
         try {
 
             // query all group statistical info
@@ -73,7 +73,7 @@ public class StatisticsTransdailyTask {
         } catch (Exception ex) {
             log.error("fail updateTransdailyData", ex);
         }
-        log.info("end updateTransdailyData useTime:{}",
+        log.debug("end updateTransdailyData useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
     }
 
@@ -104,7 +104,7 @@ public class StatisticsTransdailyTask {
 
             // Traversing block list
             if (blockList == null | blockList.size() == 0) {
-                log.info("updateTransdailyData jump over .This chain [{}] did not find new block",
+                log.debug("updateTransdailyData jump over .This chain [{}] did not find new block",
                     groupId);
                 continue;
             }
@@ -113,7 +113,7 @@ public class StatisticsTransdailyTask {
                 LocalDate blockDate = tbBlock.getBlockTimestamp() == null ? null
                     : tbBlock.getBlockTimestamp().toLocalDate();
                 if (blockDate == null) {
-                    log.warn("updateTransdailyData jump over . blockDate is null");
+                    log.debug("updateTransdailyData jump over . blockDate is null");
                     continue;
                 }
 
