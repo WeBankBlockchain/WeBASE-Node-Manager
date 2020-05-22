@@ -31,6 +31,7 @@ import java.util.*;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.bcel.Const;
 import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.utils.Numeric;
@@ -263,6 +264,9 @@ public class UserService {
      */
     public String getSignUserIdByAddress(int groupId, String address) throws NodeMgrException {
         TbUser user = queryUser(null, groupId, null, address);
+        if (user == null) {
+            throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
+        }
         return user.getSignUserId();
     }
 
