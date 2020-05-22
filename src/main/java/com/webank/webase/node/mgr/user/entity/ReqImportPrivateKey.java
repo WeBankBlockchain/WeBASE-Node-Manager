@@ -17,12 +17,16 @@
 package com.webank.webase.node.mgr.user.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
 
 @Data
 @NoArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class ReqImportPrivateKey extends NewUserInputParam{
 	@NotBlank
 	private String privateKey;
