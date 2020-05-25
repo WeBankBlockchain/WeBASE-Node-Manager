@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2020  the original author or authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,7 +46,7 @@ public class ConstantCode {
     public static final RetCode FRONT_EXISTS = RetCode.mark(202004, "front already exists");
 
     public static final RetCode GROUP_ID_NULL = RetCode
-        .mark(202005, "group id cannot be empty");
+            .mark(202005, "group id cannot be empty");
 
     public static final RetCode INVALID_GROUP_ID = RetCode.mark(202006, "invalid group id");
 
@@ -56,7 +56,7 @@ public class ConstantCode {
 
     public static final RetCode SAVE_FRONT_FAIL = RetCode.mark(202009, "save front fail");
 
-    public static final RetCode REQUEST_FRONT_FAIL = RetCode.mark(202010,"request front fail");
+    public static final RetCode REQUEST_FRONT_FAIL = RetCode.mark(202010, "request front fail");
 
     public static final RetCode CONTRACT_ABI_EMPTY = RetCode.mark(202011, "abiInfo cannot be empty");
 
@@ -77,10 +77,10 @@ public class ConstantCode {
     public static final RetCode CONTRACT_NOT_DEPLOY = RetCode.mark(202023, "contract has not deploy");
 
     public static final RetCode ACCOUNT_EXISTS = RetCode
-        .mark(202026, "account info already exists");
+            .mark(202026, "account info already exists");
 
     public static final RetCode ACCOUNT_NOT_EXISTS = RetCode
-        .mark(202027, "account info not exists");
+            .mark(202027, "account info not exists");
 
     public static final RetCode ACCOUNT_NAME_EMPTY = RetCode.mark(202028, "account name empty");
 
@@ -97,21 +97,21 @@ public class ConstantCode {
     public static final RetCode LOGIN_FAIL = RetCode.mark(202034, "login fail");
 
     public static final RetCode CONTRACT_HAS_BEAN_DEPLOYED = RetCode
-        .mark(202035, "contract has been deployed");
+            .mark(202035, "contract has been deployed");
 
     public static final RetCode PUBLICKEY_NULL = RetCode.mark(202036, "publicKey cannot be empty");
 
     public static final RetCode CONTRACT_DEPLOY_FAIL = RetCode
-        .mark(202040, "contract deploy not success");
+            .mark(202040, "contract deploy not success");
 
     public static final RetCode NOW_PWD_EQUALS_OLD = RetCode
-        .mark(202045, "the new password cannot be same as old");
+            .mark(202045, "the new password cannot be same as old");
 
     public static final RetCode PUBLICKEY_LENGTH_ERROR = RetCode
-        .mark(202050, "publicKey's length is 130,address's length is 42");
+            .mark(202050, "publicKey's length is 130,address's length is 42");
 
     public static final RetCode SERVER_CONNECT_FAIL = RetCode
-        .mark(202051, "wrong host or port");
+            .mark(202051, "wrong host or port");
     public static final RetCode INVALID_TOKEN = RetCode.mark(202052, "invalid token");
     public static final RetCode TOKEN_EXPIRE = RetCode.mark(202053, "token expire");
 
@@ -151,4 +151,24 @@ public class ConstantCode {
     /* param exception */
     public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
 
+
+    // add in v1.4.0
+    public static final RetCode NO_DOCKER_TAG_UPDATE_URL_ERROR = RetCode.mark(500001, "No docker image tag update url.");
+    public static final RetCode UPDATE_DOCKER_TAG_ERROR = RetCode.mark(500002, "Update docker tag from registry error.");
+    public static final RetCode UNKNOWN_CONFIG_TYPE_ERROR = RetCode.mark(500003, "Unknown config type.");
+    public static final RetCode SAVE_IP_CONFIG_FILE_ERROR = RetCode.mark(500004, "Save IP config error.");
+    public static final RetCode TAG_ID_PARAM_ERROR = RetCode.mark(500005, "Tag id param error.");
+    public static final RetCode IP_CONF_PARAM_NULL_ERROR = RetCode.mark(500006, "ipconf null.");
+    public static final RetCode CHAIN_NAME_EXISTS_ERROR = RetCode.mark(500007, "Chain name exists.");
+    public static final RetCode INSERT_CHAIN_ERROR = RetCode.mark(500008, "Insert new chain failed.");
+    public static final RetCode NO_CONFIG_FILE_ERROR = RetCode.mark(500009, "No ipconf file.");
+    public static final RetCode EXEC_BUILD_CHAIN_ERROR = RetCode.mark(500010, "Exec build chain script failed.");
+    public static final RetCode IP_CONFIG_LINE_ERROR = RetCode.mark(500011, "ipconf line error.");
+    public static final RetCode IP_NUM_ERROR = RetCode.mark(500012, "IP and num config error.");
+    public static final RetCode AGENCY_NAME_CONFIG_ERROR = RetCode.mark(500013, "Agency name config error.");
+    public static final RetCode GROUPS_CONFIG_ERROR = RetCode.mark(500014, "Groups config error.");
+    public static final RetCode HOST_CONNECT_ERROR = RetCode.mark(500015, "Connect to host error.");
+    public static final RetCode INSERT_AGENCY_ERROR = RetCode.mark(500016, "Insert new agency failed.");
+    public static final RetCode INSERT_GROUP_ERROR = RetCode.mark(500017, "Insert new group failed.");
+    public static final RetCode INSERT_HOST_ERROR = RetCode.mark(500018, "Insert new host failed.");
 }
