@@ -87,6 +87,7 @@ public class GroupService {
     public static final String RUNNING_GROUP = "RUNNING";
     public static final String OPERATE_START_GROUP = "start";
     public static final String OPERATE_STOP_GROUP = "stop";
+    public static final String OPERATE_STATUS_GROUP = "getStatus";
 
     /**
      * query count of group.
@@ -616,11 +617,11 @@ public class GroupService {
         Map<String, String> statusRes = frontInterface.queryGroupStatus(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), nodeId, groupIdList);
         // refresh front group map
-        groupIdList.forEach(gId -> {
-            Integer status = RUNNING_GROUP.equalsIgnoreCase(statusRes.get(gId.toString())) ?
-                    GroupStatus.NORMAL.getValue() : GroupStatus.MAINTAINING.getValue();
-            frontGroupMapService.newFrontGroup(tbFront.getFrontId(), gId, status);
-        });
+//        groupIdList.forEach(gId -> {
+//            Integer status = RUNNING_GROUP.equalsIgnoreCase(statusRes.get(gId.toString())) ?
+//                    GroupStatus.NORMAL.getValue() : GroupStatus.MAINTAINING.getValue();
+//            frontGroupMapService.newFrontGroup(tbFront.getFrontId(), gId, status);
+//        });
         return statusRes;
     }
 
