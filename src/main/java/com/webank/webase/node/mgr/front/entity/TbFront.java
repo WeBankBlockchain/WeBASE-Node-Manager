@@ -16,6 +16,7 @@
 package com.webank.webase.node.mgr.front.entity;
 
 import java.time.LocalDateTime;
+
 import lombok.Data;
 
 @Data
@@ -29,6 +30,19 @@ public class TbFront {
     private String clientVersion;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+
+
+    private Byte runType;
+    private Integer agencyId;
+    private String agencyName;
+    private Integer hostId;
+    private Short hostIndex;
+    private String imageTag;
+    private String containerName;
+    private Short jsonrpcPort;
+    private Short p2pPort;
+    private Short channelPort;
+    private Byte status;
 }
 
 

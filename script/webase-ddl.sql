@@ -157,22 +157,21 @@ CREATE TABLE `tb_front` (
   `client_version` varchar(32) NOT NULL COMMENT '节点版本（国密/非国密）',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '修改时间',
-
-  `run_type` tinyint(8) NOT NULL DEFAULT '0' COMMENT '运行方式：0，命令行；1，Docker',
-  `agency_id` int(10) unsigned NOT NULL DEFAULT '1' COMMENT '所属机构 ID',
-  `agency_name` varchar(64) DEFAULT NULL COMMENT '所属机构名称，冗余字段',
-  `host_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '所属主机',
-  `host_index` smallint(6) NOT NULL DEFAULT '0' COMMENT '一台主机可能有多个节点。表示在主机中的编号，从 0 开始编号',
-  `image_tag` varchar(64) NOT NULL DEFAULT '' COMMENT '运行的镜像版本标签',
-  `container_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Docker 启动的容器名称',
-  `jsonrpc_port` smallint(6) NOT NULL DEFAULT '8545' COMMENT 'jsonrpc 端口',
-  `p2p_port` smallint(6) NOT NULL DEFAULT '30303' COMMENT 'p2p 端口',
-  `channel_port` smallint(6) NOT NULL DEFAULT '20200' COMMENT 'channel 端口',
-  `status` tinyint(8) NOT NULL DEFAULT '0' COMMENT '容器状态：0，未创建；1，停止；2，启动；',
-
+  `run_type` tinyint(8) unsigned DEFAULT '0' COMMENT '运行方式：0，命令行；1，Docker',
+  `agency_id` int(10) unsigned DEFAULT '0' COMMENT '所属机构 ID',
+  `agency_name` varchar(64) DEFAULT '' COMMENT '所属机构名称，冗余字段, 跟 agency 字段相同',
+  `host_id` int(10) unsigned DEFAULT '0' COMMENT '所属主机',
+  `host_index` smallint(6) DEFAULT '0' COMMENT '一台主机可能有多个节点。表示在主机中的编号，从 0 开始编号',
+  `image_tag` varchar(64) DEFAULT '' COMMENT '运行的镜像版本标签',
+  `container_name` varchar(255) DEFAULT '' COMMENT 'Docker 启动的容器名称',
+  `jsonrpc_port` smallint(6) DEFAULT '8545' COMMENT 'jsonrpc 端口',
+  `p2p_port` smallint(6) DEFAULT '30303' COMMENT 'p2p 端口',
+  `channel_port` smallint(6) DEFAULT '20200' COMMENT 'channel 端口',
+  `status` tinyint(8) DEFAULT '2' COMMENT '容器状态：0，未创建；1，停止；2，启动；',
   PRIMARY KEY (`front_id`),
-  UNIQUE KEY `unique_node_id` (`node_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=500001 DEFAULT CHARSET=utf8 COMMENT='前置服务信息表';
+  UNIQUE KEY `unique_node_id` (`node_id`),
+  UNIQUE KEY `unique_agency_id_host_id_front_port` (`agency_id`,`front_ip`,`front_port`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='前置服务信息表'
 
 -- ----------------------------
 -- Table structure for tb_front_group_map
@@ -193,12 +192,18 @@ CREATE TABLE `tb_front_group_map` (
 CREATE TABLE `tb_group` (
   `group_id` int(11) UNSIGNED NOT NULL COMMENT '群组ID',
   `group_name` varchar(64) NOT NULL COMMENT '群组名字',
+
+  `chain_id` int(10) unsigned NULL DEFAULT '0' COMMENT '所属链 ID',
+  `chain_name` varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
+
   `group_status` int(1) UNSIGNED DEFAULT '1' COMMENT '状态（1-正常 2-异常）',
   `node_count` int(11) UNSIGNED DEFAULT '0' COMMENT '群组下节点数',
   `group_desc` varchar(1024) DEFAULT NULL COMMENT '群组描述',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `modify_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`group_id`)
+  PRIMARY KEY (`group_id`),
+  UNIQUE KEY `unique_chain_id_group_id` (`chain_id`,`group_id`),
+  UNIQUE KEY `unique_chain_id_group_name` (`chain_id`,`group_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='群组信息表';
 
 -- ----------------------------
@@ -217,7 +222,7 @@ CREATE TABLE `tb_host` (
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unq_ip` (`ip`) USING BTREE
+  UNIQUE KEY `unq_agency_id,ip` (`agency_id`,`ip`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
