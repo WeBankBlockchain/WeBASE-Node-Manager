@@ -29,6 +29,8 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.group.entity.*;
@@ -83,6 +85,8 @@ public class GroupService {
     private BlockService blockService;
 
     public static final String RUNNING_GROUP = "RUNNING";
+    public static final String OPERATE_START_GROUP = "start";
+    public static final String OPERATE_STOP_GROUP = "stop";
 
     /**
      * query count of group.
@@ -238,6 +242,8 @@ public class GroupService {
         checkGroupGenesisSameWithEach();
         // remove front_group_map that not in tb_front or tb_group
         frontGroupMapService.removeInvalidFrontGroupMap();
+        // remove group and front_group_map that front_group_map's status is all invalid
+        removeInvalidGroupByMap(allGroupSet);
         //clear cache
         frontGroupMapCache.clearMapList();
 
@@ -563,7 +569,7 @@ public class GroupService {
         // request front to operate
         Object groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
-        if ("start".equals(type) || "stop".equals(type)) {
+        if (OPERATE_START_GROUP.equals(type) || OPERATE_STOP_GROUP.equals(type)) {
             // reset front group map status
             frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
         }
@@ -708,6 +714,41 @@ public class GroupService {
     public TbGroup getGroupById(Integer groupId) {
         log.debug("getGroupById groupId:{}", groupId);
         return groupMapper.getGroupById(groupId);
+    }
+
+    /**
+     * check all group
+     * @param allGroupSet
+     */
+    private void removeInvalidGroupByMap(Set<Integer> allGroupSet) {
+        // if all front of group invalid, remove group and front_group_map
+        allGroupSet.forEach(this::removeGroupAccording2MapStatus);
+    }
+
+    /**
+     * remove group whose front(front_group_map) all invalid
+     * case1: remove front, call this
+     * case2: stop all front of one group, call this
+     * @param groupId
+     */
+    public void removeGroupAccording2MapStatus(Integer groupId) {
+        log.debug("removeGroupByMapStatus groupId:{}", groupId);
+        // get list of this group
+        MapListParam param = new MapListParam();
+        param.setGroupId(groupId);
+        // count of group belonging to this front
+        List<FrontGroup> frontListByGroup = frontGroupMapService.getList(param);
+
+        // count of front's groupStatus normal
+        long count = frontListByGroup.stream()
+                .filter( f -> f.getStatus() == GroupStatus.NORMAL.getValue())
+                .count();
+        long countInvalid = frontListByGroup.size() - count;
+        // front belong to this group all invalid
+        if (countInvalid == frontListByGroup.size()) {
+            log.warn("removeGroupByMapStatus all map is valid, remove group: countInvalid:{}", countInvalid);
+            removeAllDataByGroupId(groupId);
+        }
     }
 
 }
