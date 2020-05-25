@@ -48,10 +48,12 @@ public class FrontGroupMapService {
      * add new mapping
      */
     private TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
+        MapListParam param = new MapListParam(frontId, groupId);
+        FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
+        // add db
         TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
-        // TODO not working
-        //add db
-        frontGroupMapMapper.add(tbFrontGroupMap);
+        tbFrontGroupMap.setMapId(frontGroup.getMapId());
+        Integer res = frontGroupMapMapper.update(tbFrontGroupMap);
         return tbFrontGroupMap;
     }
 
