@@ -62,8 +62,7 @@ public class FrontGroupMapCache {
         }
         // filter all FrontGroup which groupStatus is normal
         List<FrontGroup> map = list.stream()
-            .filter(m -> groupId == m.getGroupId()
-                    && GroupStatus.NORMAL.getValue() == groupService.getGroupStatus(groupId))
+            .filter(m -> groupId == m.getGroupId())
             .collect(Collectors.toList());
         return map;
     }
