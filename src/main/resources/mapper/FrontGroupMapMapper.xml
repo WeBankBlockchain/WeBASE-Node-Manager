@@ -23,6 +23,32 @@
         </selectKey>
     </insert>
 
+    <update id="update" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
+        update tb_front_group_map set modify_time = now()
+        <if test="status != null and status != ''">
+            ,status = #{status}
+        </if>
+        where map_id = #{mapId}
+    </update>
+
+    <select id="queryFrontGroup" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam"
+            resultMap="frontGroupMap">
+        select * from tb_front_group_map where 1=1
+        <if test="mapId != null and mapId != ''">
+            and map_id = #{param.mapId}
+        </if>
+        <if test="frontId != null and frontId != ''">
+            and front_id = #{frontId}
+        </if>
+        <if test="groupId != null and groupId != ''">
+            and group_id = #{groupId}
+        </if>
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+        limit 1
+    </select>
+
     <select id="getCount" resultType="java.lang.Integer"
             parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam">
         select count(1) from tb_front_group_map where 1=1

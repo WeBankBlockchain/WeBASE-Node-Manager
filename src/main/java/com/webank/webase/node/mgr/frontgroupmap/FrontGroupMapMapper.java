@@ -26,6 +26,10 @@ public interface FrontGroupMapMapper {
 
     int add(TbFrontGroupMap tbFrontGroupMap);
 
+    int update(TbFrontGroupMap tbFrontGroupMap);
+
+    FrontGroup queryFrontGroup(MapListParam mapListParam);
+
     int getCount(MapListParam mapListParam);
 
     int removeByGroupId(@Param("groupId") Integer groupId);

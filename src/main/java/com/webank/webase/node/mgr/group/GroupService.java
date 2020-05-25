@@ -225,7 +225,8 @@ public class GroupService {
                     saveGroup(gId, groupPeerList.size(), "synchronous",
                             GroupType.SYNC.getValue(), GroupStatus.NORMAL.getValue());
                 }
-                // refresh front group map
+                // refresh front group map by group list onchain
+                // different from checkGroupMapByLocalGroupList
                 frontGroupMapService.newFrontGroupWithStatus(front, gId);
 
                 //save new peers(tb_node)
@@ -239,14 +240,15 @@ public class GroupService {
 
         // check group status(normal or maintaining), update by local grouplist
         checkAndUpdateGroupStatus(allGroupSet);
-        // check group if has dirty data
+        // check group local whether has dirty data
         checkSameChainDataWithLocal();
-        // check group's genesis block same with each other
+        // check group's genesis block same with each other front
         checkGroupGenesisSameWithEach();
         // remove front_group_map that not in tb_front or tb_group
         // if stop group, and not delete group, group not on chain but in local db,
         // wont's update map as invalid
         frontGroupMapService.removeInvalidFrontGroupMap();
+        // update group_map status by local group
         checkGroupMapByLocalGroupList(allGroupSet);
         // remove group and front_group_map that front_group_map's status is all invalid
         removeInvalidGroupByMap();
