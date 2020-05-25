@@ -15,7 +15,6 @@ package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -327,7 +326,7 @@ public class GroupService {
             return;
         }
 
-        List<TbGroup> allLocalGroup = getGroupList(null);
+         List<TbGroup> allLocalGroup = getGroupList(null);
         if (CollectionUtils.isEmpty(allLocalGroup)) {
             return;
         }
