@@ -561,6 +561,10 @@ public class GroupService {
         // request front to operate
         Object groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
+        if ("start".equals(type) || "stop".equals(type)) {
+            // reset front group map status
+            frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
+        }
         // refresh group status, not remove tb_group if within gray period (yaml-groupInvalidGrayscaleValue)
         resetGroupList();
 
@@ -624,6 +628,8 @@ public class GroupService {
             // request front to start
             frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
                     "start");
+            // reset front group map status
+            frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
         }
         // refresh group status
         resetGroupList();
