@@ -70,7 +70,7 @@ public class FrontGroupMapCache {
             .filter(m -> groupId == m.getGroupId()
                     && m.getStatus() == GroupStatus.NORMAL.getValue())
             .collect(Collectors.toList());
-        log.error("getMapListByGroupId map size:{}", map.size());
+        log.info("getMapListByGroupId map size:{}", map.size());
         return map;
     }
 

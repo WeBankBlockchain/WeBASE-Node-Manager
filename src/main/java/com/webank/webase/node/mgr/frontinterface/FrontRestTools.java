@@ -205,7 +205,8 @@ public class FrontRestTools {
         Iterator<String> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             String key = iter.next();
-            if (rkey.equals(key)) {
+            // fix null
+            if (key.equals(rkey)) {
                 iter.remove();
             }
         }
