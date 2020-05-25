@@ -82,6 +82,8 @@ public class GroupService {
     @Autowired
     private BlockService blockService;
 
+    public static final String RUNNING_GROUP = "RUNNING";
+
     /**
      * query count of group.
      */
@@ -603,8 +605,16 @@ public class GroupService {
             log.error("fail getGroupStatus node front not exists.");
             throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
         }
+
+        // groupId, status
         Map<String, String> statusRes = frontInterface.queryGroupStatus(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), nodeId, groupIdList);
+        // refresh front group map
+        groupIdList.forEach(gId -> {
+            Integer status = RUNNING_GROUP.equalsIgnoreCase(statusRes.get(gId.toString())) ?
+                    GroupStatus.NORMAL.getValue() : GroupStatus.MAINTAINING.getValue();
+            frontGroupMapService.newFrontGroup(tbFront, gId, status);
+        });
         return statusRes;
     }
 
