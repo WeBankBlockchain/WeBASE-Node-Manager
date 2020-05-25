@@ -61,12 +61,15 @@ public class FrontGroupMapService {
         // check front's all group status
         BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
                 groupId, "getStatus");
+        log.info("newFrontGroupWithStatus getGroupStatus {}", res);
         // "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
         if (res.getCode() == 0) {
             String groupStatus = (String) res.getData();
             if (RUNNING_GROUP.equals(groupStatus)) {
+                log.info("newFrontGroupWithStatus update map's groupStatus NORMAL.");
                 newFrontGroup(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
             } else {
+                log.info("newFrontGroupWithStatus update map's groupStatus MAINTAINING.");
                 newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
             }
         }
