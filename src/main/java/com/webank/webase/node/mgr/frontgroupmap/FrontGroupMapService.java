@@ -55,14 +55,17 @@ public class FrontGroupMapService {
 
         // add db
         TbFrontGroupMap tbFrontGroupMap;
+        Integer res;
         if (frontGroup == null) {
             tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
-            frontGroupMapMapper.add(tbFrontGroupMap);
+            res = frontGroupMapMapper.add(tbFrontGroupMap);
         } else {
             tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
             tbFrontGroupMap.setMapId(frontGroup.getMapId());
-            frontGroupMapMapper.update(tbFrontGroupMap);
+            res = frontGroupMapMapper.update(tbFrontGroupMap);
         }
+        log.info("end newFrontGroup res:{}", res);
+
         return tbFrontGroupMap;
     }
 
