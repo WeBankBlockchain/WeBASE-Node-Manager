@@ -51,9 +51,15 @@ public class FrontGroupMapService {
         MapListParam param = new MapListParam(frontId, groupId);
         FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
         // add db
-        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
-        tbFrontGroupMap.setMapId(frontGroup.getMapId());
-        Integer res = frontGroupMapMapper.update(tbFrontGroupMap);
+        TbFrontGroupMap tbFrontGroupMap;
+        if (frontGroup == null) {
+            tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
+            frontGroupMapMapper.add(tbFrontGroupMap);
+        } else {
+            tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
+            tbFrontGroupMap.setMapId(frontGroup.getMapId());
+            frontGroupMapMapper.update(tbFrontGroupMap);
+        }
         return tbFrontGroupMap;
     }
 

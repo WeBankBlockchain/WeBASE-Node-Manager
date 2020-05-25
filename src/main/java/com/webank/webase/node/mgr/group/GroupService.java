@@ -188,7 +188,7 @@ public class GroupService {
      * reset groupList.
      */
     @Transactional
-    public void resetGroupList() {
+    public synchronized void resetGroupList() {
         Instant startTime = Instant.now();
         log.info("start resetGroupList. startTime:{}", startTime.toEpochMilli());
 
