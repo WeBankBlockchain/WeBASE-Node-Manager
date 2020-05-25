@@ -47,9 +47,9 @@ public class FrontGroupMapService {
     /**
      * add new mapping
      */
-    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
+    private TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
         TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
-
+        // TODO not working
         //add db
         frontGroupMapMapper.add(tbFrontGroupMap);
         return tbFrontGroupMap;
