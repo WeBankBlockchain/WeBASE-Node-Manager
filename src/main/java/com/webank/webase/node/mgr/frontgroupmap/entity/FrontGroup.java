@@ -25,4 +25,5 @@ public class FrontGroup {
     private Integer frontId;
     private String frontIp;
     private Integer frontPort;
+    private Integer status;
 }
