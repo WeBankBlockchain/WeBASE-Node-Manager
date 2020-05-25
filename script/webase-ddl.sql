@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
   group_id int(11) NOT NULL COMMENT '群组编号',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  status int(11) DEFAULT 1 NOT NULL COMMENT '节点（前置）的群组状态',
   PRIMARY KEY (map_id),
   unique  unique_front_group (front_id,group_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=600001 DEFAULT CHARSET=utf8 COMMENT='前置群组映射表';
