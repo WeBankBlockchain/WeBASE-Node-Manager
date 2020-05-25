@@ -13,10 +13,14 @@
  */
 package com.webank.webase.node.mgr.frontgroupmap;
 
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +38,36 @@ public class FrontGroupMapService {
     private GroupService groupService;
     @Autowired
     private FrontService frontService;
+    @Autowired
+    private FrontInterfaceService frontInterface;
 
     /**
      * add new mapping
      */
-    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId) {
-        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId);
+    private TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
+        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
 
         //add db
         frontGroupMapMapper.add(tbFrontGroupMap);
         return tbFrontGroupMap;
+    }
+
+    /**
+     * new front group map only for normal group
+     */
+    public void newFrontGroupWithStatus(TbFront front, Integer groupId) {
+        // check front's all group status
+        BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
+                groupId, "getStatus");
+        // "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
+        if (res.getCode() == 0) {
+            String groupStatus = (String) res.getData();
+            if ("RUNNING".equals(groupStatus)) {
+                newFrontGroup(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
+            } else {
+                newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
+            }
+        }
     }
 
     /**

@@ -15,11 +15,11 @@ package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
@@ -29,7 +29,7 @@ import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.group.entity.*;
@@ -49,7 +49,6 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -219,7 +218,8 @@ public class GroupService {
                     saveGroup(gId, groupPeerList.size(), "synchronous",
                             GroupType.SYNC.getValue(), GroupStatus.NORMAL.getValue());
                 }
-                frontGroupMapService.newFrontGroup(front.getFrontId(), gId);
+                // refresh front group map
+                frontGroupMapService.newFrontGroupWithStatus(front, gId);
                 //save new peers
                 savePeerList(frontIp, frontPort, gId, groupPeerList);
                 //remove invalid peers
@@ -695,11 +695,4 @@ public class GroupService {
         return groupMapper.getGroupById(groupId);
     }
 
-    /**
-     * get status of group
-     * @return groupStatus
-     */
-    public Integer getGroupStatus(Integer groupId) {
-        return getGroupById(groupId).getGroupStatus();
-    }
 }

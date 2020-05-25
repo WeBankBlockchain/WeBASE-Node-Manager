@@ -20,4 +20,5 @@ public class MapListParam {
     private int mapId;
     private int frontId;
     private int groupId;
+    private int status;
 }
