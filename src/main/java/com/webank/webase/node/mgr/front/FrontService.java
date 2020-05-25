@@ -270,8 +270,8 @@ public class FrontService {
         frontMapper.remove(frontId);
         //remove map
         frontGroupMapService.removeByFrontId(frontId);
-        //reset group list
-        resetGroupListTask.asyncResetGroupList();
+        //reset group list => remove groups that only belongs to this front
+         resetGroupListTask.asyncResetGroupList();
         //clear cache
         frontGroupMapCache.clearMapList();
     }

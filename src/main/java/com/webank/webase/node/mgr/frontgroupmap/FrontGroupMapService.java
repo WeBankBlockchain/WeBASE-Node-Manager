@@ -61,7 +61,8 @@ public class FrontGroupMapService {
         // check front's all group status
         BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
                 groupId, "getStatus");
-        log.info("newFrontGroupWithStatus getGroupStatus {}", res);
+        log.info("newFrontGroupWithStatus getGroupStatus frontId{} groupId{} res{}",
+                front.getFrontId(), groupId, res);
         // "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
         if (res.getCode() == 0) {
             String groupStatus = (String) res.getData();
