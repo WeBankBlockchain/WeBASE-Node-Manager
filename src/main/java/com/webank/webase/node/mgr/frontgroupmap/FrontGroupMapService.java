@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
+
 @Slf4j
 @Service
 public class FrontGroupMapService {
@@ -44,7 +46,7 @@ public class FrontGroupMapService {
     /**
      * add new mapping
      */
-    private TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
+    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
         TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
 
         //add db
@@ -62,7 +64,7 @@ public class FrontGroupMapService {
         // "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
         if (res.getCode() == 0) {
             String groupStatus = (String) res.getData();
-            if ("RUNNING".equals(groupStatus)) {
+            if (RUNNING_GROUP.equals(groupStatus)) {
                 newFrontGroup(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
             } else {
                 newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
