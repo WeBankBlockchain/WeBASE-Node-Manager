@@ -221,7 +221,7 @@ public class GroupService {
                 }
                 // refresh front group map
                 frontGroupMapService.newFrontGroupWithStatus(front, gId);
-                //save new peers
+                //save new peers(tb_node)
                 savePeerList(frontIp, frontPort, gId, groupPeerList);
                 //remove invalid peers
                 removeInvalidPeer(gId, groupPeerList);
@@ -613,7 +613,7 @@ public class GroupService {
         groupIdList.forEach(gId -> {
             Integer status = RUNNING_GROUP.equalsIgnoreCase(statusRes.get(gId.toString())) ?
                     GroupStatus.NORMAL.getValue() : GroupStatus.MAINTAINING.getValue();
-            frontGroupMapService.newFrontGroup(tbFront, gId, status);
+            frontGroupMapService.newFrontGroup(tbFront.getFrontId(), gId, status);
         });
         return statusRes;
     }
