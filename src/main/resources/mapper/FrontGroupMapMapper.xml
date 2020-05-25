@@ -11,12 +11,13 @@
         <result column="front_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontId"/>
         <result column="front_ip" javaType="java.lang.String" jdbcType="VARCHAR" property="frontIp"/>
         <result column="front_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontPort"/>
+        <result column="status" javaType="java.lang.Integer" jdbcType="INTEGER" property="status"/>
     </resultMap>
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
         insert ignore into tb_front_group_map
-        (front_id,group_id,create_time,modify_time)values(#{frontId},#{groupId},NOW(),NOW())
+        (front_id,group_id,status,create_time,modify_time)values(#{frontId},#{groupId},#{status},NOW(),NOW())
         <selectKey keyProperty="mapId" order="AFTER" resultType="java.lang.Integer">
             SELECT LAST_INSERT_ID()
         </selectKey>
@@ -33,6 +34,9 @@
         </if>
         <if test="groupId != null and groupId != ''">
             and group_id = #{groupId}
+        </if>
+        <if test="status != null and status != ''">
+            and status = #{status}
         </if>
     </select>
 
@@ -51,6 +55,9 @@
         </if>
         <if test="groupId != null and groupId != ''">
             and a.group_id = #{groupId}
+        </if>
+        <if test="status != null and status != ''">
+            and a.status = #{status}
         </if>
     </select>
 
