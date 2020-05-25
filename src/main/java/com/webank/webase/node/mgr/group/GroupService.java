@@ -13,6 +13,20 @@
  */
 package com.webank.webase.node.mgr.group;
 
+import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
@@ -38,19 +52,8 @@ import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
-import com.webank.webase.node.mgr.user.UserService;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * services for group data.
@@ -129,6 +132,23 @@ public class GroupService {
         String groupName = "group" + groupId;
         TbGroup tbGroup = new TbGroup(groupId, groupName, nodeCount);
         groupMapper.save(tbGroup);
+
+        //create table by group id
+        tableService.newTableByGroupId(groupId);
+    }
+    /**
+     * save group id
+     */
+    public void saveGroupId(int groupId, int nodeCount, int chainId,String chainName,String groupDesc) {
+        if (groupId == 0) {
+            throw new NodeMgrException(INSERT_GROUP_ERROR);
+        }
+        //save group id
+        TbGroup tbGroup = new TbGroup(groupId, String.format("group%s" , groupId), nodeCount,chainId,chainName,groupDesc);
+        int count = groupMapper.save(tbGroup);
+        if (count != 1 ){
+            throw new NodeMgrException(INSERT_GROUP_ERROR);
+        }
 
         //create table by group id
         tableService.newTableByGroupId(groupId);

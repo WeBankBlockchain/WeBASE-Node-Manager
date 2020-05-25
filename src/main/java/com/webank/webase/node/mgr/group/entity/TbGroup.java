@@ -36,9 +36,27 @@ public class TbGroup {
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
+    private Integer chainId;
+    private String chainName;
+    private String groupDesc;
+
+
     public TbGroup(Integer groupId, String groupName,Integer nodeCount){
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
+    }
+    public TbGroup(Integer groupId,
+                   String groupName,
+                   Integer nodeCount,
+                   int chainId,
+                   String chainName,
+                   String groupDesc){
+        this.groupId = groupId;
+        this.groupName = groupName;
+        this.nodeCount = nodeCount;
+        this.chainId = chainId;
+        this.chainName = chainName;
+        this.groupDesc = groupDesc;
     }
 }
