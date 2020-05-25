@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
 import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
 
 @Slf4j
@@ -60,7 +61,7 @@ public class FrontGroupMapService {
     public void newFrontGroupWithStatus(TbFront front, Integer groupId) {
         // check front's all group status
         BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
-                groupId, "getStatus");
+                groupId, OPERATE_STATUS_GROUP);
         log.info("newFrontGroupWithStatus getGroupStatus frontId{} groupId{} res{}",
                 front.getFrontId(), groupId, res);
         // "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
