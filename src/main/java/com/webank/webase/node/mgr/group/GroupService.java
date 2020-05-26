@@ -229,8 +229,8 @@ public class GroupService {
 	/**
 	 * check group status(normal or maintaining), update by local group list
 	 * if groupid not in allGroupSet, remove it
-	 * @param frontList
-	 * @param allGroupSet
+	 * @param frontList all front
+	 * @param allGroupSet to record all group from each front
 	 */
 	private void saveDataOfGroup(List<TbFront> frontList, Set<Integer> allGroupSet) {
 		for (TbFront front : frontList) {
@@ -331,6 +331,8 @@ public class GroupService {
 
     /**
      * check group status and Update
+	 * check group status(normal or maintaining), update by local group list
+	 * 	@param allGroupOnChain if groupid not in allGroupSet, remove it
      */
     private void checkAndUpdateGroupStatus(Set<Integer> allGroupOnChain) {
         if (CollectionUtils.isEmpty(allGroupOnChain)) {
@@ -373,6 +375,7 @@ public class GroupService {
 
 	/**
 	 * check group's genesis block the same with each other on chain
+	 * @case: each front has different genesis conf, but add in same nodemgr
 	 */
 	private void checkGroupGenesisSameWithEach() {
 	    log.info("start checkGroupGenesisSameWithEach.");
@@ -470,11 +473,14 @@ public class GroupService {
 
 	/**
 	 * check and update front group map by local group id list
+	 * @case: front1 has group2, front2 not has group2,
+	 * so groupListOnChain from front don't contain group2, need to check if front_group_map of front2_group2 in db
+	 * if so, remove it
 	 */
 	public void checkGroupMapByLocalGroupList(List<TbFront> frontList) {
 		// local group id
 		List<TbGroup> groupListLocal = getGroupList(null);
-		log.info("checkGroupMapByLocalGroupList frontList:{},groupListLocal:{}",
+		log.debug("checkGroupMapByLocalGroupList frontList:{},groupListLocal:{}",
 				frontList, groupListLocal);
 		for (TbFront front: frontList) {
 			// query roup list from chain
@@ -489,7 +495,8 @@ public class GroupService {
 				Integer groupId = group.getGroupId();
 				// only check local group id
 				if (!groupListOnChain.contains(groupId.toString())) {
-					log.info("checkGroupMapByLocalGroupList. front:{}, groupId:{} ", front, groupId);
+					log.info("update front_group_map by local data front:{}, groupId:{} ",
+							front, groupId);
 					frontGroupMapService.newFrontGroupWithStatus(front, groupId);
 				}
 			});
@@ -498,11 +505,13 @@ public class GroupService {
 
 	/**
 	 * check all group and remove those without normal front group
+	 * @related removeGroupAccording2MapStatus
 	 */
 	private void removeInvalidGroupByMap() {
 		List<TbGroup> groupList = getGroupList(null);
 		// if all front of group invalid, remove group and front_group_map
-		groupList.forEach(tbGroup -> removeGroupAccording2MapStatus(tbGroup.getGroupId()));
+		groupList.forEach(tbGroup ->
+				removeGroupBy2MapStatus(tbGroup.getGroupId()));
 	}
 
 	/**
@@ -511,7 +520,7 @@ public class GroupService {
 	 * case2: stop all front of one group, call this
 	 * @param groupId
 	 */
-	public void removeGroupAccording2MapStatus(Integer groupId) {
+	private void removeGroupBy2MapStatus(Integer groupId) {
 		log.debug("removeGroupByMapStatus groupId:{}", groupId);
 		// get list of this group
 		MapListParam param = new MapListParam();
