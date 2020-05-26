@@ -455,7 +455,7 @@ public class  ContractService {
             deployUserList = JSON.parseArray(JSON.toJSONString(listData), PermissionInfo.class);
         }
 
-        // check user in the list,
+        // check user in the list
         if (deployUserList.isEmpty()) {
             return;
         } else {

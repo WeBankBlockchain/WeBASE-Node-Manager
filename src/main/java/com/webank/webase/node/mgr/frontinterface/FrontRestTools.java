@@ -20,7 +20,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
 import java.time.Duration;
 import java.time.Instant;
@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,7 @@ public class FrontRestTools {
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
+    public static final String URI_KEY_PAIR_IMPORT_WITH_SIGN = "privateKey/importWithSign";
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
     public static final String URI_SEND_TRANSACTION_WITH_SIGN = "trans/handleWithSign";
@@ -106,7 +108,8 @@ public class FrontRestTools {
         .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
                 URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
-                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE);
+                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE,
+                URI_KEY_PAIR_IMPORT_WITH_SIGN);
 
     public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 
@@ -203,7 +206,8 @@ public class FrontRestTools {
         Iterator<String> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             String key = iter.next();
-            if (rkey.equals(key)) {
+            // fix null
+            if (key.equals(rkey)) {
                 iter.remove();
             }
         }
@@ -295,13 +299,13 @@ public class FrontRestTools {
         Object param, Class<T> clazz) {
         List<FrontGroup> frontList = frontGroupMapCache.getMapListByGroupId(groupId);
         if (frontList == null || frontList.size() == 0) {
-            log.error("fail restTemplateExchange. frontList is empty");
+            log.error("fail restTemplateExchange. frontList is empty groupId:{}", groupId);
             throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT);
         }
         ArrayList<FrontGroup> list = new ArrayList<>(frontList);
         RestTemplate restTemplate = caseRestemplate(uri);
 
-        while (list != null && list.size() > 0) {
+        while (list.size() > 0) {
             String url = buildFrontUrl(list, uri, method);//build url
             try {
                 HttpEntity entity = buildHttpEntity(param);// build entity

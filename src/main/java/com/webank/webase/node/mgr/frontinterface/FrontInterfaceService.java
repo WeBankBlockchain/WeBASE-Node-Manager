@@ -176,7 +176,12 @@ public class FrontInterfaceService {
 		log.debug("start getBlockByNumberFromSpecificFront frontIp:{},frontPort{}," +
 				" groupId:{} blockNumber:{}", frontIp, frontPort, groupId, blockNumber);
 		String uri = String.format(FrontRestTools.URI_BLOCK_BY_NUMBER, blockNumber);
-		BlockInfo blockInfo = getFromSpecificFront(groupId, frontIp, frontPort, uri, BlockInfo.class);
+		BlockInfo blockInfo = null;
+		try{
+            blockInfo = getFromSpecificFront(groupId, frontIp, frontPort, uri, BlockInfo.class);
+        } catch (Exception ex) {
+		    log.error("getBlockByNumberFromSpecificFront:{}", ex.getMessage());
+        }
 		return blockInfo;
 	}
 
@@ -238,7 +243,7 @@ public class FrontInterfaceService {
         try {
             blockInfo = frontRestTools.getForEntity(groupId, uri, BlockInfo.class);
         } catch (Exception ex) {
-            log.info("fail getBlockByNumber,exception:{}", ex);
+            log.error("fail getBlockByNumber,exception:[]", ex);
         }
         log.debug("end getBlockByNumber");
         return blockInfo;
