@@ -218,7 +218,7 @@ public class GroupService {
         // update front_group_map status of local group
         checkGroupMapByLocalGroupList(frontList);
         // remove group and front_group_map that front_group_map's status is all invalid
-        removeInvalidGroupByMap();
+        // removeInvalidGroupByMap();
         // clear cache
         frontGroupMapCache.clearMapList();
 
