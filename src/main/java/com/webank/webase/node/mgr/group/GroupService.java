@@ -447,6 +447,7 @@ public class GroupService {
 			String blockHashOnChain = "";
 			// get all frontGroupMap list by group id
 			List<FrontGroup> allFrontGroupList = frontGroupMapCache.getMapListByGroupId(groupId);
+			boolean flagEmptyFront = (allFrontGroupList == null || allFrontGroupList.size() == 0);
 			for(FrontGroup front: allFrontGroupList) {
 				BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
 						front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
@@ -459,7 +460,7 @@ public class GroupService {
 			}
 			// if no block in each node, not same chain, else contrast with local hash
 			// if all front group map invalid, ignore
-			if (!allFrontGroupList.isEmpty() && blockHashOnChain.isEmpty()) {
+			if (blockHashOnChain.isEmpty() && !flagEmptyFront) {
 				log.info("smallestBlockOnChain groupId: {} height: {} return null block, " +
 						"please check group's node", groupId, blockHeightLocal);
 				// null block not means conflict
