@@ -26,13 +26,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -531,5 +529,20 @@ public class NodeMgrTools {
             input = StringUtils.removeStart(input, target);
         }
         return input;
+    }
+
+    public static String encodedBase64Str(String input) {
+        if (input == null) {
+            return null;
+        }
+        return Base64.getEncoder().encodeToString(input.getBytes());
+    }
+
+    /**
+     * 只包含中文
+     */
+    public static boolean notContainsChinese(String input) {
+        String regex = "[^\\u4e00-\\u9fa5]+";
+        return input.matches(regex);
     }
 }

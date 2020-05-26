@@ -16,7 +16,6 @@
 package com.webank.webase.node.mgr.contract.entity;
 
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

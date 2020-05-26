@@ -25,14 +25,13 @@ import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeParam;
 import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 
@@ -140,7 +139,7 @@ public class FrontService {
                         GroupType.SYNC.getValue(), DataStatus.NORMAL.getValue());
             }
             //save front group map
-            frontGroupMapService.newFrontGroup(tbFront.getFrontId(), group);
+            frontGroupMapService.newFrontGroupWithStatus(tbFront, group);
             //save nodes
             for (String nodeId : groupPeerList) {
                 PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools
@@ -271,8 +270,8 @@ public class FrontService {
         frontMapper.remove(frontId);
         //remove map
         frontGroupMapService.removeByFrontId(frontId);
-        //reset group list
-        resetGroupListTask.asyncResetGroupList();
+        //reset group list => remove groups that only belongs to this front
+         resetGroupListTask.asyncResetGroupList();
         //clear cache
         frontGroupMapCache.clearMapList();
     }
