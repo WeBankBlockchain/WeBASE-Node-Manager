@@ -51,22 +51,22 @@ public class FrontGroupMapService {
         log.info("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
         MapListParam param = new MapListParam(frontId, groupId);
         FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
-        log.info("start newFrontGroup frontGroup query:{}", frontGroup);
+        log.debug("start newFrontGroup frontGroup query:{}", frontGroup);
 
         // add db
         TbFrontGroupMap tbFrontGroupMap = null;
         Integer res;
         if (frontGroup == null) {
             tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
-            log.info("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
+            log.debug("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
             res = frontGroupMapMapper.add(tbFrontGroupMap);
         } else {
             tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
             tbFrontGroupMap.setMapId(frontGroup.getMapId());
-            log.info("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
+            log.debug("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
             res = frontGroupMapMapper.update(tbFrontGroupMap);
         }
-        log.info("end newFrontGroup res:{}", res);
+        log.debug("end newFrontGroup res:{}", res);
 
         return tbFrontGroupMap;
     }
@@ -78,16 +78,16 @@ public class FrontGroupMapService {
         // check front's all group status
         BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
                 groupId, OPERATE_STATUS_GROUP);
-        log.info("newFrontGroupWithStatus getGroupStatus frontId{} groupId{} res{}",
+        log.debug("newFrontGroupWithStatus getGroupStatus frontId{} groupId{} res{}",
                 front.getFrontId(), groupId, res);
         // "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
         if (res.getCode() == 0) {
             String groupStatus = (String) res.getData();
             if (RUNNING_GROUP.equals(groupStatus)) {
-                log.info("newFrontGroupWithStatus update map's groupStatus NORMAL.");
+                log.debug("newFrontGroupWithStatus update map's groupStatus NORMAL.");
                 newFrontGroup(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
             } else {
-                log.info("newFrontGroupWithStatus update map's groupStatus MAINTAINING.");
+                log.debug("newFrontGroupWithStatus update map's groupStatus MAINTAINING.");
                 newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
             }
         }

@@ -196,7 +196,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
-        Integer userId = userService.importPem(reqImportPem);
+        Integer userId = userService.impoPem(reqImportPem);
         // query user row
         TbUser userRow = userService.queryByUserId(userId);
         baseResponse.setData(userRow);
@@ -210,8 +210,7 @@ public class UserController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File, @RequestParam String p12Password,
                                             @RequestParam Integer groupId, @RequestParam String userName,
-                                            @RequestParam(required = false) String description, BindingResult result) {
-        checkBindResult(result);
+                                            @RequestParam(required = false) String description) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
