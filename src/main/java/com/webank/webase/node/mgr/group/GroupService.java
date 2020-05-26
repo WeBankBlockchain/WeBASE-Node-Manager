@@ -274,8 +274,6 @@ public class GroupService {
             // if local hash node, count = 1
             long count = localNodeList.stream().filter(
                     ln -> nodeId.equals(ln.getNodeId()) && groupId == ln.getGroupId()).count();
-            // TODO remove
-            log.error("=========== savePeerList:{}", count);
             // local node not contains this one:
             if (count != 1) {
                 PeerInfo newPeer = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
@@ -726,6 +724,7 @@ public class GroupService {
 
     /**
      * check and update front group map by local group id list
+     *  TODO 未生效
      */
     public void checkGroupMapByLocalGroupList(Set<Integer> allGroupSet) {
         //get all front
@@ -735,11 +734,13 @@ public class GroupService {
         }
         // local group id
         List<TbGroup> groupList = getGroupList(null);
+        log.info("checkGroupMapByLocalGroupList allGroupSet:{},frontList:{},groupList:{}",allGroupSet ,frontList groupList);
         for (TbFront front: frontList) {
             groupList.forEach(group -> {
                 Integer groupId = group.getGroupId();
                 // only check local group id
                 if (!allGroupSet.contains(groupId)) {
+                    log.info("checkGroupMapByLocalGroupList. front:{}, groupId:{} ", front, groupId);
                     frontGroupMapService.newFrontGroupWithStatus(front, groupId);
                 }
             });
