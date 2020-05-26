@@ -13,16 +13,23 @@
  */
 package com.webank.webase.node.mgr.frontgroupmap;
 
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
+import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
 
 @Slf4j
 @Service
@@ -34,16 +41,56 @@ public class FrontGroupMapService {
     private GroupService groupService;
     @Autowired
     private FrontService frontService;
+    @Autowired
+    private FrontInterfaceService frontInterface;
 
     /**
      * add new mapping
      */
-    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId) {
-        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId);
+    private TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
+        log.info("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
+        MapListParam param = new MapListParam(frontId, groupId);
+        FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
+        log.debug("start newFrontGroup frontGroup query:{}", frontGroup);
 
-        //add db
-        frontGroupMapMapper.add(tbFrontGroupMap);
+        // add db
+        TbFrontGroupMap tbFrontGroupMap = null;
+        Integer res;
+        if (frontGroup == null) {
+            tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
+            log.debug("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
+            res = frontGroupMapMapper.add(tbFrontGroupMap);
+        } else {
+            tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
+            tbFrontGroupMap.setMapId(frontGroup.getMapId());
+            log.debug("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
+            res = frontGroupMapMapper.update(tbFrontGroupMap);
+        }
+        log.debug("end newFrontGroup res:{}", res);
+
         return tbFrontGroupMap;
+    }
+
+    /**
+     * new front group map only for normal group
+     */
+    public void newFrontGroupWithStatus(TbFront front, Integer groupId) {
+        // check front's all group status
+        BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
+                groupId, OPERATE_STATUS_GROUP);
+        log.debug("newFrontGroupWithStatus getGroupStatus frontId{} groupId{} res{}",
+                front.getFrontId(), groupId, res);
+        // "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
+        if (res.getCode() == 0) {
+            String groupStatus = (String) res.getData();
+            if (RUNNING_GROUP.equals(groupStatus)) {
+                log.debug("newFrontGroupWithStatus update map's groupStatus NORMAL.");
+                newFrontGroup(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
+            } else {
+                log.debug("newFrontGroupWithStatus update map's groupStatus MAINTAINING.");
+                newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
+            }
+        }
     }
 
     /**

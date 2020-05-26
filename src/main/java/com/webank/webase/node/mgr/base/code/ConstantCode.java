@@ -34,6 +34,12 @@ public class ConstantCode {
 
     /* front error code */
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied");
+    public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
+    public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
+    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201234, "Pem file content error");
+    public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201235, "p12's password cannot be chinese");
+    public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(201236, "p12's password not match");
+    public static final RetCode P12_FILE_ERROR = RetCode.mark(201237, "P12 file content error");
 
     /**
      * Business exception.
@@ -152,6 +158,9 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_ABI_INVALID = RetCode.mark(202098, "Contract abi invalid, please check abi");
     public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(202099, "Abi Id cannot be empty");
     public static final RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(202100, "contractAddress is null");
+
+    public static final RetCode USER_NOT_EXIST = RetCode.mark(202110, "User's signUserId not exist");
+
 
     /* dynamic group manage */
     public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");

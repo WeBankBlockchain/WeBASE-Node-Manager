@@ -28,6 +28,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -77,7 +78,12 @@ public class PrecompiledService {
         map.put("pageSize", String.valueOf(pageSize));
         map.put("pageNumber", String.valueOf(pageNumber));
         uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CONSENSUS_LIST, map);
-        Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
+        Object frontRsp = null;
+//        try {
+            frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
+//        } catch (Exception ex) {
+//            log.error("getNodeListService :{}", ex.getMessage());
+//        }
         log.debug("end getNodeListService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
