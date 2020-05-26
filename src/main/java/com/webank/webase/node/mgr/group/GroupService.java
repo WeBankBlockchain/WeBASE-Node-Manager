@@ -207,8 +207,6 @@ public class GroupService {
         // check group status(normal or maintaining), update by local group list
 		// if groupid not in allGroupSet, remove it
         checkAndUpdateGroupStatus(allGroupSet);
-		// update front_group_map status of local group
-		checkGroupMapByLocalGroupList(frontList);
         // check group local whether has dirty data by contrast of local blockHash with chain blockHash
 		// if not same, update group as DIRTY
         checkSameChainDataWithLocal();
@@ -217,6 +215,8 @@ public class GroupService {
         checkGroupGenesisSameWithEach();
         // remove front_group_map that not in tb_front or tb_group by local data
         frontGroupMapService.removeInvalidFrontGroupMap();
+		// update front_group_map status of local group
+		checkGroupMapByLocalGroupList(frontList);
         // remove group and front_group_map that front_group_map's status is all invalid
         // removeInvalidGroupByMap();
         // clear cache
