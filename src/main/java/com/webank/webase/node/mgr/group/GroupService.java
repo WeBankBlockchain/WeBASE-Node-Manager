@@ -443,17 +443,29 @@ public class GroupService {
             BigInteger blockHeightLocal = smallestBlockLocal.getBlockNumber();
 			String blockHashLocal = smallestBlockLocal.getPkHash();
 
-            // get same height block from chain, contrast block hash
-            BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumber(groupId, blockHeightLocal);
-            // if no block in each node, not same chain
-            if (smallestBlockOnChain == null) {
-                log.info("smallestBlockOnChain groupId: {} height: {} return null block, " +
-                        "please check group's node", groupId, blockHeightLocal);
-                // null block not means conflict
-                // updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
-                continue;
-            }
-			String blockHashOnChain = smallestBlockOnChain.getHash();
+            // get same height block from chain(if null, get from another front), contrast block hash
+			String blockHashOnChain = "";
+			// get all frontGroupMap list by group id
+			List<FrontGroup> allFrontList = frontGroupMapCache.getMapListByGroupId(groupId);
+			for(FrontGroup front: allFrontList) {
+				BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
+						front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
+				if (smallestBlockOnChain == null) {
+					continue;
+				} else {
+					blockHashOnChain = smallestBlockOnChain.getHash();
+					break;
+				}
+			}
+			// if no block in each node, not same chain, else contrast with local hash
+			if (blockHashOnChain.isEmpty()) {
+				log.info("smallestBlockOnChain groupId: {} height: {} return null block, " +
+						"please check group's node", groupId, blockHeightLocal);
+				// null block not means conflict
+			 	updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
+				continue;
+			}
+
             log.debug("checkSameChainData groupId:{},blockHeight:{},localHash:{},chainHash:{} ",
                     groupId, blockHeightLocal, blockHashLocal, blockHashOnChain);
             // check same block hash, the same chain
