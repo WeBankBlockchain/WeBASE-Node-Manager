@@ -196,7 +196,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
-        Integer userId = userService.impoPem(reqImportPem);
+        Integer userId = userService.importPem(reqImportPem);
         // query user row
         TbUser userRow = userService.queryByUserId(userId);
         baseResponse.setData(userRow);
