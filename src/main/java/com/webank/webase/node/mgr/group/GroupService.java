@@ -446,8 +446,8 @@ public class GroupService {
             // get same height block from chain(if null, get from another front), contrast block hash
 			String blockHashOnChain = "";
 			// get all frontGroupMap list by group id
-			List<FrontGroup> allFrontList = frontGroupMapCache.getMapListByGroupId(groupId);
-			for(FrontGroup front: allFrontList) {
+			List<FrontGroup> allFrontGroupList = frontGroupMapCache.getMapListByGroupId(groupId);
+			for(FrontGroup front: allFrontGroupList) {
 				BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
 						front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
 				if (smallestBlockOnChain == null) {
