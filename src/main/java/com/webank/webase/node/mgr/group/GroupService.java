@@ -575,11 +575,12 @@ public class GroupService {
         // request front to operate
         Object groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
-//        if (OPERATE_START_GROUP.equals(type) || OPERATE_STOP_GROUP.equals(type)) {
-//            // reset front group map status
-//            frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
-//        }
-        // refresh group status, not remove tb_group if within gray period (yaml-groupInvalidGrayscaleValue)
+        if (OPERATE_START_GROUP.equals(type) || OPERATE_STOP_GROUP.equals(type)) {
+            // reset front group map status
+			log.info("operateGroup type:{}, update front_group_map status :{}:{}", type,  tbFront, groupId);
+			frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
+        }
+        // refresh group status
         resetGroupList();
 
         // return
@@ -734,7 +735,7 @@ public class GroupService {
         }
         // local group id
         List<TbGroup> groupList = getGroupList(null);
-        log.info("checkGroupMapByLocalGroupList allGroupSet:{},frontList:{},groupList:{}",allGroupSet ,frontList groupList);
+        log.info("checkGroupMapByLocalGroupList allGroupSet:{},frontList:{},groupList:{}",allGroupSet ,frontList, groupList);
         for (TbFront front: frontList) {
             groupList.forEach(group -> {
                 Integer groupId = group.getGroupId();
