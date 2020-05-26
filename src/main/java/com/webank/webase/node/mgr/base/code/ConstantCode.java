@@ -48,7 +48,7 @@ public class ConstantCode {
 
     public static final RetCode DB_EXCEPTION = RetCode.mark(202001, "database exception");
 
-    public static final RetCode FRONT_LIST_NOT_FOUNT = RetCode.mark(202002, "not found any front");
+    public static final RetCode FRONT_LIST_NOT_FOUNT = RetCode.mark(202002, "not found any front for this group");
 
     public static final RetCode INVALID_FRONT_IP = RetCode.mark(202003, "not support this ip");
 

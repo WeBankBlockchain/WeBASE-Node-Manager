@@ -207,21 +207,20 @@ public class GroupService {
         // check group status(normal or maintaining), update by local group list
 		// if groupid not in allGroupSet, remove it
         checkAndUpdateGroupStatus(allGroupSet);
-        // check group local whether has dirty data by contrast of local blockHash with chain blockHash
-		// if not same, update group as DIRTY
-        checkSameChainDataWithLocal();
-        // check group's genesis block same with each other front,
-		// if not, update group as CONFLICT
-        checkGroupGenesisSameWithEach();
-        // remove front_group_map that not in tb_front or tb_group by local data
-        frontGroupMapService.removeInvalidFrontGroupMap();
-        // update front_group_map status of local group
-        checkGroupMapByLocalGroupList(frontList);
         // remove group and front_group_map that front_group_map's status is all invalid
-        removeInvalidGroupByMap();
+        // removeInvalidGroupByMap();
         // clear cache
         frontGroupMapCache.clearMapList();
-
+		// check group local whether has dirty data by contrast of local blockHash with chain blockHash
+		// if not same, update group as DIRTY
+		checkSameChainDataWithLocal();
+		// check group's genesis block same with each other front,
+		// if not, update group as CONFLICT
+		checkGroupGenesisSameWithEach();
+		// remove front_group_map that not in tb_front or tb_group by local data
+		frontGroupMapService.removeInvalidFrontGroupMap();
+		// update front_group_map status of local group
+		checkGroupMapByLocalGroupList(frontList);
         log.info("end resetGroupList. useTime:{} ",
                 Duration.between(startTime, Instant.now()).toMillis());
     }
@@ -443,21 +442,36 @@ public class GroupService {
             BigInteger blockHeightLocal = smallestBlockLocal.getBlockNumber();
 			String blockHashLocal = smallestBlockLocal.getPkHash();
 
-            // get same height block from chain, contrast block hash
-            BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumber(groupId, blockHeightLocal);
-            // if no block in each node, not same chain
-            if (smallestBlockOnChain == null) {
-                log.info("smallestBlockOnChain groupId: {} height: {} return null block, " +
-                        "please check group's node", groupId, blockHeightLocal);
-                // null block not means conflict
-                // updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
-                continue;
-            }
-			String blockHashOnChain = smallestBlockOnChain.getHash();
+            // get same height block from chain(if null, get from another front), contrast block hash
+			String blockHashOnChain = "";
+			// get all frontGroupMap list by group id
+			List<FrontGroup> allFrontGroupList = frontGroupMapCache.getMapListByGroupId(groupId);
+			log.debug("checkSameChainDataWithLocal allFrontGroupList:{}", allFrontGroupList);
+			boolean flagEmptyFront = (allFrontGroupList == null || allFrontGroupList.size() == 0);
+			for(FrontGroup front: allFrontGroupList) {
+				BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
+						front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
+				if (smallestBlockOnChain == null) {
+					continue;
+				} else {
+					blockHashOnChain = smallestBlockOnChain.getHash();
+					break;
+				}
+			}
+			// if no block in each node, not same chain, else contrast with local hash
+			// if all front group map invalid, ignore
+			if (blockHashOnChain.isEmpty() && !flagEmptyFront) {
+				log.warn("smallestBlockOnChain groupId: {} height: {} return null block, " +
+						"please check group's node", groupId, blockHeightLocal);
+				// null block not means conflict
+			 	updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
+				continue;
+			}
+
             log.debug("checkSameChainData groupId:{},blockHeight:{},localHash:{},chainHash:{} ",
                     groupId, blockHeightLocal, blockHashLocal, blockHashOnChain);
             // check same block hash, the same chain
-            if (!blockHashLocal.equals(blockHashOnChain)) {
+            if (!blockHashOnChain.isEmpty() && !blockHashLocal.equals(blockHashOnChain)) {
                 log.warn("checkSameChainDataWithLocal blockHashOnChain conflicts with local block data " +
                                 "groupId: {} height:{} on chain ", groupId, blockHeightLocal);
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
