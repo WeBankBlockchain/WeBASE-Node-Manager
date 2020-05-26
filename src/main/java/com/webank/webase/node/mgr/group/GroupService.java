@@ -472,7 +472,7 @@ public class GroupService {
             log.debug("checkSameChainData groupId:{},blockHeight:{},localHash:{},chainHash:{} ",
                     groupId, blockHeightLocal, blockHashLocal, blockHashOnChain);
             // check same block hash, the same chain
-            if (! blockHashOnChain.isEmpty() && !blockHashLocal.equals(blockHashOnChain)) {
+            if (!blockHashOnChain.isEmpty() && !blockHashLocal.equals(blockHashOnChain)) {
                 log.warn("checkSameChainDataWithLocal blockHashOnChain conflicts with local block data " +
                                 "groupId: {} height:{} on chain ", groupId, blockHeightLocal);
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
