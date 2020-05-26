@@ -44,9 +44,9 @@
 
   <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
 		insert into tb_group
-		(group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time)
+		(group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time)
 		values(#{groupId},#{groupName},#{nodeCount},#{description},#{groupType},#{groupStatus},
-      #{groupTimestamp},#{nodeIdList},NOW())
+      #{groupTimestamp},#{nodeIdList},NOW(),NOW())
 		ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
 	</insert>
 
