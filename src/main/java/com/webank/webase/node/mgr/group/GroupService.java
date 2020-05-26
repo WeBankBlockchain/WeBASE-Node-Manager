@@ -207,21 +207,20 @@ public class GroupService {
         // check group status(normal or maintaining), update by local group list
 		// if groupid not in allGroupSet, remove it
         checkAndUpdateGroupStatus(allGroupSet);
-        // check group local whether has dirty data by contrast of local blockHash with chain blockHash
-		// if not same, update group as DIRTY
-        checkSameChainDataWithLocal();
-        // check group's genesis block same with each other front,
-		// if not, update group as CONFLICT
-        checkGroupGenesisSameWithEach();
-        // remove front_group_map that not in tb_front or tb_group by local data
-        frontGroupMapService.removeInvalidFrontGroupMap();
-		// update front_group_map status of local group
-		checkGroupMapByLocalGroupList(frontList);
         // remove group and front_group_map that front_group_map's status is all invalid
         // removeInvalidGroupByMap();
         // clear cache
         frontGroupMapCache.clearMapList();
-
+		// check group local whether has dirty data by contrast of local blockHash with chain blockHash
+		// if not same, update group as DIRTY
+		checkSameChainDataWithLocal();
+		// check group's genesis block same with each other front,
+		// if not, update group as CONFLICT
+		checkGroupGenesisSameWithEach();
+		// remove front_group_map that not in tb_front or tb_group by local data
+		frontGroupMapService.removeInvalidFrontGroupMap();
+		// update front_group_map status of local group
+		checkGroupMapByLocalGroupList(frontList);
         log.info("end resetGroupList. useTime:{} ",
                 Duration.between(startTime, Instant.now()).toMillis());
     }
