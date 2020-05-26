@@ -300,7 +300,8 @@ public class FrontRestTools {
         List<FrontGroup> frontList = frontGroupMapCache.getMapListByGroupId(groupId);
         if (frontList == null || frontList.size() == 0) {
             log.error("fail restTemplateExchange. frontList is empty groupId:{}", groupId);
-            throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT);
+            throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT.getCode(),
+                    "all front of group: " + groupId + " is stopped");
         }
         ArrayList<FrontGroup> list = new ArrayList<>(frontList);
         RestTemplate restTemplate = caseRestemplate(uri);
