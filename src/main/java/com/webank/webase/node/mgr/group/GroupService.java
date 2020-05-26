@@ -458,7 +458,8 @@ public class GroupService {
 				}
 			}
 			// if no block in each node, not same chain, else contrast with local hash
-			if (blockHashOnChain.isEmpty()) {
+			// if all front group map invalid, ignore
+			if (!allFrontGroupList.isEmpty() && blockHashOnChain.isEmpty()) {
 				log.info("smallestBlockOnChain groupId: {} height: {} return null block, " +
 						"please check group's node", groupId, blockHeightLocal);
 				// null block not means conflict
