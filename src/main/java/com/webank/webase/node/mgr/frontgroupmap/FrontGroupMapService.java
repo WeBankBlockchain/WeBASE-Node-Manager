@@ -47,7 +47,7 @@ public class FrontGroupMapService {
     /**
      * add new mapping
      */
-    private TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
+    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
         log.info("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
         MapListParam param = new MapListParam(frontId, groupId);
         FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
