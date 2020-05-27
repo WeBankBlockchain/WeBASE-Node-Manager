@@ -208,7 +208,8 @@ public class UserController extends BaseController {
 
     @PostMapping("/importP12")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File, @RequestParam String p12Password,
+    public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
+                                            @RequestParam(required = false, defaultValue = "") String p12Password,
                                             @RequestParam Integer groupId, @RequestParam String userName,
                                             @RequestParam(required = false) String description) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
