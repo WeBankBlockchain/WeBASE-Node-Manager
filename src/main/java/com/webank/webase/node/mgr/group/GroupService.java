@@ -505,13 +505,15 @@ public class GroupService {
 				log.error("fail getGroupListFromSpecificFront.", ex);
 				continue;
 			}
+			// group list local
 			groupListLocal.forEach(group -> {
 				Integer groupId = group.getGroupId();
 				// only check local group id
 				if (!groupListOnChain.contains(groupId.toString())) {
 					log.info("update front_group_map by local data front:{}, groupId:{} ",
 							front, groupId);
-					frontGroupMapService.newFrontGroupWithStatus(front, groupId);
+					// TODO bug: group2 in font1, not in front2, but local has group2, so add front1_group2_map and front2_group2_map
+					frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
 				}
 			});
 		}
@@ -673,11 +675,11 @@ public class GroupService {
         // request front to operate
         Object groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
-        if (OPERATE_START_GROUP.equals(type) || OPERATE_STOP_GROUP.equals(type)) {
-            // reset front group map status
-			log.info("operateGroup type:{}, update front_group_map status :{}:{}", type,  tbFront, groupId);
-			frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
-        }
+//        if (OPERATE_START_GROUP.equals(type) || OPERATE_STOP_GROUP.equals(type)) {
+//            // reset front group map status
+//			log.info("operateGroup type:{}, update front_group_map status :{}:{}", type,  tbFront, groupId);
+//			frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
+//        }
         // refresh group status
         resetGroupList();
 
