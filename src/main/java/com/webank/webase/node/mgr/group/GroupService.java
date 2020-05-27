@@ -673,11 +673,11 @@ public class GroupService {
         // request front to operate
         Object groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
-        if (OPERATE_START_GROUP.equals(type) || OPERATE_STOP_GROUP.equals(type)) {
-            // reset front group map status
-			log.info("operateGroup type:{}, update front_group_map status :{}:{}", type,  tbFront, groupId);
-			frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
-        }
+//        if (OPERATE_START_GROUP.equals(type) || OPERATE_STOP_GROUP.equals(type)) {
+//            // reset front group map status
+//			log.info("operateGroup type:{}, update front_group_map status :{}:{}", type,  tbFront, groupId);
+//			frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
+//        }
         // refresh group status
         resetGroupList();
 
