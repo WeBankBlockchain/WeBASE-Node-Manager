@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
+import com.webank.webase.node.mgr.base.enums.OperateStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.block.BlockService;
@@ -46,7 +47,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.ResourceAccessException;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
@@ -446,8 +449,12 @@ public class GroupService {
 			String blockHashOnChain = "";
 			// get all frontGroupMap list by group id
 			List<FrontGroup> allFrontGroupList = frontGroupMapCache.getMapListByGroupId(groupId);
+			if (allFrontGroupList == null) {
+				continue;
+			}
 			log.debug("checkSameChainDataWithLocal allFrontGroupList:{}", allFrontGroupList);
-			boolean flagEmptyFront = (allFrontGroupList == null || allFrontGroupList.size() == 0);
+			// case: if group's all front is stopped, front_group_map still normal, would set as CONFLICT for no data from front
+			boolean flagEmptyFront = (allFrontGroupList.size() == 0);
 			for(FrontGroup front: allFrontGroupList) {
 				BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
 						front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
@@ -512,7 +519,7 @@ public class GroupService {
 				if (!groupListOnChain.contains(groupId.toString())) {
 					log.info("update front_group_map by local data front:{}, groupId:{} ",
 							front, groupId);
-					// TODO bug: group2 in font1, not in front2, but local has group2, so add front1_group2_map and front2_group2_map
+					// case: group2 in font1, not in front2, but local has group2, so add front1_group2_map but not front2_group2_map
 					frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
 				}
 			});
@@ -631,30 +638,43 @@ public class GroupService {
      * @param req info
      * @return
      */
-    public TbGroup generateGroup(ReqGenerateGroup req) {
+    public List<RspOperateResult> generateGroup(ReqGenerateGroup req) {
         Integer generateGroupId = req.getGenerateGroupId();
         if (checkGroupIdExisted(generateGroupId)) {
             throw new NodeMgrException(ConstantCode.GROUP_ID_EXISTS);
         }
-
-        for (String nodeId : req.getNodeList()) {
+        List<String> nodeIdList = req.getNodeList();
+		List<RspOperateResult> resOperateList = new ArrayList<>(nodeIdList.size());
+        for (String nodeId : nodeIdList) {
             // get front
             TbFront tbFront = frontService.getByNodeId(nodeId);
             if (tbFront == null) {
                 log.error("fail generateGroup node front not exists.");
                 throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
             }
+			// record generate result
+			RspOperateResult operateResult = new RspOperateResult(tbFront.getFrontId(),
+					OperateStatus.SUCCESS.getValue());
             // request front to generate
             GenerateGroupInfo generateGroupInfo = new GenerateGroupInfo();
             BeanUtils.copyProperties(req, generateGroupInfo);
-            frontInterface.generateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(),
-                    generateGroupInfo);
+            try {
+            	frontInterface.generateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(),
+						generateGroupInfo);
+				resOperateList.add(operateResult);
+			} catch (NodeMgrException | ResourceAccessException e) {
+				log.error("fail generateGroup in frontId:{}, exception:{}",
+						tbFront.getFrontId(), e.getMessage());
+				// request front fail
+				operateResult.setCode(OperateStatus.FAIL.getValue());
+				resOperateList.add(operateResult);
+			}
         }
         // save group, saved as invalid status until start
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
                 req.getDescription(), GroupType.MANUAL.getValue(), GroupStatus.MAINTAINING.getValue(),
                 req.getTimestamp(), req.getNodeList());
-        return tbGroup;
+        return resOperateList;
     }
 
     /**
@@ -675,11 +695,6 @@ public class GroupService {
         // request front to operate
         Object groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
-//        if (OPERATE_START_GROUP.equals(type) || OPERATE_STOP_GROUP.equals(type)) {
-//            // reset front group map status
-//			log.info("operateGroup type:{}, update front_group_map status :{}:{}", type,  tbFront, groupId);
-//			frontGroupMapService.newFrontGroupWithStatus(tbFront, groupId);
-//        }
         // refresh group status
         resetGroupList();
 
@@ -695,10 +710,22 @@ public class GroupService {
      */
     public List<RspGroupStatus> listGroupStatus(List<String> nodeIdList, List<Integer> groupIdList) {
         List<RspGroupStatus> resList = new ArrayList<>(nodeIdList.size());
-        for (String nodeId : nodeIdList) {
+		for (String nodeId : nodeIdList) {
+			// get front
+			TbFront tbFront = frontService.getByNodeId(nodeId);
+			if (tbFront == null) {
+				log.error("fail getGroupStatus node front not exists.");
+				throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
+			}
             Map<String, String> statusMap = new HashMap<>();
-            statusMap = getGroupStatus(nodeId, groupIdList);
-
+            try{
+            	statusMap = getGroupStatus(tbFront, groupIdList);
+			} catch (NodeMgrException | ResourceAccessException e) {
+				log.error("fail getGroupStatus in frontId:{}, exception:{}",
+						tbFront.getFrontId(), e.getMessage());
+				// request front fail
+				statusMap.put(nodeId, "FAIL");
+			}
             RspGroupStatus rspGroupStatus = new RspGroupStatus(nodeId, statusMap);
             resList.add(rspGroupStatus);
         }
@@ -707,21 +734,14 @@ public class GroupService {
 
     /**
      * getGroupStatus of single node's sight
-     * @param nodeId
+     * @param tbFront
      * @param groupIdList
      * @return map of <groupId, status>
      */
-    private Map<String, String> getGroupStatus(String nodeId, List<Integer> groupIdList) {
-        // get front
-        TbFront tbFront = frontService.getByNodeId(nodeId);
-        if (tbFront == null) {
-            log.error("fail getGroupStatus node front not exists.");
-            throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
-        }
-
+    private Map<String, String> getGroupStatus(TbFront tbFront, List<Integer> groupIdList) {
         // groupId, status
         Map<String, String> statusRes = frontInterface.queryGroupStatus(tbFront.getFrontIp(),
-                tbFront.getFrontPort(), nodeId, groupIdList);
+                tbFront.getFrontPort(), tbFront.getNodeId(), groupIdList);
         return statusRes;
     }
 
@@ -730,25 +750,39 @@ public class GroupService {
      *
      * @param req
      */
-    public void batchStartGroup(ReqBatchStartGroup req) {
+    public List<RspOperateResult> batchStartGroup(ReqBatchStartGroup req) {
         log.debug("start batchStartGroup:{}", req);
         Integer groupId = req.getGenerateGroupId();
         // check id
         checkGroupId(groupId);
-        for (String nodeId : req.getNodeList()) {
+        List<String> nodeIdList = req.getNodeList();
+		List<RspOperateResult> resOperateList = new ArrayList<>(nodeIdList.size());
+		for (String nodeId : nodeIdList) {
             // get front
             TbFront tbFront = frontService.getByNodeId(nodeId);
             if (tbFront == null) {
                 log.error("fail batchStartGroup node not exists.");
                 throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
             }
+			// record generate result
+			RspOperateResult operateResult = new RspOperateResult(tbFront.getFrontId(),
+					OperateStatus.SUCCESS.getValue());
             // request front to start
-            frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
-                    "start");
+            try{
+            	frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
+						OPERATE_START_GROUP);
+				resOperateList.add(operateResult);
+			} catch (NodeMgrException | ResourceAccessException e) {
+				log.error("fail startGroup in frontId:{}, exception:{}",
+						tbFront.getFrontId(), e.getMessage());
+				operateResult.setCode(OperateStatus.FAIL.getValue());
+				resOperateList.add(operateResult);
+			}
         }
         // refresh group status
         resetGroupList();
         log.debug("end batchStartGroup.");
+        return resOperateList;
     }
 
     /* end dynamic group operation*/

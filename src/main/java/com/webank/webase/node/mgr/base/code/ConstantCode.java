@@ -124,6 +124,8 @@ public class ConstantCode {
     public static final RetCode INVALID_TOKEN = RetCode.mark(202052, "invalid token");
     public static final RetCode TOKEN_EXPIRE = RetCode.mark(202053, "token expire");
 
+    public static final RetCode AVAILABLE_FRONT_URL_IS_NULL = RetCode.mark(202054, "Available front url is empty, check front status");
+
     // 证书管理
     public static final RetCode CERT_ERROR = RetCode.mark(202060, "cert handle error");
     public static final RetCode FAIL_SAVE_CERT_ERROR = RetCode.mark(202061, "store cert error");

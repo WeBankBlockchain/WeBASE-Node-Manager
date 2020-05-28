@@ -24,6 +24,8 @@ public interface FrontMapper {
 
     int add(TbFront tbFront);
 
+    int update(TbFront tbFront);
+
     int remove(@Param("frontId") int frontId);
 
     Integer getCount(FrontParam param);

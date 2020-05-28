@@ -31,6 +31,12 @@ public class TbFront {
     private String clientVersion;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    /**
+     * front status by now
+     * @case1: front's node is abnormal
+     * @case2: front's request fail/no response
+     */
+    private Integer status;
 }
 
 
