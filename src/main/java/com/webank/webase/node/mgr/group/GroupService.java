@@ -15,7 +15,6 @@ package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.OperateStatus;
@@ -48,7 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -663,7 +662,7 @@ public class GroupService {
             	frontInterface.generateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(),
 						generateGroupInfo);
 				resOperateList.add(operateResult);
-			} catch (NodeMgrException | HttpStatusCodeException e) {
+			} catch (NodeMgrException | ResourceAccessException e) {
 				log.error("fail generateGroup in frontId:{}, exception:{}",
 						tbFront.getFrontId(), e.getMessage());
 				// request front fail
@@ -721,7 +720,7 @@ public class GroupService {
             Map<String, String> statusMap = new HashMap<>();
             try{
             	statusMap = getGroupStatus(tbFront, groupIdList);
-			} catch (NodeMgrException | HttpStatusCodeException e) {
+			} catch (NodeMgrException | ResourceAccessException e) {
 				log.error("fail getGroupStatus in frontId:{}, exception:{}",
 						tbFront.getFrontId(), e.getMessage());
 				// request front fail
@@ -773,7 +772,7 @@ public class GroupService {
             	frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
 						OPERATE_START_GROUP);
 				resOperateList.add(operateResult);
-			} catch (NodeMgrException | HttpStatusCodeException e) {
+			} catch (NodeMgrException | ResourceAccessException e) {
 				log.error("fail startGroup in frontId:{}, exception:{}",
 						tbFront.getFrontId(), e.getMessage());
 				operateResult.setCode(OperateStatus.FAIL.getValue());
