@@ -10,13 +10,14 @@
     <result column="front_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontPort"/>
     <result column="agency" javaType="java.lang.String" jdbcType="VARCHAR" property="agency"/>
     <result column="client_version" javaType="java.lang.String" jdbcType="VARCHAR" property="clientVersion"/>
+    <result column="status" javaType="java.lang.Integer" jdbcType="INTEGER" property="status"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"  property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"  property="modifyTime"/>
   </resultMap>
 
 
   <sql id="QUERY_ROW_COLUMN">
-		front_id frontId,front_ip frontIp,front_port frontPort,agency,client_version,create_time createTime,modify_time modifyTime
+		front_id frontId,front_ip frontIp,front_port frontPort,agency,client_version,status,create_time createTime,modify_time modifyTime
 	</sql>
 
   <insert id="add">
@@ -26,6 +27,14 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
   </insert>
+
+  <update id="update" parameterType="com.webank.webase.node.mgr.front.entity.TbFront">
+    update tb_front set modify_time = now()
+    <if test="status != null and status != ''">
+      ,status = #{status}
+    </if>
+    where front_id = #{frontId}
+  </update>
 
   <delete id="remove" parameterType="java.lang.Integer">
     delete from tb_front where front_id=#{frontId}
