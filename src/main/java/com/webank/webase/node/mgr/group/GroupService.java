@@ -446,8 +446,12 @@ public class GroupService {
 			String blockHashOnChain = "";
 			// get all frontGroupMap list by group id
 			List<FrontGroup> allFrontGroupList = frontGroupMapCache.getMapListByGroupId(groupId);
+			if (allFrontGroupList == null) {
+				continue;
+			}
 			log.debug("checkSameChainDataWithLocal allFrontGroupList:{}", allFrontGroupList);
-			boolean flagEmptyFront = (allFrontGroupList == null || allFrontGroupList.size() == 0);
+			// case: if group's all front is stopped, front_group_map still normal, would set as CONFLICT for no data from front
+			boolean flagEmptyFront = (allFrontGroupList.size() == 0);
 			for(FrontGroup front: allFrontGroupList) {
 				BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
 						front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
@@ -512,7 +516,7 @@ public class GroupService {
 				if (!groupListOnChain.contains(groupId.toString())) {
 					log.info("update front_group_map by local data front:{}, groupId:{} ",
 							front, groupId);
-					// TODO bug: group2 in font1, not in front2, but local has group2, so add front1_group2_map and front2_group2_map
+					// case: group2 in font1, not in front2, but local has group2, so add front1_group2_map but not front2_group2_map
 					frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
 				}
 			});
