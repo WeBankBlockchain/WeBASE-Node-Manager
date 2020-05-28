@@ -276,10 +276,23 @@ public class FrontService {
         frontGroupMapCache.clearMapList();
     }
 
-    public void setFrontEncryptType(List<TbFront> list) {
+    public void updateFront(TbFront updateFront) {
+        log.debug("updateFrontStatus updateFront:{}", updateFront);
+        if (updateFront == null) {
+            log.error("updateFrontStatus updateFront is null");
+            return;
+        }
+        frontMapper.update(updateFront);
+    }
 
-        list.stream().forEach(front -> {
-
-        });
+    public void updateFront(Integer frontId, Integer status) {
+        log.info("updateFrontStatus frontId:{}, status:{}", frontId, status);
+        TbFront updateFront = getById(frontId);
+        if (updateFront == null) {
+            log.error("updateFrontStatus updateFront is null");
+            return;
+        }
+        updateFront.setStatus(status);
+        frontMapper.update(updateFront);
     }
 }
