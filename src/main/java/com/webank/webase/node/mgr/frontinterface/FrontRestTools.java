@@ -355,7 +355,8 @@ public class FrontRestTools {
                     throw new NodeMgrException(error.getInteger("code"),
                             error.getString("errorMessage"), ex);
                 }
-                throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
+                frontService.updateFront(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
+                throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), error.getString("message"));
             }
         }
         return null;
