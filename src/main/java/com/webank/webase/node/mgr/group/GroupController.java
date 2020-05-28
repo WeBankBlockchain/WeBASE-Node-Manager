@@ -230,8 +230,8 @@ public class GroupController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         log.info("start generateGroup startTime:{} groupId:{}", startTime.toEpochMilli(),
                 req.getGenerateGroupId());
-        TbGroup tbGroup = groupService.generateGroup(req);
-        baseResponse.setData(tbGroup);
+        List<RspOperateResult> generateResultList = groupService.generateGroup(req);
+        baseResponse.setData(generateResultList);
         log.info("end generateGroup useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return baseResponse;
@@ -290,7 +290,8 @@ public class GroupController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         log.info("start batchStartGroup startTime:{} groupId:{}", startTime.toEpochMilli(),
                 req.getGenerateGroupId());
-        groupService.batchStartGroup(req);
+        List<RspOperateResult> operateResultList = groupService.batchStartGroup(req);
+        baseResponse.setData(operateResultList);
         log.info("end batchStartGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JSON.toJSONString(baseResponse));

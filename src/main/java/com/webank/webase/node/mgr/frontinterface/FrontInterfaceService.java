@@ -449,7 +449,7 @@ public class FrontInterfaceService {
      */
     public GroupHandleResult generateGroup(String frontIp, Integer frontPort,
             GenerateGroupInfo param) {
-        log.debug("start generateGroup frontIp:{} frontPort:{} param:{}", JSON.toJSONString(param));
+        log.debug("start generateGroup frontIp:{} frontPort:{} param:{}", frontIp, frontPort, JSON.toJSONString(param));
 
         Integer groupId = Integer.MAX_VALUE;
         GroupHandleResult groupHandleResult = requestSpecificFront(groupId, frontIp, frontPort,

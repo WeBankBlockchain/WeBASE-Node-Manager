@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.group.entity;
+package com.webank.webase.node.mgr.frontinterface.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 /**
- * entity of <nodeId,<groupId, status>>
+ * vo of front's frontId and built url to request front
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class RspGroupStatus {
-	private String nodeId;
-	/**
-	 * <groupId, status>
-	 *     status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
-	 *     request fail: "FAIL"
-	 */
-	private Map<String, String> groupStatusMap;
+public class FrontUrlInfo {
+	private Integer frontId;
+	private String url;
 }
