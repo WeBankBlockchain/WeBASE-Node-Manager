@@ -19,6 +19,8 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
@@ -47,6 +49,12 @@ public class NodeService {
     private NodeMapper nodeMapper;
     @Autowired
     private FrontInterfaceService frontInterface;
+    /**
+     * update front status
+     */
+    @Autowired
+    private FrontService frontService;
+
     // interval of check node status
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 7500L;
 
@@ -218,6 +226,14 @@ public class NodeService {
                 log.warn("checkNodeStatus jump over. subTime:{}", subTime);
                 return;
             }
+
+            // to update front status
+            TbFront updateFront = frontService.getByNodeId(nodeId);
+            if (updateFront == null) {
+                log.warn(" checkAndUpdateNodeStatus updateFront is null, nodeId:{}", nodeId);
+                log.warn("checkNodeStatus jump over. subTime:{}", subTime);
+                return;
+            }
             
             int nodeType = 0;   //0-consensus;1-observer
             if (observerList != null) {
@@ -237,10 +253,12 @@ public class NodeService {
                     log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                         nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
                     tbNode.setNodeActive(DataStatus.INVALID.getValue());
+                    updateFront.setStatus(DataStatus.INVALID.getValue());
                 } else {
                     tbNode.setBlockNumber(latestNumber);
                     tbNode.setPbftView(latestView);
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+                    updateFront.setStatus(DataStatus.NORMAL.getValue());
                 }
             } else { //observer
                 // if latest block number not equal, invalid
@@ -248,15 +266,19 @@ public class NodeService {
                     log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                             nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
                     tbNode.setNodeActive(DataStatus.INVALID.getValue());
+                    updateFront.setStatus(DataStatus.INVALID.getValue());
                 } else {
                     tbNode.setBlockNumber(latestNumber);
                     tbNode.setPbftView(latestView);
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+                    updateFront.setStatus(DataStatus.NORMAL.getValue());
                 }
             }
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
+            // update front status
+            frontService.updateFront(updateFront);
         }
 
     }
@@ -318,8 +340,14 @@ public class NodeService {
 
     public List<String> getNodeIdListService(int groupId) {
         log.debug("start getSealerAndObserverList groupId:{}", groupId);
-        List<String> nodeIdList = frontInterface.getNodeIdList(groupId);
-        log.debug("end getSealerAndObserverList nodeIdList:{}", nodeIdList);
-        return nodeIdList;
+        try {
+            List<String> nodeIdList = frontInterface.getNodeIdList(groupId);
+            log.debug("end getSealerAndObserverList nodeIdList:{}", nodeIdList);
+            return nodeIdList;
+        } catch (Exception e) {
+            log.error("getNodeIdList error groupId:{}, exception:{}", groupId, e.getMessage());
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), e.getMessage());
+        }
+
     }
 }
