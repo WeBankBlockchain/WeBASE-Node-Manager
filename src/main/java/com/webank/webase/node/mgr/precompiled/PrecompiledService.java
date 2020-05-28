@@ -71,7 +71,7 @@ public class PrecompiledService {
      * get node list with consensus status
      */
     public Object getNodeListService(int groupId, int pageSize, int pageNumber) {
-        log.debug("start getNodeListService. groupId:{}" + groupId);
+        log.debug("start getNodeListService. groupId:{}", groupId);
         String uri;
         Map<String, String> map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
@@ -79,11 +79,7 @@ public class PrecompiledService {
         map.put("pageNumber", String.valueOf(pageNumber));
         uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CONSENSUS_LIST, map);
         Object frontRsp = null;
-//        try {
-            frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-//        } catch (Exception ex) {
-//            log.error("getNodeListService :{}", ex.getMessage());
-//        }
+        frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
         log.debug("end getNodeListService. frontRsp:{}", JSON.toJSONString(frontRsp));
         return frontRsp;
     }
