@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.group.entity;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Map;
+package com.webank.webase.node.mgr.base.enums;
 
 /**
- * entity of <nodeId,<groupId, status>>
+ * result code of operate group
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class RspGroupStatus {
-	private String nodeId;
-	/**
-	 * <groupId, status>
-	 *     status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
-	 *     request fail: "FAIL"
-	 */
-	private Map<String, String> groupStatusMap;
+public enum OperateStatus {
+	SUCCESS(0), FAIL(1);
+
+	private int value;
+
+	OperateStatus(Integer result) {
+		this.value = result;
+	}
+
+	public int getValue() {
+		return this.value;
+	}
 }
