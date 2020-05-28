@@ -292,6 +292,9 @@ public class FrontService {
             log.error("updateFrontStatus updateFront is null");
             return;
         }
+        if (updateFront.getStatus().equals(status)) {
+            return;
+        }
         updateFront.setStatus(status);
         frontMapper.update(updateFront);
     }
