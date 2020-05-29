@@ -337,13 +337,13 @@ public class FrontRestTools {
                     throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
                 }
                 ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
-                frontService.updateFront(frontUrlInfo.getFrontId(), DataStatus.NORMAL.getValue());
+                frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.NORMAL.getValue());
                 return response.getBody();
             } catch (ResourceAccessException ex) {
                 log.warn("fail restTemplateExchange", ex);
                 setFailCount(url, method.toString());
                 if (isServiceSleep(url, method.toString())) {
-                    frontService.updateFront(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
+                    frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
                     throw ex;
                 }
                 log.info("continue next front", ex);
@@ -355,7 +355,7 @@ public class FrontRestTools {
                     throw new NodeMgrException(error.getInteger("code"),
                             error.getString("errorMessage"), ex);
                 }
-                frontService.updateFront(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
+                frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
                 throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), error.getString("message"));
             }
         }
