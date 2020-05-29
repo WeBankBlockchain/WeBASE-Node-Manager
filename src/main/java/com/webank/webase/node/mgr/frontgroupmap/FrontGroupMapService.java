@@ -47,7 +47,7 @@ public class FrontGroupMapService {
     /**
      * add new mapping with group status directly
      */
-    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
+    public TbFrontGroupMap newFrontGroupWithStatus(Integer frontId, Integer groupId, Integer status) {
         log.info("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
         MapListParam param = new MapListParam(frontId, groupId);
         FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
@@ -72,9 +72,9 @@ public class FrontGroupMapService {
     }
 
     /**
-     * new front group map only for normal group
+     * new front group map
      */
-    public void newFrontGroupWithStatus(TbFront front, Integer groupId) {
+    public void newFrontGroup(TbFront front, Integer groupId) {
         // check front's all group status
         BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
                 groupId, OPERATE_STATUS_GROUP);
@@ -85,10 +85,10 @@ public class FrontGroupMapService {
             String groupStatus = (String) res.getData();
             if (RUNNING_GROUP.equals(groupStatus)) {
                 log.debug("newFrontGroupWithStatus update map's groupStatus NORMAL.");
-                newFrontGroup(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
+                newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
             } else {
                 log.debug("newFrontGroupWithStatus update map's groupStatus MAINTAINING.");
-                newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
+                newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
             }
         } else {
             log.warn("newFrontGroupWithStatus get group status fail, " +

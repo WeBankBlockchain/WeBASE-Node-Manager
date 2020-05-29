@@ -144,7 +144,7 @@ public class FrontService {
                         GroupType.SYNC.getValue(), DataStatus.NORMAL.getValue());
             }
             //save front group map
-            frontGroupMapService.newFrontGroupWithStatus(tbFront, group);
+            frontGroupMapService.newFrontGroup(tbFront, group);
             //save nodes
             for (String nodeId : groupPeerList) {
                 PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools

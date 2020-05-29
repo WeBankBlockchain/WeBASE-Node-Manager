@@ -278,7 +278,7 @@ public class GroupService {
 				}
 				// refresh front group map by group list on chain
 				// different from checkGroupMapByLocalGroupList which update by local groupList
-				frontGroupMapService.newFrontGroupWithStatus(front, gId);
+				frontGroupMapService.newFrontGroup(front, gId);
 
 				//save new peers(tb_node)
 				savePeerList(frontIp, frontPort, gId, groupPeerList);
@@ -537,7 +537,7 @@ public class GroupService {
 					log.info("update front_group_map by local data front:{}, groupId:{} ",
 							front, groupId);
 					// case: group2 in font1, not in front2, but local has group2, so add front1_group2_map but not front2_group2_map
-					frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
+					frontGroupMapService.newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
 				}
 			});
 		}
@@ -715,7 +715,7 @@ public class GroupService {
         // if stop group, manually refresh front_group_map as invalid
         if (OPERATE_STOP_GROUP.equals(type) && groupOperateStatus.getCode() == 0) {
         	log.info("stopGroup newFrontGroup frontId:{}, groupId:{}", tbFront.getFrontId(), groupId);
-        	frontGroupMapService.newFrontGroup(tbFront.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
+        	frontGroupMapService.newFrontGroupWithStatus(tbFront.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
 		}
         // refresh group status
 		// if stop group, cannot update front_group_map as invalid for getGroupPeers fail
