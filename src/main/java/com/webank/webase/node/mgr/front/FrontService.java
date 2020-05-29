@@ -35,6 +35,8 @@ import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,6 +73,9 @@ public class FrontService {
     private ResetGroupListTask resetGroupListTask;
     @Autowired
     private ConstantProperties constants;
+
+	// interval of check front status
+	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
     /**
      * add new front
@@ -285,8 +290,8 @@ public class FrontService {
         frontMapper.update(updateFront);
     }
 
-    public void updateFront(Integer frontId, Integer status) {
-        log.info("updateFrontStatus frontId:{}, status:{}", frontId, status);
+    public void updateFrontWithInternal(Integer frontId, Integer status) {
+        log.debug("updateFrontStatus frontId:{}, status:{}", frontId, status);
         TbFront updateFront = getById(frontId);
         if (updateFront == null) {
             log.error("updateFrontStatus updateFront is null");
@@ -295,6 +300,15 @@ public class FrontService {
         if (updateFront.getStatus().equals(status)) {
             return;
         }
+        LocalDateTime modifyTime = updateFront.getModifyTime();
+        LocalDateTime createTime = updateFront.getCreateTime();
+		Duration duration = Duration.between(modifyTime, LocalDateTime.now());
+		Long subTime = duration.toMillis();
+		if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
+			log.info("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
+					subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
+			return;
+		}
         updateFront.setStatus(status);
         frontMapper.update(updateFront);
     }
