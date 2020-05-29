@@ -108,7 +108,7 @@ public class GroupController extends BaseController {
         }
 
         // reset group
-        resetGroupListTask.asyncResetGroupList();
+        groupService.asyncResetGroupList();
 
         log.info("end getAllGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
@@ -145,7 +145,7 @@ public class GroupController extends BaseController {
             }
         }
         // reset group
-        resetGroupListTask.asyncResetGroupList();
+        groupService.asyncResetGroupList();
 
         log.info("end getAllGroupIncludeInvalidGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
@@ -171,7 +171,7 @@ public class GroupController extends BaseController {
         }
 
         // reset group
-        resetGroupListTask.asyncResetGroupList();
+        groupService.asyncResetGroupList();
 
         log.info("end getAllGroupOfStatus useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
