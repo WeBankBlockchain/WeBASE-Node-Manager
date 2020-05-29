@@ -90,6 +90,9 @@ public class FrontGroupMapService {
                 log.debug("newFrontGroupWithStatus update map's groupStatus MAINTAINING.");
                 newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
             }
+        } else {
+            log.warn("newFrontGroupWithStatus get group status fail, " +
+                    "update front_group_map status fail. res:{}", res);
         }
     }
 
