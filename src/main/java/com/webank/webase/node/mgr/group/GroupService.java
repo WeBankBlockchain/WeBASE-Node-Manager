@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.OperateStatus;
@@ -259,7 +260,15 @@ public class GroupService {
 				Integer gId = Integer.valueOf(groupId);
 				allGroupSet.add(gId);
 				// peer in group
-				List<String> groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+				List<String> groupPeerList;
+				try {
+					groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+				} catch (Exception e) {
+					// case: if front1 group1 stopped, getGroupPeers error, update front1_group1_map invalid fail
+					log.warn("saveDataOfGroup getGroupPeersFromSpecificFront fail, frontId:{}, groupId:{}",
+							front.getFrontId(), groupId);
+					continue;
+				}
 				// check group not existed or node count differs
 				// save group entity
 				TbGroup checkGroupExist = getGroupById(gId);
@@ -701,9 +710,15 @@ public class GroupService {
             throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
         }
         // request front to operate
-        Object groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
+        BaseResponse groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
+        // if stop group, manually refresh front_group_map as invalid
+        if (OPERATE_STOP_GROUP.equals(type) && groupOperateStatus.getCode() == 0) {
+        	log.info("stopGroup newFrontGroup frontId:{}, groupId:{}", tbFront.getFrontId(), groupId);
+        	frontGroupMapService.newFrontGroup(tbFront.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
+		}
         // refresh group status
+		// if stop group, cannot update front_group_map as invalid for getGroupPeers fail
         resetGroupList();
 
         // return
