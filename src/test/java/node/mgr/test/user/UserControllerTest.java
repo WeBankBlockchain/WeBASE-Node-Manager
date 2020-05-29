@@ -15,7 +15,7 @@ package node.mgr.test.user;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;

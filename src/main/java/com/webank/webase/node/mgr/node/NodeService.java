@@ -223,17 +223,10 @@ public class NodeService {
             Duration duration = Duration.between(modifyTime, LocalDateTime.now());
             Long subTime = duration.toMillis();
             if (subTime < CHECK_NODE_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
-                log.warn("checkNodeStatus jump over. subTime:{}", subTime);
+                log.warn("checkNodeStatus jump over. for time internal subTime:{}", subTime);
                 return;
             }
 
-            // to update front status
-            TbFront updateFront = frontService.getByNodeId(nodeId);
-            if (updateFront == null) {
-                log.warn(" checkAndUpdateNodeStatus updateFront is null, nodeId:{}", nodeId);
-                log.warn("checkNodeStatus jump over. subTime:{}", subTime);
-                return;
-            }
             
             int nodeType = 0;   //0-consensus;1-observer
             if (observerList != null) {
@@ -253,12 +246,10 @@ public class NodeService {
                     log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                         nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
                     tbNode.setNodeActive(DataStatus.INVALID.getValue());
-                    updateFront.setStatus(DataStatus.INVALID.getValue());
                 } else {
                     tbNode.setBlockNumber(latestNumber);
                     tbNode.setPbftView(latestView);
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
-                    updateFront.setStatus(DataStatus.NORMAL.getValue());
                 }
             } else { //observer
                 // if latest block number not equal, invalid
@@ -266,19 +257,23 @@ public class NodeService {
                     log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                             nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
                     tbNode.setNodeActive(DataStatus.INVALID.getValue());
-                    updateFront.setStatus(DataStatus.INVALID.getValue());
                 } else {
                     tbNode.setBlockNumber(latestNumber);
                     tbNode.setPbftView(latestView);
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
-                    updateFront.setStatus(DataStatus.NORMAL.getValue());
                 }
             }
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
-            // update front status as long as update node (7.5s internal)
-            frontService.updateFront(updateFront);
+            // to update front status
+            TbFront updateFront = frontService.getByNodeId(nodeId);
+            if (updateFront != null) {
+                // update front status as long as update node (7.5s internal)
+                log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
+                updateFront.setStatus(tbNode.getNodeActive());
+                frontService.updateFront(updateFront);
+            }
         }
 
     }

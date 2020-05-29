@@ -144,7 +144,7 @@ public class FrontService {
                         GroupType.SYNC.getValue(), DataStatus.NORMAL.getValue());
             }
             //save front group map
-            frontGroupMapService.newFrontGroupWithStatus(tbFront, group);
+            frontGroupMapService.newFrontGroup(tbFront, group);
             //save nodes
             for (String nodeId : groupPeerList) {
                 PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools
@@ -276,7 +276,7 @@ public class FrontService {
         //remove map
         frontGroupMapService.removeByFrontId(frontId);
         //reset group list => remove groups that only belongs to this front
-         resetGroupListTask.asyncResetGroupList();
+        resetGroupListTask.asyncResetGroupList();
         //clear cache
         frontGroupMapCache.clearMapList();
     }
