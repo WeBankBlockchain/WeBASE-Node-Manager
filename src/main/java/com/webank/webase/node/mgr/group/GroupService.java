@@ -212,7 +212,7 @@ public class GroupService {
             return;
         }
         // save group and nodes(peers, sealer, observer) and front_group_map from chain
-		// update front_group_map by chain data
+		// update front_group_map by group list on chain
 		saveDataOfGroup(frontList, allGroupSet);
 
         // check group status(normal or maintaining), update by local group list
@@ -251,7 +251,7 @@ public class GroupService {
 			try {
 				groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
 			} catch (Exception ex) {
-				log.error("fail getGroupListFromSpecificFront.", ex);
+				log.error("saveDataOfGroup fail getGroupListFromSpecificFront.", ex);
 				continue;
 			}
 			// update by group list on chain
@@ -517,7 +517,7 @@ public class GroupService {
 			try {
 				groupListOnChain = frontInterface.getGroupListFromSpecificFront(front.getFrontIp(), front.getFrontPort());
 			} catch (Exception ex) {
-				log.error("fail getGroupListFromSpecificFront.", ex);
+				log.error("checkGroupMapByLocalGroupList fail getGroupListFromSpecificFront.", ex);
 				continue;
 			}
 			// group list local
