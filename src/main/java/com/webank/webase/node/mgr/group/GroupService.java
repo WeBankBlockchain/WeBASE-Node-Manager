@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.group;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.OperateStatus;
@@ -44,6 +45,7 @@ import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -186,7 +188,6 @@ public class GroupService {
         return generalInfo;
     }
 
-
     /**
      * reset groupList.
      */
@@ -204,7 +205,7 @@ public class GroupService {
             return;
         }
         // save group and nodes(peers, sealer, observer) and front_group_map from chain
-		// update front_group_map by chain data
+		// update front_group_map by group list on chain
 		saveDataOfGroup(frontList, allGroupSet);
 
         // check group status(normal or maintaining), update by local group list
@@ -243,7 +244,7 @@ public class GroupService {
 			try {
 				groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
 			} catch (Exception ex) {
-				log.error("fail getGroupListFromSpecificFront.", ex);
+				log.error("saveDataOfGroup fail getGroupListFromSpecificFront.", ex);
 				continue;
 			}
 			// update by group list on chain
@@ -251,7 +252,15 @@ public class GroupService {
 				Integer gId = Integer.valueOf(groupId);
 				allGroupSet.add(gId);
 				// peer in group
-				List<String> groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+				List<String> groupPeerList;
+				try {
+					groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+				} catch (Exception e) {
+					// case: if front1 group1 stopped, getGroupPeers error, update front1_group1_map invalid fail
+					log.warn("saveDataOfGroup getGroupPeersFromSpecificFront fail, frontId:{}, groupId:{}",
+							front.getFrontId(), groupId);
+					continue;
+				}
 				// check group not existed or node count differs
 				// save group entity
 				TbGroup checkGroupExist = getGroupById(gId);
@@ -261,7 +270,7 @@ public class GroupService {
 				}
 				// refresh front group map by group list on chain
 				// different from checkGroupMapByLocalGroupList which update by local groupList
-				frontGroupMapService.newFrontGroupWithStatus(front, gId);
+				frontGroupMapService.newFrontGroup(front, gId);
 
 				//save new peers(tb_node)
 				savePeerList(frontIp, frontPort, gId, groupPeerList);
@@ -509,7 +518,7 @@ public class GroupService {
 			try {
 				groupListOnChain = frontInterface.getGroupListFromSpecificFront(front.getFrontIp(), front.getFrontPort());
 			} catch (Exception ex) {
-				log.error("fail getGroupListFromSpecificFront.", ex);
+				log.error("checkGroupMapByLocalGroupList fail getGroupListFromSpecificFront.", ex);
 				continue;
 			}
 			// group list local
@@ -520,7 +529,7 @@ public class GroupService {
 					log.info("update front_group_map by local data front:{}, groupId:{} ",
 							front, groupId);
 					// case: group2 in font1, not in front2, but local has group2, so add front1_group2_map but not front2_group2_map
-					frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
+					frontGroupMapService.newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
 				}
 			});
 		}
@@ -693,9 +702,15 @@ public class GroupService {
             throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
         }
         // request front to operate
-        Object groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
+        BaseResponse groupOperateStatus = frontInterface.operateGroup(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), groupId, type);
+        // if stop group, manually refresh front_group_map as invalid
+        if (OPERATE_STOP_GROUP.equals(type) && groupOperateStatus.getCode() == 0) {
+        	log.info("stopGroup newFrontGroup frontId:{}, groupId:{}", tbFront.getFrontId(), groupId);
+        	frontGroupMapService.newFrontGroupWithStatus(tbFront.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
+		}
         // refresh group status
+		// if stop group, cannot update front_group_map as invalid for getGroupPeers fail
         resetGroupList();
 
         // return

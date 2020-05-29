@@ -76,9 +76,9 @@ executor:
 
 # scheduler config for sync scheduled task
 scheduler:
-  poolSize: 5
+  poolSize: 50
   threadNamePrefix: "node-mgr-task-"
-  awaitTerminationSeconds: 60
+  awaitTerminationSeconds: 600
   waitForTasksToCompleteOnShutdown: true
 
 sdk:
