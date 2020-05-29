@@ -44,6 +44,7 @@ import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -186,6 +187,13 @@ public class GroupService {
         return generalInfo;
     }
 
+	/**
+	 * async reset groupList.
+	 */
+	@Async(value = "mgrAsyncExecutor")
+	public void asyncResetGroupList() {
+		resetGroupList();
+	}
 
     /**
      * reset groupList.
