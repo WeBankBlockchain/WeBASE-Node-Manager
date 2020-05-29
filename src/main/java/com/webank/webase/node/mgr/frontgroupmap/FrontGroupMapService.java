@@ -45,7 +45,7 @@ public class FrontGroupMapService {
     private FrontInterfaceService frontInterface;
 
     /**
-     * add new mapping
+     * add new mapping with group status directly
      */
     public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, Integer status) {
         log.info("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
