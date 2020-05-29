@@ -188,14 +188,6 @@ public class GroupService {
         return generalInfo;
     }
 
-	/**
-	 * async reset groupList.
-	 */
-	@Async(value = "mgrAsyncExecutor")
-	public void asyncResetGroupList() {
-		resetGroupList();
-	}
-
     /**
      * reset groupList.
      */
