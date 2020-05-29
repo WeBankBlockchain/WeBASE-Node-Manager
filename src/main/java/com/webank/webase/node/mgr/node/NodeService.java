@@ -277,7 +277,7 @@ public class NodeService {
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
-            // update front status
+            // update front status as long as update node (7.5s internal)
             frontService.updateFront(updateFront);
         }
 
