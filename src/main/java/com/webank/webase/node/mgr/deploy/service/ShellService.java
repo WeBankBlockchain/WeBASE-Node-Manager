@@ -18,7 +18,6 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,7 +91,7 @@ public class ShellService {
     public ExecuteResult execBuildChain(byte encryptType,
                                   String[] ipLines,
                                   String chainName) {
-        Path ipConf = Paths.get(pathService.getIpConfigPath(chainName));
+        Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
                 JSON.toJSONString(ipLines),
                 chainName,ipConf.toAbsolutePath().toString());
@@ -111,30 +110,14 @@ public class ShellService {
             log.error("File: [{}] not exists in directory:[{}] ", ipConf, Paths.get(".").toAbsolutePath().toString());
             throw new NodeMgrException(ConstantCode.NO_CONFIG_FILE_ERROR);
         }
-
+        // build_chain.sh only support docker on linux
         String command = String.format("bash -e %s -f %s -o %s %s %s",
                 constant.getBuildChainShell(),
                 ipConf.toAbsolutePath().toString(),
-                pathService.getChainRoot(chainName),
+                pathService.getChainRootString(chainName),
                 encryptType == EncryptType.SM2_TYPE ? "-g" : "",
-                SystemUtils.IS_OS_LINUX ? " -d " : ""); // build_chain.sh only support docker on linux
+                SystemUtils.IS_OS_LINUX ? " -d " : "");
 
         return javaCommandExecutor.executeCommand(command, constant.getBuildChainTimeout());
-    }
-
-    /**
-     * Add execute privilege for file.
-     *
-     * @param file
-     * @throws FileNotFoundException
-     */
-    public static void addExecPrivilege(String file) {
-        Path shellPath = Paths.get(file);
-        if (Files.notExists(shellPath)) {
-            // file not exists
-            log.error("File: [{}] not exists in directory:[{}] ", file, Paths.get(".").toAbsolutePath().toString());
-            return;
-        }
-        shellPath.toFile().setExecutable(true);
     }
 }

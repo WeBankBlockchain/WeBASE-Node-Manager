@@ -15,20 +15,28 @@ package com.webank.webase.node.mgr.chain;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CHAIN;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import lombok.extern.log4j.Log4j2;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.deploy.entity.TbChain;
+import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
@@ -40,6 +48,8 @@ public class ChainService {
     private FrontService frontService;
     @Autowired
     private RestTemplate genericRestTemplate;
+
+    @Autowired private TbChainMapper tbChainMapper;
 
     /**
      * get chain info.
@@ -77,5 +87,22 @@ public class ChainService {
         Object rspObj = genericRestTemplate.getForObject(url, Object.class);
         log.debug("end getChainMonitorInfo. rspObj:{}", JSON.toJSONString(rspObj));
         return rspObj;
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbChain insert(String chainName,
+                          String chainDesc,
+                          String version,
+                          byte encryptType,
+                          ChainStatusEnum status) throws NodeMgrException{
+        // TODO. params check
+
+        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status);
+
+        if (tbChainMapper.insertSelective(chain) != 1 || chain.getId() <= 0) {
+            throw new NodeMgrException(ConstantCode.INSERT_CHAIN_ERROR);
+        }
+        return chain;
     }
 }

@@ -15,7 +15,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class TbConfig {
 
-    public static TbConfig build(ConfigTypeEnum type,String value){
+    public static TbConfig init(ConfigTypeEnum type,String value){
         Date now = new Date();
 
         TbConfig config = new TbConfig();

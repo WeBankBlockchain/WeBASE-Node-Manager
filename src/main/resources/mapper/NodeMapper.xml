@@ -133,4 +133,7 @@
   <delete id="deleteByGroupId">
 		delete from tb_node where group_id = #{groupId}
 	</delete>
+  <delete id="deleteByNodeId">
+    delete from tb_node where node_id = #{nodeId}
+  </delete>
 </mapper>

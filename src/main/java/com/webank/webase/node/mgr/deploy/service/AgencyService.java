@@ -19,6 +19,8 @@ import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_AGENCY_ER
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
@@ -36,12 +38,13 @@ public class AgencyService {
 
     @Autowired private TbAgencyMapper tbAgencyMapper;
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public TbAgency insert(String agencyName,
                            String agencyDesc,
                            int chainId,
                            String chainName) throws NodeMgrException {
         // TODO. params check
-        TbAgency agency = TbAgency.build( agencyName, agencyDesc, chainId, chainName);
+        TbAgency agency = TbAgency.init( agencyName, agencyDesc, chainId, chainName);
 
         if (tbAgencyMapper.insertSelective(agency) != 1 || agency.getId() <= 0) {
             throw new NodeMgrException(INSERT_AGENCY_ERROR);

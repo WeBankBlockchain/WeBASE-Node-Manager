@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
+ 
 package com.webank.webase.node.mgr.base.enums;
 
 import lombok.AllArgsConstructor;
@@ -21,25 +21,27 @@ import lombok.ToString;
 @Getter
 @ToString
 @AllArgsConstructor
-public enum ConfigTypeEnum {
-    DOCKER_IMAGE_TYPE((short)1,"docker 镜像版本", "Supported tags of docker image FISCO-BCOS and WeBASE-Front."),
+public enum  RunTypeEnum {
+    COMMAND((byte) 0, "Run with a command."),
+    DOCKER((byte) 1, "Run with docker."),
     ;
 
-    private short id;
-    private String name;
+    private byte id;
     private String description;
 
     /**
-     *
      * @param id
      * @return
      */
-    public static ConfigTypeEnum getById(short id) {
-        for (ConfigTypeEnum value : ConfigTypeEnum.values()) {
+    public static RunTypeEnum getById(byte id) {
+        for (RunTypeEnum value : RunTypeEnum.values()) {
             if (value.id == id) {
                 return value;
             }
         }
         return null;
     }
+
+
 }
+

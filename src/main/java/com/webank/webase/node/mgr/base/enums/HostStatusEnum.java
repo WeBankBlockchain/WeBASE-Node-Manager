@@ -15,10 +15,17 @@
  */
 package com.webank.webase.node.mgr.base.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
+
 /**
  *
  */
 
+@Getter
+@ToString
+@AllArgsConstructor
 public enum HostStatusEnum {
     ADDED((byte) 0, "Added."),
     INITIALIZED((byte) 1, "Initialized."),
@@ -29,14 +36,6 @@ public enum HostStatusEnum {
     private byte id;
     private String description;
 
-    /**
-     * @param id
-     * @param description
-     */
-    HostStatusEnum(byte id, String description) {
-        this.id = id;
-        this.description = description;
-    }
 
     /**
      * @param id
@@ -49,23 +48,5 @@ public enum HostStatusEnum {
             }
         }
         return null;
-    }
-
-    public byte getId() {
-        return id;
-    }
-
-
-    public String getDescription() {
-        return description;
-    }
-
-
-    @Override
-    public String toString() {
-        return "ChainStatusEnum{" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                '}';
     }
 }

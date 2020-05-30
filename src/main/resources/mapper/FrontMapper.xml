@@ -93,4 +93,15 @@
      select * from tb_front where front_id = #{frontId}
   </select>
 
+  <select id="selectByHostId" resultMap="frontMap" parameterType="java.lang.Integer">
+    select * from tb_front where host_id= #{hostId}
+  </select>
+  <select id="selectByAgencyId" resultMap="frontMap" parameterType="java.lang.Integer">
+    select * from tb_front where agency_id= #{agencyId}
+  </select>
+
+  <delete id="deleteByAgencyId" parameterType="java.lang.Integer">
+    delete from tb_front where agency_id = #{agencyId}
+  </delete>
+
 </mapper>

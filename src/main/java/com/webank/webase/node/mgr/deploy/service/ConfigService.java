@@ -74,7 +74,7 @@ public class ConfigService {
                     }
 
                     List<TbConfig> configList = Arrays.stream(responseEntity.getBody())
-                            .map((tag) -> TbConfig.build(type,tag.getName()))
+                            .map((tag) -> TbConfig.init(type,tag.getName()))
                             .collect(Collectors.toList());
 
                     tbConfigMapper.deleteByType(type.getId());

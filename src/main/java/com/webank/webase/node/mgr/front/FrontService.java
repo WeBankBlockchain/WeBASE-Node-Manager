@@ -13,8 +13,22 @@
  */
 package com.webank.webase.node.mgr.front;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
@@ -29,21 +43,10 @@ import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeParam;
 import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * service of web3.
@@ -182,13 +185,12 @@ public class FrontService {
     /**
      * check not support ip.
      */
-    /**
-     * check not support ip.
-     */
-    private void checkNotSupportIp(String ip) {
+    public void checkNotSupportIp(String ip) {
 
         String ipConfig = constants.getNotSupportFrontIp();
-        if(StringUtils.isBlank(ipConfig))return;
+        if(StringUtils.isBlank(ipConfig)) {
+            return;
+        }
         List<String> list = Arrays.asList(ipConfig.split(","));
         if (list.contains(ip)) {
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_IP);
@@ -263,5 +265,33 @@ public class FrontService {
         list.stream().forEach(front -> {
 
         });
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbFront insert(String nodeId,
+                          String ip,
+                          int port,
+                          String agencyName,
+                          String clientVersion,
+                          RunTypeEnum runTypeEnum,
+                          int agencyId,
+                          int hostId,
+                          short hostIndex,
+                          String imageTag,
+                          String containerName,
+                          short jsonrpcPort,
+                          short p2pPort,
+                          short channelPort,
+                          FrontStatusEnum frontStatusEnum
+    ) throws NodeMgrException {
+        // TODO. params check
+
+        TbFront front = TbFront.init(nodeId, ip, port, agencyName, clientVersion, runTypeEnum,
+                agencyId, hostId, hostIndex, imageTag, containerName, jsonrpcPort, p2pPort, channelPort, frontStatusEnum);
+
+        if (frontMapper.add(front) != 1 || front.getFrontId() <= 0){
+            throw new NodeMgrException(ConstantCode.INSERT_FRONT_ERROR);
+        }
+        return front;
     }
 }

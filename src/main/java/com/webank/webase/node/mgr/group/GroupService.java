@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -139,16 +140,15 @@ public class GroupService {
     /**
      * save group id
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void saveGroupId(int groupId, int nodeCount, int chainId,String chainName,String groupDesc) {
+        // TODO. check params
         if (groupId == 0) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
         //save group id
         TbGroup tbGroup = new TbGroup(groupId, String.format("group%s" , groupId), nodeCount,chainId,chainName,groupDesc);
-        int count = groupMapper.save(tbGroup);
-        if (count != 1 ){
-            throw new NodeMgrException(INSERT_GROUP_ERROR);
-        }
+        groupMapper.save(tbGroup);
 
         //create table by group id
         tableService.newTableByGroupId(groupId);
@@ -448,5 +448,15 @@ public class GroupService {
         transDailyService.deleteByGroupId(groupId);
         //drop table.
         tableService.dropTableByGroupId(groupId);
+    }
+
+    /**
+     * update status.
+     */
+    public void updateGroupNodeCount(int groupId, int nodeCount) {
+        log.debug("start updateGroupNodeCount groupId:{} nodeCount:{}", groupId, nodeCount);
+        groupMapper.updateNodeCount(groupId, nodeCount);
+        log.debug("end updateGroupNodeCount groupId:{} nodeCount:{}", groupId, nodeCount);
+
     }
 }
