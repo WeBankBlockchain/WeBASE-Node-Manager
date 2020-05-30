@@ -23,7 +23,7 @@ CREATE TABLE `tb_account_info` (
 CREATE TABLE `tb_agency` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
   `agency_name` varchar(64) NOT NULL COMMENT '机构名称',
-  `desc` varchar(1024) DEFAULT '' COMMENT '机构描述信息',
+  `agency_desc` varchar(1024) DEFAULT '' COMMENT '机构描述信息',
   `chain_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '所属链 ID',
   `chain_name` varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
   `create_time` datetime NOT NULL COMMENT '创建时间',
@@ -97,10 +97,10 @@ CREATE TABLE `tb_cert` (
 CREATE TABLE `tb_chain` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
   `chain_name` varchar(64) NOT NULL COMMENT '链名称',
-  `desc` varchar(1024) DEFAULT NULL COMMENT '链描述信息',
+  `chain_desc` varchar(1024) DEFAULT NULL COMMENT '链描述信息',
   `version` varchar(64) NOT NULL DEFAULT '' COMMENT '创建链时选择的镜像版本',
   `encrypt_type` tinyint(8) unsigned NOT NULL DEFAULT '1' COMMENT '加密类型：1，标密；2，国密；默认 1 ',
-  `status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '链状态：0，初始化；1，部署中；2，部署失败；3，部署成功等等',
+  `chain_status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '链状态：0，初始化；1，部署中；2，部署失败；3，部署成功等等',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
@@ -203,7 +203,6 @@ CREATE TABLE `tb_group` (
   `modify_time` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`group_id`),
   UNIQUE KEY `unique_chain_id_group_id` (`chain_id`,`group_id`),
-  UNIQUE KEY `unique_chain_id_group_name` (`chain_id`,`group_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='群组信息表';
 
 -- ----------------------------

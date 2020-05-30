@@ -18,8 +18,12 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
@@ -35,17 +39,23 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+
 public class HostService {
 
     @Autowired private TbHostMapper tbHostMapper;
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public TbHost insert(int agencyId,
                          String agencyName,
                          String ip,
                          String rootDir) throws NodeMgrException {
-        return this.insert(agencyId, agencyName, ip, SSH_DEFAULT_USER, SSH_DEFAULT_PORT, rootDir, HostStatusEnum.ADDED);
+
+        // fix call transaction in the same class
+        return ((HostService) AopContext.currentProxy())
+                .insert(agencyId, agencyName, ip, SSH_DEFAULT_USER, SSH_DEFAULT_PORT, rootDir, HostStatusEnum.ADDED);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public TbHost insert(int agencyId,
                          String agencyName,
                          String ip,
@@ -56,7 +66,7 @@ public class HostService {
 
         // TODO. params check
 
-        TbHost host = TbHost.build(agencyId, agencyName, ip, sshUser, sshPort, rootDir, hostStatusEnum);
+        TbHost host = TbHost.init(agencyId, agencyName, ip, sshUser, sshPort, rootDir, hostStatusEnum);
 
         if ( tbHostMapper.insertSelective(host) != 1 || host.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_HOST_ERROR);

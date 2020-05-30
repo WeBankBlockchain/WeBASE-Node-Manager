@@ -17,7 +17,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class TbHost {
 
-    public static TbHost build(int agencyId,
+    public static TbHost init(int agencyId,
                                String agencyName,
                                String ip,
                                String sshUser,

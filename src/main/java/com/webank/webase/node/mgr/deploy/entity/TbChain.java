@@ -15,7 +15,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class TbChain {
 
-    public static TbChain build(String chainName,
+    public static TbChain init(String chainName,
                                 String chainDesc,
                                 String version,
                                 byte encryptType,
@@ -24,10 +24,10 @@ public class TbChain {
         Date now = new Date();
         TbChain chain  = new TbChain();
         chain.setChainName(chainName);
-        chain.setDesc(chainDesc);
+        chain.setChainDesc(chainDesc);
         chain.setVersion(version);
         chain.setEncryptType(encryptType);
-        chain.setStatus(status.getId());
+        chain.setChainStatus(status.getId());
         chain.setCreateTime(now);
         chain.setModifyTime(now);
         return chain;
@@ -58,7 +58,7 @@ public class TbChain {
      *
      * @mbg.generated
      */
-    private String desc;
+    private String chainDesc;
 
     /**
      *
@@ -85,7 +85,7 @@ public class TbChain {
      *
      * @mbg.generated
      */
-    private Byte status;
+    private Byte chainStatus;
 
     /**
      *

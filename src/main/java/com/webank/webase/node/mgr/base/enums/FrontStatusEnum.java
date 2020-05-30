@@ -12,6 +12,7 @@
  * the License.
  */
 
+
 package com.webank.webase.node.mgr.base.enums;
 
 import lombok.AllArgsConstructor;
@@ -21,25 +22,30 @@ import lombok.ToString;
 @Getter
 @ToString
 @AllArgsConstructor
-public enum ConfigTypeEnum {
-    DOCKER_IMAGE_TYPE((short)1,"docker 镜像版本", "Supported tags of docker image FISCO-BCOS and WeBASE-Front."),
+public enum FrontStatusEnum {
+    INITIALIZED((byte) 0, "Initialized."),
+    CREATE((byte) 1, "Create."),
+    RUN((byte) 2, "Run."),
+    STOP((byte) 3, "Stop."),
+    REMOVE((byte) 4, "Remove."),
     ;
 
-    private short id;
-    private String name;
+    private byte id;
     private String description;
+
 
     /**
      *
      * @param id
      * @return
      */
-    public static ConfigTypeEnum getById(short id) {
-        for (ConfigTypeEnum value : ConfigTypeEnum.values()) {
+    public static FrontStatusEnum getById(byte id) {
+        for (FrontStatusEnum value : FrontStatusEnum.values()) {
             if (value.id == id) {
                 return value;
             }
         }
         return null;
     }
+
 }

@@ -13,24 +13,27 @@
  */
 package com.webank.webase.node.mgr.base.properties;
 
+import static java.io.File.separator;
+
 import java.math.BigInteger;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * constants.
  */
+@Slf4j
 @Data
 @Component
 @ConfigurationProperties(prefix = ConstantProperties.CONSTANT_PREFIX)
 public class ConstantProperties {
-
-    @Autowired
-    private ConstantProperties constants;
 
     // constant
     public static final String CONSTANT_PREFIX = "constant";
@@ -83,9 +86,15 @@ public class ConstantProperties {
     private Integer certMonitorTaskFixedDelay;
 
     //******************* Add in v1.4.0 start. *******************
-    public static final short DOCKER_DAEMON_PORT= 3000;
-    public static final String SSH_DEFAULT_USER= "root";
-    public static final short SSH_DEFAULT_PORT= 22;
+    public static final short DOCKER_DAEMON_PORT = 3000;
+    public static final String SSH_DEFAULT_USER = "root";
+    public static final short SSH_DEFAULT_PORT = 22;
+
+    public short defaultJsonrpcPort = 8545;
+    public short defaultP2pPort = 30300;
+    public short defaultChannelPort = 20200;
+    public short defaultFrontPort = 5002;
+
     // shell script
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
     private String buildChainShell = "./script/deploy/build_chain.sh";
@@ -96,7 +105,24 @@ public class ConstantProperties {
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login", "/user/privateKey/**", "/encrypt"};
     private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/fiscoorg/front/tags";
-    private String generateNodesRoot = "NODES_ROOT";
-    //******************* Add in v1.4.0 end. *******************
+    private String nodesRootDir = "NODES_ROOT";
 
+    @EventListener(ApplicationReadyEvent.class)
+    public void init() {
+        if (StringUtils.isBlank(nodesRootDir)) {
+            // return "." by default
+            nodesRootDir = "./NODES_ROOT/";
+        } else if (nodesRootDir.trim().endsWith(separator)) {
+            // ends with separator
+            nodesRootDir = nodesRootDir.trim();
+        } else {
+            // append a separator
+            nodesRootDir = String.format("%s%s", nodesRootDir.trim(), separator);
+        }
+        log.info("Generate nodes root dir:[{}]", nodesRootDir);
+
+        log.info("permitUrlArray: [{}]", StringUtils.join(permitUrlArray,","));
+
+    }
+    //******************* Add in v1.4.0 end. *******************
 }

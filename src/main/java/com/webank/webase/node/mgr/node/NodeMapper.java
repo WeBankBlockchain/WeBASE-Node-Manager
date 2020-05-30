@@ -67,6 +67,10 @@ public interface NodeMapper {
     Integer deleteByNodeAndGroup(@Param("nodeId") String nodeId, @Param("groupId") Integer groupId);
     /**
      * delete by groupId.
+     * TODO. should delete by nodeid in multi-chain.
      */
+    @Deprecated
     Integer deleteByGroupId( @Param("groupId") Integer groupId);
+
+    int deleteByNodeId(@Param("nodeId") String nodeId);
 }
