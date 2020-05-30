@@ -13,12 +13,14 @@
  */
 package com.webank.webase.node.mgr.group;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 /**
  * mapper for table tb_group.
@@ -41,6 +43,7 @@ public interface GroupMapper {
      */
     int updateStatus(@Param("groupId") Integer groupId, @Param("groupStatus") Integer groupStatus);
 
+
     /**
      * query group count.
      */
@@ -61,4 +64,8 @@ public interface GroupMapper {
      */
     GroupGeneral getGeneral(@Param("groupId") Integer groupId);
 
+
+    int updateNodeCount(@Param("groupId") int groupId, @Param("nodeCount") int nodeCount);
+
+    int deleteByChainId(@Param("chainId") int chainId);
 }

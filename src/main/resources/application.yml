@@ -21,6 +21,9 @@ spring:
     username: "defaultAccount"
     password: "defaultPassword"
 
+  aop:
+    proxy-target-class: true
+
 #log config
 logging:
   config: classpath:log/log4j2.xml

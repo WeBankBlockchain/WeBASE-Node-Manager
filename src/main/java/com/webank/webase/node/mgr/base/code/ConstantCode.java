@@ -171,4 +171,12 @@ public class ConstantCode {
     public static final RetCode INSERT_AGENCY_ERROR = RetCode.mark(500016, "Insert new agency failed.");
     public static final RetCode INSERT_GROUP_ERROR = RetCode.mark(500017, "Insert new group failed.");
     public static final RetCode INSERT_HOST_ERROR = RetCode.mark(500018, "Insert new host failed.");
+    public static final RetCode INSERT_FRONT_ERROR = RetCode.mark(500019, "Insert new front failed.");
+    public static final RetCode INSERT_NODE_ERROR = RetCode.mark(500020, "Insert new node failed.");
+    public static final RetCode INSERT_FRONT_GROUP_ERROR = RetCode.mark(500021, "Insert new front node group failed.");
+    public static final RetCode PARSE_HOST_INDEX_ERROR = RetCode.mark(500022, "Parse host index from node directory failed.");
+    public static final RetCode HOST_ONLY_BELONGS_ONE_AGENCY_ERROR = RetCode.mark(500023, "A host only belongs to one agency.");
+    public static final RetCode DEPLOY_WITH_UNKNOWN_EXCEPTION_ERROR = RetCode.mark(500024, "Unexpected exception occurred when deploy.");
+    public static final RetCode UNSUPPORTED_PASSWORD_SSH_ERROR = RetCode.mark(500025, "SSH password login not supported yet.");
+    public static final RetCode CHAIN_WITH_NO_AGENCY_ERROR = RetCode.mark(500026, "Chain has no agency.");
 }

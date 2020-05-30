@@ -54,6 +54,10 @@
      update tb_group set group_status=#{groupStatus},modify_time=NOW() where group_id=#{groupId}
   </update>
 
+    <update id="updateNodeCount">
+        update tb_group set node_count=#{nodeCount},modify_time=NOW() where group_id=#{groupId}
+    </update>
+
   <select id="getCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
     select count(1) from tb_group where 1 = 1
     <if test="groupId != null and groupId !=''">
@@ -92,4 +96,8 @@
 		)b on(a.group_id = b.group_id)
 		where a.group_id = #{groupId}
 	</select>
+
+    <delete id="deleteByChainId" parameterType="java.lang.Integer">
+        delete from tb_group where chain_id=#{chainId}
+    </delete>
 </mapper>

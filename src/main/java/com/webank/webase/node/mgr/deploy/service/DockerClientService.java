@@ -1,5 +1,7 @@
 package com.webank.webase.node.mgr.deploy.service;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,6 +28,16 @@ public class DockerClientService {
      */
     private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new ConcurrentHashMap();
 
+    /**
+     *  Get container's name for node.
+     *
+     * @param nodePath
+     * @return              delete all {@link File#separator} and blank of nodePath's absolute path.
+     */
+    public static String getContainerName(Path nodePath){
+        return nodePath.toAbsolutePath().toString()
+                .replaceAll(File.separator,"").replaceAll(" ","");
+    }
 
     /**
      * Get a docker client to server, create one if no exists.
@@ -58,6 +70,5 @@ public class DockerClientService {
 
         return client;
     }
-
 
 }

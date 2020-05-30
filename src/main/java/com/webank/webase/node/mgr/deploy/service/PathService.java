@@ -15,9 +15,19 @@
  */
 package com.webank.webase.node.mgr.deploy.service;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
+import org.ini4j.Ini;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,36 +46,142 @@ public class PathService {
     @Autowired private ConstantProperties constant;
 
     /**
-     * The file to save ip list config.
+     * The file to save ipconf.
+     *
      * @param chainName
      * @return
      */
-    public String getIpConfigPath(String chainName) {
-        return String.format("%s%s-ipconf", getRoot(), chainName);
+    public Path getIpConfig(String chainName) {
+        return Paths.get(constant.getNodesRootDir(), String.format("%s_ipconf", chainName));
     }
 
     /**
      * Root dir of the nodes config.
+     *
      * @param chainName
      * @return
      */
-    public String getChainRoot(String chainName) {
-        return String.format("%s%s-nodes", getRoot(), chainName);
+    public String getChainRootString(String chainName) {
+        return this.getChainRoot(chainName).toString();
     }
 
-    private String getRoot() {
-        if (StringUtils.isBlank(constant.getGenerateNodesRoot())) {
-            // return "." by default
-            return ".";
-        }
-        if (constant.getGenerateNodesRoot().trim().endsWith(File.separator)) {
-            // ends with separator
-            return constant.getGenerateNodesRoot().trim();
-        }
-        // append a separator
-        return String.format("%s%s", constant.getGenerateNodesRoot().trim(), File.separator);
-
+    /**
+     * Root dir of the nodes config.
+     *
+     * @param chainName
+     * @return
+     */
+    public Path getChainRoot(String chainName) {
+        return Paths.get(constant.getNodesRootDir(), String.format("%s_nodes", chainName));
     }
 
+    /**
+     * Delete chain node config while exception occurred during deploy option.
+     * @param chainName
+     * @return
+     */
+    public void deleteChain(String chainName) throws IOException {
+        // delete nodes config
+        Path chainRoot = getChainRoot(chainName);
+        if (Files.exists(chainRoot)){
+            FileUtils.deleteDirectory(chainRoot.toFile());
+        }
+
+        // delete ipconf
+        Path ipConfig = getIpConfig(chainName);
+        if (Files.exists(ipConfig)){
+            Files.delete(ipConfig);
+        }
+    }
+
+    /**
+     * Get host path.
+     *
+     * @param chainName
+     * @param ip
+     * @return
+     */
+    public Path getHost(String chainName, String ip) {
+        return Paths.get(this.getChainRootString(chainName), ip);
+    }
+
+    /**
+     * Get sdk path under host.
+     *
+     * @param chainName
+     * @param ip
+     * @return
+     */
+    public Path getHostSdk(String chainName, String ip) {
+        return this.getHost(chainName, ip).resolve("sdk");
+    }
+
+
+    /**
+     * Get nodeX path under host.
+     *
+     * @param chainName
+     * @param ip
+     * @return
+     */
+    public List<Path> listHostNodesPath(String chainName, String ip) throws IOException {
+        Path hostNodes = this.getHost(chainName, ip);
+        return Files.walk(hostNodes, 1)
+                .filter(path -> path.getFileName().toString().startsWith("node"))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get nodeId from a node, trim first non-blank line and return from node.nodeid file.
+     * @param nodePath
+     * @return
+     * @throws IOException
+     */
+    public static String getNodeId(Path nodePath) throws IOException {
+        List<String> lines = Files.readAllLines(nodePath.resolve("conf/node.nodeid"));
+        if (CollectionUtils.isEmpty(lines)){
+            return null;
+        }
+        return lines.stream().filter(StringUtils::isNotBlank)
+                .map(StringUtils::trim).findFirst().orElse(null);
+    }
+
+    /**
+     * Get jsonrpcPort, channelPort, p2pPort from a node.
+     * @param nodePath
+     * @return              order : <jsonrpcPort, channelPort, p2pPort>
+     * @throws IOException
+     */
+    public static Triple<Short,Short,Short> getNodePorts(Path nodePath)  {
+        try {
+            Path configIni = nodePath.resolve("config.ini");
+            Ini ini = new Ini(configIni.toFile());
+            short channelPort = Short.parseShort(ini.get("rpc","channel_listen_port"));
+            short jsonrpcPort = Short.parseShort(ini.get("rpc","jsonrpc_listen_port"));
+            short p2pPort = Short.parseShort(ini.get("p2p","listen_port"));
+            return Triple.of(jsonrpcPort,channelPort,p2pPort);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    /**
+     *  Get node group id set.
+     *
+     * @param nodePath
+     * @return
+     * @throws IOException
+     */
+    public static Set<Integer> getNodeGroupIdSet(Path nodePath) {
+        try {
+            return Files.walk(nodePath.resolve("conf"), 1)
+                    .filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
+                    .map((path)->Integer.parseInt(path.getFileName().toString()
+                            .replaceAll("group\\.","").replaceAll("\\.genesis","")))
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
 }

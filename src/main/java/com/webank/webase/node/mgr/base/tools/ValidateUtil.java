@@ -25,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ValidateUtil {
+    public static final String IP_PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
+    public static final String AGENCY_NAME_PATTERN = "^[0-9a-zA-Z_]+$";
 
     /**
      * Validate ipv4 address.
@@ -35,18 +37,13 @@ public class ValidateUtil {
         if (StringUtils.isBlank(ip)){
             return false;
         }
-
-        String PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
-        return ip.matches(PATTERN);
+        return ip.matches(IP_PATTERN);
     }
 
     public static boolean validateAgencyName(final String agencyName) {
         if (StringUtils.isBlank(agencyName)){
             return false;
         }
-        String PATTERN = "^[0-9a-zA-Z_]+$";
-        return agencyName.matches(PATTERN);
+        return agencyName.matches(AGENCY_NAME_PATTERN);
     }
-
-
 }

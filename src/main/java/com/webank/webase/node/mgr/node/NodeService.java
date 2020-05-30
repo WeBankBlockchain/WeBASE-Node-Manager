@@ -13,56 +13,32 @@
  */
 package com.webank.webase.node.mgr.node;
 
-import static com.webank.webase.node.mgr.base.code.ConstantCode.HOST_CONNECT_ERROR;
-import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
-
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.base.tools.SshTools;
-import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
-import com.webank.webase.node.mgr.deploy.entity.ConfigLine;
-import com.webank.webase.node.mgr.deploy.entity.TbAgency;
-import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.entity.TbConfig;
-import com.webank.webase.node.mgr.deploy.entity.TbHost;
-import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
-import com.webank.webase.node.mgr.deploy.service.AgencyService;
-import com.webank.webase.node.mgr.deploy.service.ChainService;
-import com.webank.webase.node.mgr.deploy.service.HostService;
-import com.webank.webase.node.mgr.deploy.service.PathService;
-import com.webank.webase.node.mgr.deploy.service.ShellService;
+import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
-import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -79,14 +55,6 @@ public class NodeService {
     @Autowired
     private FrontInterfaceService frontInterface;
 
-    @Autowired private TbConfigMapper tbConfigMapper;
-    @Autowired private TbChainMapper tbChainMapper;
-    @Autowired private AgencyService agencyService;
-    @Autowired private HostService hostService;
-    @Autowired private ChainService chainService;
-    @Autowired private ShellService shellService;
-    @Autowired private GroupService groupService;
-    @Autowired private PathService pathService;
 
     // interval of check node status
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 7500L;
@@ -103,7 +71,7 @@ public class NodeService {
             nodeIp = ipPort[0];
             nodeP2PPort = Integer.valueOf(ipPort[1]);
         }
-        String nodeName = groupId + "_" + peerInfo.getNodeId();
+        String nodeName = getNodeName(groupId, peerInfo.getNodeId());
 
         // add row
         TbNode tbNode = new TbNode();
@@ -114,6 +82,7 @@ public class NodeService {
         tbNode.setP2pPort(nodeP2PPort);
         nodeMapper.add(tbNode);
     }
+
 
     /**
      * query count of node.
@@ -357,168 +326,38 @@ public class NodeService {
     }
 
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbNode insert(
+            String nodeId,
+            String nodeName,
+            int groupId,
+            String ip,
+            int p2pPort,
+            String description,
+            NodeStatusEnum nodeStatusEnum
+    ) throws NodeMgrException {
+        // TODO. params check
+        if (! ValidateUtil.validateIpv4(ip)){
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_IP);
+        }
+
+        nodeStatusEnum = nodeStatusEnum == null ? NodeStatusEnum.DEAD : nodeStatusEnum;
+
+        TbNode node = TbNode.init(nodeId, nodeName, groupId, ip, p2pPort, description, nodeStatusEnum);
+
+        if (nodeMapper.add(node) != 1) {
+            throw new NodeMgrException(ConstantCode.INSERT_NODE_ERROR);
+        }
+        return node;
+    }
+
     /**
-     * Add in v1.4.0 deploy.
-     *
-     * @param ipConf
-     * @param tagId
-     * @param rootDirOnHost
+     * @param groupId
+     * @param nodeId
      * @return
      */
-    @Transactional
-    public Pair<RetCode, String> deploy(String chainName,
-                                        String[] ipConf,
-                                        int tagId,
-                                        String rootDirOnHost) throws NodeMgrException {
-        // verify tagId if exists
-        TbConfig imageTag = tbConfigMapper.selectByPrimaryKey(tagId);
-        if (imageTag == null
-                || StringUtils.isBlank(imageTag.getConfigValue())) {
-            throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
-        }
+    public static String getNodeName(int groupId, String nodeId) {
+        return String.format("%s_%s", groupId, nodeId);
 
-        // validate ipConf config
-        List<ConfigLine> configLineList = this.validateIpConf(ipConf);
-
-        TbChain chain = tbChainMapper.selectByChainName(chainName);
-        if (chain != null) {
-            throw new NodeMgrException(ConstantCode.CHAIN_NAME_EXISTS_ERROR);
-        }
-
-        byte encryptType = (byte) (imageTag.getConfigValue().endsWith("-gm") ?
-                EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
-
-        try {
-            // generate nodes config
-            ExecuteResult buildChainResult = shellService.execBuildChain(encryptType, ipConf, chainName);
-            if (buildChainResult.failed()) {
-                return Pair.of(ConstantCode.EXEC_BUILD_CHAIN_ERROR, buildChainResult.getExecuteOut());
-            }
-
-            // insert chain
-            final TbChain newChain = this.chainService.insert(chainName, chainName,
-                    imageTag.getConfigValue(), encryptType, ChainStatusEnum.INITIALIZED);
-
-            Map<String, Integer> agencyIdMap = new HashMap<>();
-            Map<String, Integer> hostIdMap = new HashMap<>();
-            Map<Integer, AtomicInteger> groupCountMap = new HashMap<>();
-
-            configLineList.forEach((config) -> {
-                // insert agency
-                if (!agencyIdMap.containsKey(config.getAgencyName())) {
-                    TbAgency agency = agencyService.insert(config.getAgencyName(), config.getAgencyName(),
-                            newChain.getId(), newChain.getChainName());
-                    agencyIdMap.put(config.getAgencyName(), agency.getId());
-                }
-
-                // insert host
-                if (!hostIdMap.containsKey(config.getIp())) {
-                    TbHost host = hostService.insert(agencyIdMap.get(config.getAgencyName()),
-                            config.getAgencyName(), config.getIp(), rootDirOnHost);
-                    hostIdMap.put(config.getIp(), host.getId());
-                }
-
-                // insert group
-                // sum node num in group
-                config.getGroupIdSet().forEach((groupId) -> {
-                    if (groupCountMap.containsKey(groupId)) {
-                        groupCountMap.get(groupId).addAndGet(config.getNum());
-                    } else {
-                        groupService.saveGroupId(groupId,config.getNum(),
-                                newChain.getId(),newChain.getChainName(),"");
-                        groupCountMap.put(groupId, new AtomicInteger(config.getNum()));
-                    }
-                });
-
-                // TODO. save node
-
-                // TODO. save front
-
-                // TODO. save front_group
-
-            });
-
-            // update group node count
-            groupCountMap.forEach((groupId,nodeCount) -> {
-                // TODO. upate node count
-//                groupService.updateGroupStatus();
-
-            });
-
-
-
-        } catch (
-                Exception e) {
-            // TODO. delete ipConf file and nodes config
-        } finally {
-
-        }
-
-        return null;
-    }
-
-    /**
-     * Validate ipConf.
-     *
-     * @param ipConf
-     * @throws NodeMgrException
-     */
-    public List<ConfigLine> validateIpConf(String[] ipConf) throws NodeMgrException {
-        if (ArrayUtils.isEmpty(ipConf)) {
-            throw new NodeMgrException(ConstantCode.IP_CONF_PARAM_NULL_ERROR);
-        }
-
-        List<ConfigLine> configLineList = new ArrayList<>();
-        for (String line : ipConf) {
-            if (StringUtils.isBlank(line)) {
-                continue;
-            }
-
-            ConfigLine configLine = ConfigLine.parseLine(line);
-            if (configLine == null) {
-                continue;
-            }
-
-            // SSH to host ip
-            if (!SshTools.iSConnectable(configLine.getIp())) { // cannot SSH to IP
-                throw new NodeMgrException(HOST_CONNECT_ERROR.msg(configLine.getIp()));
-            }
-
-            // TODO. Get max mem size, check nodes num.
-            if (configLine.getNum() <= 0) {
-                throw new NodeMgrException(IP_NUM_ERROR.msg(line));
-            }
-
-            configLineList.add(configLine);
-        }
-
-        if (CollectionUtils.isEmpty(configLineList)) {
-            throw new NodeMgrException(ConstantCode.IP_CONF_PARAM_NULL_ERROR);
-        }
-
-        return configLineList;
-    }
-
-    /**
-     * Insert values from ipConf.
-     *
-     * @param ipConf
-     * @throws NodeMgrException
-     */
-    public void insertIpConf(String[] ipConf) throws NodeMgrException {
-        // validate ip address
-        if (ArrayUtils.isEmpty(ipConf)) {
-            throw new NodeMgrException(ConstantCode.IP_CONF_PARAM_NULL_ERROR);
-        }
-
-        // TODO.
-        for (String conf : ipConf) {
-            if (StringUtils.isBlank(conf)) {
-                continue;
-            }
-            conf.split(" ");
-
-
-        }
     }
 }

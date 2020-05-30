@@ -18,18 +18,15 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -116,24 +113,5 @@ public class NodeController {
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
         return baseResponse;
     }
-
-    /**
-     * Deploy by ipconf and tagId.
-     */
-    @PostMapping(value = "/deploy")
-    public BaseResponse deploy(
-            @RequestParam(value = "ipconf", required = true) String[] ipConf,
-            @RequestParam(value = "tagId", required = true, defaultValue = "0") int tagId,
-            @RequestParam(value = "rootDirOnHost", required = false, defaultValue = "/opt/fisco") String rootDirOnHost,
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-    ) throws NodeMgrException {
-        Instant startTime = Instant.now();
-        log.info("start deploy startTime:[{}], tagId:[{}], ipconf:[{}]",
-                startTime.toEpochMilli(), tagId, ipConf);
-
-        Pair<RetCode, String> deployResult = this.nodeService.deploy(chainName, ipConf, tagId,rootDirOnHost);
-        return new BaseResponse(deployResult.getKey(),deployResult.getKey());
-    }
-
 
 }
