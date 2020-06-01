@@ -306,8 +306,8 @@ public class NodeService {
         JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
         List<Object> dataIsList = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List)
             .map(arr -> {
-                Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
                 try {
+                    Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
                     NodeMgrTools.object2JavaBean(obj, PeerOfConsensusStatus.class);
                 } catch (Exception e) {
                     return null;
