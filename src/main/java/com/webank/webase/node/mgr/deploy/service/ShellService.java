@@ -66,7 +66,7 @@ public class ShellService {
     @Async("mgrAsyncExecutor")
     public void execHostOperate(String ip, int port, String user, String pwd) {
         log.info("Exec execHostOperate method for [{}@{}:{}#{}]", user, ip, port, pwd);
-        if (! ValidateUtil.validateIpv4(ip)) {
+        if (!ValidateUtil.validateIpv4(ip)) {
             log.error("Exec execHostOperate method ERROR: IP:[{}] error", ip);
             return;
         }
@@ -82,22 +82,20 @@ public class ShellService {
     }
 
     /**
-     *  TODO. if nodes config dir already exists, delete or backup first ?
+     * TODO. if nodes config dir already exists, delete or backup first ?
      *
      * @param encryptType
      * @param ipLines
      * @return
      */
     public ExecuteResult execBuildChain(byte encryptType,
-                                  String[] ipLines,
-                                  String chainName) {
+                                        String[] ipLines,
+                                        String chainName) {
         Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
-                JSON.toJSONString(ipLines),
-                chainName,ipConf.toAbsolutePath().toString());
-
+                JSON.toJSONString(ipLines), chainName, ipConf.toString());
         try {
-            if( ! Files.exists(ipConf.getParent())){
+            if (!Files.exists(ipConf.getParent())) {
                 Files.createDirectories(ipConf.getParent());
             }
             Files.write(ipConf, Arrays.asList(ipLines), StandardOpenOption.CREATE);
@@ -113,7 +111,7 @@ public class ShellService {
         // build_chain.sh only support docker on linux
         String command = String.format("bash -e %s -f %s -o %s %s %s",
                 constant.getBuildChainShell(),
-                ipConf.toAbsolutePath().toString(),
+                ipConf.toString(),
                 pathService.getChainRootString(chainName),
                 encryptType == EncryptType.SM2_TYPE ? "-g" : "",
                 SystemUtils.IS_OS_LINUX ? " -d " : "");
