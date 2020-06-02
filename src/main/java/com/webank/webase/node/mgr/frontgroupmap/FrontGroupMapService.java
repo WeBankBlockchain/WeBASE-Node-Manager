@@ -18,13 +18,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
-import com.webank.webase.node.mgr.group.GroupService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,10 +30,6 @@ public class FrontGroupMapService {
 
     @Autowired
     private FrontGroupMapMapper frontGroupMapMapper;
-    @Autowired
-    private GroupService groupService;
-    @Autowired
-    private FrontService frontService;
 
     /**
      * add new mapping
@@ -46,9 +38,7 @@ public class FrontGroupMapService {
         TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId);
 
         //add db
-        if(frontGroupMapMapper.add(tbFrontGroupMap) != 1){
-            throw new NodeMgrException(ConstantCode.INSERT_FRONT_GROUP_ERROR);
-        }
+        frontGroupMapMapper.add(tbFrontGroupMap);
 
         return tbFrontGroupMap;
     }
