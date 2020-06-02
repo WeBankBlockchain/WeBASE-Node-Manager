@@ -305,7 +305,7 @@ public class FrontService {
 		Duration duration = Duration.between(modifyTime, LocalDateTime.now());
 		Long subTime = duration.toMillis();
 		if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
-			log.info("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
+			log.debug("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
 					subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
 			return;
 		}
