@@ -58,6 +58,7 @@ public class NodeConfig {
         config.channelPort = nodePorts.getMiddle();
         config.p2pPort = nodePorts.getRight();
 
+        config.groupIdList = PathService.getNodeGroupIdSet(nodePath);
 
         return config;
     }

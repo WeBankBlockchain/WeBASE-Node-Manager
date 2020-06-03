@@ -41,48 +41,47 @@ else
 fi
 
 # install rsync for synchronizing node files
-install rsync rsync
 install wget wget
-install vim vim
 install curl curl
-install nslookup bind-utils
+#install vim vim
+#install rsync rsync
+#install nslookup bind-utils
 
 # install docker
-if [[ ! $(command -v docker) || ! $(command -v docker-compose) ]]; then
-    # install docker first
-    if [[ ! $(command -v docker) ]]; then
-        echo "Install docker..."
-        bash <(curl -s -L get.docker.com)
-    fi
+if [[ ! $(command -v docker) ]]; then
+    echo "Install docker..."
+    bash <(curl -s -L get.docker.com)
+fi
 
-    if [[ ! $(command -v docker-compose) ]]; then
-        echo "Install docker-compose..."
-        curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        chmod +x /usr/local/bin/docker-compose
-    fi
 
-    ## update docker demon
-    [ -d "/etc/docker" ] || mkdir "/etc/docker"
-    cat << EOF > "/etc/docker/daemon.json"
+# install docker-compose
+if [[ ! $(command -v docker-compose) ]]; then
+    echo "Install docker-compose..."
+    curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+fi
+
+# mkdir /etc/docker if not exists
+[ -d "/etc/docker" ] || mkdir "/etc/docker"
+
+# update docker demon listen tcp on 3000
+cat << EOF > "/etc/docker/daemon.json"
 {
   "hosts": ["unix:///var/run/docker.sock", "tcp://0.0.0.0:3000"]
 }
 EOF
 
-    if [[ $(command -v systemctl) ]]; then
-        ## update docker.service, fix https://stackoverflow.com/questions/44052054/unable-to-start-docker-after-configuring-hosts-in-daemon-json
-        cp /lib/systemd/system/docker.service /etc/systemd/system/
-        sed -i 's/\ -H\ fd:\/\///g' /etc/systemd/system/docker.service
-        systemctl daemon-reload
+# update docker systemctl config and start docker service
+if [[ $(command -v systemctl) ]]; then
+    ## update docker.service, fix https://stackoverflow.com/questions/44052054/unable-to-start-docker-after-configuring-hosts-in-daemon-json
+    cp -fv /lib/systemd/system/docker.service /etc/systemd/system/
+    sed -i 's/\ -H\ fd:\/\///g' /etc/systemd/system/docker.service
 
-        # Debian/Ubuntu
-        systemctl enable docker
-        systemctl restart docker
-    else
-        # RHEL/CentOS
-        service docker restart
-        chkconfig docker on
-    fi
-
+    systemctl daemon-reload
+    systemctl enable docker
+    systemctl restart docker
+else
+    service docker restart
+    chkconfig docker on
 fi
 

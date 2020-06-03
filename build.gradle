@@ -69,9 +69,10 @@ dependencies {
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.54'
     compile 'com.jcraft:jsch:0.1.55'
-    compile 'com.github.docker-java:docker-java:3.2.1'
     compile 'org.ini4j:ini4j:0.5.4'
-
+    compile ('com.github.docker-java:docker-java:3.2.1') {
+        exclude group: 'io.netty'
+    }
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
     compileOnly lombok
 

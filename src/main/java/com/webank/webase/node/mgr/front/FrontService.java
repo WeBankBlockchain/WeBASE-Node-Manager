@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.front;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -294,4 +295,10 @@ public class FrontService {
         }
         return front;
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public boolean updateStatus(int frontId,FrontStatusEnum newStatus){
+        return this.frontMapper.updateStatus(frontId,newStatus.getId(),LocalDateTime.now()) == 1;
+    }
+
 }
