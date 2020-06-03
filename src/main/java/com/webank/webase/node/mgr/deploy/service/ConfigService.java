@@ -46,9 +46,9 @@ public class ConfigService {
     @Autowired private RestTemplate genericRestTemplate;
 
     /**
-     *  Select config by type.
+     * Select config by type.
      *
-     * @param update    Update config when value is true.
+     * @param update Update config when value is true.
      * @param type
      * @return
      */
@@ -65,17 +65,22 @@ public class ConfigService {
                         throw new NodeMgrException(ConstantCode.NO_DOCKER_TAG_UPDATE_URL_ERROR);
                     }
 
-                    log.info("Fetch tag from: [{}]",constants.getImageTagUpdateUrl());
+                    log.info("Fetch tag from: [{}]", constants.getImageTagUpdateUrl());
                     ResponseEntity<ImageTag[]> responseEntity =
                             this.genericRestTemplate.getForEntity(constants.getImageTagUpdateUrl(), ImageTag[].class);
                     if (responseEntity == null
-                            || ArrayUtils.isEmpty(responseEntity.getBody())){ // return empty
+                            || ArrayUtils.isEmpty(responseEntity.getBody())) {
+                        // docker hub api return empty
                         throw new NodeMgrException(ConstantCode.UPDATE_DOCKER_TAG_ERROR);
                     }
 
                     List<TbConfig> configList = Arrays.stream(responseEntity.getBody())
-                            .map((tag) -> TbConfig.init(type,tag.getName()))
-                            .collect(Collectors.toList());
+                            .map((tag) -> {
+                                if(StringUtils.startsWithIgnoreCase(tag.getName(),"latest")){
+                                    return null;
+                                }
+                                return TbConfig.init(type, tag.getName());
+                            }).filter(tbConfig -> tbConfig != null).collect(Collectors.toList());
 
                     tbConfigMapper.deleteByType(type.getId());
                     tbConfigMapper.batchInsert(configList);

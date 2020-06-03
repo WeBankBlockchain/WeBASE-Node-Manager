@@ -17,6 +17,7 @@ import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CHAIN
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,5 +105,16 @@ public class ChainService {
             throw new NodeMgrException(ConstantCode.INSERT_CHAIN_ERROR);
         }
         return chain;
+    }
+
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public boolean updateStatus(int chainId,ChainStatusEnum newStatus){
+        TbChain newChain = new TbChain();
+        newChain.setId(chainId);
+        newChain.setChainStatus(newStatus.getId());
+        newChain.setModifyTime(new Date());
+        return this.tbChainMapper.updateByPrimaryKeySelective(newChain) == 1;
     }
 }

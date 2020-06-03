@@ -18,6 +18,7 @@ package com.webank.webase.node.mgr.base.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
@@ -26,11 +27,12 @@ import lombok.ToString;
 @Getter
 @ToString
 @AllArgsConstructor
+@Slf4j
 public enum HostStatusEnum {
-    ADDED((byte) 0, "Added."),
-    INITIALIZED((byte) 1, "Initialized."),
-    FAILED((byte) 2, "Init failed."),
-    SUCCESS((byte) 3, "Init success."),
+    ADDED((byte) 0, "added"),
+    INITIATING((byte) 1, "host is initiating"),
+    INIT_SUCCESS((byte) 2, "host init success"),
+    INIT_FAILED((byte) 3, "host init failed"),
     ;
 
     private byte id;
@@ -48,5 +50,22 @@ public enum HostStatusEnum {
             }
         }
         return null;
+    }
+
+    public static boolean successOrInitiating(byte status){
+        HostStatusEnum statusEnum = HostStatusEnum.getById(status);
+        if (statusEnum == null) {
+            log.error("Host with unknown status:[{}].", status);
+            return false;
+        }
+
+        // check host status
+        switch (statusEnum){
+            case INIT_SUCCESS:
+            case INITIATING:
+                return true;
+            default:
+                return false;
+        }
     }
 }

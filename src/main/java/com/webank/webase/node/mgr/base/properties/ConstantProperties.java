@@ -16,8 +16,11 @@ package com.webank.webase.node.mgr.base.properties;
 import static java.io.File.separator;
 
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
@@ -90,22 +93,34 @@ public class ConstantProperties {
     public static final String SSH_DEFAULT_USER = "root";
     public static final short SSH_DEFAULT_PORT = 22;
 
-    public short defaultJsonrpcPort = 8545;
-    public short defaultP2pPort = 30300;
-    public short defaultChannelPort = 20200;
-    public short defaultFrontPort = 5002;
-
     // shell script
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
     private String buildChainShell = "./script/deploy/build_chain.sh";
+    private String scpShell =        "./script/deploy/file_trans_util.sh";
 
-    // exec shell script timeout
-    public long hostInitTimeout = 2 * 3600 * 1000;
-    public long buildChainTimeout = 10 * 60 * 1000;
+    // default port
+    private short defaultJsonrpcPort = 8545;
+    private short defaultP2pPort = 30300;
+    private short defaultChannelPort = 20200;
+    private short defaultFrontPort = 5002;
+
+    // timeout config
+    private long execHostInitTimeout = 2 * 60 * 60 * 1000;
+    private long execBuildChainTimeout = 10 * 60 * 1000;
+    private int dockerClientConnectTimeout = 10 * 60 * 1000;
+    private int dockerClientReadTimeout = 10 * 60 * 1000;
+    private int dockerPullTimeout = 5 * 60 * 1000;
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login", "/user/privateKey/**", "/encrypt"};
-    private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/fiscoorg/front/tags";
+    private String dockerRepository= "fiscoorg/front";
+    private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
+    private String dockerRegistryMirror = "docker.mirrors.ustc.edu.cn";
     private String nodesRootDir = "NODES_ROOT";
+
+    /**
+     * Docker client connect daemon ip with proxy ip.
+     */
+    private Map<String, MutablePair<String, Short>> dockerProxyMap = new ConcurrentHashMap<>();
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
@@ -119,10 +134,15 @@ public class ConstantProperties {
             // append a separator
             nodesRootDir = String.format("%s%s", nodesRootDir.trim(), separator);
         }
-        log.info("Generate nodes root dir:[{}]", nodesRootDir);
+        log.info("Init constant properties, generate nodes root dir:[{}]", nodesRootDir);
 
-        log.info("permitUrlArray: [{}]", StringUtils.join(permitUrlArray,","));
 
+        this.imageTagUpdateUrl = String.format(this.imageTagUpdateUrl,dockerRepository);
+        log.info("Init constant properties, imageTagUpdateUrl: [{}]", this.imageTagUpdateUrl);
+
+        log.info("Init constant properties, permitUrlArray: [{}]", StringUtils.join(permitUrlArray,","));
+
+        log.info("Init constant properties, dockerProxyMap: [{}]", dockerProxyMap);
     }
     //******************* Add in v1.4.0 end. *******************
 }

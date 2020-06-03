@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.front;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
@@ -38,4 +39,8 @@ public interface FrontMapper {
     List<TbFront> selectByAgencyId(@Param("agencyId") Integer agencyId);
 
     void deleteByAgencyId(@Param("agencyId") Integer agencyId);
+
+    int updateStatus(@Param("frontId") int frontId,
+                     @Param("status")byte status,
+                     @Param("modifyTime")LocalDateTime now);
 }

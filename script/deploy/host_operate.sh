@@ -45,6 +45,7 @@ host=
 port=22
 user=root
 password=
+node_root=/opt/fisco
 
 ####### error code
 SUCCESS=0
@@ -57,19 +58,20 @@ cmdname=$(basename "$0")
 usage() {
     cat << USAGE  >&2
 Usage:
-    $cmdname [-H host] [-P port] [-u user] [-p password] [-d] [-h]
+    $cmdname [-H host] [-P port] [-u user] [-p password] [-n node_root] [-d] [-h]
     -H     Required, remote host.
     -P     Not required, remote port, default is 22.
     -u     Not required, remote userName, default is root.
     -p     Required, password.
     -d     User debug model, default no.
+    -n     Node config root directory, default is /opt/fisco
     -h     Show help info.
 USAGE
     exit ${PARAM_ERROR}
 }
 
 
-while getopts H:P:u:p:dh OPT;do
+while getopts H:P:u:p:n:dh OPT;do
     case ${OPT} in
         H)
             host=$OPTARG
@@ -85,6 +87,9 @@ while getopts H:P:u:p:dh OPT;do
             ;;
         d)
             debug=yes
+            ;;
+        n)
+            node_root="$OPTARG"
             ;;
         h)
             usage
@@ -117,62 +122,74 @@ function sshExec(){
 }
 
 function init() {
-    echo "Initialing node server ....."
+    if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
+        echo "Initialing local server ....."
 
-    if [[ "$password"x != ""x ]] ; then
-      cmd="yum"
-      # install sshpass
-      case $(uname | tr '[:upper:]' '[:lower:]') in
-        linux*)
-          # GNU/Linux操作系统
-          # Debian(Ubuntu) or RHEL(CentOS)
-          if [[ $(command -v apt) ]]; then
-              cmd="apt"
-          fi
+        echo "mkdir node root ${node_root} on local"
+        mkdir -p ${node_root}
 
-          # install sshpass for ssh-copy-id
-          if [[ ! $(command -v sshpass) ]]; then
-              # install ufw
-              echo "Installing sshpass on node..."
-              ${cmd} install -y sshpass
-          fi
-          ;;
-        darwin*)
-          cmd="brew"
+        echo "Local host init SUCCESS!!! "
+    else
+        echo "Initialing remote server ....."
+        if [[ "$password"x != ""x ]] ; then
+          cmd="yum"
           # install sshpass
-          if [[ ! $(command -v sshpass) ]]; then
-              echo "Installing sshpass on mac ....."
-              ${cmd} install http://git.io/sshpass.rb
-          fi
-          ;;
-        *)
-          LOG_WARN "Unsupported Windows yet."
-          ;;
-      esac
+          case $(uname | tr '[:upper:]' '[:lower:]') in
+            linux*)
+              # GNU/Linux操作系统
+              # Debian(Ubuntu) or RHEL(CentOS)
+              if [[ $(command -v apt) ]]; then
+                  cmd="apt"
+              fi
 
+              # install sshpass for ssh-copy-id
+              if [[ ! $(command -v sshpass) ]]; then
+                  # install ufw
+                  echo "Installing sshpass on node..."
+                  ${cmd} install -y sshpass
+              fi
+              ;;
+            darwin*)
+              cmd="brew"
+              # install sshpass
+              if [[ ! $(command -v sshpass) ]]; then
+                  echo "Installing sshpass on mac ....."
+                  ${cmd} install http://git.io/sshpass.rb
+              fi
+              ;;
+            *)
+              LOG_WARN "Unsupported Windows yet."
+              ;;
+          esac
+
+        fi
+
+        # ssh-keygen
+        if [[ ! -f ~/.ssh/id_rsa.pub ]]; then
+            echo "Executing ssh-kengen ...."
+            ssh-keygen -q -b 4096 -t rsa -N '' -f ~/.ssh/id_rsa
+        fi
+
+
+        if [[ "$password"x != ""x ]] ; then
+          # scp id_rsa.pub to remote`
+          echo "Start ssh-copy-id to remote server..."
+          sshpass -p "${password}" ssh-copy-id -i ~/.ssh/id_rsa.pub -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" ${user}@${host} -p ${port}
+        fi
+
+        # scp node-init.sh to remote and exec
+        cat "${__dir}/host_init_shell.sh" | sshExec bash -e -x
+        status=($?)
+        if [[ $status != 0 ]] ;then
+            echo "Remote init node ERROR!!!"
+            exit "$status"
+        fi
+
+        echo "mkdir node root ${node_root} on remote"
+        sshExec "mkdir -p ${node_root}"
+
+        echo "Remote host init SUCCESS!!! "
     fi
-
-    # ssh-keygen
-    if [[ ! -f ~/.ssh/id_rsa.pub ]]; then
-        echo "Executing ssh-kengen ...."
-        ssh-keygen -q -b 4096 -t rsa -N '' -f ~/.ssh/id_rsa
-    fi
-
-
-    if [[ "$password"x != ""x ]] ; then
-      # scp id_rsa.pub to remote`
-      echo "Start ssh-copy-id to remote server..."
-      sshpass -p "${password}" ssh-copy-id -i ~/.ssh/id_rsa.pub -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" ${user}@${host} -p ${port}
-    fi
-
-    # scp node-init.sh to remote and exec
-    cat "${__dir}/host_init_shell.sh" | sshExec bash -e -x
-    status=($?)
-    if [[ $status != 0 ]] ;then
-        echo "Remote init node ERROR!!!"
-        exit "$status"
-    fi
-    echo "Host init SUCCESS!!! "
 }
 
 init

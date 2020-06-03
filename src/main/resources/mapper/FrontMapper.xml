@@ -104,4 +104,7 @@
     delete from tb_front where agency_id = #{agencyId}
   </delete>
 
+  <update id="updateStatus" parameterType="java.util.Map">
+    update tb_front set `status`=#{status},modify_time=#{modifyTime} where front_id = #{frontId}
+  </update>
 </mapper>
