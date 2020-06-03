@@ -18,9 +18,10 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
+import java.util.Date;
+
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,10 +40,19 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-
 public class HostService {
 
     @Autowired private TbHostMapper tbHostMapper;
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public boolean updateStatus(int hostId, HostStatusEnum newStatus) throws NodeMgrException {
+        TbHost newHost = new TbHost();
+        newHost.setId(hostId);
+        newHost.setStatus(newStatus.getId());
+        newHost.setModifyTime(new Date());
+        return tbHostMapper.updateByPrimaryKeySelective(newHost) == 1;
+    }
+
 
     @Transactional(propagation = Propagation.REQUIRED)
     public TbHost insert(int agencyId,
@@ -73,4 +83,5 @@ public class HostService {
         }
         return host;
     }
+
 }

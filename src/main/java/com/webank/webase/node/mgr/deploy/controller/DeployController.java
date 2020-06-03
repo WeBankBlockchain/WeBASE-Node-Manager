@@ -15,17 +15,23 @@ package com.webank.webase.node.mgr.deploy.controller;
 
 import java.time.Instant;
 
+import javax.validation.Valid;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.deploy.entity.DeployReq;
 import com.webank.webase.node.mgr.deploy.service.DeployService;
 
 import lombok.extern.log4j.Log4j2;
@@ -36,25 +42,31 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @RestController
 @RequestMapping("deploy")
-public class DeployController {
+public class DeployController extends BaseController {
 
     @Autowired private DeployService deployService;
 
+//    @PostMapping(value = "init")
+//    public BaseResponse deploy(
+//            @RequestParam(value = "ipconf[]", required = true) String[] ipConf,
+//            @RequestParam(value = "tagId", required = true, defaultValue = "0") int tagId,
+//            @RequestParam(value = "rootDirOnHost", required = false, defaultValue = "/opt/fisco") String rootDirOnHost,
+//            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     /**
      * Deploy by ipconf and tagId.
      */
     @PostMapping(value = "init")
-    public BaseResponse deploy(
-            @RequestParam(value = "ipconf", required = true) String[] ipConf,
-            @RequestParam(value = "tagId", required = true, defaultValue = "0") int tagId,
-            @RequestParam(value = "rootDirOnHost", required = false, defaultValue = "/opt/fisco") String rootDirOnHost,
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-    ) throws NodeMgrException {
+    public BaseResponse deploy( @RequestBody @Valid DeployReq deploy,
+                                BindingResult result ) throws NodeMgrException {
+        checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start deploy chainName:[{}], rootDirOnHost:[{}] startTime:[{}], tagId:[{}], ipconf:[{}]",
-                chainName, rootDirOnHost, startTime.toEpochMilli(), tagId, ipConf);
+                deploy.getChainName(), deploy.getRootDirOnHost(), startTime.toEpochMilli(),
+                deploy.getTagId(),deploy.getIpconf());
 
-        Pair<RetCode, String> deployResult = this.deployService.deploy(chainName, ipConf, tagId, rootDirOnHost);
+
+        Pair<RetCode, String> deployResult = this.deployService.deploy(deploy.getChainName(),
+                deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost());
         return new BaseResponse(deployResult.getKey(), deployResult.getValue());
     }
 

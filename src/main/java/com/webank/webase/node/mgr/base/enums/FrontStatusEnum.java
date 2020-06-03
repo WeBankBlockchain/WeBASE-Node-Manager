@@ -23,11 +23,9 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public enum FrontStatusEnum {
-    INITIALIZED((byte) 0, "Initialized."),
-    CREATE((byte) 1, "Create."),
-    RUN((byte) 2, "Run."),
-    STOP((byte) 3, "Stop."),
-    REMOVE((byte) 4, "Remove."),
+    INITIALIZED((byte) 0, "initialized"),
+    RUNNING((byte) 1, "running"),
+    STOPPED((byte) 2, "stopped"),
     ;
 
     private byte id;

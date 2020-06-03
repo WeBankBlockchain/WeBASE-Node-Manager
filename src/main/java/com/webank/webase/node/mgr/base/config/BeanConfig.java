@@ -96,6 +96,20 @@ public class BeanConfig {
         return executor;
     }
 
+    @Bean
+    public ThreadPoolTaskExecutor deployAsyncExecutor() {
+        log.info("start deployAsyncExecutor init...");
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("deploy-async-thread-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        // init executor
+        executor.initialize();
+        return executor;
+    }
+
     /**
      * mail sender for alert mail in node\mgr\alert\mail\MailService.java
      */

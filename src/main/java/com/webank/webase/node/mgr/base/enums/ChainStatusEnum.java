@@ -18,6 +18,7 @@ package com.webank.webase.node.mgr.base.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
@@ -26,11 +27,13 @@ import lombok.ToString;
 @Getter
 @ToString
 @AllArgsConstructor
+@Slf4j
 public enum ChainStatusEnum {
-    INITIALIZED((byte) 0, "Initialized."),
-    DEPLOYING((byte) 1, "Deploying."),
-    FAILED((byte) 2, "Deploy failed."),
-    SUCCESS((byte) 3, "Deploy success."),
+    INITIALIZED((byte) 0, "initialized"),
+    DEPLOYING((byte) 1, "deploying"),
+    DEPLOY_SUCCESS((byte) 2, "deploy success"),
+    DEPLOY_FAILED((byte) 3, "deploy failed"),
+    DEPLOY_TIMEOUT_FAILED((byte) 4, "deploy timeout failed"),
     ;
 
     private byte id;
@@ -49,4 +52,25 @@ public enum ChainStatusEnum {
         return null;
     }
 
+    /**
+     *
+     * @param status
+     * @return
+     */
+    public static boolean successOrDeploying(byte status){
+        ChainStatusEnum statusEnum = ChainStatusEnum.getById(status);
+        if (statusEnum == null) {
+            log.error("Chain with unknown status:[{}].", status);
+            return false;
+        }
+
+        // check chain status
+        switch (statusEnum){
+            case DEPLOYING:
+            case DEPLOY_SUCCESS:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

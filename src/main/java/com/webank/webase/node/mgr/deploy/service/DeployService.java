@@ -18,8 +18,11 @@ import static com.webank.webase.node.mgr.base.code.ConstantCode.HOST_CONNECT_ERR
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +92,7 @@ public class DeployService {
     @Autowired private FrontGroupMapService frontGroupMapService;
     @Autowired private NodeService nodeService;
     @Autowired private ChainService chainService;
-    @Autowired private ShellService shellService;
+    @Autowired private DeployShellService deployShellService;
     @Autowired private PathService pathService;
     @Autowired private ConstantProperties constant;
 
@@ -133,7 +136,7 @@ public class DeployService {
 
         try {
             // generate nodes config
-            ExecuteResult buildChainResult = shellService.execBuildChain(encryptType, ipConf, chainName);
+            ExecuteResult buildChainResult = deployShellService.execBuildChain(encryptType, ipConf, chainName);
             if (buildChainResult.failed()) {
                 return Pair.of(ConstantCode.EXEC_BUILD_CHAIN_ERROR, buildChainResult.getExecuteOut());
             }
@@ -199,7 +202,7 @@ public class DeployService {
                             imageConfig.getConfigValue(), RunTypeEnum.DOCKER,
                             agency.getValue(), hostIdMap.get(ip),
                             nodeConfig.getHostIndex(), imageConfig.getConfigValue(),
-                            DockerClientService.getContainerName(nodePath),
+                            DockerClientService.getContainerName(rootDirOnHost,chainName,nodeConfig.getHostIndex()),
                             nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
                             nodeConfig.getChannelPort(), FrontStatusEnum.INITIALIZED);
 
@@ -211,6 +214,17 @@ public class DeployService {
 
                         this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId);
                     });
+
+                    // generate front application.yml
+                    // TODO. make constant
+                    Files.write(nodePath.resolve("application.yml"), Arrays.asList(
+                            new String[]{
+                            "spring:",
+                            "  datasource:",
+                            "    url: jdbc:h2:file:/data/h2/webasefront;DB_CLOSE_ON_EXIT=FALSE",
+                            "sdk:",
+                            String.format("  encryptType: %s  # 0:ecdsa, 1:guomi", encryptType)}
+                    ), StandardOpenOption.CREATE);
                 }
             }
 
@@ -218,9 +232,11 @@ public class DeployService {
             groupCountMap.forEach((groupId, nodeCount) -> {
                 groupService.updateGroupNodeCount(groupId, nodeCount.get());
             });
-            return Pair.of(ConstantCode.SUCCESS, buildChainResult.getExecuteOut());
 
-            // TODO. start init host
+            // init host env
+            this.deployShellService.initHostList(newChain.getChainName());
+
+            return Pair.of(ConstantCode.SUCCESS, buildChainResult.getExecuteOut());
         } catch (Exception e) {
             try {
                 pathService.deleteChain(chainName);
@@ -267,7 +283,7 @@ public class DeployService {
             frontService.checkNotSupportIp(configLine.getIp());
 
             // SSH to host ip
-            if (!SshTools.iSConnectable(configLine.getIp())) {
+            if (!SshTools.connect(configLine.getIp())) {
                 // cannot SSH to IP
                 throw new NodeMgrException(HOST_CONNECT_ERROR.msg(configLine.getIp()));
             }
@@ -346,7 +362,7 @@ public class DeployService {
         }
 
         try {
-            log.info("Delete chain:[{}] config files");
+            log.info("Delete chain:[{}] config files",chainName);
             this.pathService.deleteChain(chainName);
         } catch (IOException e) {
             log.error("Delete chain:[{}] config files ERROR", e);

@@ -20,6 +20,7 @@ import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_
 
 import java.io.File;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,20 +36,44 @@ import lombok.extern.slf4j.Slf4j;
 public class SshTools {
 
     private static Properties config = new Properties();
+
     static {
         config.put("StrictHostKeyChecking", "no");
         config.put("CheckHostIP", "no");
         config.put("Compression", "yes");
         config.put("PreferredAuthentications", "publickey");
     }
+
     public final static String PRIVATE_KEY = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "id_rsa";
+
+    public final static String[] LOCAL_ARRAY = new String[]{"127.0.0.1", "localhost"};
+
+    /**
+     * Check ip is local.
+     *
+     * @param ip
+     * @return
+     */
+    public static boolean isLocal (String ip){
+        return Stream.of(LOCAL_ARRAY).anyMatch(ip::equalsIgnoreCase);
+
+    }
 
     /**
      * @param ip
      * @return
      */
-    public static boolean iSConnectable(String ip) {
-        return iSConnectable(ip, SSH_DEFAULT_PORT, SSH_DEFAULT_USER, "", 5);
+    public static boolean connect(String ip) {
+        if (isLocal(ip)){
+            return true;
+        }
+
+        Session session = connect(ip, SSH_DEFAULT_PORT, SSH_DEFAULT_USER, "", 0);
+        if (session != null && session.isConnected()) {
+            session.disconnect();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -59,7 +84,7 @@ public class SshTools {
      * @param connectTimeoutInSeconds seconds.
      * @return
      */
-    public static boolean iSConnectable(
+    public static Session connect(
             String ip,
             short port,
             String user,
@@ -67,7 +92,7 @@ public class SshTools {
             int connectTimeoutInSeconds) {
         if (StringUtils.isBlank(ip)
                 || (!"localhost".equals(ip) && !ValidateUtil.validateIpv4(ip))) {
-            return false;
+            return null;
         }
         user = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
         port = port <= 0 ? SSH_DEFAULT_PORT : port;
@@ -90,18 +115,10 @@ public class SshTools {
                 throw new NodeMgrException(ConstantCode.UNSUPPORTED_PASSWORD_SSH_ERROR);
             }
             session.connect(connectTimeoutInSeconds * 1000);
-            // connect success
-            if (session.isConnected()) {
-                return true;
-            }
         } catch (Exception e) {
             log.info("Connect to host:[{}] ERROR!!!", hostDetail, e);
-        } finally {
-            if (session != null) {
-                session.disconnect();
-            }
-            log.warn("Disconnect from host: [{}] ", hostDetail);
         }
-        return false;
+        return session;
     }
+
 }

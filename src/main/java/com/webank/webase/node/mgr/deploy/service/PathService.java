@@ -77,19 +77,20 @@ public class PathService {
 
     /**
      * Delete chain node config while exception occurred during deploy option.
+     *
      * @param chainName
      * @return
      */
     public void deleteChain(String chainName) throws IOException {
         // delete nodes config
         Path chainRoot = getChainRoot(chainName);
-        if (Files.exists(chainRoot)){
+        if (Files.exists(chainRoot)) {
             FileUtils.deleteDirectory(chainRoot.toFile());
         }
 
         // delete ipconf
         Path ipConfig = getIpConfig(chainName);
-        if (Files.exists(ipConfig)){
+        if (Files.exists(ipConfig)) {
             Files.delete(ipConfig);
         }
     }
@@ -132,14 +133,41 @@ public class PathService {
     }
 
     /**
+     *
+     * @param rootDirOnHost
+     * @param chainName
+     * @return
+     */
+    public static String getChainRootOnHost(
+            String rootDirOnHost,
+            String chainName ) {
+        return String.format("%s/%s", rootDirOnHost, chainName );
+
+    }
+
+    /**
+     *
+     * @param chainRoot
+     * @param index
+     * @return
+     */
+    public static String getNodeRootOnHost(
+            String chainRoot,
+            short index) {
+        return String.format("%s/node%s", chainRoot,index);
+
+    }
+
+    /**
      * Get nodeId from a node, trim first non-blank line and return from node.nodeid file.
+     *
      * @param nodePath
      * @return
      * @throws IOException
      */
     public static String getNodeId(Path nodePath) throws IOException {
         List<String> lines = Files.readAllLines(nodePath.resolve("conf/node.nodeid"));
-        if (CollectionUtils.isEmpty(lines)){
+        if (CollectionUtils.isEmpty(lines)) {
             return null;
         }
         return lines.stream().filter(StringUtils::isNotBlank)
@@ -148,25 +176,26 @@ public class PathService {
 
     /**
      * Get jsonrpcPort, channelPort, p2pPort from a node.
+     *
      * @param nodePath
-     * @return              order : <jsonrpcPort, channelPort, p2pPort>
+     * @return order : <jsonrpcPort, channelPort, p2pPort>
      * @throws IOException
      */
-    public static Triple<Short,Short,Short> getNodePorts(Path nodePath)  {
+    public static Triple<Short, Short, Short> getNodePorts(Path nodePath) {
         try {
             Path configIni = nodePath.resolve("config.ini");
             Ini ini = new Ini(configIni.toFile());
-            short channelPort = Short.parseShort(ini.get("rpc","channel_listen_port"));
-            short jsonrpcPort = Short.parseShort(ini.get("rpc","jsonrpc_listen_port"));
-            short p2pPort = Short.parseShort(ini.get("p2p","listen_port"));
-            return Triple.of(jsonrpcPort,channelPort,p2pPort);
-        }catch (Exception e){
+            short channelPort = Short.parseShort(ini.get("rpc", "channel_listen_port"));
+            short jsonrpcPort = Short.parseShort(ini.get("rpc", "jsonrpc_listen_port"));
+            short p2pPort = Short.parseShort(ini.get("p2p", "listen_port"));
+            return Triple.of(jsonrpcPort, channelPort, p2pPort);
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
-     *  Get node group id set.
+     * Get node group id set.
      *
      * @param nodePath
      * @return
@@ -176,12 +205,11 @@ public class PathService {
         try {
             return Files.walk(nodePath.resolve("conf"), 1)
                     .filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
-                    .map((path)->Integer.parseInt(path.getFileName().toString()
-                            .replaceAll("group\\.","").replaceAll("\\.genesis","")))
+                    .map((path) -> Integer.parseInt(path.getFileName().toString()
+                            .replaceAll("group\\.", "").replaceAll("\\.genesis", "")))
                     .collect(Collectors.toSet());
         } catch (IOException e) {
             return null;
         }
     }
-
 }
