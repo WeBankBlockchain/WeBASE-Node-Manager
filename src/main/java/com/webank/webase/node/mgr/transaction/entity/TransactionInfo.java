@@ -18,6 +18,9 @@ package com.webank.webase.node.mgr.transaction.entity;
 import java.math.BigInteger;
 import lombok.Data;
 
+/**
+ * transaction info entity (different from receipt)
+ */
 @Data
 public class TransactionInfo {
     private String hash;

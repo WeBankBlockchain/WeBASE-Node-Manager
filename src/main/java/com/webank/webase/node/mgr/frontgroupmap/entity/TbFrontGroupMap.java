@@ -26,9 +26,15 @@ public class TbFrontGroupMap {
     private Integer groupId;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    /**
+     * front's group status, 1-normal
+     * @related GroupStatus enum
+     */
+    private Integer status;
 
-    public TbFrontGroupMap(Integer frontId,Integer groupId){
+    public TbFrontGroupMap(Integer frontId,Integer groupId, Integer status){
         this.frontId = frontId;
         this.groupId = groupId;
+        this.status = status;
     }
 }

@@ -28,6 +28,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * using in async monitor
+ * 交易审计
  */
 @Log4j2
 @Component
@@ -49,14 +50,14 @@ public class TransMonitorTask {
      */
     public synchronized void monitorStart() {
         Instant startTime = Instant.now();
-        log.info("=== start monitor. startTime:{}", startTime.toEpochMilli());
+        log.debug("=== start monitor. startTime:{}", startTime.toEpochMilli());
         //get group list
         List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
-            log.info("monitor jump over .not found any group");
+            log.warn("monitor jump over, not found any group");
             return;
         }
-
+        // count down group, make sure all group's transMonitor finished
         CountDownLatch latch = new CountDownLatch(groupList.size());
         groupList.stream()
             .forEach(group -> monitorService.transMonitorByGroupId(latch, group.getGroupId()));
@@ -68,7 +69,7 @@ public class TransMonitorTask {
             Thread.currentThread().interrupt();
         }
 
-        log.info("=== end monitor. useTime:{} ",
+        log.debug("=== end monitor. useTime:{} ",
             Duration.between(startTime, Instant.now()).toMillis());
     }
 }

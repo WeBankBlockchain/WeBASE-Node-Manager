@@ -16,7 +16,6 @@
 package com.webank.webase.node.mgr.contract.entity;
 
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -24,13 +23,14 @@ import lombok.ToString;
 
 /**
  * param of send transaction from web
+ * support send by contract api and abi api
  */
 @Data
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TransactionInputParam extends TransactionParam {
-    @NotNull
+
     private Integer contractId;
     /**
      * user address, identify signUserId
