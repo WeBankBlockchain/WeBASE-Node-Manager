@@ -63,7 +63,7 @@ public class AlertLogController {
                     Duration.between(startTime, Instant.now()).toMillis(), resList);
             return new BasePageResponse(ConstantCode.SUCCESS, resList, count);
         }catch (NodeMgrException e) {
-            log.debug("listAlertLog, error, exception:[] ", e);
+            log.error("listAlertLog, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());
         }
     }
@@ -80,14 +80,12 @@ public class AlertLogController {
         log.info("start updateAlertLog. startTime:{} ReqAlertLogParam:{}",
                 startTime.toEpochMilli(), JSON.toJSONString(param));
         if(param.getStatus() == null || param.getLogId() == null) {
-            log.debug("updateAlertLog, error:{} ",
-                    ConstantCode.ALERT_LOG_PARAM_EMPTY);
             return new BaseResponse(ConstantCode.ALERT_LOG_PARAM_EMPTY);
         }
         try{
             alertLogService.updateAlertLog(param);
         }catch (NodeMgrException e) {
-            log.debug("updateAlertLog, error, exception:[] ", e);
+            log.error("updateAlertLog, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());
         }
         AlertLog res = alertLogService.queryByLogId(param.getLogId());

@@ -64,7 +64,7 @@ public class MethodControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post( "/method/add").
             content(JSON.toJSONString(param)).
-            contentType(MediaType.APPLICATION_JSON)
+            contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).

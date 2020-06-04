@@ -19,6 +19,8 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
@@ -47,6 +49,12 @@ public class NodeService {
     private NodeMapper nodeMapper;
     @Autowired
     private FrontInterfaceService frontInterface;
+    /**
+     * update front status
+     */
+    @Autowired
+    private FrontService frontService;
+
     // interval of check node status
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 7500L;
 
@@ -215,9 +223,10 @@ public class NodeService {
             Duration duration = Duration.between(modifyTime, LocalDateTime.now());
             Long subTime = duration.toMillis();
             if (subTime < CHECK_NODE_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
-                log.info("checkNodeStatus jump over. subTime:{}", subTime);
+                log.warn("checkNodeStatus jump over. for time internal subTime:{}", subTime);
                 return;
             }
+
             
             int nodeType = 0;   //0-consensus;1-observer
             if (observerList != null) {
@@ -257,6 +266,14 @@ public class NodeService {
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
+            // to update front status
+            TbFront updateFront = frontService.getByNodeId(nodeId);
+            if (updateFront != null) {
+                // update front status as long as update node (7.5s internal)
+                log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
+                updateFront.setStatus(tbNode.getNodeActive());
+                frontService.updateFront(updateFront);
+            }
         }
 
     }
@@ -289,8 +306,8 @@ public class NodeService {
         JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
         List<Object> dataIsList = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List)
             .map(arr -> {
-                Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
                 try {
+                    Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
                     NodeMgrTools.object2JavaBean(obj, PeerOfConsensusStatus.class);
                 } catch (Exception e) {
                     return null;
@@ -314,5 +331,18 @@ public class NodeService {
         observerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
         log.debug("end getSealerAndObserverList resList:{}", resList);
         return resList;
+    }
+
+    public List<String> getNodeIdListService(int groupId) {
+        log.debug("start getSealerAndObserverList groupId:{}", groupId);
+        try {
+            List<String> nodeIdList = frontInterface.getNodeIdList(groupId);
+            log.debug("end getSealerAndObserverList nodeIdList:{}", nodeIdList);
+            return nodeIdList;
+        } catch (Exception e) {
+            log.error("getNodeIdList error groupId:{}, exception:{}", groupId, e.getMessage());
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), e.getMessage());
+        }
+
     }
 }

@@ -3,15 +3,18 @@
 -- Table structure for tb_group
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_group (
-        group_id int(11) NOT NULL COMMENT '群组ID',
-        group_name varchar(64) NOT NULL COMMENT '群组名字',
-        group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常）',
-        node_count int DEFAULT '0' COMMENT '群组下节点数',
-        group_desc varchar(1024) COMMENT '群组描述',
-        create_time datetime DEFAULT NULL COMMENT '创建时间',
-        modify_time datetime DEFAULT NULL COMMENT '修改时间',
-        PRIMARY KEY (group_id)
-    ) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8;
+    group_id int(11) NOT NULL COMMENT '群组ID',
+    group_name varchar(64) NOT NULL COMMENT '群组名字',
+    group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常）',
+    node_count int DEFAULT '0' COMMENT '群组下节点数',
+    description varchar(1024) COMMENT '群组描述',
+    group_type int COMMENT '群组类型（1-拉取，2-动态创建）',
+    group_timestamp varchar(64) COMMENT '群组创世块时间戳',
+    node_id_list text COMMENT '群组成员节点的ID',
+    create_time datetime DEFAULT NULL COMMENT '创建时间',
+    modify_time datetime DEFAULT NULL COMMENT '修改时间',
+    PRIMARY KEY (group_id)
+) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8;
 
 
 -- ----------------------------
@@ -24,6 +27,7 @@ CREATE TABLE IF NOT EXISTS tb_front (
   front_port int(11) DEFAULT NULL COMMENT '前置服务端口',
   agency varchar(32) NOT NULL COMMENT '所属机构名称',
   client_version varchar(32) NOT NULL COMMENT '节点版本（国密/非国密）',
+  status int(11) DEFAULT 1 COMMENT '前置服务状态',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (front_id),
@@ -40,6 +44,7 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
   group_id int(11) NOT NULL COMMENT '群组编号',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  status int(11) DEFAULT 1 NOT NULL COMMENT '节点（前置）的群组状态',
   PRIMARY KEY (map_id),
   unique  unique_front_group (front_id,group_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=600001 DEFAULT CHARSET=utf8 COMMENT='前置群组映射表';
@@ -105,7 +110,7 @@ CREATE TABLE IF NOT EXISTS tb_method(
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (method_id,group_id)
-) COMMENT='方法解析信息表' ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='方法解析信息表';
 
 
 
@@ -300,4 +305,21 @@ CREATE TABLE IF NOT EXISTS tb_alert_log (
   modify_time datetime DEFAULT NULL COMMENT '告警日志的修改时间',
   PRIMARY KEY (log_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='告警日志表';
+
+-- ----------------------------
+-- Table structure for tb_abi, unrelated with tb_contract
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_abi (
+  abi_id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约ABI的编号',
+  group_id int(11) NOT NULL COMMENT '合约ABI所属群组的编号',
+  contract_name varchar(120) NOT NULL COMMENT '合约ABI的合约名',
+  contract_address varchar(64) NOT NULL COMMENT '合约ABI的合约地址',
+  contract_abi text NOT NULL COMMENT '合约ABI的内容',
+  contract_bin text NOT NULL COMMENT '合约ABI的runtime-bin',
+  create_time datetime DEFAULT NULL COMMENT '合约ABI的创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '合约ABI的修改时间',
+  PRIMARY KEY (abi_id),
+  UNIQUE KEY unique_address (group_id,contract_address),
+  UNIQUE KEY unique_name (group_id,contract_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约ABI表';
 
