@@ -52,6 +52,11 @@ public interface GroupMapper {
     List<TbGroup> getList(@Param("groupStatus") Integer groupStatus);
 
     /**
+     * get group by group id
+     */
+    TbGroup getGroupById(@Param("groupId") Integer groupId);
+
+    /**
      * query the latest statistics trans on all groups.
      */
     List<StatisticalGroupTransInfo> queryLatestStatisticalTrans();

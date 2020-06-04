@@ -18,8 +18,10 @@ import java.util.*;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
+import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
@@ -169,6 +171,20 @@ public class FrontInterfaceService {
                 SyncStatus.class);
     }
 
+    public BlockInfo getBlockByNumberFromSpecificFront(String frontIp, Integer frontPort,
+													   Integer groupId, BigInteger blockNumber) {
+		log.debug("start getBlockByNumberFromSpecificFront frontIp:{},frontPort{}," +
+				" groupId:{} blockNumber:{}", frontIp, frontPort, groupId, blockNumber);
+		String uri = String.format(FrontRestTools.URI_BLOCK_BY_NUMBER, blockNumber);
+		BlockInfo blockInfo = null;
+		try{
+            blockInfo = getFromSpecificFront(groupId, frontIp, frontPort, uri, BlockInfo.class);
+        } catch (Exception ex) {
+		    log.error("getBlockByNumberFromSpecificFront:{}", ex.getMessage());
+        }
+		return blockInfo;
+	}
+
     /**
      * get peers.
      */
@@ -227,7 +243,7 @@ public class FrontInterfaceService {
         try {
             blockInfo = frontRestTools.getForEntity(groupId, uri, BlockInfo.class);
         } catch (Exception ex) {
-            log.info("fail getBlockByNumber,exception:{}", ex);
+            log.error("fail getBlockByNumber,exception:[]", ex);
         }
         log.debug("end getBlockByNumber");
         return blockInfo;
@@ -433,7 +449,7 @@ public class FrontInterfaceService {
      */
     public GroupHandleResult generateGroup(String frontIp, Integer frontPort,
             GenerateGroupInfo param) {
-        log.debug("start generateGroup frontIp:{} frontPort:{} param:{}", JSON.toJSONString(param));
+        log.debug("start generateGroup frontIp:{} frontPort:{} param:{}", frontIp, frontPort, JSON.toJSONString(param));
 
         Integer groupId = Integer.MAX_VALUE;
         GroupHandleResult groupHandleResult = requestSpecificFront(groupId, frontIp, frontPort,
@@ -446,17 +462,29 @@ public class FrontInterfaceService {
     /**
      * start group.
      */
-    public GroupHandleResult startGroup(String frontIp, Integer frontPort, Integer startGroupId) {
-        log.debug("start startGroup frontIp:{} frontPort:{} startGroupId:{}",
-                frontIp, frontPort, startGroupId);
+    public BaseResponse operateGroup(String frontIp, Integer frontPort, Integer groupId, String type) {
+        log.debug("start operateGroup frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
+                groupId);
+        String uri = String.format(FrontRestTools.URI_OPERATE_GROUP, type);
+        BaseResponse response =
+                getFromSpecificFront(groupId, frontIp, frontPort, uri, BaseResponse.class);
+        log.debug("end operateGroup");
+        return response;
+    }
 
-        Integer groupId = Integer.MAX_VALUE;
-        String uri = String.format(FrontRestTools.URI_START_GROUP, startGroupId);
-        GroupHandleResult groupHandleResult =
-                getFromSpecificFront(groupId, frontIp, frontPort, uri, GroupHandleResult.class);
-
-        log.debug("end startGroup");
-        return groupHandleResult;
+    /**
+     * query group status list
+     */
+    public Map<String, String> queryGroupStatus(String frontIp, Integer frontPort, String nodeId, List<Integer> groupIdList) {
+        log.debug("start queryGroupStatusList frontIp:{} frontPort:{} nodeId:{} groupIdList:{}",
+                frontIp, frontPort, nodeId, groupIdList);
+        int uselessGroupId = 1;
+        Map<String, Object> param = new HashMap<>(1);
+        param.put("groupIdList", groupIdList);
+        BaseResponse response = requestSpecificFront(uselessGroupId, frontIp, frontPort,
+                        HttpMethod.POST, FrontRestTools.URI_QUERY_GROUP_STATUS, param, BaseResponse.class);
+        log.debug("end queryGroupStatusList");
+        return (Map<String, String>) response.getData();
     }
     
     /**
@@ -482,7 +510,7 @@ public class FrontInterfaceService {
         if (response.getData() == null) {
             return new ArrayList<>();
         }
-        List<NewBlockEventInfo> data = (List<NewBlockEventInfo>) response.getData();
+        List data = (List) response.getData();
         List<NewBlockEventInfo> resList = JSON.parseArray(JSON.toJSONString(data), NewBlockEventInfo.class);
         resList.forEach(info -> info.setFrontInfo(frontIp));
         return resList;
@@ -498,7 +526,7 @@ public class FrontInterfaceService {
 		if (response.getData() == null) {
 			return new ArrayList<>();
 		}
-		List<ContractEventInfo> data = (List<ContractEventInfo>) response.getData();
+		List data = (List) response.getData();
 		List<ContractEventInfo> resList = JSON.parseArray(JSON.toJSONString(data), ContractEventInfo.class);
 		resList.forEach(info -> info.setFrontInfo(frontIp));
 		return resList;
@@ -509,5 +537,10 @@ public class FrontInterfaceService {
                 FrontRestTools.URI_KEY_PAIR_LOCAL_KEYSTORE, List.class);
         List<KeyPair> resList = JSON.parseArray(JSON.toJSONString(data), KeyPair.class);
         return resList;
+    }
+
+    public List<String> getNodeIdList(int groupId) {
+        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_NODEID_LIST, List.class);
+
     }
 }

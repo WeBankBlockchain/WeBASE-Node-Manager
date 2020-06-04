@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -183,6 +184,10 @@ public class ContractController extends BaseController {
     public BaseResponse sendTransaction(@RequestBody @Valid TransactionInputParam param,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        // 0x0000000000000000000000000000000000000000 address is invalid
+        if (Address.DEFAULT.toString().equals(param.getContractAddress())) {
+            throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+        }
         Instant startTime = Instant.now();
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
             JSON.toJSONString(param));
