@@ -94,6 +94,7 @@ public class DeployService {
     @Autowired private NodeService nodeService;
     @Autowired private ChainService chainService;
     @Autowired private DeployShellService deployShellService;
+    @Autowired private DockerClientService dockerClientService;
     @Autowired private PathService pathService;
     @Autowired private ConstantProperties constant;
 
@@ -203,7 +204,7 @@ public class DeployService {
                             imageConfig.getConfigValue(), RunTypeEnum.DOCKER,
                             agency.getValue(), hostIdMap.get(ip),
                             nodeConfig.getHostIndex(), imageConfig.getConfigValue(),
-                            DockerClientService.getContainerName(rootDirOnHost,chainName,nodeConfig.getHostIndex()),
+                            DockerClientService.getContainerName(rootDirOnHost, chainName, nodeConfig.getHostIndex()),
                             nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
                             nodeConfig.getChannelPort(), FrontStatusEnum.INITIALIZED);
 
@@ -220,11 +221,15 @@ public class DeployService {
                     // TODO. make constant
                     Files.write(nodePath.resolve("application.yml"), Arrays.asList(
                             new String[]{
-                            "spring:",
-                            "  datasource:",
-                            "    url: jdbc:h2:file:/data/h2/webasefront;DB_CLOSE_ON_EXIT=FALSE",
-                            "sdk:",
-                            String.format("  encryptType: %s  # 0:ecdsa, 1:guomi", encryptType)}
+                                    "spring:",
+                                    "  datasource:",
+                                    "    url: jdbc:h2:file:/data/h2/webasefront;DB_CLOSE_ON_EXIT=FALSE",
+                                    "sdk:",
+                                    String.format("  encryptType: %s  # 0:ecdsa, 1:guomi", encryptType),
+                                    String.format("  channelPort: %s", nodeConfig.getChannelPort()),
+                                    "server:",
+                                    String.format("  port: %s", frontPort)
+                            }
                     ), StandardOpenOption.CREATE);
                 }
             }
@@ -332,6 +337,15 @@ public class DeployService {
                     // TODO. ssh remote server, shutdown, delete node config
                     log.info("ssh remote server and shutdown front id:[{}].", front.getFrontId());
 
+                    // optimize code to get host
+                    TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+                    if (host != null) {
+                        log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
+                        this.dockerClientService.removeByName(
+                                front.getFrontIp(),
+                                host.getDockerPort(),
+                                front.getContainerName());
+                    }
 
                     // TODO. delete node and frontGroupMap in batch
                     // delete node
@@ -363,7 +377,7 @@ public class DeployService {
         }
 
         try {
-            log.info("Delete chain:[{}] config files",chainName);
+            log.info("Delete chain:[{}] config files", chainName);
             this.pathService.deleteChain(chainName);
         } catch (IOException e) {
             log.error("Delete chain:[{}] config files ERROR", e);

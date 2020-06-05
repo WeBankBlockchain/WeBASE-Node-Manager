@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS tb_group (
     modify_time datetime DEFAULT NULL COMMENT '修改时间',
     chain_id int(10) unsigned NULL DEFAULT '0' COMMENT '所属链 ID',
     chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
-    PRIMARY KEY (group_id)
+    PRIMARY KEY (group_id),
   UNIQUE KEY `unique_chain_id_group_id` (`chain_id`,`group_id`)
 ) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8;
 
@@ -34,7 +34,7 @@ CREATE TABLE tb_front (
   client_version varchar(32) NOT NULL COMMENT '节点版本（国密/非国密）',
   create_time datetime NOT NULL COMMENT '创建时间',
   modify_time datetime NOT NULL COMMENT '修改时间',
-  status int(11) DEFAULT 1 COMMENT COMMENT '前置服务状态：0，未创建；1，停止；2，启动；',
+  status int(11) DEFAULT 1 COMMENT '前置服务状态：0，未创建；1，停止；2，启动；',
   run_type tinyint(8) unsigned DEFAULT '0' COMMENT '运行方式：0，命令行；1，Docker',
   agency_id int(10) unsigned DEFAULT '0' COMMENT '所属机构 ID',
   agency_name varchar(64) DEFAULT '' COMMENT '所属机构名称，冗余字段, 跟 agency 字段相同',

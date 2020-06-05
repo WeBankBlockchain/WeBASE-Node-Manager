@@ -16,6 +16,8 @@ package com.webank.webase.node.mgr.base.properties;
 import static java.io.File.separator;
 
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -97,6 +99,7 @@ public class ConstantProperties {
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
     private String buildChainShell = "./script/deploy/build_chain.sh";
     private String scpShell =        "./script/deploy/file_trans_util.sh";
+    private String fiscoBcosBinary =  "";
 
     // default port
     private short defaultJsonrpcPort = 8545;
@@ -143,6 +146,12 @@ public class ConstantProperties {
         log.info("Init constant properties, permitUrlArray: [{}]", StringUtils.join(permitUrlArray,","));
 
         log.info("Init constant properties, dockerProxyMap: [{}]", dockerProxyMap);
+
+        log.info("Init constant properties, check FISCO-BCOS binary path: [{}]", fiscoBcosBinary);
+        if (!Files.exists(Paths.get(fiscoBcosBinary))) {
+            log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
+            fiscoBcosBinary = "";
+        }
     }
     //******************* Add in v1.4.0 end. *******************
 }
