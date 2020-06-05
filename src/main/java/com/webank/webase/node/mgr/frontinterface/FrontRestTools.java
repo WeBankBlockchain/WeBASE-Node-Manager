@@ -17,10 +17,12 @@ package com.webank.webase.node.mgr.frontinterface;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
 import java.time.Duration;
 import java.time.Instant;
@@ -32,6 +34,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import com.webank.webase.node.mgr.frontinterface.entity.FrontUrlInfo;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,12 +76,14 @@ public class FrontRestTools {
     public static final String URI_GET_OBSERVER_LIST = "web3/observerList";
     public static final String URI_GET_CLIENT_VERSION = "web3/clientVersion";
     public static final String URI_GENERATE_GROUP = "web3/generateGroup";
-    public static final String URI_START_GROUP = "web3/startGroup/%1s";
+    public static final String URI_OPERATE_GROUP = "web3/operateGroup/%1s";
+    public static final String URI_QUERY_GROUP_STATUS = "web3/queryGroupStatus";
     public static final String URI_REFRESH_FRONT = "web3/refresh";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
+    public static final String URI_KEY_PAIR_IMPORT_WITH_SIGN = "privateKey/importWithSign";
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
     public static final String URI_SEND_TRANSACTION_WITH_SIGN = "trans/handleWithSign";
@@ -105,7 +111,8 @@ public class FrontRestTools {
         .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
                 URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
-                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE);
+                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE,
+                URI_KEY_PAIR_IMPORT_WITH_SIGN);
 
     public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 
@@ -119,6 +126,11 @@ public class FrontRestTools {
     private ConstantProperties cproperties;
     @Autowired
     private FrontGroupMapCache frontGroupMapCache;
+    /**
+     * update front status
+     */
+    @Autowired
+    private FrontService frontService;
 
     private static Map<String, FailInfo> failRequestMap = new HashMap<>();
 
@@ -143,13 +155,14 @@ public class FrontRestTools {
 
     /**
      * check url status.
+     * @return if sleeping, true
      */
     private boolean isServiceSleep(String url, String methType) {
         //get failInfo
         String key = buildKey(url, methType);
         FailInfo failInfo = failRequestMap.get(key);
 
-        //cehck server status
+        //check server status
         if (failInfo == null) {
             return false;
         }
@@ -202,7 +215,8 @@ public class FrontRestTools {
         Iterator<String> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             String key = iter.next();
-            if (rkey.equals(key)) {
+            // fix null
+            if (key.equals(rkey)) {
                 iter.remove();
             }
         }
@@ -213,13 +227,15 @@ public class FrontRestTools {
     /**
      * build  url of front service.
      */
-    private String buildFrontUrl(ArrayList<FrontGroup> list, String uri, HttpMethod httpMethod) {
+    private FrontUrlInfo buildFrontUrl(ArrayList<FrontGroup> list, String uri, HttpMethod httpMethod) {
         Collections.shuffle(list);//random one
         log.info("====================map list:{}",JSON.toJSONString(list));
         Iterator<FrontGroup> iterator = list.iterator();
         while (iterator.hasNext()) {
             FrontGroup frontGroup = iterator.next();
             log.info("============frontGroup:{}",JSON.toJSONString(frontGroup));
+            FrontUrlInfo frontUrlInfo = new FrontUrlInfo();
+            frontUrlInfo.setFrontId(frontGroup.getFrontId());
 
             uri = uriAddGroupId(frontGroup.getGroupId(), uri);//append groupId to uri
             String url = String
@@ -232,7 +248,8 @@ public class FrontRestTools {
                 log.warn("front url[{}] is sleep,jump over", url);
                 continue;
             }
-            return url;
+            frontUrlInfo.setUrl(url);
+            return frontUrlInfo;
         }
         log.info("end buildFrontUrl. url is null");
         return null;
@@ -294,14 +311,24 @@ public class FrontRestTools {
         Object param, Class<T> clazz) {
         List<FrontGroup> frontList = frontGroupMapCache.getMapListByGroupId(groupId);
         if (frontList == null || frontList.size() == 0) {
-            log.error("fail restTemplateExchange. frontList is empty");
-            throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT);
+            log.error("fail restTemplateExchange. frontList is empty groupId:{}", groupId);
+            throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT.getCode(),
+                    "all front of group: " + groupId + " is stopped");
         }
         ArrayList<FrontGroup> list = new ArrayList<>(frontList);
         RestTemplate restTemplate = caseRestemplate(uri);
 
-        while (list != null && list.size() > 0) {
-            String url = buildFrontUrl(list, uri, method);//build url
+        while (list.size() > 0) {
+            // build by frontGroupList, if build one, remove one;
+            // build until find success url and return
+            // while loop use the same list, try again until get response
+            FrontUrlInfo frontUrlInfo = buildFrontUrl(list, uri, method);//build url
+            String url = frontUrlInfo.getUrl();
+            // check url available
+            if (StringUtils.isBlank(uri)) {
+                log.warn("restTemplateExchange buildFrontUrl get null url:{}", list);
+                throw new NodeMgrException(ConstantCode.AVAILABLE_FRONT_URL_IS_NULL);
+            }
             try {
                 HttpEntity entity = buildHttpEntity(param);// build entity
                 if (null == restTemplate) {
@@ -310,11 +337,13 @@ public class FrontRestTools {
                     throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
                 }
                 ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
+                frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.NORMAL.getValue());
                 return response.getBody();
             } catch (ResourceAccessException ex) {
                 log.warn("fail restTemplateExchange", ex);
                 setFailCount(url, method.toString());
                 if (isServiceSleep(url, method.toString())) {
+                    frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
                     throw ex;
                 }
                 log.info("continue next front", ex);
@@ -326,7 +355,8 @@ public class FrontRestTools {
                     throw new NodeMgrException(error.getInteger("code"),
                             error.getString("errorMessage"), ex);
                 }
-                throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
+                frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
+                throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), error.getString("message"));
             }
         }
         return null;

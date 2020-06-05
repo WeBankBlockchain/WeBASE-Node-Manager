@@ -11,15 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.frontgroupmap.entity;
+package com.webank.webase.node.mgr.frontgroupmap;
 
 
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
+
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 @Component
 public class FrontGroupMapCache {
 
@@ -50,10 +57,15 @@ public class FrontGroupMapCache {
     public List<FrontGroup> getMapListByGroupId(int groupId) {
         List<FrontGroup> list = getAllMap();
         if (list == null) {
+            log.warn("getMapListByGroupId getAllMap is null.");
             return null;
         }
-        List<FrontGroup> map = list.stream().filter(m -> groupId == m.getGroupId())
+        // filter all FrontGroup which groupStatus is normal
+        List<FrontGroup> map = list.stream()
+            .filter(m -> groupId == m.getGroupId()
+                    && m.getStatus() == GroupStatus.NORMAL.getValue())
             .collect(Collectors.toList());
+        log.info("getMapListByGroupId map size:{}", map.size());
         return map;
     }
 

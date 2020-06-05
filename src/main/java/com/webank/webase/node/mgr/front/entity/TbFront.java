@@ -29,10 +29,18 @@ public class TbFront {
     private String frontIp;
     private Integer frontPort;
     private String agency;
-    // node version
+    /**
+     * node version
+     */
     private String clientVersion;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    /**
+     * front status by now
+     * @case1: front's node is abnormal
+     * @case2: front's request fail/no response
+     */
+    private Integer status;
 
 
     private Byte runType;
@@ -45,7 +53,6 @@ public class TbFront {
     private Short jsonrpcPort;
     private Short p2pPort;
     private Short channelPort;
-    private Byte status;
 
     public static TbFront init(
             String nodeId,

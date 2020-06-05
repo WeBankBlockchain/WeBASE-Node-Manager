@@ -17,6 +17,9 @@ package com.webank.webase.node.mgr.group.entity;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
+import com.webank.webase.node.mgr.base.enums.GroupType;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -29,34 +32,57 @@ public class TbGroup {
 
     private Integer groupId;
     private String groupName;
+    /**
+     * 1-normal, 2-invalid
+     */
     private Integer groupStatus;
     private Integer nodeCount;
     private BigInteger latestBlock = BigInteger.ZERO;
     private BigInteger transCount = BigInteger.ZERO;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    private String description;
+    private Integer groupType;
+    /**
+     * group.x.genesis timestamp
+     */
+    private String groupTimestamp;
+    /**
+     * group peers nodeid
+     */
+    private String nodeIdList;
 
     private Integer chainId;
     private String chainName;
-    private String groupDesc;
 
 
-    public TbGroup(Integer groupId, String groupName,Integer nodeCount){
-        this.groupId = groupId;
-        this.groupName = groupName;
-        this.nodeCount = nodeCount;
-    }
     public TbGroup(Integer groupId,
                    String groupName,
                    Integer nodeCount,
                    int chainId,
                    String chainName,
-                   String groupDesc){
+                   String description,
+                   GroupType groupType){
+        LocalDateTime now =  LocalDateTime.now();
+
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
+        this.description = description;
+        this.groupType = groupType.getValue();
         this.chainId = chainId;
         this.chainName = chainName;
-        this.groupDesc = groupDesc;
+        this.createTime = now;
+        this.modifyTime = now;
+    }
+
+    public TbGroup(Integer groupId, String groupName, Integer nodeCount,
+                   String description, Integer groupType, Integer groupStatus) {
+        this.groupId = groupId;
+        this.groupName = groupName;
+        this.nodeCount = nodeCount;
+        this.description = description;
+        this.groupType = groupType;
+        this.groupStatus = groupStatus;
     }
 }

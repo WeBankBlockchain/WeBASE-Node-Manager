@@ -27,6 +27,8 @@ public interface FrontMapper {
 
     int add(TbFront tbFront);
 
+    int update(TbFront tbFront);
+
     int remove(@Param("frontId") int frontId);
 
     Integer getCount(FrontParam param);
@@ -35,12 +37,14 @@ public interface FrontMapper {
 
     TbFront getById(@Param("frontId") int frontId);
 
+    TbFront getByNodeId(@Param("nodeId") String nodeId);
+
     List<TbFront> selectByHostId(@Param("hostId") Integer hostId);
     List<TbFront> selectByAgencyId(@Param("agencyId") Integer agencyId);
 
     void deleteByAgencyId(@Param("agencyId") Integer agencyId);
 
     int updateStatus(@Param("frontId") int frontId,
-                     @Param("status")byte status,
+                     @Param("status")int status,
                      @Param("modifyTime")LocalDateTime now);
 }

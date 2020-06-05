@@ -38,8 +38,6 @@ public class BeanConfig {
 
     @Autowired
     private ConstantProperties constantProperties;
-    @Autowired
-    private ExecutorProperties executorProperties;
 
     @Bean
     public RestTemplate restTemplate(ClientHttpRequestFactory factory) {
@@ -78,23 +76,6 @@ public class BeanConfig {
         return factory;
     }
 
-    /**
-     * pull block and trans from chain
-     * @return
-     */
-    @Bean
-    public ThreadPoolTaskExecutor mgrAsyncExecutor() {
-        log.info("start mgrAsyncExecutor init..");
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(executorProperties.getCorePoolSize());
-        executor.setMaxPoolSize(executorProperties.getMaxPoolSize());
-        executor.setQueueCapacity(executorProperties.getQueueSize());
-        executor.setThreadNamePrefix(executorProperties.getThreadNamePrefix());
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        // init executor
-        executor.initialize();
-        return executor;
-    }
 
     @Bean
     public ThreadPoolTaskExecutor deployAsyncExecutor() {

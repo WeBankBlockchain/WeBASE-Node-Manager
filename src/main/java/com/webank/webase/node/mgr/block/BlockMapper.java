@@ -32,6 +32,11 @@ public interface BlockMapper {
     BigInteger getLatestBlockNumber(@Param("tableName") String tableName);
 
     /**
+     * query smallest block number
+     */
+    BigInteger getSmallestBlockNumber(@Param("tableName") String tableName);
+
+    /**
      * Add new block data.
      */
     Integer add(@Param("tableName") String tableName, @Param("block") TbBlock tbBlock);
@@ -62,4 +67,7 @@ public interface BlockMapper {
      */
     Integer remove(@Param("tableName") String tableName,
         @Param("blockRetainMax") BigInteger blockRetainMax);
+
+    TbBlock getBlockByBlockNumber(@Param("tableName") String tableName,
+                                  @Param("blockNumber") BigInteger blockNumber);
 }

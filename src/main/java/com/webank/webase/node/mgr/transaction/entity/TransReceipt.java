@@ -20,6 +20,9 @@ import java.math.BigInteger;
 import java.util.List;
 import lombok.Data;
 
+/**
+ * transaction receipt entity
+ */
 @Data
 public class TransReceipt {
 
@@ -40,4 +43,13 @@ public class TransReceipt {
     private String transactionIndexRaw;
     private boolean statusOK;
     private String gasUsedRaw;
+
+    private String root;
+    private String message;
+    private String input;
+    /**
+     * list of MerkleProofUnit
+     */
+    private List<Object> txProof;
+    private List<Object> receiptProof;
 }
