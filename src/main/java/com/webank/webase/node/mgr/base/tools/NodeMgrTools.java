@@ -29,6 +29,7 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
@@ -89,14 +90,28 @@ public class NodeMgrTools {
     /**
      * convert timestamp to localDateTime.
      */
-    public static LocalDateTime timestamp2LocalDateTime(Long inputTime) {
-        if (inputTime == null) {
-            log.warn("timestamp2LocalDateTime fail. inputTime is null");
+    public static LocalDateTime timestamp2LocalDateTime(Long inputTimeStamp) {
+        if (inputTimeStamp == null) {
+            log.warn("timestamp2LocalDateTime fail. inputTimeStamp is null");
             return null;
         }
-        Instant instant = Instant.ofEpochMilli(inputTime);
+        Instant instant = Instant.ofEpochMilli(inputTimeStamp);
         ZoneId zone = ZoneId.systemDefault();
         return LocalDateTime.ofInstant(instant, zone);
+//        Timestamp time = new Timestamp(inputTimeStamp);
+//        return time.toLocalDateTime();
+    }
+    /**
+     * LocalDateTime to timestamp
+     */
+    public static Long localDateTime2Timestamp(LocalDateTime inputDateTime) {
+        if (inputDateTime == null) {
+            log.warn("localDateTime2Timestamp fail. inputDateTime is null");
+            return null;
+        }
+//        Timestamp time = Timestamp.valueOf(inputDateTime);
+//        return time.getTime();
+        return inputDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 
     /**
@@ -357,42 +372,45 @@ public class NodeMgrTools {
 
 
     /**
-     * check target time is valid.
+     * check target time if within time period
      *
-     * @param dateTime target time.
+     * @param lastTime target time.
      * @param validLength y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid;
-     * example1:1d;example2:n
+     * example1: 1d; example2:n
      */
-    public static boolean isDateTimeInValid(LocalDateTime dateTime, String validLength) {
-        log.debug("start isDateTimeInValid. dateTime:{} validLength:{}", dateTime, validLength);
+    public static boolean isWithinPeriod(LocalDateTime lastTime, String validLength) {
+        log.debug("start isWithinTime. dateTime:{} validLength:{}", lastTime, validLength);
         if ("n".equals(validLength)) {
             return true;
         }
-        if (Objects.isNull(dateTime) || StringUtils.isBlank(validLength)
+        if (Objects.isNull(lastTime) || StringUtils.isBlank(validLength)
             || validLength.length() < 2) {
             return false;
         }
-
+        // example: 2d (2 day)
+        // 2
         String lifeStr = validLength.substring(0, validLength.length() - 1);
         if (!StringUtils.isNumeric(lifeStr)) {
-            log.warn("fail isDateTimeInValid");
-            throw new RuntimeException("fail isDateTimeInValid. validLength is error");
+            log.warn("fail isWithinTime");
+            throw new RuntimeException("fail isWithinTime. validLength is error");
         }
-        int lifeValue = Integer.valueOf(lifeStr);
+        int lifeValue = Integer.parseInt(lifeStr);
+        // d
         String lifeUnit = validLength.substring(validLength.length() - 1);
-
+        // now is day 2, last time is day 1, 2 - 1 = 1 < 2 true
+        // now is day 3, last time is day 1, 3 - 1 = 2 < 2 false, not within
         LocalDateTime now = LocalDateTime.now();
         switch (lifeUnit) {
             case "y":
-                return dateTime.getYear() - now.getYear() < lifeValue;
+                return now.getYear() - lastTime.getYear() < lifeValue;
             case "M":
-                return dateTime.getMonthValue() - now.getMonthValue() < lifeValue;
+                return now.getMonthValue() - lastTime.getMonthValue() < lifeValue;
             case "d":
-                return dateTime.getDayOfMonth() - now.getDayOfMonth() < lifeValue;
+                return  now.getDayOfMonth() - lastTime.getDayOfMonth() < lifeValue;
             case "m":
-                return dateTime.getMinute() - now.getMinute() < lifeValue;
+                return now.getMinute() - lastTime.getMinute() < lifeValue;
             default:
-                log.warn("fail isDateTimeInValid lifeUnit:{}", lifeUnit);
+                log.warn("fail isWithinTime lifeUnit:{}", lifeUnit);
                 return false;
         }
     }
@@ -484,5 +502,50 @@ public class NodeMgrTools {
             return 0;
         }
         return Integer.parseInt(str.substring(2), 16);
+    }
+
+    /**
+     * remove "0x" and last character.
+     */
+    public static String removeBinFirstAndLast(String contractBin, int removaLastLength) {
+        if (StringUtils.isBlank(contractBin)) {
+            return null;
+        }
+        String contractBinResult = removeFirstStr(contractBin, "0x");
+        if (contractBinResult.length() > removaLastLength) {
+            contractBinResult = contractBinResult.substring(0, contractBinResult.length() - removaLastLength);
+        }
+        return contractBinResult;
+    }
+
+    /**
+     * remove fist string.
+     */
+    public static String removeFirstStr(String input, String target) {
+        if (StringUtils.isBlank(input) || StringUtils.isBlank(target)) {
+            return input;
+        }
+        if (input.startsWith(target)) {
+            input = StringUtils.removeStart(input, target);
+        }
+        return input;
+    }
+
+    public static String encodedBase64Str(String input) {
+        if (input == null) {
+            return null;
+        }
+        return Base64.getEncoder().encodeToString(input.getBytes());
+    }
+
+    /**
+     * 只包含中文
+     */
+    public static boolean notContainsChinese(String input) {
+        if (StringUtils.isBlank(input)) {
+            return true;
+        }
+        String regex = "[^\\u4e00-\\u9fa5]+";
+        return input.matches(regex);
     }
 }

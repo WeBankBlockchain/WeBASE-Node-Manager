@@ -15,7 +15,7 @@ package node.mgr.test.user;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
@@ -63,7 +63,7 @@ public class UserControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/userInfo").
             content(JSON.toJSONString(newUser)).
-            contentType(MediaType.APPLICATION_JSON)
+            contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
@@ -80,7 +80,7 @@ public class UserControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put("/user/userInfo").
             content(JSON.toJSONString(updateUser)).
-            contentType(MediaType.APPLICATION_JSON)
+            contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
@@ -100,7 +100,7 @@ public class UserControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/bind").
             content(JSON.toJSONString(newUser)).
-            contentType(MediaType.APPLICATION_JSON)
+            contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).

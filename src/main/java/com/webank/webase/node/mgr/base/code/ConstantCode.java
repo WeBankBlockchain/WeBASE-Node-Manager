@@ -32,6 +32,15 @@ public class ConstantCode {
     public static final RetCode SYSTEM_EXCEPTION = RetCode.mark(102000, "system exception");
     public static final RetCode SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL = RetCode.mark(102000, "system exception: please check front");
 
+    /* front error code */
+    public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied");
+    public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
+    public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
+    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201234, "Pem file content error");
+    public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201235, "p12's password cannot be chinese");
+    public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(201236, "p12's password not match");
+    public static final RetCode P12_FILE_ERROR = RetCode.mark(201237, "P12 file content error");
+
     /**
      * Business exception.
      */
@@ -39,7 +48,7 @@ public class ConstantCode {
 
     public static final RetCode DB_EXCEPTION = RetCode.mark(202001, "database exception");
 
-    public static final RetCode FRONT_LIST_NOT_FOUNT = RetCode.mark(202002, "not found any front");
+    public static final RetCode FRONT_LIST_NOT_FOUNT = RetCode.mark(202002, "not found any front for this group");
 
     public static final RetCode INVALID_FRONT_IP = RetCode.mark(202003, "not support this ip");
 
@@ -115,6 +124,8 @@ public class ConstantCode {
     public static final RetCode INVALID_TOKEN = RetCode.mark(202052, "invalid token");
     public static final RetCode TOKEN_EXPIRE = RetCode.mark(202053, "token expire");
 
+    public static final RetCode AVAILABLE_FRONT_URL_IS_NULL = RetCode.mark(202054, "Available front url is empty, check front status");
+
     // 证书管理
     public static final RetCode CERT_ERROR = RetCode.mark(202060, "cert handle error");
     public static final RetCode FAIL_SAVE_CERT_ERROR = RetCode.mark(202061, "store cert error");
@@ -124,7 +135,7 @@ public class ConstantCode {
 
     // 邮件告警错误
     public static final RetCode MAIL_SERVER_CONFIG_ERROR = RetCode.mark(202070, "Mail server config error.");
-    public static final RetCode MAIL_SERVER_CONFIG__PARAM_EMPTY = RetCode.mark(202071,
+    public static final RetCode MAIL_SERVER_CONFIG_PARAM_EMPTY = RetCode.mark(202071,
             "Mail server config param empty/not match.");
     public static final RetCode MAIL_SERVER_CONFIG_ERROR_NO_DATA_IN_DB = RetCode.mark(202072,
             "Mail server config error, db's server config is empty");
@@ -143,6 +154,19 @@ public class ConstantCode {
     public static final RetCode ENCRYPT_TYPE_NOT_MATCH = RetCode.mark(202091,
             "Front's encrypt type not matches with nodemgr");
 
+    // abi import
+    public static final RetCode CONTRACT_ADDRESS_ALREADY_EXISTS = RetCode.mark(202096, "contract address already exists");
+    public static final RetCode ABI_INFO_NOT_EXISTS = RetCode.mark(202097, "abi info of this id not exists");
+    public static final RetCode PARAM_FAIL_ABI_INVALID = RetCode.mark(202098, "Contract abi invalid, please check abi");
+    public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(202099, "Abi Id cannot be empty");
+    public static final RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(202100, "contractAddress is null");
+
+    public static final RetCode USER_NOT_EXIST = RetCode.mark(202110, "User's signUserId not exist");
+
+
+    /* dynamic group manage */
+    public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");
+    public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node's front not exists");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
