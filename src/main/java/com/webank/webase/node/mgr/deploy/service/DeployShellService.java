@@ -415,12 +415,21 @@ public class DeployShellService {
             throw new NodeMgrException(ConstantCode.NO_CONFIG_FILE_ERROR);
         }
         // build_chain.sh only support docker on linux
-        String command = String.format("bash -e %s -f %s -o %s %s %s",
+        String command = String.format("bash -e %s -f %s -o %s %s %s %s",
+                // build_chain.sh shell script
                 constant.getBuildChainShell(),
+                // ipconf file path
                 ipConf.toString(),
+                // output path
                 pathService.getChainRootString(chainName),
+                // guomi or standard
                 encryptType == EncryptType.SM2_TYPE ? "-g" : "",
-                SystemUtils.IS_OS_LINUX ? " -d " : "");
+                // only linux supports docker modle
+                SystemUtils.IS_OS_LINUX ? " -d " : "",
+                // use binary local
+                StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
+                        String.format(" -e %s ", constant.getFiscoBcosBinary())
+                );
 
         return JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
     }

@@ -182,6 +182,32 @@ public class DockerClientService {
         return false;
     }
 
+
+    /**
+     * @param ip
+     * @param dockerPort
+     * @param containerName
+     * @return
+     */
+    public boolean removeByName(String ip, short dockerPort, String containerName) {
+        log.info("Host:[{}] remove container by name:[{}].", ip, containerName);
+        try {
+            Container container = this.getContainer(ip, dockerPort, containerName);
+            if (container == null){
+                return false;
+            }
+            DockerClient dockerClient = this.getDockerClient(ip, dockerPort);
+            dockerClient.removeContainerCmd(container.getId())
+                    .withForce(true)
+                    .exec();
+            log.info("Host:[{}] remove container:[{}] success.", ip, containerName);
+            return true;
+        } catch (Exception e) {
+            log.info("Host:[{}] remove container by name:[{}] error.", ip, containerName, e);
+        }
+        return false;
+    }
+
     /**
      * Get a docker client to server, create one if no exists.
      *
