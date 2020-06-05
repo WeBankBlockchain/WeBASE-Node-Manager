@@ -114,4 +114,23 @@ public class NodeController {
         return baseResponse;
     }
 
+    /**
+     * get node id list
+     */
+    @GetMapping("/nodeIdList/{groupId}")
+    public BaseResponse getNodeIdList(@PathVariable("groupId") Integer groupId) {
+        Instant startTime = Instant.now();
+        log.info("start getNodeIdList startTime:{} groupId:{}",
+                startTime.toEpochMilli(), groupId);
+        List<String> res = nodeService.getNodeIdListService(groupId);
+
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(res);
+
+        log.info("end getNodeIdList useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+
 }

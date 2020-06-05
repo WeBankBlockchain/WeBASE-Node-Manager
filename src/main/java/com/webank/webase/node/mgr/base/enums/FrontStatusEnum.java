@@ -23,12 +23,12 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public enum FrontStatusEnum {
-    INITIALIZED((byte) 0, "initialized"),
-    RUNNING((byte) 1, "running"),
-    STOPPED((byte) 2, "stopped"),
+    INITIALIZED( 0, "initialized"),
+    RUNNING( 1, "running"),
+    STOPPED(2, "stopped"),
     ;
 
-    private byte id;
+    private int id;
     private String description;
 
 
@@ -37,7 +37,7 @@ public enum FrontStatusEnum {
      * @param id
      * @return
      */
-    public static FrontStatusEnum getById(byte id) {
+    public static FrontStatusEnum getById(int id) {
         for (FrontStatusEnum value : FrontStatusEnum.values()) {
             if (value.id == id) {
                 return value;

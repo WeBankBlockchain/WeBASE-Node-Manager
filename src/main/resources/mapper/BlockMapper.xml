@@ -25,6 +25,10 @@
 		select max(block_number) from ${tableName}
 	</select>
 
+  <select id="getSmallestBlockNumber" resultType="java.math.BigInteger">
+    select min(block_number) from ${tableName}
+  </select>
+
   <insert id="add">
     insert ignore into ${tableName}
     (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time)
@@ -79,4 +83,11 @@
     DELETE tb from ${tableName} as tb,(SELECT max(block_number) maxBlock FROM ${tableName}) AS tmp
     where tb.block_number &lt;= tmp.maxBlock - ${blockRetainMax}
   </delete>
+
+  <select id="getBlockByBlockNumber" resultMap="blockMap">
+    select * from ${tableName}
+    where block_number = #{blockNumber}
+    limit 1
+  </select>
+
 </mapper>

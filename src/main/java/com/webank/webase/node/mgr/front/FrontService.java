@@ -28,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -38,14 +40,22 @@ import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeParam;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -72,6 +82,9 @@ public class FrontService {
     private ResetGroupListTask resetGroupListTask;
     @Autowired
     private ConstantProperties constants;
+
+	// interval of check front status
+	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
     /**
      * add new front
@@ -127,15 +140,20 @@ public class FrontService {
             Integer group = Integer.valueOf(groupId);
             //peer in group
             List<String> groupPeerList = frontInterface
-                .getNodeIDListFromSpecificFront(frontIp, frontPort, group);
+                .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
             //get peers on chain
             PeerInfo[] peerArr = frontInterface
                 .getPeersFromSpecificFront(frontIp, frontPort, group);
             List<PeerInfo> peerList = Arrays.asList(peerArr);
-            //add groupId
-            groupService.saveGroupId(group, groupPeerList.size());
+            //add group
+            // check group not existed or node count differs
+            TbGroup checkGroup = groupService.getGroupById(group);
+            if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
+                groupService.saveGroup(group, groupPeerList.size(), "synchronous",
+                        GroupType.SYNC.getValue(), DataStatus.NORMAL.getValue());
+            }
             //save front group map
-            frontGroupMapService.newFrontGroup(tbFront.getFrontId(), group);
+            frontGroupMapService.newFrontGroup(tbFront, group);
             //save nodes
             for (String nodeId : groupPeerList) {
                 PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools
@@ -240,6 +258,16 @@ public class FrontService {
     }
 
     /**
+     * query front by nodeId.
+     */
+    public TbFront getByNodeId(String nodeId) {
+        if (StringUtils.isBlank(nodeId)) {
+            return null;
+        }
+        return frontMapper.getByNodeId(nodeId);
+    }
+
+    /**
      * remove front
      */
     public void removeFront(int frontId) {
@@ -255,17 +283,42 @@ public class FrontService {
         frontMapper.remove(frontId);
         //remove map
         frontGroupMapService.removeByFrontId(frontId);
-        //reset group list
+        //reset group list => remove groups that only belongs to this front
         resetGroupListTask.asyncResetGroupList();
         //clear cache
         frontGroupMapCache.clearMapList();
     }
 
-    public void setFrontEncryptType(List<TbFront> list) {
+    public void updateFront(TbFront updateFront) {
+        log.debug("updateFrontStatus updateFront:{}", updateFront);
+        if (updateFront == null) {
+            log.error("updateFrontStatus updateFront is null");
+            return;
+        }
+        frontMapper.update(updateFront);
+    }
 
-        list.stream().forEach(front -> {
-
-        });
+    public void updateFrontWithInternal(Integer frontId, Integer status) {
+        log.debug("updateFrontStatus frontId:{}, status:{}", frontId, status);
+        TbFront updateFront = getById(frontId);
+        if (updateFront == null) {
+            log.error("updateFrontStatus updateFront is null");
+            return;
+        }
+        if (updateFront.getStatus().equals(status)) {
+            return;
+        }
+        LocalDateTime modifyTime = updateFront.getModifyTime();
+        LocalDateTime createTime = updateFront.getCreateTime();
+		Duration duration = Duration.between(modifyTime, LocalDateTime.now());
+		Long subTime = duration.toMillis();
+		if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
+			log.info("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
+					subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
+			return;
+		}
+        updateFront.setStatus(status);
+        frontMapper.update(updateFront);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

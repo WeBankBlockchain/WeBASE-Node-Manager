@@ -14,10 +14,24 @@
 package com.webank.webase.node.mgr.frontgroupmap.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class MapListParam {
     private int mapId;
     private int frontId;
     private int groupId;
+    private int status;
+
+    public MapListParam(int frontId, int groupId) {
+        this.frontId = frontId;
+        this.groupId = groupId;
+    }
+
+    public MapListParam(int frontId, int groupId, int status) {
+        this.frontId = frontId;
+        this.groupId = groupId;
+        this.status = status;
+    }
 }
