@@ -117,7 +117,7 @@ public class ConstantProperties {
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login", "/user/privateKey/**", "/encrypt"};
     private String dockerRepository= "fiscoorg/front";
     private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
-    private String dockerRegistryMirror = "docker.mirrors.ustc.edu.cn";
+    private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
 
     /**
