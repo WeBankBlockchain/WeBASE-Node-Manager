@@ -108,6 +108,7 @@ public class DeployShellService {
             }
 
             // check chain status
+            // TODO. deploying but no thread is deploying, still need to deploy
             if (ChainStatusEnum.successOrDeploying(tbChain.getChainStatus())) {
                 log.error("Chain:[{}] is already deployed success or deploying:[{}].", chainName, tbChain.getChainStatus());
                 return;
