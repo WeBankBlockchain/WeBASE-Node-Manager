@@ -50,7 +50,7 @@ public class DockerClientService {
      * @param hostIndex
      * @return delete all {@link File#separator} and blank of node path on host.
      */
-    public static String getContainerName(String rootDirOnHost, String chainName, short hostIndex) {
+    public static String getContainerName(String rootDirOnHost, String chainName, int hostIndex) {
         return String.format("%s%snode%s",
                 rootDirOnHost.replaceAll(File.separator, "").replaceAll(" ", ""),
                 chainName,
@@ -66,7 +66,7 @@ public class DockerClientService {
      * @param imageTag
      * @return
      */
-    public boolean pullImage(String ip, short port, String imageTag) {
+    public boolean pullImage(String ip, int port, String imageTag) {
         String image = this.getImageRepositoryTag(imageTag);
         log.info("Host:[{}] pull image:[{}].", ip, image);
         try {
@@ -89,7 +89,7 @@ public class DockerClientService {
      * @param containerName
      * @return
      */
-    public Container getContainer(String ip, short port, String containerName) {
+    public Container getContainer(String ip, int port, String containerName) {
         log.info("Host:[{}] query container by name:[{}].", ip, containerName);
         try {
             DockerClient dockerClient = this.getDockerClient(ip, port);
@@ -116,11 +116,11 @@ public class DockerClientService {
      * @return container id.
      */
     public String create(String ip,
-                         short port,
+                         int port,
                          String imageTag,
                          String containerName,
                          String chainRootOnHost,
-                         Short nodeIndex) {
+                         int nodeIndex) {
         log.info("Host:[{}] create container:[{}].", ip, containerName);
         String image = this.getImageRepositoryTag(imageTag);
         try {
@@ -166,7 +166,7 @@ public class DockerClientService {
      * @param containerId
      * @return
      */
-    public boolean startById(String ip, short dockerPort, String containerId) {
+    public boolean startById(String ip, int dockerPort, String containerId) {
         log.info("Host:[{}] start container by id:[{}].", ip, containerId);
         try {
             DockerClient dockerClient = this.getDockerClient(ip, dockerPort);
@@ -189,7 +189,7 @@ public class DockerClientService {
      * @param containerName
      * @return
      */
-    public boolean removeByName(String ip, short dockerPort, String containerName) {
+    public boolean removeByName(String ip, int dockerPort, String containerName) {
         log.info("Host:[{}] remove container by name:[{}].", ip, containerName);
         try {
             Container container = this.getContainer(ip, dockerPort, containerName);
@@ -215,7 +215,7 @@ public class DockerClientService {
      * @param originPort
      * @return
      */
-    private DockerClient getDockerClient(final String originIp, short originPort) {
+    private DockerClient getDockerClient(final String originIp, int originPort) {
         // cache client
         log.info("Get docker client for:[{}:{}].", originIp, originPort);
         return DOCKER_CLIENT_CACHE.computeIfAbsent(originIp, k -> {
@@ -223,7 +223,7 @@ public class DockerClientService {
 
             if (MapUtils.isNotEmpty(constant.getDockerProxyMap())
                     && constant.getDockerProxyMap().containsKey(originIp)) {
-                Pair<String, Short> proxyIpPort = constant.getDockerProxyMap().get(originIp);
+                Pair<String, Integer> proxyIpPort = constant.getDockerProxyMap().get(originIp);
                 tcpUrl = String.format("tcp://%s:%s", proxyIpPort.getLeft(), proxyIpPort.getValue());
                 log.info("Get docker client for:[{}:{}], use proxy address:[{}:{}].",
                         originIp, originPort, proxyIpPort.getLeft(), proxyIpPort.getValue());

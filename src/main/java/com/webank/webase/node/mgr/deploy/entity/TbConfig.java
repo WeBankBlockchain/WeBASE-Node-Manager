@@ -53,7 +53,7 @@ public class TbConfig {
      *
      * @mbg.generated
      */
-    private Short configType;
+    private Integer configType;
 
     /**
      *

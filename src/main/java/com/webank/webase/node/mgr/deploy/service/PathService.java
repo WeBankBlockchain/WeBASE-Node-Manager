@@ -153,7 +153,7 @@ public class PathService {
      */
     public static String getNodeRootOnHost(
             String chainRoot,
-            short index) {
+            int index) {
         return String.format("%s/node%s", chainRoot,index);
 
     }
@@ -181,13 +181,13 @@ public class PathService {
      * @return order : <jsonrpcPort, channelPort, p2pPort>
      * @throws IOException
      */
-    public static Triple<Short, Short, Short> getNodePorts(Path nodePath) {
+    public static Triple<Integer, Integer, Integer> getNodePorts(Path nodePath) {
         try {
             Path configIni = nodePath.resolve("config.ini");
             Ini ini = new Ini(configIni.toFile());
-            short channelPort = Short.parseShort(ini.get("rpc", "channel_listen_port"));
-            short jsonrpcPort = Short.parseShort(ini.get("rpc", "jsonrpc_listen_port"));
-            short p2pPort = Short.parseShort(ini.get("p2p", "listen_port"));
+            int channelPort = Integer.parseInt(ini.get("rpc", "channel_listen_port"));
+            int jsonrpcPort = Integer.parseInt(ini.get("rpc", "jsonrpc_listen_port"));
+            int p2pPort = Integer.parseInt(ini.get("p2p", "listen_port"));
             return Triple.of(jsonrpcPort, channelPort, p2pPort);
         } catch (Exception e) {
             return null;

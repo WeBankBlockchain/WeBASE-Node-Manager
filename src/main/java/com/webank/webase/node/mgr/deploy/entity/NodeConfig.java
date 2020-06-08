@@ -25,16 +25,14 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 
 import lombok.Data;
-import lombok.extern.log4j.Log4j2;
 
-@Log4j2
 @Data
 public class NodeConfig {
     private String nodeId;
-    private short hostIndex;
-    private short jsonrpcPort;
-    private short p2pPort;
-    private short channelPort;
+    private int hostIndex;
+    private int jsonrpcPort;
+    private int p2pPort;
+    private int channelPort;
     private Set<Integer> groupIdList;
 
     /**
@@ -48,12 +46,12 @@ public class NodeConfig {
         NodeConfig config = new NodeConfig();
         config.nodeId= PathService.getNodeId(nodePath);
         try {
-            config.hostIndex = Short.parseShort(nodePath.getFileName().toString().replaceAll("node", ""));
+            config.hostIndex = Integer.parseInt(nodePath.getFileName().toString().replaceAll("node", ""));
         } catch (Exception e) {
             throw new NodeMgrException(ConstantCode.PARSE_HOST_INDEX_ERROR);
         }
 
-        Triple<Short, Short, Short> nodePorts = PathService.getNodePorts(nodePath);
+        Triple<Integer, Integer, Integer> nodePorts = PathService.getNodePorts(nodePath);
         config.jsonrpcPort = nodePorts.getLeft();
         config.channelPort = nodePorts.getMiddle();
         config.p2pPort = nodePorts.getRight();

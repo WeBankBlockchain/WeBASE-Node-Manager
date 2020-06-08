@@ -13,10 +13,12 @@
  */
 package com.webank.webase.node.mgr.front;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
@@ -29,8 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -39,8 +41,8 @@ import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
@@ -49,13 +51,6 @@ import com.webank.webase.node.mgr.node.NodeParam;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -330,12 +325,12 @@ public class FrontService {
                           RunTypeEnum runTypeEnum,
                           int agencyId,
                           int hostId,
-                          short hostIndex,
+                          int hostIndex,
                           String imageTag,
                           String containerName,
-                          short jsonrpcPort,
-                          short p2pPort,
-                          short channelPort,
+                          int jsonrpcPort,
+                          int p2pPort,
+                          int channelPort,
                           FrontStatusEnum frontStatusEnum
     ) throws NodeMgrException {
         // TODO. params check

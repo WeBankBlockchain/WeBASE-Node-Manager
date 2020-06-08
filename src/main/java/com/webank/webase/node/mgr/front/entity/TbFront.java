@@ -47,12 +47,12 @@ public class TbFront {
     private Integer agencyId;
     private String agencyName;
     private Integer hostId;
-    private Short hostIndex;
+    private Integer hostIndex;
     private String imageTag;
     private String containerName;
-    private Short jsonrpcPort;
-    private Short p2pPort;
-    private Short channelPort;
+    private Integer jsonrpcPort;
+    private Integer p2pPort;
+    private Integer channelPort;
 
     public static TbFront init(
             String nodeId,
@@ -63,12 +63,12 @@ public class TbFront {
             RunTypeEnum runTypeEnum,
             int agencyId,
             int hostId,
-            short hostIndex,
+            int hostIndex,
             String imageTag,
             String containerName ,
-            short jsonrpcPort,
-            short p2pPort,
-            short channelPort,
+            int jsonrpcPort,
+            int p2pPort,
+            int channelPort,
             FrontStatusEnum frontStatusEnum
     ){
         LocalDateTime now = LocalDateTime.now();

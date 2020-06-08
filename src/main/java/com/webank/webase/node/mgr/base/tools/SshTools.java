@@ -86,28 +86,28 @@ public class SshTools {
      */
     public static Session connect(
             String ip,
-            short port,
-            String user,
+            final int port,
+            final String user,
             String password,
             int connectTimeoutInSeconds) {
         if (StringUtils.isBlank(ip)
                 || (!"localhost".equals(ip) && !ValidateUtil.validateIpv4(ip))) {
             return null;
         }
-        user = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
-        port = port <= 0 ? SSH_DEFAULT_PORT : port;
+        String newUser = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
+        int newPort = port <= 0 ? SSH_DEFAULT_PORT : port;
         boolean pubAuth = StringUtils.isBlank(password);
 
         // set default connect timeout to 10s
         connectTimeoutInSeconds = connectTimeoutInSeconds <= 0 ? 10 : connectTimeoutInSeconds;
 
         String hostDetail = String.format("[%s@%s:%s] by [%s] with connectTimeout:[%s]",
-                user, ip, port, pubAuth ? "public_key" : "password", connectTimeoutInSeconds);
+                newUser, ip, newPort, pubAuth ? "public_key" : "password", connectTimeoutInSeconds);
         log.info("Start to connect to host:{} using SSH...", hostDetail);
         JSch jsch = new JSch();
         Session session = null;
         try {
-            session = jsch.getSession(user, ip, port);
+            session = jsch.getSession(newUser, ip, newPort);
             session.setConfig(config);
             if (pubAuth) {
                 jsch.addIdentity(PRIVATE_KEY);
