@@ -48,11 +48,11 @@ public class ConfigLine {
         if (StringUtils.isBlank(line)) {
             return null;
         }
-        line = StringUtils.trim(line);
+        String newLine = StringUtils.trim(line);
 
-        String[] configArray = line.split(" ");
+        String[] configArray = newLine.split(" ");
         if (ArrayUtils.getLength(configArray) < 3) {
-            throw error(IP_CONFIG_LINE_ERROR, line);
+            throw error(IP_CONFIG_LINE_ERROR, newLine);
         }
 
         ConfigLine configLine = new ConfigLine();
@@ -99,19 +99,6 @@ public class ConfigLine {
 
     private static NodeMgrException error(RetCode ret, String msg, Throwable e) {
         return new NodeMgrException(ret.msg(msg), e);
-    }
-
-    public static void main(String[] args) {
-
-        String[] ipLines = new String[]{
-                "127.0.0.1:2 agencyA 1,2,3",
-                "127.0.0.1:2 agencyB 2,-1",
-                "127.0.0.1:2 agencyC 3"
-        };
-        for (String ipLine : ipLines) {
-            System.out.println(parseLine(ipLine));
-        }
-
     }
 }
 

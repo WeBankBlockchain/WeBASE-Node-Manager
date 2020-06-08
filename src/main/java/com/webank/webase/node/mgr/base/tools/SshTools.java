@@ -89,7 +89,7 @@ public class SshTools {
             final int port,
             final String user,
             String password,
-            int connectTimeoutInSeconds) {
+            final int connectTimeoutInSeconds) {
         if (StringUtils.isBlank(ip)
                 || (!"localhost".equals(ip) && !ValidateUtil.validateIpv4(ip))) {
             return null;
@@ -99,10 +99,10 @@ public class SshTools {
         boolean pubAuth = StringUtils.isBlank(password);
 
         // set default connect timeout to 10s
-        connectTimeoutInSeconds = connectTimeoutInSeconds <= 0 ? 10 : connectTimeoutInSeconds;
+        int newConnectTimeoutInSeconds = connectTimeoutInSeconds <= 0 ? 10 : connectTimeoutInSeconds;
 
         String hostDetail = String.format("[%s@%s:%s] by [%s] with connectTimeout:[%s]",
-                newUser, ip, newPort, pubAuth ? "public_key" : "password", connectTimeoutInSeconds);
+                newUser, ip, newPort, pubAuth ? "public_key" : "password", newConnectTimeoutInSeconds);
         log.info("Start to connect to host:{} using SSH...", hostDetail);
         JSch jsch = new JSch();
         Session session = null;
@@ -114,7 +114,7 @@ public class SshTools {
             } else {
                 throw new NodeMgrException(ConstantCode.UNSUPPORTED_PASSWORD_SSH_ERROR);
             }
-            session.connect(connectTimeoutInSeconds * 1000);
+            session.connect(newConnectTimeoutInSeconds * 1000);
         } catch (Exception e) {
             log.info("Connect to host:[{}] ERROR!!!", hostDetail, e);
         }
