@@ -39,7 +39,6 @@ public class ConfigController {
      * 获取配置类型
      */
     @GetMapping(value = "list")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse listDockerTag(
             @RequestParam(value = "type", required = true, defaultValue = "0") int type,
             @RequestParam(value = "update", required = false) boolean update
