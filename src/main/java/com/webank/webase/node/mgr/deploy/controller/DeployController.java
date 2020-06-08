@@ -58,7 +58,7 @@ public class DeployController extends BaseController {
      * Deploy by ipconf and tagId.
      */
     @PostMapping(value = "init")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deploy( @RequestBody @Valid DeployReq deploy,
                                 BindingResult result ) throws NodeMgrException {
         checkBindResult(result);
@@ -77,7 +77,7 @@ public class DeployController extends BaseController {
      * delete chain by chainName.
      */
     @DeleteMapping(value = "delete")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse delete(
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     ) throws NodeMgrException {
