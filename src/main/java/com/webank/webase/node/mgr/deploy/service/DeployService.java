@@ -71,9 +71,9 @@ import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeMapper;
 import com.webank.webase.node.mgr.node.NodeService;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
-@Slf4j
+@Log4j2
 @Component
 public class DeployService {
 

@@ -26,13 +26,13 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  *
  */
 
-@Slf4j
+@Log4j2
 @Component
 public class AgencyService {
 

@@ -18,7 +18,7 @@ package com.webank.webase.node.mgr.base.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  *
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @ToString
 @AllArgsConstructor
-@Slf4j
+@Log4j2
 public enum HostStatusEnum {
     ADDED((byte) 0, "added"),
     INITIATING((byte) 1, "host is initiating"),

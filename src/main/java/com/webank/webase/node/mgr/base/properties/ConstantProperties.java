@@ -29,12 +29,12 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * constants.
  */
-@Slf4j
+@Log4j2
 @Data
 @Component
 @ConfigurationProperties(prefix = ConstantProperties.CONSTANT_PREFIX)

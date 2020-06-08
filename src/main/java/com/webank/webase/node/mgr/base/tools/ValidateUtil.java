@@ -17,13 +17,13 @@ package com.webank.webase.node.mgr.base.tools;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  *
  */
 
-@Slf4j
+@Log4j2
 public class ValidateUtil {
     public static final String IP_PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
     public static final String AGENCY_NAME_PATTERN = "^[0-9a-zA-Z_]+$";
