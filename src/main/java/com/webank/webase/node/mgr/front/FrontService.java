@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.front;
 
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -145,7 +146,7 @@ public class FrontService {
             TbGroup checkGroup = groupService.getGroupById(group);
             if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
                 groupService.saveGroup(group, groupPeerList.size(), "synchronous",
-                        GroupType.SYNC.getValue(), DataStatus.NORMAL.getValue());
+                        GroupType.SYNC, GroupStatus.NORMAL);
             }
             //save front group map
             frontGroupMapService.newFrontGroup(tbFront, group);

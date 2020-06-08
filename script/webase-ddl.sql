@@ -7,7 +7,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE IF NOT EXISTS tb_group (
     group_id int(11) NOT NULL COMMENT '群组ID',
     group_name varchar(64) NOT NULL COMMENT '群组名字',
-    group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常）',
+    group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常 3-脏数据冲突 4-创世块冲突）',
     node_count int DEFAULT '0' COMMENT '群组下节点数',
     description varchar(1024) DEFAULT NULL COMMENT '群组描述',
     group_type int COMMENT '群组类型（1-拉取，2-动态创建）',
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
   group_id int(11) NOT NULL COMMENT '群组编号',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  status int(11) DEFAULT 1 NOT NULL COMMENT '节点（前置）的群组状态',
+  status int(11) DEFAULT 1 NOT NULL COMMENT '节点（前置）的群组状态，1-normal，2-invalid',
   PRIMARY KEY (map_id),
   unique  unique_front_group (front_id,group_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=600001 DEFAULT CHARSET=utf8 COMMENT='前置群组映射表';

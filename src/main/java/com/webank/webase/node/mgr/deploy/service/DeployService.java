@@ -44,6 +44,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
@@ -184,8 +185,8 @@ public class DeployService {
                         groupCountMap.get(groupId).addAndGet(config.getNum());
                     } else {
                         // TODO. why insert ignore???
-                        groupService.saveGroupId(groupId, config.getNum(),
-                                newChain.getId(), newChain.getChainName(), "", GroupType.DEPLOY);
+                        groupService.saveGroup(groupId, config.getNum(),
+                             "deploy", GroupType.DEPLOY, GroupStatus.NORMAL, newChain.getId(), newChain.getChainName());
                         groupCountMap.put(groupId, new AtomicInteger(config.getNum()));
                     }
                 });
