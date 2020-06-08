@@ -355,6 +355,7 @@ public class NodeService {
     }
 
 
+
     @Transactional(propagation = Propagation.REQUIRED)
     public TbNode insert(
             String nodeId,
@@ -363,16 +364,16 @@ public class NodeService {
             String ip,
             int p2pPort,
             String description,
-            NodeStatusEnum nodeStatusEnum
+            final NodeStatusEnum nodeStatusEnum
     ) throws NodeMgrException {
         // TODO. params check
         if (! ValidateUtil.validateIpv4(ip)){
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_IP);
         }
 
-        nodeStatusEnum = nodeStatusEnum == null ? NodeStatusEnum.DEAD : nodeStatusEnum;
+        NodeStatusEnum newNodeStatusEnum = nodeStatusEnum == null ? NodeStatusEnum.DEAD : nodeStatusEnum;
 
-        TbNode node = TbNode.init(nodeId, nodeName, groupId, ip, p2pPort, description, nodeStatusEnum);
+        TbNode node = TbNode.init(nodeId, nodeName, groupId, ip, p2pPort, description, newNodeStatusEnum);
 
         if (nodeMapper.add(node) != 1) {
             throw new NodeMgrException(ConstantCode.INSERT_NODE_ERROR);

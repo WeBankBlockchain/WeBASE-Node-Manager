@@ -376,11 +376,11 @@ public class DeployShellService {
             return null;
         }
 
-        port = port <= 0 || port > 65535 ? SSH_DEFAULT_PORT : port;
-        user = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
+        int newport = port <= 0 || port > 65535 ? SSH_DEFAULT_PORT : port;
+        String newuser = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
 
         String command = String.format("bash -x -e %s -H %s -P %s -u %s %s %s", constant.getNodeOperateShell(),
-                ip, port, user,
+                ip, newport, newuser,
                 StringUtils.isBlank(pwd) ? "" : String.format(" -p %s ", pwd),
                 StringUtils.isBlank(chainRoot) ? "" : String.format(" -n %s ", chainRoot)
         );
@@ -425,7 +425,7 @@ public class DeployShellService {
                 pathService.getChainRootString(chainName),
                 // guomi or standard
                 encryptType == EncryptType.SM2_TYPE ? "-g" : "",
-                // only linux supports docker modle
+                // only linux supports docker model
                 SystemUtils.IS_OS_LINUX ? " -d " : "",
                 // use binary local
                 StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
