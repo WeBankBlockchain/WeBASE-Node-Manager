@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -49,6 +50,7 @@ import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.SshTools;
+import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.ConfigLine;
@@ -335,6 +337,7 @@ public class DeployService {
 
                 for (TbFront front : CollectionUtils.emptyIfNull(frontList)) {
                     // TODO. ssh remote server, shutdown, delete node config
+                    // delete config files
                     log.info("ssh remote server and shutdown front id:[{}].", front.getFrontId());
 
                     // optimize code to get host
@@ -384,6 +387,55 @@ public class DeployService {
         }
 
         return ConstantCode.SUCCESS;
+    }
+
+    /**
+     * Add a node.
+     *
+     * @param ip
+     * @param agencyName
+     * @param num
+     * @param chainName
+     * @return
+     */
+    public Pair<RetCode, String> add(String chainName, String ip, String agencyName, int num) {
+        log.info("Check chainName:[{}] exists...", chainName);
+        TbChain chain = tbChainMapper.getByChainName(chainName);
+        if (chain == null) {
+            throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
+        }
+
+        log.info("Check ip format:[{}]...", ip);
+        if (!ValidateUtil.validateIpv4(ip)) {
+            throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
+        }
+
+        List<TbAgency> agencyList = this.tbAgencyMapper.selectByChainId(chain.getId());
+        if (CollectionUtils.isEmpty(agencyList)) {
+            throw new NodeMgrException(ConstantCode.CHAIN_WITH_NO_AGENCY_ERROR);
+        }
+
+        // get agency id set
+        Set<Integer> agencyIdSet = agencyList.stream().map(agency -> agency.getId()).collect(Collectors.toSet());
+
+        List<TbHost> hostList = this.tbHostMapper.selectByIp(ip);
+        if (CollectionUtils.isEmpty(hostList) && StringUtils.isBlank(agencyName)){
+            // new ip address, agencyName cannot be blank
+            throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
+        }
+
+        // get agency id set from host
+        Set<Integer> agencyIdSetFromHost = hostList.stream().map(host -> host.getAgencyId()).collect(Collectors.toSet());
+        agencyIdSet.retainAll(agencyIdSetFromHost);
+
+        if (CollectionUtils.size(agencyIdSet) != 1
+                && StringUtils.isBlank(agencyName)){
+            // new ip address, agencyName cannot be blank
+            throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
+        }
+
+
+        return null;
     }
 }
 

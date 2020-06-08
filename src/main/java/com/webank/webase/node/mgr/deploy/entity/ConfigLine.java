@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.deploy.entity;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.AGENCY_NAME_CONFIG_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.GROUPS_CONFIG_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_CONFIG_LINE_ERROR;
+import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_FORMAT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
 
 import java.util.Arrays;
@@ -63,6 +64,9 @@ public class ConfigLine {
         }
         try {
             // parse IP:Num
+            if (ValidateUtil.validateIpv4(ipNumArray[0])){
+                throw error(IP_FORMAT_ERROR, newLine);
+            }
             configLine.ip = ipNumArray[0];
             configLine.num = Integer.parseInt(ipNumArray[1]);
         } catch (Exception e) {

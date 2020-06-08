@@ -23,16 +23,6 @@ public interface TbChainMapper {
             "select ", TbChainSqlProvider.ALL_COLUMN_FIELDS, " from tb_chain ",
             "where chain_name = #{chainName,jdbcType=VARCHAR}"
     })
-    @Results({
-            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
-            @Result(column="chain_name", property="chainName", jdbcType=JdbcType.VARCHAR),
-            @Result(column="chain_desc", property="chainDesc", jdbcType=JdbcType.VARCHAR),
-            @Result(column="version", property="version", jdbcType=JdbcType.VARCHAR),
-            @Result(column="encrypt_type", property="encryptType", jdbcType=JdbcType.TINYINT),
-            @Result(column="chain_status", property="chainStatus", jdbcType=JdbcType.TINYINT),
-            @Result(column="create_time", property="createTime", jdbcType=JdbcType.TIMESTAMP),
-            @Result(column="modify_time", property="modifyTime", jdbcType=JdbcType.TIMESTAMP)
-    })
     TbChain getByChainName(@Param("chainName") String chainName);
 
     /**
