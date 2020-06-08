@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.HOST_CONNECT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
 
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -182,8 +183,8 @@ public class DeployService {
                         groupCountMap.get(groupId).addAndGet(config.getNum());
                     } else {
                         // TODO. why insert ignore???
-                        groupService.saveGroupId(groupId, config.getNum(),
-                                newChain.getId(), newChain.getChainName(), "", GroupType.DEPLOY);
+                        groupService.saveGroup(groupId, config.getNum(),
+                             "deploy", GroupType.DEPLOY, GroupStatus.NORMAL, newChain.getId(), newChain.getChainName());
                         groupCountMap.put(groupId, new AtomicInteger(config.getNum()));
                     }
                 });

@@ -15,7 +15,6 @@
  */
 package com.webank.webase.node.mgr.base.config;
 
-import java.util.concurrent.ThreadPoolExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +22,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.properties.ExecutorProperties;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -76,20 +73,6 @@ public class BeanConfig {
         return factory;
     }
 
-
-    @Bean
-    public ThreadPoolTaskExecutor deployAsyncExecutor() {
-        log.info("start deployAsyncExecutor init...");
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("deploy-async-thread-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        // init executor
-        executor.initialize();
-        return executor;
-    }
 
     /**
      * mail sender for alert mail in node\mgr\alert\mail\MailService.java
