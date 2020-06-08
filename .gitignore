@@ -25,3 +25,4 @@
 /log/
 /nbdist/
 /.nb-gradle/
+/NODES_ROOT/*

@@ -17,6 +17,9 @@ package com.webank.webase.node.mgr.node;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
+import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
+
 import lombok.Data;
 
 /**
@@ -37,4 +40,29 @@ public class TbNode {
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
+    public static TbNode init(
+            String nodeId,
+            String nodeName,
+            int groupId ,
+            String ip,
+            int p2pPort,
+            String description,
+            NodeStatusEnum nodeStatusEnum
+    ) {
+        LocalDateTime now = LocalDateTime.now();
+        TbNode node = new TbNode();
+        node.setNodeId(nodeId);
+        node.setNodeName(nodeName);
+        node.setGroupId(groupId);
+        node.setNodeIp(ip);
+        node.setP2pPort(p2pPort);
+        node.setDescription(description);
+        node.setBlockNumber(BigInteger.ZERO);
+        node.setPbftView(BigInteger.ZERO);
+        node.setNodeActive(nodeStatusEnum.getId());
+        node.setCreateTime(now);
+        node.setModifyTime(now);
+
+        return node;
+    }
 }

@@ -13,6 +13,14 @@
  */
 package com.webank.webase.node.mgr.frontgroupmap;
 
+import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
+import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.front.FrontService;
@@ -22,16 +30,10 @@ import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import lombok.extern.log4j.Log4j2;
 
-import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
-import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
-
-@Slf4j
+@Log4j2
 @Service
 public class FrontGroupMapService {
 
@@ -70,6 +72,19 @@ public class FrontGroupMapService {
 
         return tbFrontGroupMap;
     }
+
+    /**
+     * add new mapping
+     */
+    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId) {
+        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId);
+
+        //add db
+        frontGroupMapMapper.add(tbFrontGroupMap);
+
+        return tbFrontGroupMap;
+    }
+
 
     /**
      * new front group map
