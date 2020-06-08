@@ -22,10 +22,10 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public enum ConfigTypeEnum {
-    DOCKER_IMAGE_TYPE((short)1,"docker 镜像版本", "Supported tags of docker image FISCO-BCOS and WeBASE-Front."),
+    DOCKER_IMAGE_TYPE(1,"docker 镜像版本", "Supported tags of docker image FISCO-BCOS and WeBASE-Front."),
     ;
 
-    private short id;
+    private int id;
     private String name;
     private String description;
 
@@ -34,7 +34,7 @@ public enum ConfigTypeEnum {
      * @param id
      * @return
      */
-    public static ConfigTypeEnum getById(short id) {
+    public static ConfigTypeEnum getById(int id) {
         for (ConfigTypeEnum value : ConfigTypeEnum.values()) {
             if (value.id == id) {
                 return value;

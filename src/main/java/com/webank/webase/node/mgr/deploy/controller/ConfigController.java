@@ -41,7 +41,7 @@ public class ConfigController {
     @GetMapping(value = "list")
 //    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse listDockerTag(
-            @RequestParam(value = "type", required = true, defaultValue = "0") short type,
+            @RequestParam(value = "type", required = true, defaultValue = "0") int type,
             @RequestParam(value = "update", required = false) boolean update
     ) throws Exception {
         log.info("list config, type: [{}], update: [{}]",type, update);

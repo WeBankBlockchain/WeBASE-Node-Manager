@@ -70,7 +70,7 @@ public class HostService {
                          String agencyName,
                          String ip,
                          String sshUser,
-                         short sshPort,
+                         int sshPort,
                          String rootDir,
                          HostStatusEnum hostStatusEnum) throws NodeMgrException {
 

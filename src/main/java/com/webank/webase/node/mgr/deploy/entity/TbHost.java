@@ -21,7 +21,7 @@ public class TbHost {
                                String agencyName,
                                String ip,
                                String sshUser,
-                               short sshPort,
+                               int sshPort,
                                String rootDir,
                                HostStatusEnum hostStatusEnum ){
         Date now = new Date();
@@ -90,7 +90,7 @@ public class TbHost {
      *
      * @mbg.generated
      */
-    private Short sshPort;
+    private Integer sshPort;
 
     /**
      *
@@ -108,7 +108,7 @@ public class TbHost {
      *
      * @mbg.generated
      */
-    private Short dockerPort;
+    private Integer dockerPort;
 
     /**
      *

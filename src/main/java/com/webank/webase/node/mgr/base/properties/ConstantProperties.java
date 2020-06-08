@@ -91,9 +91,9 @@ public class ConstantProperties {
     private Integer certMonitorTaskFixedDelay;
 
     //******************* Add in v1.4.0 start. *******************
-    public static final short DOCKER_DAEMON_PORT = 3000;
+    public static final int DOCKER_DAEMON_PORT = 3000;
     public static final String SSH_DEFAULT_USER = "root";
-    public static final short SSH_DEFAULT_PORT = 22;
+    public static final int SSH_DEFAULT_PORT = 22;
 
     // shell script
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
@@ -102,10 +102,10 @@ public class ConstantProperties {
     private String fiscoBcosBinary =  "";
 
     // default port
-    private short defaultJsonrpcPort = 8545;
-    private short defaultP2pPort = 30300;
-    private short defaultChannelPort = 20200;
-    private short defaultFrontPort = 5002;
+    private int defaultJsonrpcPort = 8545;
+    private int defaultP2pPort = 30300;
+    private int defaultChannelPort = 20200;
+    private int defaultFrontPort = 5002;
 
     // timeout config
     private long execHostInitTimeout = 2 * 60 * 60 * 1000;
@@ -123,7 +123,7 @@ public class ConstantProperties {
     /**
      * Docker client connect daemon ip with proxy ip.
      */
-    private Map<String, MutablePair<String, Short>> dockerProxyMap = new ConcurrentHashMap<>();
+    private Map<String, MutablePair<String, Integer>> dockerProxyMap = new ConcurrentHashMap<>();
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
