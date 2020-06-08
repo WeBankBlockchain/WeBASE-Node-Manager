@@ -16,6 +16,10 @@
 package com.webank.webase.node.mgr.front.entity;
 
 import java.time.LocalDateTime;
+
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
+
 import lombok.Data;
 
 @Data
@@ -37,6 +41,60 @@ public class TbFront {
      * @case2: front's request fail/no response
      */
     private Integer status;
+
+
+    private Byte runType;
+    private Integer agencyId;
+    private String agencyName;
+    private Integer hostId;
+    private Integer hostIndex;
+    private String imageTag;
+    private String containerName;
+    private Integer jsonrpcPort;
+    private Integer p2pPort;
+    private Integer channelPort;
+
+    public static TbFront init(
+            String nodeId,
+            String ip,
+            int port,
+            String agencyName,
+            String clientVersion,
+            RunTypeEnum runTypeEnum,
+            int agencyId,
+            int hostId,
+            int hostIndex,
+            String imageTag,
+            String containerName ,
+            int jsonrpcPort,
+            int p2pPort,
+            int channelPort,
+            FrontStatusEnum frontStatusEnum
+    ){
+        LocalDateTime now = LocalDateTime.now();
+        TbFront front = new TbFront();
+        front.setNodeId(nodeId);
+        front.setFrontIp(ip);
+        front.setFrontPort(port);
+        front.setAgency(agencyName);
+        front.setClientVersion(clientVersion);
+        front.setCreateTime(now);
+        front.setModifyTime(now);
+        front.setRunType(runTypeEnum.getId());
+        front.setAgencyId(agencyId);
+        front.setAgencyName(agencyName);
+        front.setHostId(hostId);
+        front.setHostIndex(hostIndex);
+        front.setImageTag(imageTag);
+        front.setContainerName(containerName);
+        front.setJsonrpcPort(jsonrpcPort);
+        front.setP2pPort(p2pPort);
+        front.setChannelPort(channelPort);
+        front.setStatus(frontStatusEnum.getId());
+
+        return front;
+    }
+
 }
 
 

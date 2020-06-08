@@ -31,6 +31,10 @@ public class RetCode {
         this.message = message;
     }
 
+    public RetCode msg(String message) {
+        this.message = message;
+        return this;
+    }
     public static RetCode mark(int code, String message) {
         return new RetCode(code, message);
     }
