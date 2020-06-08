@@ -17,6 +17,9 @@ package com.webank.webase.node.mgr.group.entity;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
+import com.webank.webase.node.mgr.base.enums.GroupType;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -49,13 +52,28 @@ public class TbGroup {
      */
     private String nodeIdList;
 
-    public TbGroup(Integer groupId, String groupName, Integer nodeCount,
-                   String description, Integer groupType) {
+    private Integer chainId;
+    private String chainName;
+
+
+    public TbGroup(Integer groupId,
+                   String groupName,
+                   Integer nodeCount,
+                   int chainId,
+                   String chainName,
+                   String description,
+                   GroupType groupType){
+        LocalDateTime now =  LocalDateTime.now();
+
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
         this.description = description;
-        this.groupType = groupType;
+        this.groupType = groupType.getValue();
+        this.chainId = chainId;
+        this.chainName = chainName;
+        this.createTime = now;
+        this.modifyTime = now;
     }
 
     public TbGroup(Integer groupId, String groupName, Integer nodeCount,

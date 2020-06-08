@@ -13,11 +13,14 @@
  */
 package com.webank.webase.node.mgr.front;
 
-import com.webank.webase.node.mgr.front.entity.FrontParam;
-import com.webank.webase.node.mgr.front.entity.TbFront;
+import java.time.LocalDateTime;
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
+
+import com.webank.webase.node.mgr.front.entity.FrontParam;
+import com.webank.webase.node.mgr.front.entity.TbFront;
 
 @Repository
 public interface FrontMapper {
@@ -35,4 +38,13 @@ public interface FrontMapper {
     TbFront getById(@Param("frontId") int frontId);
 
     TbFront getByNodeId(@Param("nodeId") String nodeId);
+
+    List<TbFront> selectByHostId(@Param("hostId") Integer hostId);
+    List<TbFront> selectByAgencyId(@Param("agencyId") Integer agencyId);
+
+    void deleteByAgencyId(@Param("agencyId") Integer agencyId);
+
+    int updateStatus(@Param("frontId") int frontId,
+                     @Param("status")int status,
+                     @Param("modifyTime")LocalDateTime now);
 }

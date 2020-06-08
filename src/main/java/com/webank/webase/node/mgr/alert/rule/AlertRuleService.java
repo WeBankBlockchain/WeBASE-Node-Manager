@@ -16,22 +16,24 @@
 
 package com.webank.webase.node.mgr.alert.rule;
 
-import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
-import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
+import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Alert Type Configuration Service
  */
-@Slf4j
+@Log4j2
 @Service
 public class AlertRuleService {
 

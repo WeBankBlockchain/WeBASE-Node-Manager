@@ -13,6 +13,28 @@
  */
 package com.webank.webase.node.mgr.group;
 
+import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
+
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.ResourceAccessException;
+
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -29,33 +51,27 @@ import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.group.entity.*;
+import com.webank.webase.node.mgr.group.entity.GroupGeneral;
+import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
+import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
+import com.webank.webase.node.mgr.group.entity.RspGroupStatus;
+import com.webank.webase.node.mgr.group.entity.RspOperateResult;
+import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.ResourceAccessException;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * services for group data.
@@ -866,5 +882,36 @@ public class GroupService {
         return groupMapper.getGroupById(groupId);
     }
 
+
+
+    /**
+     * update status.
+     */
+    public void updateGroupNodeCount(int groupId, int nodeCount) {
+        log.debug("start updateGroupNodeCount groupId:{} nodeCount:{}", groupId, nodeCount);
+        groupMapper.updateNodeCount(groupId, nodeCount);
+        log.debug("end updateGroupNodeCount groupId:{} nodeCount:{}", groupId, nodeCount);
+
+    }
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void saveGroupId(int groupId,
+                            int nodeCount,
+                            int chainId,
+                            String chainName,
+                            String groupDesc,
+                            GroupType groupType) {
+        // TODO. check params
+        if (groupId == 0) {
+            throw new NodeMgrException(INSERT_GROUP_ERROR);
+        }
+        //save group id
+        TbGroup tbGroup = new TbGroup(groupId,
+                String.format("group%s" , groupId),
+                nodeCount,chainId,chainName,groupDesc, groupType);
+        groupMapper.save(tbGroup);
+
+        //create table by group id
+        tableService.newTableByGroupId(groupId);
+    }
 
 }

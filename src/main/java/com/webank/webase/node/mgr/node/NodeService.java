@@ -13,19 +13,6 @@
  */
 package com.webank.webase.node.mgr.node;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
-import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
-import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -33,10 +20,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.log4j.Log4j2;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.base.tools.ValidateUtil;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
+import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
+import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
+import com.webank.webase.node.mgr.node.entity.PeerInfo;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * services for node data.
@@ -70,7 +77,7 @@ public class NodeService {
             nodeIp = ipPort[0];
             nodeP2PPort = Integer.valueOf(ipPort[1]);
         }
-        String nodeName = groupId + "_" + peerInfo.getNodeId();
+        String nodeName = getNodeName(groupId, peerInfo.getNodeId());
 
         // add row
         TbNode tbNode = new TbNode();
@@ -82,6 +89,7 @@ public class NodeService {
         nodeMapper.add(tbNode);
     }
 
+
     /**
      * query count of node.
      */
@@ -90,7 +98,7 @@ public class NodeService {
         try {
             Integer nodeCount = nodeMapper.getCount(queryParam);
             log.debug("end countOfNode nodeCount:{} queryParam:{}", nodeCount,
-                JSON.toJSONString(queryParam));
+                    JSON.toJSONString(queryParam));
             return nodeCount;
         } catch (RuntimeException ex) {
             log.error("fail countOfNode . queryParam:{}", queryParam, ex);
@@ -197,7 +205,6 @@ public class NodeService {
 
     /**
      * check node status
-     *
      */
     public void checkAndUpdateNodeStatus(int groupId) {
         //get local node list
@@ -205,11 +212,11 @@ public class NodeService {
 
         //getPeerOfConsensusStatus
         List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
-        if(Objects.isNull(consensusList)){
+        if (Objects.isNull(consensusList)) {
             log.error("fail checkNodeStatus, consensusList is null");
             return;
         }
-        
+
         // getObserverList
         List<String> observerList = frontInterface.getObserverList(groupId);
 
@@ -227,7 +234,8 @@ public class NodeService {
                 return;
             }
 
-            
+
+
             int nodeType = 0;   //0-consensus;1-observer
             if (observerList != null) {
                 nodeType = observerList.stream()
@@ -237,14 +245,14 @@ public class NodeService {
 
             BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
             BigInteger latestView = consensusList.stream()
-                .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
-                .orElse(BigInteger.ZERO);//pbftView
-            
+                    .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
+                    .orElse(BigInteger.ZERO);//pbftView
+
             if (nodeType == 0) {    //0-consensus;1-observer
                 // if local block number and pbftView equals chain's, invalid
                 if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
                     log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
-                        nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
+                            nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
                     tbNode.setNodeActive(DataStatus.INVALID.getValue());
                 } else {
                     tbNode.setBlockNumber(latestNumber);
@@ -343,6 +351,43 @@ public class NodeService {
             log.error("getNodeIdList error groupId:{}, exception:{}", groupId, e.getMessage());
             throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), e.getMessage());
         }
+
+    }
+
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbNode insert(
+            String nodeId,
+            String nodeName,
+            int groupId,
+            String ip,
+            int p2pPort,
+            String description,
+            final NodeStatusEnum nodeStatusEnum
+    ) throws NodeMgrException {
+        // TODO. params check
+        if (! ValidateUtil.validateIpv4(ip)){
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_IP);
+        }
+
+        NodeStatusEnum newNodeStatusEnum = nodeStatusEnum == null ? NodeStatusEnum.DEAD : nodeStatusEnum;
+
+        TbNode node = TbNode.init(nodeId, nodeName, groupId, ip, p2pPort, description, newNodeStatusEnum);
+
+        if (nodeMapper.add(node) != 1) {
+            throw new NodeMgrException(ConstantCode.INSERT_NODE_ERROR);
+        }
+        return node;
+    }
+
+    /**
+     * @param groupId
+     * @param nodeId
+     * @return
+     */
+    public static String getNodeName(int groupId, String nodeId) {
+        return String.format("%s_%s", groupId, nodeId);
 
     }
 }
