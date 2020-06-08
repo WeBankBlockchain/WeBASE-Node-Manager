@@ -282,7 +282,7 @@ public class GroupService {
 				TbGroup checkGroupExist = getGroupById(gId);
 				if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
 					saveGroup(gId, groupPeerList.size(), "synchronous",
-							GroupType.SYNC.getValue(), GroupStatus.NORMAL.getValue());
+							GroupType.SYNC, GroupStatus.NORMAL);
 				}
 				// refresh front group map by group list on chain
 				// different from checkGroupMapByLocalGroupList which update by local groupList
@@ -652,7 +652,7 @@ public class GroupService {
                 generateGroupInfo);
         // save group, saved as invalid status until start
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
-                req.getDescription(), GroupType.MANUAL.getValue(), GroupStatus.MAINTAINING.getValue(),
+                req.getDescription(), GroupType.MANUAL, GroupStatus.MAINTAINING,
                 req.getTimestamp(), req.getNodeList());
         return tbGroup;
     }
@@ -697,7 +697,7 @@ public class GroupService {
         }
         // save group, saved as invalid status until start
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
-                req.getDescription(), GroupType.MANUAL.getValue(), GroupStatus.MAINTAINING.getValue(),
+                req.getDescription(), GroupType.MANUAL, GroupStatus.MAINTAINING,
                 req.getTimestamp(), req.getNodeList());
         return resOperateList;
     }
@@ -823,7 +823,8 @@ public class GroupService {
      */
     @Transactional
     public TbGroup saveGroup(int groupId, int nodeCount, String description,
-                             int groupType, int groupStatus) {
+        GroupType groupType, GroupStatus groupStatus) {
+
         if (groupId == 0) {
             return null;
         }
@@ -839,8 +840,9 @@ public class GroupService {
     }
 
     @Transactional
-    public TbGroup saveGroup(int groupId, int nodeCount, String description, int groupType,
-                             int groupStatus, BigInteger timestamp, List<String> nodeIdList) {
+    public TbGroup saveGroup(int groupId, int nodeCount, String description, GroupType groupType,
+        GroupStatus groupStatus, BigInteger timestamp, List<String> nodeIdList) {
+
         if (groupId == 0) {
             return null;
         }
@@ -894,12 +896,8 @@ public class GroupService {
 
     }
     @Transactional(propagation = Propagation.REQUIRED)
-    public void saveGroupId(int groupId,
-                            int nodeCount,
-                            int chainId,
-                            String chainName,
-                            String groupDesc,
-                            GroupType groupType) {
+    public void saveGroup(int groupId, int nodeCount, String groupDesc,
+                            GroupType groupType, GroupStatus groupStatus, int chainId, String chainName) {
         // TODO. check params
         if (groupId == 0) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
@@ -907,7 +905,7 @@ public class GroupService {
         //save group id
         TbGroup tbGroup = new TbGroup(groupId,
                 String.format("group%s" , groupId),
-                nodeCount,chainId,chainName,groupDesc, groupType);
+                nodeCount, groupDesc, groupType, groupStatus, chainId, chainName);
         groupMapper.save(tbGroup);
 
         //create table by group id
