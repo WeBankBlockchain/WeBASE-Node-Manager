@@ -63,4 +63,19 @@ public class ThreadPoolConfig {
                 schedulerProperties.getWaitForTasksToCompleteOnShutdown());
         return scheduler;
     }
+
+
+    @Bean
+    public ThreadPoolTaskExecutor deployAsyncExecutor() {
+        log.info("start deployAsyncExecutor init...");
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("deploy-async-thread-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        // init executor
+        executor.initialize();
+        return executor;
+    }
 }

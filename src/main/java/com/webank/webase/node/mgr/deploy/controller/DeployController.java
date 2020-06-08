@@ -13,12 +13,14 @@
  */
 package com.webank.webase.node.mgr.deploy.controller;
 
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import java.time.Instant;
 
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,6 +52,7 @@ public class DeployController extends BaseController {
      * Deploy by ipconf and tagId.
      */
     @PostMapping(value = "init")
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deploy(@RequestBody @Valid ReqDeploy deploy,
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -89,6 +92,7 @@ public class DeployController extends BaseController {
      * delete chain by chainName.
      */
     @DeleteMapping(value = "delete")
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse delete(
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     ) throws NodeMgrException {
