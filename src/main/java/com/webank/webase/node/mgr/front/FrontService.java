@@ -13,10 +13,27 @@
  */
 package com.webank.webase.node.mgr.front;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupType;
+import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
@@ -24,8 +41,8 @@ import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
@@ -35,20 +52,7 @@ import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * service of web3.
@@ -195,13 +199,12 @@ public class FrontService {
     /**
      * check not support ip.
      */
-    /**
-     * check not support ip.
-     */
-    private void checkNotSupportIp(String ip) {
+    public void checkNotSupportIp(String ip) {
 
         String ipConfig = constants.getNotSupportFrontIp();
-        if(StringUtils.isBlank(ipConfig))return;
+        if(StringUtils.isBlank(ipConfig)) {
+            return;
+        }
         List<String> list = Arrays.asList(ipConfig.split(","));
         if (list.contains(ip)) {
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_IP);
@@ -312,4 +315,38 @@ public class FrontService {
         updateFront.setStatus(status);
         frontMapper.update(updateFront);
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbFront insert(String nodeId,
+                          String ip,
+                          int port,
+                          String agencyName,
+                          String clientVersion,
+                          RunTypeEnum runTypeEnum,
+                          int agencyId,
+                          int hostId,
+                          int hostIndex,
+                          String imageTag,
+                          String containerName,
+                          int jsonrpcPort,
+                          int p2pPort,
+                          int channelPort,
+                          FrontStatusEnum frontStatusEnum
+    ) throws NodeMgrException {
+        // TODO. params check
+
+        TbFront front = TbFront.init(nodeId, ip, port, agencyName, clientVersion, runTypeEnum,
+                agencyId, hostId, hostIndex, imageTag, containerName, jsonrpcPort, p2pPort, channelPort, frontStatusEnum);
+
+        if (frontMapper.add(front) != 1 || front.getFrontId() <= 0){
+            throw new NodeMgrException(ConstantCode.INSERT_FRONT_ERROR);
+        }
+        return front;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public boolean updateStatus(int frontId,FrontStatusEnum newStatus){
+        return this.frontMapper.updateStatus(frontId,newStatus.getId(),LocalDateTime.now()) == 1;
+    }
+
 }
