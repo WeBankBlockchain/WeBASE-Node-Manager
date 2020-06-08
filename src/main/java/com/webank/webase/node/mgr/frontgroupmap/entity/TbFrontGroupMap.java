@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.frontgroupmap.entity;
 
 import java.time.LocalDateTime;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -36,5 +37,10 @@ public class TbFrontGroupMap {
         this.frontId = frontId;
         this.groupId = groupId;
         this.status = status;
+    }
+
+    public TbFrontGroupMap(Integer frontId, Integer groupId) {
+        this.frontId = frontId;
+        this.groupId = groupId;
     }
 }
