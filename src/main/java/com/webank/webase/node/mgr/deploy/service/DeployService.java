@@ -399,6 +399,7 @@ public class DeployService {
      * @param chainName
      * @return
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public Pair<RetCode, String> add(String chainName, String ip, String agencyName, int num) {
         log.info("Check chainName:[{}] exists...", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
@@ -421,7 +422,7 @@ public class DeployService {
 
         List<TbHost> hostList = this.tbHostMapper.selectByIp(ip);
         if (CollectionUtils.isEmpty(hostList) && StringUtils.isBlank(agencyName)){
-            // new ip address, agencyName cannot be blank
+            // new ip address, agency name cannot be blank
             throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
         }
 
@@ -431,10 +432,25 @@ public class DeployService {
 
         if (CollectionUtils.size(agencyIdSet) != 1
                 && StringUtils.isBlank(agencyName)){
-            // new ip address, agencyName cannot be blank
+            // new ip address, agency name cannot be blank
             throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
         }
 
+        if(CollectionUtils.isEmpty(agencyIdSet)){
+            // new IP and new agency name
+
+            // call shell to generate new agency config(private key and crt)
+
+            // insert node to db
+        }
+
+        // generate nodes config by agency config
+
+        // insert host into db
+
+        // ssh host and start docker container
+
+        // try catch, if error occurred, delete generated config files.
 
         return null;
     }
