@@ -25,13 +25,13 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.netty.NettyDockerCmdExecFactory;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * TODO. 1. A host should exec only one command at the same time.
  */
 
-@Slf4j
+@Log4j2
 @Component
 public class DockerClientService {
 

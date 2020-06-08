@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  *
  */
 
-@Slf4j
+@Log4j2
 public class StreamGobbler extends Thread {
     private InputStream inputStream;
     private String streamType;

@@ -62,12 +62,12 @@ import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Java call shell script and system command.
  */
-@Slf4j
+@Log4j2
 @Component
 public class DeployShellService {
 

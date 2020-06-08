@@ -353,7 +353,7 @@ CREATE TABLE `tb_agency` (
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_chain_id_agency_name` (`chain_id`,`agency_name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='机构信息表';
 
 
 
@@ -371,7 +371,7 @@ CREATE TABLE `tb_chain` (
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_chain_name` (`chain_name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链信息表';
 
 -- ----------------------------
 -- Table structure for tb_config
@@ -385,7 +385,7 @@ CREATE TABLE `tb_config` (
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unq_type_value` (`config_type`,`config_value`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='配置信息表';
 
 
 
@@ -406,7 +406,7 @@ CREATE TABLE `tb_host` (
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unq_agency_id,ip` (`agency_id`,`ip`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物理主机信息';
 
 
 
