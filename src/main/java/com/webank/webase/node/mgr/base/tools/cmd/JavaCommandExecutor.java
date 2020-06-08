@@ -21,13 +21,13 @@ import java.io.InputStream;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  *
  */
 
-@Slf4j
+@Log4j2
 public class JavaCommandExecutor {
 
     public static ExecuteResult executeCommand(String command, long timeout) {

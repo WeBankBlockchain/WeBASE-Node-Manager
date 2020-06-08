@@ -13,6 +13,9 @@
  */
 package com.webank.webase.node.mgr.frontgroupmap;
 
+import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
+import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +28,12 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
-
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
-import lombok.extern.slf4j.Slf4j;
 
-import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
-import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
+import lombok.extern.log4j.Log4j2;
 
-@Slf4j
+@Log4j2
 @Service
 public class FrontGroupMapService {
 
