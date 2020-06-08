@@ -31,7 +31,8 @@ public class StreamGobbler extends Thread {
     private InputStream inputStream;
     private String streamType;
     private StringBuilder buf;
-    private volatile boolean isStopped = false;
+    // TODO. why PMD delete volatile?
+    private boolean isStopped = false;
 
     /**
      * @param inputStream the InputStream to be consumed
