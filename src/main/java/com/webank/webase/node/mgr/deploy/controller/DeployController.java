@@ -31,7 +31,7 @@ import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.deploy.entity.DeployReq;
+import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
 import com.webank.webase.node.mgr.deploy.service.DeployService;
 
 import lombok.extern.log4j.Log4j2;
@@ -46,28 +46,43 @@ public class DeployController extends BaseController {
 
     @Autowired private DeployService deployService;
 
-//    @PostMapping(value = "init")
-//    public BaseResponse deploy(
-//            @RequestParam(value = "ipconf[]", required = true) String[] ipConf,
-//            @RequestParam(value = "tagId", required = true, defaultValue = "0") int tagId,
-//            @RequestParam(value = "rootDirOnHost", required = false, defaultValue = "/opt/fisco") String rootDirOnHost,
-//            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     /**
      * Deploy by ipconf and tagId.
      */
     @PostMapping(value = "init")
-    public BaseResponse deploy( @RequestBody @Valid DeployReq deploy,
-                                BindingResult result ) throws NodeMgrException {
+    public BaseResponse deploy(@RequestBody @Valid ReqDeploy deploy,
+                               BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start deploy chainName:[{}], rootDirOnHost:[{}] startTime:[{}], tagId:[{}], ipconf:[{}]",
                 deploy.getChainName(), deploy.getRootDirOnHost(), startTime.toEpochMilli(),
-                deploy.getTagId(),deploy.getIpconf());
-
+                deploy.getTagId(), deploy.getIpconf());
 
         Pair<RetCode, String> deployResult = this.deployService.deploy(deploy.getChainName(),
                 deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost());
         return new BaseResponse(deployResult.getKey(), deployResult.getValue());
+    }
+
+    /**
+     * @param ip         Host runs new node, maybe a new host.
+     * @param agencyName If host ip is new one, agency name should not be null.
+     * @param chainName  If agency name is a new one, chain name should not be null.
+     * @param num        Count of new nodes , default is 1.
+     * @return
+     */
+    @PostMapping(value = "add")
+    public BaseResponse add(
+            @RequestParam(value = "ip", required = true) String ip,
+            @RequestParam(value = "agencyName", required = false, defaultValue = "") String agencyName,
+            @RequestParam(value = "num", required = false, defaultValue = "1") int num,
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
+    ) {
+        Instant startTime = Instant.now();
+        log.info("start add node ip:[{}], agencyName:[{}], num:[{}], chainName:[{}], now:[{}]",
+                ip, agencyName, num, chainName, startTime);
+
+        Pair<RetCode, String> addResult = this.deployService.add(chainName, ip, agencyName, num);
+        return new BaseResponse(addResult.getKey(), addResult.getValue());
     }
 
     /**

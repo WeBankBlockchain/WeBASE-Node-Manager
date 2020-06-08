@@ -368,7 +368,7 @@ public class NodeService {
     ) throws NodeMgrException {
         // TODO. params check
         if (! ValidateUtil.validateIpv4(ip)){
-            throw new NodeMgrException(ConstantCode.INVALID_FRONT_IP);
+            throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
         NodeStatusEnum newNodeStatusEnum = nodeStatusEnum == null ? NodeStatusEnum.DEAD : nodeStatusEnum;

@@ -203,4 +203,8 @@ public class ConstantCode {
     public static final RetCode DEPLOY_WITH_UNKNOWN_EXCEPTION_ERROR = RetCode.mark(500024, "Unexpected exception occurred when deploy.");
     public static final RetCode UNSUPPORTED_PASSWORD_SSH_ERROR = RetCode.mark(500025, "SSH password login not supported yet.");
     public static final RetCode CHAIN_WITH_NO_AGENCY_ERROR = RetCode.mark(500026, "Chain has no agency.");
+    public static final RetCode CHAIN_NAME_NOT_EXISTS_ERROR = RetCode.mark(500027, "Chain name not exists.");
+    public static final RetCode IP_FORMAT_ERROR = RetCode.mark(500028, "IP format error.");
+    public static final RetCode AGENCY_NAME_EMPTY_ERROR = RetCode.mark(500029, "Agency name is null when host ip is new.");
+
 }
