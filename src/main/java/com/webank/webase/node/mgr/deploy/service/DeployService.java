@@ -410,7 +410,7 @@ public class DeployService {
         }
 
         log.info("Check ip format:[{}]...", ip);
-        if (!ValidateUtil.validateIpv4(ip)) {
+        if (!ValidateUtil.ipv4Valid(ip)) {
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 

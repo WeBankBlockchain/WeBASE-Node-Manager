@@ -64,7 +64,7 @@ public class ConfigLine {
         }
         try {
             // parse IP:Num
-            if (ValidateUtil.validateIpv4(ipNumArray[0])){
+            if (! ValidateUtil.ipv4Valid(ipNumArray[0])){
                 throw error(IP_FORMAT_ERROR, newLine);
             }
             configLine.ip = ipNumArray[0];
