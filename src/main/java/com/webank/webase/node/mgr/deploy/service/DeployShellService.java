@@ -371,7 +371,7 @@ public class DeployShellService {
      */
     public ExecuteResult execHostOperate(String ip, int port, String user, String pwd, String chainRoot) {
         log.info("Exec execHostOperate method for [{}@{}:{}#{}]", user, ip, port, pwd);
-        if (!ValidateUtil.validateIpv4(ip)) {
+        if (!ValidateUtil.ipv4Valid(ip)) {
             log.error("Exec execHostOperate method ERROR: IP:[{}] error", ip);
             return null;
         }
