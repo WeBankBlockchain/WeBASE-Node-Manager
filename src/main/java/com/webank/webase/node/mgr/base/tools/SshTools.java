@@ -91,7 +91,7 @@ public class SshTools {
             String password,
             final int connectTimeoutInSeconds) {
         if (StringUtils.isBlank(ip)
-                || (!"localhost".equals(ip) && !ValidateUtil.validateIpv4(ip))) {
+                || (!"localhost".equals(ip) && !ValidateUtil.ipv4Valid(ip))) {
             return null;
         }
         String newUser = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;

@@ -197,6 +197,10 @@ public class ConstantCode {
     public static final RetCode UNSUPPORTED_PASSWORD_SSH_ERROR = RetCode.mark(205025, "SSH password login not supported yet.");
     public static final RetCode CHAIN_WITH_NO_AGENCY_ERROR = RetCode.mark(205026, "Chain has no agency.");
 
+    public static final RetCode CHAIN_NAME_NOT_EXISTS_ERROR = RetCode.mark(205027, "Chain name not exists.");
+    public static final RetCode IP_FORMAT_ERROR = RetCode.mark(205028, "IP format error.");
+    public static final RetCode AGENCY_NAME_EMPTY_ERROR = RetCode.mark(205029, "Agency name is null when host ip is new.");
+
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
     public static final RetCode ACCESS_DENIED = RetCode.mark(302001, "access denied");
