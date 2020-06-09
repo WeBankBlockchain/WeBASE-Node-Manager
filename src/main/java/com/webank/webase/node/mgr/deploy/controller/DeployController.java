@@ -13,14 +13,12 @@
  */
 package com.webank.webase.node.mgr.deploy.controller;
 
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import java.time.Instant;
 
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +31,7 @@ import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.deploy.entity.DeployReq;
+import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
 import com.webank.webase.node.mgr.deploy.service.DeployService;
 
 import lombok.extern.log4j.Log4j2;
@@ -58,8 +56,8 @@ public class DeployController extends BaseController {
      * Deploy by ipconf and tagId.
      */
     @PostMapping(value = "init")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse deploy( @RequestBody @Valid DeployReq deploy,
+    // @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse deploy( @RequestBody @Valid ReqDeploy deploy,
                                 BindingResult result ) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
@@ -77,7 +75,7 @@ public class DeployController extends BaseController {
      * delete chain by chainName.
      */
     @DeleteMapping(value = "delete")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse delete(
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     ) throws NodeMgrException {
