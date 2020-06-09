@@ -203,5 +203,4 @@ public class ConstantCode {
 
     /* param exception */
     public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
-
 }
