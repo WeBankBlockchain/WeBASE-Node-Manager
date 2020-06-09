@@ -23,7 +23,7 @@ import lombok.Data;
  *
  */
 @Data
-public class DeployReq {
+public class ReqDeploy {
     @NotNull
     private String[] ipconf;
 
