@@ -390,7 +390,7 @@ public class DeployShellService {
 
     /**
      * TODO. if nodes config dir already exists, delete or backup first ?
-     *
+     * TODO. separate two steps: save config files local, and exec build_chain
      * @param encryptType
      * @param ipLines
      * @return

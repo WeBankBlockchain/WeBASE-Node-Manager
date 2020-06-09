@@ -119,22 +119,22 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
 
-        // verify tagId if exists
+        // check tagId existed
         TbConfig imageConfig = tbConfigMapper.selectByPrimaryKey(tagId);
         if (imageConfig == null
                 || StringUtils.isBlank(imageConfig.getConfigValue())) {
             throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
         }
 
-        // validate ipConf config
-        log.info("Parse ipConf content....");
-        List<ConfigLine> configLineList = this.parseIpConf(ipConf);
-
         log.info("Check chainName exists....");
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain != null) {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_EXISTS_ERROR);
         }
+
+        // validate ipConf config
+        log.info("Parse ipConf content....");
+        List<ConfigLine> configLineList = this.parseIpConf(ipConf);
 
         byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
                 EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
@@ -149,7 +149,7 @@ public class DeployService {
             // insert chain
             final TbChain newChain = this.chainService.insert(chainName, chainName,
                     imageConfig.getConfigValue(), encryptType, ChainStatusEnum.INITIALIZED);
-
+            // TODO 提高代码可读性
             Map<String, Integer> agencyIdMap = new HashMap<>();
             Map<String, Integer> hostIdMap = new HashMap<>();
             Map<String, Set<Integer>> hostGroupListMap = new HashMap<>();
@@ -185,8 +185,10 @@ public class DeployService {
                         groupCountMap.get(groupId).addAndGet(config.getNum());
                     } else {
                         // TODO. why insert ignore???
+                        // save group default status maintaining
                         groupService.saveGroup(groupId, config.getNum(),
-                             "deploy", GroupType.DEPLOY, GroupStatus.NORMAL, newChain.getId(), newChain.getChainName());
+                             "deploy", GroupType.DEPLOY, GroupStatus.MAINTAINING,
+                            newChain.getId(), newChain.getChainName());
                         groupCountMap.put(groupId, new AtomicInteger(config.getNum()));
                     }
                 });
@@ -263,6 +265,7 @@ public class DeployService {
      *
      * @param ipConf
      * @throws NodeMgrException
+     * @return List<ConfigLine> entity of config for build_chain
      */
     public List<ConfigLine> parseIpConf(String[] ipConf) throws NodeMgrException {
         if (ArrayUtils.isEmpty(ipConf)) {
@@ -288,8 +291,7 @@ public class DeployService {
             }
             hostAgencyMap.put(configLine.getIp(), configLine.getAgencyName());
 
-            // TODO. why ????
-            frontService.checkNotSupportIp(configLine.getIp());
+//            frontService.checkNotSupportIp(configLine.getIp());
 
             // SSH to host ip
             if (!SshTools.connect(configLine.getIp())) {
