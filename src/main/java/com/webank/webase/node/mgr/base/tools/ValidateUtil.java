@@ -25,7 +25,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class ValidateUtil {
-    public static final String IP_PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
+    public static final String IP_PATTERN = "^(25[0-5]|2[0-4]\\\\d|[0-1]?\\\\d?\\\\d)(\\\\.(25[0-5]|2[0-4]\\\\d|[0-1]?\\\\d?\\\\d)){3}$";
     public static final String AGENCY_NAME_PATTERN = "^[0-9a-zA-Z_]+$";
 
     /**
