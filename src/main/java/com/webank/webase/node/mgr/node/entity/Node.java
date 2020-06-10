@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.node;
+package com.webank.webase.node.mgr.node.entity;
 
-import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
+/**
+ * receive node info entity.
+ */
 @Data
-@NoArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class NodeParam extends BaseQueryParam {
-    private Integer groupId;
+public class Node {
     private String nodeId;
-    private Integer p2pPort;
-    private String nodeName;
-    private String nodeIp;
+    private String nodeType;
+//    private Integer groupId;
+//    private String nodeIp;
+//    private Integer nodeType;
+//    private Integer frontPort;
 }
