@@ -66,7 +66,7 @@ import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.TbNode;
+import com.webank.webase.node.mgr.node.entity.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;

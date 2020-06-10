@@ -281,7 +281,7 @@ public class DeployShellService {
                     // init success
                     log.info("Init host:[{}], exec shell script success:[{}].", tbHost.getIp(), result.getExecuteOut());
 
-                    // scp config files
+                    // scp config files from
                     String src = String.format("%s/*", pathService.getHost(tbChain.getChainName(), tbHost.getIp()).toString());
                     String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName());
 

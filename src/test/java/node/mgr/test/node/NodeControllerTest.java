@@ -17,7 +17,7 @@ package node.mgr.test.node;
 
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.TbNode;
+import com.webank.webase.node.mgr.node.entity.TbNode;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

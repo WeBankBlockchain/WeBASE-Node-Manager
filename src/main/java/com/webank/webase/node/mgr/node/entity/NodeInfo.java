@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.node;
+package com.webank.webase.node.mgr.node.entity;
 
 import lombok.Data;
 
-/**
- * receive node info entity.
- */
 @Data
-public class Node {
-    private String nodeId;
-    private String nodeType;
-//    private Integer groupId;
-//    private String nodeIp;
-//    private Integer nodeType;
-//    private Integer frontPort;
+public class NodeInfo {
+
+    private String systemproxyaddress;
+    private String p2pip;
+    private String orgName;
+    private String listenip;
+    private Integer rpcport;
+    private Integer p2pport;
+    private Integer channelPort;
+    private String datadir;
 }
