@@ -245,7 +245,7 @@ public class DeployService {
             });
 
             // init host env
-            this.deployShellService.initHostList(newChain.getChainName());
+            this.hostService.initHostList(newChain.getChainName());
 
             return Pair.of(ConstantCode.SUCCESS, buildChainResult.getExecuteOut());
         } catch (Exception e) {
