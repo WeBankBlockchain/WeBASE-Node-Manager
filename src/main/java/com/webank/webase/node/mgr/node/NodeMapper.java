@@ -50,6 +50,7 @@ public interface NodeMapper {
      */
     TbNode queryByNodeId(@Param("nodeId") String nodeId);
 
+
     /**
      * update node info.
      */

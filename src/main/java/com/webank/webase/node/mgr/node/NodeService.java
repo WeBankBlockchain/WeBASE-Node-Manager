@@ -13,15 +13,20 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,10 +38,14 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
+import com.webank.webase.node.mgr.base.tools.ValidateUtil;
+import com.webank.webase.node.mgr.deploy.entity.TbChain;
+import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
@@ -61,6 +70,10 @@ public class NodeService {
      */
     @Autowired
     private FrontService frontService;
+    @Autowired
+    private PathService pathService;
+    @Autowired
+    private ConstantProperties constant;
 
     // interval of check node status
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 7500L;
@@ -389,5 +402,56 @@ public class NodeService {
     public static String getNodeName(int groupId, String nodeId) {
         return String.format("%s_%s", groupId, nodeId);
 
+    }
+
+    /**
+     *
+     * @param chainId
+     * @param groupId
+     * @return
+     */
+    public List<TbNode> selectNodeListByChainIdAndGroupId(int chainId,int groupId){
+        // select all fronts by all agencies
+        List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
+
+        List<TbNode> tbNodeList = tbFrontList.stream()
+                .map((front) -> nodeMapper.queryByNodeId(front.getNodeId()))
+                .filter((node) -> node != null)
+                .filter((node) -> node.getGroupId() == groupId)
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(tbNodeList)) {
+            log.error("Chain:[{}] has no node.", chainId);
+            return Collections.emptyList();
+        }
+        return tbNodeList;
+    }
+
+
+    /**
+     *
+     * @param chain
+     * @param groupId
+     */
+    public void generateNodeConfig(TbChain chain, int groupId,String ip, List<TbFront> newFrontList) throws IOException {
+        int chainId = chain.getId();
+        String chainName = chain.getChainName();
+        byte encryptType = chain.getEncryptType();
+
+        // select same peers to update node config.ini p2p part
+        // if group
+        List<TbNode> peerList = this.selectNodeListByChainIdAndGroupId(chainId, groupId);
+
+        for (TbFront newFront : newFrontList) {
+            boolean guomi = encryptType == EncryptType.SM2_TYPE;
+            int chainIdInConfigIni = this.constant.getDefaultChainId();
+
+            // local node root
+            Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
+
+            // generate config.ini
+            ThymeleafUtil.newNodeConfigIni(nodeRoot, newFront.getChannelPort(),
+                    newFront.getP2pPort(), newFront.getJsonrpcPort(), peerList, guomi, chainIdInConfigIni);
+        }
     }
 }

@@ -196,10 +196,20 @@ public class ConstantCode {
     public static final RetCode DEPLOY_WITH_UNKNOWN_EXCEPTION_ERROR = RetCode.mark(205024, "Unexpected exception occurred when deploy.");
     public static final RetCode UNSUPPORTED_PASSWORD_SSH_ERROR = RetCode.mark(205025, "SSH password login not supported yet.");
     public static final RetCode CHAIN_WITH_NO_AGENCY_ERROR = RetCode.mark(205026, "Chain has no agency.");
-
     public static final RetCode CHAIN_NAME_NOT_EXISTS_ERROR = RetCode.mark(205027, "Chain name not exists.");
     public static final RetCode IP_FORMAT_ERROR = RetCode.mark(205028, "IP format error.");
     public static final RetCode AGENCY_NAME_EMPTY_ERROR = RetCode.mark(205029, "Agency name is null when host ip is new.");
+    public static final RetCode AGENCY_NAME_EXISTS_ERROR = RetCode.mark(205030, "Agency name exists when host ip is new.");
+    public static final RetCode ADD_NODE_WITH_UNKNOWN_EXCEPTION_ERROR = RetCode.mark(205031, "Unexpected exception occurred when add new node.");
+    public static final RetCode CHAIN_CERT_NOT_EXISTS_ERROR = RetCode.mark(205032, "Chain cert directory not exists.");
+    public static final RetCode EXEC_GEN_AGENCY_ERROR = RetCode.mark(205033, "Exec generate agency script failed.");
+    public static final RetCode HOST_WITH_NO_AGENCY_ERROR = RetCode.mark(205034, "Host's agency is null.");
+    public static final RetCode NODES_NUM_ERROR = RetCode.mark(205035, "Num should be positive integer and less then 200.");
+    public static final RetCode EXEC_GEN_SDK_ERROR = RetCode.mark(205036, "Exec generate node script to generate sdk dir failed.");
+    public static final RetCode EXEC_GEN_NODE_ERROR = RetCode.mark(205037, "Exec generate node script to generate node dir failed.");
+    public static final RetCode COPY_SDK_FILES_ERROR = RetCode.mark(205038, "Copy sdk config files error.");
+    public static final RetCode SEND_SDK_FILES_ERROR = RetCode.mark(205039, "Send sdk config files error.");
+    public static final RetCode SEND_NODE_FILES_ERROR = RetCode.mark(205040, "Send node config files error.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

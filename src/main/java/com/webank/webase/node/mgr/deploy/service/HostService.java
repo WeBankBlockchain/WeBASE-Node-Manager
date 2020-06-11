@@ -18,8 +18,13 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,8 +33,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
+import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 
 import lombok.extern.log4j.Log4j2;
@@ -43,6 +52,11 @@ import lombok.extern.log4j.Log4j2;
 public class HostService {
 
     @Autowired private TbHostMapper tbHostMapper;
+    @Autowired private TbAgencyMapper tbAgencyMapper;
+    @Autowired private AgencyService agencyService;
+    @Autowired private PathService pathService;
+    @Autowired private ConfigService configService;
+    @Autowired private DeployShellService deployShellService;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int hostId, HostStatusEnum newStatus) throws NodeMgrException {
@@ -82,6 +96,69 @@ public class HostService {
             throw new NodeMgrException(ConstantCode.INSERT_HOST_ERROR);
         }
         return host;
+    }
+
+    /**
+     *
+     * @param chainId
+     * @return
+     */
+    public List<TbHost> selectHostListByChainId(int chainId){
+        // select all agencies by chainId
+        List<TbAgency> tbAgencyList = this.agencyService.selectAgencyListByChainId(chainId);
+
+        // select all hosts by all agencies
+        List<TbHost> tbHostList = tbAgencyList.stream()
+                .map((agency) -> tbHostMapper.selectByAgencyId(agency.getId()))
+                .filter((host) -> host != null)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(tbHostList)) {
+            log.error("Chain:[{}] has no host.", chainId);
+            return Collections.emptyList();
+        }
+        return tbHostList;
+    }
+
+    /**
+     * Init a host, generate sdk files(crt files and node.[key,crt]) and insert into db.
+     *
+     *
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbHost initHost(
+            byte encryptType,
+            String chainName,
+            String rootDirOnHost,
+            String ip,
+            int agencyId,
+            String agencyName) throws NodeMgrException {
+        // new host, generate sdk dir first
+        Path sdkPath = this.pathService.getSdk(chainName, ip);
+
+        // call shell to generate new node config(private key and crt)
+        ExecuteResult executeResult = this.deployShellService.execGenNode(
+                encryptType, chainName, agencyName, sdkPath.toAbsolutePath().toString());
+        if (executeResult.failed()) {
+             throw new NodeMgrException(ConstantCode.EXEC_GEN_SDK_ERROR);
+        }
+
+        // init sdk dir
+        this.configService.initSdkDir(encryptType, sdkPath);
+
+        // scp sdk to remote
+        String src = String.format("%s", sdkPath.toAbsolutePath().toString());
+        String dst = PathService.getChainRootOnHost(rootDirOnHost, chainName);
+
+        log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst);
+        executeResult = this.deployShellService.scp(ScpTypeEnum.UP, ip, src, dst);
+        if (executeResult.failed()) {
+            throw new NodeMgrException(ConstantCode.SEND_SDK_FILES_ERROR);
+        }
+
+        // insert host into db
+        return ((HostService) AopContext.currentProxy()).insert(agencyId, agencyName, ip, chainName);
     }
 
 }

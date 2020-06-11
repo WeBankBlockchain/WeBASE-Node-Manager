@@ -113,6 +113,29 @@ public class DockerClientService {
      * @param containerName
      * @param chainRootOnHost
      * @param nodeIndex
+     * @return true if run success, false when run failed.
+     */
+    public boolean createAndStart(String ip,
+                         int port,
+                         String imageTag,
+                         String containerName,
+                         String chainRootOnHost,
+                         int nodeIndex) {
+        String containerId = this.create(ip, port, imageTag, containerName, chainRootOnHost, nodeIndex);
+        if (StringUtils.isBlank(containerId)) {
+            log.error("Create bcos-front container:[{}:{}] on host:[{}] failed.", imageTag,containerId, ip);
+            return false;
+        }
+        return  this.startById(ip, port, containerId);
+    }
+
+
+    /**
+     * @param ip
+     * @param port
+     * @param containerName
+     * @param chainRootOnHost
+     * @param nodeIndex
      * @return container id.
      */
     public String create(String ip,

@@ -32,7 +32,7 @@ public class ValidateUtil {
     /**
      * Validate ipv4 address.
      * @param ip
-     * @return
+     * @return  return false if ip is not a valid IP format.
      */
     public static boolean ipv4Valid(final String ip) {
         if (StringUtils.isBlank(ip)){
