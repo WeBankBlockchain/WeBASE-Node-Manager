@@ -139,7 +139,7 @@ public class DeployService {
         byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
                 EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
 
-        try {
+        try { //TODO try太大，在分号处注明起始与结束，或对try内容封装
             // generate nodes config
             ExecuteResult buildChainResult = deployShellService.execBuildChain(encryptType, ipConf, chainName);
             if (buildChainResult.failed()) {
@@ -211,7 +211,7 @@ public class DeployService {
                             nodeConfig.getHostIndex(), imageConfig.getConfigValue(),
                             DockerClientService.getContainerName(rootDirOnHost, chainName, nodeConfig.getHostIndex()),
                             nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
-                            nodeConfig.getChannelPort(), FrontStatusEnum.INITIALIZED);
+                            nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
 
                     hostGroupListMap.get(ip).forEach((groupId) -> {
                         String nodeName = NodeService.getNodeName(groupId, nodeConfig.getNodeId());
