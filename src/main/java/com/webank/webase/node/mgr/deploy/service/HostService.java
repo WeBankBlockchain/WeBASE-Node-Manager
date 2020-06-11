@@ -331,7 +331,8 @@ public class HostService {
                     String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName());
 
                     log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), dst);
-                    ExecuteResult executeResult = deployShellService.scp(ScpTypeEnum.UP, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), src, dst);                    log.info("Send files to host:[{}] result:[{}]", tbHost.getIp(), executeResult.getExecuteOut());
+                    ExecuteResult executeResult = deployShellService.scp(ScpTypeEnum.UP, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), src, dst);
+                    log.info("Send files to host:[{}] result:[{}]", tbHost.getIp(), executeResult.getExecuteOut());
                     if (!executeResult.success()) {
                         log.error("Send files from [{}] to [{}:{}] filed.", src, tbHost.getIp(), dst);
                         this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED);
