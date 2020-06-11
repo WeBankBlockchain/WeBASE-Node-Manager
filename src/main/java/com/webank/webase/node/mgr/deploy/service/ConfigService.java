@@ -133,6 +133,29 @@ public class ConfigService {
         }
     }
 
+    /**
+     *
+     * @param oldNode
+     * @param newNode
+     */
+    public void copyGroupConfigFiles(Path oldNode,Path newNode, int groupId) {
+        if (Files.exists(oldNode)) {
+            String groupGenesisFileName =String.format("conf/group.%s.genesis",groupId);
+            String groupIniFileName =String.format("conf/group.%s.ini",groupId);
+
+            try {
+                PathService.copyFile(
+                        Pair.of(oldNode.resolve(groupGenesisFileName), newNode.resolve(groupGenesisFileName)),
+                        Pair.of(oldNode.resolve(groupIniFileName), newNode.resolve(groupIniFileName))
+                );
+            } catch (IOException e) {
+                throw new NodeMgrException(ConstantCode.COPY_GROUP_FILES_ERROR);
+            }
+        } else {
+            log.error("Old node dir:[{}] not exists.", oldNode.toAbsolutePath().toString());
+        }
+    }
+
 
     /**
      * Result of listing tags from hub.docker.com.
