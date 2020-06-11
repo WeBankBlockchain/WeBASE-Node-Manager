@@ -13,6 +13,8 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import com.webank.webase.node.mgr.node.entity.NodeParam;
+import com.webank.webase.node.mgr.node.entity.TbNode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;

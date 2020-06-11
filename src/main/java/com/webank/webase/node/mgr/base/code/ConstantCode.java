@@ -210,6 +210,7 @@ public class ConstantCode {
     public static final RetCode COPY_SDK_FILES_ERROR = RetCode.mark(205038, "Copy sdk config files error.");
     public static final RetCode SEND_SDK_FILES_ERROR = RetCode.mark(205039, "Send sdk config files error.");
     public static final RetCode SEND_NODE_FILES_ERROR = RetCode.mark(205040, "Send node config files error.");
+    public static final RetCode COPY_GROUP_FILES_ERROR = RetCode.mark(205041, "Copy original group config files error.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

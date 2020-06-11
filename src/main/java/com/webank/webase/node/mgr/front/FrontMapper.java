@@ -54,4 +54,9 @@ public interface FrontMapper {
             "where host_id = #{hostId,jdbcType=INTEGER}"
     })
     Integer getNodeMaxIndex(int hostId);
+
+    @Select({
+            "select * from tb_front  where chain_id= #{chainId,jdbcType=INTEGER} order by create_time asc limit 1"
+    })
+    TbFront getFirstByCreatetime(@Param("chainId") int chainId);
 }

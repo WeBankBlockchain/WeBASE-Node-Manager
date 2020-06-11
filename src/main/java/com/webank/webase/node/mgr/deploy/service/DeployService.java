@@ -16,8 +16,6 @@ package com.webank.webase.node.mgr.deploy.service;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.HOST_CONNECT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,7 +46,6 @@ import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
-import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.SshTools;
@@ -143,7 +140,7 @@ public class DeployService {
         byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
                 EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
 
-        try {
+        try { //TODO try太大，在分号处注明起始与结束，或对try内容封装
             // generate nodes config
             ExecuteResult buildChainResult = deployShellService.execBuildChain(encryptType, ipConf, chainName);
             if (buildChainResult.failed()) {
@@ -216,7 +213,7 @@ public class DeployService {
                             nodeConfig.getHostIndex(), imageConfig.getConfigValue(),
                             DockerClientService.getContainerName(rootDirOnHost, chainName, nodeConfig.getHostIndex()),
                             nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
-                            nodeConfig.getChannelPort(), FrontStatusEnum.INITIALIZED);
+                            nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
 
                     hostGroupListMap.get(ip).forEach((groupId) -> {
                         String nodeName = NodeService.getNodeName(groupId, nodeConfig.getNodeId());
@@ -244,7 +241,7 @@ public class DeployService {
             });
 
             // init host env
-            this.deployShellService.initHostList(newChain.getChainName());
+            this.hostService.initHostList(newChain.getChainName());
 
             return Pair.of(ConstantCode.SUCCESS, buildChainResult.getExecuteOut());
         } catch (Exception e) {
@@ -452,44 +449,30 @@ public class DeployService {
         boolean newGroup = isNewGroup.getValue();
 
         // init front and node
-        List<TbFront> newFrontList = this.frontService.initFront(num, chain,
-                tbHost, agency.getId(), agencyName, group);
-
-        // generate config files and scp to remote
-        this.nodeService.generateNodeConfig(chain, groupId, ip, newFrontList);
-
-        // generate config files and scp to remote
-        this.groupService.generateGroupConfigs(newGroup, chain, groupId, ip, newFrontList);
-
-        // scp node to remote
-        String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
-        String dst = PathService.getChainRootOnHost(rootDirOnHost, chainName);
-
-        log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst);
-        executeResult = this.deployShellService.scp(ScpTypeEnum.UP, ip, src, dst);
-        if (executeResult.failed()) {
-            //TODO. write file error
-            log.error("Send node:[{}:{}] files error.", ip, currentIndex);
-        }
-
-        NodeConfig nodeConfig = null;
         try {
-            nodeConfig = NodeConfig.read(nodeRoot);
-        } catch (IOException e) {
-            log.error("Reade node:[{}:{}] config error.", ip, currentIndex);
+            List<TbFront> newFrontList = this.frontService.initFront(num, chain,
+                    tbHost, agency.getId(), agencyName, group);
+
+            // generate config files and scp to remote
+            this.nodeService.generateNodeConfig(chain, groupId, ip, newFrontList);
+
+            // generate config files and scp to remote
+            this.groupService.generateGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList);
+
+
+            for (TbFront newFront : newFrontList) {
+                // ssh host and start docker container
+                dockerClientService.createAndStart(ip, tbHost.getDockerPort(),
+                        chain.getVersion(), newFront.getContainerName(),
+                        PathService.getChainRootOnHost(tbHost.getRootDir(), chainName),newFront.getHostIndex());
+            }
+
+        } catch (Exception e) {
+            //TODO.
+            log.error("Add node error",e);
         }
 
-        // ssh host and start docker container
-        dockerClientService.createAndStart(ip, dockerPort,
-                imageTag, front.getContainerName(),
-                PathService.getChainRootOnHost(rootDirOnHost, chainName),
-                currentIndex);
-
-
+        return Pair.of(ConstantCode.SUCCESS,"success");
     }
-
-
-        return null;
-}
 }
 
