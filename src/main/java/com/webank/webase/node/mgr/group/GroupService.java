@@ -14,6 +14,8 @@
 package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
+import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
+import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -46,15 +48,23 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.OperateStatus;
+import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
+import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
+import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
+import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
+import com.webank.webase.node.mgr.deploy.service.ConfigService;
+import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
+import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -74,8 +84,8 @@ import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.TbNode;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.node.entity.TbNode;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
 
@@ -90,6 +100,11 @@ public class GroupService {
 
     @Autowired
     private GroupMapper groupMapper;
+    @Autowired
+    private TbHostMapper tbHostMapper;
+    @Autowired
+    private FrontMapper frontMapper;
+
     @Autowired
     private TableService tableService;
     @Autowired
@@ -113,7 +128,11 @@ public class GroupService {
     @Autowired
     private BlockService blockService;
     @Autowired
+    private DeployShellService deployShellService;
+    @Autowired
     private PathService pathService;
+    @Autowired
+    private ConfigService configService;
 
     public static final String RUNNING_GROUP = "RUNNING";
     public static final String OPERATE_START_GROUP = "start";
@@ -669,6 +688,8 @@ public class GroupService {
         BeanUtils.copyProperties(req, generateGroupInfo);
         frontInterface.generateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(),
                 generateGroupInfo);
+        // fetch group config file
+        this.pullAllGroupFiles(generateGroupId, tbFront);
         // save group, saved as invalid status until start
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
                 req.getDescription(), GroupType.MANUAL, GroupStatus.MAINTAINING,
@@ -706,6 +727,8 @@ public class GroupService {
                 frontInterface.generateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(),
                         generateGroupInfo);
                 resOperateList.add(operateResult);
+                // fetch group config file
+                this.pullAllGroupFiles(generateGroupId, tbFront);
             } catch (NodeMgrException | ResourceAccessException e) {
                 log.error("fail generateGroup in frontId:{}, exception:{}",
                         tbFront.getFrontId(), e.getMessage());
@@ -747,7 +770,7 @@ public class GroupService {
         // refresh group status
         // if stop group, cannot update front_group_map as invalid for getGroupPeers fail
         resetGroupList();
-
+        this.pullGroupStatusFile(groupId, tbFront);
         // return
         return groupOperateStatus;
     }
@@ -824,6 +847,7 @@ public class GroupService {
                 frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
                         OPERATE_START_GROUP);
                 resOperateList.add(operateResult);
+                this.pullGroupStatusFile(groupId, tbFront);
             } catch (NodeMgrException | ResourceAccessException e) {
                 log.error("fail startGroup in frontId:{}, exception:{}",
                         tbFront.getFrontId(), e.getMessage());
@@ -935,17 +959,17 @@ public class GroupService {
     }
 
     /**
-     *  Insert group when group id not exists.
-     *
-     *  When group exists, update node count with num.
+     * Insert group when group id not exists.
+     * <p>
+     * When group exists, update node count with num.
      *
      * @param groupId
      * @param num
      * @param chainId
      * @param chainName
-     * @return          return true if insert.
+     * @return return true if insert.
      */
-    public Pair<TbGroup,Boolean> saveOrUpdateNodeCount(int groupId, int num, int chainId, String chainName){
+    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(int groupId, int num, int chainId, String chainName) {
         TbGroup group = this.getGroupById(groupId);
         if (group == null) {
             // group not exists, insert a new one
@@ -957,12 +981,81 @@ public class GroupService {
             ((GroupService) AopContext.currentProxy()).updateGroupNodeCount(groupId, newGroupCount);
             // update node count
             group.setNodeCount(newGroupCount);
-            return Pair.of(group,false);
+            return Pair.of(group, false);
         }
     }
 
-    public void generateGroupConfigs(boolean newGroup, TbChain chain, int groupId, String ip,
-                                     List<TbFront> newFrontList) throws IOException {
+    private void pullAllGroupFiles(int generateGroupId, TbFront tbFront) {
+        this.pullGroupConfigFile(generateGroupId, tbFront);
+        this.pullGroupStatusFile(generateGroupId, tbFront);
+    }
+
+    /**
+     * pull docker node's group config file and group_status file
+     * when generateGroup/operateGroup
+     *
+     * @include group.x.genesis, group.x.ini, .group_status
+     */
+    private void pullGroupConfigFile(int generateGroupId, TbFront tbFront) {
+        // only support docker node/front
+        if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
+            return;
+        }
+        String chainName = tbFront.getChainName();
+        int nodeIndex = tbFront.getHostIndex();
+        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+        // scp group config files from remote to local
+        // path pattern: /host.getRootDir/chain_name
+        // ex: (in the remote host) /opt/fisco/chain1
+        String remoteChainPath = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
+        // ex: (in the remote host) /opt/fisco/chain1/node0/conf/group.1001.*
+        String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.*",
+                remoteChainPath, nodeIndex, generateGroupId);
+        // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]
+        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
+        String localNodePath = pathService.getHost(chainName, tbHost.getIp()).toString();
+        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
+        String localDst = String.format("%s/conf/", localNodePath);
+        // copy group config files to local node's conf dir
+        deployShellService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(),
+                remoteGroupConfSource, localDst);
+    }
+
+    private void pullGroupStatusFile(int generateGroupId, TbFront tbFront) {
+        // only support docker node/front
+        if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
+            return;
+        }
+        String chainName = tbFront.getChainName();
+        int nodeIndex = tbFront.getHostIndex();
+        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+        // scp group status files from remote to local
+        // path pattern: /host.getRootDir/chain_name
+        // ex: (in the remote host) /opt/fisco/chain1
+        String remoteChainPath = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
+        // ex: (in the remote host) /opt/fisco/chain1/node0/data/group1001/.group_status
+        String remoteGroupStatusSource = String.format("%s/node%s/data/group%s/.group_status",
+                remoteChainPath, nodeIndex, generateGroupId);
+        // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]
+        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
+        String localNodePath = pathService.getHost(chainName, tbHost.getIp()).toString();
+        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
+        String localDst = String.format("%s/conf/", localNodePath);
+        // copy group status file to local node's conf dir
+        deployShellService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(),
+                remoteGroupStatusSource, localDst);
+    }
+
+    /**
+     * @param newGroup
+     * @param chain
+     * @param groupId
+     * @param ip
+     * @param newFrontList
+     * @throws IOException
+     */
+    public void generateGroupConfigsAndScp(boolean newGroup, TbChain chain, int groupId, String ip,
+                                           List<TbFront> newFrontList) throws IOException {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
         long now = System.currentTimeMillis();
@@ -971,7 +1064,7 @@ public class GroupService {
                 .collect(Collectors.toList());
 
         // copy group.x.[genesis] from old front
-        List<TbFront> AllFrontList = this.frontService.selectFrontListByChainId(chainId);
+        TbFront oldFront = this.frontMapper.getFirstByCreatetime(chainId);
 
         for (TbFront newFront : newFrontList) {
             // local node root
@@ -982,7 +1075,21 @@ public class GroupService {
                 ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
             } else {
                 // copy old group files
+                if (oldFront != null) {
+                    Path oldNode = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
+                    this.configService.copyGroupConfigFiles(oldNode, nodeRoot, groupId);
+                }
+            }
 
+            // scp node to remote host
+            String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
+            String dst = PathService.getChainRootOnHost(chain.getRootDir(), chainName);
+
+            log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst);
+            ExecuteResult executeResult = this.deployShellService.scp(ScpTypeEnum.UP, ip, src, dst);
+            if (executeResult.failed()) {
+                //TODO. write file error
+                log.error("Send node:[{}:{}] files error.", ip, newFront.getHostIndex());
             }
         }
     }

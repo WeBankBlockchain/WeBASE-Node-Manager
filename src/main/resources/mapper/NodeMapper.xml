@@ -4,7 +4,7 @@
 
 <!--对应mapper接口 -->
 <mapper namespace="com.webank.webase.node.mgr.node.NodeMapper">
-  <resultMap id="nodeMap" type="com.webank.webase.node.mgr.node.TbNode">
+  <resultMap id="nodeMap" type="com.webank.webase.node.mgr.node.entity.TbNode">
     <id column="node_id" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeId"/>
     <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
     <result column="node_name" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeName"/>
@@ -29,14 +29,14 @@
 		node_id,node_name,group_id,node_ip,p2p_port,block_number,pbft_view,node_active,create_time,modify_time
 	</sql>
 
-  <insert id="add" parameterType="com.webank.webase.node.mgr.node.TbNode">
+  <insert id="add" parameterType="com.webank.webase.node.mgr.node.entity.TbNode">
     insert ignore into tb_node
     (node_id,node_name,group_id,node_ip,p2p_port,description,create_time,modify_time)
     values(#{nodeId},#{nodeName},#{groupId},#{nodeIp},#{p2pPort},#{description},NOW(),NOW())
   </insert>
 
 
-  <select id="getCount" parameterType="com.webank.webase.node.mgr.node.NodeParam"
+  <select id="getCount" parameterType="com.webank.webase.node.mgr.node.entity.NodeParam"
     resultType="java.lang.Integer">
     select count(1) from tb_node where 1=1
     <if test="groupId != null and groupId != ''">
@@ -53,7 +53,7 @@
     </if>
   </select>
 
-  <select id="getList" parameterType="com.webank.webase.node.mgr.node.NodeParam"
+  <select id="getList" parameterType="com.webank.webase.node.mgr.node.entity.NodeParam"
     resultMap="nodeMap">
     select a.* from tb_node a where 1=1
     <if test="groupId != null and groupId != ''">
@@ -88,7 +88,7 @@
 		select * from tb_node where node_id = #{nodeId}
 	</select>
 
-  <update id="update" parameterType="com.webank.webase.node.mgr.node.TbNode">
+  <update id="update" parameterType="com.webank.webase.node.mgr.node.entity.TbNode">
     update tb_node set modify_time=NOW()
     <if test="blockNumber != null">
       ,block_number = #{blockNumber}
@@ -105,7 +105,7 @@
     where node_id=#{nodeId} and group_id=#{groupId}
   </update>
 
-  <select id="queryNodeInfo" parameterType="com.webank.webase.node.mgr.node.NodeParam"
+  <select id="queryNodeInfo" parameterType="com.webank.webase.node.mgr.node.entity.NodeParam"
     resultMap="nodeMap">
     select * from tb_node where 1=1
     <if test="groupId != null and groupId != ''">

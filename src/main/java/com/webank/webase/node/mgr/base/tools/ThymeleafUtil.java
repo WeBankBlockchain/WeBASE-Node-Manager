@@ -29,7 +29,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-import com.webank.webase.node.mgr.node.TbNode;
+import com.webank.webase.node.mgr.node.entity.TbNode;
 
 
 public class ThymeleafUtil {
