@@ -1,11 +1,11 @@
 /**
  * Copyright 2014-2020  the original author or authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -56,19 +56,19 @@ public class ChainService {
      * get chain info.
      */
     public Object getChainMonitorInfo(Integer frontId, LocalDateTime beginDate,
-        LocalDateTime endDate, LocalDateTime contrastBeginDate,
-        LocalDateTime contrastEndDate, int gap, int groupId) {
+                                      LocalDateTime endDate, LocalDateTime contrastBeginDate,
+                                      LocalDateTime contrastEndDate, int gap, int groupId) {
         log.debug(
-            "start getChainMonitorInfo.  frontId:{} beginDate:{} endDate:{}"
-                + " contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}",
-            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
+                "start getChainMonitorInfo.  frontId:{} beginDate:{} endDate:{}"
+                        + " contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}",
+                frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
 
         // request param to str
         List<Object> valueList = Arrays
-            .asList(beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
+                .asList(beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
         List<String> nameList = Arrays
-            .asList("beginDate", "endDate", "contrastBeginDate", "contrastEndDate", "gap",
-                "groupId");
+                .asList("beginDate", "endDate", "contrastBeginDate", "contrastEndDate", "gap",
+                        "groupId");
 
         String chainUrlParam = NodeMgrTools.convertUrlParam(nameList, valueList);
 
@@ -80,8 +80,8 @@ public class ChainService {
 
         // request url
         String url = String
-            .format(cproperties.getFrontUrl(), tbFront.getFrontIp(), tbFront.getFrontPort(),
-                URI_CHAIN);
+                .format(cproperties.getFrontUrl(), tbFront.getFrontIp(), tbFront.getFrontPort(),
+                        URI_CHAIN);
         url = url + "?" + chainUrlParam;
         log.info("getChainMonitorInfo request url:{}", url);
 
@@ -96,10 +96,12 @@ public class ChainService {
                           String chainDesc,
                           String version,
                           byte encryptType,
-                          ChainStatusEnum status) throws NodeMgrException{
+                          ChainStatusEnum status,
+                          String rootDirOnHost
+    ) throws NodeMgrException {
         // TODO. params check
 
-        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status);
+        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, rootDirOnHost);
 
         if (tbChainMapper.insertSelective(chain) != 1 || chain.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_CHAIN_ERROR);
@@ -108,9 +110,8 @@ public class ChainService {
     }
 
 
-
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean updateStatus(int chainId,ChainStatusEnum newStatus){
+    public boolean updateStatus(int chainId, ChainStatusEnum newStatus) {
         TbChain newChain = new TbChain();
         newChain.setId(chainId);
         newChain.setChainStatus(newStatus.getId());

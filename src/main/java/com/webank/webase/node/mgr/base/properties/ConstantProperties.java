@@ -98,10 +98,14 @@ public class ConstantProperties {
     // shell script
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
     private String buildChainShell = "./script/deploy/build_chain.sh";
+    private String genAgencyShell = "./script/deploy/gen_agency_cert.sh";
+    private String genNodeShell = "./script/deploy/gen_node_cert.sh";
     private String scpShell =        "./script/deploy/file_trans_util.sh";
     private String fiscoBcosBinary =  "";
 
     // default port
+    // TODO. write tbchain's id in db into config.ini
+    private int defaultChainId = 1;
     private int defaultJsonrpcPort = 8545;
     private int defaultP2pPort = 30300;
     private int defaultChannelPort = 20200;
@@ -110,6 +114,7 @@ public class ConstantProperties {
     // timeout config
     private long execHostInitTimeout = 2 * 60 * 60 * 1000;
     private long execBuildChainTimeout = 10 * 60 * 1000;
+    private long execShellTimeout = 2 * 60 * 1000;
     private int dockerClientConnectTimeout = 10 * 60 * 1000;
     private int dockerClientReadTimeout = 10 * 60 * 1000;
     private int dockerPullTimeout = 5 * 60 * 1000;

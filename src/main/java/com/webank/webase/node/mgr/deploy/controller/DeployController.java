@@ -51,8 +51,8 @@ public class DeployController extends BaseController {
      */
     @PostMapping(value = "init")
     // @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse deploy( @RequestBody @Valid ReqDeploy deploy,
-                                BindingResult result ) throws NodeMgrException {
+    public BaseResponse deploy(@RequestBody @Valid ReqDeploy deploy,
+                               BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start deploy chainName:[{}], rootDirOnHost:[{}] startTime:[{}], tagId:[{}], ipconf:[{}]",
@@ -66,6 +66,7 @@ public class DeployController extends BaseController {
 
     /**
      * @param ip         Host runs new node, maybe a new host.
+     * @param groupId
      * @param agencyName If host ip is new one, agency name should not be null.
      * @param chainName  If agency name is a new one, chain name should not be null.
      * @param num        Count of new nodes , default is 1.
@@ -74,15 +75,16 @@ public class DeployController extends BaseController {
     @PostMapping(value = "add")
     public BaseResponse add(
             @RequestParam(value = "ip", required = true) String ip,
+            @RequestParam(value = "groupId", required = false) int groupId,
             @RequestParam(value = "agencyName", required = false, defaultValue = "") String agencyName,
             @RequestParam(value = "num", required = false, defaultValue = "1") int num,
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     ) {
         Instant startTime = Instant.now();
-        log.info("start add node ip:[{}], agencyName:[{}], num:[{}], chainName:[{}], now:[{}]",
-                ip, agencyName, num, chainName, startTime);
+        log.info("start add node ip:[{}],group:[{}], agencyName:[{}], num:[{}], chainName:[{}], now:[{}]",
+                ip, groupId, agencyName, num, chainName, startTime);
 
-        Pair<RetCode, String> addResult = this.deployService.add(chainName, ip, agencyName, num);
+        Pair<RetCode, String> addResult = this.deployService.add(chainName, groupId, ip, agencyName, num);
         return new BaseResponse(addResult.getKey(), addResult.getValue());
     }
 

@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -47,4 +48,10 @@ public interface FrontMapper {
     int updateStatus(@Param("frontId") int frontId,
                      @Param("status")int status,
                      @Param("modifyTime")LocalDateTime now);
+
+    @Select({
+            "select  max(host_index) from tb_front",
+            "where host_id = #{hostId,jdbcType=INTEGER}"
+    })
+    Integer getNodeMaxIndex(int hostId);
 }

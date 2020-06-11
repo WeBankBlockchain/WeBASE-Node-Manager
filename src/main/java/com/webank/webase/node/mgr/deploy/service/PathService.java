@@ -25,7 +25,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.ini4j.Ini;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,7 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import lombok.extern.log4j.Log4j2;
 
 /**
- *
+ * TODO. check path exists
  */
 
 @Log4j2
@@ -96,6 +98,25 @@ public class PathService {
     }
 
     /**
+     * @param chainName
+     * @param agencyName
+     * @throws IOException
+     */
+    public void deleteAgency(String chainName, String agencyName) throws IOException {
+        // delete agency root
+        Path agencyRoot = this.getAgencyRoot(chainName, agencyName);
+        if (Files.exists(agencyRoot)) {
+            FileUtils.deleteDirectory(agencyRoot.toFile());
+        }
+
+        // delete guomi agency root
+        Path gmAgencyRoot = this.getGmAgencyRoot(chainName, agencyName);
+        if (Files.exists(gmAgencyRoot)) {
+            Files.delete(gmAgencyRoot);
+        }
+    }
+
+    /**
      * Get host path.
      *
      * @param chainName
@@ -107,16 +128,66 @@ public class PathService {
     }
 
     /**
-     * Get sdk path under host.
+     * Get sdk path.
      *
      * @param chainName
      * @param ip
      * @return
      */
-    public Path getHostSdk(String chainName, String ip) {
+    public Path getSdk(String chainName, String ip) {
         return this.getHost(chainName, ip).resolve("sdk");
     }
 
+    /**
+     * Get cert root directory of chain.
+     *
+     * @param chainName
+     * @return
+     */
+    public Path getCertRoot(String chainName) {
+        return this.getChainRoot(chainName).resolve("cert");
+    }
+
+    /**
+     * Get agency root directory of chain.
+     *
+     * @param chainName
+     * @return
+     */
+    public Path getAgencyRoot(String chainName, String agencyName) {
+        return this.getCertRoot(chainName).resolve(agencyName);
+    }
+
+    /**
+     * Get guomi cert root directory of chain.
+     *
+     * @param chainName
+     * @return
+     */
+    public Path getGmCertRoot(String chainName) {
+        return this.getChainRoot(chainName).resolve("gmcert");
+    }
+
+    /**
+     * TODO. optimize.
+     * <p>
+     * Get guomi agency root directory of chain.
+     *
+     * @param chainName
+     * @param agencyName
+     * @return
+     */
+    public Path getGmAgencyRoot(String chainName, String agencyName) {
+        Path gmCertRoot = this.getGmCertRoot(chainName).resolve(agencyName);
+
+        if (!Files.exists(gmCertRoot)) {
+            gmCertRoot = this.getGmCertRoot(chainName).resolve(String.format("%s-gm", agencyName));
+        }
+        if (!Files.exists(gmCertRoot)) {
+            return null;
+        }
+        return gmCertRoot;
+    }
 
     /**
      * Get nodeX path under host.
@@ -133,20 +204,31 @@ public class PathService {
     }
 
     /**
-     *
+     * @param chainName
+     * @param ip
+     * @param index
+     * @return
+     */
+    public Path getNodeRoot(
+            String chainName,
+            String ip,
+            int index) {
+        return this.getHost(chainName, ip).resolve(String.format("node%s", index));
+    }
+
+    /**
      * @param rootDirOnHost
      * @param chainName
      * @return
      */
     public static String getChainRootOnHost(
             String rootDirOnHost,
-            String chainName ) {
-        return String.format("%s/%s", rootDirOnHost, chainName );
+            String chainName) {
+        return String.format("%s/%s", rootDirOnHost, chainName);
 
     }
 
     /**
-     *
      * @param chainRoot
      * @param index
      * @return
@@ -154,8 +236,7 @@ public class PathService {
     public static String getNodeRootOnHost(
             String chainRoot,
             int index) {
-        return String.format("%s/node%s", chainRoot,index);
-
+        return String.format("%s/node%s", chainRoot, index);
     }
 
     /**
@@ -210,6 +291,35 @@ public class PathService {
                     .collect(Collectors.toSet());
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    /**
+     * TODO. check params
+     *
+     * @param src
+     * @param des
+     * @return
+     */
+    public static void copyFile(Path src, Path des) throws IOException {
+        try {
+            FileUtils.copyFile(src.toFile(), des.toFile());
+        } catch (IOException e) {
+            log.error("Copy file from:[{}] to:[{}] error.", src, des, e);
+            throw e;
+        }
+    }
+
+    /**
+     * TODO. check params
+     *
+     * @param filePair
+     */
+    public static void copyFile(Pair<Path, Path>... filePair) throws IOException {
+        if (ArrayUtils.isNotEmpty(filePair)) {
+            for (Pair<Path, Path> pair : filePair) {
+                copyFile(pair.getLeft(), pair.getRight());
+            }
         }
     }
 }
