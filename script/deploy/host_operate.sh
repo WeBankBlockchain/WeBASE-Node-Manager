@@ -125,6 +125,13 @@ function init() {
     if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
         echo "Initialing local server ....."
 
+        bash -e -x "${__dir}/host_init_shell.sh"
+        status=($?)
+        if [[ $status != 0 ]] ;then
+            echo "Local init node ERROR!!!"
+            exit "$status"
+        fi
+
         echo "mkdir node root ${node_root} on local"
         mkdir -p ${node_root}
 
