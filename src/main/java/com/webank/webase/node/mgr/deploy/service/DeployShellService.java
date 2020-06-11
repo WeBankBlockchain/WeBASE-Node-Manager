@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +51,6 @@ import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
 import com.webank.webase.node.mgr.chain.ChainService;
-import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
@@ -125,18 +123,8 @@ public class DeployShellService {
             }
         }
 
-        // select all hosts by all agencies
-        List<TbAgency> tbAgencyList = tbAgencyMapper.selectByChainId(tbChain.getId());
-        if (CollectionUtils.isEmpty(tbAgencyList)) {
-            log.error("Chain:[{}:{}] has no agency.", tbChain.getId(), tbChain.getChainName());
-            return;
-        }
-        // select all host
-        List<TbHost> tbHostList = tbAgencyList.stream()
-                .map((agency) -> tbHostMapper.selectByAgencyId(agency.getId()))
-                .filter((host) -> host != null)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+        // select host list of chain
+        List<TbHost> tbHostList = this.hostService.selectHostListByChainId(tbChain.getId());
 
         if (CollectionUtils.isEmpty(tbHostList)) {
             log.error("Chain:[{}:{}] has no host.", tbChain.getId(), tbChain.getChainName());
@@ -166,24 +154,14 @@ public class DeployShellService {
                         try {
                             // TODO. check front status
 
-                            log.info("try to create bcos-front:[{}:{}] container",
+                            log.info("try to create and start bcos-front:[{}:{}] container",
                                     tbFront.getFrontIp(), tbFront.getHostIndex());
-                            String containerId = dockerClientService.create(tbHost.getIp(),
+                            boolean startResult = dockerClientService.createAndStart(tbHost.getIp(),
                                     tbHost.getDockerPort(),
                                     tbFront.getImageTag(),
                                     tbFront.getContainerName(),
                                     PathService.getChainRootOnHost(tbHost.getRootDir(), chainName),
                                     tbFront.getHostIndex());
-                            if (StringUtils.isBlank(containerId)) {
-                                log.error("Create bcos-front:[{}:{}:{}] container failed",
-                                        tbFront.getFrontIp(), tbFront.getContainerName(), tbFront.getHostIndex());
-                                continue;
-                            }
-
-                            log.info("try to start bcos-front:[{}:{}]", tbFront.getFrontIp(), tbFront.getHostIndex());
-                            boolean startResult = dockerClientService.startById(tbHost.getIp(),
-                                    tbHost.getDockerPort(),
-                                    containerId);
 
                             log.info("Start docker container:[{}:{}] result:[{}] on host:[{}]",
                                     tbFront.getContainerName(), tbFront.getHostIndex(), startResult, tbHost.getIp());
@@ -334,6 +312,21 @@ public class DeployShellService {
     }
 
     /**
+     *
+     * @param typeEnum
+     * @param ip
+     * @param src
+     * @param dst
+     * @return
+     */
+    public ExecuteResult scp(ScpTypeEnum typeEnum, String ip,  String src, String dst) {
+        String command = String.format("bash -x -e %s -t %s -i %s -u %s -p %s -s %s -d %s",
+                constant.getScpShell(), typeEnum.getValue(), ip, SSH_DEFAULT_USER, SSH_DEFAULT_PORT, src, dst);
+        log.info("exec file send command: [{}]", command);
+        return JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
+    }
+
+    /**
      * @param typeEnum
      * @param user
      * @param ip
@@ -391,6 +384,7 @@ public class DeployShellService {
     /**
      * TODO. if nodes config dir already exists, delete or backup first ?
      * TODO. separate two steps: save config files local, and exec build_chain
+     *
      * @param encryptType
      * @param ipLines
      * @return
@@ -430,8 +424,79 @@ public class DeployShellService {
                 // use binary local
                 StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
                         String.format(" -e %s ", constant.getFiscoBcosBinary())
-                );
+        );
 
         return JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
+    }
+
+    /**
+     * TODO. check agency cert dir, put to temp directory first
+     *
+     * @param encryptType
+     * @param chainName
+     * @param newAgencyName
+     * @return
+     */
+    public ExecuteResult execGenAgency(byte encryptType,
+                                       String chainName,
+                                       String newAgencyName) {
+        log.info("Exec execGenAgency method for chainName:[{}], newAgencyName:[{}:{}]", chainName, newAgencyName, encryptType);
+
+        Path certRoot = this.pathService.getCertRoot(chainName);
+
+        if (Files.notExists(certRoot)) {
+            // file not exists
+            log.error("Chain cert : [{}] not exists in directory:[{}] ", chainName, Paths.get(".").toAbsolutePath().toString());
+            throw new NodeMgrException(ConstantCode.CHAIN_CERT_NOT_EXISTS_ERROR);
+        }
+
+        // build_chain.sh only support docker on linux
+        String command = String.format("bash -e %s -c %s -a %s %s",
+                // gen_agency_cert.sh shell script
+                constant.getGenAgencyShell(),
+                // chain cert dir
+                certRoot.toAbsolutePath().toString(),
+                // new agency name
+                newAgencyName,
+                encryptType == EncryptType.SM2_TYPE ?
+                        String.format(" -g %s", pathService.getGmCertRoot(chainName).toAbsolutePath().toString())
+                        : ""
+        );
+
+        return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+    }
+
+
+    /**
+     * TODO. check agency cert dir, put to temp directory first
+     *
+     * @param encryptType
+     * @param chainName
+     * @param agencyName
+     * @param newNodeRoot
+     * @return
+     */
+    public ExecuteResult execGenNode(byte encryptType,
+                                     String chainName,
+                                     String agencyName,
+                                     String newNodeRoot) {
+        log.info("Exec execGenNode method for chainName:[{}], " +
+                "node:[{}:{}:{}]", chainName, encryptType, agencyName, newNodeRoot);
+
+        Path agencyRoot = this.pathService.getAgencyRoot(chainName,agencyName);
+
+        // build_chain.sh only support docker on linux
+        String command = String.format("bash -e %s -c %s -o %s %s",
+                // gen_node_cert.sh shell script
+                constant.getGenNodeShell(),
+                // agency cert root
+                agencyRoot.toAbsolutePath().toString(),
+                // new node dir
+                newNodeRoot,
+                encryptType == EncryptType.SM2_TYPE ?
+                        String.format(" -g %s", pathService.getGmAgencyRoot(chainName,agencyName).toAbsolutePath().toString()) : ""
+        );
+
+        return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
     }
 }

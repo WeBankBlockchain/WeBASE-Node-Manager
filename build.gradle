@@ -74,6 +74,8 @@ dependencies {
         exclude group: 'io.netty'
     }
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
+    compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
+    compile 'ognl:ognl:3.2.14'
     compileOnly lombok
 
     testCompile test

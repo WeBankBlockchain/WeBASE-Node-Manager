@@ -1,11 +1,11 @@
 /**
  * Copyright 2014-2020  the original author or authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -13,16 +13,21 @@
  */
 package com.webank.webase.node.mgr.front;
 
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,14 +36,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
+import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.deploy.entity.TbAgency;
+import com.webank.webase.node.mgr.deploy.entity.TbChain;
+import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.service.AgencyService;
+import com.webank.webase.node.mgr.deploy.service.DeployShellService;
+import com.webank.webase.node.mgr.deploy.service.DockerClientService;
+import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -78,9 +92,20 @@ public class FrontService {
     private ResetGroupListTask resetGroupListTask;
     @Autowired
     private ConstantProperties constants;
+    @Autowired
+    private AgencyService agencyService;
+    @Autowired
+    private PathService pathService;
+    @Autowired
+    private DeployShellService deployShellService;
+    @Autowired
+    private ConstantProperties constant;
+    @Autowired
+    private DockerClientService dockerClientService;
+    ;
 
-	// interval of check front status
-	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
+    // interval of check front status
+    private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
     /**
      * add new front
@@ -100,7 +125,7 @@ public class FrontService {
         try {
             groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
         } catch (Exception e) {
-            log.error("fail newFront, frontIp:{},frontPort:{}",frontIp,frontPort);
+            log.error("fail newFront, frontIp:{},frontPort:{}", frontIp, frontPort);
             throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
         }
         // check front's encrypt type same as nodemgr(guomi or standard)
@@ -112,7 +137,7 @@ public class FrontService {
             throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
         }
         //check front not exist
-        SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
+        SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
                 frontPort, Integer.valueOf(groupIdList.get(0)));
         FrontParam param = new FrontParam();
         param.setNodeId(syncStatus.getNodeId());
@@ -136,10 +161,10 @@ public class FrontService {
             Integer group = Integer.valueOf(groupId);
             //peer in group
             List<String> groupPeerList = frontInterface
-                .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
+                    .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
             //get peers on chain
             PeerInfo[] peerArr = frontInterface
-                .getPeersFromSpecificFront(frontIp, frontPort, group);
+                    .getPeersFromSpecificFront(frontIp, frontPort, group);
             List<PeerInfo> peerList = Arrays.asList(peerArr);
             //add group
             // check group not existed or node count differs
@@ -153,13 +178,13 @@ public class FrontService {
             //save nodes
             for (String nodeId : groupPeerList) {
                 PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools
-                    .object2JavaBean(p, PeerInfo.class))
-                    .filter(peer -> nodeId.equals(peer.getNodeId()))
-                    .findFirst().orElseGet(() -> new PeerInfo(nodeId));
+                        .object2JavaBean(p, PeerInfo.class))
+                        .filter(peer -> nodeId.equals(peer.getNodeId()))
+                        .findFirst().orElseGet(() -> new PeerInfo(nodeId));
                 nodeService.addNodeInfo(group, newPeer);
             }
             //add sealer(consensus node) and observer in nodeList
-             refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
+            refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
         }
         // pull cert from new front and its node
         CertTools.isPullFrontCertsDone = false;
@@ -170,6 +195,7 @@ public class FrontService {
 
     /**
      * add sealer(consensus node) and observer in nodeList
+     *
      * @param groupId
      */
     public void refreshSealerAndObserverInNodeList(String frontIp, int frontPort, int groupId) {
@@ -190,7 +216,7 @@ public class FrontService {
                     int existedNodeCount = nodeService.countOfNode(checkParam);
                     log.debug("addSealerAndObserver peerInfo:{},existedNodeCount:{}",
                             peerInfo, existedNodeCount);
-                    if(existedNodeCount == 0) {
+                    if (existedNodeCount == 0) {
                         nodeService.addNodeInfo(groupId, peerInfo);
                     }
                 });
@@ -203,7 +229,7 @@ public class FrontService {
     public void checkNotSupportIp(String ip) {
 
         String ipConfig = constants.getNotSupportFrontIp();
-        if(StringUtils.isBlank(ipConfig)) {
+        if (StringUtils.isBlank(ipConfig)) {
             return;
         }
         List<String> list = Arrays.asList(ipConfig.split(","));
@@ -214,7 +240,7 @@ public class FrontService {
 
     /**
      * check front ip and prot
-     *
+     * <p>
      * if exist:throw exception
      */
     private void checkFrontNotExist(String frontIp, int frontPort) {
@@ -306,48 +332,119 @@ public class FrontService {
         }
         LocalDateTime modifyTime = updateFront.getModifyTime();
         LocalDateTime createTime = updateFront.getCreateTime();
-		Duration duration = Duration.between(modifyTime, LocalDateTime.now());
-		Long subTime = duration.toMillis();
-		if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
-			log.info("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
-					subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
-			return;
-		}
+        Duration duration = Duration.between(modifyTime, LocalDateTime.now());
+        Long subTime = duration.toMillis();
+        if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
+            log.info("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
+                    subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
+            return;
+        }
         updateFront.setStatus(status);
         frontMapper.update(updateFront);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbFront insert(String nodeId,
-                          String ip,
-                          int port,
-                          String agencyName,
-                          String clientVersion,
-                          RunTypeEnum runTypeEnum,
-                          int agencyId,
-                          int hostId,
-                          int hostIndex,
-                          String imageTag,
-                          String containerName,
-                          int jsonrpcPort,
-                          int p2pPort,
-                          int channelPort,
-                          FrontStatusEnum frontStatusEnum
+    public TbFront insert(String nodeId, String ip, int port,
+                          String agencyName, String clientVersion, RunTypeEnum runTypeEnum,
+                          int agencyId, int hostId, int hostIndex,
+                          String imageTag, String containerName, int jsonrpcPort,
+                          int p2pPort, int channelPort, FrontStatusEnum frontStatusEnum
     ) throws NodeMgrException {
         // TODO. params check
 
         TbFront front = TbFront.init(nodeId, ip, port, agencyName, clientVersion, runTypeEnum,
                 agencyId, hostId, hostIndex, imageTag, containerName, jsonrpcPort, p2pPort, channelPort, frontStatusEnum);
 
-        if (frontMapper.add(front) != 1 || front.getFrontId() <= 0){
+        if (frontMapper.add(front) != 1 || front.getFrontId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_FRONT_ERROR);
         }
         return front;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean updateStatus(int frontId,FrontStatusEnum newStatus){
-        return this.frontMapper.updateStatus(frontId,newStatus.getId(),LocalDateTime.now()) == 1;
+    public boolean updateStatus(int frontId, FrontStatusEnum newStatus) {
+        return this.frontMapper.updateStatus(frontId, newStatus.getId(), LocalDateTime.now()) == 1;
     }
 
+    /**
+     * @param chainId
+     * @return
+     */
+    public List<TbFront> selectFrontListByChainId(int chainId) {
+        // select all agencies by chainId
+        List<TbAgency> tbAgencyList = this.agencyService.selectAgencyListByChainId(chainId);
+
+        // select all fronts by all agencies
+        List<TbFront> tbFrontList = tbAgencyList.stream()
+                .map((agency) -> frontMapper.selectByAgencyId(agency.getId()))
+                .filter((host) -> host != null)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(tbFrontList)) {
+            log.error("Chain:[{}] has no front.", chainId);
+            return Collections.emptyList();
+        }
+        return tbFrontList;
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public List<TbFront> initFront(int num, TbChain chain, TbHost host, int agencyId,
+                                   String agencyName, TbGroup group) throws NodeMgrException, IOException {
+
+        String chainName = chain.getChainName();
+        byte encryptType = chain.getEncryptType();
+        // the node dir on remote host
+        String rootDirOnHost = chain.getRootDir();
+        String imageTag = chain.getVersion();
+        int hostId = host.getId();
+        String ip = host.getIp();
+        int groupId = group.getGroupId();
+
+        // if host is a new one, currentIndexOnHost will be null
+        Integer maxIndexOnHost = this.frontMapper.getNodeMaxIndex(hostId);
+
+        // get start index on host
+        int startIndex = maxIndexOnHost == null ? 0 : maxIndexOnHost + 1;
+
+        List<TbFront> newFrontList = new ArrayList<>();
+        // call shell to generate new node config(private key and crt)
+        for (int i = 0; i < num; i++) {
+            int currentIndex = startIndex + i;
+            Path nodeRoot = pathService.getNodeRoot(chainName, ip, currentIndex);
+
+            // exec gen_node_cert.sh
+            ExecuteResult executeResult = this.deployShellService.execGenNode(encryptType, chainName, agencyName,
+                    nodeRoot.toAbsolutePath().toString());
+
+            if (executeResult.failed()) {
+                // TODO. put into temp dir first, delete wher error occurred
+                log.error("Generate node:[{}:{}] key and crt error.", ip, currentIndex);
+            }
+
+            String nodeId = PathService.getNodeId(nodeRoot);
+            int frontPort = constant.getDefaultFrontPort() + currentIndex;
+            int channelPort = constant.getDefaultChannelPort() + currentIndex;
+            int p2pPort = constant.getDefaultP2pPort() + currentIndex;
+            int jsonrpcPort = constant.getDefaultJsonrpcPort() + currentIndex;
+
+            // TODO. pass object
+            // insert front into db
+            TbFront front = ((FrontService) AopContext.currentProxy()).insert(
+                    nodeId, ip, frontPort, agencyName, imageTag, RunTypeEnum.DOCKER,
+                    agencyId, hostId, currentIndex, imageTag,
+                    DockerClientService.getContainerName(rootDirOnHost, chainName, currentIndex),
+                    jsonrpcPort, p2pPort, channelPort, FrontStatusEnum.INITIALIZED);
+            newFrontList.add(front);
+
+            // insert node into db
+            String nodeName = NodeService.getNodeName(groupId, nodeId);
+            this.nodeService.insert(nodeId, nodeName, groupId, ip, p2pPort, nodeName, NodeStatusEnum.DEAD);
+
+            // insert front group into db
+            this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId);
+        }
+        return newFrontList;
+    }
 }

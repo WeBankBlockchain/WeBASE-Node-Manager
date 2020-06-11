@@ -14,14 +14,20 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -76,7 +82,7 @@ public class ConfigService {
 
                     List<TbConfig> configList = Arrays.stream(responseEntity.getBody())
                             .map((tag) -> {
-                                if(StringUtils.startsWithIgnoreCase(tag.getName(),"latest")){
+                                if (StringUtils.startsWithIgnoreCase(tag.getName(), "latest")) {
                                     return null;
                                 }
                                 return TbConfig.init(type, tag.getName());
@@ -95,6 +101,38 @@ public class ConfigService {
         }
         return tbConfigMapper.selectByType(type.getId());
     }
+
+    /**
+     * Modify sdk dir structure.
+     *
+     * @param encryptType
+     * @param sdk
+     */
+    public void initSdkDir(byte encryptType, Path sdk) {
+        if (Files.exists(sdk)) {
+            Path sdkConfig = sdk.resolve("conf");
+            if (encryptType == EncryptType.SM2_TYPE) {
+                sdkConfig = sdkConfig.resolve("origin_cert");
+            }
+
+            try {
+                PathService.copyFile(
+                        Pair.of(sdkConfig.resolve("ca.crt"), sdk.resolve("ca.crt")),
+                        Pair.of(sdkConfig.resolve("node.crt"), sdk.resolve("node.crt")),
+                        Pair.of(sdkConfig.resolve("node.key"), sdk.resolve("node.key")),
+                        Pair.of(sdkConfig.resolve("node.crt"), sdk.resolve("sdk.crt")),
+                        Pair.of(sdkConfig.resolve("node.key"), sdk.resolve("sdk.key"))
+                );
+
+                FileUtils.deleteDirectory(sdk.resolve("conf").toFile());
+            } catch (IOException e) {
+                throw new NodeMgrException(ConstantCode.COPY_SDK_FILES_ERROR);
+            }
+        } else {
+            log.error("SDK dir:[{}] not exists.", sdk.toAbsolutePath().toString());
+        }
+    }
+
 
     /**
      * Result of listing tags from hub.docker.com.

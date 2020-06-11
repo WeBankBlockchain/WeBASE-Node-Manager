@@ -16,19 +16,19 @@ package com.webank.webase.node.mgr.deploy.service;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.HOST_CONNECT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
+import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
+import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -48,9 +48,11 @@ import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
+import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.SshTools;
+import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
@@ -71,6 +73,7 @@ import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.group.GroupMapper;
 import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeMapper;
 import com.webank.webase.node.mgr.node.NodeService;
 
@@ -100,6 +103,7 @@ public class DeployService {
     @Autowired private DockerClientService dockerClientService;
     @Autowired private PathService pathService;
     @Autowired private ConstantProperties constant;
+    @Autowired private ConfigService configService;
 
     /**
      * Add in v1.4.0 deploy.
@@ -148,7 +152,7 @@ public class DeployService {
 
             // insert chain
             final TbChain newChain = this.chainService.insert(chainName, chainName,
-                    imageConfig.getConfigValue(), encryptType, ChainStatusEnum.INITIALIZED);
+                    imageConfig.getConfigValue(), encryptType, ChainStatusEnum.INITIALIZED, rootDirOnHost);
             // TODO 提高代码可读性
             Map<String, Integer> agencyIdMap = new HashMap<>();
             Map<String, Integer> hostIdMap = new HashMap<>();
@@ -187,8 +191,8 @@ public class DeployService {
                         // TODO. why insert ignore???
                         // save group default status maintaining
                         groupService.saveGroup(groupId, config.getNum(),
-                             "deploy", GroupType.DEPLOY, GroupStatus.MAINTAINING,
-                            newChain.getId(), newChain.getChainName());
+                                "deploy", GroupType.DEPLOY, GroupStatus.MAINTAINING,
+                                newChain.getId(), newChain.getChainName());
                         groupCountMap.put(groupId, new AtomicInteger(config.getNum()));
                     }
                 });
@@ -205,6 +209,7 @@ public class DeployService {
                     // frontPort = 5002 + indexOnHost(0,1,2,3...)
                     int frontPort = constant.getDefaultFrontPort() + nodeConfig.getHostIndex();
 
+                    // TODO. pass object
                     TbFront front = this.frontService.insert(nodeConfig.getNodeId(), ip, frontPort, agency.getKey(),
                             imageConfig.getConfigValue(), RunTypeEnum.DOCKER,
                             agency.getValue(), hostIdMap.get(ip),
@@ -223,19 +228,13 @@ public class DeployService {
                     });
 
                     // generate front application.yml
-                    // TODO. make constant
-                    Files.write(nodePath.resolve("application.yml"), Arrays.asList(
-                            new String[]{
-                                    "spring:",
-                                    "  datasource:",
-                                    "    url: jdbc:h2:file:/data/h2/webasefront;DB_CLOSE_ON_EXIT=FALSE",
-                                    "sdk:",
-                                    String.format("  encryptType: %s  # 0:ecdsa, 1:guomi", encryptType),
-                                    String.format("  channelPort: %s", nodeConfig.getChannelPort()),
-                                    "server:",
-                                    String.format("  port: %s", frontPort)
-                            }
-                    ), StandardOpenOption.CREATE);
+                    String applicationYml = ThymeleafUtil.generate(
+                            ThymeleafUtil.FRONT_APLLICATION_YML,
+                            Pair.of("encryptType", encryptType),
+                            Pair.of("channelPort", nodeConfig.getChannelPort()),
+                            Pair.of("frontPort", frontPort)
+                    );
+                    Files.write(nodePath.resolve("application.yml"), applicationYml.getBytes(), StandardOpenOption.CREATE);
                 }
             }
 
@@ -264,8 +263,8 @@ public class DeployService {
      * Validate ipConf.
      *
      * @param ipConf
-     * @throws NodeMgrException
      * @return List<ConfigLine> entity of config for build_chain
+     * @throws NodeMgrException
      */
     public List<ConfigLine> parseIpConf(String[] ipConf) throws NodeMgrException {
         if (ArrayUtils.isEmpty(ipConf)) {
@@ -402,8 +401,8 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> add(String chainName, String ip, String agencyName, int num) {
-        log.info("Check chainName:[{}] exists...", chainName);
+    public Pair<RetCode, String> add(String chainName, int groupId, String ip, String agencyName, int num) {
+        log.info("Check chain name:[{}] exists...", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain == null) {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
@@ -414,47 +413,83 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
-        List<TbAgency> agencyList = this.tbAgencyMapper.selectByChainId(chain.getId());
-        if (CollectionUtils.isEmpty(agencyList)) {
-            throw new NodeMgrException(ConstantCode.CHAIN_WITH_NO_AGENCY_ERROR);
+        log.info("Check num:[{}]...", num);
+        if (num <= 0 || num >= 200) {
+            throw new NodeMgrException(ConstantCode.NODES_NUM_ERROR);
         }
 
-        // get agency id set
-        Set<Integer> agencyIdSet = agencyList.stream().map(agency -> agency.getId()).collect(Collectors.toSet());
+        // select host list by agency id
+        List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
 
-        List<TbHost> hostList = this.tbHostMapper.selectByIp(ip);
-        if (CollectionUtils.isEmpty(hostList) && StringUtils.isBlank(agencyName)){
-            // new ip address, agency name cannot be blank
-            throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
+        // check ip exists
+        TbHost tbHost = tbHostList.stream()
+                .filter(host -> StringUtils.equalsIgnoreCase(ip, host.getIp())).findFirst().orElse(null);
+
+        TbAgency agency = null;
+        if (tbHost == null) {
+            if (StringUtils.isBlank(agencyName)) {
+                // agency name cannot be blank when host ip is new
+                throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
+            }
+
+            // a new host IP address, check agency name is new
+            agency = this.agencyService.initAgencyIfNew(
+                    agencyName, chain.getId(), chainName, chain.getEncryptType());
+
+            // init host, generate sdk config files
+            tbHost = this.hostService.initHost(chain.getEncryptType(),
+                    chain.getChainName(), chain.getRootDir(),
+                    ip, agency.getId(), agency.getAgencyName());
+        } else {
+            // exist host
+            agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chain.getId(), tbHost.getAgencyName());
         }
 
-        // get agency id set from host
-        Set<Integer> agencyIdSetFromHost = hostList.stream().map(host -> host.getAgencyId()).collect(Collectors.toSet());
-        agencyIdSet.retainAll(agencyIdSetFromHost);
+        // init group, if group is new, return true
+        Pair<TbGroup, Boolean> isNewGroup = this.groupService.saveOrUpdateNodeCount(groupId,
+                num, chain.getId(), chainName);
+        TbGroup group = isNewGroup.getKey();
+        boolean newGroup = isNewGroup.getValue();
 
-        if (CollectionUtils.size(agencyIdSet) != 1
-                && StringUtils.isBlank(agencyName)){
-            // new ip address, agency name cannot be blank
-            throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
+        // init front and node
+        List<TbFront> newFrontList = this.frontService.initFront(num, chain,
+                tbHost, agency.getId(), agencyName, group);
+
+        // generate config files and scp to remote
+        this.nodeService.generateNodeConfig(chain, groupId, ip, newFrontList);
+
+        // generate config files and scp to remote
+        this.groupService.generateGroupConfigs(newGroup, chain, groupId, ip, newFrontList);
+
+        // scp node to remote
+        String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
+        String dst = PathService.getChainRootOnHost(rootDirOnHost, chainName);
+
+        log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst);
+        executeResult = this.deployShellService.scp(ScpTypeEnum.UP, ip, src, dst);
+        if (executeResult.failed()) {
+            //TODO. write file error
+            log.error("Send node:[{}:{}] files error.", ip, currentIndex);
         }
 
-        if(CollectionUtils.isEmpty(agencyIdSet)){
-            // new IP and new agency name
-
-            // call shell to generate new agency config(private key and crt)
-
-            // insert node to db
+        NodeConfig nodeConfig = null;
+        try {
+            nodeConfig = NodeConfig.read(nodeRoot);
+        } catch (IOException e) {
+            log.error("Reade node:[{}:{}] config error.", ip, currentIndex);
         }
-
-        // generate nodes config by agency config
-
-        // insert host into db
 
         // ssh host and start docker container
+        dockerClientService.createAndStart(ip, dockerPort,
+                imageTag, front.getContainerName(),
+                PathService.getChainRootOnHost(rootDirOnHost, chainName),
+                currentIndex);
 
-        // try catch, if error occurred, delete generated config files.
+
+    }
+
 
         return null;
-    }
+}
 }
 
