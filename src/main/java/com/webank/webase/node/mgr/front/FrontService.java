@@ -331,12 +331,14 @@ public class FrontService {
                           int jsonrpcPort,
                           int p2pPort,
                           int channelPort,
-                          FrontStatusEnum frontStatusEnum
-    ) throws NodeMgrException {
+                          int chainId,
+                          String chainName,
+                          FrontStatusEnum frontStatusEnum) throws NodeMgrException {
         // TODO. params check
 
         TbFront front = TbFront.init(nodeId, ip, port, agencyName, clientVersion, runTypeEnum,
-                agencyId, hostId, hostIndex, imageTag, containerName, jsonrpcPort, p2pPort, channelPort, frontStatusEnum);
+                agencyId, hostId, hostIndex, imageTag, containerName, jsonrpcPort, p2pPort, channelPort,
+            chainId, chainName, frontStatusEnum);
 
         if (frontMapper.add(front) != 1 || front.getFrontId() <= 0){
             throw new NodeMgrException(ConstantCode.INSERT_FRONT_ERROR);
