@@ -76,8 +76,8 @@ public class FrontGroupMapService {
     /**
      * add new mapping
      */
-    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId) {
-        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId);
+    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, GroupStatus groupStatus) {
+        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, groupStatus.getValue());
 
         //add db
         frontGroupMapMapper.add(tbFrontGroupMap);
