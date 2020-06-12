@@ -111,7 +111,7 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> deploy(String chainName,
+    public Pair<RetCode, String> deployChain(String chainName,
                                         String[] ipConf,
                                         int tagId,
                                         String rootDirOnHost) throws NodeMgrException {
@@ -222,7 +222,7 @@ public class DeployService {
                                 groupId, ip, nodeConfig.getP2pPort(),
                                 nodeName, NodeStatusEnum.DEAD);
 
-                        this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId);
+                        this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
                     });
 
                     // generate front application.yml
@@ -236,7 +236,7 @@ public class DeployService {
                 }
             }
 
-            // update group node count
+            // update group node count todo 是否删除？因为上面save group时已设置了group nodeCount
             groupCountMap.forEach((groupId, nodeCount) -> {
                 groupService.updateGroupNodeCount(groupId, nodeCount.get());
             });
@@ -322,7 +322,7 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public RetCode delete(String chainName) {
+    public RetCode deleteChain(String chainName) {
         if (StringUtils.isBlank(chainName)) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
@@ -408,7 +408,7 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> add(String chainName, int groupId, String ip, String agencyName, int num) throws NodeMgrException {
+    public Pair<RetCode, String> deployNodes(String chainName, int groupId, String ip, String agencyName, int num) throws NodeMgrException {
         log.info("Add node check chain name:[{}] exists...", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain == null) {
@@ -420,6 +420,7 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
+        // TODO get proper node number according to host performance
         log.info("Add node check num:[{}]...", num);
         if (num <= 0 || num >= 200) {
             throw new NodeMgrException(ConstantCode.NODES_NUM_ERROR);
@@ -465,7 +466,7 @@ public class DeployService {
 
             // generate config files and scp to remote
             this.nodeService.generateNodeConfig(chain, groupId, ip, newFrontList);
-
+            // TODO update group's other node's config.ini p2p list
             // generate config files and scp to remote
             this.groupService.generateGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList);
 
@@ -485,6 +486,21 @@ public class DeployService {
         }
 
         return Pair.of(ConstantCode.SUCCESS, "success");
+    }
+
+
+    public void deleteNode() {
+        // check node is removed from sealer/observer, else abort
+
+        // remove front
+
+        // destroy docker-container
+
+        // update local group's nodes' config.ini p2p, mv to temp dir
+
+        // update host nodes' config.ini
+
+        // mv host node's data file
     }
 
     /**
