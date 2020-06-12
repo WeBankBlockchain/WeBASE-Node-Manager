@@ -388,7 +388,7 @@ CREATE TABLE `tb_config` (
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`)
 --  UNIQUE KEY `unq_type_value` (`config_type`,`config_value`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='配置信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统配置信息表';
 
 
 
