@@ -33,7 +33,7 @@ public class TbFrontGroupMap {
      */
     private Integer status;
 
-    public TbFrontGroupMap(Integer frontId,Integer groupId, Integer status){
+    public TbFrontGroupMap(Integer frontId, Integer groupId, Integer status){
         this.frontId = frontId;
         this.groupId = groupId;
         this.status = status;

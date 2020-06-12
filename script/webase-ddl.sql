@@ -387,9 +387,9 @@ CREATE TABLE `tb_config` (
   `config_value` varchar(512) NOT NULL DEFAULT '' COMMENT '配置值',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unq_type_value` (`config_type`,`config_value`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='配置信息表';
+  PRIMARY KEY (`id`)
+--  UNIQUE KEY `unq_type_value` (`config_type`,`config_value`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统配置信息表';
 
 
 
