@@ -244,7 +244,7 @@ public class HostService {
             dockerStartLatch.await(20, TimeUnit.MINUTES);
             // check if all host init success
             if (startCount.get() == 0) {
-                log.info("All bcos-front of chain:[{}] start success.", startCount.get(), tbChain.getChainName());
+                log.info("All bcos-front of chain:[{}] start success, start failed count:[{}].",  tbChain.getChainName(), startCount.get());
                 chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_SUCCESS);
             } else {
                 log.error("[{}] bcos-front of chain:[{}] start failed.", startCount.get(), tbChain.getChainName());
@@ -252,7 +252,7 @@ public class HostService {
             }
         } catch (InterruptedException e) {
             chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_FAILED);
-            log.error("CountDownLatch wait for all bcos-front:[{}] of chain:[{}] start timeout.", dockerStartLatch.getCount(), chainName);
+            log.error("CountDownLatch wait for bcos-front of chain:[{}] start timeout, left count:[{}].",  chainName,dockerStartLatch.getCount());
         }
     }
 
