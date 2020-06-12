@@ -15,6 +15,8 @@
  */
 package com.webank.webase.node.mgr.deploy.service;
 
+import static com.webank.webase.node.mgr.base.tools.DateUtil.YYYYMMDD_HHMMSS;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.DateUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -225,7 +228,18 @@ public class PathService {
             String rootDirOnHost,
             String chainName) {
         return String.format("%s/%s", rootDirOnHost, chainName);
+    }
 
+    /**
+     *  Move node directory to another when delete.
+     * @param rootDirOnHost
+     * @param chainName
+     * @return
+     */
+    public static String getChainDeletedRootOnHost(
+            String rootDirOnHost,
+            String chainName) {
+        return String.format("%s/delete-%s-%s", rootDirOnHost, chainName, DateUtil.formatNow(YYYYMMDD_HHMMSS));
     }
 
     /**

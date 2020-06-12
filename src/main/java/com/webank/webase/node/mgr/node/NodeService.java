@@ -154,17 +154,17 @@ public class NodeService {
     /**
      * query node info.
      */
-    public TbNode queryByNodeId(String nodeId) throws NodeMgrException {
-        log.debug("start queryNode nodeId:{}", nodeId);
-        try {
-            TbNode nodeRow = nodeMapper.queryByNodeId(nodeId);
-            log.debug("end queryNode nodeId:{} TbNode:{}", nodeId, JSON.toJSONString(nodeRow));
-            return nodeRow;
-        } catch (RuntimeException ex) {
-            log.error("fail queryNode . nodeId:{}", nodeId, ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-    }
+//    public TbNode queryByNodeId(String nodeId) throws NodeMgrException {
+//        log.debug("start queryNode nodeId:{}", nodeId);
+//        try {
+//            TbNode nodeRow = nodeMapper.queryByNodeId(nodeId);
+//            log.debug("end queryNode nodeId:{} TbNode:{}", nodeId, JSON.toJSONString(nodeRow));
+//            return nodeRow;
+//        } catch (RuntimeException ex) {
+//            log.error("fail queryNode . nodeId:{}", nodeId, ex);
+//            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+//        }
+//    }
 
 
     /**
@@ -412,12 +412,12 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(int chainId,int groupId){
+    public List<TbNode> selectNodeListByChainIdAndGroupId(int chainId,final int groupId){
         // select all fronts by all agencies
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
 
         List<TbNode> tbNodeList = tbFrontList.stream()
-                .map((front) -> nodeMapper.queryByNodeId(front.getNodeId()))
+                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(),groupId))
                 .filter((node) -> node != null)
                 .filter((node) -> node.getGroupId() == groupId)
                 .collect(Collectors.toList());
