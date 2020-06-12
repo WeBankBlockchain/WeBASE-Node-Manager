@@ -100,7 +100,6 @@ public class DeployService {
     @Autowired private DockerClientService dockerClientService;
     @Autowired private PathService pathService;
     @Autowired private ConstantProperties constant;
-    @Autowired private ConfigService configService;
 
     /**
      * Add in v1.4.0 deploy.
@@ -313,6 +312,7 @@ public class DeployService {
 
     /**
      * TODO. delete object should call service.delete
+     *
      * <p>
      * Delete a chain by chain name.
      *
@@ -337,7 +337,6 @@ public class DeployService {
                 for (TbFront front : CollectionUtils.emptyIfNull(frontList)) {
                     // TODO. ssh remote server, shutdown, delete node config
                     // delete config files
-                    log.info("ssh remote server and shutdown front id:[{}].", front.getFrontId());
 
                     // optimize code to get host
                     TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
@@ -347,6 +346,13 @@ public class DeployService {
                                 front.getFrontIp(),
                                 host.getDockerPort(),
                                 front.getContainerName());
+
+                        String chainRootOnHost = PathService.getChainRootOnHost(host.getRootDir(), chainName);
+                        if (StringUtils.isNotBlank(chainRootOnHost)) {
+                            String rmCommand = String.format("rm -rf %s && exit 0", chainRootOnHost);
+                            log.info("Remove config on remote host:[{}], command:[{}].", host.getIp(), rmCommand);
+                            SshTools.exec(host.getIp(), rmCommand);
+                        }
                     }
 
                     // TODO. delete node and frontGroupMap in batch
@@ -459,20 +465,19 @@ public class DeployService {
             // generate config files and scp to remote
             this.groupService.generateGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList);
 
-
             for (TbFront newFront : newFrontList) {
                 // ssh host and start docker container
                 dockerClientService.createAndStart(ip, tbHost.getDockerPort(),
                         chain.getVersion(), newFront.getContainerName(),
-                        PathService.getChainRootOnHost(tbHost.getRootDir(), chainName),newFront.getHostIndex());
+                        PathService.getChainRootOnHost(tbHost.getRootDir(), chainName), newFront.getHostIndex());
             }
 
         } catch (Exception e) {
             //TODO.
-            log.error("Add node error",e);
+            log.error("Add node error", e);
         }
 
-        return Pair.of(ConstantCode.SUCCESS,"success");
+        return Pair.of(ConstantCode.SUCCESS, "success");
     }
 }
 
