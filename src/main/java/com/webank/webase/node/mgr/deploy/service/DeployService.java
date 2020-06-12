@@ -111,7 +111,7 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> deploy(String chainName,
+    public Pair<RetCode, String> deployChain(String chainName,
                                         String[] ipConf,
                                         int tagId,
                                         String rootDirOnHost) throws NodeMgrException {
@@ -235,7 +235,7 @@ public class DeployService {
                 }
             }
 
-            // update group node count
+            // update group node count todo 是否删除？因为上面save group时已设置了group nodeCount
             groupCountMap.forEach((groupId, nodeCount) -> {
                 groupService.updateGroupNodeCount(groupId, nodeCount.get());
             });
@@ -320,7 +320,7 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public RetCode delete(String chainName) {
+    public RetCode deleteChain(String chainName) {
         if (StringUtils.isBlank(chainName)) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
@@ -398,7 +398,7 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> add(String chainName, int groupId, String ip, String agencyName, int num) {
+    public Pair<RetCode, String> deployNode(String chainName, int groupId, String ip, String agencyName, int num) {
         log.info("Check chain name:[{}] exists...", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain == null) {
