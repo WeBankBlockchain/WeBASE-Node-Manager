@@ -59,7 +59,7 @@ public class DeployController extends BaseController {
                 deploy.getChainName(), deploy.getRootDirOnHost(), startTime.toEpochMilli(),
                 deploy.getTagId(), deploy.getIpconf());
 
-        Pair<RetCode, String> deployResult = this.deployService.deploy(deploy.getChainName(),
+        Pair<RetCode, String> deployResult = this.deployService.deployChain(deploy.getChainName(),
                 deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost());
         return new BaseResponse(deployResult.getKey(), deployResult.getValue());
     }
@@ -84,7 +84,7 @@ public class DeployController extends BaseController {
         log.info("start add node ip:[{}],group:[{}], agencyName:[{}], num:[{}], chainName:[{}], now:[{}]",
                 ip, groupId, agencyName, num, chainName, startTime);
 
-        Pair<RetCode, String> addResult = this.deployService.add(chainName, groupId, ip, agencyName, num);
+        Pair<RetCode, String> addResult = this.deployService.deployNodes(chainName, groupId, ip, agencyName, num);
         return new BaseResponse(addResult.getKey(), addResult.getValue());
     }
 
@@ -100,7 +100,7 @@ public class DeployController extends BaseController {
         log.info("start delete chainName:[{}], startTime:[{}]",
                 chainName, startTime.toEpochMilli());
 
-        RetCode deleteResult = this.deployService.delete(chainName);
+        RetCode deleteResult = this.deployService.deleteChain(chainName);
         return new BaseResponse(deleteResult);
     }
 
