@@ -40,6 +40,7 @@ import com.webank.webase.node.mgr.security.JsonAuthenticationEntryPoint;
 import com.webank.webase.node.mgr.security.JsonLogoutSuccessHandler;
 import com.webank.webase.node.mgr.security.LoginFailHandler;
 import com.webank.webase.node.mgr.security.customizeAuth.TokenAuthenticationProvider;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
@@ -80,8 +81,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     "/login","/user/privateKey/**", "/encrypt")
             .permitAll()
             .anyRequest().authenticated().and()
+            .csrf()
+            // set http-only false
+            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             // ignore login csrf verify
-            .csrf().ignoringAntMatchers("/account/login").and()
+            .ignoringAntMatchers("/account/login").and()
             .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class)
             .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint).and()
             .logout()
