@@ -18,12 +18,17 @@ package com.webank.webase.node.mgr.base.tools;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -54,9 +59,63 @@ public class SshTools {
      * @param ip
      * @return
      */
-    public static boolean isLocal (String ip){
+    public static boolean isLocal(String ip) {
         return Stream.of(LOCAL_ARRAY).anyMatch(ip::equalsIgnoreCase);
 
+    }
+
+    /**
+     * TODO exceptions and exec log
+     *
+     * @param ip
+     * @param command
+     */
+    public static boolean exec(String ip, String command) {
+        Session session = connect(ip, SSH_DEFAULT_PORT, SSH_DEFAULT_USER, "", 0);
+        if (session != null && session.isConnected()) {
+            ChannelExec channelExec = null;
+            StringBuilder execLog = new StringBuilder();
+            BufferedReader reader = null;
+            try {
+                channelExec = (ChannelExec) session.openChannel("exec");
+                InputStream in = channelExec.getInputStream();
+                channelExec.setCommand(command);
+                channelExec.connect();
+
+                reader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    execLog.append(line).append("\n");
+                }
+
+                int status = channelExec.getExitStatus();
+                if (status < 0) {
+                    log.error("Exec command:[{}] on remote host:[{}], no exit status:[{}] not set, log:[{}].",
+                            command, ip, status, execLog.toString());
+                    return true;
+                } else if (status == 0) {
+                    log.error("Exec command:[{}] on remote host:[{}] success, log:[{}].", command, ip, execLog.toString());
+                    return true;
+                } else {
+                    log.error("Exec command:[{}] on remote host:[{}] with error[{}], log:[{}].", command, ip, status, execLog.toString());
+                }
+            } catch (Exception e) {
+                log.error("Exec command:[{}] on remote host:[{}] occurred exception.", command, ip, e);
+            } finally {
+                // TODO.
+                if (channelExec != null) {
+                    channelExec.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                    }
+                }
+                session.disconnect();
+            }
+        }
+        return false;
     }
 
     /**
@@ -64,7 +123,7 @@ public class SshTools {
      * @return
      */
     public static boolean connect(String ip) {
-        if (isLocal(ip)){
+        if (isLocal(ip)) {
             return true;
         }
 

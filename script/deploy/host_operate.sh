@@ -125,6 +125,18 @@ function init() {
     if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
         echo "Initialing local server ....."
 
+        case $(uname | tr '[:upper:]' '[:lower:]') in
+          linux*)
+            # GNU/Linux操作系统
+            # Debian(Ubuntu) or RHEL(CentOS)
+            bash -e -x "${__dir}/host_init_shell.sh"
+            status=($?)
+            if [[ $status != 0 ]] ;then
+                echo "Local init node ERROR!!!"
+                exit "$status"
+            fi
+            ;;
+        esac
         echo "mkdir node root ${node_root} on local"
         mkdir -p ${node_root}
 
