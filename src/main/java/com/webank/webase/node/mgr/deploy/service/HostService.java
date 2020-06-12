@@ -185,7 +185,8 @@ public class HostService {
         // 1. install docker and docker-compose,
         // 2. send node config to remote host
         // 3. docker pull image
-        if (!this.initHosts(tbChain, tbHostList)) {
+        boolean isInitSuccess = this.initHosts(tbChain, tbHostList);
+        if (!isInitSuccess) {
             // init host failed
             log.error("Chain:[{}:{}] has no host.", tbChain.getId(), tbChain.getChainName());
             return;
@@ -362,6 +363,12 @@ public class HostService {
         return false;
     }
 
+    /**
+     * destroy host when delete last node of host
+     */
+    public void destroyHost() {
+
+    }
 
     /**
      *
