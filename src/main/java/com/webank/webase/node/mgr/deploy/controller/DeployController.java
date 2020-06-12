@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.deploy.controller;
 
+import java.io.IOException;
 import java.time.Instant;
 
 import javax.validation.Valid;
@@ -21,17 +22,21 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
+import com.webank.webase.node.mgr.deploy.entity.TbChain;
+import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.service.DeployService;
 
 import lombok.extern.log4j.Log4j2;
@@ -43,6 +48,7 @@ import lombok.extern.log4j.Log4j2;
 @RestController
 @RequestMapping("deploy")
 public class DeployController extends BaseController {
+    @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private DeployService deployService;
 
@@ -55,7 +61,7 @@ public class DeployController extends BaseController {
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("start deploy chainName:[{}], rootDirOnHost:[{}] startTime:[{}], tagId:[{}], ipconf:[{}]",
+        log.info("Start deploy chainName:[{}], rootDirOnHost:[{}] startTime:[{}], tagId:[{}], ipconf:[{}]",
                 deploy.getChainName(), deploy.getRootDirOnHost(), startTime.toEpochMilli(),
                 deploy.getTagId(), deploy.getIpconf());
 
@@ -79,9 +85,9 @@ public class DeployController extends BaseController {
             @RequestParam(value = "agencyName", required = false, defaultValue = "") String agencyName,
             @RequestParam(value = "num", required = false, defaultValue = "1") int num,
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-    ) {
+    ) throws IOException {
         Instant startTime = Instant.now();
-        log.info("start add node ip:[{}],group:[{}], agencyName:[{}], num:[{}], chainName:[{}], now:[{}]",
+        log.info("Start add node ip:[{}],group:[{}], agencyName:[{}], num:[{}], chainName:[{}], now:[{}]",
                 ip, groupId, agencyName, num, chainName, startTime);
 
         Pair<RetCode, String> addResult = this.deployService.add(chainName, groupId, ip, agencyName, num);
@@ -89,19 +95,56 @@ public class DeployController extends BaseController {
     }
 
     /**
+     *
+     * @param newTagId
+     * @return
+     * @throws IOException
+     */
+    @PostMapping(value = "upgrade")
+    public BaseResponse upgradeChain(
+            @RequestParam(value = "newTagId", required = true) int newTagId,
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
+    ) throws IOException {
+        Instant startTime = Instant.now();
+        log.info("Start upgrade chain to version:[{}], chainName:[{}], now:[{}]", newTagId, chainName, startTime);
+
+        Pair<RetCode, String> upgradeResult = this.deployService.upgrade(newTagId,chainName);
+        return new BaseResponse(upgradeResult.getKey(), upgradeResult.getValue());
+    }
+
+    /**
      * delete chain by chainName.
      */
     @DeleteMapping(value = "delete")
     // @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse delete(
+    public BaseResponse deleteChain(
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     ) throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start delete chainName:[{}], startTime:[{}]",
+        log.info("Start delete chainName:[{}], startTime:[{}]",
                 chainName, startTime.toEpochMilli());
 
         RetCode deleteResult = this.deployService.delete(chainName);
         return new BaseResponse(deleteResult);
     }
 
+    /**
+     *
+     * @param chainName
+     * @return
+     * @throws IOException
+     */
+    @GetMapping(value = "chain/info")
+    public BaseResponse getChain(
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
+    ) throws IOException {
+        Instant startTime = Instant.now();
+        log.info("Start get chain info :[{}], chainName:[{}], now:[{}]", chainName, startTime);
+
+        TbChain chain = this.tbChainMapper.getByChainName(chainName);
+        if (chain == null){
+            throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
+        }
+        return new BaseResponse(ConstantCode.SUCCESS, chain);
+    }
 }

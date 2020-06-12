@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
+import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -97,11 +98,12 @@ public class ChainService {
                           String version,
                           byte encryptType,
                           ChainStatusEnum status,
-                          String rootDirOnHost
+                          String rootDirOnHost,
+                          RunTypeEnum runTypeEnum
     ) throws NodeMgrException {
         // TODO. params check
 
-        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, rootDirOnHost);
+        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, rootDirOnHost, runTypeEnum);
 
         if (tbChainMapper.insertSelective(chain) != 1 || chain.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_CHAIN_ERROR);
@@ -115,6 +117,15 @@ public class ChainService {
         TbChain newChain = new TbChain();
         newChain.setId(chainId);
         newChain.setChainStatus(newStatus.getId());
+        newChain.setModifyTime(new Date());
+        return this.tbChainMapper.updateByPrimaryKeySelective(newChain) == 1;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public boolean upgrade(TbChain chain , String newTagVersion ) {
+        TbChain newChain = new TbChain();
+        newChain.setId(chain.getId());
+        newChain.setVersion(newTagVersion);
         newChain.setModifyTime(new Date());
         return this.tbChainMapper.updateByPrimaryKeySelective(newChain) == 1;
     }

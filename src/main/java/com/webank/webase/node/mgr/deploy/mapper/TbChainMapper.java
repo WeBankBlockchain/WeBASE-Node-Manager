@@ -13,9 +13,6 @@ import com.webank.webase.node.mgr.deploy.entity.TbChain;
 
 public interface TbChainMapper {
 
-    /**
-     * TODO. 删除 Result 看能否成功执行
-     */
     @Select({
             "select ", TbChainSqlProvider.ALL_COLUMN_FIELDS, " from tb_chain ",
             "where chain_name = #{chainName,jdbcType=VARCHAR}"
@@ -78,11 +75,12 @@ public interface TbChainMapper {
     "<script>",
         "insert into tb_chain (chain_name, ",
         "chain_desc, version, ",
-        "encrypt_type, chain_status, root_dir, ",
+        "encrypt_type, chain_status, root_dir,run_type, ",
         "create_time, modify_time)",
         "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.chainName,jdbcType=VARCHAR}, ",
         "#{detail.chainDesc,jdbcType=VARCHAR}, #{detail.version,jdbcType=VARCHAR}, ",
-        "#{detail.encryptType,jdbcType=TINYINT}, #{detail.chainStatus,jdbcType=TINYINT},#{detail.rootDir,jdbcType=VARCHAR}, ",
+        "#{detail.encryptType,jdbcType=TINYINT}, #{detail.chainStatus,jdbcType=TINYINT},#{detail.rootDir,jdbcType=VARCHAR}, " +
+                "#{detail.runType,jdbcType=TINYINT}",
         "#{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP})</foreach></script>"
     })
     int batchInsert(java.util.List<TbChain> list);

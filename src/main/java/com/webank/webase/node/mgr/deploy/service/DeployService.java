@@ -103,6 +103,7 @@ public class DeployService {
 
     /**
      * Add in v1.4.0 deploy.
+     * TODO. throw all exceptions.
      *
      * @param ipConf
      * @param tagId
@@ -148,7 +149,8 @@ public class DeployService {
 
             // insert chain
             final TbChain newChain = this.chainService.insert(chainName, chainName,
-                    imageConfig.getConfigValue(), encryptType, ChainStatusEnum.INITIALIZED, rootDirOnHost);
+                    imageConfig.getConfigValue(), encryptType,
+                    ChainStatusEnum.INITIALIZED, rootDirOnHost, RunTypeEnum.DOCKER);
             // TODO 提高代码可读性
             Map<String, Integer> agencyIdMap = new HashMap<>();
             Map<String, Integer> hostIdMap = new HashMap<>();
@@ -348,8 +350,9 @@ public class DeployService {
                                 front.getContainerName());
 
                         String chainRootOnHost = PathService.getChainRootOnHost(host.getRootDir(), chainName);
+                        String chainDeletedRootOnHost = PathService.getChainDeletedRootOnHost(host.getRootDir(), chainName);
                         if (StringUtils.isNotBlank(chainRootOnHost)) {
-                            String rmCommand = String.format("rm -rf %s && exit 0", chainRootOnHost);
+                            String rmCommand = String.format("mv -fv %s %s && exit 0", chainRootOnHost, chainDeletedRootOnHost);
                             log.info("Remove config on remote host:[{}], command:[{}].", host.getIp(), rmCommand);
                             SshTools.exec(host.getIp(), rmCommand);
                         }
@@ -396,6 +399,7 @@ public class DeployService {
 
     /**
      * Add a node.
+     *  TODO. throw all exceptions.
      *
      * @param ip
      * @param agencyName
@@ -404,19 +408,19 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> add(String chainName, int groupId, String ip, String agencyName, int num) {
-        log.info("Check chain name:[{}] exists...", chainName);
+    public Pair<RetCode, String> add(String chainName, int groupId, String ip, String agencyName, int num) throws NodeMgrException {
+        log.info("Add node check chain name:[{}] exists...", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain == null) {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
         }
 
-        log.info("Check ip format:[{}]...", ip);
+        log.info("Add node check ip format:[{}]...", ip);
         if (!ValidateUtil.ipv4Valid(ip)) {
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
-        log.info("Check num:[{}]...", num);
+        log.info("Add node check num:[{}]...", num);
         if (num <= 0 || num >= 200) {
             throw new NodeMgrException(ConstantCode.NODES_NUM_ERROR);
         }
@@ -424,7 +428,7 @@ public class DeployService {
         // select host list by agency id
         List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
 
-        // check ip exists
+        // check host exists by ip
         TbHost tbHost = tbHostList.stream()
                 .filter(host -> StringUtils.equalsIgnoreCase(ip, host.getIp())).findFirst().orElse(null);
 
@@ -457,7 +461,7 @@ public class DeployService {
         // init front and node
         try {
             List<TbFront> newFrontList = this.frontService.initFront(num, chain,
-                    tbHost, agency.getId(), agencyName, group);
+                    tbHost, agency.getId(), agency.getAgencyName(), group);
 
             // generate config files and scp to remote
             this.nodeService.generateNodeConfig(chain, groupId, ip, newFrontList);
@@ -470,14 +474,44 @@ public class DeployService {
                 dockerClientService.createAndStart(ip, tbHost.getDockerPort(),
                         chain.getVersion(), newFront.getContainerName(),
                         PathService.getChainRootOnHost(tbHost.getRootDir(), chainName), newFront.getHostIndex());
-            }
 
+            }
         } catch (Exception e) {
             //TODO.
             log.error("Add node error", e);
+            throw new NodeMgrException(ConstantCode.ADD_NODE_WITH_UNKNOWN_EXCEPTION_ERROR, e);
+        } finally {
+            // TODO. delete generated files
         }
 
         return Pair.of(ConstantCode.SUCCESS, "success");
+    }
+
+    /**
+     *
+     * @param newTagId
+     * @param chainName
+     * @return
+     */
+    public Pair<RetCode, String> upgrade(int newTagId, String chainName) {
+        // check tagId existed
+        TbConfig imageConfig = tbConfigMapper.selectByPrimaryKey(newTagId);
+        if (imageConfig == null
+                || StringUtils.isBlank(imageConfig.getConfigValue())) {
+            throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
+        }
+
+        log.info("Upgrade check chain name:[{}] exists...", chainName);
+        TbChain chain = tbChainMapper.getByChainName(chainName);
+        if (chain == null) {
+            throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
+        }
+
+        // TODO.
+        this.chainService.upgrade(chain,imageConfig.getConfigValue());
+        return null;
+
+
     }
 }
 

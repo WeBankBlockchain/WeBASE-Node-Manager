@@ -13,11 +13,14 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Repository;
+
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.TbNode;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 /**
  * node data interface.
@@ -50,7 +53,7 @@ public interface NodeMapper {
     /**
      * query node info.
      */
-    TbNode queryByNodeId(@Param("nodeId") String nodeId);
+//    TbNode queryByNodeId(@Param("nodeId") String nodeId);
 
 
     /**
@@ -76,4 +79,10 @@ public interface NodeMapper {
     Integer deleteByGroupId( @Param("groupId") Integer groupId);
 
     int deleteByNodeId(@Param("nodeId") String nodeId);
+
+
+    @Select({
+            "select * from tb_node where node_id= #{nodeId,jdbcType=VARCHAR} and group_id=#{groupId,jdbcType=INTEGER}"
+    })
+    TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId,@Param("groupId") int groupId);
 }
