@@ -79,12 +79,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers("/account/login", "/account/pictureCheckCode",
                     "/login","/user/privateKey/**", "/encrypt")
             .permitAll()
-            .anyRequest().authenticated()
-            .and()
-//            .csrf().disable() // close csrf
+            .anyRequest().authenticated().and()
+            // ignore login csrf verify
+            .csrf().ignoringAntMatchers("/account/login").and()
             .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class)
-            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint)
-            .and().logout()
+            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint).and()
+            .logout()
             .logoutRequestMatcher(new AntPathRequestMatcher("/account/logout","POST"))
 //            .logoutUrl("/account/logout")
             .logoutSuccessHandler(jsonLogoutSuccessHandler)
