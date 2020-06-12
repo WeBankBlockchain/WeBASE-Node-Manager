@@ -383,7 +383,7 @@ CREATE TABLE `tb_config` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
   `config_name` varchar(64) NOT NULL COMMENT '配置名称',
   `config_type` int(10) NOT NULL DEFAULT '0' COMMENT '配置类型',
-  `config_value` varchar(512) NOT NULL DEFAULT '' COMMENT '配置值',
+  `config_value` text NOT NULL DEFAULT '' COMMENT '配置值',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
