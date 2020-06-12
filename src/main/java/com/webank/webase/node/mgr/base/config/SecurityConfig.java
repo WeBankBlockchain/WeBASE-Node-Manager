@@ -40,6 +40,7 @@ import com.webank.webase.node.mgr.security.JsonAuthenticationEntryPoint;
 import com.webank.webase.node.mgr.security.JsonLogoutSuccessHandler;
 import com.webank.webase.node.mgr.security.LoginFailHandler;
 import com.webank.webase.node.mgr.security.customizeAuth.TokenAuthenticationProvider;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * security config.
@@ -82,8 +83,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
 //            .csrf().disable() // close csrf
             .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class)
-            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint).and().logout()
-            .logoutUrl("/account/logout")
+            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint)
+            .and().logout()
+            .logoutRequestMatcher(new AntPathRequestMatcher("/account/logout","POST"))
+//            .logoutUrl("/account/logout")
             .logoutSuccessHandler(jsonLogoutSuccessHandler)
             .permitAll();
     }
