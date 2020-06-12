@@ -454,7 +454,7 @@ public class FrontService {
             this.nodeService.insert(nodeId, nodeName, groupId, ip, p2pPort, nodeName, NodeStatusEnum.DEAD);
 
             // insert front group into db
-            this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId);
+            this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
         }
         return newFrontList;
     }
