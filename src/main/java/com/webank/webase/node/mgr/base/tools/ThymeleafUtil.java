@@ -94,7 +94,7 @@ public class ThymeleafUtil {
     }
 
     /**
-     *
+     * node config path: /NODES_ROOT/IP/NODE[index]/
      * @param nodeRoot
      * @param channelPort
      * @param p2pPort
@@ -115,7 +115,7 @@ public class ThymeleafUtil {
     }
 
     /**
-     *
+     * group config path: /NODES_ROOT/IP/NODE[index]/conf/
      * @param nodeRoot
      * @param groupId
      * @throws IOException
