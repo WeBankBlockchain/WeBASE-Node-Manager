@@ -349,7 +349,7 @@ public class DeployService {
 
                         String chainRootOnHost = PathService.getChainRootOnHost(host.getRootDir(), chainName);
                         if (StringUtils.isNotBlank(chainRootOnHost)) {
-                            String rmCommand = String.format("rm -rf %s", chainRootOnHost);
+                            String rmCommand = String.format("rm -rf %s && exit 0", chainRootOnHost);
                             log.info("Remove config on remote host:[{}], command:[{}].", host.getIp(), rmCommand);
                             SshTools.exec(host.getIp(), rmCommand);
                         }

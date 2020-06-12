@@ -89,12 +89,15 @@ public class SshTools {
                 }
 
                 int status = channelExec.getExitStatus();
-                boolean success = status == 0;
-                if (success) {
-                    log.error("Exec command:[{}] on remote host:[{}] success:[{}].", command, ip, execLog.toString());
+                if (status < 0) {
+                    log.error("Exec command:[{}] on remote host:[{}], no exit status:[{}] not set, log:[{}].",
+                            command, ip, status, execLog.toString());
+                    return true;
+                } else if (status == 0) {
+                    log.error("Exec command:[{}] on remote host:[{}] success, log:[{}].", command, ip, execLog.toString());
                     return true;
                 } else {
-                    log.error("Exec command:[{}] on remote host:[{}] with error:[{}:{}].", command, ip, status, execLog.toString());
+                    log.error("Exec command:[{}] on remote host:[{}] with error[{}], log:[{}].", command, ip, status, execLog.toString());
                 }
             } catch (Exception e) {
                 log.error("Exec command:[{}] on remote host:[{}] occurred exception.", command, ip, e);
