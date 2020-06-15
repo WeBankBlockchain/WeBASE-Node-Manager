@@ -21,7 +21,6 @@ import java.util.function.Supplier;
 
 @Slf4j
 public class JsonTools {
-    // 加载速度太慢了，放在静态代码块中
     // private static final ObjectMapper mapper = new ObjectMapper();
     private static ObjectMapper mapper;
     private static final String STANDARD_FORMAT = "yyyy-MM-dd HH:mm:ss";
