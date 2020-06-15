@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.rule;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -55,7 +55,7 @@ public class AlertRuleController {
         TbAlertRule res = alertRuleService.queryByRuleId(ruleId);
 
         log.info("end getAlertRuleByRuleId useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
@@ -79,7 +79,7 @@ public class AlertRuleController {
 //    public Object saveAlertRule(@RequestBody @Valid AlertRuleParam param) {
 //        Instant startTime = Instant.now();
 //        log.info("start saveAlertRule. startTime:{} AlertRuleParam:{}",
-//                startTime.toEpochMilli(), JSON.toJSONString(param));
+//                startTime.toEpochMilli(), JsonTools.toJSONString(param));
 //        // check param
 //        // 保证参数，用catch方式
 //        if(param.getUserList().isEmpty()) {
@@ -96,7 +96,7 @@ public class AlertRuleController {
     public Object updateAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertRule. startTime:{} AlertRuleParam:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(param));
+                startTime.toEpochMilli(), JsonTools.toJSONString(param));
         if(param.getRuleId() == null) {
             return new BaseResponse(ConstantCode.ALERT_RULE_PARAM_EMPTY);
         }
@@ -119,7 +119,7 @@ public class AlertRuleController {
     public Object toggleAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start toggleAlertRule. startTime:{} AlertRuleParam:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(param));
+                startTime.toEpochMilli(), JsonTools.toJSONString(param));
         if(param.getRuleId() == null || param.getEnable() == null) {
             return new BaseResponse(ConstantCode.ALERT_RULE_PARAM_EMPTY);
         }

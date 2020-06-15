@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.front;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
@@ -124,7 +124,7 @@ public class FrontService {
         //save front info
         frontMapper.add(tbFront);
         if (tbFront.getFrontId() == null || tbFront.getFrontId() == 0) {
-            log.warn("fail newFront, after save, tbFront:{}", JSON.toJSONString(tbFront));
+            log.warn("fail newFront, after save, tbFront:{}", JsonTools.toJSONString(tbFront));
             throw new NodeMgrException(ConstantCode.SAVE_FRONT_FAIL);
         }
         for (String groupId : groupIdList) {

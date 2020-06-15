@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.ImageToken;
@@ -82,7 +82,7 @@ public class AccountController extends BaseController {
             tokenData.setToken(token);
             tokenData.setBase64Image(base64Image);
             baseResponse.setData(tokenData);
-            log.info("end getPictureCheckCode. baseResponse:{}", JSON.toJSONString(baseResponse));
+            log.info("end getPictureCheckCode. baseResponse:{}", JsonTools.toJSONString(baseResponse));
             return baseResponse;
         } catch (Exception e) {
             log.error("fail getPictureCheckCode", e);
@@ -102,7 +102,7 @@ public class AccountController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addAccountInfo. startTime:{} accountInfo:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(info));
+            JsonTools.toJSONString(info));
 
         // add account row
         accountService.addAccountRow(info);
@@ -113,7 +113,7 @@ public class AccountController extends BaseController {
         baseResponse.setData(tbAccount);
 
         log.info("end addAccountInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -128,7 +128,7 @@ public class AccountController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start updateAccountInfo startTime:{} accountInfo:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(info));
+            JsonTools.toJSONString(info));
 
         // current
         String currentAccount = getCurrentAccount(request);
@@ -143,7 +143,7 @@ public class AccountController extends BaseController {
 
         log.info("end updateAccountInfo useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
-            JSON.toJSONString(baseResponse));
+            JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -173,7 +173,7 @@ public class AccountController extends BaseController {
         }
 
         log.info("end queryAccountList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -191,7 +191,7 @@ public class AccountController extends BaseController {
         accountService.deleteAccountRow(account);
 
         log.info("end deleteAccount. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -205,7 +205,7 @@ public class AccountController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start updatePassword startTime:{} passwordInfo:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(info));
+            JsonTools.toJSONString(info));
 
         String targetAccount = getCurrentAccount(request);
 
@@ -214,7 +214,7 @@ public class AccountController extends BaseController {
             .updatePassword(targetAccount, info.getOldAccountPwd(), info.getNewAccountPwd());
 
         log.info("end updatePassword useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
     

@@ -13,8 +13,7 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -155,26 +154,17 @@ public class NodeMgrTools {
             log.warn("object2JavaBean. obj or clazz null");
             return null;
         }
-        String jsonStr = JSON.toJSONString(obj);
+        String jsonStr = JsonTools.toJSONString(obj);
 
-        return JSON.parseObject(jsonStr, clazz);
+        return JsonTools.toJavaObject(jsonStr, clazz);
     }
 
-
-    public static JSONObject Object2JSONObject(Object obj) {
-        if (obj == null) {
-            log.warn("obj is null");
-            return null;
-        }
-        String objJson = JSON.toJSONString(obj);
-        return JSONObject.parseObject(objJson);
-    }
 
     /**
      * encode list by sha.
      */
     public static String shaList(List<String> values) {
-        log.info("shaList start. values:{}", JSON.toJSONString(values));
+        log.info("shaList start. values:{}", JsonTools.toJSONString(values));
         // list按字段排序，并转换成字符串
         String list2SortString = list2SortString(values);
         // SHA加密字符串
@@ -364,7 +354,7 @@ public class NodeMgrTools {
 /*        baseResponse.setMessage(ex.getMessage());
         response.setContentType("application/json;charset=UTF-8");*/
         try {
-            response.getWriter().write(JSON.toJSONString(baseResponse));
+            response.getWriter().write(JsonTools.toJSONString(baseResponse));
         } catch (IOException e) {
             log.error("fail responseRetCodeException",e);
         }
@@ -416,20 +406,6 @@ public class NodeMgrTools {
     }
 
     /**
-     * is json.
-     */
-    public static boolean isJSON(String str) {
-        boolean result;
-        try {
-            JSON.parse(str);
-            result = true;
-        } catch (Exception e) {
-            result = false;
-        }
-        return result;
-    }
-
-    /**
      * response string.
      */
     public static void responseString(HttpServletResponse response, String str) {
@@ -439,12 +415,12 @@ public class NodeMgrTools {
         }
 
         RetCode retCode;
-        if (isJSON(str) && (retCode = JSONObject.parseObject(str, RetCode.class)) != null) {
+        if (JsonTools.isJson(str) && (retCode = JsonTools.toJavaObject(str, RetCode.class)) != null) {
             baseResponse = new BaseResponse(retCode);
         }
 
         try {
-            response.getWriter().write(JSON.toJSONString(baseResponse));
+            response.getWriter().write(JsonTools.toJSONString(baseResponse));
         } catch (IOException e) {
             log.error("fail responseRetCodeException", e);
         }
