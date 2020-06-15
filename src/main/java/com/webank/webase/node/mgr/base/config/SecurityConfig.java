@@ -78,22 +78,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .failureHandler(loginfailHandler) // if login fail
             .and().authorizeRequests()
             .antMatchers("/account/login", "/account/pictureCheckCode",
-                    "/login","/user/privateKey/**", "/encrypt")
+                "/login","/user/privateKey/**", "/encrypt")
             .permitAll()
-            .anyRequest().authenticated().and()
-            .csrf()
-            // set http-only false
-            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-            // ignore login csrf verify
-            .ignoringAntMatchers("/account/login").and()
+            .anyRequest().authenticated().and().csrf()
+            .disable() // close csrf
             .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class)
-            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint).and()
-            .logout()
-            .logoutRequestMatcher(new AntPathRequestMatcher("/account/logout","POST"))
-//            .logoutUrl("/account/logout")
+            .httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint).and().logout()
+            .logoutUrl("/account/logout")
             .logoutSuccessHandler(jsonLogoutSuccessHandler)
             .permitAll();
     }
+
 
     @Override
     public void configure(WebSecurity web) throws Exception {
