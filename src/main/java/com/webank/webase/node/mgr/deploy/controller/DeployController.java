@@ -37,6 +37,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
 import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
 import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
+import com.webank.webase.node.mgr.deploy.entity.ReqUpgrade;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.service.DeployService;
@@ -161,19 +162,19 @@ public class DeployController extends BaseController {
 
     /**
      *
-     * @param newTagId
-     * @param chainName
+     * @param upgrade
+     * @param result
      * @return
      * @throws IOException
      */
     @PostMapping(value = "upgrade")
     public BaseResponse upgradeChain(
-            @RequestParam(value = "newTagId", required = true) int newTagId,
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-    ) throws IOException {
+            @RequestBody @Valid ReqUpgrade upgrade, BindingResult result ) throws IOException {
+        checkBindResult(result);
+        int newTagId = upgrade.getNewTagId();
+        String chainName = upgrade.getChainName();
         Instant startTime = Instant.now();
         log.info("Start upgrade chain to version:[{}], chainName:[{}], now:[{}]", newTagId, chainName, startTime);
-
         this.deployService.upgrade(newTagId,chainName);
         return new BaseResponse(ConstantCode.SUCCESS);
     }

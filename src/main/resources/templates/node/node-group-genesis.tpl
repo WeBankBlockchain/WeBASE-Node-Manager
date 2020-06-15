@@ -6,11 +6,11 @@
     max_trans_num=1000
     ; rpbft related configuration
     ; the sealers num of each consensus epoch
-    epoch_sealer_num=4
+    epoch_sealer_num=[(${sealerCount})]
     ; the number of generated blocks each epoch
     epoch_block_num=1000
     ; the node id of consensusers
-    [# th:each="nodeId,iter : ${nodeIdList}"]node.[(${iter.index})]=[(${nodeId})])]
+    [# th:each="nodeId,iter : ${nodeIdList}"]node.[(${iter.index})]=[(${nodeId})]
     [/]
 
 [state]

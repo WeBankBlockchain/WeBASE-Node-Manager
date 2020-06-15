@@ -22,8 +22,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -133,7 +133,7 @@ public class ThymeleafUtil {
 
         String nodeGenesis = ThymeleafUtil.generate(ThymeleafUtil.NODE_GROUP_GENESIS,
                 Pair.of("groupId",groupId),Pair.of("timestamp",timestamp),
-                Pair.of("nodeIdList",nodeIdList));
+                Pair.of("nodeIdList",nodeIdList),Pair.of("sealerCount", CollectionUtils.size(nodeIdList)));
         Files.write(nodeRoot.resolve(String.format("conf/group.%s.genesis",groupId)), nodeGenesis.getBytes(), StandardOpenOption.CREATE);
     }
 }
