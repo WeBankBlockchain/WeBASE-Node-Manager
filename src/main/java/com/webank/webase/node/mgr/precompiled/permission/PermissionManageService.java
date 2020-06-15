@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.precompiled.permission;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -68,7 +68,7 @@ public class PermissionManageService {
                 resultMap.put(address, emptyState);
             }
         }
-        log.debug("end listPermissionState. frontRsp:{}", JSON.toJSONString(resultMap));
+        log.debug("end listPermissionState. frontRsp:{}", JsonTools.toJSONString(resultMap));
         return resultMap;
     }
 
@@ -91,7 +91,7 @@ public class PermissionManageService {
         map.put("groupId", String.valueOf(groupId));
         uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION_SORTED_FULL_LIST, map);
         Map<String, Object> frontRsp = (Map<String, Object>) frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end listPermissionStateFull. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end listPermissionStateFull. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         Map<String, PermissionState> result = (Map<String, PermissionState>) frontRsp.get("data");
         return result;
     }
@@ -115,7 +115,7 @@ public class PermissionManageService {
         }
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end listPermissionPaged. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end listPermissionPaged. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -135,7 +135,7 @@ public class PermissionManageService {
             uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION_FULL_LIST, map);
         }
         BasePageResponse frontRsp = frontRestTools.getForEntity(groupId, uri, BasePageResponse.class);
-        log.debug("end listPermissionFull. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end listPermissionFull. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -143,7 +143,7 @@ public class PermissionManageService {
      * repost permission grant
      */
     public Object updatePermissionState(PermissionParam permissionParam) {
-        log.debug("start updatePermissionState. permissionParam:{}", JSON.toJSONString(permissionParam));
+        log.debug("start updatePermissionState. permissionParam:{}", JsonTools.toJSONString(permissionParam));
         if (Objects.isNull(permissionParam)) {
             log.error("fail updatePermissionState. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
@@ -154,12 +154,12 @@ public class PermissionManageService {
         Object frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_PERMISSION_SORTED_LIST,
                 permissionParam, Object.class);
-        log.debug("end updatePermissionState. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end updatePermissionState. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
     public Object grantPermission(PermissionParam permissionParam) {
-        log.debug("start grantPermission. permissionParam:{}", JSON.toJSONString(permissionParam));
+        log.debug("start grantPermission. permissionParam:{}", JsonTools.toJSONString(permissionParam));
         if (Objects.isNull(permissionParam)) {
             log.error("fail grantPermission. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
@@ -170,12 +170,12 @@ public class PermissionManageService {
         Object frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_PERMISSION,
                 permissionParam, Object.class);
-        log.debug("end grantPermission. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end grantPermission. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
     public Object revokePermission(PermissionParam permissionParam) {
-        log.debug("start revokePermission. permissionParam:{}", JSON.toJSONString(permissionParam));
+        log.debug("start revokePermission. permissionParam:{}", JsonTools.toJSONString(permissionParam));
         if (Objects.isNull(permissionParam)) {
             log.error("fail revokePermission. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
@@ -186,7 +186,7 @@ public class PermissionManageService {
         Object frontRsp = frontRestTools.deleteForEntity(
                 groupId, FrontRestTools.URI_PERMISSION,
                 permissionParam, Object.class);
-        log.debug("end revokePermission. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end revokePermission. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 }

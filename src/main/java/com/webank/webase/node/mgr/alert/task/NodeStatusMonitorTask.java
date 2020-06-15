@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.alert.mail.MailService;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
@@ -111,10 +111,10 @@ public class NodeStatusMonitorTask {
             });
         if(!abnormalNodeIdList.isEmpty()) {
             log.warn("start  node abnormal mail alert nodeIds:{} in groupId:{}",
-                    JSON.toJSONString(abnormalNodeIdList), groupId);
+                    JsonTools.toJSONString(abnormalNodeIdList), groupId);
             List<String> alertContentList = new ArrayList<>();
-            alertContentList.add("群组group " + groupId + "的共识/观察节点nodeId：" + JSON.toJSONString(abnormalNodeIdList));
-            alertContentList.add("group " + groupId + "'s sealer/observer nodes nodeId: " + JSON.toJSONString(abnormalNodeIdList));
+            alertContentList.add("群组group " + groupId + "的共识/观察节点nodeId：" + JsonTools.toJSONString(abnormalNodeIdList));
+            alertContentList.add("group " + groupId + "'s sealer/observer nodes nodeId: " + JsonTools.toJSONString(abnormalNodeIdList));
             // send node alert mail
             alertMailService.sendMailByRule(AlertRuleType.NODE_ALERT.getValue(), alertContentList);
         }

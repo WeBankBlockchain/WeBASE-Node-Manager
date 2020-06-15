@@ -15,7 +15,7 @@ package com.webank.webase.node.mgr.chain;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CHAIN;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -75,7 +75,7 @@ public class ChainService {
         log.info("getChainMonitorInfo request url:{}", url);
 
         Object rspObj = genericRestTemplate.getForObject(url, Object.class);
-        log.debug("end getChainMonitorInfo. rspObj:{}", JSON.toJSONString(rspObj));
+        log.debug("end getChainMonitorInfo. rspObj:{}", JsonTools.toJSONString(rspObj));
         return rspObj;
     }
 }
