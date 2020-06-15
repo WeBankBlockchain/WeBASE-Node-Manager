@@ -34,6 +34,7 @@ import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
 import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
@@ -71,22 +72,24 @@ public class DeployController extends BaseController {
     }
 
     /**
-     * @param ip         Host runs new node, maybe a new host.
-     * @param groupId
-     * @param agencyName If host ip is new one, agency name should not be null.
-     * @param chainName  If agency name is a new one, chain name should not be null.
-     * @param num        Count of new nodes , default is 1.
+     *
+     * @param add
+     * @param result
      * @return
+     * @throws NodeMgrException
      */
     @PostMapping(value = "add")
     public BaseResponse add(
-            @RequestParam(value = "ip", required = true) String ip,
-            @RequestParam(value = "groupId", required = false) int groupId,
-            @RequestParam(value = "agencyName", required = false, defaultValue = "") String agencyName,
-            @RequestParam(value = "num", required = false, defaultValue = "1") int num,
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-    ) throws IOException {
+            @RequestBody @Valid ReqAdd add,
+            BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        String ip = add.getIp();
+        String agencyName = add.getAgencyName();
+        int groupId = add.getGroupId();
+        int num = add.getNum();
+        String chainName = add.getChainName();
         Instant startTime = Instant.now();
+
         log.info("Start add node ip:[{}],group:[{}], agencyName:[{}], num:[{}], chainName:[{}], now:[{}]",
                 ip, groupId, agencyName, num, chainName, startTime);
 

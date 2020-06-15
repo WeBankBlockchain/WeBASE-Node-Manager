@@ -18,10 +18,14 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.AGENCY_NAME_CONFIG_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_AGENCY_ERROR;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,6 +51,7 @@ public class AgencyService {
 
     @Autowired private TbAgencyMapper tbAgencyMapper;
     @Autowired private DeployShellService deployShellService;
+    @Autowired private PathService pathService;
 
     /**
      * @param chainId
@@ -71,7 +76,7 @@ public class AgencyService {
             String agencyName,
             int chainId,
             String chainName,
-            byte encryptType) throws NodeMgrException {
+            byte encryptType) throws NodeMgrException  {
         TbAgency agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chainId, agencyName);
         // check agency name is new
         if (agency != null) {
@@ -80,6 +85,17 @@ public class AgencyService {
 
         if(! ValidateUtil.validateAgencyName(agencyName)){
             throw new NodeMgrException(AGENCY_NAME_CONFIG_ERROR);
+        }
+        // TODO use mv replace mv
+        // delete agency config
+        Path agencyRoot = this.pathService.getAgencyRoot(chainName, agencyName);
+        if(Files.exists(agencyRoot)){
+            log.warn("Exists agency:[{}:{}] config, delete first.",agencyName,agencyRoot.toAbsolutePath().toString());
+            try {
+                FileUtils.deleteDirectory(agencyRoot.toFile());
+            } catch (IOException e) {
+                throw new NodeMgrException(ConstantCode.DELETE_OLD_AGENCY_DIR_ERROR);
+            }
         }
 
         // generate new agency config(private key and crt)

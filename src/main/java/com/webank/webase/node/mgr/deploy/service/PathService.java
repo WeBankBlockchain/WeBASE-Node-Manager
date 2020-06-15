@@ -30,8 +30,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
-import org.ini4j.Ini;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -79,6 +77,7 @@ public class PathService {
     public Path getChainRoot(String chainName) {
         return Paths.get(constant.getNodesRootDir(), String.format("%s_nodes", chainName));
     }
+
 
     /**
      * Delete chain node config while exception occurred during deploy option.
@@ -220,6 +219,14 @@ public class PathService {
     }
 
     /**
+     *
+     * @param nodePath
+     * @return
+     */
+    public static Path getConfigIniPath( Path nodePath ) {
+        return nodePath.resolve("config.ini");
+    }
+    /**
      * @param rootDirOnHost
      * @param chainName
      * @return
@@ -269,25 +276,6 @@ public class PathService {
                 .map(StringUtils::trim).findFirst().orElse(null);
     }
 
-    /**
-     * Get jsonrpcPort, channelPort, p2pPort from a node.
-     *
-     * @param nodePath
-     * @return order : <jsonrpcPort, channelPort, p2pPort>
-     * @throws IOException
-     */
-    public static Triple<Integer, Integer, Integer> getNodePorts(Path nodePath) {
-        try {
-            Path configIni = nodePath.resolve("config.ini");
-            Ini ini = new Ini(configIni.toFile());
-            int channelPort = Integer.parseInt(ini.get("rpc", "channel_listen_port"));
-            int jsonrpcPort = Integer.parseInt(ini.get("rpc", "jsonrpc_listen_port"));
-            int p2pPort = Integer.parseInt(ini.get("p2p", "listen_port"));
-            return Triple.of(jsonrpcPort, channelPort, p2pPort);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 
     /**
      * Get node group id set.
