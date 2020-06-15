@@ -18,6 +18,8 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
 import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
@@ -28,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +50,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
+import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
@@ -409,6 +413,15 @@ public class HostService {
         // new host, generate sdk dir first
         Path sdkPath = this.pathService.getSdk(chainName, ip);
 
+        if (Files.exists(sdkPath)){
+            log.warn("Exists sdk dir of host:[{}:{}], delete first.", ip,sdkPath.toAbsolutePath().toAbsolutePath());
+            try {
+                FileUtils.deleteDirectory(sdkPath.toFile());
+            } catch (IOException e) {
+                throw new NodeMgrException(ConstantCode.DELETE_OLD_SDK_DIR_ERROR);
+            }
+        }
+
         // call shell to generate new node config(private key and crt)
         ExecuteResult executeResult = this.deployShellService.execGenNode(
                 encryptType, chainName, agencyName, sdkPath.toAbsolutePath().toString());
@@ -417,7 +430,7 @@ public class HostService {
         }
 
         // init sdk dir
-        this.configService.initSdkDir(encryptType, sdkPath);
+        NodeConfig.initSdkDir(encryptType, sdkPath);
 
         // scp sdk to remote
         String src = String.format("%s", sdkPath.toAbsolutePath().toString());
@@ -430,7 +443,7 @@ public class HostService {
         }
 
         // insert host into db
-        return ((HostService) AopContext.currentProxy()).insert(agencyId, agencyName, ip, chainName);
+        return ((HostService) AopContext.currentProxy()).insert(agencyId, agencyName, ip, rootDirOnHost);
     }
 
 }

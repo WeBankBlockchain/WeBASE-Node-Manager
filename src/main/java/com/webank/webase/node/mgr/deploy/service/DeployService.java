@@ -400,6 +400,7 @@ public class DeployService {
     /**
      * Add a node.
      *  TODO. throw all exceptions.
+     *  TODO. put into tmp dir first
      *
      * @param ip
      * @param agencyName
@@ -430,11 +431,10 @@ public class DeployService {
         List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
 
         // check host exists by ip
-        TbHost tbHost = tbHostList.stream()
-                .filter(host -> StringUtils.equalsIgnoreCase(ip, host.getIp())).findFirst().orElse(null);
+        TbHost tbHostExists = tbHostList.stream().filter(host -> StringUtils.equalsIgnoreCase(ip, host.getIp())).findFirst().orElse(null);
 
         TbAgency agency = null;
-        if (tbHost == null) {
+        if (tbHostExists == null) {
             if (StringUtils.isBlank(agencyName)) {
                 // agency name cannot be blank when host ip is new
                 throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
@@ -445,12 +445,12 @@ public class DeployService {
                     agencyName, chain.getId(), chainName, chain.getEncryptType());
 
             // init host, generate sdk config files
-            tbHost = this.hostService.initHost(chain.getEncryptType(),
+            tbHostExists = this.hostService.initHost(chain.getEncryptType(),
                     chain.getChainName(), chain.getRootDir(),
                     ip, agency.getId(), agency.getAgencyName());
         } else {
             // exist host
-            agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chain.getId(), tbHost.getAgencyName());
+            agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chain.getId(), tbHostExists.getAgencyName());
         }
 
         // init group, if group is new, return true
@@ -461,22 +461,22 @@ public class DeployService {
 
         // init front and node
         try {
-            List<TbFront> newFrontList = this.frontService.initFront(num, chain,
-                    tbHost, agency.getId(), agency.getAgencyName(), group);
+            List<TbFront> newFrontList = this.frontService.initFrontAndNode(num, chain,
+                    tbHostExists, agency.getId(), agency.getAgencyName(), group);
 
-            // generate config files and scp to remote
-            this.nodeService.generateNodeConfig(chain, groupId, ip, newFrontList);
-            // TODO update group's other node's config.ini p2p list
+            // generate new node config files
+            this.frontService.generateAllNodeConfigIni(chain, groupId, ip);
+
             // generate config files and scp to remote
             this.groupService.generateGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList);
 
-            for (TbFront newFront : newFrontList) {
-                // ssh host and start docker container
-                dockerClientService.createAndStart(ip, tbHost.getDockerPort(),
-                        chain.getVersion(), newFront.getContainerName(),
-                        PathService.getChainRootOnHost(tbHost.getRootDir(), chainName), newFront.getHostIndex());
-
+            // scp old node config.ini to remote
+            if (! newGroup ){
+                this.frontService.scpNodeConfigIni(chain, groupId);
             }
+
+            // restart all front
+            this.frontService.restartFront(chain,groupId);
         } catch (Exception e) {
             //TODO.
             log.error("Add node error", e);

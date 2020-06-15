@@ -111,6 +111,11 @@ public class ThymeleafUtil {
                 Pair.of("channelPort", channelPort), Pair.of("p2pPort", p2pPort),
                 Pair.of("jsonrpcPort", jsonrpcPort), Pair.of("nodeList", peerList),
                 Pair.of("guomi", guomi), Pair.of("chainId", chainIdInConfigIni));
+
+        if (Files.notExists(nodeRoot)){
+            Files.createDirectories(nodeRoot);
+        }
+
         Files.write(nodeRoot.resolve("config.ini"), nodeConfigIni.getBytes(), StandardOpenOption.CREATE);
     }
 

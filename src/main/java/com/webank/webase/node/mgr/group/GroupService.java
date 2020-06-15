@@ -58,6 +58,7 @@ import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
@@ -1063,8 +1064,12 @@ public class GroupService {
         List<String> nodeIdList = newFrontList.stream().map(tbFront -> tbFront.getNodeId())
                 .collect(Collectors.toList());
 
-        // copy group.x.[genesis] from old front
-        TbFront oldFront = this.frontMapper.getFirstByCreatetime(chainId);
+        // copy group.x.[genesis|conf] from old front
+        TbNode oldNode = this.nodeService.getOldestNodeByChainIdAndGroupId(chainId,groupId);
+        TbFront oldFront = null;
+        if (oldNode != null){
+             oldFront = this.frontMapper.getByNodeId(oldNode.getNodeId());
+        }
 
         for (TbFront newFront : newFrontList) {
             // local node root
@@ -1076,14 +1081,14 @@ public class GroupService {
             } else {
                 // copy old group files
                 if (oldFront != null) {
-                    Path oldNode = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
-                    this.configService.copyGroupConfigFiles(oldNode, nodeRoot, groupId);
+                    Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
+                    NodeConfig.copyGroupConfigFiles(oldNodePath, nodeRoot, groupId);
                 }
             }
 
             // scp node to remote host
             String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
-            String dst = PathService.getChainRootOnHost(chain.getRootDir(), chainName);
+            String dst = PathService.getNodeRootOnHost(PathService.getChainRootOnHost(chain.getRootDir(),chainName),newFront.getHostIndex() );
 
             log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst);
             ExecuteResult executeResult = this.deployShellService.scp(ScpTypeEnum.UP, ip, src, dst);
