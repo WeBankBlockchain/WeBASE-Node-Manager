@@ -67,6 +67,7 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.node.NodeMapper;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
@@ -83,13 +84,15 @@ import lombok.extern.log4j.Log4j2;
 public class FrontService {
 
     @Autowired
-    private GroupService groupService;
-    @Autowired
     private FrontMapper frontMapper;
     @Autowired
     private TbHostMapper tbHostMapper;
     @Autowired
+    private NodeMapper nodeMapper;
+    @Autowired
     private NodeService nodeService;
+    @Autowired
+    private GroupService groupService;
     @Autowired
     private FrontGroupMapService frontGroupMapService;
     @Autowired
@@ -476,33 +479,36 @@ public class FrontService {
         return newFrontList;
     }
 
+
     /**
      *
      * @param chain
      * @param groupId
-     * @param ip
      * @throws IOException
      */
-    public void generateAllNodeConfigIni(TbChain chain, int groupId, String ip) throws IOException {
+    public void generateAllNodeConfigIni(TbChain chain, int groupId) throws IOException {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
 
-        // select same peers to update node config.ini p2p part
-        List<TbNode> allPeerList = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
+        List<TbNode> tbNodeListOfGroup = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
 
         // all fronts include old and new
-        List<TbFront> allFrontList = this.selectFrontListByChainId(chainId);
-        for (TbFront newFront : allFrontList) {
+        for (TbNode node : CollectionUtils.emptyIfNull(tbNodeListOfGroup)){
+            // select related peers to update node config.ini p2p part
+            List<TbNode> nodeRelatedNode = this.nodeMapper.selectConnectedNodeList(node.getNodeId())  ;
+
+            TbFront tbFront = this.getByNodeId(node.getNodeId());
+
             boolean guomi = encryptType == EncryptType.SM2_TYPE;
             int chainIdInConfigIni = this.constant.getDefaultChainId();
 
             // local node root
-            Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
+            Path nodeRoot = this.pathService.getNodeRoot(chainName, tbFront.getFrontIp(), tbFront.getHostIndex());
 
             // generate config.ini
-            ThymeleafUtil.newNodeConfigIni(nodeRoot, newFront.getChannelPort(),
-                    newFront.getP2pPort(), newFront.getJsonrpcPort(), allPeerList, guomi, chainIdInConfigIni);
+            ThymeleafUtil.newNodeConfigIni(nodeRoot, tbFront.getChannelPort(),
+                    tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedNode, guomi, chainIdInConfigIni);
         }
 
     }
@@ -536,30 +542,101 @@ public class FrontService {
     }
 
     /**
-     * // TODO add async
-     * @param chain
-     * @param groupId
+     *
+     * @param nodeId
+     * @return
      */
-    public void restartFront(TbChain chain, int groupId){
-        List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chain.getId(), groupId);
-
-        for (TbNode tbNode : CollectionUtils.emptyIfNull(tbNodeList)) {
-            TbFront front = this.getByNodeId(tbNode.getNodeId());
-
-            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
-
-            // ssh host and start docker container
-             dockerClientService.createAndStart(host.getIp(),
-                    host.getDockerPort(),
-                    front.getImageTag(),
-                    front.getContainerName(),
-                    PathService.getChainRootOnHost(host.getRootDir(), chain.getChainName()),
-                    front.getHostIndex());
-            try {
-                Thread.sleep(constant.getDockerRestartPeriodTime());
-            } catch (InterruptedException e) {
-                log.error("Docker restart server:[{}:{}] throws exception when sleep.",host.getIp(),front.getContainerName());
-            }
+    @Transactional
+    public boolean start(String nodeId){
+        // get front
+        TbFront front = this.getByNodeId(nodeId);
+        if (front == null){
+            throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
+
+        TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+
+        log.info("Docker start container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
+        boolean startResult = this.dockerClientService.createAndStart(
+                front.getFrontIp(),
+                host.getDockerPort(),
+                front.getImageTag(),
+                front.getContainerName(),
+                PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()),
+                front.getHostIndex());
+
+        if (startResult){
+            this.updateStatus(front.getFrontId(),FrontStatusEnum.RUNNING);
+        }
+        return startResult;
     }
+
+    /**
+     *
+     * @param chain
+     */
+    @Transactional
+    public boolean upgrade(TbChain chain) {
+        boolean updateResult = this.frontMapper.updateImageTagByChainId(chain.getId(), chain.getVersion(), LocalDateTime.now()) > 0;
+        return updateResult;
+    }
+
+
+    /**
+     *
+     * @param nodeId
+     * @return
+     */
+    @Transactional
+    public boolean stopNode(String nodeId){
+        return ((FrontService) AopContext.currentProxy()).stopNode(null,nodeId);
+    }
+
+    /**
+     *
+     * @param host
+     * @param nodeId
+     * @return
+     */
+    @Transactional
+    public boolean stopNode(TbHost host, String nodeId){
+        // get front
+        TbFront front = this.getByNodeId(nodeId);
+        if (front == null){
+            throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
+        }
+
+        TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+
+        log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
+        boolean stopResult = this.dockerClientService.removeByName(
+                front.getFrontIp(),
+                hostInDb.getDockerPort(),
+                front.getContainerName());
+
+        if (stopResult){
+            ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
+        }
+        return stopResult;
+
+    }
+
+
+    /**
+     *
+     * @param nodeId
+     * @return  if front is in group, return true;
+     */
+    public boolean checkFrontInGroup(String nodeId){
+
+        TbFront front = this.getByNodeId(nodeId);
+        if (front == null){
+            throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
+        }
+        List<String> groupIdList = this.frontInterface.getGroupListFromSpecificFront(front.getFrontIp(), front.getFrontPort());
+
+        // if front has group id, return true.
+        return CollectionUtils.isNotEmpty(groupIdList);
+    }
+
 }

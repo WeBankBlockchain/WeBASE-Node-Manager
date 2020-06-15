@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -55,4 +56,9 @@ public interface FrontMapper {
     })
     Integer getNodeMaxIndex(int hostId);
 
+    @Update({
+        "update tb_front set image_tag=#{newImageTag},modify_time=#{modifyTime} where chain_id = #{chainId}"
+    })
+    int updateImageTagByChainId(@Param("chainId") int chainId,
+                                @Param("newImageTag") String newImageTag, @Param("modifyTime") LocalDateTime now);
 }

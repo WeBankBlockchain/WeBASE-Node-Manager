@@ -351,7 +351,7 @@ public class GroupService {
                         nodeService.deleteByNodeAndGroupId(n.getNodeId(), groupId));
     }
 
-    private boolean checkSealerAndObserverListContains(int groupId, String nodeId) {
+    public boolean checkSealerAndObserverListContains(int groupId, String nodeId) {
         log.debug("checkSealerAndObserverListNotContains nodeId:{},groupId:{}",
                 nodeId, groupId);
         //get sealer and observer on chain
