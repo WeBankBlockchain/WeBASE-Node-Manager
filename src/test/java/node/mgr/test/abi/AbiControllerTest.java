@@ -17,7 +17,7 @@
 package node.mgr.test.abi;
 
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
 import org.junit.Before;
@@ -61,12 +61,12 @@ public class AbiControllerTest {
 		abiInsert.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
 		abiInsert.setContractName("Hello");
 		String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-		abiInsert.setContractAbi(JSON.parseArray(abiStr));
+		abiInsert.setContractAbi(JsonTools.toJavaObjectList(abiStr, Object.class));
 
 		// post action
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.post("/abi")
-						.content(JSON.toJSONString(abiInsert))
+						.content(JsonTools.toJSONString(abiInsert))
 						.contentType(MediaType.APPLICATION_JSON_UTF8)
 		);
 		resultActions
@@ -118,12 +118,12 @@ public class AbiControllerTest {
 		abiUpdate.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
 		abiUpdate.setContractName("Hello_222");
 		String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-		abiUpdate.setContractAbi(JSON.parseArray(abiStr));
+		abiUpdate.setContractAbi(JsonTools.toJavaObjectList(abiStr, Object.class));
 
 		// post action
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.put("/abi")
-						.content(JSON.toJSONString(abiUpdate))
+						.content(JsonTools.toJSONString(abiUpdate))
 						.contentType(MediaType.APPLICATION_JSON_UTF8)
 		);
 		resultActions.
