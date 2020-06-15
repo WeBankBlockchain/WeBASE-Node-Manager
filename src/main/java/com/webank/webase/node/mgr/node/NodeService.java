@@ -37,6 +37,7 @@ import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
@@ -452,5 +453,30 @@ public class NodeService {
             }
         }
         return oldest;
+    }
+
+    /**
+     * @param ip
+     * @param rooDirOnHost
+     * @param chainName
+     * @param hostIndex
+     * @param nodeId
+     */
+    public static void mvNodeOnRemote(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId) {
+        // create /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss as a parent
+        String chainDeleteRootOnHost = PathService.getChainDeletedRootOnHost(rooDirOnHost, chainName);
+        SshTools.createDirOnRemote(ip, chainDeleteRootOnHost);
+
+        // like /opt/fisco/default_chain
+        String chainRootOnHost = PathService.getChainRootOnHost(rooDirOnHost, chainName);
+        // like /opt/fisco/default_chain/node[x]
+        String src_nodeRootOnHost = PathService.getNodeRootOnHost(chainDeleteRootOnHost, hostIndex);
+
+        // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss/[nodeid(128)]
+        String dst_nodeDeletedRootOnHost =
+                PathService.getNodeDeletedRootOnHost(rooDirOnHost, chainName, nodeId);
+        // move
+        SshTools.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
+
     }
 }

@@ -33,8 +33,10 @@ import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
+import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 
@@ -127,6 +129,34 @@ public class ChainService {
         newChain.setId(chain.getId());
         newChain.setVersion(newTagVersion);
         newChain.setModifyTime(new Date());
-        return this.tbChainMapper.updateByPrimaryKeySelective(newChain) == 1;
+        int count = this.tbChainMapper.updateByPrimaryKeySelective(newChain);
+
+        if(count != 1){
+            throw new NodeMgrException(ConstantCode.UPDATE_CHAIN_WITH_NEW_VERSION_ERROR);
+        }
+
+        // restart front
+        return this.frontService.upgrade(chain);
+    }
+
+
+    /**
+     *
+     * @param ip
+     * @param rootDirOnHost
+     * @param chainName
+     */
+    public static void mvChainOnRemote(String ip,String rootDirOnHost,String chainName){
+        // create /opt/fisco/deleted-tmp/ as a parent dir
+        String deleteRootOnHost = PathService.getDeletedRootOnHost(rootDirOnHost);
+        SshTools.createDirOnRemote(ip, deleteRootOnHost);
+
+        // like /opt/fisco/default_chain
+        String src_chainRootOnHost = PathService.getChainRootOnHost(rootDirOnHost, chainName);
+        // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss
+        String dst_chainDeletedRootOnHost = PathService.getChainDeletedRootOnHost(rootDirOnHost, chainName);
+
+        SshTools.mvDirOnRemote(ip,src_chainRootOnHost,dst_chainDeletedRootOnHost);
+
     }
 }
