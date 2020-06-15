@@ -13,9 +13,7 @@
  */
 package com.webank.webase.node.mgr.node;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -40,9 +37,8 @@ import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
-import com.webank.webase.node.mgr.deploy.entity.TbChain;
+import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -74,6 +70,8 @@ public class NodeService {
     private FrontService frontService;
     @Autowired
     private PathService pathService;
+    @Autowired
+    private DeployShellService deployShellService;
     @Autowired
     private ConstantProperties constant;
 
@@ -431,29 +429,28 @@ public class NodeService {
 
 
     /**
+     * Find the first node for coping group config files.
      *
-     * @param chain
+     * @param chainId
      * @param groupId
+     * @return
      */
-    public void generateNodeConfig(TbChain chain, int groupId,String ip, List<TbFront> newFrontList) throws IOException {
-        int chainId = chain.getId();
-        String chainName = chain.getChainName();
-        byte encryptType = chain.getEncryptType();
-
-        // select same peers to update node config.ini p2p part
-        // if group
-        List<TbNode> peerList = this.selectNodeListByChainIdAndGroupId(chainId, groupId);
-
-        for (TbFront newFront : newFrontList) {
-            boolean guomi = encryptType == EncryptType.SM2_TYPE;
-            int chainIdInConfigIni = this.constant.getDefaultChainId();
-
-            // local node root
-            Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
-
-            // generate config.ini
-            ThymeleafUtil.newNodeConfigIni(nodeRoot, newFront.getChannelPort(),
-                    newFront.getP2pPort(), newFront.getJsonrpcPort(), peerList, guomi, chainIdInConfigIni);
+    public TbNode getOldestNodeByChainIdAndGroupId(int chainId, int groupId) {
+        List<TbNode> tbNodeList = this.selectNodeListByChainIdAndGroupId(chainId, groupId);
+        if (CollectionUtils.isEmpty(tbNodeList)) {
+            return null;
         }
+        TbNode oldest = null;
+
+        for (TbNode tbNode : tbNodeList) {
+            if (oldest == null){
+                oldest = tbNode;
+                continue;
+            }
+            if (tbNode.getCreateTime().isBefore(oldest.getCreateTime())){
+                oldest = tbNode;
+            }
+        }
+        return oldest;
     }
 }

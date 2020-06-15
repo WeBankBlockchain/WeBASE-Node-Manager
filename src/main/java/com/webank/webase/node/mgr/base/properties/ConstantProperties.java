@@ -118,6 +118,7 @@ public class ConstantProperties {
     private int dockerClientConnectTimeout = 10 * 60 * 1000;
     private int dockerClientReadTimeout = 10 * 60 * 1000;
     private int dockerPullTimeout = 5 * 60 * 1000;
+    private long dockerRestartPeriodTime = 60 * 1000L;
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login", "/user/privateKey/**", "/encrypt"};
     private String dockerRepository= "fiscoorg/front";

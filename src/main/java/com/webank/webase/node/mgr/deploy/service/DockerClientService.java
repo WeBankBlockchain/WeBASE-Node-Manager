@@ -126,7 +126,7 @@ public class DockerClientService {
             log.error("Create bcos-front container:[{}:{}] on host:[{}] failed.", imageTag,containerId, ip);
             return false;
         }
-        return  this.startById(ip, port, containerId);
+        return this.startById(ip, port, containerId);
     }
 
 
@@ -149,7 +149,6 @@ public class DockerClientService {
         try {
             String nodeRootOnHost = PathService.getNodeRootOnHost(chainRootOnHost, nodeIndex);
             DockerClient dockerClient = this.getDockerClient(ip, port);
-
 
             log.info("Host:[{}] create container:[{}], check exists?", ip, containerName);
             Container container = this.getContainer(ip, port, containerName);

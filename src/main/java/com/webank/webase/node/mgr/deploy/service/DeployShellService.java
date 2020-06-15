@@ -193,7 +193,7 @@ public class DeployShellService {
         }
 
         // build_chain.sh only support docker on linux
-        String command = String.format("bash -e %s -c %s -a %s %s",
+        String command = String.format("bash -x -e %s -c %s -a %s %s",
                 // gen_agency_cert.sh shell script
                 constant.getGenAgencyShell(),
                 // chain cert dir
@@ -228,7 +228,7 @@ public class DeployShellService {
         Path agencyRoot = this.pathService.getAgencyRoot(chainName,agencyName);
 
         // build_chain.sh only support docker on linux
-        String command = String.format("bash -e %s -c %s -o %s %s",
+        String command = String.format("bash -x -e %s -c %s -o %s %s",
                 // gen_node_cert.sh shell script
                 constant.getGenNodeShell(),
                 // agency cert root

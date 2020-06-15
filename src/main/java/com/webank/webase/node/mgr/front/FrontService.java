@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.front;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.aop.framework.AopContext;
@@ -41,14 +43,17 @@ import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
+import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AgencyService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.DockerClientService;
@@ -62,9 +67,10 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
-import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.NodeService;
+import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.node.entity.TbNode;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 
 import lombok.extern.log4j.Log4j2;
@@ -80,6 +86,8 @@ public class FrontService {
     private GroupService groupService;
     @Autowired
     private FrontMapper frontMapper;
+    @Autowired
+    private TbHostMapper tbHostMapper;
     @Autowired
     private NodeService nodeService;
     @Autowired
@@ -102,7 +110,6 @@ public class FrontService {
     private ConstantProperties constant;
     @Autowired
     private DockerClientService dockerClientService;
-    ;
 
     // interval of check front status
     private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
@@ -401,8 +408,8 @@ public class FrontService {
 
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<TbFront> initFront(int num, TbChain chain, TbHost host, int agencyId,
-                                   String agencyName, TbGroup group) throws NodeMgrException, IOException {
+    public List<TbFront> initFrontAndNode(int num, TbChain chain, TbHost host, int agencyId,
+                                          String agencyName, TbGroup group) throws NodeMgrException, IOException {
 
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
@@ -425,13 +432,23 @@ public class FrontService {
             int currentIndex = startIndex + i;
             Path nodeRoot = pathService.getNodeRoot(chainName, ip, currentIndex);
 
+            if (Files.exists(nodeRoot)){
+                if(Files.exists(nodeRoot)){
+                    log.warn("Exists node:[{}:{}] config, delete first.",ip,nodeRoot.toAbsolutePath().toString());
+                    try {
+                        FileUtils.deleteDirectory(nodeRoot.toFile());
+                    } catch (IOException e) {
+                        throw new NodeMgrException(ConstantCode.DELETE_OLD_NODE_DIR_ERROR);
+                    }
+                }
+            }
             // exec gen_node_cert.sh
             ExecuteResult executeResult = this.deployShellService.execGenNode(encryptType, chainName, agencyName,
                     nodeRoot.toAbsolutePath().toString());
 
             if (executeResult.failed()) {
-                // TODO. put into temp dir first, delete wher error occurred
                 log.error("Generate node:[{}:{}] key and crt error.", ip, currentIndex);
+                throw new NodeMgrException(ConstantCode.EXEC_GEN_NODE_ERROR);
             }
 
             String nodeId = PathService.getNodeId(nodeRoot);
@@ -457,5 +474,92 @@ public class FrontService {
             this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
         }
         return newFrontList;
+    }
+
+    /**
+     *
+     * @param chain
+     * @param groupId
+     * @param ip
+     * @throws IOException
+     */
+    public void generateAllNodeConfigIni(TbChain chain, int groupId, String ip) throws IOException {
+        int chainId = chain.getId();
+        String chainName = chain.getChainName();
+        byte encryptType = chain.getEncryptType();
+
+        // select same peers to update node config.ini p2p part
+        List<TbNode> allPeerList = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
+
+        // all fronts include old and new
+        List<TbFront> allFrontList = this.selectFrontListByChainId(chainId);
+        for (TbFront newFront : allFrontList) {
+            boolean guomi = encryptType == EncryptType.SM2_TYPE;
+            int chainIdInConfigIni = this.constant.getDefaultChainId();
+
+            // local node root
+            Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
+
+            // generate config.ini
+            ThymeleafUtil.newNodeConfigIni(nodeRoot, newFront.getChannelPort(),
+                    newFront.getP2pPort(), newFront.getJsonrpcPort(), allPeerList, guomi, chainIdInConfigIni);
+        }
+
+    }
+
+    /**
+     *
+     * @param chain
+     * @param groupId
+     */
+    public void scpNodeConfigIni(TbChain chain, int groupId) {
+        List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chain.getId(), groupId);
+
+        for (TbNode tbNode : CollectionUtils.emptyIfNull(tbNodeList)){
+            TbFront front = this.getByNodeId(tbNode.getNodeId());
+            int hostIndex = front.getHostIndex();
+
+            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+
+            // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]/config.ini
+            // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/config.ini
+            Path localNodePath = this.pathService.getNodeRoot(chain.getChainName(),front.getFrontIp(),hostIndex);
+            String localScr = PathService.getConfigIniPath(localNodePath).toAbsolutePath().toString();
+
+            // ex: (node-mgr local) /opt/fisco/chain1/node0/config.ini
+            String remoteDst = String.format("%s/%s/node%s/config.ini", chain.getRootDir(),chain.getChainName(),hostIndex);
+
+            // copy group config files to local node's conf dir
+            this.deployShellService.scp(ScpTypeEnum.UP, host.getSshUser(), host.getIp(), host.getSshPort(),
+                    localScr, remoteDst);
+        }
+    }
+
+    /**
+     * // TODO add async
+     * @param chain
+     * @param groupId
+     */
+    public void restartFront(TbChain chain, int groupId){
+        List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chain.getId(), groupId);
+
+        for (TbNode tbNode : CollectionUtils.emptyIfNull(tbNodeList)) {
+            TbFront front = this.getByNodeId(tbNode.getNodeId());
+
+            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+
+            // ssh host and start docker container
+             dockerClientService.createAndStart(host.getIp(),
+                    host.getDockerPort(),
+                    front.getImageTag(),
+                    front.getContainerName(),
+                    PathService.getChainRootOnHost(host.getRootDir(), chain.getChainName()),
+                    front.getHostIndex());
+            try {
+                Thread.sleep(constant.getDockerRestartPeriodTime());
+            } catch (InterruptedException e) {
+                log.error("Docker restart server:[{}:{}] throws exception when sleep.",host.getIp(),front.getContainerName());
+            }
+        }
     }
 }
