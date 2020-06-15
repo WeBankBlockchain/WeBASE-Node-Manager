@@ -15,7 +15,7 @@
  */
 package node.mgr.test.method;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.method.entity.Method;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
@@ -63,7 +63,7 @@ public class MethodControllerTest {
         param.setGroupId(2);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post( "/method/add").
-            content(JSON.toJSONString(param)).
+            content(JsonTools.toJSONString(param)).
             contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.

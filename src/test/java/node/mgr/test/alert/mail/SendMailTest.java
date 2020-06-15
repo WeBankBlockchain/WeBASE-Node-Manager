@@ -16,7 +16,7 @@
 
 package node.mgr.test.alert.mail;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.alert.mail.MailService;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
@@ -110,7 +110,7 @@ public class SendMailTest {
     public void testFinalEmailContent() {
         TbAlertRule alertRule = alertRuleService.queryByRuleId(1);
         System.out.println("=========alertRule=========");
-        System.out.println(JSON.toJSON(alertRule));
+        System.out.println(JsonTools.toJSONString(alertRule));
 
         String emailTitle = AlertRuleTools.getAlertTypeStrFromEnum(alertRule.getAlertType());
         System.out.println("=========emailTitle=========");
@@ -142,12 +142,12 @@ public class SendMailTest {
         // 假设只有一个参数时
         List<String> testParam = new ArrayList<>();
         testParam.add("nodeId");
-        String afterTestParam = JSON.toJSONString(testParam);
+        String afterTestParam = JsonTools.toJSONString(testParam);
         System.out.println("=======afterTestParam======");
         System.out.println(afterTestParam);
 
         // 转回去，可能出错
-        List<String> finalParamList = (List<String>) JSON.parse(afterTestParam);
+        List<String> finalParamList = JsonTools.toJavaObjectList(afterTestParam, String.class);
 
         // 待处理的string
         String alertContent = "您的节点nodeId状态异常";
@@ -169,7 +169,7 @@ public class SendMailTest {
 //        testList.add("yourmail@163.com");
 //        System.out.println(JSON.toJSON(testList));
         String listStr = "[\"targetmail@163.com\",\"yourmail@163.com\"]";
-        List<String> list = (List<String>) JSON.parse(listStr);
+        List<String> list = JsonTools.toJavaObjectList(listStr, String.class);
         System.out.println(list);
     }
 

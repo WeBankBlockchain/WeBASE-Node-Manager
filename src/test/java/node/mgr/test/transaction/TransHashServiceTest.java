@@ -1,6 +1,6 @@
 package node.mgr.test.transaction;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.transaction.TransHashMapper;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
@@ -48,7 +48,7 @@ public class TransHashServiceTest {
         BigInteger blockNumber = new BigInteger("12");
         List<TbTransHash> trans = transHashService.getTransListFromChain(groupId, transHash, blockNumber);
         assert (trans != null);
-        System.out.println(JSON.toJSONString(trans));
+        System.out.println(JsonTools.toJSONString(trans));
     }
 
     /**
