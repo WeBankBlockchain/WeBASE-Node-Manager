@@ -137,8 +137,8 @@ function init() {
             fi
             ;;
         esac
-        echo "mkdir node root ${node_root}/deleted-tmp on local"
-        mkdir -p ${node_root}/deleted-tmp
+        echo "mkdir node root ${node_root} on local"
+        mkdir -p ${node_root}
 
         echo "Local host init SUCCESS!!! "
     else
@@ -199,9 +199,6 @@ function init() {
 
         echo "mkdir node root ${node_root} on remote"
         sshExec "mkdir -p ${node_root}"
-
-        echo "mkdir node root ${node_root}/deleted-tmp on remote"
-        sshExec "mkdir -p ${node_root}/deleted-tmp"
 
         echo "Remote host init SUCCESS!!! "
     fi
