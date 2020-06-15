@@ -238,6 +238,17 @@ public class PathService {
     }
 
     /**
+     * Return /opt/fisco/deleted-tmp.
+     *
+     * @param rootDirOnHost
+     * @return
+     */
+    public static String getDeletedRootOnHost(
+            String rootDirOnHost) {
+        return String.format("%s/deleted-tmp", rootDirOnHost);
+    }
+
+    /**
      *  Move node directory to another when delete.
      * @param rootDirOnHost
      * @param chainName
@@ -246,7 +257,23 @@ public class PathService {
     public static String getChainDeletedRootOnHost(
             String rootDirOnHost,
             String chainName) {
-        return String.format("%s/delete-%s-%s", rootDirOnHost, chainName, DateUtil.formatNow(YYYYMMDD_HHMMSS));
+        return String.format("%s/%s-%s",
+                getDeletedRootOnHost(rootDirOnHost), chainName, DateUtil.formatNow(YYYYMMDD_HHMMSS));
+    }
+
+    /**
+     *
+     * @param rootDirOnHost
+     * @param chainName
+     * @param nodeId
+     * @return
+     */
+    public static String getNodeDeletedRootOnHost(
+            String rootDirOnHost,
+            String chainName,
+            String nodeId) {
+        return String.format("%s/delete-%s-%s/%s",
+                getDeletedRootOnHost(rootDirOnHost), chainName, DateUtil.formatNow(YYYYMMDD_HHMMSS),nodeId);
     }
 
     /**
@@ -260,15 +287,16 @@ public class PathService {
         return String.format("%s/node%s", chainRoot, index);
     }
 
+
     /**
-     * Get nodeId from a node, trim first non-blank line and return from node.nodeid file.
+     * Get nodeId from a node, trim first non-blank line and return from node.nodeId file.
      *
      * @param nodePath
      * @return
      * @throws IOException
      */
     public static String getNodeId(Path nodePath) throws IOException {
-        List<String> lines = Files.readAllLines(nodePath.resolve("conf/node.nodeid"));
+        List<String> lines = Files.readAllLines(nodePath.resolve("conf/node.nodeId"));
         if (CollectionUtils.isEmpty(lines)) {
             return null;
         }
@@ -324,4 +352,6 @@ public class PathService {
             }
         }
     }
+
+
 }

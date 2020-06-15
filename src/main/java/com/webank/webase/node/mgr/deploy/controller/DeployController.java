@@ -36,6 +36,7 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
 import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
+import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.service.DeployService;
@@ -78,8 +79,8 @@ public class DeployController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
-    @PostMapping(value = "add")
-    public BaseResponse add(
+    @PostMapping(value = "node/add")
+    public BaseResponse addNode(
             @RequestBody @Valid ReqAdd add,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -99,7 +100,69 @@ public class DeployController extends BaseController {
 
     /**
      *
+     * @param start
+     * @param result
+     * @return
+     * @throws NodeMgrException
+     */
+    @PostMapping(value = "node/start")
+    public BaseResponse startNode(
+            @RequestBody @Valid ReqNodeOption start, BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        String nodeId = start.getNodeId();
+        Instant startTime = Instant.now();
+
+        log.info("Start node nodeId:[{}], now:[{}]", nodeId, startTime);
+
+        this.deployService.startNode(start.getNodeId());
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     *
+     * @param stop
+     * @param result
+     * @return
+     * @throws NodeMgrException
+     */
+    @PostMapping(value = "node/stop")
+    public BaseResponse stopNode(
+            @RequestBody @Valid ReqNodeOption stop, BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        String nodeId = stop.getNodeId();
+        Instant startTime = Instant.now();
+
+        log.info("Stop node nodeId:[{}], now:[{}]", nodeId, startTime);
+
+        this.deployService.stopNode(stop.getNodeId());
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     *
+     * @param delete
+     * @param result
+     * @return
+     * @throws NodeMgrException
+     */
+    @PostMapping(value = "node/delete")
+    public BaseResponse deleteNode(
+            @RequestBody @Valid ReqNodeOption delete, BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        String nodeId = delete.getNodeId();
+        Instant startTime = Instant.now();
+
+        log.info("Delete node nodeId:[{}], now:[{}]", nodeId, startTime);
+
+        this.deployService.deleteNode(delete.getNodeId(),
+                delete.isDeleteHost(),delete.isDeleteAgency(),delete.isDeleteGroup());
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     *
      * @param newTagId
+     * @param chainName
      * @return
      * @throws IOException
      */
@@ -111,25 +174,10 @@ public class DeployController extends BaseController {
         Instant startTime = Instant.now();
         log.info("Start upgrade chain to version:[{}], chainName:[{}], now:[{}]", newTagId, chainName, startTime);
 
-        Pair<RetCode, String> upgradeResult = this.deployService.upgrade(newTagId,chainName);
-        return new BaseResponse(upgradeResult.getKey(), upgradeResult.getValue());
+        this.deployService.upgrade(newTagId,chainName);
+        return new BaseResponse(ConstantCode.SUCCESS);
     }
 
-    /**
-     * delete chain by chainName.
-     */
-    @DeleteMapping(value = "delete")
-    // @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse deleteChain(
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-    ) throws NodeMgrException {
-        Instant startTime = Instant.now();
-        log.info("Start delete chainName:[{}], startTime:[{}]",
-                chainName, startTime.toEpochMilli());
-
-        RetCode deleteResult = this.deployService.deleteChain(chainName);
-        return new BaseResponse(deleteResult);
-    }
 
     /**
      *
@@ -149,5 +197,22 @@ public class DeployController extends BaseController {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
         }
         return new BaseResponse(ConstantCode.SUCCESS, chain);
+    }
+
+
+    /**
+     * delete chain by chainName.
+     */
+    @DeleteMapping(value = "delete")
+    // @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse deleteChain(
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
+    ) throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("Start delete chainName:[{}], startTime:[{}]",
+                chainName, startTime.toEpochMilli());
+
+        RetCode deleteResult = this.deployService.deleteChain(chainName);
+        return new BaseResponse(deleteResult);
     }
 }

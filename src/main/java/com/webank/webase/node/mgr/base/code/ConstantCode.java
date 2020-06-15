@@ -214,6 +214,13 @@ public class ConstantCode {
     public static final RetCode DELETE_OLD_AGENCY_DIR_ERROR = RetCode.mark(205042, "Delete old agency config files error.");
     public static final RetCode DELETE_OLD_SDK_DIR_ERROR = RetCode.mark(205043, "Delete old sdk of host config files error.");
     public static final RetCode DELETE_OLD_NODE_DIR_ERROR = RetCode.mark(205044, "Delete old node config files error.");
+    public static final RetCode NODE_ID_NOT_EXISTS_ERROR = RetCode.mark(205045, "Nodeid not exists.");
+    public static final RetCode STOP_NODE_ERROR = RetCode.mark(205046, "Stop node failed.");
+    public static final RetCode START_NODE_ERROR = RetCode.mark(205047, "Start node failed.");
+    public static final RetCode UPGRADE_WITH_SAME_TAG_ERROR = RetCode.mark(205048, "New image tag and current are the same.");
+    public static final RetCode UPDATE_CHAIN_WITH_NEW_VERSION_ERROR = RetCode.mark(205049, "Update chain version error.");
+    public static final RetCode NODE_IN_GROUP_ERROR = RetCode.mark(205050, "Node in group error.");
+    public static final RetCode READ_NODE_CONFIG_ERROR = RetCode.mark(205051, "Read node config error.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

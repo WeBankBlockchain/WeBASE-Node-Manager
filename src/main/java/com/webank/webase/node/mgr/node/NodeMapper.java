@@ -73,7 +73,7 @@ public interface NodeMapper {
     Integer deleteByNodeAndGroup(@Param("nodeId") String nodeId, @Param("groupId") Integer groupId);
     /**
      * delete by groupId.
-     * TODO. should delete by nodeid in multi-chain.
+     * TODO. should delete by nodeId in multi-chain.
      */
     @Deprecated
     Integer deleteByGroupId( @Param("groupId") Integer groupId);
@@ -85,4 +85,14 @@ public interface NodeMapper {
             "select * from tb_node where node_id= #{nodeId,jdbcType=VARCHAR} and group_id=#{groupId,jdbcType=INTEGER}"
     })
     TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId,@Param("groupId") int groupId);
+
+
+    // TODO. add chain_id in tb_node
+    @Select({
+            " SELECT " +
+            " DISTINCT(node_id), node_ip, p2p_port " +
+            " FROM tb_node  WHERE  group_id IN " +
+                    "( SELECT DISTINCT ( group_id ) FROM tb_node WHERE node_id = #{nodeId,jdbcType=VARCHAR} )"
+    })
+    List<TbNode> selectConnectedNodeList(@Param("nodeId") String nodeId);
 }

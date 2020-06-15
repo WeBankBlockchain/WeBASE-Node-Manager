@@ -68,6 +68,7 @@ import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupMapper;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
@@ -97,9 +98,10 @@ public class DeployService {
     @Autowired private NodeService nodeService;
     @Autowired private ChainService chainService;
     @Autowired private DeployShellService deployShellService;
-    @Autowired private DockerClientService dockerClientService;
+    @Autowired private NodeAsyncService nodeAsyncService;
     @Autowired private PathService pathService;
     @Autowired private ConstantProperties constant;
+    @Autowired private FrontInterfaceService frontInterfaceService;
 
     /**
      * Add in v1.4.0 deploy.
@@ -343,19 +345,11 @@ public class DeployService {
                     // optimize code to get host
                     TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
                     if (host != null) {
-                        log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-                        this.dockerClientService.removeByName(
-                                front.getFrontIp(),
-                                host.getDockerPort(),
-                                front.getContainerName());
+                        // stop front
+                        this.frontService.stopNode(host,front.getNodeId());
 
-                        String chainRootOnHost = PathService.getChainRootOnHost(host.getRootDir(), chainName);
-                        String chainDeletedRootOnHost = PathService.getChainDeletedRootOnHost(host.getRootDir(), chainName);
-                        if (StringUtils.isNotBlank(chainRootOnHost)) {
-                            String rmCommand = String.format("mv -fv %s %s && exit 0", chainRootOnHost, chainDeletedRootOnHost);
-                            log.info("Remove config on remote host:[{}], command:[{}].", host.getIp(), rmCommand);
-                            SshTools.exec(host.getIp(), rmCommand);
-                        }
+                        // move chain config files
+                        ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),chainName);
                     }
 
                     // TODO. delete node and frontGroupMap in batch
@@ -465,7 +459,7 @@ public class DeployService {
                     tbHostExists, agency.getId(), agency.getAgencyName(), group);
 
             // generate new node config files
-            this.frontService.generateAllNodeConfigIni(chain, groupId, ip);
+            this.frontService.generateAllNodeConfigIni(chain, groupId);
 
             // generate config files and scp to remote
             this.groupService.generateGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList);
@@ -476,7 +470,7 @@ public class DeployService {
             }
 
             // restart all front
-            this.frontService.restartFront(chain,groupId);
+            this.nodeAsyncService.startFrontOfGroup(chain.getId(),groupId);
         } catch (Exception e) {
             //TODO.
             log.error("Add node error", e);
@@ -489,19 +483,6 @@ public class DeployService {
     }
 
 
-    public void deleteNode() {
-        // check node is removed from sealer/observer, else abort
-
-        // remove front
-
-        // destroy docker-container
-
-        // update local group's nodes' config.ini p2p, mv to temp dir
-
-        // update host nodes' config.ini
-
-        // mv host node's data file
-    }
 
     /**
      *
@@ -509,11 +490,12 @@ public class DeployService {
      * @param chainName
      * @return
      */
-    public Pair<RetCode, String> upgrade(int newTagId, String chainName) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void upgrade(int newTagId, String chainName) {
         // check tagId existed
-        TbConfig imageConfig = tbConfigMapper.selectByPrimaryKey(newTagId);
-        if (imageConfig == null
-                || StringUtils.isBlank(imageConfig.getConfigValue())) {
+        TbConfig newTagConfig = tbConfigMapper.selectByPrimaryKey(newTagId);
+        if (newTagConfig == null
+                || StringUtils.isBlank(newTagConfig.getConfigValue())) {
             throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
         }
 
@@ -523,11 +505,102 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
         }
 
-        // TODO.
-        this.chainService.upgrade(chain,imageConfig.getConfigValue());
-        return null;
+        boolean sameTagVersion = StringUtils.equalsIgnoreCase(chain.getVersion(),newTagConfig.getConfigValue());
+        if (sameTagVersion){
+            throw new NodeMgrException(ConstantCode.UPGRADE_WITH_SAME_TAG_ERROR);
+        }
 
+        this.chainService.upgrade(chain,newTagConfig.getConfigValue());
 
+        this.nodeAsyncService.startFrontOfChain(chain.getId());
+    }
+
+    /**
+     * Start a node by nodeId.
+     *
+     * @param nodeId
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void startNode(String nodeId) {
+        boolean startResult = this.frontService.start(nodeId);
+        if( ! startResult){
+            throw new NodeMgrException(ConstantCode.START_NODE_ERROR);
+        }
+    }
+
+    /**
+     * Stop a node by nodeId.
+     *
+     * @param nodeId
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void stopNode(String nodeId) {
+        boolean stopResult = this.frontService.stopNode(nodeId);
+        if( ! stopResult){
+            throw new NodeMgrException(ConstantCode.STOP_NODE_ERROR);
+        }
+    }
+
+    /**
+     *  @param nodeId
+     * @param deleteHost
+     * @param deleteAgency
+     * @param deleteGroup
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteNode(String nodeId,
+                boolean deleteHost,
+                boolean deleteAgency,
+                boolean deleteGroup) {
+
+        // check node is removed from sealer/observer, else abort
+        boolean frontInGroup = this.frontService.checkFrontInGroup(nodeId);
+        if (frontInGroup) {
+            throw new NodeMgrException(ConstantCode.NODE_IN_GROUP_ERROR);
+        }
+
+        // destroy docker-container
+        this.frontService.stopNode(nodeId);
+
+        // remove front
+        TbFront front = this.frontService.getByNodeId(nodeId);
+        this.frontService.removeFront(front.getFrontId());
+
+        // update local group's nodes' config.ini p2p, mv to temp dir
+        TbChain chain = this.tbChainMapper.selectByPrimaryKey(front.getChainId());
+        TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+
+        Path nodePath = this.pathService.getNodeRoot(chain.getChainName(),host.getIp(),front.getHostIndex());
+        Set<Integer> groupIdList = null;
+        try {
+            NodeConfig nodeConfig = NodeConfig.read(nodePath);
+            groupIdList = nodeConfig.getGroupIdList();
+        } catch (IOException e) {
+            log.error("Delete node, read delete node:[{}:{}] config error",host.getIp(),front.getContainerName(), e);
+            throw new NodeMgrException(ConstantCode.READ_NODE_CONFIG_ERROR);
+        }
+
+        // move node files to delete-tmp
+        NodeService.mvNodeOnRemote(host.getIp(),host.getRootDir(),chain.getChainName(),front.getHostId(),front.getNodeId());
+
+        // generate config.ini
+        for (Integer groupId : CollectionUtils.emptyIfNull(groupIdList)) {
+            try {
+                // update node config.ini in group
+                this.frontService.generateAllNodeConfigIni(chain, groupId);
+
+                // scp config.ini to remote
+                this.frontService.scpNodeConfigIni(chain,groupId);
+
+                // restart node
+                this.nodeAsyncService.startFrontOfChain(chain.getId());
+            } catch (IOException e) {
+                log.error("Delete node, generate group:[{}] related node new config.ini error ", groupId,e);
+            }
+        }
     }
 }
 

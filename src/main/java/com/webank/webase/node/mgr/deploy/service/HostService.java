@@ -210,6 +210,7 @@ public class HostService {
                             // TODO. check front status
 
 
+                            // TODO. call front service
                             log.info("try to create and start bcos-front:[{}:{}] container",
                                             tbFront.getFrontIp(), tbFront.getHostIndex());
                             boolean startResult = dockerClientService.createAndStart(tbHost.getIp(),

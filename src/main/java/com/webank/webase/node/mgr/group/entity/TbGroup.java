@@ -50,7 +50,7 @@ public class TbGroup {
      */
     private String groupTimestamp;
     /**
-     * group peers nodeid
+     * group peers nodeId
      */
     private String nodeIdList;
 

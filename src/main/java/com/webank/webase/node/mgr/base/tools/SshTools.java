@@ -180,4 +180,29 @@ public class SshTools {
         return session;
     }
 
+    /**
+     *
+     * @param ip
+     * @param dir
+     */
+    public static void createDirOnRemote(String ip, String dir){
+        exec(ip, String.format("mkdir -p %s; exit 0", dir));
+    }
+
+    /**
+     *
+     * @param ip
+     * @param src
+     * @param dst
+     */
+    public static void mvDirOnRemote(String ip,
+                                     String src,
+                                     String dst){
+        if (StringUtils.isNoneBlank(ip,src,dst)) {
+            String rmCommand = String.format("mv -fv %s %s && exit 0",
+                    src, dst);
+            log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
+            SshTools.exec(ip, rmCommand);
+        }
+    }
 }
