@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.abi;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
@@ -26,6 +26,7 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -88,7 +89,7 @@ public class AbiController extends BaseController {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
 		log.info("start saveAbi. startTime:{} ReqImportAbi:{}",
-				startTime.toEpochMilli(), JSON.toJSONString(param));
+				startTime.toEpochMilli(), JsonTools.toJSONString(param));
 		abiService.saveAbi(param);
 		log.info("end saveAbi. useTime:{}",
 				Duration.between(startTime, Instant.now()).toMillis());
@@ -105,7 +106,7 @@ public class AbiController extends BaseController {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
 		log.info("start updateAbi. startTime:{} ReqImportAbi:{}",
-				startTime.toEpochMilli(), JSON.toJSONString(param));
+				startTime.toEpochMilli(), JsonTools.toJSONString(param));
 		if(param.getAbiId() == null) {
 			return new BaseResponse(ConstantCode.PARAM_FAIL_ABI_ID_EMPTY);
 		}

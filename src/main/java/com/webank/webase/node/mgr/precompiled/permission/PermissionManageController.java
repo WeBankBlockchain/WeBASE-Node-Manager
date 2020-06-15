@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.precompiled.permission;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -69,7 +69,7 @@ public class PermissionManageController extends BaseController {
         List2Page list2Page = new List2Page(resultList, pageSize, pageNumber);
         List<MapHandle> finalList = list2Page.getPagedList();
         log.info("end listPermissionMgrState useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(finalList));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(finalList));
         return new BasePageResponse(ConstantCode.SUCCESS, finalList, totalCount);
     }
 
@@ -91,7 +91,7 @@ public class PermissionManageController extends BaseController {
         Object result = permissionManageService.listPermissionPaged(groupId, permissionType, tableName, pageSize, pageNumber);
 
         log.info("end listPermissionManager useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
     }
 
@@ -112,7 +112,7 @@ public class PermissionManageController extends BaseController {
         Object result = permissionManageService.listPermissionFull(groupId, permissionType, tableName);
 
         log.info("end listFullPermissionManager useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
     }
 
@@ -127,11 +127,11 @@ public class PermissionManageController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start updatePermission startTime:{} permissionParam:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(permissionParam));
+                JsonTools.toJSONString(permissionParam));
         Object res = permissionManageService.updatePermissionState(permissionParam);
 
         log.info("end updatePermission useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }
@@ -143,12 +143,12 @@ public class PermissionManageController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start grantPermission startTime:{} permissionParam:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(permissionParam));
+                JsonTools.toJSONString(permissionParam));
 
         Object res = permissionManageService.grantPermission(permissionParam);
 
         log.info("end grantPermission useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }
@@ -163,12 +163,12 @@ public class PermissionManageController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start revokePermission startTime:{} permissionParam:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(permissionParam));
+                JsonTools.toJSONString(permissionParam));
 
         Object res = permissionManageService.revokePermission(permissionParam);
 
         log.info("end revokePermission useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }

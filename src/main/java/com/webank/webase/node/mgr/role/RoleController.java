@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.role;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -75,7 +75,7 @@ public class RoleController {
 
         log.info("end queryRoleList useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
-            JSON.toJSONString(pagesponse));
+            JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 }

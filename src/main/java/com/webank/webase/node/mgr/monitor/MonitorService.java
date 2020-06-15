@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.MonitorUserType;
@@ -211,7 +211,7 @@ public class MonitorService {
             .monitorUserList(TableName.MONITOR.getTableName(groupId));
 
         log.debug("end qureyMonitorUserList monitorUserList:{}",
-            JSON.toJSONString(monitorUserList));
+            JsonTools.toJSONString(monitorUserList));
         return monitorUserList;
     }
 
@@ -225,7 +225,7 @@ public class MonitorService {
             .monitorInterfaceList(TableName.MONITOR.getTableName(groupId), userName);
 
         log.debug("end qureyMonitorInterfaceList monitorInterfaceList:{}",
-            JSON.toJSONString(monitorInterfaceList));
+            JsonTools.toJSONString(monitorInterfaceList));
         return monitorInterfaceList;
     }
 
@@ -282,7 +282,7 @@ public class MonitorService {
         List<UnusualUserInfo> listOfUnusualUser = monitorMapper.listOfUnusualUser(param);
 
         log.debug("end qureyUnusualUserList listOfUnusualUser:{}",
-            JSON.toJSONString(listOfUnusualUser));
+            JsonTools.toJSONString(listOfUnusualUser));
         return listOfUnusualUser;
     }
 
@@ -318,7 +318,7 @@ public class MonitorService {
             .listOfUnusualContract(param);
 
         log.debug("end qureyUnusualContractList listOfUnusualContract:{}",
-            JSON.toJSONString(listOfUnusualContract));
+            JsonTools.toJSONString(listOfUnusualContract));
         return listOfUnusualContract;
     }
 
