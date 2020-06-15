@@ -296,7 +296,7 @@ public class PathService {
      * @throws IOException
      */
     public static String getNodeId(Path nodePath) throws IOException {
-        List<String> lines = Files.readAllLines(nodePath.resolve("conf/node.nodeId"));
+        List<String> lines = Files.readAllLines(nodePath.resolve("conf/node.nodeid"));
         if (CollectionUtils.isEmpty(lines)) {
             return null;
         }

@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.front;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
@@ -475,6 +477,15 @@ public class FrontService {
 
             // insert front group into db
             this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
+
+            // generate front application.yml
+            String applicationYml = ThymeleafUtil.generate(
+                    ThymeleafUtil.FRONT_APLLICATION_YML,
+                    Pair.of("encryptType", encryptType),
+                    Pair.of("channelPort", channelPort),
+                    Pair.of("frontPort", frontPort)
+            );
+            Files.write(nodeRoot.resolve("application.yml"), applicationYml.getBytes(), StandardOpenOption.CREATE);
         }
         return newFrontList;
     }
@@ -509,6 +520,7 @@ public class FrontService {
             // generate config.ini
             ThymeleafUtil.newNodeConfigIni(nodeRoot, tbFront.getChannelPort(),
                     tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedNode, guomi, chainIdInConfigIni);
+
         }
 
     }
