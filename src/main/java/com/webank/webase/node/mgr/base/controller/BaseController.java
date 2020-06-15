@@ -34,8 +34,8 @@ public class BaseController {
         if (result.hasErrors()) {
             String errFieldStr = result.getAllErrors().stream()
                 // TODO check json
-                .map(obj -> JsonTools.toMap(JsonTools.toJSONString(obj)))
-                .map(err -> err.get("field").toString())
+                .map(obj -> JsonTools.stringToJsonNode(JsonTools.toJSONString(obj)))
+                .map(err -> err.get("field").asText())
                 .collect(Collectors.joining(","));
             StringUtils.removeEnd(errFieldStr, ",");
             String message = "these fields can not be empty:" + errFieldStr;
