@@ -109,7 +109,7 @@ public class TransHashService {
             }
             return count;
         } catch (BadSqlGrammarException ex) {
-            // TODO v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
+            // v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
             log.error("fail queryCountOfTranByMinus. ", ex);
             log.info("restart from queryCountOfTranByMinus to queryCountOfTran: []", ex.getCause());
             TransListParam queryParam = new TransListParam(null, null);

@@ -351,19 +351,13 @@ public class FrontRestTools {
             } catch (HttpStatusCodeException ex) {
                 JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
                 log.error("http request fail. error:{}", JsonTools.toJSONString(error));
-                if (error == null) {
-                    log.error("deserialize http response error");
-                    throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
-                }
-                // todo check json asText
                 try {
                     int code = error.get("code").intValue();
                     String errorMessage = error.get("errorMessage").asText();
-                    throw new NodeMgrException(code, errorMessage);
-                } catch (Exception e) {
                     frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
-                    throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(),
-                        error.get("errorMessage").asText());
+                    throw new NodeMgrException(code, errorMessage);
+                } catch (NullPointerException e) {
+                    throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
                 }
             }
         }
