@@ -21,7 +21,7 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.monitor.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.util.List;
@@ -58,7 +58,7 @@ public class FrontServiceTest {
 
     @Test
     public void getTransReceiptTest() {
-        TransReceipt transReceipt = frontInterface.getTransReceipt(groupId, transHash);
+        TransactionReceipt transReceipt = frontInterface.getTransReceipt(groupId, transHash);
         assert (transReceipt != null);
         System.out.println(JsonTools.toJSONString(transReceipt));
     }
