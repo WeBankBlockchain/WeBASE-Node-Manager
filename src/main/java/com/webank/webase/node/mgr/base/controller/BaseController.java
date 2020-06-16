@@ -33,7 +33,6 @@ public class BaseController {
     protected void checkBindResult(BindingResult result) {
         if (result.hasErrors()) {
             String errFieldStr = result.getAllErrors().stream()
-                // TODO check json
                 .map(obj -> JsonTools.stringToJsonNode(JsonTools.toJSONString(obj)))
                 .map(err -> err.get("field").asText())
                 .collect(Collectors.joining(","));

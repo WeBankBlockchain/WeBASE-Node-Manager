@@ -451,7 +451,6 @@ public class  ContractService {
             return;
         } else {
             List listData = (List) response.getData();
-            // TODO check json
             deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
         }
 
