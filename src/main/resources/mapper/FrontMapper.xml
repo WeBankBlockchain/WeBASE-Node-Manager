@@ -105,10 +105,6 @@
     select * from tb_front where front_id = #{frontId}
   </select>
 
-  <select id="getByNodeId" resultMap="frontMap" parameterType="java.lang.String">
-    select * from tb_front where node_id = #{nodeId}
-    limit 1
-  </select>
 
   <select id="selectByHostId" resultMap="frontMap" parameterType="java.lang.Integer">
     select * from tb_front where host_id= #{hostId}
@@ -124,4 +120,8 @@
   <update id="updateStatus" parameterType="java.util.Map">
     update tb_front set `status`=#{status},modify_time=#{modifyTime} where front_id = #{frontId}
   </update>
+
+  <select id="getByNodeId" resultMap="frontMap" parameterType="java.lang.String">
+    select * from tb_front where node_id = #{nodeId} limit 1
+  </select>
 </mapper>

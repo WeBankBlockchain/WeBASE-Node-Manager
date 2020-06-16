@@ -125,6 +125,7 @@ public class ConstantProperties {
     private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
+    private String nodesRootTmpDir = "NODES_ROOT_TMP";
 
     /**
      * Docker client connect daemon ip with proxy ip.
@@ -133,17 +134,11 @@ public class ConstantProperties {
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
-        if (StringUtils.isBlank(nodesRootDir)) {
-            // return "." by default
-            nodesRootDir = "./NODES_ROOT/";
-        } else if (nodesRootDir.trim().endsWith(separator)) {
-            // ends with separator
-            nodesRootDir = nodesRootDir.trim();
-        } else {
-            // append a separator
-            nodesRootDir = String.format("%s%s", nodesRootDir.trim(), separator);
-        }
+        nodesRootDir = initDirectory(nodesRootDir, "NODES_ROOT/");
+        nodesRootTmpDir = initDirectory(nodesRootTmpDir, "NODES_ROOT_TMP/");
+
         log.info("Init constant properties, generate nodes root dir:[{}]", nodesRootDir);
+        log.info("Init constant properties, generate nodes root temp dir:[{}]", nodesRootTmpDir);
 
 
         this.imageTagUpdateUrl = String.format(this.imageTagUpdateUrl,dockerRepository);
@@ -157,6 +152,28 @@ public class ConstantProperties {
         if (!Files.exists(Paths.get(fiscoBcosBinary))) {
             log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
             fiscoBcosBinary = "";
+        }
+    }
+
+    /**
+     *
+     * @param injectedValue
+     * @param defaultValue
+     * @return
+     */
+    private static String initDirectory(String injectedValue, String defaultValue){
+        String newDirectory = injectedValue;
+
+        if (StringUtils.isBlank(newDirectory)) {
+            newDirectory = defaultValue;
+        }
+
+        if (newDirectory.trim().endsWith(separator)) {
+            // ends with separator
+            return newDirectory.trim();
+        } else {
+            // append a separator
+            return String.format("%s%s", newDirectory.trim(), separator);
         }
     }
     //******************* Add in v1.4.0 end. *******************

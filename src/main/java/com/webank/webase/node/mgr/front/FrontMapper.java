@@ -39,7 +39,6 @@ public interface FrontMapper {
 
     TbFront getById(@Param("frontId") int frontId);
 
-    TbFront getByNodeId(@Param("nodeId") String nodeId);
 
     List<TbFront> selectByHostId(@Param("hostId") Integer hostId);
     List<TbFront> selectByAgencyId(@Param("agencyId") Integer agencyId);
@@ -57,8 +56,10 @@ public interface FrontMapper {
     Integer getNodeMaxIndex(int hostId);
 
     @Update({
-        "update tb_front set image_tag=#{newImageTag},modify_time=#{modifyTime} where chain_id = #{chainId}"
+        "update tb_front set client_version=#{newImageTag},image_tag=#{newImageTag},modify_time=#{modifyTime} where chain_id = #{chainId}"
     })
     int updateImageTagByChainId(@Param("chainId") int chainId,
                                 @Param("newImageTag") String newImageTag, @Param("modifyTime") LocalDateTime now);
+
+    TbFront getByNodeId(@Param("nodeId") String nodeId);
 }

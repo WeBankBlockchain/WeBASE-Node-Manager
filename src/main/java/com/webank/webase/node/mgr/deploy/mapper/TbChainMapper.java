@@ -76,11 +76,11 @@ public interface TbChainMapper {
         "insert into tb_chain (chain_name, ",
         "chain_desc, version, ",
         "encrypt_type, chain_status, root_dir,run_type, ",
-        "create_time, modify_time)",
+        "create_time, modify_time,webase_sign_addr)",
         "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.chainName,jdbcType=VARCHAR}, ",
         "#{detail.chainDesc,jdbcType=VARCHAR}, #{detail.version,jdbcType=VARCHAR}, ",
         "#{detail.encryptType,jdbcType=TINYINT}, #{detail.chainStatus,jdbcType=TINYINT},#{detail.rootDir,jdbcType=VARCHAR}, " +
-                "#{detail.runType,jdbcType=TINYINT}",
+                "#{detail.runType,jdbcType=TINYINT},#{detail.webaseSignAddr,jdbcType=VARCHAR}",
         "#{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP})</foreach></script>"
     })
     int batchInsert(java.util.List<TbChain> list);

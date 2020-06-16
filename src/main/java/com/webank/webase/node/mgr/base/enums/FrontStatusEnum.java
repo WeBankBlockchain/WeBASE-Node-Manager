@@ -46,4 +46,12 @@ public enum FrontStatusEnum {
         return null;
     }
 
+    /**
+     *
+     * @param id
+     * @return
+     */
+    public static boolean isRunning(int id){
+        return id == RUNNING.getId();
+    }
 }

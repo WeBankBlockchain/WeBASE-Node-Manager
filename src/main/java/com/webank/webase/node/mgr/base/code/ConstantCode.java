@@ -219,8 +219,14 @@ public class ConstantCode {
     public static final RetCode START_NODE_ERROR = RetCode.mark(205047, "Start node failed.");
     public static final RetCode UPGRADE_WITH_SAME_TAG_ERROR = RetCode.mark(205048, "New image tag and current are the same.");
     public static final RetCode UPDATE_CHAIN_WITH_NEW_VERSION_ERROR = RetCode.mark(205049, "Update chain version error.");
-    public static final RetCode NODE_IN_GROUP_ERROR = RetCode.mark(205050, "Node in group error.");
+    public static final RetCode NODE_IN_GROUP_ERROR = RetCode.mark(205050, "Node still in group, remove before deleting.");
     public static final RetCode READ_NODE_CONFIG_ERROR = RetCode.mark(205051, "Read node config error.");
+    public static final RetCode DELETE_NODE_DIR_ERROR = RetCode.mark(205052, "Delete node config files error.");
+    public static final RetCode NODE_RUNNING_ERROR = RetCode.mark(205053, "Node is running.");
+    public static final RetCode UPDATE_RELATED_NODE_ERROR = RetCode.mark(205054, "Update related nodes error.");
+    public static final RetCode DELETE_CHAIN_ERROR = RetCode.mark(205055, "Delete chain error.");
+    public static final RetCode NODE_NEED_REMOVE_FROM_GROUP_ERROR =
+            RetCode.mark(205056, "Node is sealer or observer, remove from group first.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
