@@ -15,7 +15,7 @@
  */
 package node.mgr.test.group;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
 import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
@@ -113,7 +113,7 @@ public class GroupControllerTest {
         param.setDescription("test");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/group/generate/" + targetNodeId).
-                content(JSON.toJSONString(param)).
+                content(JsonTools.toJSONString(param)).
                 contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
@@ -134,7 +134,7 @@ public class GroupControllerTest {
         param.setDescription("test");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post( "/group/generate").
-                content(JSON.toJSONString(param)).
+                content(JsonTools.toJSONString(param)).
                 contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
@@ -153,7 +153,7 @@ public class GroupControllerTest {
 //        param.setType("recover");
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .post("/group/operate/" + targetNodeId).
-                content(JSON.toJSONString(param)).
+                content(JsonTools.toJSONString(param)).
                 contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
@@ -186,7 +186,7 @@ public class GroupControllerTest {
         param.setNodeIdList(nodeIdList);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .post("/group/queryGroupStatus/list")
-                .content(JSON.toJSONString(param))
+                .content(JsonTools.toJSONString(param))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.

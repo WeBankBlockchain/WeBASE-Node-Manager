@@ -16,8 +16,10 @@
 
 package com.webank.webase.node.mgr.alert.mail;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.account.AccountMapper;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.alert.log.AlertLogService;
@@ -321,7 +323,10 @@ public class MailService {
         }else {
             List<String> userList = new ArrayList<>();
             try {
-                userList = (List<String>) JSON.parse(alertRule.getUserList());
+                userList = JsonTools.toJavaObjectList(alertRule.getUserList(), String.class);
+                if (userList == null) {
+                    log.error("parse json error");
+                }
             }catch (Exception e) {
                 log.error("handleAllUserEmail parse error: e:{}, getUserList{}",
                         e, alertRule.getUserList());

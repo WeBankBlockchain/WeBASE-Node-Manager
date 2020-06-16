@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.transdaily;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -46,7 +46,7 @@ public class TransDailyService {
             // qurey
             List<SeventDaysTrans> transList = tbTransDailyMapper
                 .listSeventDayOfTransDaily(groupId);
-            log.debug("end listSeventDayOfTrans transList:{}", JSON.toJSONString(transList));
+            log.debug("end listSeventDayOfTrans transList:{}", JsonTools.toJSONString(transList));
             return transList;
         } catch (RuntimeException ex) {
             log.debug("fail listSeventDayOfTrans groupId:{}", groupId, ex);
@@ -62,7 +62,7 @@ public class TransDailyService {
         throws NodeMgrException {
         log.debug(
             "start updateTransDaily groupId:{} transDay:{} oldBlockNumber:{} "
-                + "latestBlockNumber:{} transCount:{}", groupId, JSON.toJSONString(transDay),
+                + "latestBlockNumber:{} transCount:{}", groupId, JsonTools.toJSONString(transDay),
             oldBlockNumber, latestBlockNumber, transCount);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("groupId", groupId);
@@ -90,7 +90,7 @@ public class TransDailyService {
     public void addTbTransDailyInfo(Integer groupId, LocalDate transDay, Integer transCount,
         BigInteger blockNumber) throws NodeMgrException {
         log.debug("start addTbTransDailyInfo groupId:{} transDay:{} transCount:{} blockNumber:{}",
-            groupId, JSON.toJSONString(transDay),
+            groupId, JsonTools.toJSONString(transDay),
             transCount, blockNumber);
 
         // check group id
@@ -103,7 +103,7 @@ public class TransDailyService {
         } catch (RuntimeException ex) {
             log.error(
                 "start addTbTransDailyInfo groupId:{} transDay:{} transCount:{} blockNumber:{}",
-                groupId, JSON.toJSONString(transDay),
+                groupId, JsonTools.toJSONString(transDay),
                 transCount, blockNumber, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
