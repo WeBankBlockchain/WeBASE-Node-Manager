@@ -15,8 +15,10 @@
 package com.webank.webase.node.mgr.deploy.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -71,6 +73,13 @@ public class NodeAsyncService {
                 log.error("Start group:[{}:{}], docker restart server:[{}:{}] throws exception when sleep.",
                         chainId,groupId,tbNode.getNodeIp(),tbNode.getNodeId());
             }
+        }
+    }
+
+    @Async
+    public void startFrontOfGroup(int chainId, Set<Integer> groupIdSet) {
+        for (Integer groupId: CollectionUtils.emptyIfNull(groupIdSet)){
+            ((NodeAsyncService) AopContext.currentProxy()).startFrontOfGroup(chainId,groupId);
         }
     }
 }

@@ -60,7 +60,7 @@ public class DeployController extends BaseController {
      */
     @PostMapping(value = "init")
     // @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse deploy(@RequestBody @Valid ReqDeploy deploy,
+    public BaseResponse deployChain(@RequestBody @Valid ReqDeploy deploy,
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
@@ -69,7 +69,7 @@ public class DeployController extends BaseController {
                 deploy.getTagId(), deploy.getIpconf());
 
         Pair<RetCode, String> deployResult = this.deployService.deployChain(deploy.getChainName(),
-                deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost());
+                deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost(),deploy.getWebaseSignAddr());
         return new BaseResponse(deployResult.getKey(), deployResult.getValue());
     }
 
@@ -156,7 +156,7 @@ public class DeployController extends BaseController {
         log.info("Delete node nodeId:[{}], now:[{}]", nodeId, startTime);
 
         this.deployService.deleteNode(delete.getNodeId(),
-                delete.isDeleteHost(),delete.isDeleteAgency(),delete.isDeleteGroup());
+                delete.isDeleteHost(),delete.isDeleteAgency());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -200,6 +200,38 @@ public class DeployController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, chain);
     }
 
+
+    /**
+     *
+     * @param chainName
+     * @return
+     * @throws IOException
+     */
+    @GetMapping(value = "chain/start")
+    public BaseResponse startChain(
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
+    ) throws IOException {
+        Instant startTime = Instant.now();
+        log.info("Start chain, chainName:[{}], now:[{}]", chainName, startTime);
+
+        return new BaseResponse(ConstantCode.SUCCESS );
+    }
+
+    /**
+     *
+     * @param chainName
+     * @return
+     * @throws IOException
+     */
+    @GetMapping(value = "chain/stop")
+    public BaseResponse stopChain(
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
+    ) throws IOException {
+        Instant startTime = Instant.now();
+        log.info("Stop chain, chainName:[{}], now:[{}]", chainName, startTime);
+
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
 
     /**
      * delete chain by chainName.

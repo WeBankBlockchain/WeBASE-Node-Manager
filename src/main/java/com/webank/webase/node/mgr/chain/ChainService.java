@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.chain;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CHAIN;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,9 +37,11 @@ import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
+import com.webank.webase.node.mgr.deploy.service.AgencyService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.group.GroupService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -46,14 +49,20 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class ChainService {
 
+    @Autowired private TbChainMapper tbChainMapper;
+
     @Autowired
     private ConstantProperties cproperties;
     @Autowired
     private FrontService frontService;
     @Autowired
+    private AgencyService agencyService;
+    @Autowired
+    private GroupService groupService;
+    @Autowired
     private RestTemplate genericRestTemplate;
-
-    @Autowired private TbChainMapper tbChainMapper;
+    @Autowired
+    private PathService pathService;
 
     /**
      * get chain info.
@@ -101,11 +110,12 @@ public class ChainService {
                           byte encryptType,
                           ChainStatusEnum status,
                           String rootDirOnHost,
-                          RunTypeEnum runTypeEnum
+                          RunTypeEnum runTypeEnum,
+                          String webaseSignAddr
     ) throws NodeMgrException {
         // TODO. params check
 
-        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, rootDirOnHost, runTypeEnum);
+        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, rootDirOnHost, runTypeEnum,webaseSignAddr);
 
         if (tbChainMapper.insertSelective(chain) != 1 || chain.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_CHAIN_ERROR);
@@ -125,6 +135,9 @@ public class ChainService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean upgrade(TbChain chain , String newTagVersion ) {
+        log.info("Upgrade chain:[{}] from version:[{}] to version:[{}].",
+                chain.getChainName(), chain.getVersion(), newTagVersion);
+
         TbChain newChain = new TbChain();
         newChain.setId(chain.getId());
         newChain.setVersion(newTagVersion);
@@ -136,7 +149,8 @@ public class ChainService {
         }
 
         // restart front
-        return this.frontService.upgrade(chain);
+        log.info("Upgrade front:[{}] to version:[{}].",chain.getVersion() , newTagVersion);
+        return this.frontService.upgrade(chain.getId(),newTagVersion);
     }
 
 
@@ -157,6 +171,29 @@ public class ChainService {
         String dst_chainDeletedRootOnHost = PathService.getChainDeletedRootOnHost(rootDirOnHost, chainName);
 
         SshTools.mvDirOnRemote(ip,src_chainRootOnHost,dst_chainDeletedRootOnHost);
+    }
 
+    /**
+     *
+     * @param chainName
+     */
+    @Transactional
+    public void delete(String chainName) throws IOException {
+        TbChain chain = tbChainMapper.getByChainName(chainName);
+        if (chain == null) {
+            throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
+        }
+
+        // delete agency
+        this.agencyService.deleteByChainId(chain.getId());
+
+        // delete group
+        this.groupService.deleteGroupByChainId(chain.getId());
+
+        log.info("Delete chain data by chain id:[{}].", chain.getId());
+        this.tbChainMapper.deleteByPrimaryKey(chain.getId());
+
+        log.info("Delete chain:[{}] config files", chainName);
+        this.pathService.deleteChain(chainName);
     }
 }

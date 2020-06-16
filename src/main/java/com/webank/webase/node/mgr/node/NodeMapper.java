@@ -51,9 +51,15 @@ public interface NodeMapper {
         @Param("p2pPort") Integer p2pPort);
 
     /**
-     * query node info.
+     * Query node info.
+     *
+     * One node maybe in multiple group.
+     *
      */
-//    TbNode queryByNodeId(@Param("nodeId") String nodeId);
+    @Select({
+            "select * from tb_node where node_id=#{nodeId,jdbcType=VARCHAR}"
+    } )
+    List<TbNode> selectByNodeId(@Param("nodeId") String nodeId);
 
 
     /**
@@ -73,9 +79,7 @@ public interface NodeMapper {
     Integer deleteByNodeAndGroup(@Param("nodeId") String nodeId, @Param("groupId") Integer groupId);
     /**
      * delete by groupId.
-     * TODO. should delete by nodeId in multi-chain.
      */
-    @Deprecated
     Integer deleteByGroupId( @Param("groupId") Integer groupId);
 
     int deleteByNodeId(@Param("nodeId") String nodeId);
@@ -86,7 +90,6 @@ public interface NodeMapper {
     })
     TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId,@Param("groupId") int groupId);
 
-
     // TODO. add chain_id in tb_node
     @Select({
             " SELECT " +
@@ -95,4 +98,9 @@ public interface NodeMapper {
                     "( SELECT DISTINCT ( group_id ) FROM tb_node WHERE node_id = #{nodeId,jdbcType=VARCHAR} )"
     })
     List<TbNode> selectConnectedNodeList(@Param("nodeId") String nodeId);
+
+    @Select({
+            "select * from tb_node where group_id=#{groupId,jdbcType=INTEGER}"
+    })
+    List<TbNode> selectByGroupId(@Param("groupId") int groupId);
 }

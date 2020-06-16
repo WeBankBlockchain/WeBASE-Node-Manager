@@ -40,9 +40,4 @@ public class ReqNodeOption {
      */
     private boolean deleteAgency;
 
-    /**
-     *  Whether delete group when trying to delete the last node on a host.
-     *
-     */
-    private boolean deleteGroup;
 }

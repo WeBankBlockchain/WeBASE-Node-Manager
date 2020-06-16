@@ -19,7 +19,9 @@ import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
@@ -39,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.ResourceAccessException;
 
 import com.alibaba.fastjson.JSON;
@@ -84,6 +86,7 @@ import com.webank.webase.node.mgr.group.entity.RspOperateResult;
 import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.method.MethodService;
+import com.webank.webase.node.mgr.node.NodeMapper;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
@@ -105,6 +108,8 @@ public class GroupService {
     private TbHostMapper tbHostMapper;
     @Autowired
     private FrontMapper frontMapper;
+    @Autowired
+    private NodeMapper nodeMapper;
 
     @Autowired
     private TableService tableService;
@@ -645,7 +650,8 @@ public class GroupService {
      * remove all data by groupId.
      * included: tb_group, tb_front_group_map, group contract/trans, group method, group node etc.
      */
-    protected void removeAllDataByGroupId(int groupId) {
+    @Transactional
+    public void removeAllDataByGroupId(int groupId) {
         if (groupId == 0) {
             return;
         }
@@ -1005,6 +1011,7 @@ public class GroupService {
         String chainName = tbFront.getChainName();
         int nodeIndex = tbFront.getHostIndex();
         TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+
         // scp group config files from remote to local
         // path pattern: /host.getRootDir/chain_name
         // ex: (in the remote host) /opt/fisco/chain1
@@ -1014,13 +1021,15 @@ public class GroupService {
                 remoteChainPath, nodeIndex, generateGroupId);
         // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
-        String localNodePath = pathService.getHost(chainName, tbHost.getIp()).toString();
+        String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
         String localDst = String.format("%s/conf/", localNodePath);
         // copy group config files to local node's conf dir
         deployShellService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(),
                 remoteGroupConfSource, localDst);
     }
+
+
 
     private void pullGroupStatusFile(int generateGroupId, TbFront tbFront) {
         // only support docker node/front
@@ -1039,13 +1048,32 @@ public class GroupService {
                 remoteChainPath, nodeIndex, generateGroupId);
         // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
-        String localNodePath = pathService.getHost(chainName, tbHost.getIp()).toString();
-        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
-        String localDst = String.format("%s/conf/", localNodePath);
+        String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
+        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/data/group[groupId]/group.1001.*
+        Path localDst = Paths.get(String.format("%s/data/group%s", localNodePath,generateGroupId));
+        // create data parent directory
+        if (Files.notExists(localDst)){
+            try {
+                Files.createDirectories(localDst);
+            } catch (IOException e) {
+                // TODO. throw exception ???
+                log.error("Create data group:[{}] file error", localDst.toAbsolutePath().toString(),e);
+            }
+        }
         // copy group status file to local node's conf dir
         deployShellService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(),
-                remoteGroupStatusSource, localDst);
+                remoteGroupStatusSource, localDst.toAbsolutePath().toString());
     }
+
+//    private void pullGroupFile(int groupId,TbFront tbFront){
+//        if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
+//            return;
+//        }
+//        String chainName = tbFront.getChainName();
+//        int nodeIndex = tbFront.getHostIndex();
+//        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+//
+//    }
 
     /**
      * @param newGroup
@@ -1055,7 +1083,7 @@ public class GroupService {
      * @param newFrontList
      * @throws IOException
      */
-    public void generateGroupConfigsAndScp(boolean newGroup, TbChain chain, int groupId, String ip,
+    public void generateNewNodesGroupConfigsAndScp(boolean newGroup, TbChain chain, int groupId, String ip,
                                            List<TbFront> newFrontList) throws IOException {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
@@ -1096,6 +1124,25 @@ public class GroupService {
                 //TODO. write file error
                 log.error("Send node:[{}:{}] files error.", ip, newFront.getHostIndex());
             }
+        }
+    }
+
+    /**
+     *
+     * @param chainId
+     */
+    @Transactional
+    public void deleteGroupByChainId(int chainId){
+        log.info("Delete group data by chain id:[{}].", chainId);
+        List<TbGroup> groupIdList = this.groupMapper.selectGroupList(chainId);
+        if (CollectionUtils.isEmpty(groupIdList)) {
+            log.warn("No group in chain:[{}]", chainId);
+            return;
+        }
+
+        for (TbGroup tbGroup : groupIdList) {
+            log.info("Delete all data of group:[{}:{}].", chainId, tbGroup.getGroupId());
+            this.removeAllDataByGroupId(tbGroup.getGroupId());
         }
     }
 }

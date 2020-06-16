@@ -71,7 +71,7 @@ public class ThymeleafUtil {
      * @param tpl
      * @param array
      */
-    public static String generate(String tpl, Pair<String, Object>... array) {
+    public static String generate(String tpl, Pair<String, Object> ... array) {
         return generate(tpl, PairUtil.toMap(array));
     }
 
