@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -42,13 +42,13 @@ public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
         try {
             token = NodeMgrTools.getToken(request);
         } catch (NodeMgrException ex) {
-            NodeMgrTools.responseString(response, JSON.toJSONString(ex.getRetCode()));
+            NodeMgrTools.responseString(response, JsonTools.toJSONString(ex.getRetCode()));
             return;
         }
         //remove token
         tokenService.deleteToken(token, null);
 
         log.debug("logout success");
-        NodeMgrTools.responseString(response, JSON.toJSONString(ConstantCode.SUCCESS));
+        NodeMgrTools.responseString(response, JsonTools.toJSONString(ConstantCode.SUCCESS));
     }
 }

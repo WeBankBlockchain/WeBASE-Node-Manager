@@ -13,8 +13,7 @@
  */
 package com.webank.webase.node.mgr.node;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -86,11 +85,11 @@ public class NodeService {
      * query count of node.
      */
     public Integer countOfNode(NodeParam queryParam) throws NodeMgrException {
-        log.debug("start countOfNode queryParam:{}", JSON.toJSONString(queryParam));
+        log.debug("start countOfNode queryParam:{}", JsonTools.toJSONString(queryParam));
         try {
             Integer nodeCount = nodeMapper.getCount(queryParam);
             log.debug("end countOfNode nodeCount:{} queryParam:{}", nodeCount,
-                JSON.toJSONString(queryParam));
+                JsonTools.toJSONString(queryParam));
             return nodeCount;
         } catch (RuntimeException ex) {
             log.error("fail countOfNode . queryParam:{}", queryParam, ex);
@@ -103,12 +102,12 @@ public class NodeService {
      * query node list by page.
      */
     public List<TbNode> qureyNodeList(NodeParam queryParam) throws NodeMgrException {
-        log.debug("start qureyNodeList queryParam:{}", JSON.toJSONString(queryParam));
+        log.debug("start qureyNodeList queryParam:{}", JsonTools.toJSONString(queryParam));
 
         // query node list
         List<TbNode> listOfNode = nodeMapper.getList(queryParam);
 
-        log.debug("end qureyNodeList listOfNode:{}", JSON.toJSONString(listOfNode));
+        log.debug("end qureyNodeList listOfNode:{}", JsonTools.toJSONString(listOfNode));
         return listOfNode;
     }
 
@@ -135,7 +134,7 @@ public class NodeService {
         log.debug("start queryNode nodeId:{}", nodeId);
         try {
             TbNode nodeRow = nodeMapper.queryByNodeId(nodeId);
-            log.debug("end queryNode nodeId:{} TbNode:{}", nodeId, JSON.toJSONString(nodeRow));
+            log.debug("end queryNode nodeId:{} TbNode:{}", nodeId, JsonTools.toJSONString(nodeRow));
             return nodeRow;
         } catch (RuntimeException ex) {
             log.error("fail queryNode . nodeId:{}", nodeId, ex);
@@ -148,7 +147,7 @@ public class NodeService {
      * update node info.
      */
     public void updateNode(TbNode tbNode) throws NodeMgrException {
-        log.debug("start updateNodeInfo  param:{}", JSON.toJSONString(tbNode));
+        log.debug("start updateNodeInfo  param:{}", JsonTools.toJSONString(tbNode));
         Integer affectRow = 0;
         try {
 
@@ -169,7 +168,7 @@ public class NodeService {
      * query node info.
      */
     public TbNode queryNodeInfo(NodeParam nodeParam) {
-        log.debug("start queryNodeInfo nodeParam:{}", JSON.toJSONString(nodeParam));
+        log.debug("start queryNodeInfo nodeParam:{}", JsonTools.toJSONString(nodeParam));
         TbNode tbNode = nodeMapper.queryNodeInfo(nodeParam);
         log.debug("end queryNodeInfo result:{}", tbNode);
         return tbNode;
@@ -303,19 +302,24 @@ public class NodeService {
             log.debug("getPeerOfConsensusStatus is null: {}", consensusStatusJson);
             return null;
         }
-        JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
-        List<Object> dataIsList = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List)
-            .map(arr -> {
-                try {
-                    Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
-                    NodeMgrTools.object2JavaBean(obj, PeerOfConsensusStatus.class);
-                } catch (Exception e) {
-                    return null;
+        List jsonArr = JsonTools.toJavaObject(consensusStatusJson, List.class);
+        if (jsonArr == null) {
+            log.error("getPeerOfConsensusStatus error");
+            throw new NodeMgrException(ConstantCode.FAIL_PARSE_JSON);
+        }
+        List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
+        for (int i = 0; i < jsonArr.size(); i++ ) {
+            if (jsonArr.get(i) instanceof List) {
+                List<PeerOfConsensusStatus> tempList = JsonTools.toJavaObjectList(
+                    JsonTools.toJSONString(jsonArr.get(i)), PeerOfConsensusStatus.class);
+                if (tempList != null) {
+                    dataIsList.addAll(tempList);
+                } else {
+                    throw new NodeMgrException(ConstantCode.FAIL_PARSE_JSON);
                 }
-                return arr;
-            }).collect(Collectors.toList());
-        return JSONArray
-            .parseArray(JSON.toJSONString(dataIsList.get(0)), PeerOfConsensusStatus.class);
+            }
+        }
+        return dataIsList;
     }
 
     /**

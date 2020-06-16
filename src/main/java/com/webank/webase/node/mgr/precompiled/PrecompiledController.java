@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -58,7 +58,7 @@ public class PrecompiledController extends BaseController {
         Object result = precompiledService.listCnsService(groupId, contractNameAndVersion, pageSize, pageNumber);
 
         log.info("end listCns useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
     }
 
@@ -77,7 +77,7 @@ public class PrecompiledController extends BaseController {
         Object result = precompiledService.getNodeListService(groupId, pageSize, pageNumber);
 
         log.info("end getNodeList useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
     }
 
@@ -88,12 +88,12 @@ public class PrecompiledController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start nodeManage startTime:{} consensusHandle:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(consensusHandle));
+                JsonTools.toJSONString(consensusHandle));
 
         Object res = precompiledService.nodeManageService(consensusHandle);
 
         log.info("end nodeManage useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }
@@ -108,12 +108,12 @@ public class PrecompiledController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start crud startTime:{} crudHandle:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(crudHandle));
+                JsonTools.toJSONString(crudHandle));
 
         Object res = precompiledService.crudService(crudHandle);
 
         log.info("end crud useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }

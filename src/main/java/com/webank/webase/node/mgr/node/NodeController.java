@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.node;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -82,7 +82,7 @@ public class NodeController {
         }
 
         log.info("end queryNodeList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -108,7 +108,7 @@ public class NodeController {
         baseResponse.setData(tbNode);
 
         log.info("end addNodeInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -126,7 +126,7 @@ public class NodeController {
         baseResponse.setData(res);
 
         log.info("end getNodeIdList useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 

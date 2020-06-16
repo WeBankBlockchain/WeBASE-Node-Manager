@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.contract;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -66,7 +66,7 @@ public class ContractController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start saveContract startTime:{} contract:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(contract));
+            JsonTools.toJSONString(contract));
 
         // add contract row
         TbContract tbContract = contractService.saveContract(contract);
@@ -74,7 +74,7 @@ public class ContractController extends BaseController {
         baseResponse.setData(tbContract);
 
         log.info("end saveContract useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -96,7 +96,7 @@ public class ContractController extends BaseController {
         contractService.deleteContract(contractId, groupId);
 
         log.info("end deleteContract useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -110,7 +110,7 @@ public class ContractController extends BaseController {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start contractList. startTime:{} inputParam:{}",
-            startTime.toEpochMilli(), JSON.toJSONString(inputParam));
+            startTime.toEpochMilli(), JsonTools.toJSONString(inputParam));
 
         //param
         ContractParam queryParam = new ContractParam();
@@ -130,7 +130,7 @@ public class ContractController extends BaseController {
         }
 
         log.info("end contractList. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -150,7 +150,7 @@ public class ContractController extends BaseController {
         baseResponse.setData(contractRow);
 
         log.info("end queryContract useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -165,13 +165,13 @@ public class ContractController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryContract startTime:{} deployInputParam:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(deployInputParam));
+            JsonTools.toJSONString(deployInputParam));
 
         TbContract tbContract = contractService.deployContract(deployInputParam);
         baseResponse.setData(tbContract);
 
         log.info("end deployContract useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
 
         return baseResponse;
     }
@@ -190,12 +190,12 @@ public class ContractController extends BaseController {
         }
         Instant startTime = Instant.now();
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(param));
+            JsonTools.toJSONString(param));
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Object transRsp = contractService.sendTransaction(param);
         baseResponse.setData(transRsp);
         log.info("end sendTransaction useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
 
         return baseResponse;
     }
@@ -210,14 +210,14 @@ public class ContractController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start getByPartOfByecodebin startTime:{} groupId:{} queryParam:{}",
-            startTime.toEpochMilli(), JSON.toJSONString(queryParam));
+            startTime.toEpochMilli(), JsonTools.toJSONString(queryParam));
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         ContractParam param = new ContractParam();
         BeanUtils.copyProperties(queryParam, param);
         TbContract tbContract = contractService.queryContract(param);
         baseResponse.setData(tbContract);
         log.info("end getByPartOfByecodebin useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 }

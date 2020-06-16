@@ -13,7 +13,7 @@
  */
 package node.mgr.test.user;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
@@ -62,7 +62,7 @@ public class UserControllerTest {
         newUser.setGroupId(1);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/userInfo").
-            content(JSON.toJSONString(newUser)).
+            content(JsonTools.toJSONString(newUser)).
             contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
@@ -79,7 +79,7 @@ public class UserControllerTest {
         updateUser.setDescription("testtttttttttttttttttttttttt");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put("/user/userInfo").
-            content(JSON.toJSONString(updateUser)).
+            content(JsonTools.toJSONString(updateUser)).
             contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
@@ -99,7 +99,7 @@ public class UserControllerTest {
             "tettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweew");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/bind").
-            content(JSON.toJSONString(newUser)).
+            content(JsonTools.toJSONString(newUser)).
             contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.

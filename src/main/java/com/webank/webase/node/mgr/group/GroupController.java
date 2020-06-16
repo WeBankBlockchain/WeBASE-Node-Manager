@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.group;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -86,7 +86,7 @@ public class GroupController extends BaseController {
         baseResponse.setData(groupGeneral);
         log.info("end getGroupGeneral useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(baseResponse));
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -112,7 +112,7 @@ public class GroupController extends BaseController {
 
         log.info("end getAllGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(pagesponse));
+                JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -149,7 +149,7 @@ public class GroupController extends BaseController {
 
         log.info("end getAllGroupIncludeInvalidGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(pagesponse));
+                JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -175,7 +175,7 @@ public class GroupController extends BaseController {
 
         log.info("end getAllGroupOfStatus useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(response));
+                JsonTools.toJSONString(response));
         return response;
     }
 
@@ -194,7 +194,7 @@ public class GroupController extends BaseController {
 
         log.info("end getAllGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(pagesponse));
+                JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -254,7 +254,7 @@ public class GroupController extends BaseController {
         Object groupHandleResult = groupService.operateGroup(nodeId, groupId, type);
         log.info("end operateGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(groupHandleResult));
+                JsonTools.toJSONString(groupHandleResult));
         return groupHandleResult;
     }
 
@@ -274,7 +274,7 @@ public class GroupController extends BaseController {
         baseResponse.setData(resList);
         log.info("end getGroupStatusMap useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(baseResponse));
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -294,7 +294,7 @@ public class GroupController extends BaseController {
         baseResponse.setData(operateResultList);
         log.info("end batchStartGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(baseResponse));
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -309,7 +309,7 @@ public class GroupController extends BaseController {
         groupService.resetGroupList();
         log.info("end updateGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(baseResponse));
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -324,7 +324,7 @@ public class GroupController extends BaseController {
         groupService.removeAllDataByGroupId(groupId);
         log.warn("end deleteGroupData useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JSON.toJSONString(baseResponse));
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 }

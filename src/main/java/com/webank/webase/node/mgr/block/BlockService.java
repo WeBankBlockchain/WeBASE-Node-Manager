@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -183,7 +183,7 @@ public class BlockService {
      */
     @Transactional
     public void addBlockInfo(TbBlock tbBlock, int groupId) throws NodeMgrException {
-        log.debug("start addBlockInfo tbBlock:{}", JSON.toJSONString(tbBlock));
+        log.debug("start addBlockInfo tbBlock:{}", JsonTools.toJSONString(tbBlock));
         String tableName = TableName.BLOCK.getTableName(groupId);
         //check newBLock == dbMaxBLock +1
         BigInteger dbMaxBLock = blockmapper.getLatestBlockNumber(tableName);
@@ -204,7 +204,7 @@ public class BlockService {
     public List<TbBlock> queryBlockList(int groupId, BlockListParam queryParam)
         throws NodeMgrException {
         log.debug("start queryBlockList groupId:{},queryParam:{}", groupId,
-            JSON.toJSONString(queryParam));
+            JsonTools.toJSONString(queryParam));
 
         List<TbBlock> listOfBlock = blockmapper
             .getList(TableName.BLOCK.getTableName(groupId), queryParam);

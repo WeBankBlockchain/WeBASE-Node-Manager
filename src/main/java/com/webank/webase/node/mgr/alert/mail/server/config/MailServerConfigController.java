@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.mail.server.config;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -83,7 +83,7 @@ public class MailServerConfigController {
     public Object updateMailServerConfig(@RequestBody ReqMailServerConfigParam param) {
         Instant startTime = Instant.now();
         log.info("start updateMailServerConfig. startTime:{} ReqMailServerConfigParam:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(param));
+                startTime.toEpochMilli(), JsonTools.toJSONString(param));
         if(param.getServerId() == null) {
             log.debug("updateMailServerConfig, error:{} ",
                     ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
@@ -112,7 +112,7 @@ public class MailServerConfigController {
 //    public Object saveMailServerConfig(@RequestBody ReqMailServerConfigParam param) {
 //        Instant startTime = Instant.now();
 //        log.info("start saveMailServerConfig. startTime:{} ReqMailServerConfigParam:{}",
-//                startTime.toEpochMilli(), JSON.toJSONString(param));
+//                startTime.toEpochMilli(), JsonTools.toJSONString(param));
 //        try{
 //            mailServerConfigService.saveMailServerConfig(param);
 //            log.info("end saveMailServerConfig. useTime:{}",
