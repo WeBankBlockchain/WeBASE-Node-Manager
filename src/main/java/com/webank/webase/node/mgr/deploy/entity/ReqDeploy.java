@@ -31,6 +31,9 @@ public class ReqDeploy {
     private int tagId;
 
     @NotBlank
+    private String webaseSignAddr;
+
+    @NotBlank
     private String chainName = "default_chain";
 
     @NotBlank

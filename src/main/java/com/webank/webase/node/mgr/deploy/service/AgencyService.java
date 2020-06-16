@@ -37,7 +37,10 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
+import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
+import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
+import com.webank.webase.node.mgr.front.FrontService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -50,8 +53,12 @@ import lombok.extern.log4j.Log4j2;
 public class AgencyService {
 
     @Autowired private TbAgencyMapper tbAgencyMapper;
+    @Autowired private TbHostMapper tbHostMapper;
+
     @Autowired private DeployShellService deployShellService;
     @Autowired private PathService pathService;
+    @Autowired private HostService hostService;
+    @Autowired private FrontService frontService;
 
     /**
      * @param chainId
@@ -137,4 +144,49 @@ public class AgencyService {
         return tbAgencyList;
     }
 
+    /**
+     *
+     * @param deleteAgency
+     * @param agencyId
+     */
+    @Transactional
+    public void deleteAgencyWithNoNode(boolean deleteAgency, int agencyId){
+        TbAgency agency = this.tbAgencyMapper.selectByPrimaryKey(agencyId);
+        if (agency == null){
+            log.warn("Agency:[{}] not exists.", agencyId);
+            return;
+        }
+
+        List<TbHost> hostList = this.tbHostMapper.selectByAgencyId(agencyId);
+        if (CollectionUtils.isEmpty(hostList)
+                && deleteAgency) {
+            this.tbAgencyMapper.deleteByPrimaryKey(agencyId);
+            log.warn("Delete agency:[{}].", agencyId);
+        }
+    }
+
+    /**
+     *
+     */
+    @Transactional
+    public void deleteByChainId(int chainId){
+        log.info("Delete agency data by chain id:[{}].", chainId);
+        // select agency list
+        List<TbAgency> tbAgencyList = tbAgencyMapper.selectByChainId(chainId);
+
+        if (CollectionUtils.isEmpty(tbAgencyList)) {
+            log.warn("No agency in chain:[{}]", chainId);
+            return;
+        }
+
+        for (TbAgency agency : tbAgencyList) {
+            // delete front
+            this.frontService.deleteFrontByAgencyId(agency.getId());
+
+            // delete host
+            this.hostService.deleteHostByAgencyId(agency.getId());
+        }
+
+        this.tbAgencyMapper.deleteByChainId(chainId);
+    }
 }

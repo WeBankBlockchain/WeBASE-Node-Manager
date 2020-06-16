@@ -40,7 +40,7 @@ public class NodeConfig {
     private int jsonrpcPort;
     private int p2pPort;
     private int channelPort;
-    private Set<Integer> groupIdList;
+    private Set<Integer> groupIdSet;
 
     /**
      * Read config value from node config files.
@@ -49,21 +49,26 @@ public class NodeConfig {
      * @return
      * @throws IOException
      */
-    public static NodeConfig read(Path nodePath) throws IOException {
+    public static NodeConfig read(Path nodePath)  {
         NodeConfig config = new NodeConfig();
-        config.nodeId= PathService.getNodeId(nodePath);
         try {
-            config.hostIndex = Integer.parseInt(nodePath.getFileName().toString().replaceAll("node", ""));
+            config.nodeId= PathService.getNodeId(nodePath);
+            try {
+                config.hostIndex = Integer.parseInt(nodePath.getFileName().toString().replaceAll("node", ""));
+            } catch (Exception e) {
+                throw new NodeMgrException(ConstantCode.PARSE_HOST_INDEX_ERROR);
+            }
+
+            Triple<Integer, Integer, Integer> nodePorts = NodeConfig.getNodePorts(nodePath);
+            config.jsonrpcPort = nodePorts.getLeft();
+            config.channelPort = nodePorts.getMiddle();
+            config.p2pPort = nodePorts.getRight();
+
+            config.groupIdSet = PathService.getNodeGroupIdSet(nodePath);
         } catch (Exception e) {
-            throw new NodeMgrException(ConstantCode.PARSE_HOST_INDEX_ERROR);
+            log.error("Read delete node:[{}] config error", nodePath.toAbsolutePath().toString(), e);
+            throw new NodeMgrException(ConstantCode.READ_NODE_CONFIG_ERROR, e);
         }
-
-        Triple<Integer, Integer, Integer> nodePorts = NodeConfig.getNodePorts(nodePath);
-        config.jsonrpcPort = nodePorts.getLeft();
-        config.channelPort = nodePorts.getMiddle();
-        config.p2pPort = nodePorts.getRight();
-
-        config.groupIdList = PathService.getNodeGroupIdSet(nodePath);
 
         return config;
     }
@@ -136,5 +141,14 @@ public class NodeConfig {
         int jsonrpcPort = Integer.parseInt(ini.get("rpc", "jsonrpc_listen_port"));
         int p2pPort = Integer.parseInt(ini.get("p2p", "listen_port"));
         return Triple.of(jsonrpcPort, channelPort, p2pPort);
+    }
+
+    /**
+     *
+     * @param nodePath
+     * @return
+     */
+    public static Set<Integer> getGroupIdSet(Path nodePath ){
+        return NodeConfig.read(nodePath).getGroupIdSet();
     }
 }

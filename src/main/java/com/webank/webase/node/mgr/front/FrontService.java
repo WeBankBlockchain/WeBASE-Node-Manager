@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,6 +53,7 @@ import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
@@ -64,6 +66,7 @@ import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
@@ -91,6 +94,9 @@ public class FrontService {
     private TbHostMapper tbHostMapper;
     @Autowired
     private NodeMapper nodeMapper;
+    @Autowired
+    private FrontGroupMapMapper frontGroupMapMapper;
+
     @Autowired
     private NodeService nodeService;
     @Autowired
@@ -303,6 +309,7 @@ public class FrontService {
     /**
      * remove front
      */
+    @Transactional
     public void removeFront(int frontId) {
         //check frontId
         FrontParam param = new FrontParam();
@@ -479,11 +486,13 @@ public class FrontService {
             this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
 
             // generate front application.yml
+            // TODO. merge to one method
             String applicationYml = ThymeleafUtil.generate(
                     ThymeleafUtil.FRONT_APLLICATION_YML,
                     Pair.of("encryptType", encryptType),
                     Pair.of("channelPort", channelPort),
-                    Pair.of("frontPort", frontPort)
+                    Pair.of("frontPort", frontPort),
+                    Pair.of("webaseSignAddr", chain.getWebaseSignAddr())
             );
             Files.write(nodeRoot.resolve("application.yml"), applicationYml.getBytes(), StandardOpenOption.CREATE);
         }
@@ -497,7 +506,7 @@ public class FrontService {
      * @param groupId
      * @throws IOException
      */
-    public void generateAllNodeConfigIni(TbChain chain, int groupId) throws IOException {
+    public void updateNodeConfigIniByGroupId(TbChain chain, int groupId) throws IOException {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
@@ -523,6 +532,22 @@ public class FrontService {
 
         }
 
+        // scp to remote
+        this.scpNodeConfigIni(chain,groupId);
+    }
+
+    /**
+     *
+     * @param chain
+     * @param groupIdList
+     */
+    public void updateNodeConfigIniByGroupList(TbChain chain,
+                                               Set<Integer> groupIdList) throws IOException {
+        // update config.ini of related nodes
+        for (Integer groupId : CollectionUtils.emptyIfNull(groupIdList)) {
+            // update node config.ini in group
+            this.updateNodeConfigIniByGroupId(chain, groupId);
+        }
     }
 
     /**
@@ -559,7 +584,7 @@ public class FrontService {
      * @return
      */
     @Transactional
-    public boolean start(String nodeId){
+    public void start(String nodeId){
         // get front
         TbFront front = this.getByNodeId(nodeId);
         if (front == null){
@@ -579,17 +604,20 @@ public class FrontService {
 
         if (startResult){
             this.updateStatus(front.getFrontId(),FrontStatusEnum.RUNNING);
+        }else{
+            throw new NodeMgrException(ConstantCode.START_NODE_ERROR);
         }
-        return startResult;
     }
 
     /**
      *
-     * @param chain
+     * @param chainId
+     * @param newImageTag
+     * @return
      */
     @Transactional
-    public boolean upgrade(TbChain chain) {
-        boolean updateResult = this.frontMapper.updateImageTagByChainId(chain.getId(), chain.getVersion(), LocalDateTime.now()) > 0;
+    public boolean upgrade(int chainId,String newImageTag) {
+        boolean updateResult = this.frontMapper.updateImageTagByChainId(chainId, newImageTag, LocalDateTime.now()) > 0;
         return updateResult;
     }
 
@@ -600,8 +628,8 @@ public class FrontService {
      * @return
      */
     @Transactional
-    public boolean stopNode(String nodeId){
-        return ((FrontService) AopContext.currentProxy()).stopNode(null,nodeId);
+    public void stopNode(String nodeId){
+        ((FrontService) AopContext.currentProxy()).stopNode(null,nodeId);
     }
 
     /**
@@ -611,12 +639,39 @@ public class FrontService {
      * @return
      */
     @Transactional
-    public boolean stopNode(TbHost host, String nodeId){
+    public void stopNode(TbHost host, String nodeId){
         // get front
         TbFront front = this.getByNodeId(nodeId);
         if (front == null){
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
+
+        if ( ! FrontStatusEnum.isRunning(front.getStatus())){
+            log.warn("Node:[{}:{}] is already stopped.",front.getFrontIp(),front.getHostIndex());
+            return ;
+        }
+
+        // select node list
+        List<TbNode> nodeList = this.nodeMapper.selectByNodeId(nodeId);
+
+        // node is removed and doesn't belong to any group.
+        boolean nodeRemovable = CollectionUtils.isEmpty(nodeList);
+
+        if (! nodeRemovable) {
+            // node belongs to some groups, check if it is the last one of each group.
+            Set<Integer> groupIdSet = nodeList.stream().map(TbNode::getGroupId)
+                    .collect(Collectors.toSet());
+
+            for (Integer groupId : groupIdSet){
+                int nodeCountOfGroup = CollectionUtils.size(this.nodeMapper.selectByGroupId(groupId));
+                if (nodeCountOfGroup != 1){ // group has another node.
+                    throw new NodeMgrException(ConstantCode.NODE_NEED_REMOVE_FROM_GROUP_ERROR.attach(groupId));
+                }
+            }
+        }
+        // Here, tow conditions:
+        //  1. node is not a sealer or an observer
+        //  2. node is is last node it's each group
 
         TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
@@ -628,27 +683,44 @@ public class FrontService {
 
         if (stopResult){
             ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
+        }else{
+            throw new NodeMgrException(ConstantCode.STOP_NODE_ERROR);
         }
-        return stopResult;
-
     }
 
+    @Transactional
+    public void deleteFrontByAgencyId(int agencyId){
+        log.info("Delete front data by chain id:[{}].", agencyId);
 
-    /**
-     *
-     * @param nodeId
-     * @return  if front is in group, return true;
-     */
-    public boolean checkFrontInGroup(String nodeId){
-
-        TbFront front = this.getByNodeId(nodeId);
-        if (front == null){
-            throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
+        // select host, front, group in agency
+        List<TbFront> frontList = frontMapper.selectByAgencyId(agencyId);
+        if (CollectionUtils.isEmpty(frontList)) {
+            log.warn("No front in agency:[{}]", agencyId);
+            return ;
         }
-        List<String> groupIdList = this.frontInterface.getGroupListFromSpecificFront(front.getFrontIp(), front.getFrontPort());
 
-        // if front has group id, return true.
-        return CollectionUtils.isNotEmpty(groupIdList);
+        for (TbFront front : frontList) {
+            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+
+            // stop node
+            try {
+                this.stopNode(host,front.getNodeId());
+            } catch (NodeMgrException e) {
+                log.warn("Stop node:[] error",e);
+                continue;
+            }
+
+            // move chain config files
+            ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),front.getChainName());
+
+            log.info("Delete node data by node id:[{}].", front.getNodeId());
+            this.nodeMapper.deleteByNodeId(front.getNodeId());
+
+            log.info("Delete front group map data by front id:[{}].", front.getFrontId());
+            this.frontGroupMapMapper.removeByFrontId(front.getFrontId());
+        }
+
+        // delete front in batch
+        this.frontMapper.deleteByAgencyId(agencyId);
     }
-
 }

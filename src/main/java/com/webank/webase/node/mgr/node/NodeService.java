@@ -35,11 +35,9 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
-import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -69,12 +67,6 @@ public class NodeService {
      */
     @Autowired
     private FrontService frontService;
-    @Autowired
-    private PathService pathService;
-    @Autowired
-    private DeployShellService deployShellService;
-    @Autowired
-    private ConstantProperties constant;
 
     // interval of check node status
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 7500L;
@@ -149,22 +141,6 @@ public class NodeService {
     public List<TbNode> getAll() {
         return qureyNodeList(new NodeParam());
     }
-
-    /**
-     * query node info.
-     */
-//    public TbNode queryByNodeId(String nodeId) throws NodeMgrException {
-//        log.debug("start queryNode nodeId:{}", nodeId);
-//        try {
-//            TbNode nodeRow = nodeMapper.queryByNodeId(nodeId);
-//            log.debug("end queryNode nodeId:{} TbNode:{}", nodeId, JSON.toJSONString(nodeRow));
-//            return nodeRow;
-//        } catch (RuntimeException ex) {
-//            log.error("fail queryNode . nodeId:{}", nodeId, ex);
-//            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-//        }
-//    }
-
 
     /**
      * update node info.
@@ -462,21 +438,20 @@ public class NodeService {
      * @param hostIndex
      * @param nodeId
      */
-    public static void mvNodeOnRemote(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId) {
+    public static void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId) {
         // create /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss as a parent
         String chainDeleteRootOnHost = PathService.getChainDeletedRootOnHost(rooDirOnHost, chainName);
         SshTools.createDirOnRemote(ip, chainDeleteRootOnHost);
 
-        // like /opt/fisco/default_chain
+        // e.g. /opt/fisco/default_chain
         String chainRootOnHost = PathService.getChainRootOnHost(rooDirOnHost, chainName);
-        // like /opt/fisco/default_chain/node[x]
-        String src_nodeRootOnHost = PathService.getNodeRootOnHost(chainDeleteRootOnHost, hostIndex);
+        // e.g. /opt/fisco/default_chain/node[x]
+        String src_nodeRootOnHost = PathService.getNodeRootOnHost(chainRootOnHost, hostIndex);
 
         // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss/[nodeid(128)]
         String dst_nodeDeletedRootOnHost =
                 PathService.getNodeDeletedRootOnHost(rooDirOnHost, chainName, nodeId);
         // move
         SshTools.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
-
     }
 }

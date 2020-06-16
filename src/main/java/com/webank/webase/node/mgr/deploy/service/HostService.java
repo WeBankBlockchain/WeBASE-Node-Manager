@@ -447,4 +447,35 @@ public class HostService {
         return ((HostService) AopContext.currentProxy()).insert(agencyId, agencyName, ip, rootDirOnHost);
     }
 
+    /**
+     *
+     * @param deleteHost
+     * @param hostId
+     */
+    @Transactional
+    public void deleteHostWithNoNode(boolean deleteHost, int hostId){
+        TbHost host = this.tbHostMapper.selectByPrimaryKey(hostId);
+        if (host == null){
+            log.warn("Host:[{}] not exists.",hostId);
+            return;
+        }
+
+        List<TbFront> frontList = this.frontMapper.selectByHostId(hostId);
+        if (CollectionUtils.isEmpty(frontList)
+                && deleteHost) {
+            this.tbHostMapper.deleteByPrimaryKey(hostId);
+            log.warn("Delete host:[{}].", hostId);
+        }
+    }
+
+    /**
+     *
+     * @param agencyId
+     */
+    @Transactional
+    public void deleteHostByAgencyId(int agencyId){
+        // delete host in batch
+        log.info("Delete host data by agency id:[{}].", agencyId);
+        this.tbHostMapper.deleteByAgencyId(agencyId);
+    }
 }
