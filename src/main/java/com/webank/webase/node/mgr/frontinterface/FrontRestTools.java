@@ -14,8 +14,8 @@
 
 package com.webank.webase.node.mgr.frontinterface;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -195,7 +195,7 @@ public class FrontRestTools {
         failInfo.setLatestTime(Instant.now());
         failInfo.setFailCount(failInfo.getFailCount() + 1);
         failRequestMap.put(key, failInfo);
-        log.info("the latest failInfo:{}", JSON.toJSONString(failRequestMap));
+        log.info("the latest failInfo:{}", JsonTools.toJSONString(failRequestMap));
     }
 
 
@@ -211,7 +211,7 @@ public class FrontRestTools {
      * delete key of map.
      */
     private static void deleteKeyOfMap(Map<String, FailInfo> map, String rkey) {
-        log.info("start deleteKeyOfMap. rkey:{} map:{}", rkey, JSON.toJSONString(map));
+        log.info("start deleteKeyOfMap. rkey:{} map:{}", rkey, JsonTools.toJSONString(map));
         Iterator<String> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             String key = iter.next();
@@ -220,7 +220,7 @@ public class FrontRestTools {
                 iter.remove();
             }
         }
-        log.info("end deleteKeyOfMap. rkey:{} map:{}", rkey, JSON.toJSONString(map));
+        log.info("end deleteKeyOfMap. rkey:{} map:{}", rkey, JsonTools.toJSONString(map));
     }
 
 
@@ -229,11 +229,11 @@ public class FrontRestTools {
      */
     private FrontUrlInfo buildFrontUrl(ArrayList<FrontGroup> list, String uri, HttpMethod httpMethod) {
         Collections.shuffle(list);//random one
-        log.info("====================map list:{}",JSON.toJSONString(list));
+        log.info("====================map list:{}",JsonTools.toJSONString(list));
         Iterator<FrontGroup> iterator = list.iterator();
         while (iterator.hasNext()) {
             FrontGroup frontGroup = iterator.next();
-            log.info("============frontGroup:{}",JSON.toJSONString(frontGroup));
+            log.info("============frontGroup:{}",JsonTools.toJSONString(frontGroup));
             FrontUrlInfo frontUrlInfo = new FrontUrlInfo();
             frontUrlInfo.setFrontId(frontGroup.getFrontId());
 
@@ -263,7 +263,7 @@ public class FrontRestTools {
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         String paramStr = null;
         if (Objects.nonNull(param)) {
-            paramStr = JSON.toJSONString(param);
+            paramStr = JsonTools.toJSONString(param);
         }
         HttpEntity requestEntity = new HttpEntity(paramStr, headers);
         return requestEntity;
@@ -349,14 +349,16 @@ public class FrontRestTools {
                 log.info("continue next front", ex);
                 continue;
             } catch (HttpStatusCodeException ex) {
-                JSONObject error = JSONObject.parseObject(ex.getResponseBodyAsString());
-                log.error("http request fail. error:{}", JSON.toJSONString(error));
-                if (error.containsKey("code") && error.containsKey("errorMessage")) {
-                    throw new NodeMgrException(error.getInteger("code"),
-                            error.getString("errorMessage"), ex);
+                JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
+                log.error("http request fail. error:{}", JsonTools.toJSONString(error));
+                try {
+                    int code = error.get("code").intValue();
+                    String errorMessage = error.get("errorMessage").asText();
+                    frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
+                    throw new NodeMgrException(code, errorMessage);
+                } catch (NullPointerException e) {
+                    throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
                 }
-                frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
-                throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), error.getString("message"));
             }
         }
         return null;

@@ -13,7 +13,7 @@
  */
 package node.mgr.test.frontgroupmap;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
@@ -38,14 +38,14 @@ public class FrontGroupMapServiceTest {
         param.setGroupId(2);
         List<FrontGroup> list = frontGroupMapService.getList(param);
         assert (list != null);
-        System.out.println(JSON.toJSONString(list));
+        System.out.println(JsonTools.toJSONString(list));
     }
 
     @Test
     public void listByGroupIdTest() {
         List<FrontGroup> list = frontGroupMapService.listByGroupId(2);
         assert (list != null);
-        System.out.println(JSON.toJSONString(list));
+        System.out.println(JsonTools.toJSONString(list));
     }
 
     @Test

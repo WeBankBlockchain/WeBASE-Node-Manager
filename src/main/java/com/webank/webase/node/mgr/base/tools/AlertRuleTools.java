@@ -16,7 +16,8 @@
 
 package com.webank.webase.node.mgr.base.tools;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import lombok.extern.log4j.Log4j2;
@@ -26,6 +27,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.fisco.bcos.web3j.tx.txdecode.ConstantCode;
 
 @Log4j2
 public class AlertRuleTools {
@@ -79,7 +81,10 @@ public class AlertRuleTools {
         List<String> contentParamList = new ArrayList<>();
         log.debug("processMailContent contentTargetParams:{}", contentTargetParams);
         try{
-            contentParamList = (List<String>) JSON.parse(contentTargetParams);
+            contentParamList = JsonTools.toJavaObjectList(contentTargetParams, String.class);
+            if (contentParamList == null) {
+                log.error("parse json error");
+            }
         } catch (Exception e) {
             log.error("processMailContent parse contentParam to List error contentParams:{}, exception:{}",
                     contentTargetParams, e);
@@ -108,7 +113,10 @@ public class AlertRuleTools {
         List<String> contentParamList = new ArrayList<>();
         log.debug("processMailContent contentTargetParams:{}", contentTargetParams);
         try{
-            contentParamList = (List<String>) JSON.parse(contentTargetParams);
+            contentParamList = JsonTools.toJavaObjectList(contentTargetParams, String.class);
+            if (contentParamList == null) {
+                log.error("parse json error");
+            }
         } catch (Exception e) {
             log.error("processMailContent parse contentParam to List error contentParams:{}, exception:{}",
                     contentTargetParams, e);

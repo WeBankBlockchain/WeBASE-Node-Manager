@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.method;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -54,12 +54,12 @@ public class MethodController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addMethod. startTime:{} newMethodInputParam:{}",
-            startTime.toEpochMilli(), JSON.toJSONString(newMethodInputParam));
+            startTime.toEpochMilli(), JsonTools.toJSONString(newMethodInputParam));
 
         methodService.saveMethod(newMethodInputParam);
 
         log.info("end addMethod. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -78,7 +78,7 @@ public class MethodController extends BaseController {
         baseResponse.setData(tbMethod);
 
         log.info("end addMethodInfo. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 }

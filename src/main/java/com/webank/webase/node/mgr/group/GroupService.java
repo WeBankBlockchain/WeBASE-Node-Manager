@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.group;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
@@ -117,7 +117,7 @@ public class GroupService {
         try {
             List<TbGroup> groupList = groupMapper.getList(groupStatus);
 
-            log.debug("end getGroupList groupList:{}", JSON.toJSONString(groupList));
+            log.debug("end getGroupList groupList:{}", JsonTools.toJSONString(groupList));
             return groupList;
         } catch (RuntimeException ex) {
             log.error("fail getGroupList", ex);
@@ -166,7 +166,7 @@ public class GroupService {
             List<StatisticalGroupTransInfo> listStatisticalTrans = groupMapper
                     .queryLatestStatisticalTrans();
             log.debug("end queryLatestStatisticalTrans listStatisticalTrans:{}",
-                    JSON.toJSONString(listStatisticalTrans));
+                    JsonTools.toJSONString(listStatisticalTrans));
             return listStatisticalTrans;
         } catch (RuntimeException ex) {
             log.error("fail queryLatestStatisticalTrans", ex);
@@ -377,7 +377,7 @@ public class GroupService {
                 }
 
             } catch (Exception ex) {
-                log.info("fail check group. localGroup:{}", JSON.toJSONString(localGroup));
+                log.info("fail check group. localGroup:{}", JsonTools.toJSONString(localGroup));
                 continue;
             }
 
@@ -834,7 +834,7 @@ public class GroupService {
                 new TbGroup(groupId, groupName, nodeCount, description,
                         groupType, groupStatus);
         tbGroup.setGroupTimestamp(timestamp.toString(10));
-        tbGroup.setNodeIdList(JSON.toJSONString(nodeIdList));
+        tbGroup.setNodeIdList(JsonTools.toJSONString(nodeIdList));
         groupMapper.save(tbGroup);
         // create table by group id
         tableService.newTableByGroupId(groupId);

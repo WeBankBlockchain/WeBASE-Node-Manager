@@ -14,7 +14,7 @@
 package com.webank.webase.node.mgr.front;
 
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -61,12 +61,12 @@ public class FrontController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start newFront startTime:{} frontInfo:{}",
-            startTime.toEpochMilli(), JSON.toJSONString(frontInfo));
+            startTime.toEpochMilli(), JsonTools.toJSONString(frontInfo));
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         TbFront tbFront = frontService.newFront(frontInfo);
         baseResponse.setData(tbFront);
         log.info("end newFront useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -98,7 +98,7 @@ public class FrontController extends BaseController {
         }
 
         log.info("end queryFrontList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -116,7 +116,7 @@ public class FrontController extends BaseController {
         frontService.removeFront(frontId);
 
         log.info("end removeFront useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 }
