@@ -52,7 +52,7 @@ public class TransHashServiceTest {
     }
 
     /**
-     * TODO optimize getCount's time
+     * optimize getCount's time: use tx_id to record count
      */
     @Test
     public void getCountTimeCost() {

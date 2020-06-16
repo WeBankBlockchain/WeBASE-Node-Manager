@@ -89,12 +89,11 @@ public class FrontInterfaceService {
                 log.error("deserialize http response error");
                 throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
             }
-            // todo check json asText
             try {
                 int code = error.get("code").intValue();
                 String errorMessage = error.get("errorMessage").asText();
                 throw new NodeMgrException(code, errorMessage);
-            } catch (Exception e) {
+            } catch (NullPointerException e) {
                 throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
             }
         }

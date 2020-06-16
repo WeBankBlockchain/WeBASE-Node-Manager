@@ -36,7 +36,6 @@ public class LoginFailHandler implements AuthenticationFailureHandler {
         String errorMsg = ex.getMessage();
         RetCode retCode = ConstantCode.PASSWORD_ERROR; // default password fail
         if (errorMsg.contains("code")) {
-            // todo check json
             retCode = JsonTools.toJavaObject(errorMsg, RetCode.class);
         }
 
