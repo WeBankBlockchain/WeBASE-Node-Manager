@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * Jackson Util
+ * edit by marsli from hujkay
+ */
 @Slf4j
 public class JsonTools {
     // private static final ObjectMapper mapper = new ObjectMapper();
