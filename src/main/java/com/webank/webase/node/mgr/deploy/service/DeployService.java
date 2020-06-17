@@ -15,19 +15,12 @@
 package com.webank.webase.node.mgr.deploy.service;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -35,19 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
-import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
-import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
-import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
@@ -115,144 +100,12 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
 
-        log.info("Check chainName exists....");
-        TbChain chain = tbChainMapper.getByChainName(chainName);
-        if (chain != null) {
-            throw new NodeMgrException(ConstantCode.CHAIN_NAME_EXISTS_ERROR);
-        }
-
-        // check tagId existed
-        TbConfig imageConfig = tbConfigMapper.selectByPrimaryKey(tagId);
-        if (imageConfig == null
-                || StringUtils.isBlank(imageConfig.getConfigValue())) {
-            throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
-        }
-
         // TODO. check WeBASE Sign accessible
 
-        // validate ipConf config
-        log.info("Parse ipConf content....");
-        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf);
+        this.chainService.generateChainConfig(chainName,ipConf,tagId,rootDirOnHost,webaseSignAddr);
 
-        byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
-                EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
-
-        try { //TODO try太大，在分号处注明起始与结束，或对try内容封装
-            // generate nodes config
-            ExecuteResult buildChainResult = deployShellService.execBuildChain(encryptType, ipConf, chainName);
-            if (buildChainResult.failed()) {
-                return Pair.of(ConstantCode.EXEC_BUILD_CHAIN_ERROR, buildChainResult.getExecuteOut());
-            }
-
-            // insert chain
-            final TbChain newChain = this.chainService.insert(chainName, chainName,
-                    imageConfig.getConfigValue(), encryptType,
-                    ChainStatusEnum.INITIALIZED, rootDirOnHost, RunTypeEnum.DOCKER, webaseSignAddr);
-            // TODO 提高代码可读性
-            Map<String, Integer> agencyIdMap = new HashMap<>();
-            Map<String, Integer> hostIdMap = new HashMap<>();
-            Map<String, Set<Integer>> hostGroupListMap = new HashMap<>();
-            Map<String, Pair<String, Integer>> hostAgencyMap = new HashMap<>();
-            Map<Integer, AtomicInteger> groupCountMap = new HashMap<>();
-
-            ipConfigParseList.forEach((config) -> {
-                // insert agency
-                if (!agencyIdMap.containsKey(config.getAgencyName())) {
-                    TbAgency agency = agencyService.insert(config.getAgencyName(), config.getAgencyName(),
-                            newChain.getId(), newChain.getChainName());
-                    agencyIdMap.put(config.getAgencyName(), agency.getId());
-                }
-                hostAgencyMap.put(config.getIp(),
-                        Pair.of(config.getAgencyName(), agencyIdMap.get(config.getAgencyName())));
-
-                // insert host
-                if (!hostIdMap.containsKey(config.getIp())) {
-                    TbHost host = hostService.insert(agencyIdMap.get(config.getAgencyName()),
-                            config.getAgencyName(), config.getIp(), rootDirOnHost);
-                    hostIdMap.put(config.getIp(), host.getId());
-                }
-
-                // insert group
-                // sum node num in group
-                if (hostGroupListMap.containsKey(config.getIp())) {
-                    hostGroupListMap.get(config.getIp()).addAll(config.getGroupIdSet());
-                } else {
-                    hostGroupListMap.put(config.getIp(), config.getGroupIdSet());
-                }
-                config.getGroupIdSet().forEach((groupId) -> {
-                    if (groupCountMap.containsKey(groupId)) {
-                        groupCountMap.get(groupId).addAndGet(config.getNum());
-                    } else {
-                        // TODO. why insert ignore???
-                        // save group default status maintaining
-                        groupService.saveGroup(groupId, config.getNum(),
-                                "deploy", GroupType.DEPLOY, GroupStatus.MAINTAINING,
-                                newChain.getId(), newChain.getChainName());
-                        groupCountMap.put(groupId, new AtomicInteger(config.getNum()));
-                    }
-                });
-            });
-
-            // insert nodes, there may be multiple nodes on a host.
-            for (String ip : hostIdMap.keySet()) {
-                List<Path> nodePathList = pathService.listHostNodesPath(newChain.getChainName(), ip);
-                Pair<String, Integer> agency = hostAgencyMap.get(ip);
-                for (Path nodePath : nodePathList) {
-                    // get node properties
-                    NodeConfig nodeConfig = NodeConfig.read(nodePath);
-
-                    // frontPort = 5002 + indexOnHost(0,1,2,3...)
-                    int frontPort = constant.getDefaultFrontPort() + nodeConfig.getHostIndex();
-
-                    // TODO. pass object
-                    TbFront front = this.frontService.insert(nodeConfig.getNodeId(), ip, frontPort, agency.getKey(),
-                            imageConfig.getConfigValue(), RunTypeEnum.DOCKER,
-                            agency.getValue(), hostIdMap.get(ip),
-                            nodeConfig.getHostIndex(), imageConfig.getConfigValue(),
-                            DockerClientService.getContainerName(rootDirOnHost, chainName, nodeConfig.getHostIndex()),
-                            nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
-                            nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
-
-                    hostGroupListMap.get(ip).forEach((groupId) -> {
-                        String nodeName = NodeService.getNodeName(groupId, nodeConfig.getNodeId());
-                        this.nodeService.insert(nodeConfig.getNodeId(), nodeName,
-                                groupId, ip, nodeConfig.getP2pPort(),
-                                nodeName, NodeStatusEnum.DEAD);
-
-                        this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
-                    });
-
-                    // generate front application.yml
-                    String applicationYml = ThymeleafUtil.generate(
-                            ThymeleafUtil.FRONT_APLLICATION_YML,
-                            Pair.of("encryptType", encryptType),
-                            Pair.of("channelPort", nodeConfig.getChannelPort()),
-                            Pair.of("frontPort", frontPort),
-                            Pair.of("webaseSignAddr", webaseSignAddr)
-                    );
-                    Files.write(nodePath.resolve("application.yml"), applicationYml.getBytes(), StandardOpenOption.CREATE);
-                }
-            }
-
-            // update group node count todo 是否删除？因为上面save group时已设置了group nodeCount
-            groupCountMap.forEach((groupId, nodeCount) -> {
-                groupService.updateGroupNodeCount(groupId, nodeCount.get());
-            });
-
-            // init host env
-            this.hostService.initHostList(newChain.getChainName());
-
-            return Pair.of(ConstantCode.SUCCESS, buildChainResult.getExecuteOut());
-        } catch (Exception e) {
-            try {
-                pathService.deleteChain(chainName);
-            } catch (IOException ex) {
-                log.error("Delete chain:[{}] node config ERROR while exception occurred during deploy option."
-                        , chainName, ex);
-            }
-            throw new NodeMgrException(ConstantCode.DEPLOY_WITH_UNKNOWN_EXCEPTION_ERROR, e);
-        }
-
+        // init host and start node
+        this.nodeAsyncService.initHostListAndStart(chainName);
     }
 
 
