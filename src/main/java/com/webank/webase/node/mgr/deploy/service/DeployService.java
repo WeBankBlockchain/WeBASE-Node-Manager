@@ -14,14 +14,10 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
-import static com.webank.webase.node.mgr.base.code.ConstantCode.HOST_CONNECT_ERROR;
-import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.web3j.crypto.EncryptType;
@@ -48,12 +43,11 @@ import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
-import com.webank.webase.node.mgr.deploy.entity.ConfigLine;
+import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
@@ -112,14 +106,19 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> deployChain(String chainName,
+    public void deployChain(String chainName,
                                              String[] ipConf,
                                              int tagId,
                                              String rootDirOnHost,
                                              String webaseSignAddr) throws NodeMgrException {
-        // TODO. check param
         if (StringUtils.isBlank(chainName)) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
+        }
+
+        log.info("Check chainName exists....");
+        TbChain chain = tbChainMapper.getByChainName(chainName);
+        if (chain != null) {
+            throw new NodeMgrException(ConstantCode.CHAIN_NAME_EXISTS_ERROR);
         }
 
         // check tagId existed
@@ -129,16 +128,11 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
         }
 
-        log.info("Check chainName exists....");
-        TbChain chain = tbChainMapper.getByChainName(chainName);
-        if (chain != null) {
-            throw new NodeMgrException(ConstantCode.CHAIN_NAME_EXISTS_ERROR);
-        }
         // TODO. check WeBASE Sign accessible
 
         // validate ipConf config
         log.info("Parse ipConf content....");
-        List<ConfigLine> configLineList = this.parseIpConf(ipConf);
+        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf);
 
         byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
                 EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
@@ -161,7 +155,7 @@ public class DeployService {
             Map<String, Pair<String, Integer>> hostAgencyMap = new HashMap<>();
             Map<Integer, AtomicInteger> groupCountMap = new HashMap<>();
 
-            configLineList.forEach((config) -> {
+            ipConfigParseList.forEach((config) -> {
                 // insert agency
                 if (!agencyIdMap.containsKey(config.getAgencyName())) {
                     TbAgency agency = agencyService.insert(config.getAgencyName(), config.getAgencyName(),
@@ -261,59 +255,6 @@ public class DeployService {
 
     }
 
-    /**
-     * Validate ipConf.
-     *
-     * @param ipConf
-     * @return List<ConfigLine> entity of config for build_chain
-     * @throws NodeMgrException
-     */
-    public List<ConfigLine> parseIpConf(String[] ipConf) throws NodeMgrException {
-        if (ArrayUtils.isEmpty(ipConf)) {
-            throw new NodeMgrException(ConstantCode.IP_CONF_PARAM_NULL_ERROR);
-        }
-
-        List<ConfigLine> configLineList = new ArrayList<>();
-        Map<String, String> hostAgencyMap = new HashMap<>();
-        for (String line : ipConf) {
-            if (StringUtils.isBlank(line)) {
-                continue;
-            }
-
-            ConfigLine configLine = ConfigLine.parseLine(line);
-            if (configLine == null) {
-                continue;
-            }
-
-            // A host only belongs to one agency.
-            if (hostAgencyMap.get(configLine.getIp()) != null &&
-                    !StringUtils.equalsIgnoreCase(hostAgencyMap.get(configLine.getIp()), configLine.getAgencyName())) {
-                throw new NodeMgrException(ConstantCode.HOST_ONLY_BELONGS_ONE_AGENCY_ERROR);
-            }
-            hostAgencyMap.put(configLine.getIp(), configLine.getAgencyName());
-
-//            frontService.checkNotSupportIp(configLine.getIp());
-
-            // SSH to host ip
-            if (!SshTools.connect(configLine.getIp())) {
-                // cannot SSH to IP
-                throw new NodeMgrException(HOST_CONNECT_ERROR.msg(configLine.getIp()));
-            }
-
-            // TODO. Get max mem size, check nodes num.
-            if (configLine.getNum() <= 0) {
-                throw new NodeMgrException(IP_NUM_ERROR.msg(line));
-            }
-
-            configLineList.add(configLine);
-        }
-
-        if (CollectionUtils.isEmpty(configLineList)) {
-            throw new NodeMgrException(ConstantCode.IP_CONF_PARAM_NULL_ERROR);
-        }
-
-        return configLineList;
-    }
 
 
     /**
