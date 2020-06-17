@@ -91,6 +91,8 @@ public class ConstantProperties {
     private Integer certMonitorTaskFixedDelay;
 
     //******************* Add in v1.4.0 start. *******************
+    public static final boolean RETURN_EXECUTE_LOG = true;
+
     public static final int DOCKER_DAEMON_PORT = 3000;
     public static final String SSH_DEFAULT_USER = "root";
     public static final int SSH_DEFAULT_PORT = 22;

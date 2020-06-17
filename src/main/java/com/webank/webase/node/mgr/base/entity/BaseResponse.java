@@ -16,6 +16,7 @@
 package com.webank.webase.node.mgr.base.entity;
 
 import com.webank.webase.node.mgr.base.code.RetCode;
+
 import lombok.Data;
 
 /**
@@ -27,18 +28,20 @@ public class BaseResponse {
     private int code;
     private String message;
     private Object data;
+    private String attachment;
 
-    public BaseResponse() {
-    }
+    public BaseResponse() {}
 
     public BaseResponse(RetCode retcode) {
         this.code = retcode.getCode();
         this.message = retcode.getMessage();
+        this.attachment = retcode.getAttachment();
     }
 
     public BaseResponse(RetCode retcode, Object data) {
         this.code = retcode.getCode();
         this.message = retcode.getMessage();
+        this.attachment = retcode.getAttachment();
         this.data = data;
     }
 }

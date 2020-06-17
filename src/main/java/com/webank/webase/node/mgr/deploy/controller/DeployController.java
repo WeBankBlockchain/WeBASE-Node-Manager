@@ -34,6 +34,7 @@ import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
 import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
 import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
@@ -51,9 +52,11 @@ import lombok.extern.log4j.Log4j2;
 @RestController
 @RequestMapping("deploy")
 public class DeployController extends BaseController {
+
     @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private DeployService deployService;
+    @Autowired private ConstantProperties constant;
 
     /**
      * Deploy by ipconf and tagId.
@@ -68,9 +71,15 @@ public class DeployController extends BaseController {
                 deploy.getChainName(), deploy.getRootDirOnHost(), startTime.toEpochMilli(),
                 deploy.getTagId(), deploy.getIpconf());
 
-        Pair<RetCode, String> deployResult = this.deployService.deployChain(deploy.getChainName(),
-                deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost(),deploy.getWebaseSignAddr());
-        return new BaseResponse(deployResult.getKey(), deployResult.getValue());
+        try {
+            // generate node config and return shell execution log
+            this.deployService.deployChain(deploy.getChainName(),
+                    deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost(),deploy.getWebaseSignAddr());
+
+            return new BaseResponse(ConstantCode.SUCCESS);
+        } catch (NodeMgrException e) {
+            return new BaseResponse(e.getRetCode());
+        }
     }
 
     /**
