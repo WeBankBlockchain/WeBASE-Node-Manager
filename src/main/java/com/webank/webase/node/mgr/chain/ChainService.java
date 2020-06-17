@@ -196,4 +196,19 @@ public class ChainService {
         log.info("Delete chain:[{}] config files", chainName);
         this.pathService.deleteChain(chainName);
     }
+
+    /**
+     *
+     * @param chainName
+     * @param ipConf
+     * @param tagId
+     * @param rootDirOnHost
+     */
+    public void init(String chainName,
+                     String[] ipConf,
+                     int tagId,
+                     String rootDirOnHost){
+
+
+    }
 }
