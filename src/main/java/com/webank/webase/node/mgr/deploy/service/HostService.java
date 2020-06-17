@@ -31,11 +31,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -43,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
-import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -96,6 +93,20 @@ public class HostService {
         return tbHostMapper.updateByPrimaryKeySelective(newHost) == 1;
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbHost insertIfNew(int agencyId,
+                         String agencyName,
+                         String ip,
+                         String rootDir) throws NodeMgrException {
+        TbHost host = this.tbHostMapper.getByAgencyIdAndIp(agencyId,ip);
+        if (host != null){
+            return host;
+        }
+
+        // fix call transaction in the same class
+        return ((HostService) AopContext.currentProxy())
+                .insert(agencyId, agencyName, ip, rootDir);
+    }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public TbHost insert(int agencyId,
@@ -117,8 +128,6 @@ public class HostService {
                          String rootDir,
                          HostStatusEnum hostStatusEnum) throws NodeMgrException {
 
-        // TODO. params check
-
         TbHost host = TbHost.init(agencyId, agencyName, ip, sshUser, sshPort, rootDir, hostStatusEnum);
 
         if ( tbHostMapper.insertSelective(host) != 1 || host.getId() <= 0) {
@@ -127,139 +136,6 @@ public class HostService {
         return host;
     }
 
-    /**
-     * TODO:  1. change to status machine; 2. update synchronized object
-     *
-     * @param chainName
-     */
-    @Async("deployAsyncExecutor")
-    public void initHostList(String chainName) {
-        if (StringUtils.isBlank(chainName)) {
-            log.error("Chain name:[{}] is blank, deploy error.", chainName);
-            return;
-        }
-
-        // check chain status
-        TbChain tbChain = null;
-        synchronized (DeployShellService.class) {
-            tbChain = this.tbChainMapper.getByChainName(chainName);
-            // chain not exists
-            if (tbChain == null) {
-                log.error("Chain:[{}] does not exist, deploy error.", chainName);
-                return;
-            }
-
-            // check chain status
-            // TODO. deploying but no thread is deploying, still need to deploy
-            if (ChainStatusEnum.successOrDeploying(tbChain.getChainStatus())) {
-                log.error("Chain:[{}] is already deployed success or deploying:[{}].", chainName, tbChain.getChainStatus());
-                return;
-            }
-
-            // update chain status
-            log.info("Start to deploy chain:[{}:{}] from status:[{}]",
-                tbChain.getId(),
-                tbChain.getChainName(),
-                tbChain.getChainStatus());
-            if (!chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOYING)) {
-                log.error("Start to deploy chain:[{}:{}], but update status to deploying failed.", tbChain.getId(), tbChain.getChainName());
-                return;
-            }
-        }
-
-        // select all hosts by all agencies
-        List<TbAgency> tbAgencyList = tbAgencyMapper.selectByChainId(tbChain.getId());
-        if (CollectionUtils.isEmpty(tbAgencyList)) {
-            log.error("Chain:[{}:{}] has no agency.", tbChain.getId(), tbChain.getChainName());
-            return;
-        }
-        // select all host
-        List<TbHost> tbHostList = tbAgencyList.stream()
-            .map((agency) -> tbHostMapper.selectByAgencyId(agency.getId()))
-            .filter((host) -> host != null)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(tbHostList)) {
-            log.error("Chain:[{}:{}] has no host.", tbChain.getId(), tbChain.getChainName());
-            return;
-        }
-
-        // init host
-        // 1. install docker and docker-compose,
-        // 2. send node config to remote host
-        // 3. docker pull image
-        boolean isInitSuccess = this.initHosts(tbChain, tbHostList);
-        if (!isInitSuccess) {
-            // init host failed
-            log.error("Chain:[{}:{}] has no host.", tbChain.getId(), tbChain.getChainName());
-            return;
-        }
-
-        log.info("Start docker containers.");
-        final CountDownLatch dockerStartLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
-        AtomicInteger startCount = new AtomicInteger(0);
-        for (TbHost tbHost : CollectionUtils.emptyIfNull(tbHostList)) {
-            log.info("try to start bcos-front on host:[{}]", tbHost.getIp());
-            executor.submit(() -> {
-                try {
-                    List<TbFront> tbFrontList = frontMapper.selectByHostId(tbHost.getId());
-                    startCount.addAndGet(CollectionUtils.size(tbFrontList));
-                    for (TbFront tbFront : CollectionUtils.emptyIfNull(tbFrontList)) {
-                        try {
-                            // TODO. check front status
-
-
-                            // TODO. call front service
-                            log.info("try to create and start bcos-front:[{}:{}] container",
-                                            tbFront.getFrontIp(), tbFront.getHostIndex());
-                            boolean startResult = dockerClientService.createAndStart(tbHost.getIp(),
-                                    tbHost.getDockerPort(),
-                                    tbFront.getImageTag(),
-                                    tbFront.getContainerName(),
-                                    PathService.getChainRootOnHost(tbHost.getRootDir(), chainName),
-                                    tbFront.getHostIndex());
-
-                            log.info("Start docker container:[{}:{}] result:[{}] on host:[{}]",
-                                tbFront.getContainerName(), tbFront.getHostIndex(), startResult, tbHost.getIp());
-                            if (startResult) {
-                                if (this.frontService.updateStatus(tbFront.getFrontId(), FrontStatusEnum.RUNNING)) {
-                                    log.info("Start docker container:[{}:{}] success on host:[{}]",
-                                        tbFront.getContainerName(), tbFront.getHostIndex(), tbHost.getIp());
-                                    startCount.decrementAndGet();
-                                }
-                            } else {
-                                log.info("Start docker container:[{}:{}] failed on host:[{}]",
-                                    tbFront.getContainerName(), tbFront.getHostIndex(), tbHost.getIp());
-                            }
-                        } catch (Exception e) {
-                            log.error("Start bcos-front error:[{}:{}]", tbFront.getFrontIp(), tbFront.getContainerName(), e);
-                        }
-                    }
-                } catch (Exception e) {
-                    log.error("Start bcos-front on host:[{}] error.", tbHost.getIp(), e);
-                } finally {
-                    dockerStartLatch.countDown();
-                }
-            });
-        }
-
-        // start success
-        try {
-            dockerStartLatch.await(20, TimeUnit.MINUTES);
-            // check if all host init success
-            if (startCount.get() == 0) {
-                log.info("All bcos-front of chain:[{}] start success, start failed count:[{}].",  tbChain.getChainName(), startCount.get());
-                chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_SUCCESS);
-            } else {
-                log.error("[{}] bcos-front of chain:[{}] start failed.", startCount.get(), tbChain.getChainName());
-                chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_FAILED);
-            }
-        } catch (InterruptedException e) {
-            chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_FAILED);
-            log.error("CountDownLatch wait for bcos-front of chain:[{}] start timeout, left count:[{}].",  chainName,dockerStartLatch.getCount());
-        }
-    }
 
     /**
      * Init hosts:
@@ -272,17 +148,7 @@ public class HostService {
      * @return
      */
     public boolean initHosts(TbChain tbChain, List<TbHost> tbHostList) {
-        if (tbChain == null) {
-            log.info("Init chain hosts error, chain null.");
-            return false;
-        }
-        if (CollectionUtils.isEmpty(tbHostList)) {
-            log.info("Init chain:[{}:{}] hosts error, empty host list.", tbChain.getId(), tbChain.getChainName());
-            return false;
-        }
-
         log.info("Start init chain:[{}:{}] hosts.", tbChain.getId(), tbChain.getChainName());
-
         final CountDownLatch initHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
         AtomicInteger hostCount = new AtomicInteger(CollectionUtils.size(tbHostList));
@@ -290,7 +156,7 @@ public class HostService {
             log.info("Init host:[{}] by exec shell script:[{}]", tbHost.getIp(), constant.getNodeOperateShell());
 
             // check host status
-            synchronized (DeployShellService.class) {
+            synchronized (HostService.class) {
                 TbHost currentTbHost = tbHostMapper.selectByPrimaryKey(tbHost.getId());
                 // check host status
                 if (HostStatusEnum.successOrInitiating(currentTbHost.getStatus())) {
@@ -366,13 +232,6 @@ public class HostService {
             log.error("CountDownLatch wait for all hosts:[{}] init timeout.", initHostLatch.getCount());
         }
         return false;
-    }
-
-    /**
-     * destroy host when delete last node of host
-     */
-    public void destroyHost() {
-
     }
 
     /**

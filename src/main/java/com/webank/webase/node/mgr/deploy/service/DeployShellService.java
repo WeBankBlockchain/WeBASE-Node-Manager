@@ -131,14 +131,14 @@ public class DeployShellService {
      * @param ipLines
      * @return
      */
-    public ExecuteResult execBuildChain(byte encryptType,
+    public void execBuildChain(byte encryptType,
                                         String[] ipLines,
                                         String chainName) {
         Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
                 JSON.toJSONString(ipLines), chainName, ipConf.toString());
         try {
-            if (!Files.exists(ipConf.getParent())) {
+            if ( ! Files.exists(ipConf.getParent())) {
                 Files.createDirectories(ipConf.getParent());
             }
             Files.write(ipConf, Arrays.asList(ipLines), StandardOpenOption.CREATE);
@@ -146,16 +146,12 @@ public class DeployShellService {
             throw new NodeMgrException(ConstantCode.SAVE_IP_CONFIG_FILE_ERROR);
         }
 
-        if (Files.notExists(ipConf)) {
-            // file not exists
-            log.error("File: [{}] not exists in directory:[{}] ", ipConf, Paths.get(".").toAbsolutePath().toString());
-            throw new NodeMgrException(ConstantCode.NO_CONFIG_FILE_ERROR);
-        }
-
+        // ports start
         String shellPortParam = String.format(" -p %s,%s,%s",
                 constant.getDefaultP2pPort(), constant.getDefaultChannelPort(),constant.getDefaultJsonrpcPort());
 
         // build_chain.sh only support docker on linux
+        // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ]
         String command = String.format("bash -e %s -f %s -o %s %s %s %s %s",
                 // build_chain.sh shell script
                 constant.getBuildChainShell(),
@@ -174,7 +170,11 @@ public class DeployShellService {
                         String.format(" -e %s ", constant.getFiscoBcosBinary())
         );
 
-        return JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
+
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.EXEC_BUILD_CHAIN_ERROR.msg(result.getExecuteOut()));
+        }
     }
 
     /**

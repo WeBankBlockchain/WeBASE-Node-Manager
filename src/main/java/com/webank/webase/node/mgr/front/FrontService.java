@@ -362,33 +362,13 @@ public class FrontService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbFront insert(String nodeId,
-                          String ip,
-                          int port,
-                          String agencyName,
-                          String clientVersion,
-                          RunTypeEnum runTypeEnum,
-                          int agencyId,
-                          int hostId,
-                          int hostIndex,
-                          String imageTag,
-                          String containerName,
-                          int jsonrpcPort,
-                          int p2pPort,
-                          int channelPort,
-                          int chainId,
-                          String chainName,
-                          FrontStatusEnum frontStatusEnum) throws NodeMgrException {
+    public TbFront insert(TbFront tbFront) throws NodeMgrException {
         // TODO. params check
 
-        TbFront front = TbFront.init(nodeId, ip, port, agencyName, clientVersion, runTypeEnum,
-                agencyId, hostId, hostIndex, imageTag, containerName, jsonrpcPort, p2pPort, channelPort,
-            chainId, chainName, frontStatusEnum);
-
-        if (frontMapper.add(front) != 1 || front.getFrontId() <= 0){
+        if (frontMapper.add(tbFront) != 1 || tbFront.getFrontId() <= 0){
             throw new NodeMgrException(ConstantCode.INSERT_FRONT_ERROR);
         }
-        return front;
+        return tbFront;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -444,14 +424,12 @@ public class FrontService {
             int currentIndex = startIndex + i;
             Path nodeRoot = pathService.getNodeRoot(chainName, ip, currentIndex);
 
-            if (Files.exists(nodeRoot)){
-                if(Files.exists(nodeRoot)){
-                    log.warn("Exists node:[{}:{}] config, delete first.",ip,nodeRoot.toAbsolutePath().toString());
-                    try {
-                        FileUtils.deleteDirectory(nodeRoot.toFile());
-                    } catch (IOException e) {
-                        throw new NodeMgrException(ConstantCode.DELETE_OLD_NODE_DIR_ERROR);
-                    }
+            if(Files.exists(nodeRoot)){
+                log.warn("Exists node:[{}:{}] config, delete first.",ip,nodeRoot.toAbsolutePath().toString());
+                try {
+                    FileUtils.deleteDirectory(nodeRoot.toFile());
+                } catch (IOException e) {
+                    throw new NodeMgrException(ConstantCode.DELETE_OLD_NODE_DIR_ERROR);
                 }
             }
             // exec gen_node_cert.sh
