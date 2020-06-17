@@ -892,8 +892,8 @@ public class GroupService {
     }
 
     @Transactional
-    public TbGroup saveGroup(int groupId, int nodeCount, String description, GroupType groupType,
-                             GroupStatus groupStatus, BigInteger timestamp, List<String> nodeIdList) {
+    public TbGroup saveGroup(int groupId, int nodeCount, String description,
+                             GroupType groupType, GroupStatus groupStatus, BigInteger timestamp, List<String> nodeIdList) {
 
         if (groupId == 0) {
             return null;
@@ -947,10 +947,24 @@ public class GroupService {
 
     }
 
+
+    @Transactional
+    public TbGroup insertIfNew(int groupId, int nodeCount, String groupDesc,
+                               GroupType groupType, GroupStatus groupStatus, int chainId, String chainName) {
+
+        TbGroup group = this.groupMapper.getGroupByChainIdAndGroupId(chainId,groupId);
+        if (group != null){
+            return group;
+        }
+
+        return ((GroupService) AopContext.currentProxy()).saveGroup(groupId,nodeCount,
+                groupDesc,groupType,groupStatus,chainId,chainName);
+    }
+
+
     @Transactional(propagation = Propagation.REQUIRED)
     public TbGroup saveGroup(int groupId, int nodeCount, String groupDesc,
                              GroupType groupType, GroupStatus groupStatus, int chainId, String chainName) {
-        // TODO. check params
         if (groupId == 0) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }

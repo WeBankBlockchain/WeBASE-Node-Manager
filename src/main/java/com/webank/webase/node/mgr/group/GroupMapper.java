@@ -79,4 +79,9 @@ public interface GroupMapper {
         "select * from tb_group where chain_id=#{chainId}"
     })
     List<TbGroup> selectGroupList(@Param("chainId") int chainId);
+
+    @Select({
+            "select * from tb_group where chain_id=#{chainId} and group_id=#{groupId}"
+    })
+    TbGroup getGroupByChainIdAndGroupId(@Param("chainId") int chainId, @Param("groupId") int groupId);
 }

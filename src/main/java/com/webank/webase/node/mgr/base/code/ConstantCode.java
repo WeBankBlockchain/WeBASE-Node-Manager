@@ -225,8 +225,9 @@ public class ConstantCode {
     public static final RetCode NODE_RUNNING_ERROR = RetCode.mark(205053, "Node is running.");
     public static final RetCode UPDATE_RELATED_NODE_ERROR = RetCode.mark(205054, "Update related nodes error.");
     public static final RetCode DELETE_CHAIN_ERROR = RetCode.mark(205055, "Delete chain error.");
-    public static final RetCode NODE_NEED_REMOVE_FROM_GROUP_ERROR =
-            RetCode.mark(205056, "Node is sealer or observer, remove from group first.");
+    public static final RetCode NODE_NEED_REMOVE_FROM_GROUP_ERROR = RetCode.mark(205056, "Node is sealer or observer, remove from group first.");
+    public static final RetCode LIST_HOST_NODE_ERROR = RetCode.mark(205057, "List nodes of host error.");
+    public static final RetCode GENERATE_FRONT_YML_ERROR = RetCode.mark(205058, "Generate front application.yml file failed.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

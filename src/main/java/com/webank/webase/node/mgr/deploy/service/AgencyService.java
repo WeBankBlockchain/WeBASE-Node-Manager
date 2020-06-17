@@ -116,6 +116,31 @@ public class AgencyService {
         return ((AgencyService) AopContext.currentProxy()).insert(agencyName, agencyName, chainId, chainName);
     }
 
+    /**
+     * Init an agency, generate config files(private key and crt files) and insert into db.
+     *
+     * @param agencyName
+     * @param chainId
+     * @param chainName
+     * @return
+     * @throws NodeMgrException
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbAgency insertIfNew(
+            String agencyName,
+            int chainId,
+            String chainName) throws NodeMgrException  {
+        TbAgency agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chainId, agencyName);
+        // check agency name is new
+        if (agency != null) {
+            return agency;
+        }
+
+        // fix call transaction in the same class
+        // insert agency to db
+        return ((AgencyService) AopContext.currentProxy()).insert(agencyName, agencyName, chainId, chainName);
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public TbAgency insert(String agencyName,
                            String agencyDesc,

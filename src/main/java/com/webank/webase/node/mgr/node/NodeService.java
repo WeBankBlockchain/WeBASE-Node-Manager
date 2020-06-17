@@ -378,7 +378,6 @@ public class NodeService {
      */
     public static String getNodeName(int groupId, String nodeId) {
         return String.format("%s_%s", groupId, nodeId);
-
     }
 
     /**
