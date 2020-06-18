@@ -228,6 +228,10 @@ public class ConstantCode {
     public static final RetCode NODE_NEED_REMOVE_FROM_GROUP_ERROR = RetCode.mark(205056, "Node is sealer or observer, remove from group first.");
     public static final RetCode LIST_HOST_NODE_ERROR = RetCode.mark(205057, "List nodes of host error.");
     public static final RetCode GENERATE_FRONT_YML_ERROR = RetCode.mark(205058, "Generate front application.yml file failed.");
+    public static final RetCode EXEC_HOST_INIT_SCRIPT_ERROR = RetCode.mark(205059, "Exec host init script failed.");
+    public static final RetCode TRANSFER_FILES_ERROR = RetCode.mark(205060, "Transfer files error.");
+    public static final RetCode DOCKER_OPTION_ERROR = RetCode.mark(205061, "Docker option error.");
+    public static final RetCode INIT_CHAIN_HOSTS_TIMEOUT_ERROR = RetCode.mark(205062, "Init hosts of chain timeout.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

@@ -23,6 +23,8 @@ import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.netty.NettyDockerCmdExecFactory;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 
 import lombok.extern.log4j.Log4j2;
@@ -52,9 +54,7 @@ public class DockerClientService {
      */
     public static String getContainerName(String rootDirOnHost, String chainName, int hostIndex) {
         return String.format("%s%snode%s",
-                rootDirOnHost.replaceAll(File.separator, "").replaceAll(" ", ""),
-                chainName,
-                hostIndex);
+                rootDirOnHost.replaceAll(File.separator, "").replaceAll(" ", ""), chainName, hostIndex);
     }
 
 
@@ -66,19 +66,24 @@ public class DockerClientService {
      * @param imageTag
      * @return
      */
-    public boolean pullImage(String ip, int port, String imageTag) {
+    public void pullImage(String ip, int port, String imageTag) {
         String image = this.getImageRepositoryTag(imageTag);
         log.info("Host:[{}] pull image:[{}].", ip, image);
+        boolean optionSuccess = false;
         try {
             // pull image, maybe same tag but newer
             DockerClient dockerClient = this.getDockerClient(ip, port);
 
-            return dockerClient.pullImageCmd(image).start()
+            optionSuccess = dockerClient.pullImageCmd(image).start()
                     .awaitCompletion(constant.getDockerPullTimeout(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("Host:[{}] docker pull image:[{}] error.", ip, image, e);
         }
-        return false;
+        if (! optionSuccess) {
+            log.error("Host:[{}] docker pull image:[{}] failed.", ip, imageTag);
+            throw new NodeMgrException(ConstantCode.DOCKER_OPTION_ERROR.msg(
+                    String.format("Docker pull image:[%s:%s]", ip,imageTag)));
+        }
     }
 
     /**
@@ -101,9 +106,10 @@ public class DockerClientService {
             }
             log.info("Host:[{}] not exists container by name:[{}].", ip, containerName);
         } catch (Exception e) {
-            log.info("Host:[{}] query container by name:[{}] error.", ip, containerName, e);
+            log.error("Host:[{}] query container:[{}] error.", ip, containerName, e);
+            throw new NodeMgrException(ConstantCode.DOCKER_OPTION_ERROR.msg(
+                    String.format("Docker query image:[%s:%s]",ip,containerName)));
         }
-
         return null;
     }
 
@@ -115,7 +121,7 @@ public class DockerClientService {
      * @param nodeIndex
      * @return true if run success, false when run failed.
      */
-    public boolean createAndStart(String ip,
+    public void createAndStart(String ip,
                          int port,
                          String imageTag,
                          String containerName,
@@ -124,9 +130,10 @@ public class DockerClientService {
         String containerId = this.create(ip, port, imageTag, containerName, chainRootOnHost, nodeIndex);
         if (StringUtils.isBlank(containerId)) {
             log.error("Create bcos-front container:[{}:{}] on host:[{}] failed.", imageTag,containerId, ip);
-            return false;
+            throw new NodeMgrException(ConstantCode.DOCKER_OPTION_ERROR.msg(
+                    String.format("Docker create container:[%s:%s]",ip,containerName)));
         }
-        return this.startById(ip, port, containerId);
+        this.startById(ip, port, containerId);
     }
 
 
@@ -176,9 +183,10 @@ public class DockerClientService {
             log.info("Host:[{}] create container:[{}] success with id:[{}].", ip, image, response.getId());
             return response.getId();
         } catch (Exception e) {
-            log.info("Host:[{}] create container:[{}] error.", ip, image, e);
+            log.error("Host:[{}] create container:[{}] error.", ip, image, e);
+            throw new NodeMgrException(ConstantCode.DOCKER_OPTION_ERROR.msg(
+                    String.format("Docker create container:[%s:%s]",ip,containerName)));
         }
-        return null;
     }
 
 
@@ -188,20 +196,17 @@ public class DockerClientService {
      * @param containerId
      * @return
      */
-    public boolean startById(String ip, int dockerPort, String containerId) {
+    public void startById(String ip, int dockerPort, String containerId) {
         log.info("Host:[{}] start container by id:[{}].", ip, containerId);
         try {
             DockerClient dockerClient = this.getDockerClient(ip, dockerPort);
-            if (StringUtils.isBlank(containerId)) {
-                return false;
-            }
             dockerClient.startContainerCmd(containerId).exec();
             log.info("Host:[{}] start container:[{}] success.", ip, containerId);
-            return true;
         } catch (Exception e) {
-            log.info("Host:[{}] start container by id:[{}] error.", ip, containerId, e);
+            log.error("Host:[{}] start container by id:[{}] error.", ip, containerId, e);
+            throw new NodeMgrException(ConstantCode.DOCKER_OPTION_ERROR.msg(
+                    String.format("Docker start container:[%s:%s]",ip,containerId)));
         }
-        return false;
     }
 
 
@@ -211,23 +216,24 @@ public class DockerClientService {
      * @param containerName
      * @return
      */
-    public boolean removeByName(String ip, int dockerPort, String containerName) {
+    public void removeByName(String ip, int dockerPort, String containerName) {
         log.info("Host:[{}] remove container by name:[{}].", ip, containerName);
         try {
             Container container = this.getContainer(ip, dockerPort, containerName);
             if (container == null){
-                return false;
+                log.error("Host:[{}] remove container:[{}] which not exists.", ip, containerName);
+                return;
             }
             DockerClient dockerClient = this.getDockerClient(ip, dockerPort);
             dockerClient.removeContainerCmd(container.getId())
                     .withForce(true)
                     .exec();
             log.info("Host:[{}] remove container:[{}] success.", ip, containerName);
-            return true;
         } catch (Exception e) {
-            log.info("Host:[{}] remove container by name:[{}] error.", ip, containerName, e);
+            log.error("Host:[{}] remove container by name:[{}] error.", ip, containerName, e);
+            throw new NodeMgrException(ConstantCode.DOCKER_OPTION_ERROR.msg(
+                    String.format("Docker remove container:[%s:%s]", ip, containerName)));
         }
-        return false;
     }
 
     /**
