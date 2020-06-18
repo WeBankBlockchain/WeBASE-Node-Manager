@@ -34,7 +34,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,10 +79,10 @@ public class HostService {
     @Autowired private FrontService frontService;
     @Autowired private AgencyService agencyService;
     @Autowired private PathService pathService;
-    @Autowired private ConfigService configService;
     @Autowired private DeployShellService deployShellService;
-    @Qualifier(value = "deployAsyncExecutor")
-    @Autowired private ThreadPoolTaskExecutor executor;
+
+    @Qualifier(value = "deployAsyncScheduler")
+    @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int hostId, HostStatusEnum newStatus) throws NodeMgrException {
@@ -165,7 +165,7 @@ public class HostService {
                 }
                 this.updateStatus(tbHost.getId(), HostStatusEnum.INITIATING);
             }
-            executor.submit(() -> {
+            threadPoolTaskScheduler.submit(() -> {
                 try {
                     // TODO. optimize code
                     // exec host init shell script
