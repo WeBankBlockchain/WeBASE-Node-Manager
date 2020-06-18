@@ -444,14 +444,12 @@ public class FrontService {
             int currentIndex = startIndex + i;
             Path nodeRoot = pathService.getNodeRoot(chainName, ip, currentIndex);
 
-            if (Files.exists(nodeRoot)){
-                if(Files.exists(nodeRoot)){
-                    log.warn("Exists node:[{}:{}] config, delete first.",ip,nodeRoot.toAbsolutePath().toString());
-                    try {
-                        FileUtils.deleteDirectory(nodeRoot.toFile());
-                    } catch (IOException e) {
-                        throw new NodeMgrException(ConstantCode.DELETE_OLD_NODE_DIR_ERROR);
-                    }
+            if(Files.exists(nodeRoot)){
+                log.warn("Exists node:[{}:{}] config, delete first.",ip,nodeRoot.toAbsolutePath().toString());
+                try {
+                    FileUtils.deleteDirectory(nodeRoot.toFile());
+                } catch (IOException e) {
+                    throw new NodeMgrException(ConstantCode.DELETE_OLD_NODE_DIR_ERROR);
                 }
             }
             // exec gen_node_cert.sh
