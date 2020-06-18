@@ -51,7 +51,7 @@ public class NodeAsyncService {
     @Autowired private HostService hostService;
     @Autowired private ConstantProperties constant;
 
-    @Async("deployAsyncExecutor")
+    @Async("deployAsyncScheduler")
     public void startFrontOfChain(int chainId) {
         List<TbFront> frontList = this.frontService.selectFrontListByChainId(chainId);
 
@@ -69,7 +69,7 @@ public class NodeAsyncService {
 
     }
 
-    @Async("deployAsyncExecutor")
+    @Async("deployAsyncScheduler")
     public void startFrontOfGroup(int chainId, int groupId) {
         List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
 
@@ -90,7 +90,7 @@ public class NodeAsyncService {
      * @param chainId
      * @param groupIdSet
      */
-    @Async("deployAsyncExecutor")
+    @Async("deployAsyncScheduler")
     public void startFrontOfGroup(int chainId, Set<Integer> groupIdSet) {
         for (Integer groupId: CollectionUtils.emptyIfNull(groupIdSet)){
             ((NodeAsyncService) AopContext.currentProxy()).startFrontOfGroup(chainId,groupId);
@@ -102,7 +102,7 @@ public class NodeAsyncService {
      *
      * @param chainName
      */
-    @Async("deployAsyncExecutor")
+    @Async("deployAsyncScheduler")
     public void initHostListAndStart(String chainName) {
         boolean deploySuccess = true;
         try {

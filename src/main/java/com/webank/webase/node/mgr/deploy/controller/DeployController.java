@@ -203,9 +203,6 @@ public class DeployController extends BaseController {
         log.info("Start get chain info :[{}], chainName:[{}], now:[{}]", chainName, startTime);
 
         TbChain chain = this.tbChainMapper.getByChainName(chainName);
-        if (chain == null){
-            throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
-        }
         return new BaseResponse(ConstantCode.SUCCESS, chain);
     }
 
