@@ -31,7 +31,6 @@ public enum FrontStatusEnum {
     private int id;
     private String description;
 
-
     /**
      *
      * @param id

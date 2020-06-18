@@ -47,13 +47,13 @@ import org.springframework.web.client.ResourceAccessException;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.OperateStatus;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.block.BlockService;
@@ -64,7 +64,6 @@ import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.deploy.service.ConfigService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontMapper;
@@ -86,7 +85,6 @@ import com.webank.webase.node.mgr.group.entity.RspOperateResult;
 import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.method.MethodService;
-import com.webank.webase.node.mgr.node.NodeMapper;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
@@ -108,8 +106,6 @@ public class GroupService {
     private TbHostMapper tbHostMapper;
     @Autowired
     private FrontMapper frontMapper;
-    @Autowired
-    private NodeMapper nodeMapper;
 
     @Autowired
     private TableService tableService;
@@ -130,15 +126,11 @@ public class GroupService {
     @Autowired
     private TransDailyService transDailyService;
     @Autowired
-    private ConstantProperties constants;
-    @Autowired
     private BlockService blockService;
     @Autowired
     private DeployShellService deployShellService;
     @Autowired
     private PathService pathService;
-    @Autowired
-    private ConfigService configService;
 
     public static final String RUNNING_GROUP = "RUNNING";
     public static final String OPERATE_START_GROUP = "start";
@@ -290,6 +282,11 @@ public class GroupService {
      */
     private void saveDataOfGroup(List<TbFront> frontList, Set<Integer> allGroupSet) {
         for (TbFront front : frontList) {
+            if( ! FrontStatusEnum.isRunning(front.getStatus())){
+                log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
+                continue;
+            }
+
             String frontIp = front.getFrontIp();
             int frontPort = front.getFrontPort();
             // query group list from chain
@@ -570,6 +567,10 @@ public class GroupService {
         log.debug("checkGroupMapByLocalGroupList frontList:{},groupListLocal:{}",
                 frontList, groupListLocal);
         for (TbFront front : frontList) {
+            if( ! FrontStatusEnum.isRunning(front.getStatus())){
+                log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
+                continue;
+            }
             // query roup list from chain
             List<String> groupListOnChain;
             try {
@@ -1023,7 +1024,7 @@ public class GroupService {
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
         String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
-        String localDst = String.format("%s/conf/", localNodePath);
+        String localDst = String.format("%s/conf/group.%s.*", localNodePath, generateGroupId);
         // copy group config files to local node's conf dir
         deployShellService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(),
                 remoteGroupConfSource, localDst);
@@ -1050,11 +1051,11 @@ public class GroupService {
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
         String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/data/group[groupId]/group.1001.*
-        Path localDst = Paths.get(String.format("%s/data/group%s", localNodePath,generateGroupId));
+        Path localDst = Paths.get(String.format("%s/data/group%s/.group_status", localNodePath,generateGroupId));
         // create data parent directory
-        if (Files.notExists(localDst)){
+        if (Files.notExists(localDst.getParent())){
             try {
-                Files.createDirectories(localDst);
+                Files.createDirectories(localDst.getParent());
             } catch (IOException e) {
                 // TODO. throw exception ???
                 log.error("Create data group:[{}] file error", localDst.toAbsolutePath().toString(),e);
