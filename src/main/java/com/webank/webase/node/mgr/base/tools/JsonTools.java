@@ -1,7 +1,7 @@
 package com.webank.webase.node.mgr.base.tools;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -24,31 +24,29 @@ import java.util.function.Supplier;
  * edit by marsli from hujkay
  */
 @Slf4j
-public class JsonTools {
-    // private static final ObjectMapper mapper = new ObjectMapper();
-    private static ObjectMapper mapper;
+public class JsonUtils {
     private static final String STANDARD_FORMAT = "yyyy-MM-dd HH:mm:ss";
     /**
      * 设置一些通用的属性
      */
-    static {
-        mapper = new ObjectMapper();
-        // 如果json中有新增的字段并且是实体类类中不存在的，不报错
-        // mapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+    private static final ThreadLocal<ObjectMapper> OBJECT_MAPPER = ThreadLocal.withInitial(() -> {
+        ObjectMapper objectMapper = new ObjectMapper();
         // 如果存在未知属性，则忽略不报错
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         // 允许key没有双引号
-        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        objectMapper.configure(Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         // 允许key有单引号
-        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        objectMapper.configure(Feature.ALLOW_SINGLE_QUOTES, true);
         // 属性值为null的不参与序列化
-//        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
+        // objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.setSerializationInclusion(Include.ALWAYS);
         // timestamp
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        mapper.setDateFormat(new SimpleDateFormat(STANDARD_FORMAT));
-    }
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        // date format
+        objectMapper.setDateFormat(new SimpleDateFormat(STANDARD_FORMAT));
+        return objectMapper;
+    });
 
     public static String toJSONString(Object obj) {
         return obj != null ? toJSONString(obj, () -> "") : "";
@@ -56,7 +54,7 @@ public class JsonTools {
 
     public static String toJSONString(Object obj, Supplier<String> defaultSupplier) {
         try {
-            return obj != null ? mapper.writeValueAsString(obj) : defaultSupplier.get();
+            return obj != null ? OBJECT_MAPPER.get().writeValueAsString(obj) : defaultSupplier.get();
         } catch (Throwable e) {
             log.error(String.format("toJSONString %s", obj != null ? obj.toString() : "null"), e);
         }
@@ -76,7 +74,7 @@ public class JsonTools {
             if (StringUtils.isBlank(value)) {
                 return defaultSupplier.get();
             }
-            return mapper.readValue(value, tClass);
+            return OBJECT_MAPPER.get().readValue(value, tClass);
         } catch (Throwable e) {
             log.error(String.format("toJavaObject exception: \n %s\n %s", value, tClass), e);
         }
@@ -96,8 +94,8 @@ public class JsonTools {
             if (StringUtils.isBlank(value)) {
                 return defaultSupplier.get();
             }
-            JavaType javaType = mapper.getTypeFactory().constructParametricType(List.class, tClass);
-            return mapper.readValue(value, javaType);
+            JavaType javaType = OBJECT_MAPPER.get().getTypeFactory().constructParametricType(List.class, tClass);
+            return OBJECT_MAPPER.get().readValue(value, javaType);
         } catch (Throwable e) {
             log.error(String.format("toJavaObjectList exception \n%s\n%s", value, tClass), e);
         }
@@ -178,7 +176,7 @@ public class JsonTools {
 
     public static boolean isJson(String str) {
         try {
-            mapper.readTree(str);
+            OBJECT_MAPPER.get().readTree(str);
             return true;
         } catch (IOException e) {
             return false;
@@ -187,7 +185,7 @@ public class JsonTools {
 
     public static JsonNode stringToJsonNode(String str) {
         try {
-            return mapper.readTree(str);
+            return OBJECT_MAPPER.get().readTree(str);
         } catch (IOException e) {
             log.error("Parse String to JsonNode error : {}", e.getMessage());
             return null;
@@ -200,7 +198,7 @@ public class JsonTools {
         }
         try {
             return obj instanceof String ? (String) obj
-                : mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+                : OBJECT_MAPPER.get().writerWithDefaultPrettyPrinter().writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             log.error("Parse Object to String error : {}", e.getMessage());
             return null;
@@ -213,7 +211,7 @@ public class JsonTools {
             return null;
         }
         try {
-            return clazz.equals(String.class) ? (T) str : mapper.readValue(str, clazz);
+            return clazz.equals(String.class) ? (T) str : OBJECT_MAPPER.get().readValue(str, clazz);
         } catch (Exception e) {
             log.error("Parse String to Object error : {}", e.getMessage());
             return null;
@@ -227,7 +225,7 @@ public class JsonTools {
         }
         try {
             return (T) (typeReference.getType().equals(String.class) ? str
-                : mapper.readValue(str, typeReference));
+                : OBJECT_MAPPER.get().readValue(str, typeReference));
         } catch (IOException e) {
             log.error("Parse String to Object error", e);
             return null;
@@ -236,10 +234,10 @@ public class JsonTools {
 
     public static <T> T stringToObj(String str, Class<?> collectionClazz,
         Class<?>... elementClazzes) {
-        JavaType javaType = mapper.getTypeFactory()
+        JavaType javaType = OBJECT_MAPPER.get().getTypeFactory()
             .constructParametricType(collectionClazz, elementClazzes);
         try {
-            return mapper.readValue(str, javaType);
+            return OBJECT_MAPPER.get().readValue(str, javaType);
         } catch (IOException e) {
             log.error("Parse String to Object error : {}" + e.getMessage());
             return null;
