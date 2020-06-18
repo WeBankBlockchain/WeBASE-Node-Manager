@@ -26,6 +26,7 @@ public enum FrontStatusEnum {
     INITIALIZED( 0, "initialized"),
     RUNNING( 1, "running"),
     STOPPED(2, "stopped"),
+    UPGRADING(3, "upgrading"),
     ;
 
     private int id;

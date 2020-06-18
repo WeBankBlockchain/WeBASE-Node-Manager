@@ -58,8 +58,10 @@ public interface FrontMapper {
     @Update({
         "update tb_front set client_version=#{newImageTag},image_tag=#{newImageTag},modify_time=#{modifyTime} where chain_id = #{chainId}"
     })
-    int updateImageTagByChainId(@Param("chainId") int chainId,
-                                @Param("newImageTag") String newImageTag, @Param("modifyTime") LocalDateTime now);
+    int updateUpgradingByChainId(@Param("chainId") int chainId,
+                                 @Param("newImageTag") String newImageTag,
+                                 @Param("modifyTime") LocalDateTime now,
+                                 @Param("status")int status);
 
     TbFront getByNodeId(@Param("nodeId") String nodeId);
 }

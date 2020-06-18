@@ -114,13 +114,14 @@ public class ConstantProperties {
     private int defaultFrontPort = 5002;
 
     // timeout config
-    private long execHostInitTimeout = 2 * 60 * 60 * 1000;
-    private long execBuildChainTimeout = 10 * 60 * 1000;
-    private long execShellTimeout = 2 * 60 * 1000;
-    private int dockerClientConnectTimeout = 10 * 60 * 1000;
-    private int dockerClientReadTimeout = 10 * 60 * 1000;
-    private int dockerPullTimeout = 5 * 60 * 1000;
+    private long execHostInitTimeout = 2 * 60 * 60 * 1000L;
+    private long startNodeTimeout = 5 * 60 * 1000L;
+    private long execBuildChainTimeout = 10 * 60 * 1000L;
+    private long execShellTimeout = 2 * 60 * 1000L;
     private long dockerRestartPeriodTime = 30 * 1000L;
+    private int dockerClientConnectTimeout = 10 * 60 * 1000;
+    private int dockerPullTimeout = 10 * 60 * 1000;
+    private int dockerClientReadTimeout = 10 * 60 * 1000;
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login", "/user/privateKey/**", "/encrypt"};
     private String dockerRepository= "fiscoorg/front";

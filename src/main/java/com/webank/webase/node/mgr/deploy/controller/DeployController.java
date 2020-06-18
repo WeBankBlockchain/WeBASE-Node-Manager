@@ -34,7 +34,6 @@ import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
 import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
 import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
@@ -56,7 +55,6 @@ public class DeployController extends BaseController {
     @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private DeployService deployService;
-    @Autowired private ConstantProperties constant;
 
     /**
      * Deploy by ipconf and tagId.

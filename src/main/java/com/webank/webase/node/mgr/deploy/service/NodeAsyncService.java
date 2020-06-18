@@ -17,11 +17,16 @@ package com.webank.webase.node.mgr.deploy.service;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.Level;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
@@ -29,8 +34,7 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
-import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
+import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.node.NodeService;
@@ -42,8 +46,7 @@ import lombok.extern.log4j.Log4j2;
 @Component
 public class NodeAsyncService {
 
-    @Autowired private TbChainMapper tbChainMapper;
-    @Autowired private TbAgencyMapper tbAgencyMapper;
+    @Autowired private FrontMapper frontMapper;
 
     @Autowired private FrontService frontService;
     @Autowired private NodeService nodeService;
@@ -51,22 +54,20 @@ public class NodeAsyncService {
     @Autowired private HostService hostService;
     @Autowired private ConstantProperties constant;
 
+    @Qualifier(value = "deployAsyncScheduler")
+    @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
     @Async("deployAsyncScheduler")
-    public void startFrontOfChain(int chainId) {
-        List<TbFront> frontList = this.frontService.selectFrontListByChainId(chainId);
-
-        for (TbFront front : CollectionUtils.emptyIfNull(frontList)) {
-            // ssh host and start docker container
-            this.frontService.start(front.getNodeId());
-            try {
-                Thread.sleep(constant.getDockerRestartPeriodTime());
-            } catch (InterruptedException e) {
-                log.error("Start chain:[{}], docker restart server:[{}:{}] throws exception when sleep.",
-                        chainId,front.getFrontIp(),front.getContainerName());
-            }
+    public void upgradeStartChain(int chainId)   {
+        try {
+            final boolean startSuccess = this.startFrontOfChain(chainId);
+            final ChainStatusEnum chainStatusEnum = startSuccess ? ChainStatusEnum.RUNNING : ChainStatusEnum.UPGRADING_FAILED;
+            threadPoolTaskScheduler.scheduleWithFixedDelay(()->{
+                chainService.updateStatus(chainId,chainStatusEnum);
+            },System.currentTimeMillis() + constant.getDockerRestartPeriodTime());
+        } catch (InterruptedException e) {
+            log.error("Upgrade start chain:[{}] failed.", chainId, e);
         }
-
-
     }
 
     @Async("deployAsyncScheduler")
@@ -74,145 +75,116 @@ public class NodeAsyncService {
         List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
 
         for (TbNode tbNode : CollectionUtils.emptyIfNull(tbNodeList)) {
-            // ssh host and start docker container
-            this.frontService.start(tbNode.getNodeId());
             try {
+                // ssh host and start docker container
+                this.frontService.start(tbNode.getNodeId());
                 Thread.sleep(constant.getDockerRestartPeriodTime());
             } catch (InterruptedException e) {
                 log.error("Start group:[{}:{}], docker restart server:[{}:{}] throws exception when sleep.",
-                        chainId,groupId,tbNode.getNodeIp(),tbNode.getNodeId());
+                        chainId, groupId, tbNode.getNodeIp(), tbNode.getNodeId());
             }
+        }
+    }
+
+    /**
+     * @param chainId
+     * @param groupIdSet
+     */
+    @Async("deployAsyncScheduler")
+    public void startFrontOfGroup(int chainId, Set<Integer> groupIdSet) {
+        for (Integer groupId : CollectionUtils.emptyIfNull(groupIdSet)) {
+            ((NodeAsyncService) AopContext.currentProxy()).startFrontOfGroup(chainId, groupId);
+        }
+    }
+
+    /**
+     *
+     * @param chainName
+     */
+    @Async("deployAsyncScheduler")
+    public void initHostListAndStart(String chainName) {
+        TbChain chain = null;
+        try {
+            // chainge chain status to deploying
+            chain = this.chainService.changeChainStatusToDeploying(chainName);
+            if (chain == null) {
+                log.error("No chain:[{}] to deploy.", chainName);
+                return;
+            }
+
+            // select all host to init
+            List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
+            if (CollectionUtils.isEmpty(tbHostList)) {
+                log.error("Chain:[{}:{}] has no host.", chain.getId(), chain.getChainName());
+                return;
+            }
+
+            // init host
+            // 1. install docker and docker-compose,
+            // 2. send node config to remote host
+            // 3. docker pull image
+            boolean deploySuccess = this.hostService.initHostList(chain, tbHostList);
+            if (deploySuccess){
+                // start node
+                deploySuccess = this.startFrontOfChain(chain.getId());
+
+                final int chainId = chain.getId();
+                final ChainStatusEnum chainStatusEnum = deploySuccess ? ChainStatusEnum.RUNNING : ChainStatusEnum.DEPLOY_FAILED;
+                threadPoolTaskScheduler.scheduleWithFixedDelay(()->{
+                    chainService.updateStatus(chainId,chainStatusEnum);
+                },System.currentTimeMillis() + constant.getDockerRestartPeriodTime());
+            }
+        } catch (Exception e) {
+            log.error("Deploy chain:[{}] error", chainName, e);
+            chainService.updateStatus(chain.getId(), ChainStatusEnum.DEPLOY_FAILED);
         }
     }
 
     /**
      *
      * @param chainId
-     * @param groupIdSet
+     * @return
+     * @throws InterruptedException
      */
-    @Async("deployAsyncScheduler")
-    public void startFrontOfGroup(int chainId, Set<Integer> groupIdSet) {
-        for (Integer groupId: CollectionUtils.emptyIfNull(groupIdSet)){
-            ((NodeAsyncService) AopContext.currentProxy()).startFrontOfGroup(chainId,groupId);
-        }
-    }
+    private boolean startFrontOfChain(int chainId) throws InterruptedException {
+        // host of chain
+        List<TbHost> hostList = this.hostService.selectHostListByChainId(chainId);
 
-    /**
-     * TODO:  1. change to status machine; 2. update synchronized object
-     *
-     * @param chainName
-     */
-    @Async("deployAsyncScheduler")
-    public void initHostListAndStart(String chainName) {
-        boolean deploySuccess = true;
-        try {
-            TbChain chain = this.chainService.startDeploy(chainName);
-            if(chain == null){
-                log.error("No chain:[{}] to deploy.",chainName);
-                deploySuccess = false;
-                return;
-            }
+        final CountDownLatch startLatch = new CountDownLatch(CollectionUtils.size(hostList));
+        AtomicInteger startSuccessCount = new AtomicInteger(0);
+        AtomicInteger totalFrontCount = new AtomicInteger(0);
 
-            // select all host
-            List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
-            if (CollectionUtils.isEmpty(tbHostList)) {
-                log.error("Chain:[{}:{}] has no host.", chain.getId(), chain.getChainName());
-                deploySuccess = false;
-                return;
-            }
+        for (TbHost tbHost : CollectionUtils.emptyIfNull(hostList)) {
+            List<TbFront> tbFrontList = this.frontMapper.selectByHostId(tbHost.getId());
+            // add to total
+            totalFrontCount.addAndGet(CollectionUtils.size(tbFrontList));
 
-        } catch (Exception e) {
-            // TODO
-            e.printStackTrace();
-            deploySuccess = false;
-
-        } finally {
-            // TODO
-
-        }
-
-
-        log.info("Start docker containers.");
-        final CountDownLatch dockerStartLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
-        AtomicInteger startCount = new AtomicInteger(0);
-        for (TbHost tbHost : CollectionUtils.emptyIfNull(tbHostList)) {
-            log.info("try to start bcos-front on host:[{}]", tbHost.getIp());
-            executor.submit(() -> {
+            for (TbFront front : CollectionUtils.emptyIfNull(tbFrontList)) {
+                log.info("Start front:[{}:{}:{}].",front.getFrontIp(),front.getHostIndex(),front.getNodeId());
                 try {
-                    List<TbFront> tbFrontList = frontMapper.selectByHostId(tbHost.getId());
-                    startCount.addAndGet(CollectionUtils.size(tbFrontList));
-                    for (TbFront tbFront : CollectionUtils.emptyIfNull(tbFrontList)) {
-                        try {
-                            // TODO. check front status
-
-
-                            // TODO. call front service
-                            log.info("try to create and start bcos-front:[{}:{}] container",
-                                    tbFront.getFrontIp(), tbFront.getHostIndex());
-                            boolean startResult = dockerClientService.createAndStart(tbHost.getIp(),
-                                    tbHost.getDockerPort(),
-                                    tbFront.getImageTag(),
-                                    tbFront.getContainerName(),
-                                    PathService.getChainRootOnHost(tbHost.getRootDir(), chainName),
-                                    tbFront.getHostIndex());
-
-                            log.info("Start docker container:[{}:{}] result:[{}] on host:[{}]",
-                                    tbFront.getContainerName(), tbFront.getHostIndex(), startResult, tbHost.getIp());
-                            if (startResult) {
-                                if (this.frontService.updateStatus(tbFront.getFrontId(), FrontStatusEnum.RUNNING)) {
-                                    log.info("Start docker container:[{}:{}] success on host:[{}]",
-                                            tbFront.getContainerName(), tbFront.getHostIndex(), tbHost.getIp());
-                                    startCount.decrementAndGet();
-                                }
-                            } else {
-                                log.info("Start docker container:[{}:{}] failed on host:[{}]",
-                                        tbFront.getContainerName(), tbFront.getHostIndex(), tbHost.getIp());
-                            }
-                        } catch (Exception e) {
-                            log.error("Start bcos-front error:[{}:{}]", tbFront.getFrontIp(), tbFront.getContainerName(), e);
-                        }
+                    boolean startResult = this.frontService.start(front.getNodeId());
+                    if (startResult){
+                        log.info("Start front:[{}:{}:{}] success.",front.getFrontIp(),front.getHostIndex(),front.getNodeId());
+                        startSuccessCount.incrementAndGet();
                     }
+                    Thread.sleep(constant.getDockerRestartPeriodTime());
                 } catch (Exception e) {
-                    log.error("Start bcos-front on host:[{}] error.", tbHost.getIp(), e);
-                } finally {
-                    dockerStartLatch.countDown();
+                    log.error("Start front:[{}] error",front.getFrontIp(),front.getHostIndex(), e);
+                }finally {
+                    startLatch.countDown();
                 }
-            });
-        }
-
-        // start success
-        try {
-            dockerStartLatch.await(20, TimeUnit.MINUTES);
-            // check if all host init success
-            if (startCount.get() == 0) {
-                log.info("All bcos-front of chain:[{}] start success, start failed count:[{}].",  tbChain.getChainName(), startCount.get());
-                chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_SUCCESS);
-            } else {
-                log.error("[{}] bcos-front of chain:[{}] start failed.", startCount.get(), tbChain.getChainName());
-                chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_FAILED);
             }
-        } catch (InterruptedException e) {
-            chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_FAILED);
-            log.error("CountDownLatch wait for bcos-front of chain:[{}] start timeout, left count:[{}].",  chainName,dockerStartLatch.getCount());
         }
-    }
 
+        startLatch.await(constant.getStartNodeTimeout(), TimeUnit.MILLISECONDS);
 
-    public boolean initHost(TbChain chain, List<TbHost> tbHostList) {
-        // init host
-        // 1. install docker and docker-compose,
-        // 2. send node config to remote host
-        // 3. docker pull image
-        boolean isInitSuccess = this.hostService.initHosts(chain, tbHostList);
-        if (!isInitSuccess) {
-            // init host failed
-            log.error("Chain:[{}:{}] has no host.", chain.getId(), chain.getChainName());
-        }
-        return isInitSuccess;
-    }
+        boolean startSuccess = startSuccessCount.get() == totalFrontCount.get();
+        // check if all host init success
+        log.log(startSuccess ? Level.INFO: Level.ERROR,
+                "Host of chain:[{}] init result, total:[{}], success:[{}]",
+                chainId, totalFrontCount.get(), startSuccessCount.get());
 
-    public void startHost(String chainName) {
-
+        return startSuccess;
     }
 }
 

@@ -16,7 +16,6 @@ package com.webank.webase.node.mgr.front;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,11 +29,12 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,6 +121,9 @@ public class FrontService {
     private ConstantProperties constant;
     @Autowired
     private DockerClientService dockerClientService;
+
+    @Qualifier(value = "deployAsyncScheduler")
+    @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     // interval of check front status
     private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
@@ -373,6 +376,7 @@ public class FrontService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int frontId, FrontStatusEnum newStatus) {
+        log.info("Update front:[{}] status to:[{}]",frontId, newStatus.toString());
         return this.frontMapper.updateStatus(frontId, newStatus.getId(), LocalDateTime.now()) == 1;
     }
 
@@ -447,13 +451,13 @@ public class FrontService {
             int p2pPort = constant.getDefaultP2pPort() + currentIndex;
             int jsonrpcPort = constant.getDefaultJsonrpcPort() + currentIndex;
 
-            // TODO. pass object
+
+            TbFront front = TbFront.init(nodeId, ip, frontPort, agencyId, agencyName, imageTag, RunTypeEnum.DOCKER,
+                    hostId, currentIndex, imageTag, DockerClientService.getContainerName(rootDirOnHost, chainName, currentIndex),
+                    jsonrpcPort, p2pPort, channelPort, chain.getId(), chainName, FrontStatusEnum.INITIALIZED);
             // insert front into db
-            TbFront front = ((FrontService) AopContext.currentProxy()).insert(
-                    nodeId, ip, frontPort, agencyName, imageTag, RunTypeEnum.DOCKER,
-                    agencyId, hostId, currentIndex, imageTag,
-                    DockerClientService.getContainerName(rootDirOnHost, chainName, currentIndex),
-                    jsonrpcPort, p2pPort, channelPort,chain.getId(), chainName, FrontStatusEnum.INITIALIZED);
+            ((FrontService) AopContext.currentProxy()).insert(front);
+
             newFrontList.add(front);
 
             // insert node into db
@@ -464,15 +468,7 @@ public class FrontService {
             this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
 
             // generate front application.yml
-            // TODO. merge to one method
-            String applicationYml = ThymeleafUtil.generate(
-                    ThymeleafUtil.FRONT_APLLICATION_YML,
-                    Pair.of("encryptType", encryptType),
-                    Pair.of("channelPort", channelPort),
-                    Pair.of("frontPort", frontPort),
-                    Pair.of("webaseSignAddr", chain.getWebaseSignAddr())
-            );
-            Files.write(nodeRoot.resolve("application.yml"), applicationYml.getBytes(), StandardOpenOption.CREATE);
+            ThymeleafUtil.newFrontConfig(nodeRoot,encryptType,channelPort, frontPort,chain.getWebaseSignAddr());
         }
         return newFrontList;
     }
@@ -551,8 +547,7 @@ public class FrontService {
             String remoteDst = String.format("%s/%s/node%s/config.ini", chain.getRootDir(),chain.getChainName(),hostIndex);
 
             // copy group config files to local node's conf dir
-            this.deployShellService.scp(ScpTypeEnum.UP, host.getSshUser(), host.getIp(), host.getSshPort(),
-                    localScr, remoteDst);
+            this.deployShellService.scp(ScpTypeEnum.UP,  host.getIp(), localScr, remoteDst);
         }
     }
 
@@ -562,27 +557,38 @@ public class FrontService {
      * @return
      */
     @Transactional
-    public void start(String nodeId){
+    public boolean start(String nodeId){
         // get front
         TbFront front = this.getByNodeId(nodeId);
         if (front == null){
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
 
+        if(FrontStatusEnum.isRunning(front.getStatus())){
+            log.warn("Front:[{}:{}] is already running",front.getFrontIp(), front.getHostIndex());
+            return true;
+        }
+
         TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
         log.info("Docker start container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        boolean startResult = this.dockerClientService.createAndStart(
-                front.getFrontIp(),
-                host.getDockerPort(),
-                front.getImageTag(),
-                front.getContainerName(),
-                PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()),
-                front.getHostIndex());
+        try {
+            this.dockerClientService.createAndStart(
+                    front.getFrontIp(),
+                    host.getDockerPort(),
+                    front.getImageTag(),
+                    front.getContainerName(),
+                    PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()),
+                    front.getHostIndex());
 
-        if (startResult){
-            this.updateStatus(front.getFrontId(),FrontStatusEnum.RUNNING);
-        }else{
+            threadPoolTaskScheduler.scheduleWithFixedDelay(()->{
+                this.updateStatus(front.getFrontId(),FrontStatusEnum.RUNNING);
+            },System.currentTimeMillis() + constant.getDockerRestartPeriodTime());
+
+            return true;
+        } catch (Exception e) {
+            log.warn("Start front:[{}:{}] failed.",front.getFrontIp(), front.getHostIndex());
+            this.updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
             throw new NodeMgrException(ConstantCode.START_NODE_ERROR);
         }
     }
@@ -595,7 +601,8 @@ public class FrontService {
      */
     @Transactional
     public boolean upgrade(int chainId,String newImageTag) {
-        boolean updateResult = this.frontMapper.updateImageTagByChainId(chainId, newImageTag, LocalDateTime.now()) > 0;
+        boolean updateResult = this.frontMapper.updateUpgradingByChainId(chainId,
+                newImageTag, LocalDateTime.now(), FrontStatusEnum.UPGRADING.getId()) > 0;
         return updateResult;
     }
 
@@ -654,16 +661,12 @@ public class FrontService {
         TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        boolean stopResult = this.dockerClientService.removeByName(
+        this.dockerClientService.removeByName(
                 front.getFrontIp(),
                 hostInDb.getDockerPort(),
                 front.getContainerName());
 
-        if (stopResult){
-            ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
-        }else{
-            throw new NodeMgrException(ConstantCode.STOP_NODE_ERROR);
-        }
+        ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
     }
 
     @Transactional
