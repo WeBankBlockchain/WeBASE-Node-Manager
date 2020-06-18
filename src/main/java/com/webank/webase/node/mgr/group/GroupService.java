@@ -55,7 +55,6 @@ import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
-import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
@@ -458,6 +457,10 @@ public class GroupService {
             int groupId = tbGroup.getGroupId();
             String lastBlockHash = "";
             for (TbFront front : frontList) {
+                if( ! FrontStatusEnum.isRunning(front.getStatus())){
+                    log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
+                    continue;
+                }
                 String frontIp = front.getFrontIp();
                 int frontPort = front.getFrontPort();
                 // check genesis block
@@ -1040,8 +1043,7 @@ public class GroupService {
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
         String localDst = String.format("%s/conf/group.%s.*", localNodePath, generateGroupId);
         // copy group config files to local node's conf dir
-        deployShellService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(),
-                remoteGroupConfSource, localDst);
+        deployShellService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupConfSource, localDst);
     }
 
 
@@ -1076,7 +1078,7 @@ public class GroupService {
             }
         }
         // copy group status file to local node's conf dir
-        deployShellService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(),
+        deployShellService.scp(ScpTypeEnum.DOWNLOAD,  tbHost.getIp(),
                 remoteGroupStatusSource, localDst.toAbsolutePath().toString());
     }
 
@@ -1130,14 +1132,17 @@ public class GroupService {
             }
 
             // scp node to remote host
+            // NODES_ROOT/[chainName]/[ip]/node[index] as a {@link Path}, a directory.
             String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
-            String dst = PathService.getNodeRootOnHost(PathService.getChainRootOnHost(chain.getRootDir(),chainName),newFront.getHostIndex() );
+            String dst = PathService.getChainRootOnHost(chain.getRootDir(),chainName);
 
             log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst);
-            ExecuteResult executeResult = this.deployShellService.scp(ScpTypeEnum.UP, ip, src, dst);
-            if (executeResult.failed()) {
-                //TODO. write file error
-                log.error("Send node:[{}:{}] files error.", ip, newFront.getHostIndex());
+            try {
+                this.deployShellService.scp(ScpTypeEnum.UP, ip, src, dst);
+            } catch (Exception e) {
+                // TODO.e
+                log.info("Send files from:[{}] to:[{}@{}#{}:{}] error.", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst, e);
+                e.printStackTrace();
             }
         }
     }

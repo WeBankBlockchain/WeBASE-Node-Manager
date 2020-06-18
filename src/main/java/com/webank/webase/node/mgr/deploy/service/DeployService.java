@@ -30,7 +30,6 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
@@ -45,12 +44,8 @@ import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
-import com.webank.webase.node.mgr.group.GroupMapper;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
-import com.webank.webase.node.mgr.node.NodeMapper;
 import com.webank.webase.node.mgr.node.NodeService;
 
 import lombok.extern.log4j.Log4j2;
@@ -62,23 +57,16 @@ public class DeployService {
     @Autowired private TbConfigMapper tbConfigMapper;
     @Autowired private TbChainMapper tbChainMapper;
     @Autowired private FrontMapper frontMapper;
-    @Autowired private NodeMapper nodeMapper;
-    @Autowired private FrontGroupMapMapper frontGroupMapMapper;
     @Autowired private TbAgencyMapper tbAgencyMapper;
-    @Autowired private GroupMapper groupMapper;
     @Autowired private TbHostMapper tbHostMapper;
 
     @Autowired private AgencyService agencyService;
     @Autowired private HostService hostService;
     @Autowired private GroupService groupService;
     @Autowired private FrontService frontService;
-    @Autowired private FrontGroupMapService frontGroupMapService;
-    @Autowired private NodeService nodeService;
     @Autowired private ChainService chainService;
-    @Autowired private DeployShellService deployShellService;
     @Autowired private NodeAsyncService nodeAsyncService;
     @Autowired private PathService pathService;
-    @Autowired private ConstantProperties constant;
 
     /**
      * Add in v1.4.0 deploy.
@@ -102,6 +90,7 @@ public class DeployService {
 
         // TODO. check WeBASE Sign accessible
 
+        // generate config files and insert data to db
         this.chainService.generateChainConfig(chainName,ipConf,tagId,rootDirOnHost,webaseSignAddr);
 
         // init host and start node
@@ -251,8 +240,6 @@ public class DeployService {
         }
 
         this.chainService.upgrade(chain,newTagConfig.getConfigValue());
-
-        this.nodeAsyncService.startFrontOfChain(chain.getId());
     }
 
     /**

@@ -31,11 +31,10 @@ import lombok.extern.log4j.Log4j2;
 public enum ChainStatusEnum {
     INITIALIZED((byte) 0, "initialized"),
     DEPLOYING((byte) 1, "deploying"),
-    DEPLOY_SUCCESS((byte) 2, "deploy success"),
+    UPGRADING((byte) 2, "Upgrading"),
     DEPLOY_FAILED((byte) 3, "deploy failed"),
-    DEPLOY_TIMEOUT_FAILED((byte) 4, "deploy timeout failed"),
-    UPGRADING((byte) 5, "Upgrading"),
-    RUNNING((byte) 6, "Running"),
+    UPGRADING_FAILED((byte) 4, "deploy failed"),
+    RUNNING((byte) 5, "Running"),
     ;
 
     private byte id;
@@ -69,7 +68,7 @@ public enum ChainStatusEnum {
         // check chain status
         switch (statusEnum){
             case DEPLOYING:
-            case DEPLOY_SUCCESS:
+            case RUNNING:
                 return true;
             default:
                 return false;

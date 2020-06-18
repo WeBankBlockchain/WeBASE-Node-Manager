@@ -36,7 +36,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.ValidateUtil;
+import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
 
@@ -61,11 +61,8 @@ public class DeployShellService {
      * @param dst
      * @return
      */
-    public ExecuteResult scp(ScpTypeEnum typeEnum, String ip,  String src, String dst) {
-        String command = String.format("bash -x -e %s -t %s -i %s -u %s -p %s -s %s -d %s",
-                constant.getScpShell(), typeEnum.getValue(), ip, SSH_DEFAULT_USER, SSH_DEFAULT_PORT, src, dst);
-        log.info("exec file send command: [{}]", command);
-        return JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
+    public void scp(ScpTypeEnum typeEnum, String ip,  String src, String dst) {
+        this.scp(typeEnum,SSH_DEFAULT_USER,ip,SSH_DEFAULT_PORT,src,dst );
     }
 
     /**
@@ -77,11 +74,22 @@ public class DeployShellService {
      * @param dst
      * @return
      */
-    public ExecuteResult scp(ScpTypeEnum typeEnum, String user, String ip, int port, String src, String dst) {
+    public void scp(ScpTypeEnum typeEnum, String user, String ip, int port, String src, String dst) {
+        if (Files.isRegularFile(Paths.get(src))) {
+            String parentOnRemote = Paths.get(dst).getParent().toAbsolutePath().toString();
+            String mkdirCommand = String.format("mkdir -p %s ; exit 0", parentOnRemote);
+            SshTools.exec(ip, mkdirCommand);
+        }
+
         String command = String.format("bash -x -e %s -t %s -i %s -u %s -p %s -s %s -d %s",
                 constant.getScpShell(), typeEnum.getValue(), ip, user, port, src, dst);
         log.info("exec file send command: [{}]", command);
-        return JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
+
+        if (result.failed()) {
+            log.error("Send files from [{}] to [{}:{}] filed.", src, ip, dst);
+            throw new NodeMgrException(ConstantCode.TRANSFER_FILES_ERROR.msg(result.getExecuteOut()));
+        }
     }
 
 
@@ -92,8 +100,8 @@ public class DeployShellService {
      * @param chainRoot chain root on host, default is /opt/fisco/{chain_name}.
      * @return
      */
-    public ExecuteResult execHostOperate(String ip, int port, String user, String chainRoot) {
-        return this.execHostOperate(ip, port, user, "", chainRoot);
+    public void execHostOperate(String ip, int port, String user, String chainRoot) {
+        this.execHostOperate(ip, port, user, "", chainRoot);
     }
 
     /**
@@ -104,12 +112,8 @@ public class DeployShellService {
      * @param chainRoot chain root on host, default is /opt/fisco/{chain_name}.
      * @return
      */
-    public ExecuteResult execHostOperate(String ip, int port, String user, String pwd, String chainRoot) {
+    public void execHostOperate(String ip, int port, String user, String pwd, String chainRoot) {
         log.info("Exec execHostOperate method for [{}@{}:{}#{}]", user, ip, port, pwd);
-        if (!ValidateUtil.ipv4Valid(ip)) {
-            log.error("Exec execHostOperate method ERROR: IP:[{}] error", ip);
-            return null;
-        }
 
         int newport = port <= 0 || port > 65535 ? SSH_DEFAULT_PORT : port;
         String newuser = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
@@ -120,7 +124,10 @@ public class DeployShellService {
                 StringUtils.isBlank(chainRoot) ? "" : String.format(" -n %s ", chainRoot)
         );
 
-        return JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.EXEC_HOST_INIT_SCRIPT_ERROR.msg(result.getExecuteOut()));
+        }
     }
 
     /**

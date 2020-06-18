@@ -40,9 +40,7 @@ import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 
 import lombok.Data;
 import lombok.ToString;
-import lombok.extern.log4j.Log4j2;
 
-@Log4j2
 @Data
 @ToString
 public class IpConfigParse {

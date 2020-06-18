@@ -59,11 +59,11 @@ import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AgencyService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.DockerClientService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
+import com.webank.webase.node.mgr.deploy.service.NodeAsyncService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -81,7 +81,6 @@ public class ChainService {
     @Autowired private TbChainMapper tbChainMapper;
     @Autowired private TbConfigMapper tbConfigMapper;
     @Autowired private TbAgencyMapper tbAgencyMapper;
-    @Autowired private TbHostMapper tbHostMapper;
 
     @Autowired
     private ConstantProperties cproperties;
@@ -105,6 +104,8 @@ public class ChainService {
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private ConstantProperties constant;
+    @Autowired
+    private NodeAsyncService nodeAsyncService;
 
     /**
      * get chain info.
@@ -159,6 +160,7 @@ public class ChainService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int chainId, ChainStatusEnum newStatus) {
+        log.info("Update chain:[{}] status to:[{}]",chainId, newStatus.toString());
         TbChain newChain = new TbChain();
         newChain.setId(chainId);
         newChain.setChainStatus(newStatus.getId());
@@ -167,7 +169,7 @@ public class ChainService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean upgrade(TbChain chain , String newTagVersion ) {
+    public void upgrade(TbChain chain , String newTagVersion ) {
         log.info("Upgrade chain:[{}] from version:[{}] to version:[{}].",
                 chain.getChainName(), chain.getVersion(), newTagVersion);
 
@@ -175,6 +177,7 @@ public class ChainService {
         newChain.setId(chain.getId());
         newChain.setVersion(newTagVersion);
         newChain.setModifyTime(new Date());
+        newChain.setChainStatus(ChainStatusEnum.UPGRADING.getId());
         int count = this.tbChainMapper.updateByPrimaryKeySelective(newChain);
 
         if(count != 1){
@@ -183,7 +186,10 @@ public class ChainService {
 
         // restart front
         log.info("Upgrade front:[{}] to version:[{}].",chain.getVersion() , newTagVersion);
-        return this.frontService.upgrade(chain.getId(),newTagVersion);
+        this.frontService.upgrade(chain.getId(),newTagVersion);
+
+        // start chain
+        this.nodeAsyncService.upgradeStartChain(chain.getId());
     }
 
 
@@ -369,7 +375,7 @@ public class ChainService {
      * @param chainName
      * @return
      */
-    public TbChain startDeploy(String chainName){
+    public TbChain changeChainStatusToDeploying(String chainName){
         if (StringUtils.isBlank(chainName)) {
             log.error("Chain name:[{}] is blank, deploy error.", chainName);
             return null;
