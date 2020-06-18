@@ -36,7 +36,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,10 +82,10 @@ public class HostService {
     @Autowired private FrontService frontService;
     @Autowired private AgencyService agencyService;
     @Autowired private PathService pathService;
-    @Autowired private ConfigService configService;
     @Autowired private DeployShellService deployShellService;
-    @Qualifier(value = "deployAsyncExecutor")
-    @Autowired private ThreadPoolTaskExecutor executor;
+
+    @Qualifier(value = "deployAsyncScheduler")
+    @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int hostId, HostStatusEnum newStatus) throws NodeMgrException {
@@ -132,7 +132,7 @@ public class HostService {
      *
      * @param chainName
      */
-    @Async("deployAsyncExecutor")
+    @Async("deployAsyncScheduler")
     public void initHostList(String chainName) {
         if (StringUtils.isBlank(chainName)) {
             log.error("Chain name:[{}] is blank, deploy error.", chainName);
@@ -201,7 +201,7 @@ public class HostService {
         AtomicInteger startCount = new AtomicInteger(0);
         for (TbHost tbHost : CollectionUtils.emptyIfNull(tbHostList)) {
             log.info("try to start bcos-front on host:[{}]", tbHost.getIp());
-            executor.submit(() -> {
+            threadPoolTaskScheduler.submit(() -> {
                 try {
                     List<TbFront> tbFrontList = frontMapper.selectByHostId(tbHost.getId());
                     startCount.addAndGet(CollectionUtils.size(tbFrontList));
@@ -249,8 +249,13 @@ public class HostService {
             dockerStartLatch.await(20, TimeUnit.MINUTES);
             // check if all host init success
             if (startCount.get() == 0) {
-                log.info("All bcos-front of chain:[{}] start success, start failed count:[{}].",  tbChain.getChainName(), startCount.get());
-                chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_SUCCESS);
+                final int chainId = tbChain.getId();
+                // waite front to start up
+                threadPoolTaskScheduler.scheduleWithFixedDelay(() -> {
+                    log.info("All bcos-front of chain:[{}] start success, start failed count:[{}].",  chainName, startCount.get());
+                    chainService.updateStatus(chainId, ChainStatusEnum.DEPLOY_SUCCESS);
+                }, System.currentTimeMillis() + constant.getDockerRestartPeriodTime() );
+
             } else {
                 log.error("[{}] bcos-front of chain:[{}] start failed.", startCount.get(), tbChain.getChainName());
                 chainService.updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOY_FAILED);
@@ -299,7 +304,7 @@ public class HostService {
                 }
                 this.updateStatus(tbHost.getId(), HostStatusEnum.INITIATING);
             }
-            executor.submit(() -> {
+            threadPoolTaskScheduler.submit(() -> {
                 try {
                     // TODO. optimize code
                     // exec host init shell script
