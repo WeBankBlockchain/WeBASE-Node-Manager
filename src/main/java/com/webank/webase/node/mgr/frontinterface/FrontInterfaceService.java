@@ -45,7 +45,7 @@ import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.monitor.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import lombok.extern.log4j.Log4j2;
 
@@ -214,10 +214,10 @@ public class FrontInterfaceService {
     /**
      * get transaction receipt.
      */
-    public TransReceipt getTransReceipt(Integer groupId, String transHash) throws NodeMgrException {
+    public TransactionReceipt getTransReceipt(Integer groupId, String transHash) throws NodeMgrException {
         log.debug("start getTransReceipt groupId:{} transaction:{}", groupId, transHash);
         String uri = String.format(FrontRestTools.FRONT_TRANS_RECEIPT_BY_HASH_URI, transHash);
-        TransReceipt transReceipt = frontRestTools.getForEntity(groupId, uri, TransReceipt.class);
+        TransactionReceipt transReceipt = frontRestTools.getForEntity(groupId, uri, TransactionReceipt.class);
         log.debug("end getTransReceipt");
         return transReceipt;
     }
@@ -289,7 +289,7 @@ public class FrontInterfaceService {
     public String getAddressByHash(Integer groupId, String transHash) throws NodeMgrException {
         log.debug("start getAddressByHash. groupId:{} transHash:{}", groupId, transHash);
 
-        TransReceipt transReceipt = getTransReceipt(groupId, transHash);
+        TransactionReceipt transReceipt = getTransReceipt(groupId, transHash);
         String contractAddress = transReceipt.getContractAddress();
         log.debug("end getAddressByHash. contractAddress{}", contractAddress);
         return contractAddress;
