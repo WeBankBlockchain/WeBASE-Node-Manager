@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  * edit by marsli from hujkay
  */
 @Slf4j
-public class JsonUtils {
+public class JsonTools {
     private static final String STANDARD_FORMAT = "yyyy-MM-dd HH:mm:ss";
     /**
      * 设置一些通用的属性
