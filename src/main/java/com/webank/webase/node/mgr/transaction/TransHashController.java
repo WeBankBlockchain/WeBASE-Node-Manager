@@ -24,7 +24,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -112,7 +112,7 @@ public class TransHashController {
         log.info("start getTransReceipt startTime:{} groupId:{} transaction:{}",
             startTime.toEpochMilli(), groupId, transHash);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        TransReceipt transReceipt = transHashService.getTransReceipt(groupId, transHash);
+        TransactionReceipt transReceipt = transHashService.getTransReceipt(groupId, transHash);
         baseResponse.setData(transReceipt);
         log.info("end getTransReceipt useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));

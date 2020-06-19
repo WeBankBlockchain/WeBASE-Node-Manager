@@ -21,7 +21,7 @@ import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 
 import java.math.BigInteger;
@@ -253,7 +253,7 @@ public class TransHashService {
     /**
      * get transaction receipt
      */
-    public TransReceipt getTransReceipt(int groupId, String transHash) {
+    public TransactionReceipt getTransReceipt(int groupId, String transHash) {
         return frontInterface.getTransReceipt(groupId, transHash);
     }
 
