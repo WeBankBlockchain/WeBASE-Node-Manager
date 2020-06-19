@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-def springboot_version="2.1.2.RELEASE"
+def springboot_version="2.1.15.RELEASE"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
@@ -35,19 +35,8 @@ List springboot = [
 // cover old version
 def spring_version="5.1.15.RELEASE"
 List spring =[
-        "org.springframework:spring-aop:$spring_version",
-        "org.springframework:spring-core:$spring_version",
-        "org.springframework:spring-beans:$spring_version",
-        "org.springframework:spring-context:$spring_version",
-        "org.springframework:spring-context-support:$spring_version",
-        "org.springframework:spring-tx:$spring_version",
-        "org.springframework:spring-web:$spring_version",
-        "org.springframework:spring-webmvc:$spring_version",
-        "org.springframework:spring-jdbc:$spring_version",
-        "org.springframework:spring-aspects:$spring_version",
-        "org.springframework:spring-messaging:$spring_version",
-        "org.springframework:spring-orm:$spring_version",
-        "org.springframework:spring-test:$spring_version"
+    "org.springframework:spring-jdbc:$spring_version",
+    "org.springframework:spring-tx:$spring_version"
 ]
 
 List jaxb = [
