@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.security;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.ACCESS_DENIED);
 
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(JSON.toJSONString(baseResponse));
+        response.getWriter().write(JsonTools.toJSONString(baseResponse));
     }
 
 }

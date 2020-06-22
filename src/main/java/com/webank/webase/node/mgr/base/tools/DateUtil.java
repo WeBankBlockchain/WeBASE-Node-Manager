@@ -17,9 +17,6 @@ package com.webank.webase.node.mgr.base.tools;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class DateUtil {
     public static final DateTimeFormatter _YYYY_MM_DD_HH_MM_SS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final DateTimeFormatter YYYYMMDD_HHMMSS = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");

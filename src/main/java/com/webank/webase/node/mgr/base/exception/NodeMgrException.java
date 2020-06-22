@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.base.exception;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.RetCode;
 
 /**
@@ -40,7 +40,7 @@ public class NodeMgrException extends RuntimeException {
      */
     public NodeMgrException(RetCode retCode, Throwable cause) {
         super(retCode.getMessage(), cause);
-        retCode.setMessage(JSON.toJSONString(cause.getMessage()));
+        retCode.setMessage(JsonTools.toJSONString(cause.getMessage()));
         this.retCode = retCode;
     }
 

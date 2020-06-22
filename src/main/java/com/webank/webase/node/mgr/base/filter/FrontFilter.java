@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.base.filter;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -54,7 +54,7 @@ public class FrontFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         ignorePath = getIgnorePath();
-        log.info("ignorePath:{}", JSON.toJSONString(ignorePath));
+        log.info("ignorePath:{}", JsonTools.toJSONString(ignorePath));
     }
 
     @Override

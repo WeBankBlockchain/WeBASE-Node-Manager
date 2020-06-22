@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -74,7 +74,7 @@ public class UserController extends BaseController {
         baseResponse.setData(userRow);
 
         log.info("end addUserInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -97,7 +97,7 @@ public class UserController extends BaseController {
         baseResponse.setData(userRow);
 
         log.info("end bindUserInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -112,7 +112,7 @@ public class UserController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start updateUserInfo startTime:{} User:{}", startTime.toEpochMilli(),
-            JSON.toJSONString(user));
+            JsonTools.toJSONString(user));
 
         // update user row
         userService.updateUser(user);
@@ -121,7 +121,7 @@ public class UserController extends BaseController {
         baseResponse.setData(userRow);
 
         log.info("end updateUserInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -158,7 +158,7 @@ public class UserController extends BaseController {
         }
 
         log.info("end userList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -180,7 +180,7 @@ public class UserController extends BaseController {
         baseResponse.setData(userRow);
 
         log.info("end importPrivateKey useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -202,7 +202,7 @@ public class UserController extends BaseController {
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -228,7 +228,7 @@ public class UserController extends BaseController {
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 

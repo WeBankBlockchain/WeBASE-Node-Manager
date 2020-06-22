@@ -16,20 +16,21 @@
 package node.mgr.test.contract;
 
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.ContractService;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import java.util.Arrays;
 import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
+import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -55,14 +56,14 @@ public class ContractServiceTest {
         //deploy
         TbContract tbContract = contractService.deployContract(deployInputParam);
         assert (tbContract.getContractId()!=null);
-        System.out.println("=========================================deploy result:"+ JSON.toJSONString(tbContract));
+        System.out.println("=========================================deploy result:"+ JsonTools.toJSONString(tbContract));
     }
 
     @Test
     public void sendTransactionTest(){
         //abi
         String abiStr = "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"type\":\"constructor\"}]";
-        List<Object> abiList = JSONArray.parseArray(abiStr);
+        List<Object> abiList = JsonTools.toJavaObjectList(abiStr, Object.class);
 
         //param
         TransactionInputParam param = new TransactionInputParam();

@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.cert;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -71,7 +71,7 @@ public class CertController extends BaseController {
             return new BaseResponse(ConstantCode.CERT_ERROR, e.getMessage());
         }
         log.info("end getCertByFingerPrint useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(tbCert));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(tbCert));
         return new BaseResponse(ConstantCode.SUCCESS, tbCert);
     }
 
@@ -88,7 +88,7 @@ public class CertController extends BaseController {
                                   BindingResult result) throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start addCert. startTime:{} certHandle:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(certHandle));
+                startTime.toEpochMilli(), JsonTools.toJSONString(certHandle));
         checkBindResult(result);
         int count = 0;
         String content = certHandle.getContent();
@@ -113,7 +113,7 @@ public class CertController extends BaseController {
                           BindingResult result) throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start removeCert. startTime:{} certHandle:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(certHandle));
+                startTime.toEpochMilli(), JsonTools.toJSONString(certHandle));
         checkBindResult(result);
         int count = 0;
         String fingerPrint = certHandle.getFingerPrint();

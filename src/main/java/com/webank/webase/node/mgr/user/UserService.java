@@ -13,26 +13,16 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.HasPk;
-import com.webank.webase.node.mgr.base.enums.UserType;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
-import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
-import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.monitor.MonitorService;
-import com.webank.webase.node.mgr.user.entity.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.bcel.Const;
 import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.utils.Numeric;
@@ -41,6 +31,26 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.HasPk;
+import com.webank.webase.node.mgr.base.enums.UserType;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.Web3Tools;
+import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
+import com.webank.webase.node.mgr.user.entity.KeyPair;
+import com.webank.webase.node.mgr.user.entity.ReqImportPem;
+import com.webank.webase.node.mgr.user.entity.TbUser;
+import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
+import com.webank.webase.node.mgr.user.entity.UserParam;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * services for user data.
@@ -128,7 +138,7 @@ public class UserService {
      */
     @Transactional
     public Integer bindUserInfo(BindUserInputParam user) throws NodeMgrException {
-        log.debug("start bindUserInfo User:{}", JSON.toJSONString(user));
+        log.debug("start bindUserInfo User:{}", JsonTools.toJSONString(user));
 
         String publicKey = user.getPublicKey();
         if (StringUtils.isBlank(publicKey)) {
@@ -185,14 +195,14 @@ public class UserService {
      * query count of user.
      */
     public Integer countOfUser(UserParam userParam) throws NodeMgrException {
-        log.debug("start countOfUser. userParam:{}", JSON.toJSONString(userParam));
+        log.debug("start countOfUser. userParam:{}", JsonTools.toJSONString(userParam));
 
         try {
             Integer count = userMapper.countOfUser(userParam);
-            log.debug("end countOfUser userParam:{} count:{}", JSON.toJSONString(userParam), count);
+            log.debug("end countOfUser userParam:{} count:{}", JsonTools.toJSONString(userParam), count);
             return count;
         } catch (RuntimeException ex) {
-            log.error("fail countOfUser userParam:{}", JSON.toJSONString(userParam), ex);
+            log.error("fail countOfUser userParam:{}", JsonTools.toJSONString(userParam), ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -210,10 +220,10 @@ public class UserService {
      * query user list by page.
      */
     public List<TbUser> qureyUserList(UserParam userParam) throws NodeMgrException {
-        log.debug("start qureyUserList userParam:{}", JSON.toJSONString(userParam));
+        log.debug("start qureyUserList userParam:{}", JsonTools.toJSONString(userParam));
         // query user list
         List<TbUser> listOfUser = userMapper.listOfUser(userParam);
-        log.debug("end qureyUserList listOfUser:{}", JSON.toJSONString(listOfUser));
+        log.debug("end qureyUserList listOfUser:{}", JsonTools.toJSONString(listOfUser));
         return listOfUser;
     }
 
@@ -228,7 +238,7 @@ public class UserService {
             TbUser userRow = userMapper.queryUser(userId, groupId, userName, address);
             log.debug(
                 "end queryUser userId:{} groupId:{} userName:{}  address:{} TbUser:{}",
-                userId, groupId, userName, address, JSON.toJSONString(userRow));
+                userId, groupId, userName, address, JsonTools.toJSONString(userRow));
             return userRow;
         } catch (RuntimeException ex) {
             log.error("fail queryUser userId:{} groupId:{} userName:{}  address:{}",
@@ -284,7 +294,7 @@ public class UserService {
      * update user info.
      */
     public void updateUser(TbUser user) throws NodeMgrException {
-        log.debug("start updateUser user", JSON.toJSONString(user));
+        log.debug("start updateUser user", JsonTools.toJSONString(user));
         Integer userId = Optional.ofNullable(user).map(u -> u.getUserId()).orElse(null);
         String description = Optional.ofNullable(user).map(u -> u.getDescription()).orElse(null);
         if (userId == null) {
