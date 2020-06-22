@@ -86,6 +86,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .permitAll();
     }
 
+
     @Override
     public void configure(WebSecurity web) throws Exception {
         super.configure(web);

@@ -39,7 +39,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
@@ -50,6 +49,7 @@ import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
@@ -126,8 +126,8 @@ public class FrontService {
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
-    // interval of check front status
-    private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
+	// interval of check front status
+	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
     /**
      * add new front
@@ -176,7 +176,7 @@ public class FrontService {
         //save front info
         frontMapper.add(tbFront);
         if (tbFront.getFrontId() == null || tbFront.getFrontId() == 0) {
-            log.warn("fail newFront, after save, tbFront:{}", JSON.toJSONString(tbFront));
+            log.warn("fail newFront, after save, tbFront:{}", JsonTools.toJSONString(tbFront));
             throw new NodeMgrException(ConstantCode.SAVE_FRONT_FAIL);
         }
         for (String groupId : groupIdList) {
@@ -357,7 +357,7 @@ public class FrontService {
 		Duration duration = Duration.between(modifyTime, LocalDateTime.now());
 		Long subTime = duration.toMillis();
 		if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
-			log.info("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
+			log.debug("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
 					subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
 			return;
 		}

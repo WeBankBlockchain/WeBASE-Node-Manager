@@ -13,12 +13,6 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -31,16 +25,32 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.utils.Numeric;
+
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * common method.
@@ -155,26 +165,17 @@ public class NodeMgrTools {
             log.warn("object2JavaBean. obj or clazz null");
             return null;
         }
-        String jsonStr = JSON.toJSONString(obj);
+        String jsonStr = JsonTools.toJSONString(obj);
 
-        return JSON.parseObject(jsonStr, clazz);
+        return JsonTools.toJavaObject(jsonStr, clazz);
     }
 
-
-    public static JSONObject Object2JSONObject(Object obj) {
-        if (obj == null) {
-            log.warn("obj is null");
-            return null;
-        }
-        String objJson = JSON.toJSONString(obj);
-        return JSONObject.parseObject(objJson);
-    }
 
     /**
      * encode list by sha.
      */
     public static String shaList(List<String> values) {
-        log.info("shaList start. values:{}", JSON.toJSONString(values));
+        log.info("shaList start. values:{}", JsonTools.toJSONString(values));
         // list按字段排序，并转换成字符串
         String list2SortString = list2SortString(values);
         // SHA加密字符串
@@ -364,7 +365,7 @@ public class NodeMgrTools {
 /*        baseResponse.setMessage(ex.getMessage());
         response.setContentType("application/json;charset=UTF-8");*/
         try {
-            response.getWriter().write(JSON.toJSONString(baseResponse));
+            response.getWriter().write(JsonTools.toJSONString(baseResponse));
         } catch (IOException e) {
             log.error("fail responseRetCodeException",e);
         }
@@ -416,20 +417,6 @@ public class NodeMgrTools {
     }
 
     /**
-     * is json.
-     */
-    public static boolean isJSON(String str) {
-        boolean result;
-        try {
-            JSON.parse(str);
-            result = true;
-        } catch (Exception e) {
-            result = false;
-        }
-        return result;
-    }
-
-    /**
      * response string.
      */
     public static void responseString(HttpServletResponse response, String str) {
@@ -439,12 +426,12 @@ public class NodeMgrTools {
         }
 
         RetCode retCode;
-        if (isJSON(str) && (retCode = JSONObject.parseObject(str, RetCode.class)) != null) {
+        if (JsonTools.isJson(str) && (retCode = JsonTools.toJavaObject(str, RetCode.class)) != null) {
             baseResponse = new BaseResponse(retCode);
         }
 
         try {
-            response.getWriter().write(JSON.toJSONString(baseResponse));
+            response.getWriter().write(JsonTools.toJSONString(baseResponse));
         } catch (IOException e) {
             log.error("fail responseRetCodeException", e);
         }

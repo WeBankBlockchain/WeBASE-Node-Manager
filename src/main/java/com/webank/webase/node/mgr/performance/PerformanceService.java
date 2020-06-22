@@ -18,7 +18,7 @@ package com.webank.webase.node.mgr.performance;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_PERFORMANCE_CONFIG;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_PERFORMANCE_RATIO;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -76,7 +76,7 @@ public class PerformanceService {
         log.info("getPerformanceRatio request url:{}", url);
 
         Object rspObj = genericRestTemplate.getForObject(url, Object.class);
-        log.debug("end getPerformanceRatio. rspObj:{}", JSON.toJSONString(rspObj));
+        log.debug("end getPerformanceRatio. rspObj:{}", JsonTools.toJSONString(rspObj));
         return rspObj;
 
     }
@@ -99,7 +99,7 @@ public class PerformanceService {
         log.info("getPerformanceConfig request url:{}", url);
 
         Object rspObj = genericRestTemplate.getForObject(url, Object.class);
-        log.debug("end getPerformanceConfig. frontRsp:{}", JSON.toJSONString(rspObj));
+        log.debug("end getPerformanceConfig. frontRsp:{}", JsonTools.toJSONString(rspObj));
         return rspObj;
     }
 

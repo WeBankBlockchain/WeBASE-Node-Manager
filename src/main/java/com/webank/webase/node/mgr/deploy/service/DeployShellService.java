@@ -31,11 +31,11 @@ import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
@@ -143,7 +143,7 @@ public class DeployShellService {
                                         String chainName) {
         Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
-                JSON.toJSONString(ipLines), chainName, ipConf.toString());
+                JsonTools.toJSONString(ipLines), chainName, ipConf.toString());
         try {
             if ( ! Files.exists(ipConf.getParent())) {
                 Files.createDirectories(ipConf.getParent());

@@ -1,11 +1,11 @@
 /**
  * Copyright 2014-2020  the original author or authors.
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -37,7 +37,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
@@ -47,6 +46,7 @@ import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.SshTools;
@@ -112,19 +112,19 @@ public class ChainService {
      * get chain info.
      */
     public Object getChainMonitorInfo(Integer frontId, LocalDateTime beginDate,
-                                      LocalDateTime endDate, LocalDateTime contrastBeginDate,
-                                      LocalDateTime contrastEndDate, int gap, int groupId) {
+        LocalDateTime endDate, LocalDateTime contrastBeginDate,
+        LocalDateTime contrastEndDate, int gap, int groupId) {
         log.debug(
-                "start getChainMonitorInfo.  frontId:{} beginDate:{} endDate:{}"
-                        + " contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}",
-                frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
+            "start getChainMonitorInfo.  frontId:{} beginDate:{} endDate:{}"
+                + " contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}",
+            frontId, beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
 
         // request param to str
         List<Object> valueList = Arrays
-                .asList(beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
+            .asList(beginDate, endDate, contrastBeginDate, contrastEndDate, gap, groupId);
         List<String> nameList = Arrays
-                .asList("beginDate", "endDate", "contrastBeginDate", "contrastEndDate", "gap",
-                        "groupId");
+            .asList("beginDate", "endDate", "contrastBeginDate", "contrastEndDate", "gap",
+                "groupId");
 
         String chainUrlParam = NodeMgrTools.convertUrlParam(nameList, valueList);
 
@@ -136,13 +136,13 @@ public class ChainService {
 
         // request url
         String url = String
-                .format(cproperties.getFrontUrl(), tbFront.getFrontIp(), tbFront.getFrontPort(),
-                        URI_CHAIN);
+            .format(cproperties.getFrontUrl(), tbFront.getFrontIp(), tbFront.getFrontPort(),
+                URI_CHAIN);
         url = url + "?" + chainUrlParam;
         log.info("getChainMonitorInfo request url:{}", url);
 
         Object rspObj = genericRestTemplate.getForObject(url, Object.class);
-        log.debug("end getChainMonitorInfo. rspObj:{}", JSON.toJSONString(rspObj));
+        log.debug("end getChainMonitorInfo. rspObj:{}", JsonTools.toJSONString(rspObj));
         return rspObj;
     }
 

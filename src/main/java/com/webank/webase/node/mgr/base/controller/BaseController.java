@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.ParamException;
 
@@ -33,8 +33,8 @@ public class BaseController {
     protected void checkBindResult(BindingResult result) {
         if (result.hasErrors()) {
             String errFieldStr = result.getAllErrors().stream()
-                .map(obj -> JSON.parseObject(JSON.toJSONString(obj)))
-                .map(err -> err.getString("field"))
+                .map(obj -> JsonTools.stringToJsonNode(JsonTools.toJSONString(obj)))
+                .map(err -> err.get("field").asText())
                 .collect(Collectors.joining(","));
             StringUtils.removeEnd(errFieldStr, ",");
             String message = "these fields can not be empty:" + errFieldStr;

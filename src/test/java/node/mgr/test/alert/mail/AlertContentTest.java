@@ -16,7 +16,7 @@
 
 package node.mgr.test.alert.mail;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import org.junit.Test;
 
