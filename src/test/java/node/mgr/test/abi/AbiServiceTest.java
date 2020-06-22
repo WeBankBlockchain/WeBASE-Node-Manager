@@ -16,7 +16,7 @@
 
 package node.mgr.test.abi;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.abi.AbiService;
 import com.webank.webase.node.mgr.abi.entity.AbiInfo;
@@ -46,7 +46,7 @@ public class AbiServiceTest {
 		abiInsert.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
 		abiInsert.setContractName("Hello");
 		String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-		abiInsert.setContractAbi(JSON.parseArray(abiStr));
+		abiInsert.setContractAbi(JsonTools.toJavaObjectList(abiStr, Object.class));
 		abiService.saveAbi(abiInsert);
 		int afterCount = abiService.countOfAbi();
 		Assert.assertTrue("insert failed", afterCount > count);
