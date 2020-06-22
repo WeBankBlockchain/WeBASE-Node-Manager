@@ -186,6 +186,20 @@ public class DeployController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
+    @GetMapping(value = "progress")
+    public BaseResponse progress(
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
+         ) throws IOException {
+        Instant startTime = Instant.now();
+        log.info("Start get progress, chainName:[{}], now:[{}]", chainName, startTime);
+        int progress = this.deployService.progress(chainName);
+        return new BaseResponse(ConstantCode.SUCCESS, progress);
+    }
 
     /**
      *

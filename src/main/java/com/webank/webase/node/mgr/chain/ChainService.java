@@ -48,6 +48,7 @@ import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
@@ -409,5 +410,38 @@ public class ChainService {
             }
         }
         return tbChain;
+    }
+
+    /**
+     *
+     * @param chain
+     * @return
+     */
+    public int progress(TbChain chain){
+        int progress = ChainStatusEnum.progress(chain.getChainStatus());
+        switch (progress){
+            // deploy or upgrade failed
+            case NumberUtil.PERCENTAGE_FAILED:
+
+            // deploy or upgrade success
+            case NumberUtil.PERCENTAGE_FINISH:
+                return progress;
+        }
+
+        progress = this.hostService.hostProgress(chain.getId());
+        // host init error
+        if (progress == NumberUtil.PERCENTAGE_FAILED){
+            return NumberUtil.PERCENTAGE_FAILED;
+        }
+        if(progress < NumberUtil.PERCENTAGE_FINISH){
+            // host init in progress
+            return progress/2;
+        }
+
+
+        // check front start
+        progress = this.frontService.frontProgress(chain.getId());
+
+        return 50 + (progress / 2);
     }
 }

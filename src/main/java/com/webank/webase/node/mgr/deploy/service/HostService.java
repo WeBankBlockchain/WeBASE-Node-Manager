@@ -45,6 +45,7 @@ import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
@@ -317,5 +318,34 @@ public class HostService {
         // delete host in batch
         log.info("Delete host data by agency id:[{}].", agencyId);
         this.tbHostMapper.deleteByAgencyId(agencyId);
+    }
+
+    /**
+     *
+     * @param chainId
+     */
+    public int hostProgress(int chainId){
+        // check host init
+        int hostFinishCount = 0;
+        List<TbHost> hostList = this.selectHostListByChainId(chainId);
+        if (CollectionUtils.isEmpty(hostList)) {
+            return NumberUtil.PERCENTAGE_FINISH;
+        }
+        for (TbHost host : hostList) {
+            HostStatusEnum hostStatusEnum = HostStatusEnum.getById(host.getStatus());
+            switch (hostStatusEnum){
+                case INIT_FAILED:
+                    return NumberUtil.PERCENTAGE_FAILED;
+                case INIT_SUCCESS:
+                    hostFinishCount ++;
+                    break;
+            }
+        }
+        // check host init finish ?
+        if (hostFinishCount == hostList.size()){
+            // init success
+            return NumberUtil.PERCENTAGE_FINISH;
+        }
+        return NumberUtil.percentage(hostFinishCount,hostList.size());
     }
 }

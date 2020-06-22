@@ -118,7 +118,7 @@ public class ConstantProperties {
     private long startNodeTimeout = 5 * 60 * 1000L;
     private long execBuildChainTimeout = 10 * 60 * 1000L;
     private long execShellTimeout = 2 * 60 * 1000L;
-    private long dockerRestartPeriodTime = 30 * 1000L;
+    private long dockerRestartPeriodTime = 60 * 1000L;
     private int dockerClientConnectTimeout = 10 * 60 * 1000;
     private int dockerPullTimeout = 10 * 60 * 1000;
     private int dockerClientReadTimeout = 10 * 60 * 1000;

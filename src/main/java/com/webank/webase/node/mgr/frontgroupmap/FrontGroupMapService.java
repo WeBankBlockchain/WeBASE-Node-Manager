@@ -23,13 +23,11 @@ import org.springframework.stereotype.Service;
 
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.group.GroupService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -39,10 +37,6 @@ public class FrontGroupMapService {
 
     @Autowired
     private FrontGroupMapMapper frontGroupMapMapper;
-    @Autowired
-    private GroupService groupService;
-    @Autowired
-    private FrontService frontService;
     @Autowired
     private FrontInterfaceService frontInterface;
 
