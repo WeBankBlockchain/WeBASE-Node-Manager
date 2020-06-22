@@ -15,31 +15,33 @@
  */
 package com.webank.webase.node.mgr.transaction;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.SqlSortType;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
-import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
-import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import lombok.extern.log4j.Log4j2;
+
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.SqlSortType;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
+import com.webank.webase.node.mgr.transaction.entity.TransListParam;
+import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
@@ -48,8 +50,6 @@ public class TransHashController {
 
     @Autowired
     private TransHashService transHashService;
-    @Autowired
-    private GroupService groupService;
 
 
     /**
@@ -73,7 +73,7 @@ public class TransHashController {
         if(StringUtils.isEmpty(transHash) && blockNumber == null) {
             count = transHashService.queryCountOfTranByMinus(groupId);
         } else {
-            // TODO select count(1) in InnoDb is slow when data gets large
+            // select count(1) in InnoDb is slow when data gets large, instead use tx_id to record count
             count = transHashService.queryCountOfTran(groupId, queryParam);
         }
         if (count != null && count > 0) {
@@ -97,7 +97,7 @@ public class TransHashController {
         }
 
         log.info("end queryBlockList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pageResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
         return pageResponse;
     }
 
@@ -112,10 +112,10 @@ public class TransHashController {
         log.info("start getTransReceipt startTime:{} groupId:{} transaction:{}",
             startTime.toEpochMilli(), groupId, transHash);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        TransReceipt transReceipt = transHashService.getTransReceipt(groupId, transHash);
+        TransactionReceipt transReceipt = transHashService.getTransReceipt(groupId, transHash);
         baseResponse.setData(transReceipt);
         log.info("end getTransReceipt useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -133,7 +133,7 @@ public class TransHashController {
         TransactionInfo transInfo = transHashService.getTransaction(groupId, transHash);
         baseResponse.setData(transInfo);
         log.info("end getTransaction useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 }

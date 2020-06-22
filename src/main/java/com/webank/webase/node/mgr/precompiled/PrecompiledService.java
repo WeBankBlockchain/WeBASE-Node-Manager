@@ -15,23 +15,24 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
-import com.alibaba.fastjson.JSON;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
 import com.webank.webase.node.mgr.user.UserService;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Precompiled common service
@@ -63,7 +64,7 @@ public class PrecompiledService {
 
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end listCnsService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end listCnsService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -80,7 +81,7 @@ public class PrecompiledService {
         uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CONSENSUS_LIST, map);
         Object frontRsp = null;
         frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end getNodeListService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end getNodeListService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -90,7 +91,7 @@ public class PrecompiledService {
      */
 
     public Object nodeManageService(ConsensusHandle consensusHandle) {
-        log.debug("start nodeManageService. consensusHandle:{}", JSON.toJSONString(consensusHandle));
+        log.debug("start nodeManageService. consensusHandle:{}", JsonTools.toJSONString(consensusHandle));
         if (Objects.isNull(consensusHandle)) {
             log.error("fail nodeManageService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
@@ -101,7 +102,7 @@ public class PrecompiledService {
         Object frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_CONSENSUS,
                 consensusHandle, Object.class);
-        log.debug("end nodeManageService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end nodeManageService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -110,7 +111,7 @@ public class PrecompiledService {
      */
 
     public Object crudService(CrudHandle crudHandle) {
-        log.debug("start crudService. crudHandle:{}", JSON.toJSONString(crudHandle));
+        log.debug("start crudService. crudHandle:{}", JsonTools.toJSONString(crudHandle));
         if (Objects.isNull(crudHandle)) {
             log.error("fail crudService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
@@ -121,7 +122,7 @@ public class PrecompiledService {
         Object frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_CRUD,
                 crudHandle, Object.class);
-        log.debug("end crudService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end crudService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 }

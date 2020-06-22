@@ -13,9 +13,6 @@
  */
  
 package com.webank.webase.node.mgr.base.tools;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class NumberUtil {
 
     public static final int PERCENTAGE_FAILED = -1;

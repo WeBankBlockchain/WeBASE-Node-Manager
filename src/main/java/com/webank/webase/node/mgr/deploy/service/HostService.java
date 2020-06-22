@@ -339,6 +339,8 @@ public class HostService {
                 case INIT_SUCCESS:
                     hostFinishCount ++;
                     break;
+                default:
+                    ;
             }
         }
         // check host init finish ?

@@ -162,7 +162,8 @@ public class ConstantCode {
     public static final RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(202100, "contractAddress is null");
 
     public static final RetCode USER_NOT_EXIST = RetCode.mark(202110, "User's signUserId not exist");
-
+    /* Json parse error */
+    public static final RetCode FAIL_PARSE_JSON = RetCode.mark(202111, "Fail to parse json");
 
     /* dynamic group manage */
     public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");

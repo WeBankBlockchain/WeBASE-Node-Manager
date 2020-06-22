@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.transaction;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -21,7 +21,7 @@ import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 
 import java.math.BigInteger;
@@ -51,7 +51,7 @@ public class TransHashService {
      */
     public void addTransInfo(int groupId, TbTransHash tbTransHash) throws NodeMgrException {
         log.debug("start addTransInfo groupId:{} tbTransHash:{}", groupId,
-                JSON.toJSONString(tbTransHash));
+                JsonTools.toJSONString(tbTransHash));
         String tableName = TableName.TRANS.getTableName(groupId);
         transHashMapper.add(tableName, tbTransHash);
         log.debug("end addTransInfo");
@@ -62,17 +62,17 @@ public class TransHashService {
      */
     public List<TbTransHash> queryTransList(int groupId, TransListParam param)
             throws NodeMgrException {
-        log.debug("start queryTransList. TransListParam:{}", JSON.toJSONString(param));
+        log.debug("start queryTransList. TransListParam:{}", JsonTools.toJSONString(param));
         String tableName = TableName.TRANS.getTableName(groupId);
         List<TbTransHash> listOfTran = null;
         try {
             listOfTran = transHashMapper.getList(tableName, param);
         } catch (RuntimeException ex) {
-            log.error("fail queryBlockList. TransListParam:{} ", JSON.toJSONString(param), ex);
+            log.error("fail queryBlockList. TransListParam:{} ", JsonTools.toJSONString(param), ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
-        log.debug("end queryBlockList. listOfTran:{}", JSON.toJSONString(listOfTran));
+        log.debug("end queryBlockList. listOfTran:{}", JsonTools.toJSONString(listOfTran));
         return listOfTran;
     }
 
@@ -81,15 +81,15 @@ public class TransHashService {
      */
     public Integer queryCountOfTran(int groupId, TransListParam queryParam)
             throws NodeMgrException {
-        log.debug("start queryCountOfTran. queryParam:{}", JSON.toJSONString(queryParam));
+        log.debug("start queryCountOfTran. queryParam:{}", JsonTools.toJSONString(queryParam));
         String tableName = TableName.TRANS.getTableName(groupId);
         try {
             Integer count = transHashMapper.getCount(tableName, queryParam);
-            log.info("end queryCountOfTran. queryParam:{} count:{}", JSON.toJSONString(queryParam),
+            log.info("end queryCountOfTran. queryParam:{} count:{}", JsonTools.toJSONString(queryParam),
                     count);
             return count;
         } catch (RuntimeException ex) {
-            log.error("fail queryCountOfTran. queryParam:{}", JSON.toJSONString(queryParam), ex);
+            log.error("fail queryCountOfTran. queryParam:{}", JsonTools.toJSONString(queryParam), ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -109,7 +109,7 @@ public class TransHashService {
             }
             return count;
         } catch (BadSqlGrammarException ex) {
-            // TODO v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
+            // v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
             log.error("fail queryCountOfTranByMinus. ", ex);
             log.info("restart from queryCountOfTranByMinus to queryCountOfTran: []", ex.getCause());
             TransListParam queryParam = new TransListParam(null, null);
@@ -246,14 +246,14 @@ public class TransHashService {
             tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
                     trans.getBlockNumber(), null);
         }
-        log.info("end getTransFromFrontByHash. tbTransHash:{}", JSON.toJSONString(tbTransHash));
+        log.info("end getTransFromFrontByHash. tbTransHash:{}", JsonTools.toJSONString(tbTransHash));
         return tbTransHash;
     }
 
     /**
      * get transaction receipt
      */
-    public TransReceipt getTransReceipt(int groupId, String transHash) {
+    public TransactionReceipt getTransReceipt(int groupId, String transHash) {
         return frontInterface.getTransReceipt(groupId, transHash);
     }
 

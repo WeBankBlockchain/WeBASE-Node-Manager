@@ -13,19 +13,9 @@
  */
 package node.mgr.test.contract;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.contract.entity.Contract;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
-import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
-import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +31,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.contract.entity.Contract;
+import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
+import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
+import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
+import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -91,7 +89,7 @@ public class ContractControllerTest {
             "60606040526000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806366c99139146100465780636d4ce63c14610066575bfe5b341561004e57fe5b610064600480803590602001909190505061008c565b005b341561006e57fe5b610076610264565b6040518082815260200191505060405180910390f35b806000600101540360006001018190555080600260010160008282540192505081905550600480548060010182816100c49190610272565b916000526020600020906004020160005b608060405190810160405280604060405190810160405280600881526020017f32303137303431330000000000000000000000000000000000000000000000008152508152602001600060000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001600260000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200185815250909190915060008201518160000190805190602001906101c49291906102a4565b5060208201518160010160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555060408201518160020160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550606082015181600301555050505b50565b600060026001015490505b90565b81548183558181151161029f5760040281600402836000526020600020918201910161029e9190610324565b5b505050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106102e557805160ff1916838001178555610313565b82800160010185558215610313579182015b828111156103125782518255916020019190600101906102f7565b5b50905061032091906103aa565b5090565b6103a791905b808211156103a357600060008201600061034491906103cf565b6001820160006101000a81549073ffffffffffffffffffffffffffffffffffffffff02191690556002820160006101000a81549073ffffffffffffffffffffffffffffffffffffffff021916905560038201600090555060040161032a565b5090565b90565b6103cc91905b808211156103c85760008160009055506001016103b0565b5090565b90565b50805460018160011615610100020316600290046000825580601f106103f55750610414565b601f01602090049060005260206000209081019061041391906103aa565b5b505600a165627a7a72305820d453cb481a312519166e409e7248d76d8c2672458c08b9500945a4004a1b69020029");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/contract/save").
-            content(JSON.toJSONString(testUpdate)).
+            content(JsonTools.toJSONString(testUpdate)).
             contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
@@ -122,7 +120,7 @@ public class ContractControllerTest {
 
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/deploy").
-                content(JSON.toJSONString(deployInputParam)).
+                content(JsonTools.toJSONString(deployInputParam)).
                 contentType(MediaType.APPLICATION_JSON_UTF8)
             );
         resultActions.
@@ -146,7 +144,7 @@ public class ContractControllerTest {
 
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/contractList").
-                content(JSON.toJSONString(param)).
+                content(JsonTools.toJSONString(param)).
                 contentType(MediaType.APPLICATION_JSON_UTF8)
             );
         resultActions.
@@ -166,7 +164,7 @@ public class ContractControllerTest {
 
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/findByPartOfBytecodeBin").
-                content(JSON.toJSONString(param)).
+                content(JsonTools.toJSONString(param)).
                 contentType(MediaType.APPLICATION_JSON_UTF8)
             );
         resultActions.
@@ -181,7 +179,7 @@ public class ContractControllerTest {
     public void tesSendTransaction() throws Exception {
         //abi
         String abiStr = "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"a\",\"type\":\"string\"}],\"name\":\"abb\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"b\",\"type\":\"string\"}],\"name\":\"bba\",\"type\":\"event\"}]";
-        List<Object> abiList = JSONArray.parseArray(abiStr);
+        List<Object> abiList = JsonTools.toJavaObjectList(abiStr, Object.class);
 
         //param
         TransactionInputParam param = new TransactionInputParam();
@@ -198,7 +196,7 @@ public class ContractControllerTest {
 
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/contract/transaction").
-                content(JSON.toJSONString(param)).
+                content(JsonTools.toJSONString(param)).
                 contentType(MediaType.APPLICATION_JSON_UTF8)
             );
         resultActions.

@@ -13,32 +13,13 @@
  */
 package com.webank.webase.node.mgr.contract;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.webank.webase.node.mgr.abi.AbiService;
-import com.webank.webase.node.mgr.abi.entity.AbiInfo;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.base.enums.ContractStatus;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
-import com.webank.webase.node.mgr.contract.entity.Contract;
-import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
-import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
-import com.webank.webase.node.mgr.front.entity.TransactionParam;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
-import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
-import com.webank.webase.node.mgr.monitor.MonitorService;
-import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
-import com.webank.webase.node.mgr.user.UserService;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
@@ -46,6 +27,29 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+
+import com.webank.webase.node.mgr.abi.AbiService;
+import com.webank.webase.node.mgr.abi.entity.AbiInfo;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.enums.ContractStatus;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.Web3Tools;
+import com.webank.webase.node.mgr.contract.entity.Contract;
+import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
+import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.front.entity.TransactionParam;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
+import com.webank.webase.node.mgr.user.UserService;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * services for contract data.
@@ -77,7 +81,7 @@ public class  ContractService {
      * add new contract data.
      */
     public TbContract saveContract(Contract contract) throws NodeMgrException {
-        log.debug("start addContractInfo Contract:{}", JSON.toJSONString(contract));
+        log.debug("start addContractInfo Contract:{}", JsonTools.toJSONString(contract));
         TbContract tbContract;
         if (contract.getContractId() == null) {
             tbContract = newContract(contract);//new
@@ -143,12 +147,12 @@ public class  ContractService {
      * query contract list.
      */
     public List<TbContract> qureyContractList(ContractParam param) throws NodeMgrException {
-        log.debug("start qureyContractList ContractListParam:{}", JSON.toJSONString(param));
+        log.debug("start qureyContractList ContractListParam:{}", JsonTools.toJSONString(param));
 
         // query contract list
         List<TbContract> listOfContract = contractMapper.listOfContract(param);
 
-        log.debug("end qureyContractList listOfContract:{}", JSON.toJSONString(listOfContract));
+        log.debug("end qureyContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
         return listOfContract;
     }
 
@@ -157,7 +161,7 @@ public class  ContractService {
      * query count of contract.
      */
     public int countOfContract(ContractParam param) throws NodeMgrException {
-        log.debug("start countOfContract ContractListParam:{}", JSON.toJSONString(param));
+        log.debug("start countOfContract ContractListParam:{}", JsonTools.toJSONString(param));
         try {
             return contractMapper.countOfContract(param);
         } catch (RuntimeException ex) {
@@ -174,7 +178,7 @@ public class  ContractService {
         try {
             TbContract contractRow = contractMapper.queryByContractId(contractId);
             log.debug("start queryContract contractId:{} contractRow:{}", contractId,
-                JSON.toJSONString(contractRow));
+                JsonTools.toJSONString(contractRow));
             return contractRow;
         } catch (RuntimeException ex) {
             log.error("fail countOfContract", ex);
@@ -194,7 +198,7 @@ public class  ContractService {
                 return null;
             }
             List<TbContract> contractRow = contractMapper.queryContractByBin(groupId, contractBin);
-            log.debug("start queryContractByBin:{}", contractBin, JSON.toJSONString(contractRow));
+            log.debug("start queryContractByBin:{}", contractBin, JsonTools.toJSONString(contractRow));
             return contractRow;
         } catch (RuntimeException ex) {
             log.error("fail queryContractByBin", ex);
@@ -206,7 +210,7 @@ public class  ContractService {
      * deploy contract.
      */
     public TbContract deployContract(DeployInputParam inputParam) throws NodeMgrException {
-        log.info("start deployContract. inputParam:{}", JSON.toJSONString(inputParam));
+        log.info("start deployContract. inputParam:{}", JsonTools.toJSONString(inputParam));
         int groupId = inputParam.getGroupId();
 
         // check deploy permission
@@ -219,7 +223,7 @@ public class  ContractService {
         verifyContractNameNotExist(inputParam.getGroupId(), inputParam.getContractPath(),
             inputParam.getContractName(), inputParam.getContractId());
 
-        JSONArray abiArray = JSONArray.parseArray(inputParam.getContractAbi());
+        List<AbiDefinition> abiArray = JsonTools.toJavaObjectList(inputParam.getContractAbi(), AbiDefinition.class);
         if (abiArray == null || abiArray.isEmpty()) {
             log.info("fail deployContract. abi is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);
@@ -234,7 +238,7 @@ public class  ContractService {
         params.put("signUserId", signUserId);
         params.put("contractName", contractName);
         // params.put("version", version);
-        params.put("abiInfo", JSONArray.parseArray(inputParam.getContractAbi()));
+        params.put("abiInfo", abiArray);
         params.put("bytecodeBin", inputParam.getBytecodeBin());
         params.put("funcParam", inputParam.getConstructorParams());
 
@@ -264,10 +268,10 @@ public class  ContractService {
      * query contract info.
      */
     public TbContract queryContract(ContractParam queryParam) {
-        log.debug("start queryContract. queryParam:{}", JSON.toJSONString(queryParam));
+        log.debug("start queryContract. queryParam:{}", JsonTools.toJSONString(queryParam));
         TbContract tbContract = contractMapper.queryContract(queryParam);
-        log.debug("end queryContract. queryParam:{} tbContract:{}", JSON.toJSONString(queryParam),
-            JSON.toJSONString(tbContract));
+        log.debug("end queryContract. queryParam:{} tbContract:{}", JsonTools.toJSONString(queryParam),
+            JsonTools.toJSONString(tbContract));
         return tbContract;
     }
 
@@ -276,7 +280,7 @@ public class  ContractService {
      * send transaction.
      */
     public Object sendTransaction(TransactionInputParam param) throws NodeMgrException {
-        log.debug("start sendTransaction. param:{}", JSON.toJSONString(param));
+        log.debug("start sendTransaction. param:{}", JsonTools.toJSONString(param));
 
         if (Objects.isNull(param)) {
             log.info("fail sendTransaction. request param is null");
@@ -314,7 +318,7 @@ public class  ContractService {
         Object frontRsp = frontRestTools
             .postForEntity(param.getGroupId(), FrontRestTools.URI_SEND_TRANSACTION_WITH_SIGN, transParam,
                 Object.class);
-        log.debug("end sendTransaction. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end sendTransaction. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -424,7 +428,7 @@ public class  ContractService {
         param.setGroupId(groupId);
         param.setContractName(contract.getContractName());
         param.setAddress(address);
-        param.setAbiInfo(JSONArray.parseArray(abiInfo, AbiDefinition.class));
+        param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, AbiDefinition.class));
         param.setContractBin(contract.getContractBin());
 
         frontInterface.sendAbi(groupId, param);
@@ -452,7 +456,7 @@ public class  ContractService {
             return;
         } else {
             List listData = (List) response.getData();
-            deployUserList = JSON.parseArray(JSON.toJSONString(listData), PermissionInfo.class);
+            deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
         }
 
         // check user in the list

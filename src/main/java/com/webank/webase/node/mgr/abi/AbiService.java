@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.abi;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
@@ -66,7 +66,7 @@ public class AbiService {
 		String contractAddress = param.getContractAddress();
 		String contractAbiStr;
 		try {
-			contractAbiStr = JSON.toJSONString(param.getContractAbi());
+			contractAbiStr = JsonTools.toJSONString(param.getContractAbi());
 		} catch (Exception e) {
 			log.warn("abi parse string error:{}", param.getContractAbi());
 			throw new NodeMgrException(ConstantCode.PARAM_FAIL_ABI_INVALID);
@@ -95,7 +95,7 @@ public class AbiService {
 		BeanUtils.copyProperties(param, updateAbi);
 		String contractAbiStr;
 		try {
-			contractAbiStr = JSON.toJSONString(param.getContractAbi());
+			contractAbiStr = JsonTools.toJSONString(param.getContractAbi());
 		} catch (Exception e) {
 			log.warn("abi parse string error:{}", param.getContractAbi());
 			throw new NodeMgrException(ConstantCode.PARAM_FAIL_ABI_INVALID);
