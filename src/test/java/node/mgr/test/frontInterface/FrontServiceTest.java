@@ -13,7 +13,7 @@
  */
 package node.mgr.test.frontInterface;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
@@ -21,7 +21,7 @@ import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.monitor.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.util.List;
@@ -58,30 +58,30 @@ public class FrontServiceTest {
 
     @Test
     public void getTransReceiptTest() {
-        TransReceipt transReceipt = frontInterface.getTransReceipt(groupId, transHash);
+        TransactionReceipt transReceipt = frontInterface.getTransReceipt(groupId, transHash);
         assert (transReceipt != null);
-        System.out.println(JSON.toJSONString(transReceipt));
+        System.out.println(JsonTools.toJSONString(transReceipt));
     }
 
     @Test
     public void getTransactionTest() {
         TransactionInfo transactionInfo = frontInterface.getTransaction(groupId, transHash);
         assert (transactionInfo != null);
-        System.out.println(JSON.toJSONString(transactionInfo));
+        System.out.println(JsonTools.toJSONString(transactionInfo));
     }
 
     @Test
     public void getBlockByNumberTest() {
         BlockInfo blockInfo = frontInterface.getBlockByNumber(groupId, new BigInteger("1000"));
 //        assert (blockInfo != null);
-        System.out.println(JSON.toJSONString(blockInfo));
+        System.out.println(JsonTools.toJSONString(blockInfo));
     }
 
     @Test
     public void getblockFromFrontByHashTest() {
         BlockInfo blockInfo = frontInterface.getblockByHash(groupId, blockHash);
         assert (blockInfo != null);
-        System.out.println(JSON.toJSONString(blockInfo));
+        System.out.println(JsonTools.toJSONString(blockInfo));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class FrontServiceTest {
         ChainTransInfo chainTransInfo = frontInterface
             .getTransInfoByHash(groupId, transHash);
         assert (chainTransInfo != null);
-        System.out.println(JSON.toJSONString(chainTransInfo));
+        System.out.println(JsonTools.toJSONString(chainTransInfo));
     }
 
     @Test
@@ -113,21 +113,21 @@ public class FrontServiceTest {
     public void getTotalTransactionCountTest() {
         TotalTransCountInfo totalTransCount = frontInterface.getTotalTransactionCount(groupId);
         assert (totalTransCount != null);
-        System.out.println(JSON.toJSONString(totalTransCount));
+        System.out.println(JsonTools.toJSONString(totalTransCount));
     }
 
     @Test
     public void getTransByBlockNumberTest() {
         List<TransactionInfo> list = frontInterface.getTransByBlockNumber(groupId, blockNumber);
         assert (list != null && list.size() > 0);
-        System.out.println(JSON.toJSONString(list));
+        System.out.println(JsonTools.toJSONString(list));
     }
 
     @Test
     public void getGroupPeersTest() {
         List<String> list = frontInterface.getGroupPeers(groupId);
         assert (list != null && list.size() > 0);
-        System.out.println(JSON.toJSONString(list));
+        System.out.println(JsonTools.toJSONString(list));
     }
 
 
@@ -135,14 +135,14 @@ public class FrontServiceTest {
     public void getGroupListTest() {
         List<String> list = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
         assert (list != null && list.size() > 0);
-        System.out.println("=====================list:" + JSON.toJSONString(list));
+        System.out.println("=====================list:" + JsonTools.toJSONString(list));
     }
 
     @Test
     public void getPeersTest() {
         PeerInfo[] list = frontInterface.getPeers(groupId);
         assert (list != null && list.length > 0);
-        System.out.println("=====================list:" + JSON.toJSONString(list));
+        System.out.println("=====================list:" + JsonTools.toJSONString(list));
     }
 
     @Test
@@ -156,7 +156,7 @@ public class FrontServiceTest {
     public void syncStatusTest() {
         SyncStatus status = frontInterface.getSyncStatus(groupId);
         assert (status != null);
-        System.out.println("=====================status:" + JSON.toJSONString(status));
+        System.out.println("=====================status:" + JsonTools.toJSONString(status));
     }
 
     @Test

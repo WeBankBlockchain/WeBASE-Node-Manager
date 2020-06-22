@@ -1,6 +1,6 @@
 package node.mgr.test.token;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.token.TokenService;
 import com.webank.webase.node.mgr.transaction.TransHashService;

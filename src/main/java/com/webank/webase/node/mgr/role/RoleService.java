@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.role;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.util.List;
@@ -37,7 +37,7 @@ public class RoleService {
      * query role count.
      */
     public int countOfRole(RoleListParam param) {
-        log.debug("start countOfRole. param:{} ", JSON.toJSONString(param));
+        log.debug("start countOfRole. param:{} ", JsonTools.toJSONString(param));
         Integer roleCount = roleMapper.countOfRole(param);
         int count = roleCount == null ? 0 : roleCount.intValue();
         log.debug("end countOfRole. count:{} ", count);
@@ -48,9 +48,9 @@ public class RoleService {
      * query role .
      */
     public List<TbRole> listOfRole(RoleListParam param) {
-        log.debug("start listOfRole. param:{} ", JSON.toJSONString(param));
+        log.debug("start listOfRole. param:{} ", JsonTools.toJSONString(param));
         List<TbRole> list = roleMapper.listOfRole(param);
-        log.debug("end listOfRole. list:{} ", JSON.toJSONString(list));
+        log.debug("end listOfRole. list:{} ", JsonTools.toJSONString(list));
         return list;
     }
 
@@ -60,7 +60,7 @@ public class RoleService {
     public TbRole queryRoleById(Integer roleId) {
         log.debug("start queryRoleById. roleId:{} ", roleId);
         TbRole roleInfo = roleMapper.queryRoleById(roleId);
-        log.debug("end queryRoleById. roleInfo:{} ", JSON.toJSONString(roleInfo));
+        log.debug("end queryRoleById. roleInfo:{} ", JsonTools.toJSONString(roleInfo));
         return roleInfo;
     }
 

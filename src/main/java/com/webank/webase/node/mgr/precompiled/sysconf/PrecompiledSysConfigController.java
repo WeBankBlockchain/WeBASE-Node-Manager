@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.precompiled.sysconf;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -57,7 +57,7 @@ public class PrecompiledSysConfigController extends BaseController {
         Object result = precompiledSysConfigService.getSysConfigListService(groupId, pageSize, pageNumber);
 
         log.info("end getSysConfigList useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
     }
 
@@ -71,12 +71,12 @@ public class PrecompiledSysConfigController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start setSysConfigByKeyService startTime:{} sysConfigParam:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(sysConfigParam));
+                JsonTools.toJSONString(sysConfigParam));
 
         Object res = precompiledSysConfigService.setSysConfigByKeyService(sysConfigParam);
 
         log.info("end setSysConfigByKeyService useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }

@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.precompiled.sysconf;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
@@ -56,7 +56,7 @@ public class PrecompiledSysConfigService {
         String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_SYS_CONFIG_LIST, map);
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end getSysConfigListService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end getSysConfigListService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -66,7 +66,7 @@ public class PrecompiledSysConfigService {
      */
 
     public Object setSysConfigByKeyService(SysConfigParam sysConfigParam) {
-        log.debug("start setSysConfigByKeyService. sysConfigParam:{}", JSON.toJSONString(sysConfigParam));
+        log.debug("start setSysConfigByKeyService. sysConfigParam:{}", JsonTools.toJSONString(sysConfigParam));
         if (Objects.isNull(sysConfigParam)) {
             log.error("fail setSysConfigByKeyService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
@@ -77,7 +77,7 @@ public class PrecompiledSysConfigService {
         Object frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_SYS_CONFIG,
                 sysConfigParam, Object.class);
-        log.debug("end setSysConfigByKeyService. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end setSysConfigByKeyService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 

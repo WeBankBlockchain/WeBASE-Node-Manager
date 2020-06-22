@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.transaction;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -24,7 +24,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -73,7 +73,7 @@ public class TransHashController {
         if(StringUtils.isEmpty(transHash) && blockNumber == null) {
             count = transHashService.queryCountOfTranByMinus(groupId);
         } else {
-            // TODO select count(1) in InnoDb is slow when data gets large
+            // select count(1) in InnoDb is slow when data gets large, instead use tx_id to record count
             count = transHashService.queryCountOfTran(groupId, queryParam);
         }
         if (count != null && count > 0) {
@@ -97,7 +97,7 @@ public class TransHashController {
         }
 
         log.info("end queryBlockList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pageResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
         return pageResponse;
     }
 
@@ -112,10 +112,10 @@ public class TransHashController {
         log.info("start getTransReceipt startTime:{} groupId:{} transaction:{}",
             startTime.toEpochMilli(), groupId, transHash);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        TransReceipt transReceipt = transHashService.getTransReceipt(groupId, transHash);
+        TransactionReceipt transReceipt = transHashService.getTransReceipt(groupId, transHash);
         baseResponse.setData(transReceipt);
         log.info("end getTransReceipt useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -133,7 +133,7 @@ public class TransHashController {
         TransactionInfo transInfo = transHashService.getTransaction(groupId, transHash);
         baseResponse.setData(transInfo);
         log.info("end getTransaction useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 }
