@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.log;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
 import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
 import com.webank.webase.node.mgr.alert.log.entity.ReqLogParam;
@@ -78,7 +78,7 @@ public class AlertLogController {
     public Object updateAlertLog(@RequestBody ReqLogParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertLog. startTime:{} ReqAlertLogParam:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(param));
+                startTime.toEpochMilli(), JsonTools.toJSONString(param));
         if(param.getStatus() == null || param.getLogId() == null) {
             return new BaseResponse(ConstantCode.ALERT_LOG_PARAM_EMPTY);
         }
@@ -111,7 +111,7 @@ public class AlertLogController {
 //    public Object saveAlertLog(@RequestBody ReqLogParam param) {
 //        Instant startTime = Instant.now();
 //        log.info("start saveAlertLog. startTime:{} ReqAlertLogParam:{}",
-//                startTime.toEpochMilli(), JSON.toJSONString(param));
+//                startTime.toEpochMilli(), JsonTools.toJSONString(param));
 //        if(StringUtils.isEmpty(param.getAlertContent()) ||
 //                StringUtils.isEmpty(param.getAlertLevel()) ||
 //                StringUtils.isEmpty(param.getAlertType())) {

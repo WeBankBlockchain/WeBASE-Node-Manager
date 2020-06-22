@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.enums.UserType;
@@ -128,7 +128,7 @@ public class UserService {
      */
     @Transactional
     public Integer bindUserInfo(BindUserInputParam user) throws NodeMgrException {
-        log.debug("start bindUserInfo User:{}", JSON.toJSONString(user));
+        log.debug("start bindUserInfo User:{}", JsonTools.toJSONString(user));
 
         String publicKey = user.getPublicKey();
         if (StringUtils.isBlank(publicKey)) {
@@ -185,14 +185,14 @@ public class UserService {
      * query count of user.
      */
     public Integer countOfUser(UserParam userParam) throws NodeMgrException {
-        log.debug("start countOfUser. userParam:{}", JSON.toJSONString(userParam));
+        log.debug("start countOfUser. userParam:{}", JsonTools.toJSONString(userParam));
 
         try {
             Integer count = userMapper.countOfUser(userParam);
-            log.debug("end countOfUser userParam:{} count:{}", JSON.toJSONString(userParam), count);
+            log.debug("end countOfUser userParam:{} count:{}", JsonTools.toJSONString(userParam), count);
             return count;
         } catch (RuntimeException ex) {
-            log.error("fail countOfUser userParam:{}", JSON.toJSONString(userParam), ex);
+            log.error("fail countOfUser userParam:{}", JsonTools.toJSONString(userParam), ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -210,10 +210,10 @@ public class UserService {
      * query user list by page.
      */
     public List<TbUser> qureyUserList(UserParam userParam) throws NodeMgrException {
-        log.debug("start qureyUserList userParam:{}", JSON.toJSONString(userParam));
+        log.debug("start qureyUserList userParam:{}", JsonTools.toJSONString(userParam));
         // query user list
         List<TbUser> listOfUser = userMapper.listOfUser(userParam);
-        log.debug("end qureyUserList listOfUser:{}", JSON.toJSONString(listOfUser));
+        log.debug("end qureyUserList listOfUser:{}", JsonTools.toJSONString(listOfUser));
         return listOfUser;
     }
 
@@ -228,7 +228,7 @@ public class UserService {
             TbUser userRow = userMapper.queryUser(userId, groupId, userName, address);
             log.debug(
                 "end queryUser userId:{} groupId:{} userName:{}  address:{} TbUser:{}",
-                userId, groupId, userName, address, JSON.toJSONString(userRow));
+                userId, groupId, userName, address, JsonTools.toJSONString(userRow));
             return userRow;
         } catch (RuntimeException ex) {
             log.error("fail queryUser userId:{} groupId:{} userName:{}  address:{}",
@@ -284,7 +284,7 @@ public class UserService {
      * update user info.
      */
     public void updateUser(TbUser user) throws NodeMgrException {
-        log.debug("start updateUser user", JSON.toJSONString(user));
+        log.debug("start updateUser user", JsonTools.toJSONString(user));
         Integer userId = Optional.ofNullable(user).map(u -> u.getUserId()).orElse(null);
         String description = Optional.ofNullable(user).map(u -> u.getDescription()).orElse(null);
         if (userId == null) {

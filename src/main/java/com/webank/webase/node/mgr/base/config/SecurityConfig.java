@@ -40,6 +40,8 @@ import com.webank.webase.node.mgr.security.JsonAuthenticationEntryPoint;
 import com.webank.webase.node.mgr.security.JsonLogoutSuccessHandler;
 import com.webank.webase.node.mgr.security.LoginFailHandler;
 import com.webank.webase.node.mgr.security.customizeAuth.TokenAuthenticationProvider;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * security config.
@@ -76,7 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .failureHandler(loginfailHandler) // if login fail
             .and().authorizeRequests()
             .antMatchers("/account/login", "/account/pictureCheckCode",
-                    "/login","/user/privateKey/**", "/encrypt")
+                "/login","/user/privateKey/**", "/encrypt")
             .permitAll()
             .anyRequest().authenticated().and().csrf()
             .disable() // close csrf
@@ -86,6 +88,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .logoutSuccessHandler(jsonLogoutSuccessHandler)
             .permitAll();
     }
+
 
     @Override
     public void configure(WebSecurity web) throws Exception {
