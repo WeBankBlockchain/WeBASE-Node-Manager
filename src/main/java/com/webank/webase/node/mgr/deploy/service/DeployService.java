@@ -321,5 +321,20 @@ public class DeployService {
         // restart related node
         this.nodeAsyncService.startFrontOfGroup(chain.getId(), groupIdSet);
     }
+
+    /**
+     *
+     * @param chainName
+     */
+    public int progress(String chainName) {
+
+        log.info("Progress check chain name:[{}] exists...", chainName);
+        TbChain chain = tbChainMapper.getByChainName(chainName);
+        if (chain == null) {
+            throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
+        }
+
+        return this.chainService.progress(chain);
+    }
 }
 

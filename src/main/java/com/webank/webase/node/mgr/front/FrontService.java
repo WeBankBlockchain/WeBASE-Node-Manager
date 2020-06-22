@@ -51,6 +51,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
@@ -703,5 +704,29 @@ public class FrontService {
 
         // delete front in batch
         this.frontMapper.deleteByAgencyId(agencyId);
+    }
+
+    /**
+     *
+     * @param chainId
+     */
+    public int frontProgress(int chainId){
+        // check host init
+        int frontFinishCount = 0;
+        List<TbFront> frontList = this.selectFrontListByChainId(chainId);
+        if (CollectionUtils.isEmpty(frontList)) {
+            return NumberUtil.PERCENTAGE_FINISH;
+        }
+        for (TbFront front : frontList) {
+            if(FrontStatusEnum.isRunning(front.getStatus())){
+                frontFinishCount ++;
+            }
+        }
+        // check front init finish ?
+        if (frontFinishCount == frontList.size()){
+            // init success
+            return NumberUtil.PERCENTAGE_FINISH;
+        }
+        return NumberUtil.percentage(frontFinishCount,frontList.size());
     }
 }

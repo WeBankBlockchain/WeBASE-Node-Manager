@@ -15,6 +15,8 @@
  */
 package com.webank.webase.node.mgr.base.enums;
 
+import com.webank.webase.node.mgr.base.tools.NumberUtil;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -72,6 +74,31 @@ public enum ChainStatusEnum {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    /**
+     *
+     * @param status
+     * @return
+     */
+    public static int progress(byte status){
+        ChainStatusEnum statusEnum = ChainStatusEnum.getById(status);
+        if (statusEnum == null) {
+            log.error("Chain with unknown status:[{}].", status);
+            return NumberUtil.PERCENTAGE_FAILED;
+        }
+
+        // check chain status
+        switch (statusEnum){
+            case DEPLOY_FAILED:
+            case UPGRADING_FAILED:
+                return NumberUtil.PERCENTAGE_FAILED;
+
+            case RUNNING:
+                return NumberUtil.PERCENTAGE_FINISH;
+            default:
+                return NumberUtil.PERCENTAGE_IN_PROGRESS;
         }
     }
 }
