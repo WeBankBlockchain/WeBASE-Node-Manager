@@ -172,7 +172,7 @@ public class HostService {
      * @param tbHostList
      * @return
      */
-    public boolean initHostList(TbChain tbChain, List<TbHost> tbHostList) throws InterruptedException {
+    public boolean initHostList(TbChain tbChain, List<TbHost> tbHostList, boolean scpNodeConfig) throws InterruptedException {
         log.info("Start init chain:[{}:{}] hosts:[{}].", tbChain.getId(), tbChain.getChainName(), CollectionUtils.size(tbHostList));
 
         final CountDownLatch initHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
@@ -190,13 +190,15 @@ public class HostService {
                     deployShellService.execHostOperate(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
                         PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
 
-                    // scp config files from local to remote
-                    // local: NODES_ROOT/[chainName]/[ip] TO remote: /opt/fisco/[chainName]
-                    String src = String.format("%s/*", pathService.getHost(tbChain.getChainName(), tbHost.getIp()).toString());
-                    String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName());
-                    deployShellService.scp(ScpTypeEnum.UP, tbHost.getIp(), src, dst);
-                    log.info("Send files from:[{}] to:[{}@{}#{}:{}] success.",
-                            src, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), dst);
+                    if(scpNodeConfig) {
+                        // scp config files from local to remote
+                        // local: NODES_ROOT/[chainName]/[ip] TO remote: /opt/fisco/[chainName]
+                        String src = String.format("%s/*", pathService.getHost(tbChain.getChainName(), tbHost.getIp()).toString());
+                        String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName());
+                        deployShellService.scp(ScpTypeEnum.UP, tbHost.getIp(), src, dst);
+                        log.info("Send files from:[{}] to:[{}@{}#{}:{}] success.",
+                                src, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), dst);
+                    }
 
                     // docker pull image
                     this.dockerClientService.pullImage(tbHost.getIp(), tbHost.getDockerPort(), tbChain.getVersion());
@@ -253,12 +255,13 @@ public class HostService {
      *
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbHost initHost( byte encryptType, String chainName, String rootDirOnHost,
-                            String ip, int agencyId, String agencyName) throws NodeMgrException {
+    public TbHost generateHostSDKAndScp(byte encryptType, String chainName, String rootDirOnHost,
+                                        String ip, int agencyId, String agencyName) throws NodeMgrException {
         // new host, generate sdk dir first
         Path sdkPath = this.pathService.getSdk(chainName, ip);
 
         if (Files.exists(sdkPath)){
+            // TODO.
             log.warn("Exists sdk dir of host:[{}:{}], delete first.", ip,sdkPath.toAbsolutePath().toAbsolutePath());
             try {
                 FileUtils.deleteDirectory(sdkPath.toFile());

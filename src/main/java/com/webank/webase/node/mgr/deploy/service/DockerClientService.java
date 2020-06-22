@@ -127,6 +127,9 @@ public class DockerClientService {
                          String containerName,
                          String chainRootOnHost,
                          int nodeIndex) {
+        // pull image
+        this.pullImage(ip,port,imageTag);
+
         String containerId = this.create(ip, port, imageTag, containerName, chainRootOnHost, nodeIndex);
         if (StringUtils.isBlank(containerId)) {
             log.error("Create bcos-front container:[{}:{}] on host:[{}] failed.", imageTag,containerId, ip);
