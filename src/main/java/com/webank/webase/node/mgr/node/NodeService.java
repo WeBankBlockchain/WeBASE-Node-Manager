@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.SshTools;
@@ -357,16 +356,16 @@ public class NodeService {
             String ip,
             int p2pPort,
             String description,
-            final NodeStatusEnum nodeStatusEnum
+            final DataStatus dataStatus
     ) throws NodeMgrException {
         // TODO. params check
         if (! ValidateUtil.ipv4Valid(ip)){
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
-        NodeStatusEnum newNodeStatusEnum = nodeStatusEnum == null ? NodeStatusEnum.DEAD : nodeStatusEnum;
+        DataStatus newDataStatus = dataStatus == null ? DataStatus.INVALID : dataStatus;
 
-        TbNode node = TbNode.init(nodeId, nodeName, groupId, ip, p2pPort, description, newNodeStatusEnum);
+        TbNode node = TbNode.init(nodeId, nodeName, groupId, ip, p2pPort, description, newDataStatus);
 
         if (nodeMapper.add(node) != 1) {
             throw new NodeMgrException(ConstantCode.INSERT_NODE_ERROR);
@@ -452,7 +451,7 @@ public class NodeService {
 
         // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss/[nodeid(128)]
         String dst_nodeDeletedRootOnHost =
-                PathService.getNodeDeletedRootOnHost(rooDirOnHost, chainName, nodeId);
+                PathService.getNodeDeletedRootOnHost(chainDeleteRootOnHost, nodeId);
         // move
         SshTools.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
     }

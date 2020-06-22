@@ -102,7 +102,7 @@ public class DeployController extends BaseController {
         log.info("Start add node ip:[{}],group:[{}], agencyName:[{}], num:[{}], chainName:[{}], now:[{}]",
                 ip, groupId, agencyName, num, chainName, startTime);
 
-        Pair<RetCode, String> addResult = this.deployService.deployNodes(chainName, groupId, ip, agencyName, num);
+        Pair<RetCode, String> addResult = this.deployService.addNodes(chainName, groupId, ip, agencyName, num);
         return new BaseResponse(addResult.getKey(), addResult.getValue());
     }
 

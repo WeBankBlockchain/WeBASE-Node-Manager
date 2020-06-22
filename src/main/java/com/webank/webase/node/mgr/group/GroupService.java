@@ -46,6 +46,7 @@ import org.springframework.web.client.ResourceAccessException;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
@@ -280,6 +281,11 @@ public class GroupService {
 	 */
 	private void saveDataOfGroup(List<TbFront> frontList, Set<Integer> allGroupSet) {
 		for (TbFront front : frontList) {
+            if( ! FrontStatusEnum.isRunning(front.getStatus())){
+                log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
+                continue;
+            }
+
 			String frontIp = front.getFrontIp();
 			int frontPort = front.getFrontPort();
 			// query group list from chain
@@ -339,6 +345,7 @@ public class GroupService {
 		}
 		//remove node that's not in groupPeerList and not in sealer/observer list
 		localNodes.stream()
+                .filter(node -> ! DataStatus.starting(node.getNodeActive()))
 				.filter(node ->
 						!groupPeerList.contains(node.getNodeId())
 								&& !checkSealerAndObserverListContains(groupId, node.getNodeId()))

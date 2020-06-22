@@ -39,10 +39,10 @@ import org.springframework.web.client.RestTemplate;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -350,7 +350,7 @@ public class ChainService {
                     String nodeName = NodeService.getNodeName(groupId, nodeConfig.getNodeId());
                     this.nodeService.insert(nodeConfig.getNodeId(), nodeName,
                             groupId, ip, nodeConfig.getP2pPort(),
-                            nodeName, NodeStatusEnum.DEAD);
+                            nodeName, DataStatus.STARTING);
 
                     // insert front group mapping
                     this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);

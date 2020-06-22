@@ -76,9 +76,13 @@ public class DeployShellService {
      */
     public void scp(ScpTypeEnum typeEnum, String user, String ip, int port, String src, String dst) {
         if (Files.isRegularFile(Paths.get(src))) {
+            // if src is file, create parent directory of dst on remote
             String parentOnRemote = Paths.get(dst).getParent().toAbsolutePath().toString();
-            String mkdirCommand = String.format("mkdir -p %s ; exit 0", parentOnRemote);
-            SshTools.exec(ip, mkdirCommand);
+            SshTools.createDirOnRemote(ip,parentOnRemote);
+        }
+        if (Files.isDirectory(Paths.get(src))) {
+            // if src is directory, create dst on remote
+            SshTools.createDirOnRemote(ip,dst);
         }
 
         String command = String.format("bash -x -e %s -t %s -i %s -u %s -p %s -s %s -d %s",
@@ -116,10 +120,10 @@ public class DeployShellService {
         log.info("Exec execHostOperate method for [{}@{}:{}#{}]", user, ip, port, pwd);
 
         int newport = port <= 0 || port > 65535 ? SSH_DEFAULT_PORT : port;
-        String newuser = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
+        String newUser = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
 
         String command = String.format("bash -x -e %s -H %s -P %s -u %s %s %s", constant.getNodeOperateShell(),
-                ip, newport, newuser,
+                ip, newport, newUser,
                 StringUtils.isBlank(pwd) ? "" : String.format(" -p %s ", pwd),
                 StringUtils.isBlank(chainRoot) ? "" : String.format(" -n %s ", chainRoot)
         );
