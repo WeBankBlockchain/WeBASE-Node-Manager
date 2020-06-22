@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,10 +41,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -69,6 +70,7 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
+import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
@@ -392,12 +394,38 @@ public class FrontService {
         // select all fronts by all agencies
         List<TbFront> tbFrontList = tbAgencyList.stream()
                 .map((agency) -> frontMapper.selectByAgencyId(agency.getId()))
-                .filter((host) -> host != null)
+                .filter((front) -> front != null)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(tbFrontList)) {
             log.error("Chain:[{}] has no front.", chainId);
+            return Collections.emptyList();
+        }
+        return tbFrontList;
+    }
+
+    /**
+     *
+     * @param groupId
+     * @return
+     */
+    public List<TbFront> selectFrontListByGroupId(int groupId) {
+        // select all agencies by chainId
+        List<TbFrontGroupMap> frontGroupMapList = this.frontGroupMapMapper.selectListByGroupId(groupId);
+        if (CollectionUtils.isEmpty(frontGroupMapList)) {
+            return Collections.emptyList();
+        }
+
+
+        // select all fronts by all agencies
+        List<TbFront> tbFrontList = frontGroupMapList.stream()
+                .map((map) -> frontMapper.getById(map.getFrontId()))
+                .filter((front) -> front != null)
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(tbFrontList)) {
+            log.error("Group:[{}] has no front.", groupId);
             return Collections.emptyList();
         }
         return tbFrontList;
@@ -463,7 +491,7 @@ public class FrontService {
 
             // insert node into db
             String nodeName = NodeService.getNodeName(groupId, nodeId);
-            this.nodeService.insert(nodeId, nodeName, groupId, ip, p2pPort, nodeName, NodeStatusEnum.DEAD);
+            this.nodeService.insert(nodeId, nodeName, groupId, ip, p2pPort, nodeName, DataStatus.STARTING);
 
             // insert front group into db
             this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
@@ -558,17 +586,16 @@ public class FrontService {
      * @return
      */
     @Transactional
-    public boolean start(String nodeId){
+    public boolean restart(String nodeId ){
+        log.info("Restart node:[{}]", nodeId );
         // get front
         TbFront front = this.getByNodeId(nodeId);
         if (front == null){
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
 
-        if(FrontStatusEnum.isRunning(front.getStatus())){
-            log.warn("Front:[{}:{}] is already running",front.getFrontIp(), front.getHostIndex());
-            return true;
-        }
+        // set front status to stopped to avoid error for time task.
+        this.updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
 
         TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
@@ -582,10 +609,9 @@ public class FrontService {
                     PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()),
                     front.getHostIndex());
 
-            threadPoolTaskScheduler.scheduleWithFixedDelay(()->{
+            threadPoolTaskScheduler.schedule(()->{
                 this.updateStatus(front.getFrontId(),FrontStatusEnum.RUNNING);
-            },System.currentTimeMillis() + constant.getDockerRestartPeriodTime());
-
+            }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
             return true;
         } catch (Exception e) {
             log.warn("Start front:[{}:{}] failed.",front.getFrontIp(), front.getHostIndex());
@@ -658,7 +684,6 @@ public class FrontService {
         // Here, tow conditions:
         //  1. node is not a sealer or an observer
         //  2. node is is last node it's each group
-
         TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
@@ -669,6 +694,23 @@ public class FrontService {
 
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
     }
+    @Transactional
+    public void deleteNode(TbHost host, String nodeId){
+        // get front
+        TbFront front = this.getByNodeId(nodeId);
+        if (front == null){
+            throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
+        }
+        TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+        log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
+        this.dockerClientService.removeByName(
+                front.getFrontIp(),
+                hostInDb.getDockerPort(),
+                front.getContainerName());
+
+        this.nodeMapper.deleteByNodeId(nodeId);
+    }
+
 
     @Transactional
     public void deleteFrontByAgencyId(int agencyId){
@@ -684,13 +726,8 @@ public class FrontService {
         for (TbFront front : frontList) {
             TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
-            // stop node
-            try {
-                this.stopNode(host,front.getNodeId());
-            } catch (NodeMgrException e) {
-                log.warn("Stop node:[] error",e);
-                continue;
-            }
+            // remote docker container
+            this.dockerClientService.removeByName(host.getIp(),host.getDockerPort(),front.getContainerName());
 
             // move chain config files
             ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),front.getChainName());

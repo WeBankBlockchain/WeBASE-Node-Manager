@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -33,6 +35,8 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -70,7 +74,16 @@ public class SshTools {
      * @param ip
      * @param command
      */
-    public static boolean exec(String ip, String command) {
+    private static boolean exec(String ip, String command) {
+        if (isLocal(ip)){
+            ExecuteResult result = JavaCommandExecutor.executeCommand(command,30 * 1000L );
+
+            if (result.failed()) {
+                log.error("SshTools exec on localhost:[{}] command:[{}] error.", ip,command );
+                throw new NodeMgrException(ConstantCode.TRANSFER_FILES_ERROR.msg(result.getExecuteOut()));
+            }
+            return result.success();
+        }
         Session session = connect(ip, SSH_DEFAULT_PORT, SSH_DEFAULT_USER, "", 0);
         if (session != null && session.isConnected()) {
             ChannelExec channelExec = null;
@@ -94,7 +107,7 @@ public class SshTools {
                             command, ip, status, execLog.toString());
                     return true;
                 } else if (status == 0) {
-                    log.error("Exec command:[{}] on remote host:[{}] success, log:[{}].", command, ip, execLog.toString());
+                    log.info("Exec command:[{}] on remote host:[{}] success, log:[{}].", command, ip, execLog.toString());
                     return true;
                 } else {
                     log.error("Exec command:[{}] on remote host:[{}] with error[{}], log:[{}].", command, ip, status, execLog.toString());
@@ -143,7 +156,7 @@ public class SshTools {
      * @param connectTimeoutInSeconds seconds.
      * @return
      */
-    public static Session connect(
+    private static Session connect(
             String ip,
             final int port,
             final String user,
@@ -186,7 +199,15 @@ public class SshTools {
      * @param dir
      */
     public static void createDirOnRemote(String ip, String dir){
-        exec(ip, String.format("mkdir -p %s; exit 0", dir));
+        if(isLocal(ip)){
+            try {
+                Files.createDirectories(Paths.get(dir));
+            } catch (IOException e) {
+                log.error("mkdir:[{}] on localhost:[{}] error",dir,ip,e );
+            }
+        }else{
+            exec(ip, String.format("mkdir -p %s; exit 0", dir));
+        }
     }
 
     /**
@@ -199,10 +220,9 @@ public class SshTools {
                                      String src,
                                      String dst){
         if (StringUtils.isNoneBlank(ip,src,dst)) {
-            String rmCommand = String.format("mv -fv %s %s && exit 0",
-                    src, dst);
+            String rmCommand = String.format("mv -fv %s %s && exit 0", src, dst);
             log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
-            SshTools.exec(ip, rmCommand);
+            exec(ip, rmCommand);
         }
     }
 }

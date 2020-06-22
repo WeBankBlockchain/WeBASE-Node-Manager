@@ -137,7 +137,7 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> deployNodes(String chainName, int groupId, String ip, String agencyName, int num) throws NodeMgrException {
+    public Pair<RetCode, String> addNodes(String chainName, int groupId, String ip, String agencyName, int num) throws NodeMgrException {
         log.info("Add node check chain name:[{}] exists...", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain == null) {
@@ -172,8 +172,8 @@ public class DeployService {
             agency = this.agencyService.initAgencyIfNew(
                     agencyName, chain.getId(), chainName, chain.getEncryptType());
 
-            // init host, generate sdk config files
-            tbHostExists = this.hostService.initHost(chain.getEncryptType(),
+            // generate sdk config files
+            tbHostExists = this.hostService.generateHostSDKAndScp(chain.getEncryptType(),
                     chain.getChainName(), chain.getRootDir(),
                     ip, agency.getId(), agency.getAgencyName());
         } else {
@@ -198,8 +198,8 @@ public class DeployService {
             // generate new nodes config files and scp to remote
             this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList);
 
-            // restart all front
-            this.nodeAsyncService.startFrontOfGroup(chain.getId(),groupId);
+            // init host and restart all front
+            this.nodeAsyncService.initHostAndStart(chain,tbHostExists,group.getGroupId());
         } catch (Exception e) {
             //TODO.
             log.error("Add node error", e);
@@ -249,7 +249,7 @@ public class DeployService {
      * @return
      */
     public void startNode(String nodeId) {
-        this.frontService.start(nodeId);
+        this.frontService.restart(nodeId);
     }
 
     /**
@@ -307,7 +307,7 @@ public class DeployService {
         }
 
         // move node of remote host files to temp directory, e.g./opt/fisco/delete-tmp
-        NodeService.mvNodeOnRemoteHost(host.getIp(), host.getRootDir(), chain.getChainName(), front.getHostId(), front.getNodeId());
+        NodeService.mvNodeOnRemoteHost(host.getIp(), host.getRootDir(), chain.getChainName(), front.getHostIndex(), front.getNodeId());
 
         // delete front, node in db
         this.frontService.removeFront(front.getFrontId());
@@ -319,7 +319,7 @@ public class DeployService {
         this.agencyService.deleteAgencyWithNoNode(deleteAgency,host.getId());
 
         // restart related node
-        this.nodeAsyncService.startFrontOfGroup(chain.getId(), groupIdSet);
+        this.nodeAsyncService.startFrontOfGroupSet(chain.getId(), groupIdSet);
     }
 
     /**

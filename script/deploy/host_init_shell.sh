@@ -34,7 +34,7 @@ UpdateDNS
 # GNU/Linux操作系统
 if [[ $(command -v apt) ]]; then
     # Debian/Ubuntu
-    apt -y update && dpkg --configure -a && apt -y upgrade
+    apt -y update && dpkg --configure -a
 else
     # RHEL/CentOS
     install epel-release epel-release

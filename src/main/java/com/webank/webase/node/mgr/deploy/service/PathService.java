@@ -274,18 +274,15 @@ public class PathService {
 
     /**
      *
-     * @param rootDirOnHost
-     * @param chainName
+     * @param chainDeleteRootOnHost
      * @param nodeId
      * @return
      * @return             /opt/fisco/deleted-tmp/[chainName]-yyyyMMdd_HHmmss/[nodeid(128)] as a {@link String}, a directory.
      */
     public static String getNodeDeletedRootOnHost(
-            String rootDirOnHost,
-            String chainName,
+            String chainDeleteRootOnHost,
             String nodeId) {
-        return String.format("%s/delete-%s-%s/%s",
-                getDeletedRootOnHost(rootDirOnHost), chainName, DateUtil.formatNow(YYYYMMDD_HHMMSS),nodeId);
+        return String.format("%s/%s", chainDeleteRootOnHost,nodeId);
     }
 
     /**

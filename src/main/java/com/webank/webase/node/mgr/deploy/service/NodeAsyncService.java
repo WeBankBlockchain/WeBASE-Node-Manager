@@ -14,6 +14,8 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -37,8 +39,8 @@ import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper;
 import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.entity.TbNode;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -47,6 +49,7 @@ import lombok.extern.log4j.Log4j2;
 public class NodeAsyncService {
 
     @Autowired private FrontMapper frontMapper;
+    @Autowired private FrontGroupMapMapper frontGroupMapMapper;
 
     @Autowired private FrontService frontService;
     @Autowired private NodeService nodeService;
@@ -57,31 +60,41 @@ public class NodeAsyncService {
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
+    /**
+     *
+     * @param chainId
+     */
     @Async("deployAsyncScheduler")
     public void upgradeStartChain(int chainId)   {
         try {
             final boolean startSuccess = this.startFrontOfChain(chainId);
             final ChainStatusEnum chainStatusEnum = startSuccess ? ChainStatusEnum.RUNNING : ChainStatusEnum.UPGRADING_FAILED;
-            threadPoolTaskScheduler.scheduleWithFixedDelay(()->{
+            threadPoolTaskScheduler.schedule(()->{
                 chainService.updateStatus(chainId,chainStatusEnum);
-            },System.currentTimeMillis() + constant.getDockerRestartPeriodTime());
-        } catch (InterruptedException e) {
+            }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
+    } catch (InterruptedException e) {
             log.error("Upgrade start chain:[{}] failed.", chainId, e);
         }
     }
 
-    @Async("deployAsyncScheduler")
-    public void startFrontOfGroup(int chainId, int groupId) {
-        List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
 
-        for (TbNode tbNode : CollectionUtils.emptyIfNull(tbNodeList)) {
+    /**
+     *
+     * @param chainId
+     * @param groupId
+     */
+    @Async("deployAsyncScheduler")
+    public void startFrontOfGroupSet(int chainId, int groupId ) {
+        List<TbFront> frontList = this.frontService.selectFrontListByGroupId(groupId);
+
+        for (TbFront tbFront : CollectionUtils.emptyIfNull(frontList)) {
             try {
                 // ssh host and start docker container
-                this.frontService.start(tbNode.getNodeId());
+                this.frontService.restart(tbFront.getNodeId());
                 Thread.sleep(constant.getDockerRestartPeriodTime());
             } catch (InterruptedException e) {
                 log.error("Start group:[{}:{}], docker restart server:[{}:{}] throws exception when sleep.",
-                        chainId, groupId, tbNode.getNodeIp(), tbNode.getNodeId());
+                        chainId, groupId, tbFront.getFrontIp(), tbFront.getNodeId());
             }
         }
     }
@@ -91,10 +104,25 @@ public class NodeAsyncService {
      * @param groupIdSet
      */
     @Async("deployAsyncScheduler")
-    public void startFrontOfGroup(int chainId, Set<Integer> groupIdSet) {
+    public void startFrontOfGroupSet(int chainId, Set<Integer> groupIdSet) {
         for (Integer groupId : CollectionUtils.emptyIfNull(groupIdSet)) {
-            ((NodeAsyncService) AopContext.currentProxy()).startFrontOfGroup(chainId, groupId);
+            ((NodeAsyncService) AopContext.currentProxy()).startFrontOfGroupSet(chainId, groupId );
         }
+    }
+
+    @Async("deployAsyncScheduler")
+    public void initHostAndStart(TbChain chain,TbHost host,int groupId) {
+        try {
+            boolean initSuccess = this.hostService.initHostList(chain, Arrays.asList(host), false);
+            log.info("Init host:[{}], result:[{}]",host.getIp(), initSuccess);
+            if (initSuccess) {
+                // start node
+                this.startFrontOfGroupSet(chain.getId(),groupId);
+            }
+        } catch (InterruptedException e) {
+            log.error("Init host:[{}] list and start chain:[{}] error",host.getIp() ,chain.getChainName(), e);
+        }
+
     }
 
     /**
@@ -123,19 +151,19 @@ public class NodeAsyncService {
             // 1. install docker and docker-compose,
             // 2. send node config to remote host
             // 3. docker pull image
-            boolean deploySuccess = this.hostService.initHostList(chain, tbHostList);
+            boolean deploySuccess = this.hostService.initHostList(chain, tbHostList, true);
             if (deploySuccess){
                 // start node
                 deploySuccess = this.startFrontOfChain(chain.getId());
 
                 final int chainId = chain.getId();
                 final ChainStatusEnum chainStatusEnum = deploySuccess ? ChainStatusEnum.RUNNING : ChainStatusEnum.DEPLOY_FAILED;
-                threadPoolTaskScheduler.scheduleWithFixedDelay(()->{
+                threadPoolTaskScheduler.schedule(()->{
                     chainService.updateStatus(chainId,chainStatusEnum);
-                },System.currentTimeMillis() + constant.getDockerRestartPeriodTime());
+                }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
             }
         } catch (Exception e) {
-            log.error("Deploy chain:[{}] error", chainName, e);
+            log.error("Init host list and start chain:[{}] error", chainName, e);
             chainService.updateStatus(chain.getId(), ChainStatusEnum.DEPLOY_FAILED);
         }
     }
@@ -162,7 +190,7 @@ public class NodeAsyncService {
             for (TbFront front : CollectionUtils.emptyIfNull(tbFrontList)) {
                 log.info("Start front:[{}:{}:{}].",front.getFrontIp(),front.getHostIndex(),front.getNodeId());
                 try {
-                    boolean startResult = this.frontService.start(front.getNodeId());
+                    boolean startResult = this.frontService.restart(front.getNodeId());
                     if (startResult){
                         log.info("Start front:[{}:{}:{}] success.",front.getFrontIp(),front.getHostIndex(),front.getNodeId());
                         startSuccessCount.incrementAndGet();
