@@ -5,7 +5,7 @@
 - 升级依赖包：spring: 5.1.15; log4j: 2.13.3; slf4j: 1.7.30; netty-all: 4.1.44+; guava: 28.2;
 
 **兼容性**
-- 支持FISCO-BCOS v2.4.0 及以上版本
+- 支持FISCO-BCOS v2.4.x 版本
 - WeBASE-Web v1.3.1+
 - WeBASE-Front v1.3.1+
 - WeBASE-Sign v1.3.1+
@@ -27,7 +27,7 @@
 - 修复公钥用户签名报空问题
 
 **兼容性**
-- 支持FISCO-BCOS v2.2.0 及以上版本
+- 支持FISCO-BCOS v2.4.x 版本
 - WeBASE-Web v1.3.1+
 - WeBASE-Front v1.3.1+
 - WeBASE-Sign v1.3.1+
@@ -55,7 +55,7 @@
 - 支持FISCO-BCOS v2.0.0-rc1 版本
 - 支持FISCO-BCOS v2.0.0-rc2 版本
 - 支持FISCO-BCOS v2.0.0-rc3 版本
-- 支持FISCO-BCOS v2.0.0 及以上版本
+- 支持FISCO-BCOS v2.0.0 - 2.4.x 版本
 - WeBASE-Web v1.2.2+
 - WeBASE-Front v1.2.2+
 - WeBASE-Sign v1.2.2+
