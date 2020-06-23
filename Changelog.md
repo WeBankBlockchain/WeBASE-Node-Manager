@@ -27,7 +27,7 @@
 - 修复公钥用户签名报空问题
 
 **兼容性**
-- 支持FISCO-BCOS v2.2.0 及以上版本
+- 支持FISCO-BCOS v2.4.0 及以上版本
 - WeBASE-Web v1.3.1+
 - WeBASE-Front v1.3.1+
 - WeBASE-Sign v1.3.1+
