@@ -50,6 +50,7 @@ import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
+import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 
@@ -67,7 +68,7 @@ public class HostService {
     @Autowired private FrontMapper frontMapper;
 
     @Autowired private ConstantProperties constant;
-    @Autowired private DockerClientService dockerClientService;
+    @Autowired private DockerOptions dockerOptions;
     @Autowired private AgencyService agencyService;
     @Autowired private PathService pathService;
     @Autowired private DeployShellService deployShellService;
@@ -184,7 +185,7 @@ public class HostService {
                     }
 
                     // docker pull image
-                    this.dockerClientService.pullImage(tbHost.getIp(), tbHost.getDockerPort(), tbChain.getVersion());
+                    this.dockerOptions.pullImage(tbHost.getIp(), tbHost.getDockerPort(), tbHost.getSshUser(),tbHost.getSshPort(), tbChain.getVersion());
 
                     // update host status
                     this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_SUCCESS) ;
@@ -303,7 +304,15 @@ public class HostService {
      * @param agencyId
      */
     @Transactional
-    public void deleteHostByAgencyId(int agencyId){
+    public void deleteHostByAgencyId(String chainName, int agencyId){
+        List<TbHost> hostList = this.tbHostMapper.selectByAgencyId(agencyId);
+        if(CollectionUtils.isNotEmpty(hostList)){
+            for (TbHost host : hostList) {
+                // move chain config files
+                ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),chainName,host.getSshUser(),host.getSshPort());
+            }
+        }
+
         // delete host in batch
         log.info("Delete host data by agency id:[{}].", agencyId);
         this.tbHostMapper.deleteByAgencyId(agencyId);

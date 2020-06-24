@@ -11,11 +11,11 @@ function install(){
         if [[ $(command -v apt) ]]; then
             # Debian/Ubuntu
             echo "Start to check and install ${app_name} on remote Debian system ....."
-            dpkg -l | grep -qw "${app_name}" || apt install -y "${app_name}"
-        else
+            sudo dpkg -l | grep -qw "${app_name}" || sudo apt install -y "${app_name}"
+        elif [[ $(command -v yum) ]]; then
             ## RHEL/CentOS
             echo "Start to check and install ${app_name} on remote RHEL system ....."
-            rpm -qa | grep -qw "${app_name}" || yum install -y "${app_name}"
+            sudo rpm -qa | grep -qw "${app_name}" || sudo yum install -y "${app_name}"
         fi
     fi
 }
@@ -26,7 +26,7 @@ function UpdateDNS() {
   file=/etc/resolv.conf
   for var in ${NAME_SERVER[@]};
   do
-    [[ "$(grep -i "$var" "$file")" == "" ]] && echo "nameserver $var" >> "$file"
+    [[ "$(grep -i "$var" "$file")" == "" ]] && sudo echo "nameserver $var" >> "$file"
   done
 }
 UpdateDNS
@@ -34,8 +34,8 @@ UpdateDNS
 # GNU/Linux操作系统
 if [[ $(command -v apt) ]]; then
     # Debian/Ubuntu
-    apt -y update && dpkg --configure -a
-else
+    sudo apt -y update && sudo dpkg --configure -a
+elif [[ $(command -v yum) ]]; then
     # RHEL/CentOS
     install epel-release epel-release
 fi
@@ -51,8 +51,8 @@ install curl curl
 if [[ ! $(command -v docker) ]]; then
     echo "Install docker..."
     bash <(curl -s -L get.docker.com)
-fi
 
+fi
 
 # install docker-compose
 #if [[ ! $(command -v docker-compose) ]]; then
@@ -61,27 +61,13 @@ fi
 #    chmod +x /usr/local/bin/docker-compose
 #fi
 
-# mkdir /etc/docker if not exists
-[ -d "/etc/docker" ] || mkdir "/etc/docker"
 
-# update docker demon listen tcp on 3000
-cat << EOF > "/etc/docker/daemon.json"
-{
-  "hosts": ["unix:///var/run/docker.sock", "tcp://0.0.0.0:3000"]
-}
-EOF
-
-# update docker systemctl config and start docker service
+# start docker
 if [[ $(command -v systemctl) ]]; then
-    ## update docker.service, fix https://stackoverflow.com/questions/44052054/unable-to-start-docker-after-configuring-hosts-in-daemon-json
-    cp -fv /lib/systemd/system/docker.service /etc/systemd/system/
-    sed -i 's/\ -H\ fd:\/\///g' /etc/systemd/system/docker.service
-
-    systemctl daemon-reload
-    systemctl enable docker
-    systemctl restart docker
+    sudo systemctl enable docker
+    sudo systemctl restart docker
 else
-    service docker restart
-    chkconfig docker on
+    sudo service docker restart
+    sudo chkconfig docker on
 fi
 

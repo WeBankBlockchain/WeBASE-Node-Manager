@@ -62,10 +62,10 @@ import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 import com.webank.webase.node.mgr.deploy.service.AgencyService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
-import com.webank.webase.node.mgr.deploy.service.DockerClientService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.NodeAsyncService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
+import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
@@ -321,7 +321,7 @@ public class ChainService {
             try {
                  nodePathList = pathService.listHostNodesPath(newChain.getChainName(), ip);
             } catch (Exception e) {
-                throw new NodeMgrException(ConstantCode.LIST_HOST_NODE_ERROR.attach(ip));
+                throw new NodeMgrException(ConstantCode.LIST_HOST_NODE_DIR_ERROR.attach(ip));
             }
 
             for (Path nodeRoot : CollectionUtils.emptyIfNull(nodePathList)) {
@@ -339,7 +339,7 @@ public class ChainService {
                 TbFront front = TbFront.init(nodeConfig.getNodeId(), ip, frontPort,
                         agency.getId(),agency.getAgencyName(), imageConfig.getConfigValue(),
                         RunTypeEnum.DOCKER , host.getId(), nodeConfig.getHostIndex(),
-                        imageConfig.getConfigValue(), DockerClientService.getContainerName(rootDirOnHost, chainName,
+                        imageConfig.getConfigValue(), DockerOptions.getContainerName(rootDirOnHost, chainName,
                         nodeConfig.getHostIndex()), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
                         nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
                 this.frontService.insert(front);
