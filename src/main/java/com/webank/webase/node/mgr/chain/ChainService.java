@@ -200,17 +200,17 @@ public class ChainService {
      * @param rootDirOnHost
      * @param chainName
      */
-    public static void mvChainOnRemote(String ip,String rootDirOnHost,String chainName){
+    public static void mvChainOnRemote(String ip,String rootDirOnHost,String chainName,String sshUser,int sshPort){
         // create /opt/fisco/deleted-tmp/ as a parent dir
         String deleteRootOnHost = PathService.getDeletedRootOnHost(rootDirOnHost);
-        SshTools.createDirOnRemote(ip, deleteRootOnHost);
+        SshTools.createDirOnRemote(ip, deleteRootOnHost,sshUser,sshPort);
 
         // like /opt/fisco/default_chain
         String src_chainRootOnHost = PathService.getChainRootOnHost(rootDirOnHost, chainName);
         // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss
         String dst_chainDeletedRootOnHost = PathService.getChainDeletedRootOnHost(rootDirOnHost, chainName);
 
-        SshTools.mvDirOnRemote(ip,src_chainRootOnHost,dst_chainDeletedRootOnHost);
+        SshTools.mvDirOnRemote(ip,src_chainRootOnHost,dst_chainDeletedRootOnHost,sshUser,sshPort);
     }
 
     /**
@@ -245,7 +245,9 @@ public class ChainService {
      * @param rootDirOnHost
      */
     @Transactional
-    public void generateChainConfig(String chainName, String[] ipConf, int tagId, String rootDirOnHost, String webaseSignAddr){
+    public void generateChainConfig(String chainName, String[] ipConf,
+                int tagId, String rootDirOnHost, String webaseSignAddr,
+                String sshUser,int sshPort,int dockerPort){
         log.info("Check chainName exists....");
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain != null) {
@@ -263,14 +265,14 @@ public class ChainService {
 
         // parse ipConf config
         log.info("Parse ipConf content....");
-        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf);
+        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf,sshUser,sshPort);
 
         // exec build_chain.sh shell script
         deployShellService.execBuildChain(encryptType, ipConf, chainName);
 
         // generate chain config
         ((ChainService) AopContext.currentProxy()).initChainDbData(chainName,ipConfigParseList,
-                rootDirOnHost,webaseSignAddr,imageConfig,encryptType);
+                rootDirOnHost,webaseSignAddr,imageConfig,encryptType,sshUser,sshPort,dockerPort);
     }
 
     /**
@@ -284,7 +286,8 @@ public class ChainService {
      */
     @Transactional
     public void initChainDbData(String chainName, List<IpConfigParse> ipConfigParseList,
-                                String rootDirOnHost, String webaseSignAddr, TbConfig imageConfig, byte encryptType){
+                                String rootDirOnHost, String webaseSignAddr, TbConfig imageConfig, byte encryptType,
+                                String sshUser,int sshPort,int dockerPort){
 
         // insert chain
         final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
@@ -300,7 +303,8 @@ public class ChainService {
             TbAgency agency = this.agencyService.insertIfNew(config.getAgencyName(),newChain.getId(),chainName);
 
             // insert host if new
-            TbHost host = this.hostService.insertIfNew(agency.getId(), agency.getAgencyName(), config.getIp(), rootDirOnHost);
+            TbHost host = this.hostService.insertIfNew(agency.getId(), agency.getAgencyName(), config.getIp(), rootDirOnHost,
+                    sshUser,sshPort,dockerPort);
 
             // insert group if new
             config.getGroupIdSet().forEach((groupId) -> {

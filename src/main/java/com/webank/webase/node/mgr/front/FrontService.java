@@ -576,7 +576,7 @@ public class FrontService {
             String remoteDst = String.format("%s/%s/node%s/config.ini", chain.getRootDir(),chain.getChainName(),hostIndex);
 
             // copy group config files to local node's conf dir
-            this.deployShellService.scp(ScpTypeEnum.UP,  host.getIp(), localScr, remoteDst);
+            this.deployShellService.scp(ScpTypeEnum.UP,host.getSshUser(),  host.getIp(),host.getSshPort(),localScr, remoteDst);
         }
     }
 
@@ -730,7 +730,7 @@ public class FrontService {
             this.dockerClientService.removeByName(host.getIp(),host.getDockerPort(),front.getContainerName());
 
             // move chain config files
-            ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),front.getChainName());
+            ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),front.getChainName(),host.getSshUser(),host.getSshPort());
 
             log.info("Delete node data by node id:[{}].", front.getNodeId());
             this.nodeMapper.deleteByNodeId(front.getNodeId());

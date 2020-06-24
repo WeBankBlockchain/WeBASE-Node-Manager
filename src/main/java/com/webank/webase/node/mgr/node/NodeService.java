@@ -439,10 +439,11 @@ public class NodeService {
      * @param hostIndex
      * @param nodeId
      */
-    public static void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId) {
+    public static void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId,
+            String sshUser, int sshPort) {
         // create /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss as a parent
         String chainDeleteRootOnHost = PathService.getChainDeletedRootOnHost(rooDirOnHost, chainName);
-        SshTools.createDirOnRemote(ip, chainDeleteRootOnHost);
+        SshTools.createDirOnRemote(ip, chainDeleteRootOnHost,sshUser,sshPort);
 
         // e.g. /opt/fisco/default_chain
         String chainRootOnHost = PathService.getChainRootOnHost(rooDirOnHost, chainName);
@@ -453,6 +454,6 @@ public class NodeService {
         String dst_nodeDeletedRootOnHost =
                 PathService.getNodeDeletedRootOnHost(chainDeleteRootOnHost, nodeId);
         // move
-        SshTools.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
+        SshTools.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost,sshUser,sshPort);
     }
 }

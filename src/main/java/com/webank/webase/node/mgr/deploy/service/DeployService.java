@@ -30,6 +30,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
@@ -67,6 +68,7 @@ public class DeployService {
     @Autowired private ChainService chainService;
     @Autowired private NodeAsyncService nodeAsyncService;
     @Autowired private PathService pathService;
+    @Autowired private ConstantProperties constantProperties;
 
     /**
      * Add in v1.4.0 deploy.
@@ -91,7 +93,9 @@ public class DeployService {
         // TODO. check WeBASE Sign accessible
 
         // generate config files and insert data to db
-        this.chainService.generateChainConfig(chainName,ipConf,tagId,rootDirOnHost,webaseSignAddr);
+        this.chainService.generateChainConfig(chainName,ipConf,tagId,rootDirOnHost,webaseSignAddr,
+                constantProperties.getSshDefaultUser(), constantProperties.getSshDefaultPort(),
+                constantProperties.getDockerDaemonPort() );
 
         // init host and start node
         this.nodeAsyncService.initHostListAndStart(chainName);
@@ -175,7 +179,10 @@ public class DeployService {
             // generate sdk config files
             tbHostExists = this.hostService.generateHostSDKAndScp(chain.getEncryptType(),
                     chain.getChainName(), chain.getRootDir(),
-                    ip, agency.getId(), agency.getAgencyName());
+                    ip, agency.getId(), agency.getAgencyName(),
+                    constantProperties.getSshDefaultUser(),
+                    constantProperties.getSshDefaultPort(),
+                    constantProperties.getDockerDaemonPort());
         } else {
             // exist host
             agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chain.getId(), tbHostExists.getAgencyName());
@@ -196,7 +203,7 @@ public class DeployService {
             this.frontService.updateNodeConfigIniByGroupId(chain, groupId);
 
             // generate new nodes config files and scp to remote
-            this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList);
+            this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList, tbHostExists.getSshUser(),tbHostExists.getSshPort());
 
             // init host and restart all front
             this.nodeAsyncService.initHostAndStart(chain,tbHostExists,group.getGroupId());
@@ -307,7 +314,8 @@ public class DeployService {
         }
 
         // move node of remote host files to temp directory, e.g./opt/fisco/delete-tmp
-        NodeService.mvNodeOnRemoteHost(host.getIp(), host.getRootDir(), chain.getChainName(), front.getHostIndex(), front.getNodeId());
+        NodeService.mvNodeOnRemoteHost(host.getIp(), host.getRootDir(), chain.getChainName(), front.getHostIndex(),
+                front.getNodeId(),host.getSshUser(),host.getSshPort());
 
         // delete front, node in db
         this.frontService.removeFront(front.getFrontId());
