@@ -55,15 +55,14 @@ import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
-import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AgencyService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
-import com.webank.webase.node.mgr.deploy.service.DockerClientService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
+import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -123,7 +122,7 @@ public class FrontService {
     @Autowired
     private ConstantProperties constant;
     @Autowired
-    private DockerClientService dockerClientService;
+    private DockerOptions dockerOptions;
 
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
@@ -482,7 +481,7 @@ public class FrontService {
 
 
             TbFront front = TbFront.init(nodeId, ip, frontPort, agencyId, agencyName, imageTag, RunTypeEnum.DOCKER,
-                    hostId, currentIndex, imageTag, DockerClientService.getContainerName(rootDirOnHost, chainName, currentIndex),
+                    hostId, currentIndex, imageTag, DockerOptions.getContainerName(rootDirOnHost, chainName, currentIndex),
                     jsonrpcPort, p2pPort, channelPort, chain.getId(), chainName, FrontStatusEnum.INITIALIZED);
             // insert front into db
             ((FrontService) AopContext.currentProxy()).insert(front);
@@ -601,20 +600,17 @@ public class FrontService {
 
         log.info("Docker start container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
         try {
-            this.dockerClientService.createAndStart(
-                    front.getFrontIp(),
-                    host.getDockerPort(),
-                    front.getImageTag(),
-                    front.getContainerName(),
-                    PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()),
-                    front.getHostIndex());
+            this.dockerOptions.run(
+                    front.getFrontIp(), host.getDockerPort(), host.getSshUser(), host.getSshPort(),
+                    front.getImageTag(), front.getContainerName(),
+                    PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()), front.getHostIndex());
 
             threadPoolTaskScheduler.schedule(()->{
                 this.updateStatus(front.getFrontId(),FrontStatusEnum.RUNNING);
             }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
             return true;
         } catch (Exception e) {
-            log.warn("Start front:[{}:{}] failed.",front.getFrontIp(), front.getHostIndex());
+            log.error("Start front:[{}:{}] failed.",front.getFrontIp(), front.getHostIndex(),e);
             this.updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
             throw new NodeMgrException(ConstantCode.START_NODE_ERROR);
         }
@@ -687,10 +683,8 @@ public class FrontService {
         TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        this.dockerClientService.removeByName(
-                front.getFrontIp(),
-                hostInDb.getDockerPort(),
-                front.getContainerName());
+        this.dockerOptions.stop( front.getFrontIp(), hostInDb.getDockerPort(), hostInDb.getSshUser(),
+                hostInDb.getSshPort(), front.getContainerName());
 
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
     }
@@ -703,10 +697,8 @@ public class FrontService {
         }
         TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        this.dockerClientService.removeByName(
-                front.getFrontIp(),
-                hostInDb.getDockerPort(),
-                front.getContainerName());
+        this.dockerOptions.stop( front.getFrontIp(), hostInDb.getDockerPort(), hostInDb.getSshUser(),
+                hostInDb.getSshPort(), front.getContainerName());
 
         this.nodeMapper.deleteByNodeId(nodeId);
     }
@@ -727,10 +719,7 @@ public class FrontService {
             TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
             // remote docker container
-            this.dockerClientService.removeByName(host.getIp(),host.getDockerPort(),front.getContainerName());
-
-            // move chain config files
-            ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),front.getChainName(),host.getSshUser(),host.getSshPort());
+            this.dockerOptions.stop(host.getIp(),host.getDockerPort(), host.getSshUser(),host.getSshPort(), front.getContainerName());
 
             log.info("Delete node data by node id:[{}].", front.getNodeId());
             this.nodeMapper.deleteByNodeId(front.getNodeId());

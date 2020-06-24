@@ -212,7 +212,7 @@ public class DeployController extends BaseController {
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     ) throws IOException {
         Instant startTime = Instant.now();
-        log.info("Start get chain info :[{}], chainName:[{}], now:[{}]", chainName, startTime);
+        log.info("Start get chain info chainName:[{}], now:[{}]", chainName, startTime);
 
         TbChain chain = this.tbChainMapper.getByChainName(chainName);
         return new BaseResponse(ConstantCode.SUCCESS, chain);

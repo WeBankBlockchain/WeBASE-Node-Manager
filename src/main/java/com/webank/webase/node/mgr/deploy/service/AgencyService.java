@@ -209,7 +209,7 @@ public class AgencyService {
             this.frontService.deleteFrontByAgencyId(agency.getId());
 
             // delete host
-            this.hostService.deleteHostByAgencyId(agency.getId());
+            this.hostService.deleteHostByAgencyId(agency.getChainName(),agency.getId());
         }
 
         this.tbAgencyMapper.deleteByChainId(chainId);

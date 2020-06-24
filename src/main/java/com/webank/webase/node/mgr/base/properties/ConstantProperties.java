@@ -93,6 +93,7 @@ public class ConstantProperties {
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
 
+    private boolean useDockerSDK = false;
     public int dockerDaemonPort = 3000;
     public String sshDefaultUser = "root";
     public int sshDefaultPort = 22;
