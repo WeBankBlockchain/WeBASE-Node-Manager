@@ -72,18 +72,22 @@ public class SshTools {
      * TODO exceptions and exec log
      *
      * @param ip
-     * @param command
+     * @param originalCommand
      */
-    private static boolean exec(String ip, String command,String sshUser,int sshPort) {
+    private static boolean exec(String ip, String originalCommand,String sshUser,int sshPort) {
+        StringBuilder newCommandBuilder = new StringBuilder(originalCommand);
         if (isLocal(ip)){
-            ExecuteResult result = JavaCommandExecutor.executeCommand(command,30 * 1000L );
+            ExecuteResult result = JavaCommandExecutor.executeCommand(originalCommand,30 * 1000L );
 
             if (result.failed()) {
-                log.error("SshTools exec on localhost:[{}] command:[{}] error.", ip,command );
+                log.error("SshTools exec on localhost:[{}] command:[{}] error.", ip, originalCommand );
                 throw new NodeMgrException(ConstantCode.TRANSFER_FILES_ERROR.msg(result.getExecuteOut()));
             }
             return result.success();
+        }else{
+            newCommandBuilder.append(" ; exit 0;");
         }
+        String newCommand = newCommandBuilder.toString();
         Session session = connect(ip, sshPort, sshUser, "", 0);
         if (session != null && session.isConnected()) {
             ChannelExec channelExec = null;
@@ -92,7 +96,7 @@ public class SshTools {
             try {
                 channelExec = (ChannelExec) session.openChannel("exec");
                 InputStream in = channelExec.getInputStream();
-                channelExec.setCommand(command);
+                channelExec.setCommand(newCommandBuilder.toString());
                 channelExec.connect();
 
                 reader = new BufferedReader(new InputStreamReader(in));
@@ -104,16 +108,16 @@ public class SshTools {
                 int status = channelExec.getExitStatus();
                 if (status < 0) {
                     log.error("Exec command:[{}] on remote host:[{}], no exit status:[{}] not set, log:[{}].",
-                            command, ip, status, execLog.toString());
+                            newCommand, ip, status, execLog.toString());
                     return true;
                 } else if (status == 0) {
-                    log.info("Exec command:[{}] on remote host:[{}] success, log:[{}].", command, ip, execLog.toString());
+                    log.info("Exec command:[{}] on remote host:[{}] success, log:[{}].", newCommand, ip, execLog.toString());
                     return true;
                 } else {
-                    log.error("Exec command:[{}] on remote host:[{}] with error[{}], log:[{}].", command, ip, status, execLog.toString());
+                    log.error("Exec command:[{}] on remote host:[{}] with error[{}], log:[{}].", newCommand, ip, status, execLog.toString());
                 }
             } catch (Exception e) {
-                log.error("Exec command:[{}] on remote host:[{}] occurred exception.", command, ip, e);
+                log.error("Exec command:[{}] on remote host:[{}] occurred exception.", newCommand, ip, e);
             } finally {
                 // TODO.
                 if (channelExec != null) {
@@ -206,7 +210,7 @@ public class SshTools {
                 log.error("mkdir:[{}] on localhost:[{}] error",dir,ip,e );
             }
         }else{
-            exec(ip, String.format("mkdir -p %s; exit 0", dir),sshUser,sshPort);
+            exec(ip, String.format("sudo mkdir -p %s", dir),sshUser,sshPort);
         }
     }
 
@@ -218,9 +222,24 @@ public class SshTools {
      */
     public static void mvDirOnRemote(String ip, String src, String dst, String sshUser, int sshPort){
         if (StringUtils.isNoneBlank(ip,src,dst)) {
-            String rmCommand = String.format("mv -fv %s %s && exit 0", src, dst);
+            String rmCommand = String.format("sudo mv -fv %s %s", src, dst);
             log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
             exec(ip, rmCommand,sshUser,sshPort);
         }
     }
+
+    /**
+     * Exec docker command.
+     *
+     * @param ip
+     * @param originalCommand
+     * @param sshUser
+     * @param sshPort
+     * @return
+     */
+    public static boolean execDocker(String ip, String originalCommand, String sshUser,int sshPort) {
+        log.info("Execute docker command:[{}] on host:[{}]", originalCommand, ip);
+        return exec(ip,originalCommand,sshUser,sshPort);
+    }
+
 }

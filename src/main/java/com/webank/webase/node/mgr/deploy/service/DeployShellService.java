@@ -110,12 +110,12 @@ public class DeployShellService {
 
         int newport = port <= 0 || port > 65535 ? SshTools.DEFAULT_SSH_PORT : port;
         String newUser = StringUtils.isBlank(user) ? SshTools.DEFAULT_SSH_USER : user;
+        String useDockerCommand = constant.isUseDockerSDK() ? "" : "-c";
+        String passwordParam = StringUtils.isBlank(pwd) ? "" : String.format(" -p %s ", pwd);
+        String chainRootParam = StringUtils.isBlank(chainRoot) ? "" : String.format(" -n %s ",chainRoot);
 
-        String command = String.format("bash -x -e %s -H %s -P %s -u %s %s %s", constant.getNodeOperateShell(),
-                ip, newport, newUser,
-                StringUtils.isBlank(pwd) ? "" : String.format(" -p %s ", pwd),
-                StringUtils.isBlank(chainRoot) ? "" : String.format(" -n %s ", chainRoot)
-        );
+        String command = String.format("bash -x -e %s -H %s -P %s -u %s %s %s %s ",
+                constant.getNodeOperateShell(), ip, newport, newUser,passwordParam, chainRootParam, useDockerCommand);
 
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
         if (result.failed()) {
