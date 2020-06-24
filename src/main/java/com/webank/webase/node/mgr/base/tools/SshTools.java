@@ -15,9 +15,6 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +40,9 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class SshTools {
+
+    public static final String DEFAULT_SSH_USER="root";
+    public static final int DEFAULT_SSH_PORT=22;
 
     private static Properties config = new Properties();
 
@@ -74,7 +74,7 @@ public class SshTools {
      * @param ip
      * @param command
      */
-    private static boolean exec(String ip, String command) {
+    private static boolean exec(String ip, String command,String sshUser,int sshPort) {
         if (isLocal(ip)){
             ExecuteResult result = JavaCommandExecutor.executeCommand(command,30 * 1000L );
 
@@ -84,7 +84,7 @@ public class SshTools {
             }
             return result.success();
         }
-        Session session = connect(ip, SSH_DEFAULT_PORT, SSH_DEFAULT_USER, "", 0);
+        Session session = connect(ip, sshPort, sshUser, "", 0);
         if (session != null && session.isConnected()) {
             ChannelExec channelExec = null;
             StringBuilder execLog = new StringBuilder();
@@ -135,12 +135,12 @@ public class SshTools {
      * @param ip
      * @return
      */
-    public static boolean connect(String ip) {
+    public static boolean connect(String ip,String sshUser,int sshPort) {
         if (isLocal(ip)) {
             return true;
         }
 
-        Session session = connect(ip, SSH_DEFAULT_PORT, SSH_DEFAULT_USER, "", 0);
+        Session session = connect(ip, sshPort, sshUser, "", 0);
         if (session != null && session.isConnected()) {
             session.disconnect();
             return true;
@@ -166,8 +166,8 @@ public class SshTools {
                 || (!"localhost".equals(ip) && !ValidateUtil.ipv4Valid(ip))) {
             return null;
         }
-        String newUser = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
-        int newPort = port <= 0 ? SSH_DEFAULT_PORT : port;
+        String newUser = StringUtils.isBlank(user) ? DEFAULT_SSH_USER : user;
+        int newPort = port <= 0 ? DEFAULT_SSH_PORT : port;
         boolean pubAuth = StringUtils.isBlank(password);
 
         // set default connect timeout to 10s
@@ -198,7 +198,7 @@ public class SshTools {
      * @param ip
      * @param dir
      */
-    public static void createDirOnRemote(String ip, String dir){
+    public static void createDirOnRemote(String ip, String dir, String sshUser, int sshPort){
         if(isLocal(ip)){
             try {
                 Files.createDirectories(Paths.get(dir));
@@ -206,7 +206,7 @@ public class SshTools {
                 log.error("mkdir:[{}] on localhost:[{}] error",dir,ip,e );
             }
         }else{
-            exec(ip, String.format("mkdir -p %s; exit 0", dir));
+            exec(ip, String.format("mkdir -p %s; exit 0", dir),sshUser,sshPort);
         }
     }
 
@@ -216,13 +216,11 @@ public class SshTools {
      * @param src
      * @param dst
      */
-    public static void mvDirOnRemote(String ip,
-                                     String src,
-                                     String dst){
+    public static void mvDirOnRemote(String ip, String src, String dst, String sshUser, int sshPort){
         if (StringUtils.isNoneBlank(ip,src,dst)) {
             String rmCommand = String.format("mv -fv %s %s && exit 0", src, dst);
             log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
-            exec(ip, rmCommand);
+            exec(ip, rmCommand,sshUser,sshPort);
         }
     }
 }

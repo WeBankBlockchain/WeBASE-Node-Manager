@@ -15,9 +15,6 @@
  */
 package com.webank.webase.node.mgr.deploy.service;
 
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -91,7 +88,8 @@ public class HostService {
     public TbHost insertIfNew(int agencyId,
                          String agencyName,
                          String ip,
-                         String rootDir) throws NodeMgrException {
+                         String rootDir,
+                         String sshUser,int sshPort,int dockerPort ) throws NodeMgrException {
         TbHost host = this.tbHostMapper.getByAgencyIdAndIp(agencyId,ip);
         if (host != null){
             return host;
@@ -99,30 +97,15 @@ public class HostService {
 
         // fix call transaction in the same class
         return ((HostService) AopContext.currentProxy())
-                .insert(agencyId, agencyName, ip, rootDir);
+                .insert(agencyId, agencyName, ip,sshUser,sshPort,rootDir,HostStatusEnum.ADDED, dockerPort);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public TbHost insert(int agencyId,
-                         String agencyName,
-                         String ip,
-                         String rootDir) throws NodeMgrException {
-
-        // fix call transaction in the same class
-        return ((HostService) AopContext.currentProxy())
-                .insert(agencyId, agencyName, ip, SSH_DEFAULT_USER, SSH_DEFAULT_PORT, rootDir, HostStatusEnum.ADDED);
-    }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbHost insert(int agencyId,
-                         String agencyName,
-                         String ip,
-                         String sshUser,
-                         int sshPort,
-                         String rootDir,
-                         HostStatusEnum hostStatusEnum) throws NodeMgrException {
+    public TbHost insert(int agencyId, String agencyName, String ip, String sshUser, int sshPort,
+                         String rootDir, HostStatusEnum hostStatusEnum, int dockerPort ) throws NodeMgrException {
 
-        TbHost host = TbHost.init(agencyId, agencyName, ip, sshUser, sshPort, rootDir, hostStatusEnum);
+        TbHost host = TbHost.init(agencyId, agencyName, ip, sshUser, sshPort, rootDir, hostStatusEnum,dockerPort);
 
         if ( tbHostMapper.insertSelective(host) != 1 || host.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_HOST_ERROR);
@@ -195,7 +178,7 @@ public class HostService {
                         // local: NODES_ROOT/[chainName]/[ip] TO remote: /opt/fisco/[chainName]
                         String src = String.format("%s/*", pathService.getHost(tbChain.getChainName(), tbHost.getIp()).toString());
                         String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName());
-                        deployShellService.scp(ScpTypeEnum.UP, tbHost.getIp(), src, dst);
+                        deployShellService.scp(ScpTypeEnum.UP,tbHost.getSshUser(), tbHost.getIp(),tbHost.getSshPort(), src, dst);
                         log.info("Send files from:[{}] to:[{}@{}#{}:{}] success.",
                                 src, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), dst);
                     }
@@ -255,8 +238,10 @@ public class HostService {
      *
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbHost generateHostSDKAndScp(byte encryptType, String chainName, String rootDirOnHost,
-                                        String ip, int agencyId, String agencyName) throws NodeMgrException {
+    public TbHost generateHostSDKAndScp(
+            byte encryptType, String chainName, String rootDirOnHost,
+            String ip, int agencyId, String agencyName,String sshUser,
+            int sshPort, int dockerPort) throws NodeMgrException {
         // new host, generate sdk dir first
         Path sdkPath = this.pathService.getSdk(chainName, ip);
 
@@ -284,11 +269,12 @@ public class HostService {
         String src = String.format("%s", sdkPath.toAbsolutePath().toString());
         String dst = PathService.getChainRootOnHost(rootDirOnHost, chainName);
 
-        log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst);
-        this.deployShellService.scp(ScpTypeEnum.UP, ip, src, dst);
+        log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, sshUser, ip, sshPort, dst);
+        this.deployShellService.scp(ScpTypeEnum.UP, sshUser, ip, sshPort, src, dst);
 
         // insert host into db
-        return ((HostService) AopContext.currentProxy()).insert(agencyId, agencyName, ip, rootDirOnHost);
+        return ((HostService) AopContext.currentProxy())
+                .insert(agencyId, agencyName, ip,sshUser,sshPort, rootDirOnHost,HostStatusEnum.ADDED, dockerPort);
     }
 
     /**
