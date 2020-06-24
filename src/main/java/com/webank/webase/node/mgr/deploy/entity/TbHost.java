@@ -1,7 +1,5 @@
 package com.webank.webase.node.mgr.deploy.entity;
 
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.DOCKER_DAEMON_PORT;
-
 import java.util.Date;
 
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
@@ -23,7 +21,9 @@ public class TbHost {
                                String sshUser,
                                int sshPort,
                                String rootDir,
-                               HostStatusEnum hostStatusEnum ){
+                               HostStatusEnum hostStatusEnum,
+                               int dockerPort
+                              ){
         Date now = new Date();
         TbHost tbHost = new TbHost();
         tbHost.setAgencyId(agencyId);
@@ -32,7 +32,7 @@ public class TbHost {
         tbHost.setSshUser(sshUser);
         tbHost.setSshPort(sshPort);
         tbHost.setRootDir(rootDir);
-        tbHost.setDockerPort(DOCKER_DAEMON_PORT);
+        tbHost.setDockerPort(dockerPort);
         tbHost.setStatus(hostStatusEnum.getId());
         tbHost.setCreateTime(now);
         tbHost.setModifyTime(now);

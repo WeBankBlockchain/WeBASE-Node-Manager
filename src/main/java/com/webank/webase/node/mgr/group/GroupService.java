@@ -14,8 +14,6 @@
 package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -1040,7 +1038,8 @@ public class GroupService {
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
         String localDst = String.format("%s/conf/group.%s.*", localNodePath, generateGroupId);
         // copy group config files to local node's conf dir
-        deployShellService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupConfSource, localDst);
+        deployShellService.scp(ScpTypeEnum.DOWNLOAD,tbHost.getSshUser(),
+                tbHost.getIp(), tbHost.getSshPort(), remoteGroupConfSource, localDst);
     }
 
 
@@ -1075,8 +1074,8 @@ public class GroupService {
             }
         }
         // copy group status file to local node's conf dir
-        deployShellService.scp(ScpTypeEnum.DOWNLOAD,  tbHost.getIp(),
-                remoteGroupStatusSource, localDst.toAbsolutePath().toString());
+        deployShellService.scp(ScpTypeEnum.DOWNLOAD,  tbHost.getSshUser(),
+                tbHost.getIp(), tbHost.getSshPort(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
     }
 
 //    private void pullGroupFile(int groupId,TbFront tbFront){
@@ -1097,8 +1096,9 @@ public class GroupService {
      * @param newFrontList
      * @throws IOException
      */
-    public void generateNewNodesGroupConfigsAndScp(boolean newGroup, TbChain chain, int groupId, String ip,
-                                           List<TbFront> newFrontList) throws IOException {
+    public void generateNewNodesGroupConfigsAndScp(
+           boolean newGroup, TbChain chain, int groupId, String ip,
+           List<TbFront> newFrontList, String sshUser, int sshPort) throws IOException {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
         long now = System.currentTimeMillis();
@@ -1133,12 +1133,12 @@ public class GroupService {
             String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
             String dst = PathService.getChainRootOnHost(chain.getRootDir(),chainName);
 
-            log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst);
+            log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, sshUser, ip, sshPort, dst);
             try {
-                this.deployShellService.scp(ScpTypeEnum.UP, ip, src, dst);
+                this.deployShellService.scp(ScpTypeEnum.UP,sshUser, ip,sshPort, src, dst);
             } catch (Exception e) {
                 // TODO.e
-                log.info("Send files from:[{}] to:[{}@{}#{}:{}] error.", src, SSH_DEFAULT_USER, ip, SSH_DEFAULT_PORT, dst, e);
+                log.info("Send files from:[{}] to:[{}@{}#{}:{}] error.", src, sshUser, ip, sshPort, dst, e);
                 e.printStackTrace();
             }
         }

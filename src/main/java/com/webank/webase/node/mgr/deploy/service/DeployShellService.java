@@ -15,9 +15,6 @@
  */
 package com.webank.webase.node.mgr.deploy.service;
 
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_PORT;
-import static com.webank.webase.node.mgr.base.properties.ConstantProperties.SSH_DEFAULT_USER;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,40 +50,32 @@ public class DeployShellService {
     private ConstantProperties constant;
     @Autowired
     private PathService pathService;
-    /**
-     *
-     * @param typeEnum
-     * @param ip
-     * @param src
-     * @param dst
-     * @return
-     */
-    public void scp(ScpTypeEnum typeEnum, String ip,  String src, String dst) {
-        this.scp(typeEnum,SSH_DEFAULT_USER,ip,SSH_DEFAULT_PORT,src,dst );
-    }
 
     /**
      * @param typeEnum
-     * @param user
+     * @param sshUser
      * @param ip
-     * @param port
+     * @param sshPort
      * @param src
      * @param dst
      * @return
      */
-    public void scp(ScpTypeEnum typeEnum, String user, String ip, int port, String src, String dst) {
-        if (Files.isRegularFile(Paths.get(src))) {
-            // if src is file, create parent directory of dst on remote
-            String parentOnRemote = Paths.get(dst).getParent().toAbsolutePath().toString();
-            SshTools.createDirOnRemote(ip,parentOnRemote);
-        }
-        if (Files.isDirectory(Paths.get(src))) {
-            // if src is directory, create dst on remote
-            SshTools.createDirOnRemote(ip,dst);
+    public void scp(ScpTypeEnum typeEnum, String sshUser, String ip, int sshPort, String src, String dst) {
+        if (typeEnum == ScpTypeEnum.UP) {
+            // scp files to remote
+            if (Files.isRegularFile(Paths.get(src))) {
+                // if src is file, create parent directory of dst on remote
+                String parentOnRemote = Paths.get(dst).getParent().toAbsolutePath().toString();
+                SshTools.createDirOnRemote(ip, parentOnRemote,sshUser,sshPort);
+            }
+            if (Files.isDirectory(Paths.get(src))) {
+                // if src is directory, create dst on remote
+                SshTools.createDirOnRemote(ip, dst,sshUser,sshPort);
+            }
         }
 
         String command = String.format("bash -x -e %s -t %s -i %s -u %s -p %s -s %s -d %s",
-                constant.getScpShell(), typeEnum.getValue(), ip, user, port, src, dst);
+                constant.getScpShell(), typeEnum.getValue(), ip, sshUser, sshPort, src, dst);
         log.info("exec file send command: [{}]", command);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
 
@@ -119,8 +108,8 @@ public class DeployShellService {
     public void execHostOperate(String ip, int port, String user, String pwd, String chainRoot) {
         log.info("Exec execHostOperate method for [{}@{}:{}#{}]", user, ip, port, pwd);
 
-        int newport = port <= 0 || port > 65535 ? SSH_DEFAULT_PORT : port;
-        String newUser = StringUtils.isBlank(user) ? SSH_DEFAULT_USER : user;
+        int newport = port <= 0 || port > 65535 ? SshTools.DEFAULT_SSH_PORT : port;
+        String newUser = StringUtils.isBlank(user) ? SshTools.DEFAULT_SSH_USER : user;
 
         String command = String.format("bash -x -e %s -H %s -P %s -u %s %s %s", constant.getNodeOperateShell(),
                 ip, newport, newUser,
