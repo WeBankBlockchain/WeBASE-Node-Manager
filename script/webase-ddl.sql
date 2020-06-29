@@ -7,7 +7,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE IF NOT EXISTS tb_group (
     group_id int(11) NOT NULL COMMENT '群组ID',
     group_name varchar(64) NOT NULL COMMENT '群组名字',
-    group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常）',
+    group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常 3-脏数据冲突 4-创世块冲突）',
     node_count int DEFAULT '0' COMMENT '群组下节点数',
     description varchar(1024) DEFAULT NULL COMMENT '群组描述',
     group_type int COMMENT '群组类型（1-拉取，2-动态创建）',
@@ -45,6 +45,8 @@ CREATE TABLE tb_front (
   jsonrpc_port int(6) DEFAULT '8545' COMMENT 'jsonrpc 端口',
   p2p_port int(6) DEFAULT '30303' COMMENT 'p2p 端口',
   channel_port int(6) DEFAULT '20200' COMMENT 'channel 端口',
+  chain_id int(10) unsigned NULL DEFAULT '0' COMMENT '所属链 ID',
+  chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
   PRIMARY KEY (`front_id`),
   UNIQUE KEY `unique_node_id` (`node_id`),
   UNIQUE KEY `unique_agency_id_host_id_front_port` (`agency_id`,`front_ip`,`front_port`)
@@ -59,7 +61,7 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
   group_id int(11) NOT NULL COMMENT '群组编号',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  status int(11) DEFAULT 1 NOT NULL COMMENT '节点（前置）的群组状态',
+  status int(11) DEFAULT 1 NOT NULL COMMENT '节点（前置）的群组状态，1-normal，2-invalid',
   PRIMARY KEY (map_id),
   unique  unique_front_group (front_id,group_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=600001 DEFAULT CHARSET=utf8 COMMENT='前置群组映射表';
@@ -367,8 +369,11 @@ CREATE TABLE `tb_chain` (
   `version` varchar(64) NOT NULL DEFAULT '' COMMENT '创建链时选择的镜像版本',
   `encrypt_type` tinyint(8) unsigned NOT NULL DEFAULT '1' COMMENT '加密类型：1，标密；2，国密；默认 1 ',
   `chain_status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '链状态：0，初始化；1，部署中；2，部署失败；3，部署成功等等',
+  `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
+  `webase_sign_addr` varchar(255) NOT NULL DEFAULT '127.0.0.1:5004' COMMENT 'WeBASE-Sign 的访问地址',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
+  `run_type` tinyint(8) unsigned DEFAULT '0' COMMENT '运行方式：0，命令行；1，Docker',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_chain_name` (`chain_name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链信息表';
@@ -383,9 +388,9 @@ CREATE TABLE `tb_config` (
   `config_value` varchar(512) NOT NULL DEFAULT '' COMMENT '配置值',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unq_type_value` (`config_type`,`config_value`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='配置信息表';
+  PRIMARY KEY (`id`)
+--  UNIQUE KEY `unq_type_value` (`config_type`,`config_value`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统配置信息表';
 
 
 

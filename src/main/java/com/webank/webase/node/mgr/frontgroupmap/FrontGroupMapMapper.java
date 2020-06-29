@@ -13,13 +13,15 @@
  */
 package com.webank.webase.node.mgr.frontgroupmap;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Repository;
+
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface FrontGroupMapMapper {
@@ -39,4 +41,14 @@ public interface FrontGroupMapMapper {
     List<FrontGroup> getList(MapListParam mapListParam);
 
     void removeInvalidMap();
+
+    @Select({
+        "select * from tb_front_group_map where group_id=#{groupId}"
+    })
+    List<TbFrontGroupMap> selectListByGroupId(@Param("groupId") int groupId);
+
+    @Select({
+        "update tb_front_group_map set modify_time = now(),status=#{status} where front_id=#{frontId}"
+    })
+    void updateStatus(@Param("frontId") int frontId,@Param("status") int status);
 }

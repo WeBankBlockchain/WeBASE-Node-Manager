@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.base.properties;
 
 import static java.io.File.separator;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -91,34 +92,46 @@ public class ConstantProperties {
     private Integer certMonitorTaskFixedDelay;
 
     //******************* Add in v1.4.0 start. *******************
-    public static final int DOCKER_DAEMON_PORT = 3000;
-    public static final String SSH_DEFAULT_USER = "root";
-    public static final int SSH_DEFAULT_PORT = 22;
+    public static final boolean RETURN_EXECUTE_LOG = true;
+
+    private boolean useDockerSDK = false;
+    public int dockerDaemonPort = 3000;
+    public String sshDefaultUser = "root";
+    public int sshDefaultPort = 22;
 
     // shell script
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
     private String buildChainShell = "./script/deploy/build_chain.sh";
+    private String genAgencyShell = "./script/deploy/gen_agency_cert.sh";
+    private String genNodeShell = "./script/deploy/gen_node_cert.sh";
     private String scpShell =        "./script/deploy/file_trans_util.sh";
+    private String privateKey = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "id_rsa";
     private String fiscoBcosBinary =  "";
 
     // default port
+    // TODO. write tbchain's id in db into config.ini
+    private int defaultChainId = 1;
     private int defaultJsonrpcPort = 8545;
     private int defaultP2pPort = 30300;
     private int defaultChannelPort = 20200;
     private int defaultFrontPort = 5002;
 
     // timeout config
-    private long execHostInitTimeout = 2 * 60 * 60 * 1000;
-    private long execBuildChainTimeout = 10 * 60 * 1000;
+    private long execHostInitTimeout = 2 * 60 * 60 * 1000L;
+    private long startNodeTimeout = 5 * 60 * 1000L;
+    private long execBuildChainTimeout = 10 * 60 * 1000L;
+    private long execShellTimeout = 2 * 60 * 1000L;
+    private long dockerRestartPeriodTime = 60 * 1000L;
     private int dockerClientConnectTimeout = 10 * 60 * 1000;
+    private int dockerPullTimeout = 10 * 60 * 1000;
     private int dockerClientReadTimeout = 10 * 60 * 1000;
-    private int dockerPullTimeout = 5 * 60 * 1000;
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login", "/user/privateKey/**", "/encrypt"};
     private String dockerRepository= "fiscoorg/front";
     private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
+    private String nodesRootTmpDir = "NODES_ROOT_TMP";
 
     /**
      * Docker client connect daemon ip with proxy ip.
@@ -127,17 +140,11 @@ public class ConstantProperties {
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
-        if (StringUtils.isBlank(nodesRootDir)) {
-            // return "." by default
-            nodesRootDir = "./NODES_ROOT/";
-        } else if (nodesRootDir.trim().endsWith(separator)) {
-            // ends with separator
-            nodesRootDir = nodesRootDir.trim();
-        } else {
-            // append a separator
-            nodesRootDir = String.format("%s%s", nodesRootDir.trim(), separator);
-        }
+        nodesRootDir = initDirectory(nodesRootDir, "NODES_ROOT/");
+        nodesRootTmpDir = initDirectory(nodesRootTmpDir, "NODES_ROOT_TMP/");
+
         log.info("Init constant properties, generate nodes root dir:[{}]", nodesRootDir);
+        log.info("Init constant properties, generate nodes root temp dir:[{}]", nodesRootTmpDir);
 
 
         this.imageTagUpdateUrl = String.format(this.imageTagUpdateUrl,dockerRepository);
@@ -152,6 +159,39 @@ public class ConstantProperties {
             log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
             fiscoBcosBinary = "";
         }
+
+        log.info("Init constant properties, private key: [{}]", privateKey);
+
+        log.info("Init constant properties, defaultP2pPort:[{}], defaultChannelPort:[{}], defaultJsonrpcPort:[{}], defaultFrontPort:[{}]",
+                defaultP2pPort, defaultChannelPort, defaultJsonrpcPort, defaultFrontPort);
+    }
+
+    /**
+     *
+     * @param injectedValue
+     * @param defaultValue
+     * @return
+     */
+    private static String initDirectory(String injectedValue, String defaultValue){
+        String newDirectory = injectedValue;
+
+        if (StringUtils.isBlank(newDirectory)) {
+            newDirectory = defaultValue;
+        }
+
+        if (newDirectory.trim().endsWith(separator)) {
+            // ends with separator
+            newDirectory = newDirectory.trim();
+        } else {
+            // append a separator
+            newDirectory = String.format("%s%s", newDirectory.trim(), separator);
+        }
+
+        if (! newDirectory.startsWith("/")){
+            // not an absolute path
+            return String.format("%s/%s",new File(".").toPath().toAbsolutePath().toString(), newDirectory);
+        }
+        return newDirectory;
     }
     //******************* Add in v1.4.0 end. *******************
 }

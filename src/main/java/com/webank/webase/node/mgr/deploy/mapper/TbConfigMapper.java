@@ -27,15 +27,7 @@ public interface TbConfigMapper {
             "select",
             TbConfigSqlProvider.ALL_COLUMN_FIELDS,
             "from tb_config",
-            "where config_type = #{type,jdbcType=SMALLINT}"
-    })
-    @Results({
-            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
-            @Result(column="config_name", property="configName", jdbcType=JdbcType.VARCHAR),
-            @Result(column="config_type", property="configType", jdbcType=JdbcType.SMALLINT),
-            @Result(column="config_value", property="configValue", jdbcType=JdbcType.VARCHAR),
-            @Result(column="create_time", property="createTime", jdbcType=JdbcType.TIMESTAMP),
-            @Result(column="modify_time", property="modifyTime", jdbcType=JdbcType.TIMESTAMP)
+            "where config_type = #{type,jdbcType=SMALLINT} order by id desc"
     })
     List<TbConfig> selectByType(@Param("type") int type);
 

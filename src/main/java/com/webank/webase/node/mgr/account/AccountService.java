@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.account;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.LoginInfo;
@@ -51,7 +51,7 @@ public class AccountService {
      * login.
      */
     public TbAccountInfo login(LoginInfo loginInfo) throws NodeMgrException {
-        log.info("start login. loginInfo:{}", JSON.toJSONString(loginInfo));
+        log.info("start login. loginInfo:{}", JsonTools.toJSONString(loginInfo));
         String accountStr = loginInfo.getAccount();
         String passwordStr = loginInfo.getAccountPwd();
 
@@ -81,7 +81,7 @@ public class AccountService {
      * add account row.
      */
     public void addAccountRow(AccountInfo accountInfo) throws NodeMgrException {
-        log.debug("start addAccountRow.  AccountInfo:{} ", JSON.toJSONString(accountInfo));
+        log.debug("start addAccountRow.  AccountInfo:{} ", JsonTools.toJSONString(accountInfo));
 
         String accountStr = accountInfo.getAccount();
         Integer roleId = accountInfo.getRoleId();
@@ -108,7 +108,7 @@ public class AccountService {
     public void updateAccountRow(String currentAccount, AccountInfo accountInfo)
         throws NodeMgrException {
         log.debug("start updateAccountRow.  currentAccount:{} AccountInfo:{} ", currentAccount,
-            JSON.toJSONString(accountInfo));
+            JsonTools.toJSONString(accountInfo));
 
         String accountStr = accountInfo.getAccount();
         // check account
@@ -183,7 +183,7 @@ public class AccountService {
     public TbAccountInfo queryByAccount(String accountStr) {
         log.debug("start queryByAccount. accountStr:{} ", accountStr);
         TbAccountInfo accountRow = accountMapper.queryByAccount(accountStr);
-        log.debug("end queryByAccount. accountRow:{} ", JSON.toJSONString(accountRow));
+        log.debug("end queryByAccount. accountRow:{} ", JsonTools.toJSONString(accountRow));
         return accountRow;
     }
 
@@ -202,9 +202,9 @@ public class AccountService {
      * query account list.
      */
     public List<TbAccountInfo> listOfAccount(AccountListParam param) {
-        log.debug("start listOfAccount. param:{} ", JSON.toJSONString(param));
+        log.debug("start listOfAccount. param:{} ", JsonTools.toJSONString(param));
         List<TbAccountInfo> list = accountMapper.listOfAccount(param);
-        log.debug("end listOfAccount. list:{} ", JSON.toJSONString(list));
+        log.debug("end listOfAccount. list:{} ", JsonTools.toJSONString(list));
         return list;
     }
 

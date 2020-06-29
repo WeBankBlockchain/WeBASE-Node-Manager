@@ -47,6 +47,9 @@ public class TbFront {
     private Integer agencyId;
     private String agencyName;
     private Integer hostId;
+    /**
+     * node index bound with front, index is 0, ex: bound with node0
+     */
     private Integer hostIndex;
     private String imageTag;
     private String containerName;
@@ -54,23 +57,17 @@ public class TbFront {
     private Integer p2pPort;
     private Integer channelPort;
 
+    private Integer chainId;
+    private String chainName;
+
     public static TbFront init(
-            String nodeId,
-            String ip,
-            int port,
-            String agencyName,
-            String clientVersion,
-            RunTypeEnum runTypeEnum,
-            int agencyId,
-            int hostId,
-            int hostIndex,
-            String imageTag,
-            String containerName ,
-            int jsonrpcPort,
-            int p2pPort,
-            int channelPort,
-            FrontStatusEnum frontStatusEnum
-    ){
+            String nodeId, String ip, int port,
+            int agencyId,String agencyName, String clientVersion,
+            RunTypeEnum runTypeEnum, int hostId, int hostIndex,
+            String imageTag, String containerName , int jsonrpcPort,
+            int p2pPort, int channelPort, int chainId,
+            String chainName, FrontStatusEnum frontStatusEnum ){
+
         LocalDateTime now = LocalDateTime.now();
         TbFront front = new TbFront();
         front.setNodeId(nodeId);
@@ -90,11 +87,12 @@ public class TbFront {
         front.setJsonrpcPort(jsonrpcPort);
         front.setP2pPort(p2pPort);
         front.setChannelPort(channelPort);
+        front.setChainId(chainId);
+        front.setChainName(chainName);
         front.setStatus(frontStatusEnum.getId());
 
         return front;
     }
-
 }
 
 

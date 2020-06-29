@@ -23,12 +23,15 @@
     <result column="jsonrpc_port" jdbcType="SMALLINT" property="jsonrpcPort" />
     <result column="p2p_port" jdbcType="SMALLINT" property="p2pPort" />
     <result column="channel_port" jdbcType="SMALLINT" property="channelPort" />
+    <result column="chain_id" jdbcType="INTEGER" property="chainId" />
+    <result column="chain_name" jdbcType="VARCHAR" property="chainName" />
   </resultMap>
 
 
   <sql id="QUERY_ROW_COLUMN">
     front_id frontId,front_ip frontIp,front_port frontPort,agency,client_version,create_time createTime,modify_time modifyTime,
-    run_type, agency_id, agency_name, host_id, host_index, image_tag, container_name,jsonrpc_port, p2p_port, channel_port, status
+    run_type, agency_id, agency_name, host_id, host_index, image_tag, container_name,jsonrpc_port, p2p_port, channel_port, status,
+    chain_id, chain_name
   </sql>
 
   <insert id="add">
@@ -37,13 +40,14 @@
     modify_time, run_type, agency_id,
     agency_name, host_id, host_index,
     image_tag, container_name, jsonrpc_port,
-    p2p_port, channel_port, status )
+    p2p_port, channel_port, status, chain_id, chain_name )
     values (#{nodeId,jdbcType=VARCHAR}, #{frontIp,jdbcType=VARCHAR}, #{frontPort,jdbcType=INTEGER},
     #{agency,jdbcType=VARCHAR}, #{clientVersion,jdbcType=VARCHAR},
     NOW(),NOW(), #{runType,jdbcType=TINYINT}, #{agencyId,jdbcType=INTEGER},
     #{agencyName,jdbcType=VARCHAR}, #{hostId,jdbcType=INTEGER}, #{hostIndex,jdbcType=SMALLINT},
     #{imageTag,jdbcType=VARCHAR}, #{containerName,jdbcType=VARCHAR}, #{jsonrpcPort,jdbcType=SMALLINT},
-    #{p2pPort,jdbcType=SMALLINT}, #{channelPort,jdbcType=SMALLINT}, #{status,jdbcType=INTEGER} )
+    #{p2pPort,jdbcType=SMALLINT}, #{channelPort,jdbcType=SMALLINT}, #{status,jdbcType=INTEGER},
+    #{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR})
     <selectKey keyProperty="frontId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -101,10 +105,6 @@
     select * from tb_front where front_id = #{frontId}
   </select>
 
-  <select id="getByNodeId" resultMap="frontMap" parameterType="java.lang.String">
-    select * from tb_front where node_id = #{nodeId}
-    limit 1
-  </select>
 
   <select id="selectByHostId" resultMap="frontMap" parameterType="java.lang.Integer">
     select * from tb_front where host_id= #{hostId}
@@ -120,4 +120,8 @@
   <update id="updateStatus" parameterType="java.util.Map">
     update tb_front set `status`=#{status},modify_time=#{modifyTime} where front_id = #{frontId}
   </update>
+
+  <select id="getByNodeId" resultMap="frontMap" parameterType="java.lang.String">
+    select * from tb_front where node_id = #{nodeId} limit 1
+  </select>
 </mapper>

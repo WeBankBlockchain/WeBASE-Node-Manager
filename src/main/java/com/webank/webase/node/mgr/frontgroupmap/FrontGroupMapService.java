@@ -20,16 +20,15 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.group.GroupService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -40,11 +39,9 @@ public class FrontGroupMapService {
     @Autowired
     private FrontGroupMapMapper frontGroupMapMapper;
     @Autowired
-    private GroupService groupService;
-    @Autowired
-    private FrontService frontService;
-    @Autowired
     private FrontInterfaceService frontInterface;
+    @Autowired
+    private FrontGroupMapCache frontGroupMapCache;
 
     /**
      * add new mapping with group status directly
@@ -76,8 +73,8 @@ public class FrontGroupMapService {
     /**
      * add new mapping
      */
-    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId) {
-        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId);
+    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, GroupStatus groupStatus) {
+        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, groupStatus.getValue());
 
         //add db
         frontGroupMapMapper.add(tbFrontGroupMap);
@@ -164,5 +161,12 @@ public class FrontGroupMapService {
      */
     public void removeInvalidFrontGroupMap() {
         frontGroupMapMapper.removeInvalidMap();
+    }
+
+    @Transactional
+    public void updateFrontMapStatus(int frontId, GroupStatus status) {
+        // update status
+        frontGroupMapMapper.updateStatus(frontId,status.getValue());
+        this.frontGroupMapCache.clearMapList();
     }
 }

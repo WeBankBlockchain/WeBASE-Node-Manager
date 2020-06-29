@@ -46,6 +46,7 @@ port=22
 user=root
 password=
 node_root=/opt/fisco
+use_docker_sdk=yes
 
 ####### error code
 SUCCESS=0
@@ -58,20 +59,21 @@ cmdname=$(basename "$0")
 usage() {
     cat << USAGE  >&2
 Usage:
-    $cmdname [-H host] [-P port] [-u user] [-p password] [-n node_root] [-d] [-h]
+    $cmdname [-H host] [-P port] [-u user] [-p password] [-n node_root] [-c] [-d] [-h]
     -H     Required, remote host.
     -P     Not required, remote port, default is 22.
     -u     Not required, remote userName, default is root.
     -p     Required, password.
-    -d     User debug model, default no.
     -n     Node config root directory, default is /opt/fisco
+    -c     Use docker command instead of using docker SDK api, default no.
+    -d     Use debug model, default no.
     -h     Show help info.
 USAGE
     exit ${PARAM_ERROR}
 }
 
 
-while getopts H:P:u:p:n:dh OPT;do
+while getopts H:P:u:p:n:dch OPT;do
     case ${OPT} in
         H)
             host=$OPTARG
@@ -90,6 +92,9 @@ while getopts H:P:u:p:n:dh OPT;do
             ;;
         n)
             node_root="$OPTARG"
+            ;;
+        c)
+            use_docker_sdk="no"
             ;;
         h)
             usage
@@ -125,57 +130,79 @@ function init() {
     if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
         echo "Initialing local server ....."
 
+        case $(uname | tr '[:upper:]' '[:lower:]') in
+          linux*)
+            # GNU/Linux操作系统
+            # Debian(Ubuntu) or RHEL(CentOS)
+            bash -e -x "${__dir}/host_init_shell.sh"
+            status=($?)
+            if [[ $status != 0 ]] ;then
+                echo "Local init node ERROR!!!"
+                exit "$status"
+            fi
+            
+            ## config docker listen on tcp:3000
+            if [[ "${use_docker_sdk}"x == "yes"x ]] ; then
+                cat "${__dir}/host_docker_tcp.sh" | sshExec bash -e -x
+                status=($?)
+                if [[ $status != 0 ]] ;then
+                    echo "Config docker list on tcp:3000 ERROR!!!"
+                    exit "$status"
+                fi
+            fi
+            ;;
+        esac
         echo "mkdir node root ${node_root} on local"
-        mkdir -p ${node_root}
+        sudo mkdir -p ${node_root}
 
         echo "Local host init SUCCESS!!! "
     else
         echo "Initialing remote server ....."
-        if [[ "$password"x != ""x ]] ; then
-          cmd="yum"
-          # install sshpass
-          case $(uname | tr '[:upper:]' '[:lower:]') in
-            linux*)
-              # GNU/Linux操作系统
-              # Debian(Ubuntu) or RHEL(CentOS)
-              if [[ $(command -v apt) ]]; then
-                  cmd="apt"
-              fi
-
-              # install sshpass for ssh-copy-id
-              if [[ ! $(command -v sshpass) ]]; then
-                  # install ufw
-                  echo "Installing sshpass on node..."
-                  ${cmd} install -y sshpass
-              fi
-              ;;
-            darwin*)
-              cmd="brew"
-              # install sshpass
-              if [[ ! $(command -v sshpass) ]]; then
-                  echo "Installing sshpass on mac ....."
-                  ${cmd} install http://git.io/sshpass.rb
-              fi
-              ;;
-            *)
-              LOG_WARN "Unsupported Windows yet."
-              ;;
-          esac
-
-        fi
+#        if [[ "$password"x != ""x ]] ; then
+#          cmd="yum"
+#          # install sshpass
+#          case $(uname | tr '[:upper:]' '[:lower:]') in
+#            linux*)
+#              # GNU/Linux操作系统
+#              # Debian(Ubuntu) or RHEL(CentOS)
+#              if [[ $(command -v apt) ]]; then
+#                  cmd="apt"
+#              fi
+#
+#              # install sshpass for ssh-copy-id
+#              if [[ ! $(command -v sshpass) ]]; then
+#                  # install ufw
+#                  echo "Installing sshpass on node..."
+#                  sudo ${cmd} install -y sshpass
+#              fi
+#              ;;
+#            darwin*)
+#              cmd="brew"
+#              # install sshpass
+#              if [[ ! $(command -v sshpass) ]]; then
+#                  echo "Installing sshpass on mac ....."
+#                  ${cmd} install http://git.io/sshpass.rb
+#              fi
+#              ;;
+#            *)
+#              LOG_WARN "Unsupported Windows yet."
+#              ;;
+#          esac
+#
+#        fi
 
         # ssh-keygen
-        if [[ ! -f ~/.ssh/id_rsa.pub ]]; then
-            echo "Executing ssh-kengen ...."
-            ssh-keygen -q -b 4096 -t rsa -N '' -f ~/.ssh/id_rsa
-        fi
-
-
-        if [[ "$password"x != ""x ]] ; then
-          # scp id_rsa.pub to remote`
-          echo "Start ssh-copy-id to remote server..."
-          sshpass -p "${password}" ssh-copy-id -i ~/.ssh/id_rsa.pub -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" ${user}@${host} -p ${port}
-        fi
+#        if [[ ! -f ~/.ssh/id_rsa.pub ]]; then
+#            echo "Executing ssh-keygen ...."
+#            sudo ssh-keygen -q -b 4096 -t rsa -N '' -f ~/.ssh/id_rsa
+#        fi
+#
+#
+#        if [[ "$password"x != ""x ]] ; then
+#          # scp id_rsa.pub to remote`
+#          echo "Start ssh-copy-id to remote server..."
+#          sudo sshpass -p "${password}" ssh-copy-id -i ~/.ssh/id_rsa.pub -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" ${user}@${host} -p ${port}
+#        fi
 
         # scp node-init.sh to remote and exec
         cat "${__dir}/host_init_shell.sh" | sshExec bash -e -x
@@ -184,9 +211,19 @@ function init() {
             echo "Remote init node ERROR!!!"
             exit "$status"
         fi
+        
+        ## config docker listen on tcp:3000
+        if [[ "${use_docker_sdk}"x == "yes"x ]] ; then
+            cat "${__dir}/host_docker_tcp.sh" | sshExec bash -e -x
+            status=($?)
+            if [[ $status != 0 ]] ;then
+                echo "Config docker list on tcp:3000 ERROR!!!"
+                exit "$status"
+            fi
+        fi
 
         echo "mkdir node root ${node_root} on remote"
-        sshExec "mkdir -p ${node_root}"
+        sshExec "sudo mkdir -p ${node_root} && sudo chown -R ${user} ${node_root} && sudo chgrp -R ${user} ${node_root}"
 
         echo "Remote host init SUCCESS!!! "
     fi

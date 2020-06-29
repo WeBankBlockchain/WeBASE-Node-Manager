@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.block;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -102,7 +102,7 @@ public class BlockController {
         }
 
         log.info("end queryBlockList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pageResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
         return pageResponse;
     }
 
@@ -121,7 +121,7 @@ public class BlockController {
         Object blockInfo = blockService.getBlockFromFrontByNumber(groupId, blockNumber);
         baseResponse.setData(blockInfo);
         log.info("end getBlockByNumber useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 }

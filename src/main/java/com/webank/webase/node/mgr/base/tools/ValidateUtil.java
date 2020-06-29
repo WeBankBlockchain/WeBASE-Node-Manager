@@ -26,14 +26,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ValidateUtil {
     public static final String IP_PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
+
     public static final String AGENCY_NAME_PATTERN = "^[0-9a-zA-Z_]+$";
 
     /**
      * Validate ipv4 address.
      * @param ip
-     * @return
+     * @return  return false if ip is not a valid IP format.
      */
-    public static boolean validateIpv4(final String ip) {
+    public static boolean ipv4Valid(final String ip) {
         if (StringUtils.isBlank(ip)){
             return false;
         }

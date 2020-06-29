@@ -26,11 +26,11 @@ public enum FrontStatusEnum {
     INITIALIZED( 0, "initialized"),
     RUNNING( 1, "running"),
     STOPPED(2, "stopped"),
+    UPGRADING(3, "upgrading"),
     ;
 
     private int id;
     private String description;
-
 
     /**
      *
@@ -46,4 +46,12 @@ public enum FrontStatusEnum {
         return null;
     }
 
+    /**
+     *
+     * @param id
+     * @return
+     */
+    public static boolean isRunning(int id){
+        return id == RUNNING.getId();
+    }
 }

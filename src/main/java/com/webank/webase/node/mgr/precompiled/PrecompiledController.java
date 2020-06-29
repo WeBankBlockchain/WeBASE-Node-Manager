@@ -15,21 +15,29 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.controller.BaseController;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
-import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
-import lombok.extern.log4j.Log4j2;
+import java.time.Duration;
+import java.time.Instant;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.time.Duration;
-import java.time.Instant;
+import com.webank.webase.node.mgr.base.controller.BaseController;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Precompiled common controller
@@ -58,7 +66,7 @@ public class PrecompiledController extends BaseController {
         Object result = precompiledService.listCnsService(groupId, contractNameAndVersion, pageSize, pageNumber);
 
         log.info("end listCns useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
     }
 
@@ -75,9 +83,8 @@ public class PrecompiledController extends BaseController {
         log.info("start getNodeList startTime:{}", startTime.toEpochMilli());
 
         Object result = precompiledService.getNodeListService(groupId, pageSize, pageNumber);
-
         log.info("end getNodeList useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
     }
 
@@ -88,12 +95,12 @@ public class PrecompiledController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start nodeManage startTime:{} consensusHandle:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(consensusHandle));
+                JsonTools.toJSONString(consensusHandle));
 
         Object res = precompiledService.nodeManageService(consensusHandle);
 
         log.info("end nodeManage useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }
@@ -108,12 +115,12 @@ public class PrecompiledController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start crud startTime:{} crudHandle:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(crudHandle));
+                JsonTools.toJSONString(crudHandle));
 
         Object res = precompiledService.crudService(crudHandle);
 
         log.info("end crud useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }

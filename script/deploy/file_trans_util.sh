@@ -51,12 +51,12 @@ usage() {
     cat << USAGE  >&2
 Usage:
     $cmdname [-t up|down ] [-i ip] [-u ssh_user] [-p ssh_port] [-s src] [-d dst] [-h]
-    -t     Required, upload or download, only up and down is valid.
+    -t     Required, transfer file by upload or download, only up and down is valid.
     -i     Required, remote server ip.
     -u     Required, SSH user.
     -p     Required, SSH port, default 22.
-    -s     Required, scp src files.
-    -d     Required, scp dst files.
+    -s     Required, scp source files.
+    -d     Required, scp destination files.
     -h     Show help info.
 USAGE
     exit 1
@@ -105,13 +105,18 @@ if [[ "${type}"x == "up"x ]] ; then
     echo "Upload files from local:[${src}] to remote dst:[${user}@${ip}:${dst}], using port:[${port}]"
 
     if [[ "$ip"x == "127.0.0.1"x || "$ip"x == "localhost"x ]] ; then
-        cp -rfv ${src} ${dst}
+        sudo cp -rfv ${src} ${dst}
     else
         scp -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" -P ${port} -r ${src} ${user}@${ip}:${dst}
     fi
 elif [[ "${type}"x == "down"x ]] ; then
-    echo "Download files from remote dst:[${user}@${ip}:${src}] to local:[${dst}], using port:[${port}]"
+    echo "Download files from remote :[${user}@${ip}:${src}] to local dst:[${dst}], using port:[${port}]"
 
+    if [[ "$ip"x == "127.0.0.1"x || "$ip"x == "localhost"x ]] ; then
+        sudo cp -rfv ${src} ${dst}
+    else
+        scp -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" -P ${port} -r ${user}@${ip}:${src} ${dst}
+    fi
 fi
 
 

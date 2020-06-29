@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.group.entity;
 
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
@@ -34,6 +35,7 @@ public class TbGroup {
     private String groupName;
     /**
      * 1-normal, 2-invalid
+     * @related groupType sync group default 1, manual default 2
      */
     private Integer groupStatus;
     private Integer nodeCount;
@@ -48,7 +50,7 @@ public class TbGroup {
      */
     private String groupTimestamp;
     /**
-     * group peers nodeid
+     * group peers nodeId
      */
     private String nodeIdList;
 
@@ -56,33 +58,25 @@ public class TbGroup {
     private String chainName;
 
 
-    public TbGroup(Integer groupId,
-                   String groupName,
-                   Integer nodeCount,
-                   int chainId,
-                   String chainName,
-                   String description,
-                   GroupType groupType){
-        LocalDateTime now =  LocalDateTime.now();
-
+    public TbGroup(Integer groupId, String groupName, Integer nodeCount, String description,
+                   GroupType groupType, GroupStatus groupStatus, int chainId, String chainName){
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
         this.description = description;
         this.groupType = groupType.getValue();
+        this.groupStatus = groupStatus.getValue();
         this.chainId = chainId;
         this.chainName = chainName;
-        this.createTime = now;
-        this.modifyTime = now;
     }
 
     public TbGroup(Integer groupId, String groupName, Integer nodeCount,
-                   String description, Integer groupType, Integer groupStatus) {
+                   String description, GroupType groupType, GroupStatus groupStatus) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
         this.description = description;
-        this.groupType = groupType;
-        this.groupStatus = groupStatus;
+        this.groupType = groupType.getValue();
+        this.groupStatus = groupStatus.getValue();
     }
 }

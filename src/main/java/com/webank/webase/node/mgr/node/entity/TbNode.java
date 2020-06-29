@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.node;
+package com.webank.webase.node.mgr.node.entity;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
-import com.webank.webase.node.mgr.base.enums.NodeStatusEnum;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 
 import lombok.Data;
 
@@ -47,7 +47,7 @@ public class TbNode {
             String ip,
             int p2pPort,
             String description,
-            NodeStatusEnum nodeStatusEnum
+            DataStatus dataStatus
     ) {
         LocalDateTime now = LocalDateTime.now();
         TbNode node = new TbNode();
@@ -59,7 +59,7 @@ public class TbNode {
         node.setDescription(description);
         node.setBlockNumber(BigInteger.ZERO);
         node.setPbftView(BigInteger.ZERO);
-        node.setNodeActive(nodeStatusEnum.getId());
+        node.setNodeActive(dataStatus.getValue());
         node.setCreateTime(now);
         node.setModifyTime(now);
 

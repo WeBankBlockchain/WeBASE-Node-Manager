@@ -16,10 +16,9 @@
 
 package node.mgr.test.alert.task;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.node.Node;
 import com.webank.webase.node.mgr.precompiled.PrecompiledService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +28,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)

@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -54,7 +54,7 @@ public class MonitorController {
         response.setData(listOfUser);
 
         log.info("end monitorUserList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(response));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(response));
         return response;
     }
 
@@ -74,7 +74,7 @@ public class MonitorController {
         response.setData(listOfInterface);
 
         log.info("end monitorInterfaceList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(response));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(response));
         return response;
     }
 
@@ -99,7 +99,7 @@ public class MonitorController {
             .qureyMonitorTransList(groupId, userName, startDate, endDate, interfaceName);
 
         log.info("end monitorTransList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(response));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(response));
         return response;
     }
 
@@ -129,7 +129,7 @@ public class MonitorController {
         }
 
         log.info("end unusualUserList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -159,7 +159,7 @@ public class MonitorController {
         }
 
         log.info("end unusualContractList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 }

@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -28,7 +29,9 @@ import lombok.extern.log4j.Log4j2;
  */
 
 @Log4j2
+@ToString
 public class JavaCommandExecutor {
+    public static final long DEFAULT_EXEC_TIMEOUT = 60_60_1000L;
 
     public static ExecuteResult executeCommand(String command, long timeout) {
         Process process = null;
@@ -53,8 +56,9 @@ public class JavaCommandExecutor {
             pErr = process.getErrorStream();
             errorGobbler = new StreamGobbler(pErr, "ERROR");
             errorGobbler.start();
+            long newTimeout = timeout <= 0? DEFAULT_EXEC_TIMEOUT:timeout;
 
-            p.waitFor(timeout, TimeUnit.MILLISECONDS);
+            p.waitFor(newTimeout, TimeUnit.MILLISECONDS);
             int exitCode = p.exitValue();
 
             if (exitCode == 0) {

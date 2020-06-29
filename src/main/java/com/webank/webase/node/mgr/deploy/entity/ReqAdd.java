@@ -13,8 +13,9 @@
  */
 package com.webank.webase.node.mgr.deploy.entity;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
 import lombok.Data;
@@ -23,13 +24,33 @@ import lombok.Data;
  *
  */
 @Data
-public class DeployReq {
-    @NotNull
-    private String[] ipconf;
+public class ReqAdd {
+
+    /**
+     * Host runs new node, maybe a new host.
+     */
+    @NotBlank
+    private String ip;
 
     @Positive
-    private int tagId;
+    private int groupId;
 
+    /**
+     * If host ip is new one, agency name should not be null.
+     */
+    private String agencyName="";
+
+    /**
+     * Count of new nodes , default is 1.
+     */
+    @Positive
+    @Max(200)
+    @Min(1)
+    private int num = 1;
+
+    /**
+     * If agency name is a new one, chain name should not be null.
+     */
     @NotBlank
     private String chainName = "default_chain";
 

@@ -17,18 +17,26 @@ repositories {
     maven {url "http://maven.aliyun.com/nexus/content/groups/public/"}
     
     maven { url 'https://dl.bintray.com/ethereum/maven/' }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+
     mavenLocal()
     mavenCentral()
 }
 
-def springboot_version="2.1.2.RELEASE"
+def springboot_version="2.1.15.RELEASE"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
-     "org.springframework.boot:spring-boot-starter-log4j2:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
      "org.springframework.boot:spring-boot-starter-mail:$springboot_version",
      "org.springframework.boot:spring-boot-starter-thymeleaf:$springboot_version",
      "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
+]
+
+// cover old version
+def spring_version="5.1.15.RELEASE"
+List spring =[
+    "org.springframework:spring-jdbc:$spring_version",
+    "org.springframework:spring-tx:$spring_version"
 ]
 
 List jaxb = [
@@ -38,45 +46,63 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-List web3jsdk = [
-    "org.fisco-bcos:web3sdk:2.4.0"
+List web3sdk = [
+    "org.fisco-bcos:web3sdk:2.4.1"
 ]
 
 List lombok = [
-
-    "org.projectlombok:lombok:1.18.2"
+    "org.projectlombok:lombok:1.18.12"
 ]
 
+def jackson_version = "2.11.0"
 List jackson = [
-    "com.fasterxml.jackson.core:jackson-databind:2.10.0",
-    "com.fasterxml.jackson.module:jackson-module-parameter-names:2.10.0",
-    "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.0",
-    "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0"
+    "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
+    "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
+    "com.fasterxml.jackson.core:jackson-core:$jackson_version",
+    "com.fasterxml.jackson.module:jackson-module-parameter-names:$jackson_version",
+    "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version",
+    "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version",
 ]
 
 List test = [
     "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
+def log4j_version="2.13.3"
+List log4j = [
+    "org.apache.logging.log4j:log4j-api:$log4j_version",
+    "org.apache.logging.log4j:log4j-core:$log4j_version",
+    "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
+    "org.apache.logging.log4j:log4j-web:$log4j_version"
+]
 
 dependencies {
-    compile springboot,jaxb,web3jsdk,jackson
+    compile springboot,spring,jaxb,web3sdk,jackson,log4j
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
-    compile "com.alibaba:fastjson:1.2.69"
     compile "mysql:mysql-connector-java:8.0.13"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.54'
+    // cover old version
+    compile 'com.google.guava:guava:28.2-jre'
+    compile 'org.slf4j:jcl-over-slf4j:1.7.30'
+
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
     compile ('com.github.docker-java:docker-java:3.2.1') {
         exclude group: 'io.netty'
     }
-    annotationProcessor 'org.projectlombok:lombok:1.18.6'
-    compileOnly lombok
+    compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
+    compile 'ognl:ognl:3.2.14'
 
     testCompile test
+
+    compileOnly lombok
+    annotationProcessor lombok
+
+    testCompileOnly lombok
+    testAnnotationProcessor lombok
 }
 
 configurations {

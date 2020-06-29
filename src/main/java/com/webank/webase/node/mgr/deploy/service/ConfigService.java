@@ -76,7 +76,7 @@ public class ConfigService {
 
                     List<TbConfig> configList = Arrays.stream(responseEntity.getBody())
                             .map((tag) -> {
-                                if(StringUtils.startsWithIgnoreCase(tag.getName(),"latest")){
+                                if (StringUtils.startsWithIgnoreCase(tag.getName(), "latest")) {
                                     return null;
                                 }
                                 return TbConfig.init(type, tag.getName());
@@ -95,6 +95,9 @@ public class ConfigService {
         }
         return tbConfigMapper.selectByType(type.getId());
     }
+
+
+
 
     /**
      * Result of listing tags from hub.docker.com.

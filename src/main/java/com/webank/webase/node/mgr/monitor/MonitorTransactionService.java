@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import lombok.extern.log4j.Log4j2;
@@ -36,7 +36,7 @@ public class MonitorTransactionService {
     public void dataAddAndUpdate(int groupId, TbMonitor tbMonitor) {
         TbMonitor dbInfo = this.queryTbMonitor(groupId, tbMonitor);
         if (dbInfo == null) {
-            log.info("====== data is not exist, add tbMonitor:{}", JSON.toJSONString(tbMonitor));
+            log.info("====== data is not exist, add tbMonitor:{}", JsonTools.toJSONString(tbMonitor));
             this.addRow(groupId, tbMonitor);
         } else {
             String[] txHashsArr = dbInfo.getTransHashs().split(",");

@@ -15,6 +15,8 @@
  */
 package com.webank.webase.node.mgr.base.enums;
 
+import com.webank.webase.node.mgr.base.tools.NumberUtil;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -31,9 +33,10 @@ import lombok.extern.log4j.Log4j2;
 public enum ChainStatusEnum {
     INITIALIZED((byte) 0, "initialized"),
     DEPLOYING((byte) 1, "deploying"),
-    DEPLOY_SUCCESS((byte) 2, "deploy success"),
+    UPGRADING((byte) 2, "Upgrading"),
     DEPLOY_FAILED((byte) 3, "deploy failed"),
-    DEPLOY_TIMEOUT_FAILED((byte) 4, "deploy timeout failed"),
+    UPGRADING_FAILED((byte) 4, "deploy failed"),
+    RUNNING((byte) 5, "Running"),
     ;
 
     private byte id;
@@ -67,10 +70,35 @@ public enum ChainStatusEnum {
         // check chain status
         switch (statusEnum){
             case DEPLOYING:
-            case DEPLOY_SUCCESS:
+            case RUNNING:
                 return true;
             default:
                 return false;
+        }
+    }
+
+    /**
+     *
+     * @param status
+     * @return
+     */
+    public static int progress(byte status){
+        ChainStatusEnum statusEnum = ChainStatusEnum.getById(status);
+        if (statusEnum == null) {
+            log.error("Chain with unknown status:[{}].", status);
+            return NumberUtil.PERCENTAGE_FAILED;
+        }
+
+        // check chain status
+        switch (statusEnum){
+            case DEPLOY_FAILED:
+            case UPGRADING_FAILED:
+                return NumberUtil.PERCENTAGE_FAILED;
+
+            case RUNNING:
+                return NumberUtil.PERCENTAGE_FINISH;
+            default:
+                return NumberUtil.PERCENTAGE_IN_PROGRESS;
         }
     }
 }

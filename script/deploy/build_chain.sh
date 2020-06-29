@@ -1412,7 +1412,7 @@ prepare_ca(){
 
 main()
 {
-output_dir="$(pwd)/${output_dir}"
+output_dir="${output_dir}"
 [ -z $use_ip_param ] && help 'ERROR: Please set -l or -f option.'
 if [ "${use_ip_param}" == "true" ];then
     ip_array=(${ip_param//,/ })

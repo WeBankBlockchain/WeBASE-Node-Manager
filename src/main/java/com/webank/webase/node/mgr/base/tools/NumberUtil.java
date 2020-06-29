@@ -11,38 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+ 
+package com.webank.webase.node.mgr.base.tools;
+public class NumberUtil {
 
-
-package com.webank.webase.node.mgr.base.enums;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
-@Getter
-@ToString
-@AllArgsConstructor
-public enum NodeStatusEnum {
-    LIVE((byte) 1, "Live."),
-    DEAD((byte) 2, "Dead."),
-    ;
-
-    private byte id;
-    private String description;
-
+    public static final int PERCENTAGE_FAILED = -1;
+    public static final int PERCENTAGE_FINISH = 100;
+    public static final int PERCENTAGE_IN_PROGRESS = 0;
 
     /**
      *
-     * @param id
+     * @param obtained
+     * @param total
      * @return
      */
-    public static NodeStatusEnum getById(byte id) {
-        for (NodeStatusEnum value : NodeStatusEnum.values()) {
-            if (value.id == id) {
-                return value;
-            }
+    public static int percentage(int obtained, int total) {
+        if (total == 0){
+            return 0;
         }
-        return null;
+        return (int)((float)obtained) * 100 / total;
     }
-
+   
+    
 }
+

@@ -14,8 +14,13 @@
 package com.webank.webase.node.mgr.node;
 
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
+
+import com.webank.webase.node.mgr.node.entity.NodeParam;
+import com.webank.webase.node.mgr.node.entity.TbNode;
 
 /**
  * node data interface.
@@ -46,9 +51,16 @@ public interface NodeMapper {
         @Param("p2pPort") Integer p2pPort);
 
     /**
-     * query node info.
+     * Query node info.
+     *
+     * One node maybe in multiple group.
+     *
      */
-    TbNode queryByNodeId(@Param("nodeId") String nodeId);
+    @Select({
+            "select * from tb_node where node_id=#{nodeId,jdbcType=VARCHAR}"
+    } )
+    List<TbNode> selectByNodeId(@Param("nodeId") String nodeId);
+
 
     /**
      * update node info.
@@ -67,10 +79,28 @@ public interface NodeMapper {
     Integer deleteByNodeAndGroup(@Param("nodeId") String nodeId, @Param("groupId") Integer groupId);
     /**
      * delete by groupId.
-     * TODO. should delete by nodeid in multi-chain.
      */
-    @Deprecated
     Integer deleteByGroupId( @Param("groupId") Integer groupId);
 
     int deleteByNodeId(@Param("nodeId") String nodeId);
+
+
+    @Select({
+            "select * from tb_node where node_id= #{nodeId,jdbcType=VARCHAR} and group_id=#{groupId,jdbcType=INTEGER}"
+    })
+    TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId,@Param("groupId") int groupId);
+
+    // TODO. add chain_id in tb_node
+    @Select({
+            " SELECT " +
+            " DISTINCT(node_id), node_ip, p2p_port " +
+            " FROM tb_node  WHERE  group_id IN " +
+                    "( SELECT DISTINCT ( group_id ) FROM tb_node WHERE node_id = #{nodeId,jdbcType=VARCHAR} )"
+    })
+    List<TbNode> selectConnectedNodeList(@Param("nodeId") String nodeId);
+
+    @Select({
+            "select * from tb_node where group_id=#{groupId,jdbcType=INTEGER}"
+    })
+    List<TbNode> selectByGroupId(@Param("groupId") int groupId);
 }

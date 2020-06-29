@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -37,7 +39,6 @@ public interface FrontMapper {
 
     TbFront getById(@Param("frontId") int frontId);
 
-    TbFront getByNodeId(@Param("nodeId") String nodeId);
 
     List<TbFront> selectByHostId(@Param("hostId") Integer hostId);
     List<TbFront> selectByAgencyId(@Param("agencyId") Integer agencyId);
@@ -47,4 +48,20 @@ public interface FrontMapper {
     int updateStatus(@Param("frontId") int frontId,
                      @Param("status")int status,
                      @Param("modifyTime")LocalDateTime now);
+
+    @Select({
+            "select  max(host_index) from tb_front",
+            "where host_id = #{hostId,jdbcType=INTEGER}"
+    })
+    Integer getNodeMaxIndex(int hostId);
+
+    @Update({
+        "update tb_front set client_version=#{newImageTag},image_tag=#{newImageTag},modify_time=#{modifyTime} where chain_id = #{chainId}"
+    })
+    int updateUpgradingByChainId(@Param("chainId") int chainId,
+                                 @Param("newImageTag") String newImageTag,
+                                 @Param("modifyTime") LocalDateTime now,
+                                 @Param("status")int status);
+
+    TbFront getByNodeId(@Param("nodeId") String nodeId);
 }

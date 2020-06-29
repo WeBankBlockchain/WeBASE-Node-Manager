@@ -162,11 +162,76 @@ public class ConstantCode {
     public static final RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(202100, "contractAddress is null");
 
     public static final RetCode USER_NOT_EXIST = RetCode.mark(202110, "User's signUserId not exist");
-
+    /* Json parse error */
+    public static final RetCode FAIL_PARSE_JSON = RetCode.mark(202111, "Fail to parse json");
 
     /* dynamic group manage */
     public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");
     public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node's front not exists");
+
+
+    // add in v1.4.0
+    public static final RetCode NO_DOCKER_TAG_UPDATE_URL_ERROR = RetCode.mark(205001, "No docker image tag update url.");
+    public static final RetCode UPDATE_DOCKER_TAG_ERROR = RetCode.mark(205002, "Update docker tag from registry error.");
+    public static final RetCode UNKNOWN_CONFIG_TYPE_ERROR = RetCode.mark(205003, "Unknown config type.");
+    public static final RetCode SAVE_IP_CONFIG_FILE_ERROR = RetCode.mark(205004, "Save IP config error.");
+    public static final RetCode TAG_ID_PARAM_ERROR = RetCode.mark(205005, "Tag id param error.");
+    public static final RetCode IP_CONF_PARAM_NULL_ERROR = RetCode.mark(205006, "ipconf null.");
+    public static final RetCode CHAIN_NAME_EXISTS_ERROR = RetCode.mark(205007, "Chain name exists.");
+    public static final RetCode INSERT_CHAIN_ERROR = RetCode.mark(205008, "Insert new chain failed.");
+    public static final RetCode NO_CONFIG_FILE_ERROR = RetCode.mark(205009, "No ipconf file.");
+    public static final RetCode EXEC_BUILD_CHAIN_ERROR = RetCode.mark(205010, "Exec build chain script failed.");
+    public static final RetCode IP_CONFIG_LINE_ERROR = RetCode.mark(205011, "ipconf line error.");
+    public static final RetCode IP_NUM_ERROR = RetCode.mark(205012, "IP and num config error.");
+    public static final RetCode AGENCY_NAME_CONFIG_ERROR = RetCode.mark(205013, "Agency name config error.");
+    public static final RetCode GROUPS_CONFIG_ERROR = RetCode.mark(205014, "Groups config error.");
+    public static final RetCode HOST_CONNECT_ERROR = RetCode.mark(205015, "Connect to host error.");
+    public static final RetCode INSERT_AGENCY_ERROR = RetCode.mark(205016, "Insert new agency failed.");
+    public static final RetCode INSERT_GROUP_ERROR = RetCode.mark(205017, "Insert new group failed.");
+    public static final RetCode INSERT_HOST_ERROR = RetCode.mark(205018, "Insert new host failed.");
+    public static final RetCode INSERT_FRONT_ERROR = RetCode.mark(205019, "Insert new front failed.");
+    public static final RetCode INSERT_NODE_ERROR = RetCode.mark(205020, "Insert new node failed.");
+    public static final RetCode INSERT_FRONT_GROUP_ERROR = RetCode.mark(205021, "Insert new front node group failed.");
+    public static final RetCode PARSE_HOST_INDEX_ERROR = RetCode.mark(205022, "Parse host index from node directory failed.");
+    public static final RetCode HOST_ONLY_BELONGS_ONE_AGENCY_ERROR = RetCode.mark(205023, "A host only belongs to one agency.");
+    public static final RetCode DEPLOY_WITH_UNKNOWN_EXCEPTION_ERROR = RetCode.mark(205024, "Unexpected exception occurred when deploy.");
+    public static final RetCode UNSUPPORTED_PASSWORD_SSH_ERROR = RetCode.mark(205025, "SSH password login not supported yet.");
+    public static final RetCode CHAIN_WITH_NO_AGENCY_ERROR = RetCode.mark(205026, "Chain has no agency.");
+    public static final RetCode CHAIN_NAME_NOT_EXISTS_ERROR = RetCode.mark(205027, "Chain name not exists.");
+    public static final RetCode IP_FORMAT_ERROR = RetCode.mark(205028, "IP format error.");
+    public static final RetCode AGENCY_NAME_EMPTY_ERROR = RetCode.mark(205029, "Agency name is null when host ip is new.");
+    public static final RetCode AGENCY_NAME_EXISTS_ERROR = RetCode.mark(205030, "Agency name exists when host ip is new.");
+    public static final RetCode ADD_NODE_WITH_UNKNOWN_EXCEPTION_ERROR = RetCode.mark(205031, "Unexpected exception occurred when add new node.");
+    public static final RetCode CHAIN_CERT_NOT_EXISTS_ERROR = RetCode.mark(205032, "Chain cert directory not exists.");
+    public static final RetCode EXEC_GEN_AGENCY_ERROR = RetCode.mark(205033, "Exec generate agency script failed.");
+    public static final RetCode HOST_WITH_NO_AGENCY_ERROR = RetCode.mark(205034, "Host's agency is null.");
+    public static final RetCode NODES_NUM_ERROR = RetCode.mark(205035, "Num should be positive integer and less then 200.");
+    public static final RetCode EXEC_GEN_SDK_ERROR = RetCode.mark(205036, "Exec generate node script to generate sdk dir failed.");
+    public static final RetCode EXEC_GEN_NODE_ERROR = RetCode.mark(205037, "Exec generate node script to generate node dir failed.");
+    public static final RetCode COPY_SDK_FILES_ERROR = RetCode.mark(205038, "Copy sdk config files error.");
+    public static final RetCode SEND_SDK_FILES_ERROR = RetCode.mark(205039, "Send sdk config files error.");
+    public static final RetCode SEND_NODE_FILES_ERROR = RetCode.mark(205040, "Send node config files error.");
+    public static final RetCode COPY_GROUP_FILES_ERROR = RetCode.mark(205041, "Copy original group config files error.");
+    public static final RetCode DELETE_OLD_AGENCY_DIR_ERROR = RetCode.mark(205042, "Delete old agency config files error.");
+    public static final RetCode DELETE_OLD_SDK_DIR_ERROR = RetCode.mark(205043, "Delete old sdk of host config files error.");
+    public static final RetCode DELETE_OLD_NODE_DIR_ERROR = RetCode.mark(205044, "Delete old node config files error.");
+    public static final RetCode NODE_ID_NOT_EXISTS_ERROR = RetCode.mark(205045, "Nodeid not exists.");
+    public static final RetCode STOP_NODE_ERROR = RetCode.mark(205046, "Stop node failed.");
+    public static final RetCode START_NODE_ERROR = RetCode.mark(205047, "Start node failed.");
+    public static final RetCode UPGRADE_WITH_SAME_TAG_ERROR = RetCode.mark(205048, "New image tag and current are the same.");
+    public static final RetCode UPDATE_CHAIN_WITH_NEW_VERSION_ERROR = RetCode.mark(205049, "Update chain version error.");
+    public static final RetCode NODE_IN_GROUP_ERROR = RetCode.mark(205050, "Node still in group, remove before deleting.");
+    public static final RetCode READ_NODE_CONFIG_ERROR = RetCode.mark(205051, "Read node config error.");
+    public static final RetCode DELETE_NODE_DIR_ERROR = RetCode.mark(205052, "Delete node config files error.");
+    public static final RetCode NODE_RUNNING_ERROR = RetCode.mark(205053, "Node is running.");
+    public static final RetCode UPDATE_RELATED_NODE_ERROR = RetCode.mark(205054, "Update related nodes error.");
+    public static final RetCode DELETE_CHAIN_ERROR = RetCode.mark(205055, "Delete chain error.");
+    public static final RetCode NODE_NEED_REMOVE_FROM_GROUP_ERROR = RetCode.mark(205056, "Node is sealer or observer, remove from group first.");
+    public static final RetCode LIST_HOST_NODE_DIR_ERROR = RetCode.mark(205057, "List node dirs of host error.");
+    public static final RetCode GENERATE_FRONT_YML_ERROR = RetCode.mark(205058, "Generate front application.yml file failed.");
+    public static final RetCode EXEC_HOST_INIT_SCRIPT_ERROR = RetCode.mark(205059, "Exec host init script failed.");
+    public static final RetCode TRANSFER_FILES_ERROR = RetCode.mark(205060, "Transfer files error.");
+    public static final RetCode DOCKER_OPERATION_ERROR = RetCode.mark(205061, "Docker option error.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
@@ -174,33 +239,4 @@ public class ConstantCode {
 
     /* param exception */
     public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
-
-
-    // add in v1.4.0
-    public static final RetCode NO_DOCKER_TAG_UPDATE_URL_ERROR = RetCode.mark(500001, "No docker image tag update url.");
-    public static final RetCode UPDATE_DOCKER_TAG_ERROR = RetCode.mark(500002, "Update docker tag from registry error.");
-    public static final RetCode UNKNOWN_CONFIG_TYPE_ERROR = RetCode.mark(500003, "Unknown config type.");
-    public static final RetCode SAVE_IP_CONFIG_FILE_ERROR = RetCode.mark(500004, "Save IP config error.");
-    public static final RetCode TAG_ID_PARAM_ERROR = RetCode.mark(500005, "Tag id param error.");
-    public static final RetCode IP_CONF_PARAM_NULL_ERROR = RetCode.mark(500006, "ipconf null.");
-    public static final RetCode CHAIN_NAME_EXISTS_ERROR = RetCode.mark(500007, "Chain name exists.");
-    public static final RetCode INSERT_CHAIN_ERROR = RetCode.mark(500008, "Insert new chain failed.");
-    public static final RetCode NO_CONFIG_FILE_ERROR = RetCode.mark(500009, "No ipconf file.");
-    public static final RetCode EXEC_BUILD_CHAIN_ERROR = RetCode.mark(500010, "Exec build chain script failed.");
-    public static final RetCode IP_CONFIG_LINE_ERROR = RetCode.mark(500011, "ipconf line error.");
-    public static final RetCode IP_NUM_ERROR = RetCode.mark(500012, "IP and num config error.");
-    public static final RetCode AGENCY_NAME_CONFIG_ERROR = RetCode.mark(500013, "Agency name config error.");
-    public static final RetCode GROUPS_CONFIG_ERROR = RetCode.mark(500014, "Groups config error.");
-    public static final RetCode HOST_CONNECT_ERROR = RetCode.mark(500015, "Connect to host error.");
-    public static final RetCode INSERT_AGENCY_ERROR = RetCode.mark(500016, "Insert new agency failed.");
-    public static final RetCode INSERT_GROUP_ERROR = RetCode.mark(500017, "Insert new group failed.");
-    public static final RetCode INSERT_HOST_ERROR = RetCode.mark(500018, "Insert new host failed.");
-    public static final RetCode INSERT_FRONT_ERROR = RetCode.mark(500019, "Insert new front failed.");
-    public static final RetCode INSERT_NODE_ERROR = RetCode.mark(500020, "Insert new node failed.");
-    public static final RetCode INSERT_FRONT_GROUP_ERROR = RetCode.mark(500021, "Insert new front node group failed.");
-    public static final RetCode PARSE_HOST_INDEX_ERROR = RetCode.mark(500022, "Parse host index from node directory failed.");
-    public static final RetCode HOST_ONLY_BELONGS_ONE_AGENCY_ERROR = RetCode.mark(500023, "A host only belongs to one agency.");
-    public static final RetCode DEPLOY_WITH_UNKNOWN_EXCEPTION_ERROR = RetCode.mark(500024, "Unexpected exception occurred when deploy.");
-    public static final RetCode UNSUPPORTED_PASSWORD_SSH_ERROR = RetCode.mark(500025, "SSH password login not supported yet.");
-    public static final RetCode CHAIN_WITH_NO_AGENCY_ERROR = RetCode.mark(500026, "Chain has no agency.");
 }
