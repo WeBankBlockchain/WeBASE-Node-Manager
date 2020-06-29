@@ -124,6 +124,7 @@ public class SshTools {
                     try {
                         reader.close();
                     } catch (IOException e) {
+                        log.error("SSH close error to ip:[{}]",ip,e);
                     }
                 }
                 session.disconnect();

@@ -339,7 +339,7 @@ public class HostService {
                     hostFinishCount ++;
                     break;
                 default:
-                    ;
+                    break;
             }
         }
         // check host init finish ?
