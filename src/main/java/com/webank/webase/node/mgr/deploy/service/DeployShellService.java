@@ -80,7 +80,7 @@ public class DeployShellService {
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
 
         if (result.failed()) {
-            log.error("Send files from [{}] to [{}:{}] filed.", src, ip, dst);
+            log.error("Send files from [{}] to [{}:{}] failed.", src, ip, dst);
             throw new NodeMgrException(ConstantCode.TRANSFER_FILES_ERROR.msg(result.getExecuteOut()));
         }
     }

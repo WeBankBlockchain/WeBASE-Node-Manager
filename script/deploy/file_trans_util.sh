@@ -105,7 +105,7 @@ if [[ "${type}"x == "up"x ]] ; then
     echo "Upload files from local:[${src}] to remote dst:[${user}@${ip}:${dst}], using port:[${port}]"
 
     if [[ "$ip"x == "127.0.0.1"x || "$ip"x == "localhost"x ]] ; then
-        cp -rfv ${src} ${dst}
+        sudo cp -rfv ${src} ${dst}
     else
         scp -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" -P ${port} -r ${src} ${user}@${ip}:${dst}
     fi
@@ -113,7 +113,7 @@ elif [[ "${type}"x == "down"x ]] ; then
     echo "Download files from remote :[${user}@${ip}:${src}] to local dst:[${dst}], using port:[${port}]"
 
     if [[ "$ip"x == "127.0.0.1"x || "$ip"x == "localhost"x ]] ; then
-        cp -rfv ${src} ${dst}
+        sudo cp -rfv ${src} ${dst}
     else
         scp -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" -P ${port} -r ${user}@${ip}:${src} ${dst}
     fi

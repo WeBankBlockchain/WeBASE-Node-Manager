@@ -32,6 +32,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
 
@@ -77,7 +78,7 @@ public class SshTools {
     private static boolean exec(String ip, String originalCommand,String sshUser,int sshPort) {
         StringBuilder newCommandBuilder = new StringBuilder(originalCommand);
         if (isLocal(ip)){
-            ExecuteResult result = JavaCommandExecutor.executeCommand(originalCommand,30 * 1000L );
+            ExecuteResult result = JavaCommandExecutor.executeCommand(originalCommand, C);
             if (result.failed()) {
                 // TODO throw exception ?
                 log.error("SshTools exec on localhost:[{}] command:[{}] error.", ip, originalCommand );
