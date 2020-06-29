@@ -1036,7 +1036,7 @@ public class GroupService {
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
         String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
-        String localDst = String.format("%s/conf/group.%s.*", localNodePath, generateGroupId);
+        String localDst = String.format("%s/conf/", localNodePath, generateGroupId);
         // copy group config files to local node's conf dir
         deployShellService.scp(ScpTypeEnum.DOWNLOAD,tbHost.getSshUser(),
                 tbHost.getIp(), tbHost.getSshPort(), remoteGroupConfSource, localDst);
