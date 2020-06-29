@@ -51,7 +51,6 @@ install curl curl
 if [[ ! $(command -v docker) ]]; then
     echo "Install docker..."
     bash <(curl -s -L get.docker.com)
-
 fi
 
 # install docker-compose
@@ -62,12 +61,8 @@ fi
 #fi
 
 
-# start docker
-if [[ $(command -v systemctl) ]]; then
-    sudo systemctl enable docker
-    sudo systemctl restart docker
-else
-    sudo service docker restart
-    sudo chkconfig docker on
+# check docker started
+if [[ "$(systemctl is-active docker)" != "active" ]] ; then
+    sudo systemctl start docker
 fi
 
