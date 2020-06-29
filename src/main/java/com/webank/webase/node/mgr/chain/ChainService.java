@@ -430,6 +430,8 @@ public class ChainService {
             // deploy or upgrade success
             case NumberUtil.PERCENTAGE_FINISH:
                 return progress;
+            default:
+                break;
         }
 
         progress = this.hostService.hostProgress(chain.getId());
