@@ -66,11 +66,11 @@ public class DeployShellService {
             if (Files.isRegularFile(Paths.get(src))) {
                 // if src is file, create parent directory of dst on remote
                 String parentOnRemote = Paths.get(dst).getParent().toAbsolutePath().toString();
-                SshTools.createDirOnRemote(ip, parentOnRemote,sshUser,sshPort);
+                SshTools.createDirOnRemote(ip, parentOnRemote,sshUser,sshPort,constant.getPrivateKey());
             }
             if (Files.isDirectory(Paths.get(src))) {
                 // if src is directory, create dst on remote
-                SshTools.createDirOnRemote(ip, dst,sshUser,sshPort);
+                SshTools.createDirOnRemote(ip, dst,sshUser,sshPort,constant.getPrivateKey());
             }
         }
 

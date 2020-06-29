@@ -309,7 +309,8 @@ public class HostService {
         if(CollectionUtils.isNotEmpty(hostList)){
             for (TbHost host : hostList) {
                 // move chain config files
-                ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),chainName,host.getSshUser(),host.getSshPort());
+                ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),chainName,host.getSshUser(),
+                        host.getSshPort(),constant.getPrivateKey());
             }
         }
 

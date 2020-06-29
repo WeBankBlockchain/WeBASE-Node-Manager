@@ -57,7 +57,7 @@ public class IpConfigParse {
      * @return List<ConfigLine> entity of config for build_chain.
      * @throws NodeMgrException
      */
-    public static List<IpConfigParse> parseIpConf(String[] ipConf,String sshUser,int sshPort) throws NodeMgrException {
+    public static List<IpConfigParse> parseIpConf(String[] ipConf,String sshUser,int sshPort,String privateKey) throws NodeMgrException {
         if (ArrayUtils.isEmpty(ipConf)){
             throw new NodeMgrException(ConstantCode.IP_CONF_PARAM_NULL_ERROR);
         }
@@ -85,7 +85,7 @@ public class IpConfigParse {
             hostAgencyMap.put(ipConfigParse.getIp(), ipConfigParse.getAgencyName());
 
             // SSH to host ip
-            if (!SshTools.connect(ipConfigParse.getIp(),sshUser,sshPort)) {
+            if (!SshTools.connect(ipConfigParse.getIp(),sshUser,sshPort,privateKey)) {
                 // cannot SSH to IP
                 throw new NodeMgrException(HOST_CONNECT_ERROR.msg(ipConfigParse.getIp()));
             }
