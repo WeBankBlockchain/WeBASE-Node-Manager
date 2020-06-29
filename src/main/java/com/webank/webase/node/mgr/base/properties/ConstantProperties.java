@@ -178,11 +178,17 @@ public class ConstantProperties {
 
         if (newDirectory.trim().endsWith(separator)) {
             // ends with separator
-            return newDirectory.trim();
+            newDirectory = newDirectory.trim();
         } else {
             // append a separator
-            return String.format("%s%s", newDirectory.trim(), separator);
+            newDirectory = String.format("%s%s", newDirectory.trim(), separator);
         }
+
+        if (! newDirectory.startsWith("/")){
+            // not an absolute path
+            return String.format("%s/%s",new File(".").toPath().toAbsolutePath().toString(), newDirectory);
+        }
+        return newDirectory;
     }
     //******************* Add in v1.4.0 end. *******************
 }
