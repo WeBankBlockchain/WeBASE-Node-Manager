@@ -161,6 +161,9 @@ public class ConstantProperties {
         }
 
         log.info("Init constant properties, private key: [{}]", privateKey);
+
+        log.info("Init constant properties, defaultP2pPort:[{}], defaultChannelPort:[{}], defaultJsonrpcPort:[{}], defaultFrontPort:[{}]",
+                defaultP2pPort, defaultChannelPort, defaultJsonrpcPort, defaultFrontPort);
     }
 
     /**
