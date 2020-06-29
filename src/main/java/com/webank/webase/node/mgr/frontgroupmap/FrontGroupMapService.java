@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
@@ -39,6 +40,8 @@ public class FrontGroupMapService {
     private FrontGroupMapMapper frontGroupMapMapper;
     @Autowired
     private FrontInterfaceService frontInterface;
+    @Autowired
+    private FrontGroupMapCache frontGroupMapCache;
 
     /**
      * add new mapping with group status directly
@@ -158,5 +161,12 @@ public class FrontGroupMapService {
      */
     public void removeInvalidFrontGroupMap() {
         frontGroupMapMapper.removeInvalidMap();
+    }
+
+    @Transactional
+    public void updateFrontMapStatus(int frontId, GroupStatus status) {
+        // update status
+        frontGroupMapMapper.updateStatus(frontId,status.getValue());
+        this.frontGroupMapCache.clearMapList();
     }
 }

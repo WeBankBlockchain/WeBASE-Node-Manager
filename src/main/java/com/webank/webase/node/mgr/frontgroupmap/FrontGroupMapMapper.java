@@ -46,4 +46,9 @@ public interface FrontGroupMapMapper {
         "select * from tb_front_group_map where group_id=#{groupId}"
     })
     List<TbFrontGroupMap> selectListByGroupId(@Param("groupId") int groupId);
+
+    @Select({
+        "update tb_front_group_map set modify_time = now(),status=#{status} where front_id=#{frontId}"
+    })
+    void updateStatus(@Param("frontId") int frontId,@Param("status") int status);
 }

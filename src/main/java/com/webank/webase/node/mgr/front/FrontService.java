@@ -595,6 +595,7 @@ public class FrontService {
 
         // set front status to stopped to avoid error for time task.
         this.updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
+        this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.MAINTAINING);
 
         TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
@@ -607,6 +608,7 @@ public class FrontService {
 
             threadPoolTaskScheduler.schedule(()->{
                 this.updateStatus(front.getFrontId(),FrontStatusEnum.RUNNING);
+                this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.NORMAL);
             }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
             return true;
         } catch (Exception e) {
