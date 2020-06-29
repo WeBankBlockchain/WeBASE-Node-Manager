@@ -141,7 +141,7 @@ function init() {
                 exit "$status"
             fi
             
-            // config docker listen on tcp:3000
+            ## config docker listen on tcp:3000
             if [[ "${use_docker_sdk}"x == "yes"x ]] ; then
                 cat "${__dir}/host_docker_tcp.sh" | sshExec bash -e -x
                 status=($?)
