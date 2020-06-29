@@ -223,7 +223,7 @@ function init() {
         fi
 
         echo "mkdir node root ${node_root} on remote"
-        sshExec "mkdir -p ${node_root}"
+        sshExec "sudo mkdir -p ${node_root} && sudo chown -R ${user} ${node_root} && sudo chgrp -R ${user} ${node_root}"
 
         echo "Remote host init SUCCESS!!! "
     fi
