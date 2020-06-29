@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.base.properties;
 
 import static java.io.File.separator;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -104,6 +105,7 @@ public class ConstantProperties {
     private String genAgencyShell = "./script/deploy/gen_agency_cert.sh";
     private String genNodeShell = "./script/deploy/gen_node_cert.sh";
     private String scpShell =        "./script/deploy/file_trans_util.sh";
+    private String privateKey = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "id_rsa";
     private String fiscoBcosBinary =  "";
 
     // default port
@@ -157,6 +159,8 @@ public class ConstantProperties {
             log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
             fiscoBcosBinary = "";
         }
+
+        log.info("Init constant properties, private key: [{}]", privateKey);
     }
 
     /**
