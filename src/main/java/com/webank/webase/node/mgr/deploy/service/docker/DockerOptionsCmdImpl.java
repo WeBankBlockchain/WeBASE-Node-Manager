@@ -26,7 +26,7 @@ public class DockerOptionsCmdImpl implements DockerOptions{
     public void pullImage(String ip, int dockerPort,String sshUser, int sshPort, String imageTag) {
         String image = getImageRepositoryTag(constant.getDockerRepository(),constant.getDockerRegistryMirror(),imageTag);
         String dockerPullCommand = String.format("sudo docker pull %s",image);
-        SshTools.execDocker(ip,dockerPullCommand,sshUser,sshPort);
+        SshTools.execDocker(ip,dockerPullCommand,sshUser,sshPort,constant.getPrivateKey());
     }
 
     @Override
@@ -47,13 +47,13 @@ public class DockerOptionsCmdImpl implements DockerOptions{
                 "-e SPRING_PROFILES_ACTIVE=docker " +
                 "--network=host -w=/data %s ", containerName , nodeRootOnHost, yml,sdk,front_log, image);
         log.info("Host:[{}] run container:[{}].", ip, containerName);
-        SshTools.execDocker(ip,dockerCreateCommand,sshUser,sshPort);
+        SshTools.execDocker(ip,dockerCreateCommand,sshUser,sshPort,constant.getPrivateKey());
     }
 
     @Override
     public void stop(String ip, int dockerPort, String sshUser, int sshPort, String containerName) {
         String dockerRmCommand = String.format("sudo docker rm -f %s ", containerName);
-        SshTools.execDocker(ip,dockerRmCommand,sshUser,sshPort);
+        SshTools.execDocker(ip,dockerRmCommand,sshUser,sshPort,constant.getPrivateKey());
     }
 }
 

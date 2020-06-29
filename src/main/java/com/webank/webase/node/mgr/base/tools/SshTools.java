@@ -16,7 +16,6 @@
 package com.webank.webase.node.mgr.base.tools;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,7 +52,6 @@ public class SshTools {
         config.put("PreferredAuthentications", "publickey");
     }
 
-    public final static String PRIVATE_KEY = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "id_rsa";
 
     public final static String[] LOCAL_ARRAY = new String[]{"127.0.0.1", "localhost"};
 
@@ -74,7 +72,7 @@ public class SshTools {
      * @param ip
      * @param originalCommand
      */
-    private static boolean exec(String ip, String originalCommand,String sshUser,int sshPort) {
+    private static boolean exec(String ip, String originalCommand,String sshUser,int sshPort,String privateKey) {
         StringBuilder newCommandBuilder = new StringBuilder(originalCommand);
         if (isLocal(ip)){
             ExecuteResult result = JavaCommandExecutor.executeCommand(originalCommand, 0);
@@ -87,7 +85,7 @@ public class SshTools {
             newCommandBuilder.append(" ; exit 0;");
         }
         String newCommand = newCommandBuilder.toString();
-        Session session = connect(ip, sshPort, sshUser, "", 0);
+        Session session = connect(ip, sshPort, sshUser, "",privateKey, 0);
         if (session != null && session.isConnected()) {
             ChannelExec channelExec = null;
             StringBuilder execLog = new StringBuilder();
@@ -138,12 +136,12 @@ public class SshTools {
      * @param ip
      * @return
      */
-    public static boolean connect(String ip,String sshUser,int sshPort) {
+    public static boolean connect(String ip,String sshUser,int sshPort,String privateKey) {
         if (isLocal(ip)) {
             return true;
         }
 
-        Session session = connect(ip, sshPort, sshUser, "", 0);
+        Session session = connect(ip, sshPort, sshUser, "",privateKey, 0);
         if (session != null && session.isConnected()) {
             session.disconnect();
             return true;
@@ -156,6 +154,7 @@ public class SshTools {
      * @param port
      * @param user
      * @param password
+     * @param privateKey
      * @param connectTimeoutInSeconds seconds.
      * @return
      */
@@ -164,6 +163,7 @@ public class SshTools {
             final int port,
             final String user,
             String password,
+            String privateKey,
             final int connectTimeoutInSeconds) {
         if (StringUtils.isBlank(ip)
                 || (!"localhost".equals(ip) && !ValidateUtil.ipv4Valid(ip))) {
@@ -185,7 +185,7 @@ public class SshTools {
             session = jsch.getSession(newUser, ip, newPort);
             session.setConfig(config);
             if (pubAuth) {
-                jsch.addIdentity(PRIVATE_KEY);
+                jsch.addIdentity(privateKey);
             } else {
                 throw new NodeMgrException(ConstantCode.UNSUPPORTED_PASSWORD_SSH_ERROR);
             }
@@ -201,7 +201,7 @@ public class SshTools {
      * @param ip
      * @param dir
      */
-    public static void createDirOnRemote(String ip, String dir, String sshUser, int sshPort){
+    public static void createDirOnRemote(String ip, String dir, String sshUser, int sshPort,String privateKey){
         if(isLocal(ip)){
             try {
                 Files.createDirectories(Paths.get(dir));
@@ -209,7 +209,7 @@ public class SshTools {
                 log.error("mkdir:[{}] on localhost:[{}] error",dir,ip,e );
             }
         }else{
-            exec(ip, String.format("sudo mkdir -p %s", dir),sshUser,sshPort);
+            exec(ip, String.format("sudo mkdir -p %s", dir),sshUser,sshPort,privateKey);
         }
     }
 
@@ -219,11 +219,11 @@ public class SshTools {
      * @param src
      * @param dst
      */
-    public static void mvDirOnRemote(String ip, String src, String dst, String sshUser, int sshPort){
+    public static void mvDirOnRemote(String ip, String src, String dst, String sshUser, int sshPort,String privateKey){
         if (StringUtils.isNoneBlank(ip,src,dst)) {
             String rmCommand = String.format("sudo mv -fv %s %s", src, dst);
             log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
-            exec(ip, rmCommand,sshUser,sshPort);
+            exec(ip, rmCommand,sshUser,sshPort,privateKey);
         }
     }
 
@@ -236,9 +236,9 @@ public class SshTools {
      * @param sshPort
      * @return
      */
-    public static boolean execDocker(String ip, String originalCommand, String sshUser,int sshPort) {
+    public static boolean execDocker(String ip, String originalCommand, String sshUser,int sshPort,String privateKey) {
         log.info("Execute docker command:[{}] on host:[{}]", originalCommand, ip);
-        return exec(ip,originalCommand,sshUser,sshPort);
+        return exec(ip,originalCommand,sshUser,sshPort,privateKey);
     }
 
 }

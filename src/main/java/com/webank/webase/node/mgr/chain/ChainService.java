@@ -200,17 +200,17 @@ public class ChainService {
      * @param rootDirOnHost
      * @param chainName
      */
-    public static void mvChainOnRemote(String ip,String rootDirOnHost,String chainName,String sshUser,int sshPort){
+    public static void mvChainOnRemote(String ip,String rootDirOnHost,String chainName,String sshUser,int sshPort,String privateKey){
         // create /opt/fisco/deleted-tmp/ as a parent dir
         String deleteRootOnHost = PathService.getDeletedRootOnHost(rootDirOnHost);
-        SshTools.createDirOnRemote(ip, deleteRootOnHost,sshUser,sshPort);
+        SshTools.createDirOnRemote(ip, deleteRootOnHost,sshUser,sshPort,privateKey);
 
         // like /opt/fisco/default_chain
         String src_chainRootOnHost = PathService.getChainRootOnHost(rootDirOnHost, chainName);
         // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss
         String dst_chainDeletedRootOnHost = PathService.getChainDeletedRootOnHost(rootDirOnHost, chainName);
 
-        SshTools.mvDirOnRemote(ip,src_chainRootOnHost,dst_chainDeletedRootOnHost,sshUser,sshPort);
+        SshTools.mvDirOnRemote(ip,src_chainRootOnHost,dst_chainDeletedRootOnHost,sshUser,sshPort,privateKey);
     }
 
     /**
@@ -265,7 +265,7 @@ public class ChainService {
 
         // parse ipConf config
         log.info("Parse ipConf content....");
-        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf,sshUser,sshPort);
+        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf,sshUser,sshPort,constant.getPrivateKey());
 
         // exec build_chain.sh shell script
         deployShellService.execBuildChain(encryptType, ipConf, chainName);
