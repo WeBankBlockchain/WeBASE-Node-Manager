@@ -78,10 +78,9 @@ public class SshTools {
         StringBuilder newCommandBuilder = new StringBuilder(originalCommand);
         if (isLocal(ip)){
             ExecuteResult result = JavaCommandExecutor.executeCommand(originalCommand,30 * 1000L );
-
             if (result.failed()) {
+                // TODO throw exception ?
                 log.error("SshTools exec on localhost:[{}] command:[{}] error.", ip, originalCommand );
-                throw new NodeMgrException(ConstantCode.TRANSFER_FILES_ERROR.msg(result.getExecuteOut()));
             }
             return result.success();
         }else{
