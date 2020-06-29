@@ -158,51 +158,51 @@ function init() {
         echo "Local host init SUCCESS!!! "
     else
         echo "Initialing remote server ....."
-        if [[ "$password"x != ""x ]] ; then
-          cmd="yum"
-          # install sshpass
-          case $(uname | tr '[:upper:]' '[:lower:]') in
-            linux*)
-              # GNU/Linux操作系统
-              # Debian(Ubuntu) or RHEL(CentOS)
-              if [[ $(command -v apt) ]]; then
-                  cmd="apt"
-              fi
-
-              # install sshpass for ssh-copy-id
-              if [[ ! $(command -v sshpass) ]]; then
-                  # install ufw
-                  echo "Installing sshpass on node..."
-                  sudo ${cmd} install -y sshpass
-              fi
-              ;;
-            darwin*)
-              cmd="brew"
-              # install sshpass
-              if [[ ! $(command -v sshpass) ]]; then
-                  echo "Installing sshpass on mac ....."
-                  ${cmd} install http://git.io/sshpass.rb
-              fi
-              ;;
-            *)
-              LOG_WARN "Unsupported Windows yet."
-              ;;
-          esac
-
-        fi
+#        if [[ "$password"x != ""x ]] ; then
+#          cmd="yum"
+#          # install sshpass
+#          case $(uname | tr '[:upper:]' '[:lower:]') in
+#            linux*)
+#              # GNU/Linux操作系统
+#              # Debian(Ubuntu) or RHEL(CentOS)
+#              if [[ $(command -v apt) ]]; then
+#                  cmd="apt"
+#              fi
+#
+#              # install sshpass for ssh-copy-id
+#              if [[ ! $(command -v sshpass) ]]; then
+#                  # install ufw
+#                  echo "Installing sshpass on node..."
+#                  sudo ${cmd} install -y sshpass
+#              fi
+#              ;;
+#            darwin*)
+#              cmd="brew"
+#              # install sshpass
+#              if [[ ! $(command -v sshpass) ]]; then
+#                  echo "Installing sshpass on mac ....."
+#                  ${cmd} install http://git.io/sshpass.rb
+#              fi
+#              ;;
+#            *)
+#              LOG_WARN "Unsupported Windows yet."
+#              ;;
+#          esac
+#
+#        fi
 
         # ssh-keygen
-        if [[ ! -f ~/.ssh/id_rsa.pub ]]; then
-            echo "Executing ssh-kengen ...."
-            sudo ssh-keygen -q -b 4096 -t rsa -N '' -f ~/.ssh/id_rsa
-        fi
-
-
-        if [[ "$password"x != ""x ]] ; then
-          # scp id_rsa.pub to remote`
-          echo "Start ssh-copy-id to remote server..."
-          sudo sshpass -p "${password}" ssh-copy-id -i ~/.ssh/id_rsa.pub -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" ${user}@${host} -p ${port}
-        fi
+#        if [[ ! -f ~/.ssh/id_rsa.pub ]]; then
+#            echo "Executing ssh-keygen ...."
+#            sudo ssh-keygen -q -b 4096 -t rsa -N '' -f ~/.ssh/id_rsa
+#        fi
+#
+#
+#        if [[ "$password"x != ""x ]] ; then
+#          # scp id_rsa.pub to remote`
+#          echo "Start ssh-copy-id to remote server..."
+#          sudo sshpass -p "${password}" ssh-copy-id -i ~/.ssh/id_rsa.pub -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" ${user}@${host} -p ${port}
+#        fi
 
         # scp node-init.sh to remote and exec
         cat "${__dir}/host_init_shell.sh" | sshExec bash -e -x
