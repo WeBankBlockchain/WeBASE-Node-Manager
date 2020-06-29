@@ -210,6 +210,8 @@ public class SshTools {
             }
         }else{
             exec(ip, String.format("sudo mkdir -p %s", dir),sshUser,sshPort,privateKey);
+            exec(ip, String.format("sudo chown -R %s %s ", sshUser,dir),sshUser,sshPort,privateKey);
+            exec(ip, String.format("sudo chgrp -R %s %s ", sshUser,dir),sshUser,sshPort,privateKey);
         }
     }
 
