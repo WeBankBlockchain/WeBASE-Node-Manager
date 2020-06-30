@@ -43,7 +43,7 @@ public interface FrontGroupMapMapper {
     void removeInvalidMap();
 
     @Select({
-        "select * from tb_front_group_map where group_id=#{groupId}"
+        "select * from tb_front_group_map where group_id=#{groupId} order by create_time desc"
     })
     List<TbFrontGroupMap> selectListByGroupId(@Param("groupId") int groupId);
 
