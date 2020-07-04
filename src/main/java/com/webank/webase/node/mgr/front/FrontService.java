@@ -344,7 +344,7 @@ public class FrontService {
     }
 
     public void updateFrontWithInternal(Integer frontId, Integer status) {
-        log.debug("updateFrontStatus frontId:{}, status:{}", frontId, status);
+        log.info("updateFrontStatus frontId:{}, status:{}", frontId, status);
         TbFront updateFront = getById(frontId);
         if (updateFront == null) {
             log.error("updateFrontStatus updateFront is null");

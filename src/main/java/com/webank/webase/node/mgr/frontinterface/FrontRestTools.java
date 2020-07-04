@@ -352,7 +352,7 @@ public class FrontRestTools {
                 continue;
             } catch (HttpStatusCodeException ex) {
                 JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
-                log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error));
+                log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error), ex);
                 try {
                     int code = error.get("code").intValue();
                     String errorMessage = error.get("errorMessage").asText();
