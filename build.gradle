@@ -47,7 +47,7 @@ List jaxb = [
 ]
 
 List web3sdk = [
-    "org.fisco-bcos:web3sdk:2.4.1"
+    "org.fisco-bcos:web3sdk:2.4.2" 
 ]
 
 List lombok = [
