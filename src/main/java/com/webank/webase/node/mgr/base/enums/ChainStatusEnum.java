@@ -37,6 +37,7 @@ public enum ChainStatusEnum {
     DEPLOY_FAILED((byte) 3, "deploy failed"),
     UPGRADING_FAILED((byte) 4, "deploy failed"),
     RUNNING((byte) 5, "Running"),
+    UPDATING((byte) 6, "Updating"),
     ;
 
     private byte id;
