@@ -47,5 +47,12 @@ public enum GroupStatus {
 		return this.value;
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("GroupStatus{");
+		sb.append("value=").append(value);
+		sb.append('}');
+		return sb.toString();
+	}
 }
 

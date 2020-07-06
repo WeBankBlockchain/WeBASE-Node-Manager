@@ -43,6 +43,7 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
+import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -190,7 +191,7 @@ public class ChainService {
         this.frontService.upgrade(chain.getId(),newTagVersion);
 
         // start chain
-        this.nodeAsyncService.upgradeStartChain(chain.getId());
+        this.nodeAsyncService.upgradeStartChain(chain.getId(), OptionType.MODIFY);
     }
 
 

@@ -89,7 +89,7 @@ public class FrontInterfaceService {
             return response.getBody();
         } catch (HttpStatusCodeException ex) {
             JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
-            log.error("http request fail. error:{}", JsonTools.toJSONString(error));
+            log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error));
             if (error == null) {
                 log.error("deserialize http response error");
                 throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);

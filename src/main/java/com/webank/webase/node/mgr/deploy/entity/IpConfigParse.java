@@ -63,6 +63,7 @@ public class IpConfigParse {
         }
 
         List<IpConfigParse> ipConfigParseList = new ArrayList<>();
+        int totalNodeNum = 0;
 
         // check one ip could
         // key: host ip; value: agencyName
@@ -95,7 +96,11 @@ public class IpConfigParse {
                 throw new NodeMgrException(IP_NUM_ERROR.msg(line));
             }
 
+            totalNodeNum += ipConfigParse.getNum();
             ipConfigParseList.add(ipConfigParse);
+        }
+        if ( totalNodeNum < 2 ) {
+            throw new NodeMgrException(ConstantCode.TWO_NODES_AT_LEAST);
         }
 
         if (CollectionUtils.isEmpty(ipConfigParseList)) {
