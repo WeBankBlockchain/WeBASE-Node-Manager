@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
@@ -114,6 +115,9 @@ public class NodeAsyncService {
         // update chain to running
         threadPoolTaskScheduler.schedule(()->{
             this.chainService.updateStatus(chainId, ChainStatusEnum.RUNNING);
+
+            // set pull cert to false
+            CertTools.isPullFrontCertsDone = false;
         }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
     }
 
@@ -132,6 +136,9 @@ public class NodeAsyncService {
                 // update chain to running
                 threadPoolTaskScheduler.schedule(()->{
                     this.chainService.updateStatus(chain.getId(),ChainStatusEnum.RUNNING);
+
+                    // set pull cert to false
+                    CertTools.isPullFrontCertsDone = false;
                 }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
             }
         } catch (InterruptedException e) {
