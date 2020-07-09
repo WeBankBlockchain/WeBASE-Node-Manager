@@ -49,4 +49,12 @@ public enum DataStatus {
     public static boolean starting(int status){
         return status == STARTING.getValue();
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("DataStatus{");
+        sb.append("value=").append(value);
+        sb.append('}');
+        return sb.toString();
+    }
 }

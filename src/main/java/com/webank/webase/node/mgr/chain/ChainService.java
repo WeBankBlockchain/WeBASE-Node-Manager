@@ -43,14 +43,17 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
+import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
+import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
@@ -107,6 +110,8 @@ public class ChainService {
     private ConstantProperties constant;
     @Autowired
     private NodeAsyncService nodeAsyncService;
+    @Autowired
+    private CertService certService;
 
     /**
      * get chain info.
@@ -190,7 +195,7 @@ public class ChainService {
         this.frontService.upgrade(chain.getId(),newTagVersion);
 
         // start chain
-        this.nodeAsyncService.upgradeStartChain(chain.getId());
+        this.nodeAsyncService.upgradeStartChain(chain.getId(), OptionType.MODIFY);
     }
 
 
@@ -235,6 +240,12 @@ public class ChainService {
 
         log.info("Delete chain:[{}] config files", chainName);
         this.pathService.deleteChain(chainName);
+
+        // delete all certs
+        this.certService.deleteAll();
+
+        // set pull cert to false
+        CertTools.isPullFrontCertsDone = false;
     }
 
     /**

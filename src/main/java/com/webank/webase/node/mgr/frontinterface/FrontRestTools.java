@@ -332,6 +332,8 @@ public class FrontRestTools {
                 throw new NodeMgrException(ConstantCode.AVAILABLE_FRONT_URL_IS_NULL);
             }
             try {
+                log.info("FrontRestTools call front:[{}]", url);
+
                 HttpEntity entity = buildHttpEntity(param);// build entity
                 if (null == restTemplate) {
                     log.error("fail restTemplateExchange, rest is null. groupId:{} uri:{}",
@@ -352,7 +354,7 @@ public class FrontRestTools {
                 continue;
             } catch (HttpStatusCodeException ex) {
                 JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
-                log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error));
+                log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error), ex);
                 try {
                     int code = error.get("code").intValue();
                     String errorMessage = error.get("errorMessage").asText();

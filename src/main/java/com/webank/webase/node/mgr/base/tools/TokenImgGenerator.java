@@ -15,7 +15,6 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
-import com.alibaba.druid.util.Base64;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -24,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.SecureRandom;
+import java.util.Base64;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +158,7 @@ public class TokenImgGenerator {
         try {
             bs = new ByteArrayOutputStream();
             ImageIO.write(bufferedimage, "png", bs);//将绘制得图片输出到流
-            return Base64.byteArrayToBase64(bs.toByteArray());
+            return Base64.getEncoder().encodeToString(bs.toByteArray());
         } catch (Exception e) {
             log.error("fail createPic.", e);
             return null;

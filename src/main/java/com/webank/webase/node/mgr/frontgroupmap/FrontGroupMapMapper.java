@@ -50,5 +50,10 @@ public interface FrontGroupMapMapper {
     @Select({
         "update tb_front_group_map set modify_time = now(),status=#{status} where front_id=#{frontId}"
     })
-    void updateStatus(@Param("frontId") int frontId,@Param("status") int status);
+    void updateAllGroupsStatus(@Param("frontId") int frontId,@Param("status") int status);
+
+    @Select({
+            "update tb_front_group_map set modify_time = now(),status=#{status} where front_id=#{frontId} and group_id=${groupId}"
+    })
+    void updateOneGroupStatus(@Param("frontId") int frontId,@Param("status") int status,@Param("groupId") int groupId);
 }

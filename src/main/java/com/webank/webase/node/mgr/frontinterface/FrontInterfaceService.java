@@ -56,7 +56,6 @@ import com.webank.webase.node.mgr.user.entity.KeyPair;
 
 import lombok.extern.log4j.Log4j2;
 
-
 @Log4j2
 @Service
 public class FrontInterfaceService {
@@ -89,7 +88,7 @@ public class FrontInterfaceService {
             return response.getBody();
         } catch (HttpStatusCodeException ex) {
             JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
-            log.error("http request fail. error:{}", JsonTools.toJSONString(error));
+            log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error));
             if (error == null) {
                 log.error("deserialize http response error");
                 throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);

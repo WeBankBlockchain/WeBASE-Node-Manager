@@ -246,6 +246,10 @@ public class GroupService {
         if (frontList == null || frontList.size() == 0) {
             return;
         }
+
+        // clear cache
+        frontGroupMapCache.clearMapList();
+
         // save group and nodes(peers, sealer, observer) and front_group_map from chain
 		// update front_group_map by group list on chain
 		saveDataOfGroup(frontList, allGroupSet);
@@ -253,10 +257,12 @@ public class GroupService {
         // check group status(normal or maintaining), update by local group list
 		// if groupid not in allGroupSet, remove it
         checkAndUpdateGroupStatus(allGroupSet);
-        // remove group and front_group_map that front_group_map's status is all invalid
-        // removeInvalidGroupByMap();
-        // clear cache
-        frontGroupMapCache.clearMapList();
+
+//        // remove group and front_group_map that front_group_map's status is all invalid
+//        // removeInvalidGroupByMap();
+//        // clear cache
+//        frontGroupMapCache.clearMapList();
+
 		// check group local whether has dirty data by contrast of local blockHash with chain blockHash
 		// if not same, update group as DIRTY
 		checkSameChainDataWithLocal();

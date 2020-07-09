@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
@@ -98,7 +99,7 @@ public class DeployService {
                 constantProperties.getDockerDaemonPort() );
 
         // init host and start node
-        this.nodeAsyncService.initHostListAndStart(chainName);
+        this.nodeAsyncService.initHostListAndStart(chainName,OptionType.DEPLOY);
     }
 
 
@@ -206,7 +207,7 @@ public class DeployService {
             this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList, tbHostExists.getSshUser(),tbHostExists.getSshPort());
 
             // init host and restart all front
-            this.nodeAsyncService.initHostAndStart(chain,tbHostExists,group.getGroupId());
+            this.nodeAsyncService.initHostAndStart(chain,tbHostExists,group.getGroupId(),OptionType.MODIFY);
         } catch (Exception e) {
             //TODO.
             log.error("Add node error", e);
@@ -255,8 +256,8 @@ public class DeployService {
      * @param nodeId
      * @return
      */
-    public void startNode(String nodeId) {
-        this.frontService.restart(nodeId);
+    public void startNode(String nodeId,OptionType optionType) {
+        this.frontService.restart(nodeId,optionType);
     }
 
     /**
@@ -266,6 +267,7 @@ public class DeployService {
      * @return
      */
     public void stopNode(String nodeId) {
+        // two nodes running at least
         this.frontService.stopNode(nodeId);
     }
 
@@ -327,7 +329,7 @@ public class DeployService {
         this.agencyService.deleteAgencyWithNoNode(deleteAgency,host.getId());
 
         // restart related node
-        this.nodeAsyncService.startFrontOfGroupSet(chain.getId(), groupIdSet);
+        this.nodeAsyncService.startFrontOfGroupSet(chain.getId(), groupIdSet, OptionType.MODIFY);
     }
 
     /**

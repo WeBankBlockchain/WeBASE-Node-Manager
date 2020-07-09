@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,7 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
+import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -55,6 +57,7 @@ import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
@@ -344,7 +347,7 @@ public class FrontService {
     }
 
     public void updateFrontWithInternal(Integer frontId, Integer status) {
-        log.debug("updateFrontStatus frontId:{}, status:{}", frontId, status);
+        log.info("updateFrontStatus frontId:{}, status:{}", frontId, status);
         TbFront updateFront = getById(frontId);
         if (updateFront == null) {
             log.error("updateFrontStatus updateFront is null");
@@ -584,8 +587,8 @@ public class FrontService {
      * @param nodeId
      * @return
      */
-    @Transactional
-    public boolean restart(String nodeId ){
+    @Transactional(rollbackFor = Throwable.class)
+    public boolean restart(String nodeId, OptionType optionType){
         log.info("Restart node:[{}]", nodeId );
         // get front
         TbFront front = this.getByNodeId(nodeId);
@@ -608,7 +611,19 @@ public class FrontService {
 
             threadPoolTaskScheduler.schedule(()->{
                 this.updateStatus(front.getFrontId(),FrontStatusEnum.RUNNING);
-                this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.NORMAL);
+                if (optionType == OptionType.DEPLOY){
+                    this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.NORMAL);
+                }else if (optionType == OptionType.MODIFY){
+                    // check front is in group
+                    Path nodePath = this.pathService.getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());
+                    Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath);
+                    Optional.of(groupIdSet).ifPresent(idSet -> idSet.forEach ( groupId ->{
+                        List<String> list = frontInterface.getGroupPeers(groupId);
+                        if(CollectionUtils.containsAny(list,front.getNodeId())){
+                            this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.NORMAL);
+                        }
+                    }));
+                }
             }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
             return true;
         } catch (Exception e) {
@@ -654,6 +669,19 @@ public class FrontService {
         TbFront front = this.getByNodeId(nodeId);
         if (front == null){
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
+        }
+
+        int chainId = front.getChainId();
+        int runningTotal = 0;
+        List<TbFront> frontList = this.selectFrontListByChainId(chainId);
+        for (TbFront tbFront : frontList) {
+            if(FrontStatusEnum.isRunning(tbFront.getStatus())){
+                runningTotal ++;
+            }
+        }
+        if ( runningTotal < 2){
+            log.error("Two running nodes at least of chain:[{}]", chainId);
+            throw new NodeMgrException(ConstantCode.TWO_NODES_AT_LEAST);
         }
 
         if ( ! FrontStatusEnum.isRunning(front.getStatus())){

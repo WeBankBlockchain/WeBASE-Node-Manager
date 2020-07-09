@@ -33,6 +33,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
 import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
@@ -122,7 +123,7 @@ public class DeployController extends BaseController {
 
         log.info("Start node nodeId:[{}], now:[{}]", nodeId, startTime);
 
-        this.deployService.startNode(start.getNodeId());
+        this.deployService.startNode(start.getNodeId(), OptionType.MODIFY);
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 

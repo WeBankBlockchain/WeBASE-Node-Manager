@@ -232,6 +232,8 @@ public class ConstantCode {
     public static final RetCode EXEC_HOST_INIT_SCRIPT_ERROR = RetCode.mark(205059, "Exec host init script failed.");
     public static final RetCode TRANSFER_FILES_ERROR = RetCode.mark(205060, "Transfer files error.");
     public static final RetCode DOCKER_OPERATION_ERROR = RetCode.mark(205061, "Docker option error.");
+    public static final RetCode TWO_NODES_AT_LEAST = RetCode.mark(205062, "Two nodes at least.");
+    public static final RetCode TWO_SEALER_IN_GROUP_AT_LEAST = RetCode.mark(205063, "Group need two sealers at least.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
