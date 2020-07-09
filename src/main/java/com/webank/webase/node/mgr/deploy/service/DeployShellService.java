@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
@@ -141,7 +140,7 @@ public class DeployShellService {
             if ( ! Files.exists(ipConf.getParent())) {
                 Files.createDirectories(ipConf.getParent());
             }
-            Files.write(ipConf, Arrays.asList(ipLines), StandardOpenOption.CREATE);
+            Files.write(ipConf, Arrays.asList(ipLines));
         } catch (IOException e) {
             throw new NodeMgrException(ConstantCode.SAVE_IP_CONFIG_FILE_ERROR);
         }

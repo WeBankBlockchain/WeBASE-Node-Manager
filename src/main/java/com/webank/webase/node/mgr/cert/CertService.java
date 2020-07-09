@@ -296,6 +296,7 @@ public class CertService {
         return x509CertList;
     }
 
+
     /**
      * 删除cert，同时更新证书的父证书为空
      * @return 返回受影响的证书数
@@ -441,5 +442,10 @@ public class CertService {
         }
         log.debug("end loadSingleCertFromCrtContent. cert:{}", cert);
         return (X509Certificate)cert;
+    }
+
+    public int deleteAll() {
+        log.info("delete all certs");
+        return this.certMapper.deleteAll();
     }
 }

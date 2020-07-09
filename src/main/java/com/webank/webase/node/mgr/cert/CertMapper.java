@@ -15,12 +15,14 @@
  */
 package com.webank.webase.node.mgr.cert;
 
-import com.webank.webase.node.mgr.cert.entity.CertParam;
-import com.webank.webase.node.mgr.cert.entity.TbCert;
+import java.util.List;
+
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.webank.webase.node.mgr.cert.entity.CertParam;
+import com.webank.webase.node.mgr.cert.entity.TbCert;
 
 @Repository
 public interface CertMapper {
@@ -36,4 +38,7 @@ public interface CertMapper {
     List<TbCert> listOfCertByConditions(CertParam param);
 
     void update(TbCert tbCert);
+
+    @Delete("delete from tb_cert")
+    int deleteAll();
 }
