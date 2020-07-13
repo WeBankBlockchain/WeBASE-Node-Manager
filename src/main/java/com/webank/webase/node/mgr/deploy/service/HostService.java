@@ -78,6 +78,7 @@ public class HostService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int hostId, HostStatusEnum newStatus) throws NodeMgrException {
+        log.info("Change host status  to:[{}]",hostId, newStatus);
         TbHost newHost = new TbHost();
         newHost.setId(hostId);
         newHost.setStatus(newStatus.getId());
