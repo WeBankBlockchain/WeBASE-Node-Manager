@@ -172,6 +172,7 @@ public class ChainService {
         newChain.setChainStatus(newStatus.getId());
         newChain.setModifyTime(new Date());
         return this.tbChainMapper.updateByPrimaryKeySelective(newChain) == 1;
+
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

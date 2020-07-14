@@ -142,6 +142,7 @@ public class DeployShellService {
             }
             Files.write(ipConf, Arrays.asList(ipLines));
         } catch (IOException e) {
+            log.error("Write ip conf file:[{}] error", ipConf.toAbsolutePath().toString(), e);
             throw new NodeMgrException(ConstantCode.SAVE_IP_CONFIG_FILE_ERROR);
         }
 
