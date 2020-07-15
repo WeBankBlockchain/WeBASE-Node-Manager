@@ -15,10 +15,10 @@
  */
 package com.webank.webase.node.mgr.group.entity;
 
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
 
 import lombok.Data;
@@ -70,13 +70,4 @@ public class TbGroup {
         this.chainName = chainName;
     }
 
-    public TbGroup(Integer groupId, String groupName, Integer nodeCount,
-                   String description, GroupType groupType, GroupStatus groupStatus) {
-        this.groupId = groupId;
-        this.groupName = groupName;
-        this.nodeCount = nodeCount;
-        this.description = description;
-        this.groupType = groupType.getValue();
-        this.groupStatus = groupStatus.getValue();
-    }
 }
