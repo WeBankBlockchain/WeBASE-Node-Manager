@@ -282,9 +282,22 @@ public class ChainService {
         // exec build_chain.sh shell script
         deployShellService.execBuildChain(encryptType, ipConf, chainName);
 
-        // generate chain config
-        ((ChainService) AopContext.currentProxy()).initChainDbData(chainName,ipConfigParseList,
-                rootDirOnHost,webaseSignAddr,imageConfig,encryptType,sshUser,sshPort,dockerPort);
+        try {
+            // generate chain config
+            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName,ipConfigParseList,
+                    rootDirOnHost,webaseSignAddr,imageConfig,encryptType,sshUser,sshPort,dockerPort);
+        } catch (Exception e) {
+            log.error("Init chain:[{}] data error. remove generated files:[{}]",
+                    chainName, this.pathService.getChainRoot(chainName), e);
+            try {
+                this.pathService.deleteChain(chainName);
+            } catch (IOException ex) {
+                log.error("Delete chain directory error when init chain data throws an exception.", e);
+                throw new NodeMgrException(ConstantCode.DELETE_CHAIN_ERROR);
+            }
+            throw e;
+        }
+
     }
 
     /**

@@ -152,7 +152,7 @@ public class DeployShellService {
 
         // build_chain.sh only support docker on linux
         // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ]
-        String command = String.format("bash -e %s -f %s -o %s %s %s %s %s",
+        String command = String.format("bash -e %s -S -f %s -o %s %s %s %s %s",
                 // build_chain.sh shell script
                 constant.getBuildChainShell(),
                 // ipconf file path
