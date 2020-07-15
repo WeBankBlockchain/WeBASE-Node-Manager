@@ -736,7 +736,7 @@ public class FrontService {
 
     @Transactional
     public void deleteFrontByAgencyId(int agencyId){
-        log.info("Delete front data by chain id:[{}].", agencyId);
+        log.info("Delete front data by agency id:[{}].", agencyId);
 
         // select host, front, group in agency
         List<TbFront> frontList = frontMapper.selectByAgencyId(agencyId);

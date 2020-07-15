@@ -142,6 +142,7 @@ public class DeployShellService {
             }
             Files.write(ipConf, Arrays.asList(ipLines));
         } catch (IOException e) {
+            log.error("Write ip conf file:[{}] error", ipConf.toAbsolutePath().toString(), e);
             throw new NodeMgrException(ConstantCode.SAVE_IP_CONFIG_FILE_ERROR);
         }
 
@@ -151,7 +152,7 @@ public class DeployShellService {
 
         // build_chain.sh only support docker on linux
         // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ]
-        String command = String.format("bash -e %s -f %s -o %s %s %s %s %s",
+        String command = String.format("bash -e %s -S -f %s -o %s %s %s %s %s",
                 // build_chain.sh shell script
                 constant.getBuildChainShell(),
                 // ipconf file path
