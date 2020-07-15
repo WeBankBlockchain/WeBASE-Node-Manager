@@ -945,6 +945,7 @@ public class GroupService {
     /**
      * update status.
      */
+    @Transactional
     public void updateGroupNodeCount(int groupId, int nodeCount) {
         log.debug("start updateGroupNodeCount groupId:{} nodeCount:{}", groupId, nodeCount);
         groupMapper.updateNodeCount(groupId, nodeCount);
