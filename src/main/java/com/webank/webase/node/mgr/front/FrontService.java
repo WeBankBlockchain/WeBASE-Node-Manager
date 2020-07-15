@@ -197,7 +197,7 @@ public class FrontService {
             TbGroup checkGroup = groupService.getGroupById(group);
             if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
                 groupService.saveGroup(group, groupPeerList.size(), "synchronous",
-                        GroupType.SYNC, GroupStatus.NORMAL);
+                        GroupType.SYNC, GroupStatus.NORMAL,tbFront.getChainId(),tbFront.getChainName());
             }
             //save front group map
             frontGroupMapService.newFrontGroup(tbFront, group);

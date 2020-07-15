@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
@@ -319,7 +320,7 @@ public class GroupService {
 				TbGroup checkGroupExist = getGroupById(gId);
 				if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
 					saveGroup(gId, groupPeerList.size(), "synchronous",
-							GroupType.SYNC, GroupStatus.NORMAL);
+							GroupType.SYNC, GroupStatus.NORMAL,front.getChainId(),front.getChainName());
 				}
 				// refresh front group map by group list on chain
 				// different from checkGroupMapByLocalGroupList which update by local groupList
@@ -706,7 +707,7 @@ public class GroupService {
         // save group, saved as invalid status until start
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
                 req.getDescription(), GroupType.MANUAL, GroupStatus.MAINTAINING,
-                req.getTimestamp(), req.getNodeList());
+                req.getTimestamp(), req.getNodeList(),tbFront.getChainId(),tbFront.getChainName());
         return tbGroup;
     }
 
@@ -723,6 +724,8 @@ public class GroupService {
         }
         List<String> nodeIdList = req.getNodeList();
         List<RspOperateResult> resOperateList = new ArrayList<>(nodeIdList.size());
+        int chainId = 0;
+        String  chainName = null;
         for (String nodeId : nodeIdList) {
             // get front
             TbFront tbFront = frontService.getByNodeId(nodeId);
@@ -742,6 +745,9 @@ public class GroupService {
                 resOperateList.add(operateResult);
                 // fetch group config file
                 this.pullAllGroupFiles(generateGroupId, tbFront);
+
+                chainId = chainId == 0 ? tbFront.getChainId() : chainId;
+                chainName = StringUtils.isBlank(chainName) ? tbFront.getChainName() : chainName;
             } catch (NodeMgrException | ResourceAccessException e) {
                 log.error("fail generateGroup in frontId:{}, exception:{}",
                         tbFront.getFrontId(), e.getMessage());
@@ -750,10 +756,15 @@ public class GroupService {
                 resOperateList.add(operateResult);
             }
         }
+
+        if(chainId == 0 || StringUtils.isBlank(chainName)){
+            log.error("Group need chainId:[{}] and chainName:[{}]",chainId,chainName);
+            throw new NodeMgrException(INSERT_GROUP_ERROR);
+        }
         // save group, saved as invalid status until start
         saveGroup(generateGroupId, req.getNodeList().size(),
                 req.getDescription(), GroupType.MANUAL, GroupStatus.MAINTAINING,
-                req.getTimestamp(), req.getNodeList());
+                req.getTimestamp(), req.getNodeList(), chainId,chainName);
         return resOperateList;
     }
 
@@ -878,27 +889,29 @@ public class GroupService {
     /**
      * save group id
      */
-    @Transactional
-    public TbGroup saveGroup(int groupId, int nodeCount, String description,
-                             GroupType groupType, GroupStatus groupStatus) {
 
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbGroup saveGroup(int groupId, int nodeCount, String groupDesc,
+                             GroupType groupType, GroupStatus groupStatus, int chainId, String chainName) {
         if (groupId == 0) {
-            return null;
+            throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
-        // save group id
-        String groupName = "group" + groupId;
-        TbGroup tbGroup =
-                new TbGroup(groupId, groupName, nodeCount, description,
-                        groupType, groupStatus);
+        //save group id
+        TbGroup tbGroup = new TbGroup(groupId,
+                String.format("group%s", groupId),
+                nodeCount, groupDesc, groupType, groupStatus, chainId, chainName);
         groupMapper.save(tbGroup);
-        // create table by group id
+
+        //create table by group id
         tableService.newTableByGroupId(groupId);
         return tbGroup;
     }
 
     @Transactional
     public TbGroup saveGroup(int groupId, int nodeCount, String description,
-                             GroupType groupType, GroupStatus groupStatus, BigInteger timestamp, List<String> nodeIdList) {
+                             GroupType groupType, GroupStatus groupStatus, BigInteger timestamp, List<String> nodeIdList,
+                             int chainId,String chainName) {
 
         if (groupId == 0) {
             return null;
@@ -907,7 +920,7 @@ public class GroupService {
         String groupName = "group" + groupId;
         TbGroup tbGroup =
                 new TbGroup(groupId, groupName, nodeCount, description,
-                        groupType, groupStatus);
+                        groupType, groupStatus,chainId,chainName);
         tbGroup.setGroupTimestamp(timestamp.toString(10));
         tbGroup.setNodeIdList(JsonTools.toJSONString(nodeIdList));
         groupMapper.save(tbGroup);
@@ -967,23 +980,6 @@ public class GroupService {
                 groupDesc,groupType,groupStatus,chainId,chainName);
     }
 
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public TbGroup saveGroup(int groupId, int nodeCount, String groupDesc,
-                             GroupType groupType, GroupStatus groupStatus, int chainId, String chainName) {
-        if (groupId == 0) {
-            throw new NodeMgrException(INSERT_GROUP_ERROR);
-        }
-        //save group id
-        TbGroup tbGroup = new TbGroup(groupId,
-                String.format("group%s", groupId),
-                nodeCount, groupDesc, groupType, groupStatus, chainId, chainName);
-        groupMapper.save(tbGroup);
-
-        //create table by group id
-        tableService.newTableByGroupId(groupId);
-        return tbGroup;
-    }
 
     /**
      * Insert group when group id not exists.
