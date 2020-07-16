@@ -244,4 +244,20 @@ public class SshTools {
         return exec(ip,originalCommand,sshUser,sshPort,privateKey);
     }
 
+    /**
+     * kill an executing command.
+     *
+     * @param ip
+     * @param commandToKill
+     * @param sshUser
+     * @param sshPort
+     * @param privateKey
+     * @return
+     */
+    public static boolean killCommand(String ip, String commandToKill, String sshUser,int sshPort,String privateKey) {
+        String newCommand= String.format("sudo pkill -f '%s'", commandToKill);
+        log.info("Execute kill command:[{}] on host:[{}]", newCommand, ip);
+        return exec(ip,newCommand,sshUser,sshPort,privateKey);
+    }
+
 }

@@ -16,6 +16,7 @@
 package com.webank.webase.node.mgr.front.entity;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
@@ -92,6 +93,19 @@ public class TbFront {
         front.setStatus(frontStatusEnum.getId());
 
         return front;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TbFront front = (TbFront) o;
+        return Objects.equals(frontId, front.frontId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(frontId);
     }
 }
 
