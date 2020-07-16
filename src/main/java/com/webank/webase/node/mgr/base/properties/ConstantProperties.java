@@ -94,6 +94,8 @@ public class ConstantProperties {
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
 
+    private String webaseSignAddress = "127.0.0.1:5004";
+
     private boolean useDockerSDK = false;
     public int dockerDaemonPort = 3000;
     public String sshDefaultUser = "root";
@@ -117,11 +119,10 @@ public class ConstantProperties {
     private int defaultFrontPort = 5002;
 
     // timeout config
-    private long execHostInitTimeout = 2 * 60 * 60 * 1000L;
-    private long startNodeTimeout = 5 * 60 * 1000L;
+    private long execHostInitTimeout = 10 * 60 * 1000L;
     private long execBuildChainTimeout = 10 * 60 * 1000L;
-    private long execShellTimeout = 2 * 60 * 1000L;
-    private long dockerRestartPeriodTime = 60 * 1000L;
+    private long execShellTimeout = 10 * 60 * 1000L;
+    private long dockerRestartPeriodTime = 30 * 1000L;
     private int dockerClientConnectTimeout = 10 * 60 * 1000;
     private int dockerPullTimeout = 10 * 60 * 1000;
     private int dockerClientReadTimeout = 10 * 60 * 1000;
@@ -161,6 +162,8 @@ public class ConstantProperties {
         }
 
         log.info("Init constant properties, private key: [{}]", privateKey);
+
+        log.info("Init constant properties, webase sign server: [{}]", webaseSignAddress);
 
         log.info("Init constant properties, defaultP2pPort:[{}], defaultChannelPort:[{}], defaultJsonrpcPort:[{}], defaultFrontPort:[{}]",
                 defaultP2pPort, defaultChannelPort, defaultJsonrpcPort, defaultFrontPort);

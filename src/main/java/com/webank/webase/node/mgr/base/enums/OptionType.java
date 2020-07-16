@@ -13,8 +13,8 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public enum OptionType {
-    DEPLOY("Deploy chain."),
-    MODIFY("Add nodes or delete node."),
+    DEPLOY_CHAIN("Deploy chain."),
+    MODIFY_CHAIN("Add nodes, delete node, upgrade chain."),
     ;
 
     private String description;

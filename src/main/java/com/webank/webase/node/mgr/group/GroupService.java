@@ -966,6 +966,12 @@ public class GroupService {
 
     }
 
+    @Transactional
+    public void updateTimestampNodeIdList(int groupId, long timestamp,List<String> nodeIdList) {
+        log.debug("start updateTimestampNodeIdList groupId:{} nodeCount:{}", groupId, timestamp, nodeIdList);
+        this.groupMapper.updateTimestampNodeList(groupId, timestamp,JsonTools.toJSONString(nodeIdList));
+    }
+
 
     @Transactional
     public TbGroup insertIfNew(int groupId, int nodeCount, String groupDesc,

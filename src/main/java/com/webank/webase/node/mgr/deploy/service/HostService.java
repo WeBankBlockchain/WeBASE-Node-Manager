@@ -79,11 +79,7 @@ public class HostService {
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int hostId, HostStatusEnum newStatus) throws NodeMgrException {
         log.info("Change host status  to:[{}]",hostId, newStatus);
-        TbHost newHost = new TbHost();
-        newHost.setId(hostId);
-        newHost.setStatus(newStatus.getId());
-        newHost.setModifyTime(new Date());
-        return tbHostMapper.updateByPrimaryKeySelective(newHost) == 1;
+        return tbHostMapper.updateChainStatus(hostId,new Date(), newStatus.getId()) == 1;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -116,38 +112,6 @@ public class HostService {
     }
 
     /**
-     *
-     * @param hostId
-     * @return
-     */
-    @Transactional
-    public TbHost changeHostStatusToInitiating(int hostId ){
-        // check chain status
-        TbHost host = null;
-        synchronized (ChainService.class) {
-            host = tbHostMapper.selectByPrimaryKey(hostId);
-            if (host == null) {
-                log.error("Host:[{}] does not exist.", hostId);
-                return null;
-            }
-            // check host status
-            if (HostStatusEnum.successOrInitiating(host.getStatus())) {
-                log.error("Host:[{}:{}] is already init success or is initiating.", host.getIp(), host.getStatus());
-                return null;
-            }
-
-            // update chain status
-            log.info("Start to init host:[{}:{}] from status:[{}]", host.getId(), host.getIp(), host.getStatus());
-
-            if (!((HostService) AopContext.currentProxy()).updateStatus(host.getId(), HostStatusEnum.INITIATING)) {
-                log.error("Start to init host:[{}:{}], but update status to initiating failed.", host.getIp(), host.getStatus());
-                return null;
-            }
-        }
-        return host;
-    }
-
-    /**
      * Init hosts:
      * 1. Install docker and docker-compose;
      * 2. Send node config to remote hosts;
@@ -164,16 +128,21 @@ public class HostService {
         // check success count
         AtomicInteger initSuccessCount = new AtomicInteger(0);
         for (final TbHost tbHost : tbHostList) {
-            log.info("Init host:[{}] by exec shell script:[{}]", tbHost.getIp(), constant.getNodeOperateShell());
-
-            // set host status
-            ((HostService) AopContext.currentProxy()).changeHostStatusToInitiating(tbHost.getId());
+            log.info("Init host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
 
             threadPoolTaskScheduler.submit(() -> {
                 try {
-                    // exec host init shell script
-                    deployShellService.execHostOperate(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
-                        PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
+                    // check if host init shell script executed
+                    if (tbHost.getStatus() != HostStatusEnum.INIT_SUCCESS.getId()){
+                        boolean success = this.updateStatus(tbHost.getId(), HostStatusEnum.INITIATING);
+                        if (success){
+                            log.info("Init host:[{}] by exec shell script:[{}]", tbHost.getIp(), constant.getNodeOperateShell());
+
+                            // exec host init shell script
+                            deployShellService.execHostOperate(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
+                                    PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
+                        }
+                    }
 
                     if(scpNodeConfig) {
                         // scp config files from local to remote
@@ -202,13 +171,13 @@ public class HostService {
 
         initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
 
-        boolean initSuccess = initSuccessCount.get() == CollectionUtils.size(tbHostList);
+        boolean hostInitSuccess = initSuccessCount.get() == CollectionUtils.size(tbHostList);
         // check if all host init success
-        log.log(initSuccess ? Level.INFO: Level.ERROR,
+        log.log(hostInitSuccess ? Level.INFO: Level.ERROR,
                 "Host of chain:[{}] init result, total:[{}], success:[{}]",
-                tbChain.getChainName(), initSuccessCount.get(),initSuccessCount.get());
+                tbChain.getChainName(), CollectionUtils.size(tbHostList),initSuccessCount.get());
 
-        return initSuccess;
+        return hostInitSuccess;
     }
 
     /**

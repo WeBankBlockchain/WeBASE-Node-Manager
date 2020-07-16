@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
@@ -84,4 +85,9 @@ public interface GroupMapper {
             "select * from tb_group where chain_id=#{chainId} and group_id=#{groupId}"
     })
     TbGroup getGroupByChainIdAndGroupId(@Param("chainId") int chainId, @Param("groupId") int groupId);
+
+    @Update({
+       "update tb_group set group_timestamp=#{timestamp}, node_id_list=#{nodeIdList},modify_time=NOW() where group_id=#{groupId}"
+    })
+    int updateTimestampNodeList(@Param("groupId") int groupId, @Param("timestamp") long timestamp, @Param("nodeIdList") String nodeIdList);
 }

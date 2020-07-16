@@ -34,9 +34,11 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
 import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
 import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
@@ -58,6 +60,7 @@ public class DeployController extends BaseController {
     @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private DeployService deployService;
+    @Autowired private ConstantProperties constantProperties;
 
     /**
      * Deploy by ipconf and tagId.
@@ -68,9 +71,8 @@ public class DeployController extends BaseController {
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("Start deploy chainName:[{}], rootDirOnHost:[{}] startTime:[{}], tagId:[{}], ipconf:[{}]",
-                deploy.getChainName(), deploy.getRootDirOnHost(), startTime.toEpochMilli(),
-                deploy.getTagId(), deploy.getIpconf());
+        deploy.setWebaseSignAddr(constantProperties.getWebaseSignAddress());
+        log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(deploy), startTime);
 
         try {
             // generate node config and return shell execution log
@@ -127,7 +129,8 @@ public class DeployController extends BaseController {
 
         log.info("Start node nodeId:[{}], now:[{}]", nodeId, startTime);
 
-        this.deployService.startNode(start.getNodeId(), OptionType.MODIFY);
+        this.deployService.startNode(start.getNodeId(), OptionType.MODIFY_CHAIN, FrontStatusEnum.STOPPED,
+                FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 

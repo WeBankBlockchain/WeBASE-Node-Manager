@@ -419,7 +419,6 @@ public class FrontService {
             return Collections.emptyList();
         }
 
-
         // select all fronts by all agencies
         List<TbFront> tbFrontList = frontGroupMapList.stream()
                 .map((map) -> frontMapper.getById(map.getFrontId()))
@@ -433,10 +432,32 @@ public class FrontService {
         return tbFrontList;
     }
 
+    /**
+     *
+     * @param groupIdSet
+     * @return
+     */
+    public List<TbFront> selectFrontListByGroupIdSet(Set<Integer> groupIdSet) {
+        // select all fronts of all group id
+        List<TbFront> allTbFrontList = groupIdSet.stream()
+                .map((groupId) -> this.selectFrontListByGroupId(groupId))
+                .filter((front) -> front != null)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(allTbFrontList)) {
+            log.error("Group id set:[{}] has no front.", JsonTools.toJSONString(groupIdSet));
+            return Collections.emptyList();
+        }
+
+        // delete replication
+        return allTbFrontList.stream().distinct().collect(Collectors.toList());
+    }
+
 
     @Transactional(propagation = Propagation.REQUIRED)
     public List<TbFront> initFrontAndNode(int num, TbChain chain, TbHost host, int agencyId,
-                                          String agencyName, TbGroup group) throws NodeMgrException, IOException {
+                                          String agencyName, TbGroup group,FrontStatusEnum frontStatusEnum) throws NodeMgrException, IOException {
 
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
@@ -485,7 +506,7 @@ public class FrontService {
 
             TbFront front = TbFront.init(nodeId, ip, frontPort, agencyId, agencyName, imageTag, RunTypeEnum.DOCKER,
                     hostId, currentIndex, imageTag, DockerOptions.getContainerName(rootDirOnHost, chainName, currentIndex),
-                    jsonrpcPort, p2pPort, channelPort, chain.getId(), chainName, FrontStatusEnum.INITIALIZED);
+                    jsonrpcPort, p2pPort, channelPort, chain.getId(), chainName, frontStatusEnum);
             // insert front into db
             ((FrontService) AopContext.currentProxy()).insert(front);
 
@@ -588,7 +609,8 @@ public class FrontService {
      * @return
      */
     @Transactional(rollbackFor = Throwable.class)
-    public boolean restart(String nodeId, OptionType optionType){
+    public boolean restart(String nodeId, OptionType optionType, FrontStatusEnum before,
+                           FrontStatusEnum success,FrontStatusEnum failed ){
         log.info("Restart node:[{}]", nodeId );
         // get front
         TbFront front = this.getByNodeId(nodeId);
@@ -597,7 +619,8 @@ public class FrontService {
         }
 
         // set front status to stopped to avoid error for time task.
-        this.updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
+        ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), before);
+
         this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.MAINTAINING);
 
         TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
@@ -610,10 +633,10 @@ public class FrontService {
                     PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()), front.getHostIndex());
 
             threadPoolTaskScheduler.schedule(()->{
-                this.updateStatus(front.getFrontId(),FrontStatusEnum.RUNNING);
-                if (optionType == OptionType.DEPLOY){
+                this.updateStatus(front.getFrontId(),success);
+                if (optionType == OptionType.DEPLOY_CHAIN){
                     this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.NORMAL);
-                }else if (optionType == OptionType.MODIFY){
+                }else if (optionType == OptionType.MODIFY_CHAIN){
                     // check front is in group
                     Path nodePath = this.pathService.getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());
                     Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath);
@@ -628,7 +651,7 @@ public class FrontService {
             return true;
         } catch (Exception e) {
             log.error("Start front:[{}:{}] failed.",front.getFrontIp(), front.getHostIndex(),e);
-            this.updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
+            ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), failed);
             throw new NodeMgrException(ConstantCode.START_NODE_ERROR);
         }
     }
@@ -642,7 +665,7 @@ public class FrontService {
     @Transactional
     public boolean upgrade(int chainId,String newImageTag) {
         boolean updateResult = this.frontMapper.updateUpgradingByChainId(chainId,
-                newImageTag, LocalDateTime.now(), FrontStatusEnum.UPGRADING.getId()) > 0;
+                newImageTag, LocalDateTime.now(), FrontStatusEnum.STARTING.getId()) > 0;
         return updateResult;
     }
 

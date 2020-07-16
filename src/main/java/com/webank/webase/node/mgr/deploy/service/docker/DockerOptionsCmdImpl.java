@@ -26,6 +26,10 @@ public class DockerOptionsCmdImpl implements DockerOptions{
     public void pullImage(String ip, int dockerPort,String sshUser, int sshPort, String imageTag) {
         String image = getImageRepositoryTag(constant.getDockerRepository(),constant.getDockerRegistryMirror(),imageTag);
         String dockerPullCommand = String.format("sudo docker pull %s",image);
+
+        // kill exists docker pull process
+        SshTools.killCommand(ip,dockerPullCommand,sshUser,sshPort,constant.getPrivateKey());
+
         SshTools.execDocker(ip,dockerPullCommand,sshUser,sshPort,constant.getPrivateKey());
     }
 

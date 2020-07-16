@@ -23,10 +23,12 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public enum FrontStatusEnum {
-    INITIALIZED( 0, "initialized"),
-    RUNNING( 1, "running"),
-    STOPPED(2, "stopped"),
-    UPGRADING(3, "upgrading"),
+    INITIALIZED( 0, "初始化"),
+    RUNNING( 1, "运行"),
+    STOPPED(2, "停止"),
+    STARTING(3, "启动中"),
+    ADDING(4, "添加中"),
+    ADD_FAILED(5, "添加失败"),
     ;
 
     private int id;
