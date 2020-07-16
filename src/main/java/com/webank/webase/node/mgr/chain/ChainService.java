@@ -19,16 +19,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,12 +165,7 @@ public class ChainService {
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int chainId, ChainStatusEnum newStatus) {
         log.info("Update chain:[{}] status to:[{}]",chainId, newStatus.toString());
-        TbChain newChain = new TbChain();
-        newChain.setId(chainId);
-        newChain.setChainStatus(newStatus.getId());
-        newChain.setModifyTime(new Date());
-        return this.tbChainMapper.updateByPrimaryKeySelective(newChain) == 1;
-
+        return this.tbChainMapper.updateChainStatus(chainId,new Date(), newStatus.getId()) == 1;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -195,8 +188,9 @@ public class ChainService {
         log.info("Upgrade front:[{}] to version:[{}].",chain.getVersion() , newTagVersion);
         this.frontService.upgrade(chain.getId(),newTagVersion);
 
-        // start chain
-        this.nodeAsyncService.upgradeStartChain(chain.getId(), OptionType.MODIFY);
+        // restart chain
+        this.nodeAsyncService.asyncStartChain(chain.getId(), OptionType.MODIFY_CHAIN, ChainStatusEnum.RUNNING ,
+                ChainStatusEnum.UPGRADING_FAILED,FrontStatusEnum.STARTING,FrontStatusEnum.RUNNING,FrontStatusEnum.STOPPED);
     }
 
 
@@ -257,9 +251,8 @@ public class ChainService {
      * @param rootDirOnHost
      */
     @Transactional
-    public void generateChainConfig(String chainName, String[] ipConf,
-                int tagId, String rootDirOnHost, String webaseSignAddr,
-                String sshUser,int sshPort,int dockerPort){
+    public void generateChainConfig(String chainName, String[] ipConf, int tagId, String rootDirOnHost,
+                                    String webaseSignAddr, String sshUser,int sshPort,int dockerPort){
         log.info("Check chainName exists....");
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain != null) {
@@ -310,9 +303,9 @@ public class ChainService {
      * @param encryptType
      */
     @Transactional
-    public void initChainDbData(String chainName, List<IpConfigParse> ipConfigParseList,
-                                String rootDirOnHost, String webaseSignAddr, TbConfig imageConfig, byte encryptType,
-                                String sshUser,int sshPort,int dockerPort){
+    public void initChainDbData(String chainName, List<IpConfigParse> ipConfigParseList, String rootDirOnHost,
+                                String webaseSignAddr, TbConfig imageConfig, byte encryptType, String sshUser,
+                                int sshPort, int dockerPort){
 
         // insert chain
         final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
@@ -333,7 +326,7 @@ public class ChainService {
 
             // insert group if new
             config.getGroupIdSet().forEach((groupId) -> {
-                this.groupService.insertIfNew(groupId, config.getNum(), "deploy", GroupType.DEPLOY,
+                this.groupService.insertIfNew(groupId, 0, "deploy", GroupType.DEPLOY,
                         GroupStatus.MAINTAINING, newChain.getId(), newChain.getChainName());
             });
 
@@ -371,10 +364,7 @@ public class ChainService {
 
 
                 // insert node and front group mapping
-                Set<Integer> groupIdSet = ipConfigParseList.stream().map(IpConfigParse::getGroupIdSet)
-                        .flatMap(Collection::stream).collect(Collectors.toSet());
-
-                groupIdSet.forEach((groupId) -> {
+                nodeConfig.getGroupIdSet().forEach((groupId) -> {
                     // insert node
                     String nodeName = NodeService.getNodeName(groupId, nodeConfig.getNodeId());
                     this.nodeService.insert(nodeConfig.getNodeId(), nodeName,
@@ -387,6 +377,12 @@ public class ChainService {
                     // update node count of goup
                     TbGroup group = this.groupService.getGroupById(groupId);
                     this.groupService.updateGroupNodeCount(groupId, group.getNodeCount() + 1 );
+
+                    // update group timestamp and node list
+                    Pair<Long, List<String>> longListPair = nodeConfig.getGroupIdToTimestampNodeListMap().get(groupId);
+                    if (longListPair != null) {
+                        this.groupService.updateTimestampNodeIdList(groupId,longListPair.getKey(),longListPair.getValue());
+                    }
                 });
 
                 // generate front application.yml
@@ -398,47 +394,6 @@ public class ChainService {
                 }
             }
         });
-    }
-
-    /**
-     *
-     * @param chainName
-     * @return
-     */
-    public TbChain changeChainStatusToDeploying(String chainName){
-        if (StringUtils.isBlank(chainName)) {
-            log.error("Chain name:[{}] is blank, deploy error.", chainName);
-            return null;
-        }
-
-        // check chain status
-        TbChain tbChain = null;
-        synchronized (ChainService.class) {
-            tbChain = this.tbChainMapper.getByChainName(chainName);
-            // chain not exists
-            if (tbChain == null) {
-                log.error("Chain:[{}] does not exist, deploy error.", chainName);
-                return null;
-            }
-
-            // check chain status
-            // TODO. deploying but no thread is deploying, still need to deploy
-            if (ChainStatusEnum.successOrDeploying(tbChain.getChainStatus())) {
-                log.error("Chain:[{}] is already deployed success or deploying:[{}].", chainName, tbChain.getChainStatus());
-                return null;
-            }
-
-            // update chain status
-            log.info("Start to deploy chain:[{}:{}] from status:[{}]",
-                    tbChain.getId(), tbChain.getChainName(), tbChain.getChainStatus());
-
-            if (!((ChainService) AopContext.currentProxy()).updateStatus(tbChain.getId(), ChainStatusEnum.DEPLOYING)) {
-                log.error("Start to deploy chain:[{}:{}], but update status to deploying failed.",
-                        tbChain.getId(), tbChain.getChainName());
-                return null;
-            }
-        }
-        return tbChain;
     }
 
     /**

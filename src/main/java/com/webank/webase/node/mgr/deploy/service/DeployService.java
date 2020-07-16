@@ -32,6 +32,7 @@ import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
@@ -91,7 +92,11 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
 
-        // TODO. check WeBASE Sign accessible
+        // check WeBASE Sign accessible
+        if (StringUtils.isBlank(webaseSignAddr)
+                || ! NetUtils.checkAddress(webaseSignAddr, 2000) ) {
+            throw new NodeMgrException(ConstantCode.WEBASE_SIGN_CONFIG_ERROR);
+        }
 
         // generate config files and insert data to db
         this.chainService.generateChainConfig(chainName,ipConf,tagId,rootDirOnHost,webaseSignAddr,
@@ -99,7 +104,7 @@ public class DeployService {
                 constantProperties.getDockerDaemonPort() );
 
         // init host and start node
-        this.nodeAsyncService.initHostListAndStart(chainName,OptionType.DEPLOY);
+        this.nodeAsyncService.asyncDeployChain(chainName,OptionType.DEPLOY_CHAIN);
     }
 
 
@@ -198,16 +203,19 @@ public class DeployService {
         // init front and node
         try {
             List<TbFront> newFrontList = this.frontService.initFrontAndNode(num, chain,
-                    tbHostExists, agency.getId(), agency.getAgencyName(), group);
+                    tbHostExists, agency.getId(), agency.getAgencyName(), group, FrontStatusEnum.ADDING);
 
             // generate related node config files
             this.frontService.updateNodeConfigIniByGroupId(chain, groupId);
 
             // generate new nodes config files and scp to remote
-            this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId, ip, newFrontList, tbHostExists.getSshUser(),tbHostExists.getSshPort());
+            this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId,
+                    tbHostExists.getIp(), newFrontList, tbHostExists.getSshUser(),tbHostExists.getSshPort());
 
-            // init host and restart all front
-            this.nodeAsyncService.initHostAndStart(chain,tbHostExists,group.getGroupId(),OptionType.MODIFY);
+            // init host
+            // start all front on the host
+            // restart related front
+            this.nodeAsyncService.asyncAddNode(chain,tbHostExists,group,OptionType.MODIFY_CHAIN,newFrontList);
         } catch (Exception e) {
             //TODO.
             log.error("Add node error", e);
@@ -256,8 +264,9 @@ public class DeployService {
      * @param nodeId
      * @return
      */
-    public void startNode(String nodeId,OptionType optionType) {
-        this.frontService.restart(nodeId,optionType);
+    public void startNode(String nodeId,OptionType optionType,FrontStatusEnum before,
+                          FrontStatusEnum success,FrontStatusEnum failed) {
+        this.frontService.restart(nodeId,optionType,before,success,failed);
     }
 
     /**
@@ -300,12 +309,11 @@ public class DeployService {
         Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath);
         try {
             // update related node's config.ini file, e.g. p2p
-            this.frontService.updateNodeConfigIniByGroupList(chain,groupIdSet);
+            this.frontService.updateNodeConfigIniByGroupList(chain, groupIdSet);
         } catch (IOException e) {
             log.error("Delete node, update related group:[{}] node's config error ", groupIdSet, e);
             throw new NodeMgrException(ConstantCode.UPDATE_RELATED_NODE_ERROR);
         }
-
         // move node directory to tmp
         try {
             this.pathService.deleteNode(chain.getChainName(), host.getIp(), front.getHostIndex(), front.getNodeId());
@@ -329,7 +337,8 @@ public class DeployService {
         this.agencyService.deleteAgencyWithNoNode(deleteAgency,host.getId());
 
         // restart related node
-        this.nodeAsyncService.startFrontOfGroupSet(chain.getId(), groupIdSet, OptionType.MODIFY);
+        this.nodeAsyncService.asyncRestartRelatedFront(chain.getId(), groupIdSet, OptionType.MODIFY_CHAIN,
+                FrontStatusEnum.STARTING,FrontStatusEnum.RUNNING,FrontStatusEnum.STOPPED);
     }
 
     /**

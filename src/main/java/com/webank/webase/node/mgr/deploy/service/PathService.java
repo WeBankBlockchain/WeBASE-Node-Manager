@@ -238,6 +238,15 @@ public class PathService {
     public static Path getConfigIniPath( Path nodePath ) {
         return nodePath.resolve("config.ini");
     }
+
+    /**
+     *
+     * @param nodePath
+     * @return
+     */
+    public static Path getGroupGenesisPath(Path nodePath,int groupId) {
+        return nodePath.resolve("conf").resolve(String.format("group.%s.genesis",groupId));
+    }
     /**
      * @param rootDirOnHost
      * @param chainName

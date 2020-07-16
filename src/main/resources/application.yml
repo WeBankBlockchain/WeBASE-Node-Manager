@@ -74,6 +74,10 @@ constant:
 
   permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**, /encrypt
 
+  # 1.4.0 visual deploy
+  webaseSignAddress: "127.0.0.1:5004"
+  dockerRepository: "fiscoorg/front"
+
 
 # executor config for async pulling data from chain
 executor:
