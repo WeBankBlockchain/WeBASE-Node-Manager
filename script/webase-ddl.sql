@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS tb_front (
   front_port int(11) DEFAULT NULL COMMENT '前置服务端口',
   agency varchar(32) NOT NULL COMMENT '所属机构名称',
   client_version varchar(32) NOT NULL COMMENT '节点版本（国密/非国密）',
+  front_version varchar(32) DEFAULT NULL COMMENT '节点前置版本号',
+  sign_version varchar(32) DEFAULT NULL COMMENT '节点前置对应签名服务版本号',
   status int(11) DEFAULT 1 COMMENT '前置服务状态',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
@@ -69,9 +71,6 @@ CREATE TABLE IF NOT EXISTS tb_node (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='节点表';
 
 
-
-
-
 -- ----------------------------
 -- Table structure for tb_contract
 -- ----------------------------
@@ -82,9 +81,9 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   contract_version varchar(120) DEFAULT NULL COMMENT '合约版本',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   contract_source text COMMENT '合约源码',
-  contract_abi text COMMENT '编译合约生成的abi文件内容',
-  contract_bin text COMMENT '合约binary',
-  bytecodeBin text COMMENT '合约bin',
+  contract_abi mediumtext COMMENT '编译合约生成的abi文件内容',
+  contract_bin mediumtext COMMENT '合约binary',
+  bytecodeBin mediumtext COMMENT '合约bin',
   contract_address varchar(64) DEFAULT NULL COMMENT '合约地址',
   deploy_time datetime DEFAULT NULL COMMENT '部署时间',
   contract_status int(1) DEFAULT '1' COMMENT '部署状态（1：未部署，2：部署成功，3：部署失败）',
@@ -314,8 +313,8 @@ CREATE TABLE IF NOT EXISTS tb_abi (
   group_id int(11) NOT NULL COMMENT '合约ABI所属群组的编号',
   contract_name varchar(120) NOT NULL COMMENT '合约ABI的合约名',
   contract_address varchar(64) NOT NULL COMMENT '合约ABI的合约地址',
-  contract_abi text NOT NULL COMMENT '合约ABI的内容',
-  contract_bin text NOT NULL COMMENT '合约ABI的runtime-bin',
+  contract_abi mediumtext NOT NULL COMMENT '合约ABI的内容',
+  contract_bin mediumtext NOT NULL COMMENT '合约ABI的runtime-bin',
   create_time datetime DEFAULT NULL COMMENT '合约ABI的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '合约ABI的修改时间',
   PRIMARY KEY (abi_id),
