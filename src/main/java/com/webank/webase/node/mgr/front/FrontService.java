@@ -78,7 +78,7 @@ public class FrontService {
 	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
     /**
-     * add new front
+     * add new front, save front, frontGroupMap, check front's groupStatus, refersh nodeList
      */
     @Transactional
     public TbFront newFront(FrontInfo frontInfo) {
@@ -115,12 +115,17 @@ public class FrontService {
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
         }
-        String clientVersion = frontInterface.getClientVersion(frontIp,
+        String clientVersion = frontInterface.getClientVersionFromSpecificFront(frontIp,
                 frontPort, Integer.valueOf(groupIdList.get(0)));
         //copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
+        // get front server version and sign server version
+        String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
+        String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
+        tbFront.setFrontVersion(frontVersion);
+        tbFront.setSignVersion(signVersion);
         //save front info
         try{
             frontMapper.add(tbFront);
@@ -155,12 +160,12 @@ public class FrontService {
                     .findFirst().orElseGet(() -> new PeerInfo(nodeId));
                 nodeService.addNodeInfo(group, newPeer);
             }
-            //add sealer(consensus node) and observer in nodeList
+            // add sealer(consensus node) and observer in nodeList
              refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
         }
         // pull cert from new front and its node
         CertTools.isPullFrontCertsDone = false;
-        //clear cache
+        // clear cache
         frontGroupMapCache.clearMapList();
         return tbFront;
     }
