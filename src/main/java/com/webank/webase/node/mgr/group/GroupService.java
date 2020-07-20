@@ -62,6 +62,7 @@ import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
@@ -105,6 +106,8 @@ public class GroupService {
     private TbHostMapper tbHostMapper;
     @Autowired
     private FrontMapper frontMapper;
+    @Autowired
+    private TbChainMapper tbChainMapper;
 
     @Autowired
     private TableService tableService;
@@ -236,6 +239,12 @@ public class GroupService {
      */
     @Transactional
     public synchronized void resetGroupList() {
+        int chainCount = this.tbChainMapper.countChain();
+        if (chainCount == 0){
+            // deploy chain first then add front manually
+            return;
+        }
+
         Instant startTime = Instant.now();
         log.info("start resetGroupList. startTime:{}", startTime.toEpochMilli());
 
