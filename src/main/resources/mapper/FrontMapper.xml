@@ -21,7 +21,7 @@
 	</sql>
 
   <insert id="add">
-    insert ignore into tb_front (node_id,front_ip,front_port,agency,client_version,create_time,modify_time)
+    insert into tb_front (node_id,front_ip,front_port,agency,client_version,create_time,modify_time)
     values(#{nodeId},#{frontIp},#{frontPort},#{agency},#{clientVersion},NOW(),NOW())
     <selectKey keyProperty="frontId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()

@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
 import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
@@ -47,6 +48,7 @@ public class FrontGroupMapService {
     /**
      * add new mapping with group status directly
      */
+    @Transactional
     public TbFrontGroupMap newFrontGroupWithStatus(Integer frontId, Integer groupId, Integer status) {
         log.info("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
         MapListParam param = new MapListParam(frontId, groupId);
@@ -74,6 +76,7 @@ public class FrontGroupMapService {
     /**
      * new front group map
      */
+    @Transactional
     public void newFrontGroup(TbFront front, Integer groupId) {
         // check front's all group status
         BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
