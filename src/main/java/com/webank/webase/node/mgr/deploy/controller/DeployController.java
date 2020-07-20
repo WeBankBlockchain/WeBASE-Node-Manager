@@ -281,4 +281,16 @@ public class DeployController extends BaseController {
         RetCode deleteResult = this.deployService.deleteChain(chainName);
         return new BaseResponse(deleteResult);
     }
+
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
+    @GetMapping(value = "type")
+    public BaseResponse deployType() throws IOException {
+        Instant startTime = Instant.now();
+        log.info("Start get deploy type, now:[{}]",  startTime);
+        return new BaseResponse(ConstantCode.SUCCESS, constantProperties.getDeployType());
+    }
 }
