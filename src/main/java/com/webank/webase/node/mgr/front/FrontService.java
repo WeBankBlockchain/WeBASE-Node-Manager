@@ -140,6 +140,7 @@ public class FrontService {
     public TbFront newFront(FrontInfo frontInfo) {
         log.debug("start newFront frontInfo:{}", frontInfo);
         TbFront tbFront = new TbFront();
+        tbFront.setRunType(RunTypeEnum.COMMAND.getId());
         String frontIp = frontInfo.getFrontIp();
         Integer frontPort = frontInfo.getFrontPort();
         //check valid ip
@@ -197,7 +198,7 @@ public class FrontService {
             TbGroup checkGroup = groupService.getGroupById(group);
             if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
                 groupService.saveGroup(group, groupPeerList.size(), "synchronous",
-                        GroupType.SYNC, GroupStatus.NORMAL,tbFront.getChainId(),tbFront.getChainName());
+                        GroupType.SYNC, GroupStatus.NORMAL,0,"");
             }
             //save front group map
             frontGroupMapService.newFrontGroup(tbFront, group);
@@ -353,7 +354,7 @@ public class FrontService {
             log.error("updateFrontStatus updateFront is null");
             return;
         }
-        if (updateFront.getStatus().equals(status)) {
+        if (updateFront.getStatus() != null &&  updateFront.getStatus().equals(status)) {
             return;
         }
         LocalDateTime modifyTime = updateFront.getModifyTime();

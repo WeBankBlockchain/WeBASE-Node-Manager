@@ -94,6 +94,7 @@ public class ConstantProperties {
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
 
+    private String deployType = "0";
     private String webaseSignAddress = "127.0.0.1:5004";
 
     private boolean useDockerSDK = false;
@@ -141,17 +142,24 @@ public class ConstantProperties {
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
+        log.info("Init constant properties,deploy type: [{}]", deployType);
+
+        log.info("Init constant properties, permitUrlArray: [{}]", StringUtils.join(permitUrlArray,","));
+
         nodesRootDir = initDirectory(nodesRootDir, "NODES_ROOT/");
         nodesRootTmpDir = initDirectory(nodesRootTmpDir, "NODES_ROOT_TMP/");
-
         log.info("Init constant properties, generate nodes root dir:[{}]", nodesRootDir);
         log.info("Init constant properties, generate nodes root temp dir:[{}]", nodesRootTmpDir);
-
 
         this.imageTagUpdateUrl = String.format(this.imageTagUpdateUrl,dockerRepository);
         log.info("Init constant properties, imageTagUpdateUrl: [{}]", this.imageTagUpdateUrl);
 
-        log.info("Init constant properties, permitUrlArray: [{}]", StringUtils.join(permitUrlArray,","));
+        log.info("Init constant properties, private key: [{}]", privateKey);
+
+        log.info("Init constant properties, webase sign server: [{}]", webaseSignAddress);
+
+        log.info("Init constant properties, defaultP2pPort:[{}], defaultChannelPort:[{}], defaultJsonrpcPort:[{}], defaultFrontPort:[{}]",
+                defaultP2pPort, defaultChannelPort, defaultJsonrpcPort, defaultFrontPort);
 
         log.info("Init constant properties, dockerProxyMap: [{}]", dockerProxyMap);
 
@@ -161,12 +169,6 @@ public class ConstantProperties {
             fiscoBcosBinary = "";
         }
 
-        log.info("Init constant properties, private key: [{}]", privateKey);
-
-        log.info("Init constant properties, webase sign server: [{}]", webaseSignAddress);
-
-        log.info("Init constant properties, defaultP2pPort:[{}], defaultChannelPort:[{}], defaultJsonrpcPort:[{}], defaultFrontPort:[{}]",
-                defaultP2pPort, defaultChannelPort, defaultJsonrpcPort, defaultFrontPort);
     }
 
     /**
