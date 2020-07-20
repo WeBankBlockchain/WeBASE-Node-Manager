@@ -78,7 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .failureHandler(loginfailHandler) // if login fail
             .and().authorizeRequests()
             .antMatchers("/account/login", "/account/pictureCheckCode",
-                "/login","/user/privateKey/**", "/encrypt")
+                "/login","/user/privateKey/**", "/encrypt", "/version")
             .permitAll()
             .anyRequest().authenticated().and().csrf()
             .disable() // close csrf

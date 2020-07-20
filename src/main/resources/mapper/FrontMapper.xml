@@ -10,6 +10,8 @@
     <result column="front_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontPort"/>
     <result column="agency" javaType="java.lang.String" jdbcType="VARCHAR" property="agency"/>
     <result column="client_version" javaType="java.lang.String" jdbcType="VARCHAR" property="clientVersion"/>
+    <result column="front_version" javaType="java.lang.String" jdbcType="VARCHAR" property="frontVersion"/>
+    <result column="sign_version" javaType="java.lang.String" jdbcType="VARCHAR" property="signVersion"/>
     <result column="status" javaType="java.lang.Integer" jdbcType="INTEGER" property="status"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"  property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"  property="modifyTime"/>
@@ -17,12 +19,12 @@
 
 
   <sql id="QUERY_ROW_COLUMN">
-		front_id frontId,front_ip frontIp,front_port frontPort,agency,client_version,status,create_time createTime,modify_time modifyTime
+		front_id frontId,front_ip frontIp,front_port frontPort,agency,client_version,front_version,sign_version,status,create_time createTime,modify_time modifyTime
 	</sql>
 
   <insert id="add">
-    insert ignore into tb_front (node_id,front_ip,front_port,agency,client_version,create_time,modify_time)
-    values(#{nodeId},#{frontIp},#{frontPort},#{agency},#{clientVersion},NOW(),NOW())
+    insert into tb_front (node_id,front_ip,front_port,agency,client_version,front_version,sign_version,create_time,modify_time)
+    values(#{nodeId},#{frontIp},#{frontPort},#{agency},#{clientVersion},#{frontVersion},#{signVersion},NOW(),NOW())
     <selectKey keyProperty="frontId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
