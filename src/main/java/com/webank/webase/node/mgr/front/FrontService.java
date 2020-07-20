@@ -122,10 +122,12 @@ public class FrontService {
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
         //save front info
-        frontMapper.add(tbFront);
-        if (tbFront.getFrontId() == null || tbFront.getFrontId() == 0) {
-            log.warn("fail newFront, after save, tbFront:{}", JsonTools.toJSONString(tbFront));
-            throw new NodeMgrException(ConstantCode.SAVE_FRONT_FAIL);
+        try{
+            frontMapper.add(tbFront);
+        } catch (Exception e) {
+            log.warn("fail newFront, after save, tbFront:{}, exception:{}",
+                JsonTools.toJSONString(tbFront), e);
+            throw new NodeMgrException(ConstantCode.SAVE_FRONT_FAIL.getCode(), e.getMessage());
         }
         for (String groupId : groupIdList) {
             Integer group = Integer.valueOf(groupId);
