@@ -40,4 +40,5 @@ public class VersionController {
     public String getServerVersion() {
         return versionProperties.getVersion();
     }
+
 }
