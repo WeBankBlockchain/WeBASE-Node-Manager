@@ -21,16 +21,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * return version of local server
+ */
 @Log4j2
 @RestController
 @RequestMapping("version")
 public class VersionController {
 
-    // webase-web: when add first front, return version and tips
     @Autowired
     private VersionProperties versionProperties;
 
-    // return version of local server
+    /**
+     * webase-web: when add first front, return version and tips
+     * @return
+     */
     @GetMapping()
     public String getServerVersion() {
         return versionProperties.getVersion();
