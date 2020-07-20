@@ -140,7 +140,11 @@ public class FrontInterfaceService {
      */
     public List<String> getGroupListFromSpecificFront(String nodeIp, Integer frontPort) {
         Integer groupId = Integer.MAX_VALUE;
-        return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_GROUP_PLIST, List.class);
+        List<String> resList = getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_GROUP_PLIST, List.class);
+        if (resList.isEmpty()) {
+            throw new NodeMgrException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+        }
+        return resList;
     }
 
 
@@ -469,12 +473,12 @@ public class FrontInterfaceService {
      * start group.
      */
     public BaseResponse operateGroup(String frontIp, Integer frontPort, Integer groupId, String type) {
-        log.debug("start operateGroup frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
+        log.info("start operateGroup frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
                 groupId);
         String uri = String.format(FrontRestTools.URI_OPERATE_GROUP, type);
         BaseResponse response =
                 getFromSpecificFront(groupId, frontIp, frontPort, uri, BaseResponse.class);
-        log.debug("end operateGroup");
+        log.info("end operateGroup");
         return response;
     }
 
