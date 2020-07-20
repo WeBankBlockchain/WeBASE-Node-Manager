@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS tb_front (
   front_port int(11) DEFAULT NULL COMMENT '前置服务端口',
   agency varchar(32) NOT NULL COMMENT '所属机构名称',
   client_version varchar(32) NOT NULL COMMENT '节点版本（国密/非国密）',
+  front_version varchar(32) DEFAULT NULL COMMENT '节点前置版本号',
+  sign_version varchar(32) DEFAULT NULL COMMENT '节点前置对应签名服务版本号',
   status int(11) DEFAULT 1 COMMENT '前置服务状态',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
@@ -67,9 +69,6 @@ CREATE TABLE IF NOT EXISTS tb_node (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (node_id,group_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='节点表';
-
-
-
 
 
 -- ----------------------------
