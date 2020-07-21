@@ -33,6 +33,7 @@ public class ConstantCode {
     public static final RetCode SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL = RetCode.mark(102000, "system exception: please check front");
 
     /* front error code */
+    public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "No group belongs to this groupId(node not belongs to this group)");
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied");
     public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
     public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");

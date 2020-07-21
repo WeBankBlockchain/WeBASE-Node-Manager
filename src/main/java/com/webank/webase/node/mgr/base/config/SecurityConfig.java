@@ -43,7 +43,6 @@ import com.webank.webase.node.mgr.security.customizeAuth.TokenAuthenticationProv
 /**
  * security config.
  */
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
