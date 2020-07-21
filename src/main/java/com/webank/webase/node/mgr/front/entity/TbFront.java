@@ -34,6 +34,14 @@ public class TbFront {
      * node version
      */
     private String clientVersion;
+    /**
+     * front server version
+     */
+    private String frontVersion;
+    /**
+     * sign server version
+     */
+    private String signVersion;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
     /**

@@ -10,6 +10,8 @@
     <result column="front_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontPort"/>
     <result column="agency" javaType="java.lang.String" jdbcType="VARCHAR" property="agency"/>
     <result column="client_version" javaType="java.lang.String" jdbcType="VARCHAR" property="clientVersion"/>
+    <result column="front_version" javaType="java.lang.String" jdbcType="VARCHAR" property="frontVersion"/>
+    <result column="sign_version" javaType="java.lang.String" jdbcType="VARCHAR" property="signVersion"/>
     <result column="status" javaType="java.lang.Integer" jdbcType="INTEGER" property="status"/>
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"  property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"  property="modifyTime"/>
@@ -28,26 +30,20 @@
   </resultMap>
 
 
-  <sql id="QUERY_ROW_COLUMN">
-    front_id frontId,front_ip frontIp,front_port frontPort,agency,client_version,create_time createTime,modify_time modifyTime,
-    run_type, agency_id, agency_name, host_id, host_index, image_tag, container_name,jsonrpc_port, p2p_port, channel_port, status,
-    chain_id, chain_name
-  </sql>
-
   <insert id="add">
-    insert into tb_front (node_id, front_ip, front_port,
-    agency, client_version, create_time,
-    modify_time, run_type, agency_id,
-    agency_name, host_id, host_index,
-    image_tag, container_name, jsonrpc_port,
-    p2p_port, channel_port, status, chain_id, chain_name )
-    values (#{nodeId,jdbcType=VARCHAR}, #{frontIp,jdbcType=VARCHAR}, #{frontPort,jdbcType=INTEGER},
-    #{agency,jdbcType=VARCHAR}, #{clientVersion,jdbcType=VARCHAR},
-    NOW(),NOW(), #{runType,jdbcType=TINYINT}, #{agencyId,jdbcType=INTEGER},
-    #{agencyName,jdbcType=VARCHAR}, #{hostId,jdbcType=INTEGER}, #{hostIndex,jdbcType=SMALLINT},
-    #{imageTag,jdbcType=VARCHAR}, #{containerName,jdbcType=VARCHAR}, #{jsonrpcPort,jdbcType=SMALLINT},
-    #{p2pPort,jdbcType=SMALLINT}, #{channelPort,jdbcType=SMALLINT}, #{status,jdbcType=INTEGER},
-    #{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR})
+    insert into tb_front
+    (node_id, front_ip, front_port, agency, client_version,
+    front_version,sign_version,status, create_time, modify_time,
+    run_type, agency_id, agency_name, host_id, host_index,
+    image_tag, container_name, jsonrpc_port, p2p_port, channel_port,
+    chain_id, chain_name )
+    values
+    (#{nodeId}, #{frontIp}, #{frontPort}, #{agency}, #{clientVersion},
+    #{frontVersion},#{signVersion},#{status}, NOW(),NOW(),
+    #{runType}, #{agencyId}, #{agencyName}, #{hostId}, #{hostIndex},
+    #{imageTag}, #{containerName}, #{jsonrpcPort}, #{p2pPort}, #{channelPort},
+    #{chainId}, #{chainName})
+
     <selectKey keyProperty="frontId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
