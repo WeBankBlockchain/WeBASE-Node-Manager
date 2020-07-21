@@ -128,7 +128,7 @@ public class ConstantProperties {
     private int dockerPullTimeout = 10 * 60 * 1000;
     private int dockerClientReadTimeout = 10 * 60 * 1000;
 
-    private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login", "/user/privateKey/**", "/encrypt"};
+    private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
     private String dockerRepository= "fiscoorg/front";
     private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";

@@ -144,7 +144,11 @@ public class FrontInterfaceService {
      */
     public List<String> getGroupListFromSpecificFront(String nodeIp, Integer frontPort) {
         Integer groupId = Integer.MAX_VALUE;
-        return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_GROUP_PLIST, List.class);
+        List<String> resList = getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_GROUP_PLIST, List.class);
+        if (resList.isEmpty()) {
+            throw new NodeMgrException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+        }
+        return resList;
     }
 
 
@@ -446,12 +450,37 @@ public class FrontInterfaceService {
         return encryptType;
     }
 
-    public String getClientVersion(String frontIp, Integer frontPort,
+    public String getClientVersionFromSpecificFront(String frontIp, Integer frontPort,
                                    Integer groupId) {
-        log.debug("start getClientVersion. groupId:{}", groupId);
+        log.debug("start getClientVersionFromSpecificFront. frontIp:{},frontPort:{},groupId:{}",
+            frontIp, frontPort, groupId);
         NodeVersion.Version clientVersion = getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_GET_CLIENT_VERSION, NodeVersion.Version.class);
-        log.debug("end getClientVersion. consensusStatus:{}", clientVersion);
+        log.debug("end getClientVersionFromSpecificFront. consensusStatus:{}", clientVersion);
         return clientVersion.getVersion();
+    }
+
+    /**
+     * get front version
+     */
+    public String getFrontVersionFromSpecificFront(String frontIp, Integer frontPort) {
+        log.debug("start getClientVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp, frontPort);
+        Integer groupId = Integer.MAX_VALUE;
+        String frontVersion = getFromSpecificFront(groupId,
+            frontIp, frontPort, FrontRestTools.URI_FRONT_VERSION, String.class);
+        log.debug("end getFrontVersionFromSpecificFront. frontVersion:{}", frontVersion);
+        return frontVersion;
+    }
+
+    /**
+     * get webase-sign version
+     */
+    public String getSignVersionFromSpecificFront(String frontIp, Integer frontPort) {
+        log.debug("start getSignVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp, frontPort);
+        Integer groupId = Integer.MAX_VALUE;
+        String signVersion = getFromSpecificFront(groupId,
+            frontIp, frontPort, FrontRestTools.URI_SIGN_VERSION, String.class);
+        log.debug("end getSignVersionFromSpecificFront. signVersion:{}", signVersion);
+        return signVersion;
     }
 
     /**
@@ -473,12 +502,12 @@ public class FrontInterfaceService {
      * start group.
      */
     public BaseResponse operateGroup(String frontIp, Integer frontPort, Integer groupId, String type) {
-        log.debug("start operateGroup frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
+        log.info("start operateGroup frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
                 groupId);
         String uri = String.format(FrontRestTools.URI_OPERATE_GROUP, type);
         BaseResponse response =
                 getFromSpecificFront(groupId, frontIp, frontPort, uri, BaseResponse.class);
-        log.debug("end operateGroup");
+        log.info("end operateGroup");
         return response;
     }
 

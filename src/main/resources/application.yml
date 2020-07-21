@@ -1,3 +1,6 @@
+# server version
+version: v1.4.0
+
 #server config
 server:
   port: 5001

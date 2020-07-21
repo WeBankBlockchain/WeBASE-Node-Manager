@@ -108,13 +108,18 @@ public class FrontRestTools {
     public static final String URI_CONTRACT_EVENT_INFO_LIST = "event/contractEvent/list";
     public static final String URI_NEW_BLOCK_EVENT_INFO_LIST = "event/newBlockEvent/list";
 
+    // server version
+    public static final String URI_FRONT_VERSION = "version";
+    public static final String URI_SIGN_VERSION = "version/sign";
+
     //不需要在url的前面添加groupId的
     private static final List<String> URI_NOT_PREPEND_GROUP_ID = Arrays
         .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
                 URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
                 URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE,
-                URI_KEY_PAIR_IMPORT_WITH_SIGN);
+                URI_KEY_PAIR_IMPORT_WITH_SIGN,
+                URI_FRONT_VERSION, URI_SIGN_VERSION);
 
     public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 
