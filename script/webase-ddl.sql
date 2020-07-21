@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS tb_group (
 -- ----------------------------
 -- Table structure for tb_front
 -- ----------------------------
-CREATE TABLE tb_front (
+CREATE TABLE IF NOT EXISTS tb_front (
   front_id int(11) NOT NULL AUTO_INCREMENT COMMENT '前置服务编号',
   node_id varchar(250) NOT NULL COMMENT '节点编号',
   front_ip varchar(16) NOT NULL COMMENT '前置服务ip',
@@ -348,7 +348,7 @@ CREATE TABLE IF NOT EXISTS tb_abi (
 -- ----------------------------
 -- Table structure for tb_agency
 -- ----------------------------
-CREATE TABLE `tb_agency` (
+CREATE TABLE IF NOT EXISTS `tb_agency` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
   `agency_name` varchar(64) NOT NULL COMMENT '机构名称',
   `agency_desc` varchar(1024) DEFAULT '' COMMENT '机构描述信息',
@@ -365,7 +365,7 @@ CREATE TABLE `tb_agency` (
 -- ----------------------------
 -- Table structure for tb_chain
 -- ----------------------------
-CREATE TABLE `tb_chain` (
+CREATE TABLE IF NOT EXISTS `tb_chain` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
   `chain_name` varchar(64) NOT NULL COMMENT '链名称',
   `chain_desc` varchar(1024) DEFAULT NULL COMMENT '链描述信息',
@@ -384,7 +384,7 @@ CREATE TABLE `tb_chain` (
 -- ----------------------------
 -- Table structure for tb_config
 -- ----------------------------
-CREATE TABLE `tb_config` (
+CREATE TABLE IF NOT EXISTS `tb_config` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
   `config_name` varchar(64) NOT NULL COMMENT '配置名称',
   `config_type` int(10) NOT NULL DEFAULT '0' COMMENT '配置类型',
@@ -400,7 +400,7 @@ CREATE TABLE `tb_config` (
 -- ----------------------------
 -- Table structure for tb_host
 -- ----------------------------
-CREATE TABLE `tb_host` (
+CREATE TABLE IF NOT EXISTS `tb_host` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
   `agency_id` int(10) unsigned NOT NULL DEFAULT '1' COMMENT '所属机构 ID',
   `agency_name` varchar(64) DEFAULT NULL COMMENT '所属机构名称，冗余字段',

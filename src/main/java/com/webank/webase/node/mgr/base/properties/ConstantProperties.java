@@ -53,7 +53,6 @@ public class ConstantProperties {
     public static final int ADDRESS_LENGTH = 42;
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
 
-
     private BigInteger transRetainMax = new BigInteger("10000");
     private String groupInvalidGrayscaleValue;  //y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
     private String notSupportFrontIp;
@@ -129,7 +128,7 @@ public class ConstantProperties {
     private int dockerClientReadTimeout = 10 * 60 * 1000;
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
-    private String dockerRepository= "fiscoorg/front";
+    private String dockerRepository= "fiscoorg/fisco-webase";
     private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";

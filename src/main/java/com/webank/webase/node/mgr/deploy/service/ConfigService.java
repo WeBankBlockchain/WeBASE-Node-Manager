@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -42,7 +43,9 @@ import lombok.extern.log4j.Log4j2;
 public class ConfigService {
 
     @Autowired private TbConfigMapper tbConfigMapper;
+
     @Autowired private ConstantProperties constants;
+    @Autowired private EncryptType encryptType;
     @Autowired private RestTemplate genericRestTemplate;
 
     /**
@@ -93,7 +96,23 @@ public class ConfigService {
             default:
                 break;
         }
-        return tbConfigMapper.selectByType(type.getId());
+
+
+        List<TbConfig> configList = tbConfigMapper.selectByType(type.getId());
+        return filterByEncryptType(configList,encryptType.getEncryptType());
+
+    }
+
+    private static List<TbConfig> filterByEncryptType( List<TbConfig> configList, int encryptType ){
+        switch (encryptType){
+            case EncryptType.ECDSA_TYPE:
+                return configList.stream().filter(config -> ! StringUtils.endsWith(config.getConfigValue(),"-gm"))
+                .collect(Collectors.toList());
+            case EncryptType.SM2_TYPE:
+                return configList.stream().filter(config -> StringUtils.endsWith(config.getConfigValue(),"-gm"))
+                .collect(Collectors.toList());
+        }
+        return configList;
     }
 
 

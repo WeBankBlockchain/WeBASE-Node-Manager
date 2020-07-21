@@ -75,11 +75,11 @@ constant:
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
 
-  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**, /encrypt
+  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**, /encrypt, /version
 
   # 1.4.0 visual deploy
   webaseSignAddress: "127.0.0.1:5004"
-  dockerRepository: "fiscoorg/bcos-front"
+  dockerRepository: "fiscoorg/fisco-webase"
   deployType: 0 # 0, original deploy chain first; 1, deploy chain visually
 
 
