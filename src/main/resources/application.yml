@@ -81,11 +81,6 @@ constant:
   webaseSignAddress: "127.0.0.1:5004"
   dockerRepository: "fiscoorg/fisco-webase"
   deployType: 0 # 0, original deploy chain first; 1, deploy chain visually
-  imageTagList:
-    - v2.4.1
-    - v2.4.1-gm
-
-
 
 
 # executor config for async pulling data from chain
