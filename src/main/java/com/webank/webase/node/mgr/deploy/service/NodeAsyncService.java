@@ -239,7 +239,7 @@ public class NodeAsyncService {
      * @throws InterruptedException
      */
     private boolean restartFrontByHost(int chainId, OptionType optionType, Map<Integer, List<TbFront>> hostFrontListMap,
-                                       FrontStatusEnum before, FrontStatusEnum success,FrontStatusEnum failed ) {
+                                       FrontStatusEnum before, FrontStatusEnum success,FrontStatusEnum failed) {
         final CountDownLatch startLatch = new CountDownLatch(CollectionUtils.size(hostFrontListMap));
 
         final AtomicInteger totalFrontCount = new AtomicInteger(0);

@@ -30,6 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -315,8 +316,10 @@ public class PathService {
      * @return
      * @throws IOException
      */
-    public static String getNodeId(Path nodePath) throws IOException {
-        List<String> lines = Files.readAllLines(nodePath.resolve("conf/node.nodeid"));
+    public static String getNodeId(Path nodePath,byte encryptType) throws IOException {
+        String nodeIdFile = encryptType == EncryptType.ECDSA_TYPE ? "node.nodeid" : "gmnode.nodeid";
+
+        List<String> lines = Files.readAllLines(nodePath.resolve("conf/").resolve(nodeIdFile));
         if (CollectionUtils.isEmpty(lines)) {
             return null;
         }

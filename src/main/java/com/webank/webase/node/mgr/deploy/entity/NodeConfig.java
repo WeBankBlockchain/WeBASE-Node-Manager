@@ -57,10 +57,10 @@ public class NodeConfig {
      * @return
      * @throws IOException
      */
-    public static NodeConfig read(Path nodePath)  {
+    public static NodeConfig read(Path nodePath,byte encryptType)  {
         NodeConfig config = new NodeConfig();
         try {
-            config.nodeId= PathService.getNodeId(nodePath);
+            config.nodeId= PathService.getNodeId(nodePath,encryptType);
             try {
                 config.hostIndex = Integer.parseInt(nodePath.getFileName().toString().replaceAll("node", ""));
             } catch (Exception e) {
@@ -191,8 +191,8 @@ public class NodeConfig {
      * @param nodePath
      * @return
      */
-    public static Set<Integer> getGroupIdSet(Path nodePath ){
-        return NodeConfig.read(nodePath).getGroupIdSet();
+    public static Set<Integer> getGroupIdSet(Path nodePath,byte  encryptType ){
+        return NodeConfig.read(nodePath,encryptType).getGroupIdSet();
     }
 }
 
