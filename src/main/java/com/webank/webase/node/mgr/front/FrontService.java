@@ -346,7 +346,7 @@ public class FrontService {
     }
 
     public void updateFront(TbFront updateFront) {
-        log.debug("updateFrontStatus updateFront:{}", updateFront);
+        log.info("updateFrontStatus updateFront:{}", updateFront);
         if (updateFront == null) {
             log.error("updateFrontStatus updateFront is null");
             return;
@@ -505,7 +505,7 @@ public class FrontService {
                 throw new NodeMgrException(ConstantCode.EXEC_GEN_NODE_ERROR);
             }
 
-            String nodeId = PathService.getNodeId(nodeRoot);
+            String nodeId = PathService.getNodeId(nodeRoot,encryptType);
             int frontPort = constant.getDefaultFrontPort() + currentIndex;
             int channelPort = constant.getDefaultChannelPort() + currentIndex;
             int p2pPort = constant.getDefaultP2pPort() + currentIndex;
@@ -618,13 +618,15 @@ public class FrontService {
      */
     @Transactional(rollbackFor = Throwable.class)
     public boolean restart(String nodeId, OptionType optionType, FrontStatusEnum before,
-                           FrontStatusEnum success,FrontStatusEnum failed ){
+                           FrontStatusEnum success,FrontStatusEnum failed){
         log.info("Restart node:[{}]", nodeId );
         // get front
         TbFront front = this.getByNodeId(nodeId);
         if (front == null){
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
+
+        final byte encryptType = FrontService.getEncryptType(front.getImageTag());
 
         // set front status to stopped to avoid error for time task.
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), before);
@@ -647,7 +649,7 @@ public class FrontService {
                 }else if (optionType == OptionType.MODIFY_CHAIN){
                     // check front is in group
                     Path nodePath = this.pathService.getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());
-                    Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath);
+                    Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath,encryptType);
                     Optional.of(groupIdSet).ifPresent(idSet -> idSet.forEach ( groupId ->{
                         List<String> list = frontInterface.getGroupPeers(groupId);
                         if(CollectionUtils.containsAny(list,front.getNodeId())){
@@ -815,5 +817,9 @@ public class FrontService {
             return NumberUtil.PERCENTAGE_FINISH;
         }
         return NumberUtil.percentage(frontFinishCount,frontList.size());
+    }
+
+    public static byte getEncryptType(String frontImageTag){
+        return  (byte)(StringUtils.endsWith(frontImageTag,"-gm") ? EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
     }
 }

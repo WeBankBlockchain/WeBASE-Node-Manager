@@ -296,6 +296,8 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
 
+        final byte encryptType = FrontService.getEncryptType(front.getImageTag());
+
         // check front status
         if (FrontStatusEnum.isRunning(front.getStatus())) {
             throw new NodeMgrException(ConstantCode.NODE_RUNNING_ERROR);
@@ -306,7 +308,7 @@ public class DeployService {
 
         // get delete node's group id list from ./NODES_ROOT/default_chain/ip/node[x]/conf/group.[groupId].genesis
         Path nodePath = this.pathService.getNodeRoot(chain.getChainName(), host.getIp(), front.getHostIndex());
-        Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath);
+        Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath,encryptType);
         try {
             // update related node's config.ini file, e.g. p2p
             this.frontService.updateNodeConfigIniByGroupList(chain, groupIdSet);
