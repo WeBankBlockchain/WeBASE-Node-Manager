@@ -100,17 +100,11 @@ public class DeployController extends BaseController {
             @RequestBody @Valid ReqAdd add,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
-        String ip = add.getIp();
-        String agencyName = add.getAgencyName();
-        int groupId = add.getGroupId();
-        int num = add.getNum();
-        String chainName = add.getChainName();
         Instant startTime = Instant.now();
 
-        log.info("Start add node ip:[{}],group:[{}], agencyName:[{}], num:[{}], chainName:[{}], now:[{}]",
-                ip, groupId, agencyName, num, chainName, startTime);
+        log.info("Start add node:[{}] , start[{}]", JsonTools.toJSONString(add), startTime);
 
-        Pair<RetCode, String> addResult = this.deployService.addNodes(chainName, groupId, ip, agencyName, num);
+        Pair<RetCode, String> addResult = this.deployService.addNodes(add);
         return new BaseResponse(addResult.getKey(), addResult.getValue());
     }
 

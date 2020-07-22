@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.deploy.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -37,6 +38,7 @@ import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
+import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
@@ -143,14 +145,19 @@ public class DeployService {
      *  TODO. throw all exceptions.
      *  TODO. put into tmp dir first
      *
-     * @param ip
-     * @param agencyName
-     * @param num
-     * @param chainName
+     * @param add
      * @return
+     * @throws NodeMgrException
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> addNodes(String chainName, int groupId, String ip, String agencyName, int num) throws NodeMgrException {
+    public Pair<RetCode, String> addNodes(ReqAdd add) throws NodeMgrException {
+        String chainName = add.getChainName();
+        String ip = add.getIp() ;
+        int num = add.getNum();
+        String agencyName = add.getAgencyName();
+        byte dockerImageType = add.getDockerImageType();
+        int groupId = add.getGroupId();
+
         log.info("Add node check chain name:[{}] exists...", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain == null) {
@@ -180,6 +187,15 @@ public class DeployService {
                 // agency name cannot be blank when host ip is new
                 throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
             }
+
+            // check docker image exists
+            DockerImageTypeEnum dockerImageTypeEnum = DockerImageTypeEnum.getById(dockerImageType);
+            dockerImageTypeEnum = dockerImageTypeEnum == null ? DockerImageTypeEnum.MANUAL : dockerImageTypeEnum;
+            if (DockerImageTypeEnum.MANUAL ==  dockerImageTypeEnum){
+                this.hostService.checkImageExists(Collections.singleton(ip), constantProperties.getSshDefaultUser(),
+                        constantProperties.getSshDefaultPort(), chain.getVersion());
+            }
+
 
             // a new host IP address, check agency name is new
             agency = this.agencyService.initAgencyIfNew(

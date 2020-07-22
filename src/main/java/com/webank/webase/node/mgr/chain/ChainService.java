@@ -279,15 +279,7 @@ public class ChainService {
         // check docker image exists
         if (DockerImageTypeEnum.MANUAL ==  dockerImageTypeEnum){
             Set<String> ipSet = ipConfigParseList.stream().map(IpConfigParse::getIp).collect(Collectors.toSet());
-            for (String ip : ipSet) {
-                boolean exists = this.dockerOptions.checkImageExists(ip, constant.getDockerDaemonPort(), sshUser,
-                        sshPort, imageConfig.getConfigValue());
-                if (!exists){
-                    log.error("Docker image type:[{}], image:[{}] not exists on host:[{}].",
-                            dockerImageTypeEnum, imageConfig.getConfigValue(), ip);
-                    throw new NodeMgrException(ConstantCode.IMAGE_NOT_EXISTS_ON_HOST.attach(ip));
-                }
-            }
+            this.hostService.checkImageExists(ipSet,sshUser,sshPort,imageConfig.getConfigValue());
         }
 
         byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
