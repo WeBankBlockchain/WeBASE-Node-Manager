@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -318,5 +319,22 @@ public class HostService {
             return NumberUtil.PERCENTAGE_FINISH;
         }
         return NumberUtil.percentage(hostFinishCount,hostList.size());
+    }
+
+    /**
+     *
+     * @param ipSet
+     * @param sshUser
+     * @param sshPort
+     * @param imageTag
+     */
+    public void checkImageExists(Set<String> ipSet,String sshUser,int sshPort, String imageTag){
+        for (String ip : ipSet) {
+            boolean exists = this.dockerOptions.checkImageExists(ip, constant.getDockerDaemonPort(), sshUser, sshPort,imageTag);
+            if (!exists){
+                log.error("Docker image:[{}] not exists on host:[{}].", imageTag, ip);
+                throw new NodeMgrException(ConstantCode.IMAGE_NOT_EXISTS_ON_HOST.attach(ip));
+            }
+        }
     }
 }
