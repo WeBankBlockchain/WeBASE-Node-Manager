@@ -16,6 +16,7 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.RestartPolicy;
 import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -37,6 +38,32 @@ public class DockerOptionsSDKImpl implements DockerOptions{
     public static final ConcurrentHashMap<String, DockerClient> DOCKER_CLIENT_CACHE = new ConcurrentHashMap<>();
 
     @Autowired private ConstantProperties constant;
+
+    /**
+     * TODO. not test.
+     * @param ip
+     * @param dockerPort
+     * @param sshUser
+     * @param sshPort
+     * @param imageTag
+     * @return
+     */
+    @Override
+    public boolean checkImageExists(String ip, int dockerPort, String sshUser, int sshPort, String imageTag) {
+
+        String image = getImageRepositoryTag(constant.getDockerRepository(),constant.getDockerRegistryMirror(), imageTag);
+        log.info("Host:[{}] check image:[{}].", ip, image);
+
+        // pull image, maybe same tag but newer
+        DockerClient dockerClient = this.getDockerClient(ip, dockerPort);
+
+        List<Image> allImages = dockerClient.listImagesCmd().withShowAll(true).withImageNameFilter(image).exec();
+        boolean exists = CollectionUtils.isNotEmpty(allImages);
+
+        log.info("Host:[{}] check image:[{}] exists:[{}].", ip, image, exists);
+
+        return exists;
+    }
 
     /**
      * Pull image, maybe same tag but newer.

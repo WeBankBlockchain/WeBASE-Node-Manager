@@ -39,6 +39,16 @@ public interface DockerOptions {
     }
 
     /**
+     *
+     * @param ip
+     * @param dockerPort
+     * @param sshUser
+     * @param sshPort
+     * @param imageTag
+     */
+    public boolean checkImageExists(String ip, int dockerPort, String sshUser, int sshPort, String imageTag);
+
+    /**
      * Pull image, maybe same tag but newer.
      *
      * @param ip
@@ -47,6 +57,7 @@ public interface DockerOptions {
      * @param imageTag
      */
     public void pullImage(String ip, int dockerPort,String sshUser, int sshPort, String imageTag);
+
 
 
 

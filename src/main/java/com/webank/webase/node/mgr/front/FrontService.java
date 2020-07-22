@@ -643,7 +643,23 @@ public class FrontService {
                     PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()), front.getHostIndex());
 
             threadPoolTaskScheduler.schedule(()->{
+                // update front status
                 this.updateStatus(front.getFrontId(),success);
+
+                // update front version
+                if (StringUtils.isBlank(front.getFrontVersion())
+                        || StringUtils.isBlank(front.getSignVersion())) {
+                    // update front version
+                    try {
+                        String frontVersion = frontInterface.getFrontVersionFromSpecificFront(front.getFrontIp(), front.getFrontPort());
+                        String signVersion = frontInterface.getSignVersionFromSpecificFront(front.getFrontIp(), front.getFrontPort());
+
+                        this.frontMapper.updateVersion(front.getChainId(), frontVersion, signVersion);
+                    } catch (Exception e) {
+                        log.error("Request front and sign version from front:[{}:{}] error.",front.getFrontIp(),front.getFrontPort(), e);
+                    }
+                }
+
                 if (optionType == OptionType.DEPLOY_CHAIN){
                     this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.NORMAL);
                 }else if (optionType == OptionType.MODIFY_CHAIN){
