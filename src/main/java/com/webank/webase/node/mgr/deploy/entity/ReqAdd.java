@@ -17,6 +17,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import lombok.Data;
 
@@ -44,16 +45,17 @@ public class ReqAdd {
      * Count of new nodes , default is 1.
      */
     @Positive
-    @Max(200)
+    @Max(50)
     @Min(1)
     private int num = 1;
+
+    @PositiveOrZero
+    private byte dockerImageType;
 
     /**
      * If agency name is a new one, chain name should not be null.
      */
-    @NotBlank
     private String chainName = "default_chain";
 
-    @NotBlank
     private String rootDirOnHost="/opt/fisco";
 }
