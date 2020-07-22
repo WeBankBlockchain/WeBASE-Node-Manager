@@ -14,24 +14,18 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ConfigTypeEnum;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
@@ -55,7 +49,6 @@ public class ConfigService {
      * @param type
      * @return
      */
-    @Transactional
     public List<TbConfig> selectConfigList(boolean update, ConfigTypeEnum type) {
         if (type == null) {
             return Collections.emptyList();
@@ -63,59 +56,52 @@ public class ConfigService {
 
         switch (type) {
             case DOCKER_IMAGE_TYPE:
-                if (update) { // update tags from docker hub registry
-                    if (StringUtils.isBlank(constants.getImageTagUpdateUrl())) {
-                        throw new NodeMgrException(ConstantCode.NO_DOCKER_TAG_UPDATE_URL_ERROR);
-                    }
+                // update tags from docker hub registry
+//                    if (StringUtils.isBlank(constants.getImageTagUpdateUrl())) {
+//                        throw new NodeMgrException(ConstantCode.NO_DOCKER_TAG_UPDATE_URL_ERROR);
+//                    }
+//
+//                    log.info("Fetch tag from: [{}]", constants.getImageTagUpdateUrl());
+//                    ResponseEntity<ImageTag[]> responseEntity =
+//                            this.genericRestTemplate.getForEntity(constants.getImageTagUpdateUrl(), ImageTag[].class);
+//                    if (responseEntity == null
+//                            || ArrayUtils.isEmpty(responseEntity.getBody())) {
+//                        // docker hub api return empty
+//                        throw new NodeMgrException(ConstantCode.UPDATE_DOCKER_TAG_ERROR);
+//                    }
 
-                    log.info("Fetch tag from: [{}]", constants.getImageTagUpdateUrl());
-                    ResponseEntity<ImageTag[]> responseEntity =
-                            this.genericRestTemplate.getForEntity(constants.getImageTagUpdateUrl(), ImageTag[].class);
-                    if (responseEntity == null
-                            || ArrayUtils.isEmpty(responseEntity.getBody())) {
-                        // docker hub api return empty
-                        throw new NodeMgrException(ConstantCode.UPDATE_DOCKER_TAG_ERROR);
-                    }
+//
+//                    log.info("Docker image tag update success, new tag count is: [{}].",
+//                            CollectionUtils.size(configList));
 
-                    List<TbConfig> configList = Arrays.stream(responseEntity.getBody())
-                            .map((tag) -> {
-                                if (StringUtils.startsWithIgnoreCase(tag.getName(), "latest")) {
-                                    return null;
-                                }
-                                return TbConfig.init(type, tag.getName());
-                            }).filter(tbConfig -> tbConfig != null).collect(Collectors.toList());
-
-                    tbConfigMapper.deleteByType(type.getId());
+                List<TbConfig> configList = tbConfigMapper.selectByType(type.getId());
+                if (CollectionUtils.isEmpty(configList)){
+                    configList = constants.getImageTagList().stream()
+                            .map((tag) -> TbConfig.init(type, tag))
+                            .filter(tbConfig -> tbConfig != null).collect(Collectors.toList());
                     tbConfigMapper.batchInsert(configList);
-
-                    log.info("Docker image tag update success, new tag count is: [{}].",
-                            CollectionUtils.size(configList));
                 }
-                break;
+                return filterByEncryptType(configList, encryptType.getEncryptType());
 
             default:
                 break;
         }
 
-
-        List<TbConfig> configList = tbConfigMapper.selectByType(type.getId());
-        return filterByEncryptType(configList,encryptType.getEncryptType());
+        return Collections.emptyList();
 
     }
 
-    private static List<TbConfig> filterByEncryptType( List<TbConfig> configList, int encryptType ){
-        switch (encryptType){
+    private static List<TbConfig> filterByEncryptType(List<TbConfig> configList, int encryptType) {
+        switch (encryptType) {
             case EncryptType.ECDSA_TYPE:
-                return configList.stream().filter(config -> ! StringUtils.endsWith(config.getConfigValue(),"-gm"))
-                .collect(Collectors.toList());
+                return configList.stream().filter(config -> !StringUtils.endsWith(config.getConfigValue(), "-gm"))
+                        .collect(Collectors.toList());
             case EncryptType.SM2_TYPE:
-                return configList.stream().filter(config -> StringUtils.endsWith(config.getConfigValue(),"-gm"))
-                .collect(Collectors.toList());
+                return configList.stream().filter(config -> StringUtils.endsWith(config.getConfigValue(), "-gm"))
+                        .collect(Collectors.toList());
         }
         return configList;
     }
-
-
 
 
     /**
