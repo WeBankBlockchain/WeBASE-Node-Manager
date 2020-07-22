@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.deploy.entity;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import lombok.Data;
 
@@ -35,6 +36,9 @@ public class ReqDeploy {
 
     @NotBlank
     private String rootDirOnHost="/opt/fisco";
+
+    @PositiveOrZero
+    private byte dockerImageType;
 
     private String webaseSignAddr;
 }

@@ -77,7 +77,8 @@ public class DeployController extends BaseController {
         try {
             // generate node config and return shell execution log
             this.deployService.deployChain(deploy.getChainName(),
-                    deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost(),deploy.getWebaseSignAddr());
+                    deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost(),
+                    deploy.getWebaseSignAddr(),deploy.getDockerImageType());
 
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {

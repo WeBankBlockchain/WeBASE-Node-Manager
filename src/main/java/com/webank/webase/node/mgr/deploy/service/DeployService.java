@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.enums.DockerImageTypeEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -83,11 +84,13 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deployChain(String chainName,
-                                             String[] ipConf,
-                                             int tagId,
-                                             String rootDirOnHost,
-                                             String webaseSignAddr) throws NodeMgrException {
+    public void deployChain(String chainName, String[] ipConf,
+                            int tagId, String rootDirOnHost, String webaseSignAddr, byte dockerImageType) throws NodeMgrException {
+        DockerImageTypeEnum imageTypeEnum = DockerImageTypeEnum.getById(dockerImageType);
+        if (imageTypeEnum == null){
+            throw new NodeMgrException(ConstantCode.UNKNOWN_DOCKER_IMAGE_TYPE);
+        }
+
         if (StringUtils.isBlank(chainName)) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
@@ -99,7 +102,7 @@ public class DeployService {
         }
 
         // generate config files and insert data to db
-        this.chainService.generateChainConfig(chainName,ipConf,tagId,rootDirOnHost,webaseSignAddr,
+        this.chainService.generateChainConfig(chainName,ipConf,tagId,rootDirOnHost,webaseSignAddr, imageTypeEnum,
                 constantProperties.getSshDefaultUser(), constantProperties.getSshDefaultPort(),
                 constantProperties.getDockerDaemonPort() );
 
