@@ -64,4 +64,11 @@ public interface FrontMapper {
                                  @Param("status")int status);
 
     TbFront getByNodeId(@Param("nodeId") String nodeId);
+
+    @Update({
+            "update tb_front set front_version=#{frontVersion},sign_version=#{signVersion},modify_time=NOW() where chain_id = #{chainId}"
+    })
+    int updateVersion(@Param("chainId") int chainId,
+                                 @Param("frontVersion") String frontVersion,
+                                 @Param("signVersion") String signVersion );
 }

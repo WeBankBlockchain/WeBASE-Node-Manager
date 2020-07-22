@@ -1,5 +1,7 @@
 package com.webank.webase.node.mgr.deploy.service.docker;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -12,6 +14,19 @@ import lombok.extern.log4j.Log4j2;
 public class DockerOptionsCmdImpl implements DockerOptions{
 
     @Autowired private ConstantProperties constant;
+
+    @Override
+    public boolean checkImageExists(String ip, int dockerPort, String sshUser, int sshPort, String imageTag) {
+        String image = getImageRepositoryTag(constant.getDockerRepository(),constant.getDockerRegistryMirror(),imageTag);
+
+        String dockerListImageCommand = String.format("sudo docker images -a %s | grep -v 'IMAGE ID'",image);
+
+        Pair<Boolean, String> result = SshTools.execDocker(ip, dockerListImageCommand, sshUser, sshPort, constant.getPrivateKey());
+        if (result.getKey() && StringUtils.isNotBlank(result.getValue())){
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Pull image, maybe same tag but newer.
@@ -32,6 +47,7 @@ public class DockerOptionsCmdImpl implements DockerOptions{
 
         SshTools.execDocker(ip,dockerPullCommand,sshUser,sshPort,constant.getPrivateKey());
     }
+
 
     @Override
     public void run(String ip, int dockerPort, String sshUser, int sshPort, String imageTag, String containerName, String chainRootOnHost, int nodeIndex) {

@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +40,7 @@ import org.springframework.web.client.RestTemplate;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.enums.DockerImageTypeEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
@@ -110,6 +113,8 @@ public class ChainService {
     private NodeAsyncService nodeAsyncService;
     @Autowired
     private CertService certService;
+
+    @Autowired private DockerOptions dockerOptions;
 
     /**
      * get chain info.
@@ -252,7 +257,8 @@ public class ChainService {
      */
     @Transactional
     public void generateChainConfig(String chainName, String[] ipConf, int tagId, String rootDirOnHost,
-                                    String webaseSignAddr, String sshUser,int sshPort,int dockerPort){
+                                    String webaseSignAddr, DockerImageTypeEnum dockerImageTypeEnum,
+                                    String sshUser, int sshPort, int dockerPort){
         log.info("Check chainName exists....");
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain != null) {
@@ -265,12 +271,27 @@ public class ChainService {
             throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
         }
 
-        byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
-                EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
-
         // parse ipConf config
         log.info("Parse ipConf content....");
-        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf,sshUser,sshPort,constant.getPrivateKey());
+        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf,
+                sshUser,sshPort,constant.getPrivateKey());
+
+        // check docker image exists
+        if (DockerImageTypeEnum.MANUAL ==  dockerImageTypeEnum){
+            Set<String> ipSet = ipConfigParseList.stream().map(IpConfigParse::getIp).collect(Collectors.toSet());
+            for (String ip : ipSet) {
+                boolean exists = this.dockerOptions.checkImageExists(ip, constant.getDockerDaemonPort(), sshUser,
+                        sshPort, imageConfig.getConfigValue());
+                if (!exists){
+                    log.error("Docker image type:[{}], image:[{}] not exists on host:[{}].",
+                            dockerImageTypeEnum, imageConfig.getConfigValue(), ip);
+                    throw new NodeMgrException(ConstantCode.IMAGE_NOT_EXISTS_ON_HOST.attach(ip));
+                }
+            }
+        }
+
+        byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
+                EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
 
         // exec build_chain.sh shell script
         deployShellService.execBuildChain(encryptType, ipConf, chainName);
