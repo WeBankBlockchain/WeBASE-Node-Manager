@@ -13,7 +13,6 @@
  */
 package com.webank.webase.node.mgr.deploy.entity;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -31,14 +30,12 @@ public class ReqDeploy {
     @Positive
     private int tagId;
 
-    @NotBlank
-    private String chainName = "default_chain";
-
-    @NotBlank
-    private String rootDirOnHost="/opt/fisco";
-
     @PositiveOrZero
     private byte dockerImageType;
+
+    private String chainName = "default_chain";
+
+    private String rootDirOnHost="/opt/fisco";
 
     private String webaseSignAddr;
 }

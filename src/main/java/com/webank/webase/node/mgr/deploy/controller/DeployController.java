@@ -72,6 +72,7 @@ public class DeployController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         deploy.setWebaseSignAddr(constantProperties.getWebaseSignAddress());
+        deploy.setRootDirOnHost(constantProperties.getRootDirOnHost());
         log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(deploy), startTime);
 
         try {

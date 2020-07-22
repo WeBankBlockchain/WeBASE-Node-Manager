@@ -19,8 +19,6 @@ import java.io.File;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -97,6 +95,7 @@ public class ConstantProperties {
 
     private String deployType = "0";
     private String webaseSignAddress = "127.0.0.1:5004";
+    private String rootDirOnHost = "/opt/fisco-webase";
 
     private boolean useDockerSDK = false;
     public int dockerDaemonPort = 3000;
@@ -135,7 +134,6 @@ public class ConstantProperties {
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
     private String nodesRootTmpDir = "NODES_ROOT_TMP";
-    private List<String> imageTagList = new ArrayList<>();
 
     /**
      * Docker client connect daemon ip with proxy ip.
@@ -156,7 +154,7 @@ public class ConstantProperties {
 //        this.imageTagUpdateUrl = String.format(this.imageTagUpdateUrl,dockerRepository);
 //        log.info("Init constant properties, imageTagUpdateUrl: [{}]", this.imageTagUpdateUrl);
 
-        log.info("Init constant properties, imageTagList: [{}]", this.imageTagList);
+        log.info("Init constant properties, rootOnHostDir: [{}]", rootDirOnHost);
 
         log.info("Init constant properties, private key: [{}]", privateKey);
 

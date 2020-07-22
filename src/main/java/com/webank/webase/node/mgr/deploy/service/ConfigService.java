@@ -18,15 +18,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.webank.webase.node.mgr.base.enums.ConfigTypeEnum;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 
@@ -38,9 +35,7 @@ public class ConfigService {
 
     @Autowired private TbConfigMapper tbConfigMapper;
 
-    @Autowired private ConstantProperties constants;
     @Autowired private EncryptType encryptType;
-    @Autowired private RestTemplate genericRestTemplate;
 
     /**
      * Select config by type.
@@ -75,14 +70,7 @@ public class ConfigService {
 //                            CollectionUtils.size(configList));
 
                 List<TbConfig> configList = tbConfigMapper.selectByType(type.getId());
-                if (CollectionUtils.isEmpty(configList)){
-                    configList = constants.getImageTagList().stream()
-                            .map((tag) -> TbConfig.init(type, tag))
-                            .filter(tbConfig -> tbConfig != null).collect(Collectors.toList());
-                    tbConfigMapper.batchInsert(configList);
-                }
                 return filterByEncryptType(configList, encryptType.getEncryptType());
-
             default:
                 break;
         }
