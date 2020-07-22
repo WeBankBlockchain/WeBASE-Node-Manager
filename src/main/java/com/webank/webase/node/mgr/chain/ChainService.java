@@ -344,7 +344,7 @@ public class ChainService {
 
             for (Path nodeRoot : CollectionUtils.emptyIfNull(nodePathList)) {
                 // get node properties
-                NodeConfig nodeConfig = NodeConfig.read(nodeRoot);
+                NodeConfig nodeConfig = NodeConfig.read(nodeRoot,encryptType);
 
                 // frontPort = 5002 + indexOnHost(0,1,2,3...)
                 int frontPort = constant.getDefaultFrontPort() + nodeConfig.getHostIndex();
@@ -429,5 +429,15 @@ public class ChainService {
         progress = this.frontService.frontProgress(chain.getId());
 
         return 50 + (progress / 2);
+    }
+
+    /**
+     *  Chain is deployed manually or deploy visually.
+     *
+     * @return
+     */
+    public boolean deployManually(){
+        int chainCount = this.tbChainMapper.countChain();
+        return chainCount == 0;
     }
 }

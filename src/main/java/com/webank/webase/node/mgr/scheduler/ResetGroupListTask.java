@@ -19,6 +19,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.group.GroupService;
 
 import lombok.extern.log4j.Log4j2;
@@ -30,12 +31,14 @@ import lombok.extern.log4j.Log4j2;
 @Component
 public class ResetGroupListTask {
 
-    @Autowired
-    private GroupService groupService;
+    @Autowired private GroupService groupService;
+    @Autowired private ChainService chainService;
 
     @Scheduled(fixedDelayString = "${constant.resetGroupListCycle}")
     public void taskStart() {
-        resetGroupList();
+        if (chainService.deployManually()) {
+            resetGroupList();
+        }
     }
 
     /**

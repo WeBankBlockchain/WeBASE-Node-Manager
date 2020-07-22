@@ -35,6 +35,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
+import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -59,6 +60,8 @@ public class NodeService {
     private NodeMapper nodeMapper;
     @Autowired
     private FrontInterfaceService frontInterface;
+    @Autowired
+    private ChainService chainService;
     /**
      * update front status
      */
@@ -261,13 +264,15 @@ public class NodeService {
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
-            // to update front status
-            TbFront updateFront = frontService.getByNodeId(nodeId);
-            if (updateFront != null) {
-                // update front status as long as update node (7.5s internal)
-                log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
-                updateFront.setStatus(tbNode.getNodeActive());
-                frontService.updateFront(updateFront);
+            // only update front status if deploy manually
+            if (chainService.deployManually()) {
+                TbFront updateFront = frontService.getByNodeId(nodeId);
+                if (updateFront != null) {
+                    // update front status as long as update node (7.5s internal)
+                    log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
+                    updateFront.setStatus(tbNode.getNodeActive());
+                    frontService.updateFront(updateFront);
+                }
             }
         }
 
