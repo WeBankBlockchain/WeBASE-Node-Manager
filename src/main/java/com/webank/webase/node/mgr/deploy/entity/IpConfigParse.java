@@ -20,6 +20,7 @@ import static com.webank.webase.node.mgr.base.code.ConstantCode.HOST_CONNECT_ERR
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_CONFIG_LINE_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_FORMAT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
+import static com.webank.webase.node.mgr.base.code.ConstantCode.NODES_NUM_EXCEED_MAX_ERROR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -35,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 
@@ -69,6 +72,7 @@ public class IpConfigParse {
         // check one ip could
         // key: host ip; value: agencyName
         Map<String, String> hostAgencyMap = new HashMap<>();
+        Map<String, AtomicInteger> ipNodeCountMap = new HashMap<>();
         for (String line : ipConf) {
             if (StringUtils.isBlank(line)) {
                 continue;
@@ -92,9 +96,14 @@ public class IpConfigParse {
                 throw new NodeMgrException(HOST_CONNECT_ERROR.msg(ipConfigParse.getIp()));
             }
 
-            // TODO. Get max mem size, check nodes num.
             if (ipConfigParse.getNum() <= 0) {
                 throw new NodeMgrException(IP_NUM_ERROR.msg(line));
+            }
+
+            if(ipNodeCountMap.containsKey(ipConfigParse.getIp())) {
+                ipNodeCountMap.get(ipConfigParse.getIp()).addAndGet(ipConfigParse.getNum());
+            } else {
+                ipNodeCountMap.put(ipConfigParse.getIp(),new AtomicInteger(ipConfigParse.getNum()));
             }
 
             totalNodeNum += ipConfigParse.getNum();
@@ -107,6 +116,12 @@ public class IpConfigParse {
         if (CollectionUtils.isEmpty(ipConfigParseList)) {
             throw new NodeMgrException(ConstantCode.IP_CONF_PARAM_NULL_ERROR);
         }
+
+        ipNodeCountMap.entrySet().forEach( entry -> {
+            if (entry.getValue().get() > ConstantProperties.MAX_NODE_ON_HOST){
+                throw new NodeMgrException(NODES_NUM_EXCEED_MAX_ERROR.msg(entry.getKey()));
+            }
+        });
 
         return ipConfigParseList;
     }

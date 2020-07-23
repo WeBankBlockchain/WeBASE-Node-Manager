@@ -111,6 +111,11 @@ public class NodeAsyncService {
                 // start chain
                 this.asyncStartChain(chain.getId(),optionType, ChainStatusEnum.RUNNING, ChainStatusEnum.DEPLOY_FAILED,
                         FrontStatusEnum.INITIALIZED,FrontStatusEnum.RUNNING,FrontStatusEnum.STOPPED);
+
+                return;
+            }else{
+                log.error("Init host list failed:[{}]", chainName);
+                chainService.updateStatus(chain.getId(), ChainStatusEnum.DEPLOY_FAILED);
             }
         } catch (Exception e) {
             log.error("Init host list and start chain:[{}] error", chainName, e);

@@ -13,8 +13,6 @@
  */
 package com.webank.webase.node.mgr.deploy.entity;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -45,8 +43,6 @@ public class ReqAdd {
      * Count of new nodes , default is 1.
      */
     @Positive
-    @Max(50)
-    @Min(1)
     private int num = 1;
 
     @PositiveOrZero

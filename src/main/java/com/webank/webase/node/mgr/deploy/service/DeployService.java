@@ -169,11 +169,6 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
-        // TODO get proper node number according to host performance
-        log.info("Add node check num:[{}]...", num);
-        if (num <= 0 || num >= 200) {
-            throw new NodeMgrException(ConstantCode.NODES_NUM_ERROR);
-        }
 
         // select host list by agency id
         List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
@@ -183,6 +178,11 @@ public class DeployService {
 
         TbAgency agency = null;
         if (tbHostExists == null) {
+            log.info("Add node check num:[{}]...", num);
+            if (num <= 0 || num > ConstantProperties.MAX_NODE_ON_HOST) {
+                throw new NodeMgrException(ConstantCode.NODES_NUM_EXCEED_MAX_ERROR);
+            }
+
             if (StringUtils.isBlank(agencyName)) {
                 // agency name cannot be blank when host ip is new
                 throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
@@ -211,6 +211,11 @@ public class DeployService {
         } else {
             // exist host
             agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chain.getId(), tbHostExists.getAgencyName());
+
+            int currentNodeNum = this.frontMapper.countByHostId(tbHostExists.getId());
+            if (currentNodeNum + num > ConstantProperties.MAX_NODE_ON_HOST){
+                throw new NodeMgrException(ConstantCode.NODES_NUM_EXCEED_MAX_ERROR);
+            }
         }
 
         // init group, if group is new, return true
