@@ -93,7 +93,7 @@ public class ConstantProperties {
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
 
-    private String deployType = "0";
+    private int deployType = 0;
     private String webaseSignAddress = "127.0.0.1:5004";
     private String rootDirOnHost = "/opt/fisco-webase";
 
