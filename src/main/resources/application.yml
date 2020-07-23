@@ -81,8 +81,7 @@ constant:
   deployType: 0 # 0, original deploy chain first; 1, deploy chain visually
   dockerRepository: "fiscoorg/fisco-webase"
   webaseSignAddress: "127.0.0.1:5004"
-  rootDirOnHost: "/root/fisco"
-
+  rootDirOnHost: "/opt/fisco"
 
 # executor config for async pulling data from chain
 executor:
