@@ -206,7 +206,7 @@ public class ConstantCode {
     public static final RetCode CHAIN_CERT_NOT_EXISTS_ERROR = RetCode.mark(205032, "Chain cert directory not exists.");
     public static final RetCode EXEC_GEN_AGENCY_ERROR = RetCode.mark(205033, "Exec generate agency script failed.");
     public static final RetCode HOST_WITH_NO_AGENCY_ERROR = RetCode.mark(205034, "Host's agency is null.");
-    public static final RetCode NODES_NUM_ERROR = RetCode.mark(205035, "Num should be positive integer and less then 200.");
+    public static final RetCode NODES_NUM_ERROR = RetCode.mark(205035, "Num should be positive integer and less then 4.");
     public static final RetCode EXEC_GEN_SDK_ERROR = RetCode.mark(205036, "Exec generate node script to generate sdk dir failed.");
     public static final RetCode EXEC_GEN_NODE_ERROR = RetCode.mark(205037, "Exec generate node script to generate node dir failed.");
     public static final RetCode COPY_SDK_FILES_ERROR = RetCode.mark(205038, "Copy sdk config files error.");
@@ -238,6 +238,7 @@ public class ConstantCode {
     public static final RetCode WEBASE_SIGN_CONFIG_ERROR = RetCode.mark(205064, "Please check webaseSignAddress in application.yml file.");
     public static final RetCode UNKNOWN_DOCKER_IMAGE_TYPE = RetCode.mark(205065, "Docker image type param error.");
     public static final RetCode IMAGE_NOT_EXISTS_ON_HOST = RetCode.mark(205066, "Image not exists on host.");
+    public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(205067, "Max 4 nodes on a same host.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

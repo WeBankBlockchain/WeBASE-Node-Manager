@@ -22,7 +22,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -53,20 +52,6 @@ public class SshTools {
         config.put("PreferredAuthentications", "publickey");
     }
 
-
-    public final static String[] LOCAL_ARRAY = new String[]{"127.0.0.1", "localhost"};
-
-    /**
-     * Check ip is local.
-     *
-     * @param ip
-     * @return
-     */
-    public static boolean isLocal(String ip) {
-        return Stream.of(LOCAL_ARRAY).anyMatch(ip::equalsIgnoreCase);
-
-    }
-
     /**
      * TODO exceptions and exec log
      *
@@ -75,7 +60,7 @@ public class SshTools {
      */
     private static Pair<Boolean,String> exec(String ip, String originalCommand, String sshUser, int sshPort, String privateKey) {
         StringBuilder newCommandBuilder = new StringBuilder(originalCommand);
-        if (isLocal(ip)){
+        if (IPUtil.isLocal(ip)){
             ExecuteResult result = JavaCommandExecutor.executeCommand(originalCommand, 0);
             if (result.failed()) {
                 // TODO throw exception ?
@@ -139,7 +124,7 @@ public class SshTools {
      * @return
      */
     public static boolean connect(String ip,String sshUser,int sshPort,String privateKey) {
-        if (isLocal(ip)) {
+        if (IPUtil.isLocal(ip)) {
             return true;
         }
 
@@ -204,7 +189,7 @@ public class SshTools {
      * @param dir
      */
     public static void createDirOnRemote(String ip, String dir, String sshUser, int sshPort,String privateKey){
-        if(isLocal(ip)){
+        if(IPUtil.isLocal(ip)){
             try {
                 Files.createDirectories(Paths.get(dir));
             } catch (IOException e) {
