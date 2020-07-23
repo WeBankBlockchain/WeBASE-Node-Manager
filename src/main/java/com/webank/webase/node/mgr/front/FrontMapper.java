@@ -71,4 +71,9 @@ public interface FrontMapper {
     int updateVersion(@Param("chainId") int chainId,
                                  @Param("frontVersion") String frontVersion,
                                  @Param("signVersion") String signVersion );
+
+    @Update({
+            "select count(front_id) from tb_front where host_id = #{hostId}"
+    })
+    int countByHostId(@Param("hostId") int hostId);
 }

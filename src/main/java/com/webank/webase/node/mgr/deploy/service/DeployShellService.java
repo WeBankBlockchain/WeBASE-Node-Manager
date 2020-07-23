@@ -31,6 +31,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
@@ -73,8 +74,9 @@ public class DeployShellService {
             }
         }
 
-        String command = String.format("bash -x -e %s -t %s -i %s -u %s -p %s -s %s -d %s",
-                constant.getScpShell(), typeEnum.getValue(), ip, sshUser, sshPort, src, dst);
+        String command = String.format("bash -x -e %s -t %s -i %s -u %s -p %s -s %s -d %s %s",
+                constant.getScpShell(), typeEnum.getValue(), ip, sshUser, sshPort, src, dst,
+                IPUtil.isLocal(dst) ? " -l " : "");
         log.info("exec file send command: [{}]", command);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
 
