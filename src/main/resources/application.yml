@@ -78,9 +78,10 @@ constant:
   permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**, /encrypt, /version
 
   # 1.4.0 visual deploy
-  webaseSignAddress: "127.0.0.1:5004"
-  dockerRepository: "fiscoorg/fisco-webase"
   deployType: 0 # 0, original deploy chain first; 1, deploy chain visually
+  dockerRepository: "fiscoorg/fisco-webase"
+  webaseSignAddress: "127.0.0.1:5004"
+  rootDirOnHost: "/root/fisco"
 
 
 # executor config for async pulling data from chain
