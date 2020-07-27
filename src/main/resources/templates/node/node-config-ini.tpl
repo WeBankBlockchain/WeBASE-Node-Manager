@@ -41,9 +41,14 @@
 
 [chain]
     id=[(${chainId})]
+    ; use SM crypto or not, should nerver be changed
+    sm_crypto=[(${guomi} ? 'true' : 'false')]
+    sm_crypto_channel=[(${guomi} ? 'true' : 'false')]
+
 [compatibility]
     ; supported_version should nerver be changed
-    supported_version=2.4.0
+    supported_version=2.5.0
+
 [log]
     enable=true
     log_path=./log
@@ -57,3 +62,11 @@
     max_log_file_size=200
     flush=true
     log_flush_threshold=100
+
+[flow_control]
+    ; restrict QPS of the node
+    ;limit_req=1000
+    ; restrict the outgoing bandwidth of the node
+    ; Mb, can be a decimal
+    ; when the outgoing bandwidth exceeds the limit, the block synchronization operation will not proceed
+    ;outgoing_bandwidth_limit=2
