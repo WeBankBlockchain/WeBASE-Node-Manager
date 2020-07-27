@@ -43,7 +43,7 @@
     id=[(${chainId})]
     ; use SM crypto or not, should nerver be changed
     sm_crypto=[(${guomi} ? 'true' : 'false')]
-    sm_crypto_channel=[(${guomi} ? 'true' : 'false')]
+    sm_crypto_channel=false
 
 [compatibility]
     ; supported_version should nerver be changed
