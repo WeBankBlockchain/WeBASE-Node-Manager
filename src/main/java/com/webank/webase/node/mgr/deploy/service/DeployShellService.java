@@ -226,8 +226,8 @@ public class DeployShellService {
                                      String chainName,
                                      String agencyName,
                                      String newNodeRoot) {
-        log.info("Exec execGenNode method for chainName:[{}], " +
-                "node:[{}:{}:{}]", chainName, encryptType, agencyName, newNodeRoot);
+        log.info("Exec execGenNode method for chainName:[{}], node:[{}:{}:{}]",
+                chainName, encryptType, agencyName, newNodeRoot);
 
         Path agencyRoot = this.pathService.getAgencyRoot(chainName,agencyName);
 
