@@ -15,22 +15,26 @@
  */
 package com.webank.webase.node.mgr.precompiled.permission;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UserParam;
-import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Permission manage service
