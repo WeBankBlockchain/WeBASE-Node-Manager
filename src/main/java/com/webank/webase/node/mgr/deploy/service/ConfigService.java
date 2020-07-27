@@ -87,6 +87,8 @@ public class ConfigService {
             case EncryptType.SM2_TYPE:
                 return configList.stream().filter(config -> StringUtils.endsWith(config.getConfigValue(), "-gm"))
                         .collect(Collectors.toList());
+            default:
+                break;
         }
         return configList;
     }
