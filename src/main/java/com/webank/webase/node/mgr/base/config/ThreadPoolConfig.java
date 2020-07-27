@@ -1,19 +1,18 @@
 package com.webank.webase.node.mgr.base.config;
 
-import com.webank.webase.node.mgr.base.properties.ExecutorProperties;
-import com.webank.webase.node.mgr.base.properties.SchedulerProperties;
-import lombok.extern.log4j.Log4j2;
+import java.util.concurrent.ThreadPoolExecutor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import java.util.concurrent.ThreadPoolExecutor;
+import com.webank.webase.node.mgr.base.properties.ExecutorProperties;
+import com.webank.webase.node.mgr.base.properties.SchedulerProperties;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 定时任务并行执行
@@ -61,6 +60,18 @@ public class ThreadPoolConfig {
         scheduler.setAwaitTerminationSeconds(schedulerProperties.getAwaitTerminationSeconds());
         scheduler.setWaitForTasksToCompleteOnShutdown(
                 schedulerProperties.getWaitForTasksToCompleteOnShutdown());
+        return scheduler;
+    }
+
+
+    @Bean
+    public ThreadPoolTaskScheduler deployAsyncScheduler() {
+        log.info("start deployAsyncScheduler init...");
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(5);
+        scheduler.afterPropertiesSet();
+        scheduler.setThreadNamePrefix("ThreadPoolTaskScheduler-async-deploy:");
+        scheduler.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         return scheduler;
     }
 }
