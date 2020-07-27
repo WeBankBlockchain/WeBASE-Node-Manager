@@ -1078,7 +1078,6 @@ public class GroupService {
             try {
                 Files.createDirectories(localDst.getParent());
             } catch (IOException e) {
-                // TODO. throw exception ???
                 log.error("Create data group:[{}] file error", localDst.toAbsolutePath().toString(),e);
             }
         }
@@ -1146,9 +1145,7 @@ public class GroupService {
             try {
                 this.deployShellService.scp(ScpTypeEnum.UP,sshUser, ip,sshPort, src, dst);
             } catch (Exception e) {
-                // TODO.e
                 log.info("Send files from:[{}] to:[{}@{}#{}:{}] error.", src, sshUser, ip, sshPort, dst, e);
-                e.printStackTrace();
             }
         }
     }

@@ -379,8 +379,6 @@ public class FrontService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public TbFront insert(TbFront tbFront) throws NodeMgrException {
-        // TODO. params check
-
         if (frontMapper.add(tbFront) != 1 || tbFront.getFrontId() <= 0){
             throw new NodeMgrException(ConstantCode.INSERT_FRONT_ERROR);
         }

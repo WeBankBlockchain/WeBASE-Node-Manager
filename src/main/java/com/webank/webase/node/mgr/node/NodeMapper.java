@@ -90,7 +90,6 @@ public interface NodeMapper {
     })
     TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId,@Param("groupId") int groupId);
 
-    // TODO. add chain_id in tb_node
     @Select({
             " SELECT " +
             " DISTINCT(node_id), node_ip, p2p_port " +

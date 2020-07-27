@@ -31,7 +31,6 @@ public class StreamGobbler extends Thread {
     private InputStream inputStream;
     private String streamType;
     private StringBuilder buf;
-    // TODO. why PMD delete volatile?
     private boolean isStopped = false;
 
     /**
@@ -60,7 +59,7 @@ public class StreamGobbler extends Thread {
                 this.buf.append(line + "\n");
             }
         } catch (IOException ex) {
-            log.error("Failed to successfully consume and display the input stream of type " + streamType + ".", ex);
+            log.error("Failed to successfully consume and display the input stream of type {}.", streamType, ex);
         } finally {
             this.isStopped = true;
             synchronized (this) {
