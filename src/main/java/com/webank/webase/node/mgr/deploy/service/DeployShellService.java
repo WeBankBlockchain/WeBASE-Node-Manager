@@ -164,7 +164,7 @@ public class DeployShellService {
                 // port param
                 shellPortParam,
                 // guomi or standard
-                encryptType == EncryptType.SM2_TYPE ? "-g -G" : "",
+                encryptType == EncryptType.SM2_TYPE ? "-g " : "",
                 // only linux supports docker model
                 SystemUtils.IS_OS_LINUX ? " -d " : "",
                 // use binary local
