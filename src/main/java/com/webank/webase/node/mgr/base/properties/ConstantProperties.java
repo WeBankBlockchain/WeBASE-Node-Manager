@@ -113,7 +113,6 @@ public class ConstantProperties {
     private String fiscoBcosBinary =  "";
 
     // default port
-    // TODO. write tbchain's id in db into config.ini
     private int defaultChainId = 1;
     private int defaultJsonrpcPort = 8545;
     private int defaultP2pPort = 30300;

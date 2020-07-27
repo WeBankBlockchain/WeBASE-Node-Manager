@@ -50,7 +50,6 @@ public class ConfigController {
             throw new NodeMgrException(ConstantCode.UNKNOWN_CONFIG_TYPE_ERROR);
         }
 
-        // TODO. log
         return new BaseResponse(ConstantCode.SUCCESS, configService.selectConfigList(update, configTypeEnum));
     }
 }

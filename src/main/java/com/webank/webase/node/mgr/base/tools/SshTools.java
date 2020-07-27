@@ -53,7 +53,6 @@ public class SshTools {
     }
 
     /**
-     * TODO exceptions and exec log
      *
      * @param ip
      * @param originalCommand
@@ -63,7 +62,6 @@ public class SshTools {
         if (IPUtil.isLocal(ip)){
             ExecuteResult result = JavaCommandExecutor.executeCommand(originalCommand, 0);
             if (result.failed()) {
-                // TODO throw exception ?
                 log.error("SshTools exec on localhost:[{}] command:[{}] error.", ip, originalCommand );
             }
             return Pair.of(result.success(),"");
@@ -102,7 +100,6 @@ public class SshTools {
             } catch (Exception e) {
                 log.error("Exec command:[{}] on remote host:[{}] occurred exception.", newCommand, ip, e);
             } finally {
-                // TODO.
                 if (channelExec != null) {
                     channelExec.disconnect();
                 }

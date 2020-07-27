@@ -218,7 +218,6 @@ public class HostService {
         Path sdkPath = this.pathService.getSdk(chainName, ip);
 
         if (Files.exists(sdkPath)){
-            // TODO.
             log.warn("Exists sdk dir of host:[{}:{}], delete first.", ip,sdkPath.toAbsolutePath().toAbsolutePath());
             try {
                 FileUtils.deleteDirectory(sdkPath.toFile());

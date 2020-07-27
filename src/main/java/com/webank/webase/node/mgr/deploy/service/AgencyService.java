@@ -93,7 +93,7 @@ public class AgencyService {
         if(! ValidateUtil.validateAgencyName(agencyName)){
             throw new NodeMgrException(AGENCY_NAME_CONFIG_ERROR);
         }
-        // TODO use mv replace mv
+
         // delete agency config
         Path agencyRoot = this.pathService.getAgencyRoot(chainName, agencyName);
         if(Files.exists(agencyRoot)){
@@ -146,7 +146,6 @@ public class AgencyService {
                            String agencyDesc,
                            int chainId,
                            String chainName) throws NodeMgrException {
-        // TODO. params check
         TbAgency agency = TbAgency.init(agencyName, agencyDesc, chainId, chainName);
 
         if (tbAgencyMapper.insertSelective(agency) != 1 || agency.getId() <= 0) {

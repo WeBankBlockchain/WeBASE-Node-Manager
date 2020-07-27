@@ -40,7 +40,6 @@ import com.webank.webase.node.mgr.base.tools.DateUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * TODO. check path exists
  */
 
 @Log4j2

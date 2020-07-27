@@ -4,10 +4,6 @@ import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * TODO. 1. A host should exec only one command at the same time.
- */
-
 public interface DockerOptions {
 
     /**
