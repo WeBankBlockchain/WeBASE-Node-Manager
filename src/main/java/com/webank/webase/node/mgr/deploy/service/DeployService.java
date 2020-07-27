@@ -77,7 +77,6 @@ public class DeployService {
 
     /**
      * Add in v1.4.0 deploy.
-     * TODO. throw all exceptions.
      *
      * @param ipConf
      * @param tagId
@@ -115,7 +114,6 @@ public class DeployService {
 
 
     /**
-     * TODO. delete object should call service.delete
      *
      * <p>
      * Delete a chain by chain name.
@@ -142,8 +140,6 @@ public class DeployService {
 
     /**
      * Add a node.
-     *  TODO. throw all exceptions.
-     *  TODO. put into tmp dir first
      *
      * @param add
      * @return
@@ -241,11 +237,8 @@ public class DeployService {
             // restart related front
             this.nodeAsyncService.asyncAddNode(chain,tbHostExists,group,OptionType.MODIFY_CHAIN,newFrontList);
         } catch (Exception e) {
-            //TODO.
             log.error("Add node error", e);
             throw new NodeMgrException(ConstantCode.ADD_NODE_WITH_UNKNOWN_EXCEPTION_ERROR, e);
-        } finally {
-            // TODO. delete generated files
         }
 
         return Pair.of(ConstantCode.SUCCESS, "success");

@@ -40,7 +40,6 @@ public class DockerOptionsSDKImpl implements DockerOptions{
     @Autowired private ConstantProperties constant;
 
     /**
-     * TODO. not test.
      * @param ip
      * @param dockerPort
      * @param sshUser

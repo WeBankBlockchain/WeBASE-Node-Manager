@@ -363,7 +363,6 @@ public class NodeService {
             String description,
             final DataStatus dataStatus
     ) throws NodeMgrException {
-        // TODO. params check
         if (! ValidateUtil.ipv4Valid(ip)){
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }

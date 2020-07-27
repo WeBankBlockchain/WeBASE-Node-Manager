@@ -30,9 +30,12 @@
  */
 package com.webank.webase.node.mgr.base.enums;
 
+import lombok.ToString;
+
 /**
  * Enumeration of data status.
  */
+@ToString
 public enum DataStatus {
     NORMAL(1), INVALID(2), STARTING(3);
 
@@ -48,13 +51,5 @@ public enum DataStatus {
 
     public static boolean starting(int status){
         return status == STARTING.getValue();
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("DataStatus{");
-        sb.append("value=").append(value);
-        sb.append('}');
-        return sb.toString();
     }
 }

@@ -125,8 +125,6 @@ public class DeployShellService {
     }
 
     /**
-     * TODO. if nodes config dir already exists, delete or backup first ?
-     * TODO. separate two steps: save config files local, and exec build_chain
      *
      * @param encryptType
      * @param ipLines
@@ -180,7 +178,6 @@ public class DeployShellService {
     }
 
     /**
-     * TODO. check agency cert dir, put to temp directory first
      *
      * @param encryptType
      * @param chainName
@@ -218,7 +215,6 @@ public class DeployShellService {
 
 
     /**
-     * TODO. check agency cert dir, put to temp directory first
      *
      * @param encryptType
      * @param chainName
