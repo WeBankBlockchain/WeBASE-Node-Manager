@@ -28,8 +28,8 @@ List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
      "org.springframework.boot:spring-boot-starter-mail:$springboot_version",
-     "org.springframework.boot:spring-boot-starter-thymeleaf:$springboot_version"
-     // "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
+     "org.springframework.boot:spring-boot-starter-thymeleaf:$springboot_version",
+     "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
 ]
 
 // cover old version
@@ -51,7 +51,7 @@ List web3sdk = [
 ]
 
 List lombok = [
-    "org.projectlombok:lombok:1.18.2"
+    "org.projectlombok:lombok:1.18.12"
 ]
 
 def jackson_version = "2.11.0"
@@ -88,10 +88,21 @@ dependencies {
     compile 'com.google.guava:guava:28.2-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.6'
-    compileOnly lombok
+    compile 'com.jcraft:jsch:0.1.55'
+    compile 'org.ini4j:ini4j:0.5.4'
+    compile ('com.github.docker-java:docker-java:3.2.1') {
+        exclude group: 'io.netty'
+    }
+    compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
+    compile 'ognl:ognl:3.2.14'
 
     testCompile test
+
+    compileOnly lombok
+    annotationProcessor lombok
+
+    testCompileOnly lombok
+    testAnnotationProcessor lombok
 }
 
 configurations {

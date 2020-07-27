@@ -14,17 +14,17 @@
 package com.webank.webase.node.mgr.frontgroupmap;
 
 
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
-import com.webank.webase.node.mgr.group.GroupService;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
@@ -32,8 +32,6 @@ public class FrontGroupMapCache {
 
     @Autowired
     private FrontGroupMapService mapService;
-    @Autowired
-    private GroupService groupService;
 
     private static List<FrontGroup> mapList;
 

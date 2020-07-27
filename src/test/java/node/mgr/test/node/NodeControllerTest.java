@@ -15,10 +15,6 @@
  */
 package node.mgr.test.node;
 
-import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.TbNode;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +29,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.node.NodeService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -57,13 +56,13 @@ public class NodeControllerTest {
             andDo(MockMvcResultHandlers.print());
         System.out.println("======================response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
-
-    @Test
-    public void testQueryNodeId() {
-        TbNode tbNode = nodeService.queryByNodeId("e5e7efc9e8d5bed699313d5a0cd5b024b3c11811d50473b987b9429c2f6379742c88249a7a8ea64ab0e6f2b69fb8bb280454f28471e38621bea8f38be45bc42d");
-        System.out.println(tbNode);
-        Assert.assertNull(tbNode);
-    }
+//
+//    @Test
+//    public void testQueryNodeId() {
+//        TbNode tbNode = nodeService.queryByNodeId("e5e7efc9e8d5bed699313d5a0cd5b024b3c11811d50473b987b9429c2f6379742c88249a7a8ea64ab0e6f2b69fb8bb280454f28471e38621bea8f38be45bc42d");
+//        System.out.println(tbNode);
+//        Assert.assertNull(tbNode);
+//    }
 
     @Test
     public void testGetNodeIdList() throws Exception {
