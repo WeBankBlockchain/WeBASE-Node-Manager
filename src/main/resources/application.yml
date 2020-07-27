@@ -78,10 +78,22 @@ constant:
   permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**, /encrypt, /version
 
   # 1.4.0 visual deploy
-  deployType: 0 # 0, original deploy chain first; 1, deploy chain visually
+  # 镜像名
   dockerRepository: "fiscoorg/fisco-webase"
+  # WeBASE-Sign 访问地址
   webaseSignAddress: "127.0.0.1:5004"
+  # 部署区块链服务的节点主机存放节点配置文件和数据的目录
   rootDirOnHost: "/opt/fisco"
+  # SSH 免密登录的账号
+  sshDefaultUser: root
+  # SSH 服务的端口，默认 22
+  sshDefaultPort: 22
+  # 部署方式：0, 先使用 build_chain.sh 部署链和 WeBASE-Front 服务，然后手动添加 ; 1, 使用可视化部署
+  deployType: 1
+
+sdk:
+  # 加密类型：0: 非国密;  1: 国密
+  encryptType: 0
 
 # executor config for async pulling data from chain
 executor:
@@ -96,7 +108,4 @@ scheduler:
   threadNamePrefix: "node-mgr-task-"
   awaitTerminationSeconds: 600
   waitForTasksToCompleteOnShutdown: true
-
-sdk:
-  encryptType: 0 # 1:guomi, 0:standard
 
