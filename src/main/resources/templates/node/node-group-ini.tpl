@@ -54,3 +54,10 @@
     gossip_peers_number=3
     ; max number of nodes that broadcast txs status to, recommended less than 5
     txs_max_gossip_peers_num=5
+[flow_control]
+    ; restrict QPS of the group
+    ;limit_req=1000
+    ; restrict the outgoing bandwidth of the group
+    ; Mb, can be a decimal
+    ; when the outgoing bandwidth exceeds the limit, the block synchronization operation will not proceed
+    ;outgoing_bandwidth_limit=2
