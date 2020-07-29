@@ -62,9 +62,9 @@ public class SshTools {
         if (IPUtil.isLocal(ip)){
             ExecuteResult result = JavaCommandExecutor.executeCommand(originalCommand, 0);
             if (result.failed()) {
-                log.error("SshTools exec on localhost:[{}] command:[{}] error.", ip, originalCommand );
+                log.error("SshTools exec on localhost:[{}] command:[{}] error:[{}].", ip, originalCommand, result.getExecuteOut() );
             }
-            return Pair.of(result.success(),"");
+            return Pair.of(result.success(),result.getExecuteOut());
         }else{
             newCommandBuilder.append(" ; exit 0;");
         }
@@ -175,7 +175,7 @@ public class SshTools {
             }
             session.connect(newConnectTimeoutInSeconds * 1000);
         } catch (Exception e) {
-            log.info("Connect to host:[{}] ERROR!!!", hostDetail, e);
+            log.error("Connect to host:[{}] ERROR!!!", hostDetail, e);
         }
         return session;
     }
