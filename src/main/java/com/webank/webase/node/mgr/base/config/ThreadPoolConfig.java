@@ -68,7 +68,7 @@ public class ThreadPoolConfig {
     public ThreadPoolTaskScheduler deployAsyncScheduler() {
         log.info("start deployAsyncScheduler init...");
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(5);
+        scheduler.setPoolSize(20);
         scheduler.afterPropertiesSet();
         scheduler.setThreadNamePrefix("ThreadPoolTaskScheduler-async-deploy:");
         scheduler.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
