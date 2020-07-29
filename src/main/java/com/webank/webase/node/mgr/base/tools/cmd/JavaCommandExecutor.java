@@ -42,8 +42,9 @@ public class JavaCommandExecutor {
         Future<Integer> executeFuture = null;
         try {
             log.info("exec command:[{}]", command);
+            String[] commandArray = { "/bin/bash", "-c", command };
 
-            process = Runtime.getRuntime().exec(command);
+            process = Runtime.getRuntime().exec(commandArray);
             final Process p = process;
 
             // close process's output stream.
@@ -112,5 +113,10 @@ public class JavaCommandExecutor {
         } catch (IOException e) {
             log.error("Exception occurred when closeQuietly!!! ", e);
         }
+    }
+
+    public static void main(String[] args) {
+        ExecuteResult result = JavaCommandExecutor.executeCommand("docker images -a fiscoorg/fisco-webase:v2.5.0-gm |grep -v 'IMAGE ID' ", 0);
+        System.out.println(result);
     }
 }
