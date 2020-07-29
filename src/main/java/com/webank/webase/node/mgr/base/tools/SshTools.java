@@ -175,7 +175,7 @@ public class SshTools {
             }
             session.connect(newConnectTimeoutInSeconds * 1000);
         } catch (Exception e) {
-            log.info("Connect to host:[{}] ERROR!!!", hostDetail, e);
+            log.error("Connect to host:[{}] ERROR!!!", hostDetail, e);
         }
         return session;
     }
