@@ -114,9 +114,4 @@ public class JavaCommandExecutor {
             log.error("Exception occurred when closeQuietly!!! ", e);
         }
     }
-
-    public static void main(String[] args) {
-        ExecuteResult result = JavaCommandExecutor.executeCommand("docker images -a fiscoorg/fisco-webase:v2.5.0-gm |grep -v 'IMAGE ID' ", 0);
-        System.out.println(result);
-    }
 }
