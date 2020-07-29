@@ -79,7 +79,7 @@ public class HostService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int hostId, HostStatusEnum newStatus) throws NodeMgrException {
-        log.info("Change host status  to:[{}]",hostId, newStatus);
+        log.info("Change host status  to:[{}:{}]",hostId, newStatus);
         return tbHostMapper.updateChainStatus(hostId,new Date(), newStatus.getId()) == 1;
     }
 
