@@ -89,7 +89,7 @@ public class DockerOptionsSDKImpl implements DockerOptions{
         }
         if (! optionSuccess) {
             log.error("Host:[{}] docker pull image:[{}] failed.", ip, imageTag);
-            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.msg(
+            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.attach(
                     String.format("Docker pull image:[%s:%s]", ip,imageTag)));
         }
     }
@@ -102,7 +102,7 @@ public class DockerOptionsSDKImpl implements DockerOptions{
         String containerId = this.create(ip, dockerPort,sshUser, sshPort, imageTag, containerName, chainRootOnHost, nodeIndex);
         if (StringUtils.isBlank(containerId)) {
             log.error("Create bcos-front container:[{}:{}] on host:[{}] failed.", imageTag,containerId, ip);
-            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.msg(
+            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.attach(
                     String.format("Docker create container:[%s:%s]",ip,containerName)));
         }
 
@@ -125,7 +125,7 @@ public class DockerOptionsSDKImpl implements DockerOptions{
             log.info("Host:[{}] remove container:[{}] success.", ip, containerName);
         } catch (Exception e) {
             log.error("Host:[{}] remove container by name:[{}] error.", ip, containerName, e);
-            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.msg(
+            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.attach(
                     String.format("Docker remove container:[%s:%s]", ip, containerName)));
         }
 
@@ -174,7 +174,7 @@ public class DockerOptionsSDKImpl implements DockerOptions{
             return response.getId();
         } catch (Exception e) {
             log.error("Host:[{}] create container:[{}] error.", ip, image, e);
-            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.msg(
+            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.attach(
                     String.format("Docker create container:[%s:%s]",ip,containerName)));
         }
     }
@@ -194,7 +194,7 @@ public class DockerOptionsSDKImpl implements DockerOptions{
             log.info("Host:[{}] start container:[{}] success.", ip, containerId);
         } catch (Exception e) {
             log.error("Host:[{}] start container by id:[{}] error.", ip, containerId, e);
-            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.msg(
+            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.attach(
                     String.format("Docker start container:[%s:%s]",ip,containerId)));
         }
     }
@@ -257,7 +257,7 @@ public class DockerOptionsSDKImpl implements DockerOptions{
             log.info("Host:[{}] not exists container by name:[{}].", ip, containerName);
         } catch (Exception e) {
             log.error("Host:[{}] query container:[{}] error.", ip, containerName, e);
-            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.msg(
+            throw new NodeMgrException(ConstantCode.DOCKER_OPERATION_ERROR.attach(
                     String.format("Docker query image:[%s:%s]",ip,containerName)));
         }
         return null;
