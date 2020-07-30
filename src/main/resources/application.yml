@@ -89,7 +89,7 @@ constant:
   # SSH 服务的端口，默认 22
   sshDefaultPort: 22
   # 部署方式：0, 先使用 build_chain.sh 部署链和 WeBASE-Front 服务，然后手动添加 ; 1, 使用可视化部署
-  deployType: 1
+  deployType: 0
 
 sdk:
   # 加密类型：0: 非国密;  1: 国密
