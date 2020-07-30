@@ -31,7 +31,10 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import com.webank.webase.node.mgr.node.entity.TbNode;
 
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 public class ThymeleafUtil {
 
     public static final String FRONT_APLLICATION_YML = "front-application-yml.tpl";
@@ -63,7 +66,12 @@ public class ThymeleafUtil {
     public static String generate(String tpl, Map<String, Object> varMap) {
         final Context ctx = new Context(Locale.CHINA);
         ctx.setVariables(varMap);
-        return templateEngine.process(tpl, ctx);
+        String fileContent =  templateEngine.process(tpl, ctx);
+
+        // TODO. add debug log
+        log.info("ThymeleafUtil gerated file:\n[{}]\n[{}]", fileContent,JsonTools.toJSONString(varMap));
+
+        return fileContent;
     }
 
     /**
