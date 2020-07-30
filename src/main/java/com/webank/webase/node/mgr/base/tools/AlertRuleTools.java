@@ -16,18 +16,16 @@
 
 package com.webank.webase.node.mgr.base.tools;
 
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
-import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.fisco.bcos.web3j.tx.txdecode.ConstantCode;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class AlertRuleTools {

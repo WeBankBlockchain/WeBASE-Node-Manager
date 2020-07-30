@@ -1,9 +1,9 @@
 /**
  * Copyright 2014-2020  the original author or authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
@@ -13,22 +13,27 @@
  */
 package com.webank.webase.node.mgr.node;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import lombok.extern.log4j.Log4j2;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.node.entity.NodeParam;
+import com.webank.webase.node.mgr.node.entity.TbNode;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Controller for node data.
@@ -38,8 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("node")
 public class NodeController {
 
-    @Autowired
-    private NodeService nodeService;
+    @Autowired private NodeService nodeService;
 
     /**
      * qurey node info list.

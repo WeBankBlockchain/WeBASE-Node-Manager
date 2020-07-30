@@ -13,12 +13,16 @@
  */
 package com.webank.webase.node.mgr.group;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.springframework.stereotype.Repository;
+
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 /**
  * mapper for table tb_group.
@@ -40,6 +44,7 @@ public interface GroupMapper {
      * update status.
      */
     int updateStatus(@Param("groupId") Integer groupId, @Param("groupStatus") Integer groupStatus);
+
 
     /**
      * query group count.
@@ -66,4 +71,23 @@ public interface GroupMapper {
      */
     GroupGeneral getGeneral(@Param("groupId") Integer groupId);
 
+
+    int updateNodeCount(@Param("groupId") int groupId, @Param("nodeCount") int nodeCount);
+
+    int deleteByChainId(@Param("chainId") int chainId);
+
+    @Select({
+        "select * from tb_group where chain_id=#{chainId}"
+    })
+    List<TbGroup> selectGroupList(@Param("chainId") int chainId);
+
+    @Select({
+            "select * from tb_group where chain_id=#{chainId} and group_id=#{groupId}"
+    })
+    TbGroup getGroupByChainIdAndGroupId(@Param("chainId") int chainId, @Param("groupId") int groupId);
+
+    @Update({
+       "update tb_group set group_timestamp=#{timestamp}, node_id_list=#{nodeIdList},modify_time=NOW() where group_id=#{groupId}"
+    })
+    int updateTimestampNodeList(@Param("groupId") int groupId, @Param("timestamp") long timestamp, @Param("nodeIdList") String nodeIdList);
 }
