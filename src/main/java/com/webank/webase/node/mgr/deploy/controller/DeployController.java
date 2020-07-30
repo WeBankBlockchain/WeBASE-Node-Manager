@@ -216,7 +216,6 @@ public class DeployController extends BaseController {
      * @throws IOException
      */
     @GetMapping(value = "chain/info")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse getChain(
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     ) throws IOException {
