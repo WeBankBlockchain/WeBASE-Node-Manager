@@ -35,6 +35,9 @@ public class ReqGenerateGroup {
 	private Integer generateGroupId;
 	@NotNull
 	private BigInteger timestamp;
+	/**
+	 * group.genesis sealers
+	 */
 	@NotEmpty
 	private List<String> nodeList;
 	private String description;
