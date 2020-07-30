@@ -32,10 +32,6 @@ public class RetCode {
         this.message = message;
     }
 
-    public RetCode msg(String message) {
-        this.message = message;
-        return this;
-    }
     public RetCode attach(Object attachment) {
         if (attachment != null){
             this.attachment = String.valueOf(attachment);

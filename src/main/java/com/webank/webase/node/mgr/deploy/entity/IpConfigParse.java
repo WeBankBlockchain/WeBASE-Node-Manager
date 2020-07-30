@@ -93,11 +93,11 @@ public class IpConfigParse {
             // SSH to host ip
             if (!SshTools.connect(ipConfigParse.getIp(),sshUser,sshPort,privateKey)) {
                 // cannot SSH to IP
-                throw new NodeMgrException(HOST_CONNECT_ERROR.msg(ipConfigParse.getIp()));
+                throw new NodeMgrException(HOST_CONNECT_ERROR.attach(ipConfigParse.getIp()));
             }
 
             if (ipConfigParse.getNum() <= 0) {
-                throw new NodeMgrException(IP_NUM_ERROR.msg(line));
+                throw new NodeMgrException(IP_NUM_ERROR.attach(line));
             }
 
             if(ipNodeCountMap.containsKey(ipConfigParse.getIp())) {
@@ -119,7 +119,7 @@ public class IpConfigParse {
 
         ipNodeCountMap.entrySet().forEach( entry -> {
             if (entry.getValue().get() > ConstantProperties.MAX_NODE_ON_HOST){
-                throw new NodeMgrException(NODES_NUM_EXCEED_MAX_ERROR.msg(entry.getKey()));
+                throw new NodeMgrException(NODES_NUM_EXCEED_MAX_ERROR.attach(entry.getKey()));
             }
         });
 
