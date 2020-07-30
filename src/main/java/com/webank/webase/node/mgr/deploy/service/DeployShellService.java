@@ -82,7 +82,7 @@ public class DeployShellService {
 
         if (result.failed()) {
             log.error("Send files from [{}] to [{}:{}] failed.", src, ip, dst);
-            throw new NodeMgrException(ConstantCode.TRANSFER_FILES_ERROR.msg(result.getExecuteOut()));
+            throw new NodeMgrException(ConstantCode.TRANSFER_FILES_ERROR.attach(result.getExecuteOut()));
         }
     }
 
@@ -120,7 +120,7 @@ public class DeployShellService {
 
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
         if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.EXEC_HOST_INIT_SCRIPT_ERROR.msg(result.getExecuteOut()));
+            throw new NodeMgrException(ConstantCode.EXEC_HOST_INIT_SCRIPT_ERROR.attach(result.getExecuteOut()));
         }
     }
 
@@ -173,7 +173,7 @@ public class DeployShellService {
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
 
         if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.EXEC_BUILD_CHAIN_ERROR.msg(result.getExecuteOut()));
+            throw new NodeMgrException(ConstantCode.EXEC_BUILD_CHAIN_ERROR.attach(result.getExecuteOut()));
         }
     }
 
