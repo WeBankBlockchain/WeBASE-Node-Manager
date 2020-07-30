@@ -179,10 +179,15 @@ public class FrontService {
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
         // get front server version and sign server version
-        String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
-        String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
-        tbFront.setFrontVersion(frontVersion);
-        tbFront.setSignVersion(signVersion);
+        try {
+            String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
+            String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
+            tbFront.setFrontVersion(frontVersion);
+            tbFront.setSignVersion(signVersion);
+        } catch (Exception e) {
+            // catch old version front and sign that not have '/version' api
+            log.warn("get version of Front and Sign failed (required front and sign v1.4.0+) exception:[]", e);
+        }
         //save front info
         try{
             frontMapper.add(tbFront);
