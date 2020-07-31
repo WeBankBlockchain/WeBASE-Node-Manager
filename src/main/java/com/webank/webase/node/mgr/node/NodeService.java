@@ -403,7 +403,7 @@ public class NodeService {
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(tbNodeList)) {
-            log.error("Chain:[{}] has no node.", chainId);
+            log.error("Group of:[{}] chain:[{}] has no node.", groupId, chainId);
             return Collections.emptyList();
         }
         return tbNodeList;
