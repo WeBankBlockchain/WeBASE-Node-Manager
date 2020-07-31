@@ -335,7 +335,7 @@ public class ChainService {
 
             // insert host if new
             TbHost host = this.hostService.insertIfNew(agency.getId(), agency.getAgencyName(), config.getIp(), rootDirOnHost,
-                    sshUser,sshPort,dockerPort);
+                    sshUser,sshPort,dockerPort,"");
 
             // insert group if new
             config.getGroupIdSet().forEach((groupId) -> {
