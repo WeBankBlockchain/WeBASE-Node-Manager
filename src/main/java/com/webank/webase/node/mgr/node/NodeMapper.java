@@ -94,9 +94,14 @@ public interface NodeMapper {
             " SELECT " +
             " DISTINCT(node_id), node_ip, p2p_port " +
             " FROM tb_node  WHERE  group_id IN " +
-                    "( SELECT DISTINCT ( group_id ) FROM tb_node WHERE node_id = #{nodeId,jdbcType=VARCHAR} )"
+                    "( )"
     })
-    List<TbNode> selectConnectedNodeList(@Param("nodeId") String nodeId);
+    List<TbNode> select(@Param("groupId") String groupId);
+
+    @Select({
+           "SELECT DISTINCT (group_id ) FROM tb_node WHERE node_id = #{nodeId,jdbcType=VARCHAR} "
+    })
+    List<Integer> selectGroupIdListOfNode(@Param("nodeId") String nodeId);
 
     @Select({
             "select * from tb_node where group_id=#{groupId,jdbcType=INTEGER}"

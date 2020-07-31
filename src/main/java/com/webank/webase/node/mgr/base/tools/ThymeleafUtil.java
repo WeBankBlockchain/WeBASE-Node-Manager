@@ -29,7 +29,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-import com.webank.webase.node.mgr.node.entity.TbNode;
+import com.webank.webase.node.mgr.front.entity.TbFront;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -113,7 +113,7 @@ public class ThymeleafUtil {
      * @throws IOException
      */
     public static void newNodeConfigIni(Path nodeRoot, int channelPort, int p2pPort,
-                                        int jsonrpcPort, List<TbNode> peerList, boolean guomi,
+                                        int jsonrpcPort, List<TbFront> peerList, boolean guomi,
                                         int chainIdInConfigIni) throws IOException {
         String nodeConfigIni = ThymeleafUtil.generate(ThymeleafUtil.NODE_CONFIG_INI,
                 Pair.of("channelPort", channelPort), Pair.of("p2pPort", p2pPort),

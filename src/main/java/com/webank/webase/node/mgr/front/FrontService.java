@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -536,6 +537,35 @@ public class FrontService {
         return newFrontList;
     }
 
+    /**
+     *
+     * @param nodeId
+     * @return
+     */
+    public List<TbFront> selectRelatedFront(String nodeId){
+        Set<Integer> frontIdSet = new HashSet<>();
+        List<Integer> groupIdList = this.nodeMapper.selectGroupIdListOfNode(nodeId);
+        if (CollectionUtils.isEmpty(groupIdList)){
+            log.error("Node:[{}] has no group", nodeId);
+            Collections.emptyList();
+        }
+        for (Integer groupIdOfNode : groupIdList) {
+            List<TbFrontGroupMap> tbFrontGroupMaps = this.frontGroupMapMapper.selectListByGroupId(groupIdOfNode);
+            if (CollectionUtils.isNotEmpty(tbFrontGroupMaps)){
+                tbFrontGroupMaps.forEach(map->{
+                    frontIdSet.add(map.getFrontId());
+                });
+            }
+        }
+
+        List<TbFront> nodeRelatedFrontList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(frontIdSet)){
+            nodeRelatedFrontList = frontIdSet.stream().map((frontId)-> this.frontMapper.getById(frontId))
+                    .filter((front) -> front != null)
+                    .collect(Collectors.toList());
+        }
+        return nodeRelatedFrontList;
+    }
 
     /**
      *
@@ -553,7 +583,7 @@ public class FrontService {
         // all fronts include old and new
         for (TbNode node : CollectionUtils.emptyIfNull(tbNodeListOfGroup)){
             // select related peers to update node config.ini p2p part
-            List<TbNode> nodeRelatedNode = this.nodeMapper.selectConnectedNodeList(node.getNodeId())  ;
+            List<TbFront> nodeRelatedFront = this.selectRelatedFront(node.getNodeId());
 
             TbFront tbFront = this.getByNodeId(node.getNodeId());
 
@@ -565,7 +595,7 @@ public class FrontService {
 
             // generate config.ini
             ThymeleafUtil.newNodeConfigIni(nodeRoot, tbFront.getChannelPort(),
-                    tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedNode, guomi, chainIdInConfigIni);
+                    tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedFront, guomi, chainIdInConfigIni);
 
         }
 
