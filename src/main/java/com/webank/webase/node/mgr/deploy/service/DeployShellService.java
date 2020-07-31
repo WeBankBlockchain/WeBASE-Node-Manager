@@ -74,7 +74,7 @@ public class DeployShellService {
             }
         }
 
-        String command = String.format("bash -x -e %s -t %s -i %s -u %s -p %s -s %s -d %s %s",
+        String command = String.format("bash -x -e %s -t %s -i %s -u %s -p %s -s '%s' -d '%s' %s",
                 constant.getScpShell(), typeEnum.getValue(), ip, sshUser, sshPort, src, dst,
                 IPUtil.isLocal(dst) ? " -l " : "");
         log.info("exec file send command: [{}]", command);
