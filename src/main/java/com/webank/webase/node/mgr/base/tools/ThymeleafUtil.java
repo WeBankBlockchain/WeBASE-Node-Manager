@@ -67,10 +67,6 @@ public class ThymeleafUtil {
         final Context ctx = new Context(Locale.CHINA);
         ctx.setVariables(varMap);
         String fileContent =  templateEngine.process(tpl, ctx);
-
-        // TODO. add debug log
-        log.info("ThymeleafUtil gerated file:\n[{}]\n[{}]", fileContent,JsonTools.toJSONString(varMap));
-
         return fileContent;
     }
 
