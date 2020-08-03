@@ -101,7 +101,7 @@ public class MethodIdGmTest extends TestBase {
     }
 
     @Test
-    public void testGetMethod() throws IOException {
+    public void testGetAllMethod() throws IOException {
         // 在application.yml中切换sdk-encryptType的值
         if(EncryptType.encryptType == 1) {
             // encryptType = 1 guomi:
@@ -111,11 +111,11 @@ public class MethodIdGmTest extends TestBase {
             System.out.println("standard");
             System.out.println();
         }
-        getAllPreMethodIdGm();
+        getAllPreMethodId();
     }
 
     String a = "{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"queryManager\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}";
-    public void getAllPreMethodIdGm() throws IOException {
+    public void getAllPreMethodId() throws IOException {
         // load abi
         List<AbiDefinition> sys_config = Web3Tools.loadContractDefinition(sys_config_Abi);
         List<AbiDefinition> table_factory = Web3Tools.loadContractDefinition(table_factory_Abi);
