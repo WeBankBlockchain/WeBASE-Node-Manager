@@ -22,7 +22,7 @@ public interface TbHostMapper {
     @Select({
             "select",
             TbHostSqlProvider.ALL_COLUMN_FIELDS,
-            "from tb_host"
+            "from tb_host order by status desc"
     })
     List<TbHost> selectAll();
 
