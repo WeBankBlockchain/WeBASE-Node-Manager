@@ -35,6 +35,7 @@ import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
+import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
@@ -165,6 +166,10 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
+        log.info("Add node check ip reachable:[{}]...", ip);
+        if (!SshTools.connect(ip,constantProperties.sshDefaultUser,constantProperties.sshDefaultPort,constantProperties.getPrivateKey())) {
+            throw new NodeMgrException(ConstantCode.HOST_CONNECT_ERROR);
+        }
 
         // select host list by agency id
         List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
