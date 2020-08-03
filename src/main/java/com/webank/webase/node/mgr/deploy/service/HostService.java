@@ -131,7 +131,8 @@ public class HostService {
         final CountDownLatch initHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
         AtomicInteger initSuccessCount = new AtomicInteger(0);
-        Map<TbHost, Future> taskMap = new HashedMap<>();
+        Map<Integer, Future> taskMap = new HashedMap<>();
+
         for (final TbHost tbHost : tbHostList) {
             log.info("Init host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
 
@@ -185,10 +186,13 @@ public class HostService {
                         return;
                     }
 
-                    // update host status
-                    tbHost.setStatus(HostStatusEnum.INIT_SUCCESS.getId());
-                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_SUCCESS,"") ;
-                    initSuccessCount.incrementAndGet();
+                    // update host status only if job is not done
+                    Future future = taskMap.get(tbHost.getId());
+                    if (future != null && ! future.isDone()) {
+                        tbHost.setStatus(HostStatusEnum.INIT_SUCCESS.getId());
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_SUCCESS, "");
+                        initSuccessCount.incrementAndGet();
+                    }
                 } catch (Exception e) {
                     log.error("Init host:[{}] with unknown error", tbHost.getIp(), e);
                     this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED, "Init host with unknown error, check from log files.");
@@ -196,17 +200,17 @@ public class HostService {
                     initHostLatch.countDown();
                 }
             });
-            taskMap.put(tbHost, task);
+            taskMap.put(tbHost.getId(), task);
         }
 
         initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
         log.error("Init host timeout, cancel unfinished tasks.");
         taskMap.entrySet().forEach((entry)->{
-            TbHost tbHost = entry.getKey();
+            int hostId = entry.getKey();
             Future<?> task = entry.getValue();
             if(! task.isDone()){
-                log.error("Init host:[{}] timeout, cancel the task.", tbHost.getIp() );
-                this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED, "Init host timeout.");
+                log.error("Init host:[{}] timeout, cancel the task.", hostId );
+                this.updateStatus(hostId, HostStatusEnum.INIT_FAILED, "Init host timeout.");
                 task.cancel(false);
             }
         });
