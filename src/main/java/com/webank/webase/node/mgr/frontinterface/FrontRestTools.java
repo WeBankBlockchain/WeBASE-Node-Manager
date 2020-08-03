@@ -14,16 +14,6 @@
 
 package com.webank.webase.node.mgr.frontinterface;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
-import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -35,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.webank.webase.node.mgr.frontinterface.entity.FrontUrlInfo;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,6 +37,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
+import com.webank.webase.node.mgr.frontinterface.entity.FrontUrlInfo;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * about http request for WeBASE-Front.
@@ -335,6 +337,8 @@ public class FrontRestTools {
                 throw new NodeMgrException(ConstantCode.AVAILABLE_FRONT_URL_IS_NULL);
             }
             try {
+                log.info("FrontRestTools call front:[{}]", url);
+
                 HttpEntity entity = buildHttpEntity(param);// build entity
                 if (null == restTemplate) {
                     log.error("fail restTemplateExchange, rest is null. groupId:{} uri:{}",
@@ -355,7 +359,7 @@ public class FrontRestTools {
                 continue;
             } catch (HttpStatusCodeException ex) {
                 JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
-                log.error("http request fail. error:{}", JsonTools.toJSONString(error));
+                log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error), ex);
                 try {
                     int code = error.get("code").intValue();
                     String errorMessage = error.get("errorMessage").asText();

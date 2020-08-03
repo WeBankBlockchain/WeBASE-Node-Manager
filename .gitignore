@@ -25,3 +25,8 @@
 /log/
 /nbdist/
 /.nb-gradle/
+/NODES_ROOT/*
+/NODES_ROOT_TMP/*
+*.srl
+gmcert.cnf
+gmsm2.param
