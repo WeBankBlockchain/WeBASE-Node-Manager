@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -53,6 +54,7 @@ import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
 import com.webank.webase.node.mgr.front.FrontMapper;
@@ -70,6 +72,7 @@ public class HostService {
 
     @Autowired private TbHostMapper tbHostMapper;
     @Autowired private FrontMapper frontMapper;
+    @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private ConstantProperties constant;
     @Autowired private DockerOptions dockerOptions;
@@ -186,13 +189,15 @@ public class HostService {
                         return;
                     }
 
-                    // update host status only if job is not done
-                    Future future = taskMap.get(tbHost.getId());
-                    if (future != null && ! future.isDone()) {
-                        tbHost.setStatus(HostStatusEnum.INIT_SUCCESS.getId());
-                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_SUCCESS, "");
-                        initSuccessCount.incrementAndGet();
+                    // update host status only when chain is deploying
+                    TbChain newTbChain = this.tbChainMapper.getByChainName(tbChain.getChainName());
+                    if (ChainStatusEnum.DEPLOY_FAILED.getId() == newTbChain.getChainStatus()) {
+                        // chain is already deploy failed, skip updating host status
+                        return;
                     }
+                    tbHost.setStatus(HostStatusEnum.INIT_SUCCESS.getId());
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_SUCCESS, "");
+                    initSuccessCount.incrementAndGet();
                 } catch (Exception e) {
                     log.error("Init host:[{}] with unknown error", tbHost.getIp(), e);
                     this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED, "Init host with unknown error, check from log files.");
