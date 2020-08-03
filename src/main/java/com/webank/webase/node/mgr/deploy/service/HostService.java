@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
@@ -187,6 +189,15 @@ public class HostService {
                         this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
                                 "Docker pull image failed, please check the host's network or configuration of Docker.");
                         return;
+                    }
+
+                    // check port
+                    Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(tbHost.getIp(), 2000, constant.getDefaultChannelPort(), constant.getDefaultP2pPort(), constant.getDefaultFrontPort(), constant.getDefaultJsonrpcPort());
+                    if(portReachable.getKey()){
+                        log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), tbHost.getIp() );
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                String.format("Port:[%s] is in use.",portReachable.getValue()));
+                        return ;
                     }
 
                     // update host status only when chain is deploying

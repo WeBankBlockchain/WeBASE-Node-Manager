@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,6 +15,21 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NetUtils {
+
+    public static Pair<Boolean,Integer> checkPorts(String ip, int timeout, int ... portArray) {
+        if (ArrayUtils.isEmpty(portArray)){
+            return Pair.of(false,0);
+        }
+
+        for (int port : portArray) {
+            boolean reachable = checkAddress(ip, port, timeout);
+            if (reachable){
+                return Pair.of(true,port);
+            }
+        }
+        return Pair.of(false,0);
+    }
+
 
     public static boolean checkAddress(String ip, int port, int timeout) {
         int newTimeout = timeout > 0 ? timeout : 2000;
