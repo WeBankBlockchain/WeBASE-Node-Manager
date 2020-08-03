@@ -263,6 +263,7 @@ public class NodeAsyncService {
                 maxWaitTime.set(estimateTimeOfHost);
             }
         });
+        maxWaitTime.addAndGet(constant.getDockerRestartPeriodTime());
 
         for (Integer tbHostId : CollectionUtils.emptyIfNull(hostFrontListMap.keySet())) {
             threadPoolTaskScheduler.submit(() -> {
