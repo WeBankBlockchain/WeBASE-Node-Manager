@@ -89,6 +89,7 @@ public class TbFront {
         front.setFrontPort(port);
         front.setAgency(agencyName);
         front.setClientVersion(frontClientVersion);
+        front.setSupportVersion(frontClientVersion);
         front.setCreateTime(now);
         front.setModifyTime(now);
         front.setRunType(runTypeEnum.getId());
