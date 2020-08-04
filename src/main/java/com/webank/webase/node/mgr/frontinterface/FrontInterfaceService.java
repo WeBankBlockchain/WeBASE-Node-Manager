@@ -450,13 +450,14 @@ public class FrontInterfaceService {
         return encryptType;
     }
 
-    public String getClientVersionFromSpecificFront(String frontIp, Integer frontPort,
+    public NodeVersion.Version getClientVersionFromSpecificFront(String frontIp, Integer frontPort,
                                    Integer groupId) {
         log.debug("start getClientVersionFromSpecificFront. frontIp:{},frontPort:{},groupId:{}",
             frontIp, frontPort, groupId);
         NodeVersion.Version clientVersion = getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_GET_CLIENT_VERSION, NodeVersion.Version.class);
         log.debug("end getClientVersionFromSpecificFront. consensusStatus:{}", clientVersion);
-        return clientVersion.getVersion();
+        // return clientVersion.getVersion();
+        return clientVersion;
     }
 
     /**
