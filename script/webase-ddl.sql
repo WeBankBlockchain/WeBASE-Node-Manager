@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS tb_front (
   front_port int(11) NOT NULL COMMENT '前置服务端口',
   agency varchar(32) NOT NULL COMMENT '所属机构名称',
   client_version varchar(32) NOT NULL COMMENT '节点版本（国密/非国密）',
+  support_version varchar(32) DEFAULT NULL COMMENT '节点兼容版本',
   front_version varchar(32) DEFAULT NULL COMMENT '节点前置版本号',
   sign_version varchar(32) DEFAULT NULL COMMENT '节点前置对应签名服务版本号',
   status int(11) DEFAULT 1 COMMENT '前置服务状态：0，未创建；1，停止；2，启动；',
