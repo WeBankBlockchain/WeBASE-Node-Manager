@@ -32,6 +32,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,12 +173,15 @@ public class FrontService {
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
         }
-        String clientVersion = frontInterface.getClientVersionFromSpecificFront(frontIp,
+        NodeVersion.Version versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
                 frontPort, Integer.valueOf(groupIdList.get(0)));
+        String clientVersion = versionResponse.getVersion();
+        String supportVersion = versionResponse.getSupportedVersion();
         //copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
+        tbFront.setSupportVersion(supportVersion);
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);

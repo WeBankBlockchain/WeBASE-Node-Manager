@@ -10,6 +10,7 @@
     <result column="front_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontPort"/>
     <result column="agency" javaType="java.lang.String" jdbcType="VARCHAR" property="agency"/>
     <result column="client_version" javaType="java.lang.String" jdbcType="VARCHAR" property="clientVersion"/>
+    <result column="support_version" javaType="java.lang.String" jdbcType="VARCHAR" property="supportVersion"/>
     <result column="front_version" javaType="java.lang.String" jdbcType="VARCHAR" property="frontVersion"/>
     <result column="sign_version" javaType="java.lang.String" jdbcType="VARCHAR" property="signVersion"/>
     <result column="status" javaType="java.lang.Integer" jdbcType="INTEGER" property="status"/>
@@ -32,13 +33,13 @@
 
   <insert id="add">
     insert into tb_front
-    (node_id, front_ip, front_port, agency, client_version,
+    (node_id, front_ip, front_port, agency, client_version,support_version,
     front_version,sign_version,status, create_time, modify_time,
     run_type, agency_id, agency_name, host_id, host_index,
     image_tag, container_name, jsonrpc_port, p2p_port, channel_port,
     chain_id, chain_name )
     values
-    (#{nodeId}, #{frontIp}, #{frontPort}, #{agency}, #{clientVersion},
+    (#{nodeId}, #{frontIp}, #{frontPort}, #{agency}, #{clientVersion},#{supportVersion},
     #{frontVersion},#{signVersion},#{status}, NOW(),NOW(),
     #{runType}, #{agencyId}, #{agencyName}, #{hostId}, #{hostIndex},
     #{imageTag}, #{containerName}, #{jsonrpcPort}, #{p2pPort}, #{channelPort},
