@@ -170,9 +170,8 @@ public class FrontServiceTest {
 
     @Test
     public void getClientVersion() {
-        String clientVersion = frontInterface.getClientVersionFromSpecificFront(frontIp, frontPort, groupId);
+        NodeVersion.Version clientVersion = frontInterface.getClientVersionFromSpecificFront(frontIp, frontPort, groupId);
         System.out.println(clientVersion);
-        assert (StringUtils.isNotEmpty(clientVersion));
     }
 
     @Test
