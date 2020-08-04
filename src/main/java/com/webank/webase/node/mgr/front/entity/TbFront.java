@@ -33,9 +33,10 @@ public class TbFront {
     private Integer frontPort;
     private String agency;
     /**
-     * node version
+     * node version and support version
      */
     private String clientVersion;
+    private String supportVersion;
     /**
      * front server version
      */
