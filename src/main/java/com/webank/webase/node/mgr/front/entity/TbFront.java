@@ -18,6 +18,8 @@ package com.webank.webase.node.mgr.front.entity;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 
@@ -77,13 +79,15 @@ public class TbFront {
             int p2pPort, int channelPort, int chainId,
             String chainName, FrontStatusEnum frontStatusEnum ){
 
+        String frontClientVersion = StringUtils.removeStart(clientVersion, "v");
+
         LocalDateTime now = LocalDateTime.now();
         TbFront front = new TbFront();
         front.setNodeId(nodeId);
         front.setFrontIp(ip);
         front.setFrontPort(port);
         front.setAgency(agencyName);
-        front.setClientVersion(clientVersion);
+        front.setClientVersion(frontClientVersion);
         front.setCreateTime(now);
         front.setModifyTime(now);
         front.setRunType(runTypeEnum.getId());
