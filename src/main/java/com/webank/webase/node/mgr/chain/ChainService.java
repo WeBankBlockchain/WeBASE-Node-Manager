@@ -451,7 +451,7 @@ public class ChainService {
     /**
      * Chains is running, default not.
      */
-    public static volatile AtomicBoolean isChainRunning  = new AtomicBoolean(false);
+    public static AtomicBoolean isChainRunning  = new AtomicBoolean(false);
 
     /**
      *  Chain is running.
