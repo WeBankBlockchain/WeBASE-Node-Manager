@@ -239,6 +239,7 @@ public class ConstantCode {
     public static final RetCode UNKNOWN_DOCKER_IMAGE_TYPE = RetCode.mark(205065, "Docker image type param error.");
     public static final RetCode IMAGE_NOT_EXISTS_ON_HOST = RetCode.mark(205066, "Image not exists on host.");
     public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(205067, "Max 4 nodes on a same host.");
+    public static final RetCode SAME_HOST_ERROR = RetCode.mark(205068, "Cannot install node and WeBASE-Node-Manager on same host.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
