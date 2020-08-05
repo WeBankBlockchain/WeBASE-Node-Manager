@@ -467,6 +467,13 @@ public class ChainService {
      */
     public boolean runTask(){
         log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
+
+        // set default chain status
+        TbChain default_chain = this.tbChainMapper.getByChainName("default_chain");
+        if (default_chain != null && default_chain.getChainStatus() == ChainStatusEnum.RUNNING.getId()){
+            isChainRunning.set(true);
+        }
+
         return constant.getDeployType() == 0  // 0, original deploy chain first; 1, deploy chain visually
                 || isChainRunning.get();
     }
