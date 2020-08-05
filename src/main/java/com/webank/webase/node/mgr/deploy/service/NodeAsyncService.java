@@ -263,6 +263,7 @@ public class NodeAsyncService {
                 maxWaitTime.set(estimateTimeOfHost);
             }
         });
+        maxWaitTime.addAndGet(constant.getDockerRestartPeriodTime());
 
         for (Integer tbHostId : CollectionUtils.emptyIfNull(hostFrontListMap.keySet())) {
             threadPoolTaskScheduler.submit(() -> {
@@ -297,7 +298,7 @@ public class NodeAsyncService {
 
         // check if all host init success
         log.log(startSuccess ? Level.INFO: Level.ERROR,
-                "Host of chain:[{}] init result, total:[{}], success:[{}]",
+                "Front of chain:[{}] init result, total:[{}], success:[{}]",
                 chainId, totalFrontCount.get(), startSuccessCount.get());
 
         return startSuccess;

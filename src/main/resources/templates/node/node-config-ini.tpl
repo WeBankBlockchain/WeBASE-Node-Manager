@@ -8,7 +8,7 @@
     listen_port=[(${p2pPort})]
     ;enable_compress=true
     ; nodes to connect
-    [# th:each="node,iter : ${nodeList}"]node.[(${iter.index})]=[(${node.nodeIp})]:[(${node.p2pPort})]
+    [# th:each="node,iter : ${nodeList}"]node.[(${iter.index})]=[(${node.frontIp})]:[(${node.p2pPort})]
     [/]
 
 [certificate_blacklist]

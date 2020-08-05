@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,6 +33,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,12 +174,15 @@ public class FrontService {
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
         }
-        String clientVersion = frontInterface.getClientVersionFromSpecificFront(frontIp,
+        NodeVersion.Version versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
                 frontPort, Integer.valueOf(groupIdList.get(0)));
+        String clientVersion = versionResponse.getVersion();
+        String supportVersion = versionResponse.getSupportedVersion();
         //copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
+        tbFront.setSupportVersion(supportVersion);
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
@@ -536,6 +541,35 @@ public class FrontService {
         return newFrontList;
     }
 
+    /**
+     *
+     * @param nodeId
+     * @return
+     */
+    public List<TbFront> selectRelatedFront(String nodeId){
+        Set<Integer> frontIdSet = new HashSet<>();
+        List<Integer> groupIdList = this.nodeMapper.selectGroupIdListOfNode(nodeId);
+        if (CollectionUtils.isEmpty(groupIdList)){
+            log.error("Node:[{}] has no group", nodeId);
+            Collections.emptyList();
+        }
+        for (Integer groupIdOfNode : groupIdList) {
+            List<TbFrontGroupMap> tbFrontGroupMaps = this.frontGroupMapMapper.selectListByGroupId(groupIdOfNode);
+            if (CollectionUtils.isNotEmpty(tbFrontGroupMaps)){
+                tbFrontGroupMaps.forEach(map->{
+                    frontIdSet.add(map.getFrontId());
+                });
+            }
+        }
+
+        List<TbFront> nodeRelatedFrontList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(frontIdSet)){
+            nodeRelatedFrontList = frontIdSet.stream().map((frontId)-> this.frontMapper.getById(frontId))
+                    .filter((front) -> front != null)
+                    .collect(Collectors.toList());
+        }
+        return nodeRelatedFrontList;
+    }
 
     /**
      *
@@ -553,7 +587,7 @@ public class FrontService {
         // all fronts include old and new
         for (TbNode node : CollectionUtils.emptyIfNull(tbNodeListOfGroup)){
             // select related peers to update node config.ini p2p part
-            List<TbNode> nodeRelatedNode = this.nodeMapper.selectConnectedNodeList(node.getNodeId())  ;
+            List<TbFront> nodeRelatedFront = this.selectRelatedFront(node.getNodeId());
 
             TbFront tbFront = this.getByNodeId(node.getNodeId());
 
@@ -565,7 +599,7 @@ public class FrontService {
 
             // generate config.ini
             ThymeleafUtil.newNodeConfigIni(nodeRoot, tbFront.getChannelPort(),
-                    tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedNode, guomi, chainIdInConfigIni);
+                    tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedFront, guomi, chainIdInConfigIni);
 
         }
 

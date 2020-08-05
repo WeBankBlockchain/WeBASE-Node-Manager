@@ -45,7 +45,9 @@ import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
 import com.webank.webase.node.mgr.deploy.entity.ReqUpgrade;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
+import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.DeployService;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -58,8 +60,10 @@ import lombok.extern.log4j.Log4j2;
 public class DeployController extends BaseController {
 
     @Autowired private TbChainMapper tbChainMapper;
+    @Autowired private TbHostMapper tbHostMapper;
 
     @Autowired private DeployService deployService;
+    @Autowired private ResetGroupListTask resetGroupListTask;
     @Autowired private ConstantProperties constantProperties;
 
     /**
@@ -287,5 +291,17 @@ public class DeployController extends BaseController {
         Instant startTime = Instant.now();
         log.info("Start get deploy type, now:[{}]",  startTime);
         return new BaseResponse(ConstantCode.SUCCESS, constantProperties.getDeployType());
+    }
+
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
+    @GetMapping(value = "host/list")
+    public BaseResponse listHost() throws IOException {
+        Instant startTime = Instant.now();
+        log.info("Start get host list info, now:[{}]",  startTime);
+        return new BaseResponse(ConstantCode.SUCCESS, this.tbHostMapper.selectAll());
     }
 }
