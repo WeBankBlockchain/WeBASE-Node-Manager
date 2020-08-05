@@ -466,6 +466,7 @@ public class ChainService {
      * @return
      */
     public boolean runTask(){
+        log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
         return constant.getDeployType() == 0  // 0, original deploy chain first; 1, deploy chain visually
                 || isChainRunning.get();
     }
