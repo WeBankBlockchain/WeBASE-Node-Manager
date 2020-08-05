@@ -172,13 +172,6 @@ public class ChainService {
     public boolean updateStatus(int chainId, ChainStatusEnum newStatus) {
         log.info("Update chain:[{}] status to:[{}]",chainId, newStatus.toString());
         int count =  this.tbChainMapper.updateChainStatus(chainId,new Date(), newStatus.getId());
-
-        if (newStatus == ChainStatusEnum.RUNNING){
-            isChainRunning.set(true);
-        }else{
-            isChainRunning.set(false);
-        }
-
         return count == 1;
     }
 
@@ -466,13 +459,13 @@ public class ChainService {
      * @return
      */
     public boolean runTask(){
-        log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
-
         // set default chain status
         TbChain default_chain = this.tbChainMapper.getByChainName("default_chain");
         if (default_chain != null && default_chain.getChainStatus() == ChainStatusEnum.RUNNING.getId()){
             isChainRunning.set(true);
         }
+
+        log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
 
         return constant.getDeployType() == 0  // 0, original deploy chain first; 1, deploy chain visually
                 || isChainRunning.get();

@@ -288,10 +288,12 @@ public class GroupService {
 		for (TbFront front : frontList) {
             if( ! FrontStatusEnum.isRunning(front.getStatus())){
                 log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
+                // update front group map status
+                this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
                 continue;
             }
 
-			String frontIp = front.getFrontIp();
+            String frontIp = front.getFrontIp();
 			int frontPort = front.getFrontPort();
 			// query group list from chain
 			List<String> groupIdList;
@@ -304,6 +306,7 @@ public class GroupService {
 			// update by group list on chain
 			for (String groupId : groupIdList) {
 				Integer gId = Integer.valueOf(groupId);
+
 				allGroupSet.add(gId);
 				// peer in group
 				List<String> groupPeerList;
