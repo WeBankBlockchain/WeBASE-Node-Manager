@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
@@ -62,6 +63,8 @@ public class NodeService {
     private FrontInterfaceService frontInterface;
     @Autowired
     private ChainService chainService;
+    @Autowired
+    private ConstantProperties constantProperties;
     /**
      * update front status
      */
@@ -265,7 +268,7 @@ public class NodeService {
             //update node
             updateNode(tbNode);
             // only update front status if deploy manually
-            if (chainService.deployManually()) {
+            if (chainService.runTask()) {
                 TbFront updateFront = frontService.getByNodeId(nodeId);
                 if (updateFront != null) {
                     // update front status as long as update node (7.5s internal)
