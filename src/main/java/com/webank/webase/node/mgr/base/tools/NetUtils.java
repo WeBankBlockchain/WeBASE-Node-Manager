@@ -42,7 +42,7 @@ public class NetUtils {
             // Return true if connection successful
             return true;
         } catch (IOException e) {
-            log.error("Connect to host:[{}] and port:[{}] with timeout:[{}] is error.", ip, port, newTimeout, e);
+            log.error("Connect to host:[{}] and port:[{}] with timeout:[{}] is error.", ip, port, newTimeout, e.getMessage() );
         }
         return false;
     }
