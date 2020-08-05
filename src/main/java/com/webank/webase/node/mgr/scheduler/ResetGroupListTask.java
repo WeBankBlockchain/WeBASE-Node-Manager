@@ -34,11 +34,9 @@ public class ResetGroupListTask {
     @Autowired private GroupService groupService;
     @Autowired private ChainService chainService;
 
-    private boolean taskOn = true;
-
     @Scheduled(fixedDelayString = "${constant.resetGroupListCycle}")
     public void taskStart() {
-        if (chainService.deployManually()) {
+        if (chainService.runTask()) {
             resetGroupList();
         }
     }
@@ -55,17 +53,6 @@ public class ResetGroupListTask {
      * reset groupList.
      */
     public void resetGroupList() {
-        if (taskOn) {
-            groupService.resetGroupList();
-        }else{
-            log.warn("task flag is off");
-        }
-    }
-
-    public void turnOnTask(){
-        this.taskOn = true;
-    }
-    public void turnOffTask(){
-        this.taskOn = false;
+        groupService.resetGroupList();
     }
 }

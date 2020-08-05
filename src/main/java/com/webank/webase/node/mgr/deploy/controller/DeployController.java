@@ -277,13 +277,8 @@ public class DeployController extends BaseController {
         log.info("Start delete chainName:[{}], startTime:[{}]",
                 chainName, startTime.toEpochMilli());
 
-        try {
-            resetGroupListTask.turnOffTask();
-            RetCode deleteResult = this.deployService.deleteChain(chainName);
-            return new BaseResponse(deleteResult);
-        }finally {
-            resetGroupListTask.turnOnTask();
-        }
+        RetCode deleteResult = this.deployService.deleteChain(chainName);
+        return new BaseResponse(deleteResult);
     }
 
     /**
