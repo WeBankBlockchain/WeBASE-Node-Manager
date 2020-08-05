@@ -36,7 +36,7 @@ public class ResetGroupListTask {
 
     @Scheduled(fixedDelayString = "${constant.resetGroupListCycle}")
     public void taskStart() {
-        if (chainService.deployManually()) {
+        if (chainService.runTask()) {
             resetGroupList();
         }
     }

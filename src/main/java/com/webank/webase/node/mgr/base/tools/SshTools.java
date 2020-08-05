@@ -19,8 +19,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
@@ -186,17 +184,9 @@ public class SshTools {
      * @param dir
      */
     public static void createDirOnRemote(String ip, String dir, String sshUser, int sshPort,String privateKey){
-        if(IPUtil.isLocal(ip)){
-            try {
-                Files.createDirectories(Paths.get(dir));
-            } catch (IOException e) {
-                log.error("mkdir:[{}] on localhost:[{}] error",dir,ip,e );
-            }
-        }else{
-            exec(ip, String.format("sudo mkdir -p %s", dir),sshUser,sshPort,privateKey);
-            exec(ip, String.format("sudo chown -R %s %s ", sshUser,dir),sshUser,sshPort,privateKey);
-            exec(ip, String.format("sudo chgrp -R %s %s ", sshUser,dir),sshUser,sshPort,privateKey);
-        }
+        exec(ip, String.format("sudo mkdir -p %s", dir),sshUser,sshPort,privateKey);
+        exec(ip, String.format("sudo chown -R %s %s ", sshUser,dir),sshUser,sshPort,privateKey);
+        exec(ip, String.format("sudo chgrp -R %s %s ", sshUser,dir),sshUser,sshPort,privateKey);
     }
 
     /**
