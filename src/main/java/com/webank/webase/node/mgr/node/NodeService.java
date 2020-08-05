@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
@@ -62,6 +63,8 @@ public class NodeService {
     private FrontInterfaceService frontInterface;
     @Autowired
     private ChainService chainService;
+    @Autowired
+    private ConstantProperties constantProperties;
     /**
      * update front status
      */
@@ -69,7 +72,7 @@ public class NodeService {
     private FrontService frontService;
 
     // interval of check node status
-    private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 7500L;
+    private static final Long EXT_CHECK_NODE_WAIT_MIN_MILLIS = 3500L;
 
     /**
      * add new node data.
@@ -211,6 +214,8 @@ public class NodeService {
         // getObserverList
         List<String> observerList = frontInterface.getObserverList(groupId);
 
+        int nodeCount = CollectionUtils.size(consensusList) + CollectionUtils.size(observerList);
+
         for (TbNode tbNode : nodeList) {
             String nodeId = tbNode.getNodeId();
             BigInteger localBlockNumber = tbNode.getBlockNumber();
@@ -220,7 +225,7 @@ public class NodeService {
 
             Duration duration = Duration.between(modifyTime, LocalDateTime.now());
             Long subTime = duration.toMillis();
-            if (subTime < CHECK_NODE_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
+            if (subTime < (nodeCount * 1000 + EXT_CHECK_NODE_WAIT_MIN_MILLIS) && createTime.isBefore(modifyTime)) {
                 log.warn("checkNodeStatus jump over. for time internal subTime:{}", subTime);
                 return;
             }
@@ -265,7 +270,7 @@ public class NodeService {
             //update node
             updateNode(tbNode);
             // only update front status if deploy manually
-            if (chainService.deployManually()) {
+            if (chainService.runTask()) {
                 TbFront updateFront = frontService.getByNodeId(nodeId);
                 if (updateFront != null) {
                     // update front status as long as update node (7.5s internal)
@@ -403,7 +408,7 @@ public class NodeService {
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(tbNodeList)) {
-            log.error("Chain:[{}] has no node.", chainId);
+            log.error("Group of:[{}] chain:[{}] has no node.", groupId, chainId);
             return Collections.emptyList();
         }
         return tbNodeList;

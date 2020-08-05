@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -170,7 +171,8 @@ public class ChainService {
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int chainId, ChainStatusEnum newStatus) {
         log.info("Update chain:[{}] status to:[{}]",chainId, newStatus.toString());
-        return this.tbChainMapper.updateChainStatus(chainId,new Date(), newStatus.getId()) == 1;
+        int count =  this.tbChainMapper.updateChainStatus(chainId,new Date(), newStatus.getId());
+        return count == 1;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -228,6 +230,8 @@ public class ChainService {
         if (chain == null) {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
         }
+
+        isChainRunning.set(false);
 
         // delete agency
         this.agencyService.deleteByChainId(chain.getId());
@@ -335,7 +339,7 @@ public class ChainService {
 
             // insert host if new
             TbHost host = this.hostService.insertIfNew(agency.getId(), agency.getAgencyName(), config.getIp(), rootDirOnHost,
-                    sshUser,sshPort,dockerPort);
+                    sshUser,sshPort,dockerPort,"");
 
             // insert group if new
             config.getGroupIdSet().forEach((groupId) -> {
@@ -445,12 +449,25 @@ public class ChainService {
     }
 
     /**
-     *  Chain is deployed manually or deploy visually.
+     * Chains is running, default not.
+     */
+    public static AtomicBoolean isChainRunning  = new AtomicBoolean(false);
+
+    /**
+     *  Chain is running.
      *
      * @return
      */
-    public boolean deployManually(){
-        int chainCount = this.tbChainMapper.countChain();
-        return chainCount == 0;
+    public boolean runTask(){
+        // set default chain status
+        TbChain default_chain = this.tbChainMapper.getByChainName("default_chain");
+        if (default_chain != null && default_chain.getChainStatus() == ChainStatusEnum.RUNNING.getId()){
+            isChainRunning.set(true);
+        }
+
+        log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
+
+        return constant.getDeployType() == 0  // 0, original deploy chain first; 1, deploy chain visually
+                || isChainRunning.get();
     }
 }

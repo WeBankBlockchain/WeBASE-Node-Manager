@@ -21,14 +21,18 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +43,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
@@ -50,6 +56,7 @@ import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
 import com.webank.webase.node.mgr.front.FrontMapper;
@@ -67,6 +74,7 @@ public class HostService {
 
     @Autowired private TbHostMapper tbHostMapper;
     @Autowired private FrontMapper frontMapper;
+    @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private ConstantProperties constant;
     @Autowired private DockerOptions dockerOptions;
@@ -78,9 +86,9 @@ public class HostService {
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean updateStatus(int hostId, HostStatusEnum newStatus) throws NodeMgrException {
-        log.info("Change host status  to:[{}:{}]",hostId, newStatus);
-        return tbHostMapper.updateChainStatus(hostId,new Date(), newStatus.getId()) == 1;
+    public boolean updateStatus(int hostId, HostStatusEnum newStatus,String remark) throws NodeMgrException {
+        log.info("Change host status to:[{}:{}:{}]",hostId, newStatus, remark);
+        return tbHostMapper.updateHostStatus(hostId,new Date(), newStatus.getId(),remark) == 1;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -88,7 +96,7 @@ public class HostService {
                          String agencyName,
                          String ip,
                          String rootDir,
-                         String sshUser,int sshPort,int dockerPort ) throws NodeMgrException {
+                         String sshUser,int sshPort,int dockerPort ,String remark) throws NodeMgrException {
         TbHost host = this.tbHostMapper.getByAgencyIdAndIp(agencyId,ip);
         if (host != null){
             return host;
@@ -96,15 +104,15 @@ public class HostService {
 
         // fix call transaction in the same class
         return ((HostService) AopContext.currentProxy())
-                .insert(agencyId, agencyName, ip,sshUser,sshPort,rootDir,HostStatusEnum.ADDED, dockerPort);
+                .insert(agencyId, agencyName, ip,sshUser,sshPort,rootDir,HostStatusEnum.ADDED, dockerPort,remark);
     }
 
 
     @Transactional(propagation = Propagation.REQUIRED)
     public TbHost insert(int agencyId, String agencyName, String ip, String sshUser, int sshPort,
-                         String rootDir, HostStatusEnum hostStatusEnum, int dockerPort ) throws NodeMgrException {
+                         String rootDir, HostStatusEnum hostStatusEnum, int dockerPort,String remark) throws NodeMgrException {
 
-        TbHost host = TbHost.init(agencyId, agencyName, ip, sshUser, sshPort, rootDir, hostStatusEnum,dockerPort);
+        TbHost host = TbHost.init(agencyId, agencyName, ip, sshUser, sshPort, rootDir, hostStatusEnum,dockerPort,remark);
 
         if ( tbHostMapper.insertSelective(host) != 1 || host.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_HOST_ERROR);
@@ -128,20 +136,30 @@ public class HostService {
         final CountDownLatch initHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
         AtomicInteger initSuccessCount = new AtomicInteger(0);
+        Map<Integer, Future> taskMap = new HashedMap<>();
+
         for (final TbHost tbHost : tbHostList) {
             log.info("Init host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
 
-            threadPoolTaskScheduler.submit(() -> {
+            Future<?> task = threadPoolTaskScheduler.submit(() -> {
                 try {
                     // check if host init shell script executed
                     if (tbHost.getStatus() != HostStatusEnum.INIT_SUCCESS.getId()){
-                        boolean success = this.updateStatus(tbHost.getId(), HostStatusEnum.INITIATING);
+                        boolean success = this.updateStatus(tbHost.getId(), HostStatusEnum.INITIATING, "Initiating...");
                         if (success){
                             log.info("Init host:[{}] by exec shell script:[{}]", tbHost.getIp(), constant.getNodeOperateShell());
 
                             // exec host init shell script
-                            deployShellService.execHostOperate(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
-                                    PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
+                            try {
+                                deployShellService.execHostOperate(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
+                                        PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
+                            } catch (Exception e) {
+                                log.error("Exec host init shell script on host:[{}] failed", tbHost.getIp(), e);
+                                this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                        "Execute host init shell script failed, please check the host's network.");
+                                return ;
+                            }
+
                         }
                     }
 
@@ -150,27 +168,68 @@ public class HostService {
                         // local: NODES_ROOT/[chainName]/[ip] TO remote: /opt/fisco/[chainName]
                         String src = String.format("%s/*", pathService.getHost(tbChain.getChainName(), tbHost.getIp()).toString());
                         String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName());
-                        deployShellService.scp(ScpTypeEnum.UP,tbHost.getSshUser(), tbHost.getIp(),tbHost.getSshPort(), src, dst);
-                        log.info("Send files from:[{}] to:[{}@{}#{}:{}] success.",
-                                src, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), dst);
+                        try {
+                            deployShellService.scp(ScpTypeEnum.UP,tbHost.getSshUser(), tbHost.getIp(),tbHost.getSshPort(), src, dst);
+                            log.info("Send files from:[{}] to:[{}@{}#{}:{}] success.",
+                                    src, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), dst);
+                        } catch (Exception e) {
+                            log.error("Send file to host :[{}] failed", tbHost.getIp(), e);
+                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                    "Scp configuration files to host failed, please check the host's network or disk usage.");
+                            return ;
+                        }
+
                     }
 
                     // docker pull image
-                    this.dockerOptions.pullImage(tbHost.getIp(), tbHost.getDockerPort(), tbHost.getSshUser(),tbHost.getSshPort(), tbChain.getVersion());
+                    try {
+                        this.dockerOptions.pullImage(tbHost.getIp(), tbHost.getDockerPort(), tbHost.getSshUser(),tbHost.getSshPort(), tbChain.getVersion());
+                    } catch (Exception e) {
+                        log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                "Docker pull image failed, please check the host's network or configuration of Docker.");
+                        return;
+                    }
 
-                    // update host status
-                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_SUCCESS) ;
+                    // check port
+                    Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(tbHost.getIp(), 2000, constant.getDefaultChannelPort(), constant.getDefaultP2pPort(), constant.getDefaultFrontPort(), constant.getDefaultJsonrpcPort());
+                    if(portReachable.getKey()){
+                        log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), tbHost.getIp() );
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                String.format("Port:[%s] is in use.",portReachable.getValue()));
+                        return ;
+                    }
+
+                    // update host status only when chain is deploying
+                    TbChain newTbChain = this.tbChainMapper.getByChainName(tbChain.getChainName());
+                    if (ChainStatusEnum.DEPLOY_FAILED.getId() == newTbChain.getChainStatus()) {
+                        // chain is already deploy failed, skip updating host status
+                        return;
+                    }
+                    tbHost.setStatus(HostStatusEnum.INIT_SUCCESS.getId());
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_SUCCESS, "");
                     initSuccessCount.incrementAndGet();
                 } catch (Exception e) {
-                    log.error("Init host:[{}] error", tbHost.getIp(), e);
-                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED);
+                    log.error("Init host:[{}] with unknown error", tbHost.getIp(), e);
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED, "Init host with unknown error, check from log files.");
                 } finally {
                     initHostLatch.countDown();
                 }
             });
+            taskMap.put(tbHost.getId(), task);
         }
 
         initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
+        log.error("Init host timeout, cancel unfinished tasks.");
+        taskMap.entrySet().forEach((entry)->{
+            int hostId = entry.getKey();
+            Future<?> task = entry.getValue();
+            if(! task.isDone()){
+                log.error("Init host:[{}] timeout, cancel the task.", hostId );
+                this.updateStatus(hostId, HostStatusEnum.INIT_FAILED, "Init host timeout.");
+                task.cancel(false);
+            }
+        });
 
         boolean hostInitSuccess = initSuccessCount.get() == CollectionUtils.size(tbHostList);
         // check if all host init success
@@ -245,7 +304,7 @@ public class HostService {
 
         // insert host into db
         return ((HostService) AopContext.currentProxy())
-                .insert(agencyId, agencyName, ip,sshUser,sshPort, rootDirOnHost,HostStatusEnum.ADDED, dockerPort);
+                .insert(agencyId, agencyName, ip,sshUser,sshPort, rootDirOnHost,HostStatusEnum.ADDED, dockerPort,"");
     }
 
     /**
