@@ -53,11 +53,13 @@ import com.webank.webase.node.mgr.base.enums.OperateStatus;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
+import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
@@ -130,6 +132,10 @@ public class GroupService {
     private DeployShellService deployShellService;
     @Autowired
     private PathService pathService;
+    @Autowired
+    private ConstantProperties constantProperties;
+
+    @Autowired private ChainService chainService;
 
     public static final String RUNNING_GROUP = "RUNNING";
     public static final String OPERATE_START_GROUP = "start";
@@ -236,6 +242,10 @@ public class GroupService {
      */
     @Transactional
     public synchronized void resetGroupList() {
+        if (! chainService.runTask()) {
+            return ;
+        }
+
         Instant startTime = Instant.now();
         log.info("start resetGroupList. startTime:{}", startTime.toEpochMilli());
 
@@ -286,13 +296,6 @@ public class GroupService {
 	 */
 	private void saveDataOfGroup(List<TbFront> frontList, Set<Integer> allGroupSet) {
 		for (TbFront front : frontList) {
-            if( ! FrontStatusEnum.isRunning(front.getStatus())){
-                log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
-                // update front group map status
-                this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
-                continue;
-            }
-
             String frontIp = front.getFrontIp();
 			int frontPort = front.getFrontPort();
 			// query group list from chain
@@ -749,8 +752,10 @@ public class GroupService {
                 // fetch group config file
                 this.pullAllGroupFiles(generateGroupId, tbFront);
 
-                chainId = chainId == 0 ? tbFront.getChainId() : chainId;
-                chainName = StringUtils.isBlank(chainName) ? tbFront.getChainName() : chainName;
+                if (constantProperties.getDeployType() == 1) { // visual deploy
+                    chainId = chainId == 0 ? tbFront.getChainId() : chainId;
+                    chainName = StringUtils.isBlank(chainName) ? tbFront.getChainName() : chainName;
+                }
             } catch (NodeMgrException | ResourceAccessException e) {
                 log.error("fail generateGroup in frontId:{}, exception:{}",
                         tbFront.getFrontId(), e.getMessage());
@@ -760,9 +765,11 @@ public class GroupService {
             }
         }
 
-        if(chainId == 0 || StringUtils.isBlank(chainName)){
-            log.error("Group need chainId:[{}] and chainName:[{}]",chainId,chainName);
-            throw new NodeMgrException(INSERT_GROUP_ERROR);
+        if (constantProperties.getDeployType() == 1) { // visual deploy
+            if (chainId == 0 || StringUtils.isBlank(chainName)) {
+                log.error("Group need chainId:[{}] and chainName:[{}]", chainId, chainName);
+                throw new NodeMgrException(INSERT_GROUP_ERROR);
+            }
         }
         // save group, saved as invalid status until start
         saveGroup(generateGroupId, req.getNodeList().size(),
