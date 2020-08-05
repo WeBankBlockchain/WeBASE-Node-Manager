@@ -21,6 +21,7 @@ import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_CONFIG_LINE_E
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_FORMAT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.NODES_NUM_EXCEED_MAX_ERROR;
+import static com.webank.webase.node.mgr.base.code.ConstantCode.SAME_HOST_ERROR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 
@@ -89,6 +91,11 @@ public class IpConfigParse {
                 throw new NodeMgrException(ConstantCode.HOST_ONLY_BELONGS_ONE_AGENCY_ERROR);
             }
             hostAgencyMap.put(ipConfigParse.getIp(), ipConfigParse.getAgencyName());
+
+            // check ip is local
+            if (IPUtil.isLocal(ipConfigParse.getIp())){
+                throw new NodeMgrException(SAME_HOST_ERROR.attach(ipConfigParse.getIp()));
+            }
 
             // SSH to host ip
             if (!SshTools.connect(ipConfigParse.getIp(),sshUser,sshPort,privateKey)) {
