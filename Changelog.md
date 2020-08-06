@@ -7,6 +7,8 @@
 
 **Optimization & Bugfix**
 - 增加返回 FISCO-BCOS 和 WeBASE-Front Version 版本接口
+- 修改`tb_contract`表中合约ABI, BIN字段为`mediumtext`
+- 支持ChainGovernance/ContractLifeCycle预编译合约的交易解析
 
 **兼容性**
 - 支持FISCO-BCOS v2.4.x 版本（推荐）
