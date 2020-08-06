@@ -16,7 +16,6 @@
 package com.webank.webase.node.mgr.contract.entity;
 
 import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
-import jnr.ffi.annotations.In;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

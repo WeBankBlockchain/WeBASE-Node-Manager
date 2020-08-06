@@ -13,29 +13,42 @@
  */
 package com.webank.webase.node.mgr.node;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.SshTools;
+import com.webank.webase.node.mgr.base.tools.ValidateUtil;
+import com.webank.webase.node.mgr.chain.ChainService;
+import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
+import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import com.webank.webase.node.mgr.node.entity.TbNode;
+
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * services for node data.
@@ -48,6 +61,10 @@ public class NodeService {
     private NodeMapper nodeMapper;
     @Autowired
     private FrontInterfaceService frontInterface;
+    @Autowired
+    private ChainService chainService;
+    @Autowired
+    private ConstantProperties constantProperties;
     /**
      * update front status
      */
@@ -55,7 +72,7 @@ public class NodeService {
     private FrontService frontService;
 
     // interval of check node status
-    private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 7500L;
+    private static final Long EXT_CHECK_NODE_WAIT_MIN_MILLIS = 3500L;
 
     /**
      * add new node data.
@@ -69,7 +86,7 @@ public class NodeService {
             nodeIp = ipPort[0];
             nodeP2PPort = Integer.valueOf(ipPort[1]);
         }
-        String nodeName = groupId + "_" + peerInfo.getNodeId();
+        String nodeName = getNodeName(groupId, peerInfo.getNodeId());
 
         // add row
         TbNode tbNode = new TbNode();
@@ -80,6 +97,7 @@ public class NodeService {
         tbNode.setP2pPort(nodeP2PPort);
         nodeMapper.add(tbNode);
     }
+
 
     /**
      * query count of node.
@@ -126,22 +144,6 @@ public class NodeService {
     public List<TbNode> getAll() {
         return qureyNodeList(new NodeParam());
     }
-
-    /**
-     * query node info.
-     */
-    public TbNode queryByNodeId(String nodeId) throws NodeMgrException {
-        log.debug("start queryNode nodeId:{}", nodeId);
-        try {
-            TbNode nodeRow = nodeMapper.queryByNodeId(nodeId);
-            log.debug("end queryNode nodeId:{} TbNode:{}", nodeId, JsonTools.toJSONString(nodeRow));
-            return nodeRow;
-        } catch (RuntimeException ex) {
-            log.error("fail queryNode . nodeId:{}", nodeId, ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-    }
-
 
     /**
      * update node info.
@@ -212,6 +214,8 @@ public class NodeService {
         // getObserverList
         List<String> observerList = frontInterface.getObserverList(groupId);
 
+        int nodeCount = CollectionUtils.size(consensusList) + CollectionUtils.size(observerList);
+
         for (TbNode tbNode : nodeList) {
             String nodeId = tbNode.getNodeId();
             BigInteger localBlockNumber = tbNode.getBlockNumber();
@@ -221,12 +225,12 @@ public class NodeService {
 
             Duration duration = Duration.between(modifyTime, LocalDateTime.now());
             Long subTime = duration.toMillis();
-            if (subTime < CHECK_NODE_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
+            if (subTime < (nodeCount * 1000 + EXT_CHECK_NODE_WAIT_MIN_MILLIS) && createTime.isBefore(modifyTime)) {
                 log.warn("checkNodeStatus jump over. for time internal subTime:{}", subTime);
                 return;
             }
 
-            
+
             int nodeType = 0;   //0-consensus;1-observer
             if (observerList != null) {
                 nodeType = observerList.stream()
@@ -265,13 +269,15 @@ public class NodeService {
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
-            // to update front status
-            TbFront updateFront = frontService.getByNodeId(nodeId);
-            if (updateFront != null) {
-                // update front status as long as update node (7.5s internal)
-                log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
-                updateFront.setStatus(tbNode.getNodeActive());
-                frontService.updateFront(updateFront);
+            // only update front status if deploy manually
+            if (chainService.runTask()) {
+                TbFront updateFront = frontService.getByNodeId(nodeId);
+                if (updateFront != null) {
+                    // update front status as long as update node (7.5s internal)
+                    log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
+                    updateFront.setStatus(tbNode.getNodeActive());
+                    frontService.updateFront(updateFront);
+                }
             }
         }
 
@@ -348,5 +354,115 @@ public class NodeService {
             throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), e.getMessage());
         }
 
+    }
+
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbNode insert(
+            String nodeId,
+            String nodeName,
+            int groupId,
+            String ip,
+            int p2pPort,
+            String description,
+            final DataStatus dataStatus
+    ) throws NodeMgrException {
+        if (! ValidateUtil.ipv4Valid(ip)){
+            throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
+        }
+
+        DataStatus newDataStatus = dataStatus == null ? DataStatus.INVALID : dataStatus;
+
+        TbNode node = TbNode.init(nodeId, nodeName, groupId, ip, p2pPort, description, newDataStatus);
+
+        if (nodeMapper.add(node) != 1) {
+            throw new NodeMgrException(ConstantCode.INSERT_NODE_ERROR);
+        }
+        return node;
+    }
+
+    /**
+     * @param groupId
+     * @param nodeId
+     * @return
+     */
+    public static String getNodeName(int groupId, String nodeId) {
+        return String.format("%s_%s", groupId, nodeId);
+    }
+
+    /**
+     *
+     * @param chainId
+     * @param groupId
+     * @return
+     */
+    public List<TbNode> selectNodeListByChainIdAndGroupId(int chainId,final int groupId){
+        // select all fronts by all agencies
+        List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
+
+        List<TbNode> tbNodeList = tbFrontList.stream()
+                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(),groupId))
+                .filter((node) -> node != null)
+                .filter((node) -> node.getGroupId() == groupId)
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(tbNodeList)) {
+            log.error("Group of:[{}] chain:[{}] has no node.", groupId, chainId);
+            return Collections.emptyList();
+        }
+        return tbNodeList;
+    }
+
+
+    /**
+     * Find the first node for coping group config files.
+     *
+     * @param chainId
+     * @param groupId
+     * @return
+     */
+    public TbNode getOldestNodeByChainIdAndGroupId(int chainId, int groupId) {
+        List<TbNode> tbNodeList = this.selectNodeListByChainIdAndGroupId(chainId, groupId);
+        if (CollectionUtils.isEmpty(tbNodeList)) {
+            return null;
+        }
+        TbNode oldest = null;
+
+        for (TbNode tbNode : tbNodeList) {
+            if (oldest == null){
+                oldest = tbNode;
+                continue;
+            }
+            if (tbNode.getCreateTime().isBefore(oldest.getCreateTime())){
+                oldest = tbNode;
+            }
+        }
+        return oldest;
+    }
+
+    /**
+     * @param ip
+     * @param rooDirOnHost
+     * @param chainName
+     * @param hostIndex
+     * @param nodeId
+     */
+    public static void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId,
+            String sshUser, int sshPort,String privateKey) {
+        // create /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss as a parent
+        String chainDeleteRootOnHost = PathService.getChainDeletedRootOnHost(rooDirOnHost, chainName);
+        SshTools.createDirOnRemote(ip, chainDeleteRootOnHost,sshUser,sshPort,privateKey);
+
+        // e.g. /opt/fisco/default_chain
+        String chainRootOnHost = PathService.getChainRootOnHost(rooDirOnHost, chainName);
+        // e.g. /opt/fisco/default_chain/node[x]
+        String src_nodeRootOnHost = PathService.getNodeRootOnHost(chainRootOnHost, hostIndex);
+
+        // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss/[nodeid(128)]
+        String dst_nodeDeletedRootOnHost =
+                PathService.getNodeDeletedRootOnHost(chainDeleteRootOnHost, nodeId);
+        // move
+        SshTools.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost,sshUser,sshPort,privateKey);
     }
 }

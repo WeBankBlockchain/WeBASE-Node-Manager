@@ -16,19 +16,6 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
-import com.webank.webase.node.mgr.alert.mail.MailService;
-import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
-import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
-import com.webank.webase.node.mgr.base.enums.AlertRuleType;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.cert.CertService;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
@@ -37,6 +24,20 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import com.webank.webase.node.mgr.alert.mail.MailService;
+import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
+import com.webank.webase.node.mgr.base.enums.AlertRuleType;
+import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.cert.CertService;
+
+import lombok.extern.log4j.Log4j2;
 
 
 /**
@@ -48,8 +49,6 @@ public class CertMonitorTask {
 
     @Autowired
     private CertService certService;
-    @Autowired
-    private ConstantProperties cProperties;
     @Autowired
     private MailService alertMailService;
     @Autowired
