@@ -13,40 +13,43 @@
  */
 package com.webank.webase.node.mgr.frontgroupmap;
 
+import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
+import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.group.GroupService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.log4j.Log4j2;
 
-import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
-import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
-
-@Slf4j
+@Log4j2
 @Service
 public class FrontGroupMapService {
 
     @Autowired
     private FrontGroupMapMapper frontGroupMapMapper;
     @Autowired
-    private GroupService groupService;
-    @Autowired
-    private FrontService frontService;
-    @Autowired
     private FrontInterfaceService frontInterface;
+    @Autowired
+    private FrontGroupMapCache frontGroupMapCache;
 
     /**
      * add new mapping with group status directly
      */
+    @Transactional
     public TbFrontGroupMap newFrontGroupWithStatus(Integer frontId, Integer groupId, Integer status) {
         log.info("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
         MapListParam param = new MapListParam(frontId, groupId);
@@ -72,8 +75,23 @@ public class FrontGroupMapService {
     }
 
     /**
+     * add new mapping
+     */
+    @Transactional
+    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, GroupStatus groupStatus) {
+        TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, groupStatus.getValue());
+
+        //add db
+        frontGroupMapMapper.add(tbFrontGroupMap);
+
+        return tbFrontGroupMap;
+    }
+
+
+    /**
      * new front group map
      */
+    @Transactional
     public void newFrontGroup(TbFront front, Integer groupId) {
         // check front's all group status
         BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
@@ -149,5 +167,21 @@ public class FrontGroupMapService {
      */
     public void removeInvalidFrontGroupMap() {
         frontGroupMapMapper.removeInvalidMap();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateFrontMapStatus(int frontId, GroupStatus status) {
+        // update status
+        log.info("Update front:[{}] all group map to status:[{}]", frontId, status);
+        frontGroupMapMapper.updateAllGroupsStatus(frontId,status.getValue());
+        this.frontGroupMapCache.clearMapList();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateFrontMapStatus(int frontId, int groupId, GroupStatus status) {
+        // update status
+        log.info("Update front:[{}] group:[{}] map to status:[{}]", frontId, groupId, status);
+        frontGroupMapMapper.updateOneGroupStatus(frontId,status.getValue(),groupId);
+        this.frontGroupMapCache.clearMapList();
     }
 }
