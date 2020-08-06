@@ -15,31 +15,33 @@
  */
 package com.webank.webase.node.mgr.transaction;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.SqlSortType;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
-import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import lombok.extern.log4j.Log4j2;
+
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.SqlSortType;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
+import com.webank.webase.node.mgr.transaction.entity.TransListParam;
+import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
@@ -48,8 +50,6 @@ public class TransHashController {
 
     @Autowired
     private TransHashService transHashService;
-    @Autowired
-    private GroupService groupService;
 
 
     /**

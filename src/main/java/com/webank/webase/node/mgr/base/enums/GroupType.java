@@ -16,28 +16,34 @@
 
 package com.webank.webase.node.mgr.base.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
+
 /**
  * Enumeration of group type.
  * @author marsli
  */
+@Getter
+@ToString
+@AllArgsConstructor
 public enum GroupType {
 	/**
 	 * sync from node
 	 */
-	SYNC(1),
+	SYNC(1,"sync"),
 	/**
 	 * manual generated
 	 */
-	MANUAL(2);
+	MANUAL(2,"manual"),
+
+	/**
+	 * deploy
+	 */
+	DEPLOY(3,"deploy");
 
 	private int value;
+	private String description;
 
-	GroupType(Integer groupType) {
-		this.value = groupType;
-	}
-
-	public int getValue() {
-		return this.value;
-	}
 }
 

@@ -1,3 +1,26 @@
+### v1.4.0(2020-08-06)
+
+**Add**
+- 在原有先部署链，后添加前置方式的基础上，新增可视化部署 FISCO-BCOS 底层节点功能；
+- 可视化部署链后，节点的管理操作，包括：新增，启动，停止；
+- 可视化部署链后，重置链后重新部署的功能；
+
+**Optimization & Bugfix**
+- 增加返回 FISCO-BCOS 和 WeBASE-Front Version 版本接口
+- 修改`tb_contract`表中合约ABI, BIN字段为`mediumtext`
+- 支持ChainGovernance/ContractLifeCycle预编译合约的交易解析
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本（推荐）
+- 支持FISCO-BCOS v2.5.x 版本
+- WeBASE-Web v1.4.0+
+- WeBASE-Front v1.4.0+
+- WeBASE-Sign v1.4.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
+
 ### v1.3.2(2020-06-17)
 
 **Fix**

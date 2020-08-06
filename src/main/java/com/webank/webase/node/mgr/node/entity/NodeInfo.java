@@ -13,28 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.node;
+package com.webank.webase.node.mgr.node.entity;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
 import lombok.Data;
 
-/**
- * Entity class of table tb_node.
- */
 @Data
-public class TbNode {
+public class NodeInfo {
 
-    private String nodeId;
-    private String nodeName;
-    private Integer groupId;
-    private String nodeIp;
-    private Integer p2pPort;
-    private String description;
-    private BigInteger blockNumber;
-    private BigInteger pbftView;
-    private int nodeActive;
-    private LocalDateTime createTime;
-    private LocalDateTime modifyTime;
-
+    private String systemproxyaddress;
+    private String p2pip;
+    private String orgName;
+    private String listenip;
+    private Integer rpcport;
+    private Integer p2pport;
+    private Integer channelPort;
+    private String datadir;
 }
