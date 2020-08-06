@@ -9,11 +9,11 @@
 - 增加返回 FISCO-BCOS 和 WeBASE-Front Version 版本接口
 
 **兼容性**
+- 支持FISCO-BCOS v2.4.x 版本（推荐）
 - 支持FISCO-BCOS v2.5.x 版本
 - WeBASE-Web v1.4.0+
 - WeBASE-Front v1.4.0+
 - WeBASE-Sign v1.4.0+
-- WeBASE-Transaction v1.3.0+
 
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
 
