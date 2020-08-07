@@ -80,7 +80,12 @@ constant:
 
   permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**, /encrypt, /version
 
-  # 1.4.0 visual deploy
+  #### 1.4.0 visual deploy
+  #### deployType 部署方式：
+  # 0, 先使用 build_chain.sh 部署链并启用 WeBASE-Front 服务，然后手动添加前置; 
+  # 1, 使用可视化部署, 需要参考WeBASE文档填写下面参数
+  deployType: 0
+  #### if deployType = 0, ignore below properties ####
   # 镜像名
   dockerRepository: "fiscoorg/fisco-webase"
   # WeBASE-Sign 访问地址
@@ -91,8 +96,7 @@ constant:
   sshDefaultUser: root
   # SSH 服务的端口，默认 22
   sshDefaultPort: 22
-  # 部署方式：0, 先使用 build_chain.sh 部署链和 WeBASE-Front 服务，然后手动添加 ; 1, 使用可视化部署
-  deployType: 0
+  #### if deployType = 0, ignore upper properties ####
 
 sdk:
   # 加密类型：0: 非国密;  1: 国密
