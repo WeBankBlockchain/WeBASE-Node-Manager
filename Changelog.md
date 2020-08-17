@@ -4,7 +4,7 @@
 - 在原有先部署链，后添加前置方式的基础上，新增可视化部署 FISCO-BCOS 底层节点功能；
 - 可视化部署链后，节点的管理操作，包括：新增，启动，停止；
 - 可视化部署链后，重置链后重新部署的功能；
-- 增加获取节点版本号（clientVersion）和节点最高支持版本号（supportVersion）接口；
+- `/front/find` 接口增加字段：节点版本号（`clientVersion`）和节点最高支持版本号（`supportVersion`）；
 
 **Optimization & Bugfix**
 - 增加返回 FISCO-BCOS 和 WeBASE-Front Version 版本接口
