@@ -298,7 +298,7 @@ public class  ContractService {
             //check contract deploy
             verifyContractDeploy(param.getContractId(), param.getGroupId());
         } else {
-            // send tx by abi
+            // send tx by TABLE abi
             // get from db and it's deployed
             AbiInfo abiInfo = abiService.getAbiByGroupIdAndAddress(param.getGroupId(), param.getContractAddress());
             contractAbiStr = abiInfo.getContractAbi();
