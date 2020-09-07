@@ -15,6 +15,8 @@
  */
 package com.webank.webase.node.mgr.precompiled.permission;
 
+import com.webank.webase.node.mgr.precompiled.entity.PermissionParam;
+import com.webank.webase.node.mgr.precompiled.entity.PermissionState;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +30,6 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.TbUser;
@@ -46,8 +47,6 @@ public class PermissionManageService {
 
     @Autowired
     private FrontRestTools frontRestTools;
-    @Autowired
-    private FrontInterfaceService frontInterfaceService;
     @Autowired
     private UserService userService;
 
