@@ -22,6 +22,8 @@ import com.webank.webase.node.mgr.base.enums.RequestType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.pagetools.List2Page;
+import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.precompiled.entity.AccountStatusHandle;
 import java.time.Duration;
@@ -63,12 +65,13 @@ public class ChainGovernController extends BaseController {
 
         Instant startTime = Instant.now();
         log.info("start listCommittee startTime:{}", startTime.toEpochMilli());
-        // todo page list
         List resList = chainGovernService.listCommittee(groupId);
-
-        log.info("end listPermissionManager useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(resList));
-        return new BasePageResponse(ConstantCode.SUCCESS, resList, resList.size());
+        int totalCount = resList.size();
+        List2Page list2Page = new List2Page(resList, pageSize, pageNumber);
+        List finalList = list2Page.getPagedList();
+        log.info("end listPermissionManager useTime:{} finalList:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(finalList));
+        return new BasePageResponse(ConstantCode.SUCCESS, finalList, totalCount);
     }
 
 
@@ -165,7 +168,7 @@ public class ChainGovernController extends BaseController {
     }
 
 
-    @GetMapping("operator")
+    @GetMapping("operator/list")
     public BasePageResponse listOperator(
         @RequestParam(defaultValue = "1") Integer groupId,
         @RequestParam(defaultValue = "10") Integer pageSize,
@@ -173,12 +176,13 @@ public class ChainGovernController extends BaseController {
 
         Instant startTime = Instant.now();
         log.info("start listOperator startTime:{}", startTime.toEpochMilli());
-        // todo page list
         List resList = chainGovernService.listOperator(groupId);
-
-        log.info("end listOperator useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(resList));
-        return new BasePageResponse(ConstantCode.SUCCESS, resList, resList.size());
+        int totalCount = resList.size();
+        List2Page list2Page = new List2Page(resList, pageSize, pageNumber);
+        List finalList = list2Page.getPagedList();
+        log.info("end listOperator useTime:{} finalList:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(finalList));
+        return new BasePageResponse(ConstantCode.SUCCESS, finalList, totalCount);
     }
 
     @PostMapping("operator")
