@@ -23,6 +23,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
+import com.webank.webase.node.mgr.precompiled.entity.AccountStatusHandle;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -220,6 +221,18 @@ public class ChainGovernController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start getAccountStatus startTime:{}", startTime.toEpochMilli());
         Object res = chainGovernService.getAccountStatus(groupId, address);
+
+        log.info("end getAccountStatus useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+        return new BaseResponse(ConstantCode.SUCCESS, res);
+    }
+
+    @GetMapping("account/status/list")
+    public BaseResponse listAccountStatus(@RequestBody AccountStatusHandle accountStatusHandle) {
+
+        Instant startTime = Instant.now();
+        log.info("start getAccountStatus startTime:{}", startTime.toEpochMilli());
+        Object res = chainGovernService.listAccountStatus(accountStatusHandle);
 
         log.info("end getAccountStatus useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));

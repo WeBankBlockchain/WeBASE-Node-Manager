@@ -14,21 +14,18 @@
 
 package com.webank.webase.node.mgr.precompiled.permission;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.RequestType;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
+import com.webank.webase.node.mgr.precompiled.entity.AccountStatusHandle;
 import com.webank.webase.node.mgr.user.UserService;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -160,6 +157,15 @@ public class ChainGovernService {
         map.put("address", String.valueOf(address));
         String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_GOVERNANCE_ACCOUNT_STATUS, map);
         String frontRsp = frontRestTools.getForEntity(groupId, uri, String.class);
+        log.debug("end getAccountStatus. frontRsp:{}", JsonTools.toJSONString(frontRsp));
+        return frontRsp;
+    }
+
+    public Map<String, String> listAccountStatus(AccountStatusHandle accountStatusHandle) {
+        log.debug("start getAccountStatus. reqAccountStatus:{}" , accountStatusHandle);
+        Integer groupId = Integer.MAX_VALUE;
+        Map frontRsp = frontRestTools.postForEntity(groupId,
+            FrontRestTools.URI_GOVERNANCE_ACCOUNT_STATUS_LIST, accountStatusHandle, Map.class);
         log.debug("end getAccountStatus. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
