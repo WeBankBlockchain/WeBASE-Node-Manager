@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.precompiled.permission;
+package com.webank.webase.node.mgr.precompiled.entity;
 
 
 import lombok.Data;
