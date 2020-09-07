@@ -101,6 +101,7 @@ public class FrontRestTools {
     public static final String URI_CONSENSUS_LIST = "precompiled/consensus/list";
     public static final String URI_CONSENSUS = "precompiled/consensus";
     public static final String URI_CRUD = "precompiled/crud";
+    public static final String URI_CONTRACT_STATUS = "precompiled/contractStatusManage";
     public static final String URI_GOVERNANCE = "governance";
     public static final String URI_GOVERNANCE_COMMITTEE = "governance/committee";
     public static final String URI_GOVERNANCE_COMMITTEE_LIST = "governance/committee/list";
@@ -109,6 +110,7 @@ public class FrontRestTools {
     public static final String URI_GOVERNANCE_OPERATOR = "governance/operator";
     public static final String URI_GOVERNANCE_OPERATOR_LIST = "governance/operator/list";
     public static final String URI_GOVERNANCE_ACCOUNT_STATUS = "governance/account/status";
+    public static final String URI_GOVERNANCE_ACCOUNT_STATUS_LIST = "governance/account/status/list";
     public static final String URI_GOVERNANCE_ACCOUNT_FREEZE = "governance/account/freeze";
     public static final String URI_GOVERNANCE_ACCOUNT_UNFREEZE = "governance/account/unfreeze";
 

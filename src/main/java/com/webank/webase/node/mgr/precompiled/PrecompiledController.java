@@ -15,6 +15,8 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
+import com.webank.webase.node.mgr.precompiled.entity.AccountStatusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -121,6 +123,26 @@ public class PrecompiledController extends BaseController {
 
         log.info("end crud useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+
+        return res;
+    }
+
+    /**
+     * contract status control.
+     */
+    @PostMapping(value = "contract/status")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public Object contractStatusManage(@RequestBody @Valid ContractStatusHandle contractStatusHandle,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start crud startTime:{} contractStatusHandle:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(contractStatusHandle));
+
+        Object res = precompiledService.contractStatusManage(contractStatusHandle);
+
+        log.info("end crud useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }
