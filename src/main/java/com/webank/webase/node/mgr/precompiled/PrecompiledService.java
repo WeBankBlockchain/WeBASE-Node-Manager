@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
+import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,9 +145,8 @@ public class PrecompiledService {
     }
 
     /**
-     *  post CRUD opperation
+     *  post CRUD operation
      */
-
     public Object crudService(CrudHandle crudHandle) {
         log.debug("start crudService. crudHandle:{}", JsonTools.toJSONString(crudHandle));
         if (Objects.isNull(crudHandle)) {
@@ -160,6 +160,25 @@ public class PrecompiledService {
                 groupId, FrontRestTools.URI_CRUD,
                 crudHandle, Object.class);
         log.debug("end crudService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
+        return frontRsp;
+    }
+
+    /**
+     *  post CRUD operation
+     */
+    public Object contractStatusManage(ContractStatusHandle contractStatusHandle) {
+        log.debug("start contractStatusManage. contractStatusHandle:{}", JsonTools.toJSONString(contractStatusHandle));
+        if (Objects.isNull(contractStatusHandle)) {
+            log.error("fail contractStatusManage. request param is null");
+            throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
+        }
+        int groupId = contractStatusHandle.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, contractStatusHandle.getFromAddress());
+        contractStatusHandle.setSignUserId(signUserId);
+        Object frontRsp = frontRestTools.postForEntity(
+            groupId, FrontRestTools.URI_CONTRACT_STATUS,
+            contractStatusHandle, Object.class);
+        log.debug("end contractStatusManage. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 }
