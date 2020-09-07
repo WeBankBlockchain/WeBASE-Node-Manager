@@ -101,6 +101,16 @@ public class FrontRestTools {
     public static final String URI_CONSENSUS_LIST = "precompiled/consensus/list";
     public static final String URI_CONSENSUS = "precompiled/consensus";
     public static final String URI_CRUD = "precompiled/crud";
+    public static final String URI_GOVERNANCE = "governance";
+    public static final String URI_GOVERNANCE_COMMITTEE = "governance/committee";
+    public static final String URI_GOVERNANCE_COMMITTEE_LIST = "governance/committee/list";
+    public static final String URI_GOVERNANCE_COMMITTEE_WEIGHT = "governance/committee/weight";
+    public static final String URI_GOVERNANCE_THRESHOLD = "governance/threshold";
+    public static final String URI_GOVERNANCE_OPERATOR = "governance/operator";
+    public static final String URI_GOVERNANCE_OPERATOR_LIST = "governance/operator/list";
+    public static final String URI_GOVERNANCE_ACCOUNT_STATUS = "governance/account/status";
+    public static final String URI_GOVERNANCE_ACCOUNT_FREEZE = "governance/account/freeze";
+    public static final String URI_GOVERNANCE_ACCOUNT_UNFREEZE = "governance/account/unfreeze";
 
     public static final String URI_CERT = "cert";
     public static final String URI_ENCRYPT_TYPE = "encrypt";
@@ -119,7 +129,11 @@ public class FrontRestTools {
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
                 URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE,
                 URI_KEY_PAIR_IMPORT_WITH_SIGN,
-                URI_FRONT_VERSION, URI_SIGN_VERSION);
+                URI_FRONT_VERSION, URI_SIGN_VERSION,
+                URI_GOVERNANCE, URI_GOVERNANCE_COMMITTEE, URI_GOVERNANCE_COMMITTEE_LIST,
+                URI_GOVERNANCE_COMMITTEE_WEIGHT, URI_GOVERNANCE_THRESHOLD,
+                URI_GOVERNANCE_OPERATOR, URI_GOVERNANCE_OPERATOR_LIST,
+                URI_GOVERNANCE_ACCOUNT_STATUS, URI_GOVERNANCE_ACCOUNT_FREEZE, URI_GOVERNANCE_ACCOUNT_UNFREEZE);
 
     public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 
