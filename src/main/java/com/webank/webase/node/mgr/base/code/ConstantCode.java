@@ -170,6 +170,9 @@ public class ConstantCode {
     public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");
     public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node's front not exists");
 
+    /* chain governance */
+    public static final RetCode CONTRACT_STATUS_RECORD_NOT_EXIST = RetCode.mark(202310, "contract status record not exist");
+    public static final RetCode GOVERN_VOTE_RECORD_NOT_EXIST = RetCode.mark(202311, "govern vote record not exist");
 
     // add in v1.4.0
     public static final RetCode NO_DOCKER_TAG_UPDATE_URL_ERROR = RetCode.mark(205001, "No docker image tag update url.");
