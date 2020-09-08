@@ -19,7 +19,7 @@ import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
-import com.webank.webase.node.mgr.precompiled.entity.AccountStatusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.user.UserService;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -161,11 +161,11 @@ public class ChainGovernService {
         return frontRsp;
     }
 
-    public Map<String, String> listAccountStatus(AccountStatusHandle accountStatusHandle) {
-        log.debug("start getAccountStatus. reqAccountStatus:{}" , accountStatusHandle);
+    public Map<String, String> listAccountStatus(AddressStatusHandle addressStatusHandle) {
+        log.debug("start getAccountStatus. reqAccountStatus:{}" , addressStatusHandle);
         Integer groupId = Integer.MAX_VALUE;
         Map frontRsp = frontRestTools.postForEntity(groupId,
-            FrontRestTools.URI_GOVERNANCE_ACCOUNT_STATUS_LIST, accountStatusHandle, Map.class);
+            FrontRestTools.URI_GOVERNANCE_ACCOUNT_STATUS_LIST, addressStatusHandle, Map.class);
         log.debug("end getAccountStatus. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
