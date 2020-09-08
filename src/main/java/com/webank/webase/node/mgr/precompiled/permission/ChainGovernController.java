@@ -23,7 +23,6 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.pagetools.List2Page;
-import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.precompiled.entity.AccountStatusHandle;
 import java.time.Duration;
@@ -57,7 +56,7 @@ public class ChainGovernController extends BaseController {
      * get permission manager paged list
      * 透传front的BaseResponse
      */
-    @GetMapping("committee")
+    @GetMapping("committee/list")
     public BasePageResponse listCommittee(
         @RequestParam(defaultValue = "1") Integer groupId,
         @RequestParam(defaultValue = "10") Integer pageSize,
