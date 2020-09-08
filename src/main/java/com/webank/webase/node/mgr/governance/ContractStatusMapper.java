@@ -27,6 +27,8 @@ public interface ContractStatusMapper {
 
     Integer getCount(GovernParam param);
 
+    TbContractStatus getById(@Param("id") Integer id);
+
     void deleteById(@Param("id") Integer id);
 
 }

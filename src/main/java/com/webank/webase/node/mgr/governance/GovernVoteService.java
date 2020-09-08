@@ -14,9 +14,37 @@
 
 package com.webank.webase.node.mgr.governance;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.governance.entity.GovernParam;
+import com.webank.webase.node.mgr.governance.entity.TbGovernVote;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 /**
  * record chain governance vote
  */
+@Service
 public class GovernVoteService {
+    @Autowired
+    private GovernVoteMapper governVoteMapper;
 
+
+    public List<TbGovernVote> getStatusList(GovernParam governParam) {
+        return governVoteMapper.getList(governParam);
+    }
+
+    public int getCount(GovernParam governParam) {
+        Integer count = governVoteMapper.getCount(governParam);
+        return count == null ? 0 : count;
+    }
+    
+    public void deleteVote(Integer voteId) {
+        TbGovernVote checkExist = governVoteMapper.getById(voteId);
+        if (checkExist == null) {
+            throw new NodeMgrException(ConstantCode.GOVERN_VOTE_RECORD_NOT_EXIST);
+        }
+        governVoteMapper.deleteById(voteId);
+    }
 }
