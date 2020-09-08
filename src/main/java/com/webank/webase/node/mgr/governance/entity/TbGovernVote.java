@@ -28,6 +28,7 @@ public class TbGovernVote {
      * blockHeight of ten times BlockLimit at voting time
      */
     private Long timeLimit;
+//    private Long enableNum;
     private String fromAddress;
     /**
      * vote type: 1-grantCommittee, 2-revokeCommittee,
