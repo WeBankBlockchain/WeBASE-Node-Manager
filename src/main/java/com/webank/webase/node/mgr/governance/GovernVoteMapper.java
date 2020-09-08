@@ -20,8 +20,11 @@ import java.util.List;
 
 public interface GovernVoteMapper {
 
-    int add(TbGovernVote tbGovernVote);
+    Integer add(TbGovernVote tbGovernVote);
 
     List<TbGovernVote> getList(GovernParam param);
 
+    Integer getCount(GovernParam param);
+
+    void deleteById(Integer id);
 }
