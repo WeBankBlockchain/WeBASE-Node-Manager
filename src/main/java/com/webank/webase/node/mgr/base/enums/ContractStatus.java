@@ -16,7 +16,8 @@
 package com.webank.webase.node.mgr.base.enums;
 
 /**
- * Enumeration of contract status.
+ * Enumeration of contract status in node manager
+ * different from contract address's status to freeze in precompiled
  */
 public enum ContractStatus {
 
