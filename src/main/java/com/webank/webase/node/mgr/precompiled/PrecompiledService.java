@@ -16,6 +16,7 @@
 package com.webank.webase.node.mgr.precompiled;
 
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.governance.ContractStatusService;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,10 +67,13 @@ public class PrecompiledService {
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private FrontMapper frontMapper;
+    @Autowired
+    private ContractStatusService contractStatusService;
 
-    private static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
     private static final String CONTRACT_MANAGE_GETSTATUS = "getStatus";
-
+    private static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
+    private static final String CONTRACT_MANAGE_FREEZE = "freeze";
+    private static final String CONTRACT_MANAGE_UNFREEZE = "unfreeze";
 
     /**
      * get cns list /{groupId}/{pathValue} /a?groupId=xx
@@ -193,6 +198,10 @@ public class PrecompiledService {
                 contractStatusHandle, Object.class);
         }
         log.debug("end contractStatusManage. frontRsp:{}", JsonTools.toJSONString(frontRsp));
+        // if success, save record
+        if (CONTRACT_MANAGE_FREEZE.equals(handleType) || CONTRACT_MANAGE_UNFREEZE.equals(handleType)) {
+            contractStatusService.saveContractStatus(contractStatusHandle);
+        }
         return frontRsp;
     }
 

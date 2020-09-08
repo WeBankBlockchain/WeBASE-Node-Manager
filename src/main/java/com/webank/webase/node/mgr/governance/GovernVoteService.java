@@ -15,21 +15,52 @@
 package com.webank.webase.node.mgr.governance;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.FreezeStatus;
+import com.webank.webase.node.mgr.base.enums.GovernType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.governance.entity.GovernParam;
+import com.webank.webase.node.mgr.governance.entity.TbContractStatus;
 import com.webank.webase.node.mgr.governance.entity.TbGovernVote;
+import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
+import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import java.util.List;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * record chain governance vote
  */
+@Log4j2
 @Service
 public class GovernVoteService {
     @Autowired
     private GovernVoteMapper governVoteMapper;
 
+    /**
+     * when freeze contract successfully, save
+     */
+    public void saveGovernVote(ChainGovernanceHandle governanceHandle, GovernType governType,
+        Long timeLimit) {
+        log.debug("saveGovernVote governanceHandle:{},governType:{}", governanceHandle, governType);
+        TbGovernVote tbGovernVote = new TbGovernVote();
+        tbGovernVote.setGroupId(governanceHandle.getGroupId());
+        tbGovernVote.setFromAddress(governanceHandle.getFromAddress());
+        tbGovernVote.setToAddress(governanceHandle.getAddress());
+        // type
+        tbGovernVote.setType(governType.getValue());
+        // block limit
+        tbGovernVote.setTimeLimit(timeLimit);
+        // detail
+        if (governType.equals(GovernType.UPDATE_COMMITTEE_WEIGHT)) {
+            tbGovernVote.setDetail("weight: " + governanceHandle.getWeight());
+        } else if (governType.equals(GovernType.UPDATE_THRESHOLD)) {
+            tbGovernVote.setDetail("threshold: " + governanceHandle.getWeight());
+        }
+        governVoteMapper.add(tbGovernVote);
+        log.debug("saveGovernVote tbGovernVote:{}", tbGovernVote);
+    }
 
     public List<TbGovernVote> getStatusList(GovernParam governParam) {
         return governVoteMapper.getList(governParam);
