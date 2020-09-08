@@ -14,6 +14,36 @@
 
 package com.webank.webase.node.mgr.governance;
 
-public class ContractStatusService {
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.governance.entity.GovernParam;
+import com.webank.webase.node.mgr.governance.entity.TbContractStatus;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+/**
+ * contract freeze status record
+ */
+@Service
+public class ContractStatusService {
+    @Autowired
+    private ContractStatusMapper statusMapper;
+
+    public List<TbContractStatus> getStatusList(GovernParam governParam) {
+        return statusMapper.getList(governParam);
+    }
+
+    public int getCount(GovernParam governParam) {
+        Integer count = statusMapper.getCount(governParam);
+        return count == null ? 0 : count;
+    }
+
+    public void deleteStatus(Integer statusId) {
+        TbContractStatus checkExist = statusMapper.getById(statusId);
+        if (checkExist == null) {
+            throw new NodeMgrException(ConstantCode.CONTRACT_STATUS_RECORD_NOT_EXIST);
+        }
+        statusMapper.deleteById(statusId);
+    }
 }

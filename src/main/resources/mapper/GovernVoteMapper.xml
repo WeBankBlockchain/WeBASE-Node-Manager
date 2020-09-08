@@ -54,6 +54,12 @@
     </if>
   </select>
 
+  <select id="getById" parameterType="java.lang.Integer"
+    resultMap="voteMap">
+    select * from tb_govern_vote
+    where id = #{id}
+  </select>
+
   <delete id="deleteById" parameterType="java.lang.Integer">
     delete from tb_govern_vote where id = #{id}
   </delete>

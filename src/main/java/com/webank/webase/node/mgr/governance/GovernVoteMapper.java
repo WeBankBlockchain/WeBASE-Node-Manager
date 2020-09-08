@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.governance;
 import com.webank.webase.node.mgr.governance.entity.GovernParam;
 import com.webank.webase.node.mgr.governance.entity.TbGovernVote;
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 public interface GovernVoteMapper {
 
@@ -25,6 +26,8 @@ public interface GovernVoteMapper {
     List<TbGovernVote> getList(GovernParam param);
 
     Integer getCount(GovernParam param);
+
+    TbGovernVote getById(@Param("id") Integer id);
 
     void deleteById(Integer id);
 }
