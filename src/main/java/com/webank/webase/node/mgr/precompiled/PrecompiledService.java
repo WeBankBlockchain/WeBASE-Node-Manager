@@ -15,6 +15,8 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +65,10 @@ public class PrecompiledService {
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private FrontMapper frontMapper;
+
+    private static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
+    private static final String CONTRACT_MANAGE_GETSTATUS = "getStatus";
+
 
     /**
      * get cns list /{groupId}/{pathValue} /a?groupId=xx
@@ -164,7 +170,7 @@ public class PrecompiledService {
     }
 
     /**
-     *  post CRUD operation
+     *  post contract status operation
      */
     public Object contractStatusManage(ContractStatusHandle contractStatusHandle) {
         log.debug("start contractStatusManage. contractStatusHandle:{}", JsonTools.toJSONString(contractStatusHandle));
@@ -173,12 +179,50 @@ public class PrecompiledService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
         int groupId = contractStatusHandle.getGroupId();
-        String signUserId = userService.getSignUserIdByAddress(groupId, contractStatusHandle.getFromAddress());
-        contractStatusHandle.setSignUserId(signUserId);
-        Object frontRsp = frontRestTools.postForEntity(
-            groupId, FrontRestTools.URI_CONTRACT_STATUS,
-            contractStatusHandle, Object.class);
+        String handleType = contractStatusHandle.getHandleType();
+        Object frontRsp;
+        if (CONTRACT_MANAGE_GETSTATUS.equals(handleType) || CONTRACT_MANAGE_LISTMANAGER.equals(handleType)) {
+            // no need to set signUserId
+            frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_STATUS,
+                contractStatusHandle, Object.class);
+        } else {
+            String signUserId = userService.getSignUserIdByAddress(groupId,
+                contractStatusHandle.getFromAddress());
+            contractStatusHandle.setSignUserId(signUserId);
+            frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_STATUS,
+                contractStatusHandle, Object.class);
+        }
         log.debug("end contractStatusManage. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
+    }
+
+    /**
+     * query status of contract address list
+     * @param addressStatusHandle
+     * @return
+     */
+    public Map<String, Object> queryContractStatus(AddressStatusHandle addressStatusHandle) {
+        log.debug("start queryContractStatus. addressStatusHandle:{}", JsonTools.toJSONString(addressStatusHandle));
+        if (Objects.isNull(addressStatusHandle)) {
+            log.error("fail queryContractStatus. request param is null");
+            throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
+        }
+        Map<String, Object> resMap = new HashMap<>();
+
+        int groupId = addressStatusHandle.getGroupId();
+        List<String> addressList = addressStatusHandle.getAddressList();
+        // init param
+        ContractStatusHandle statusHandle = new ContractStatusHandle();
+        statusHandle.setGroupId(groupId);
+        statusHandle.setHandleType(CONTRACT_MANAGE_GETSTATUS);
+        for (String contractAddress: addressList) {
+            statusHandle.setContractAddress(contractAddress);
+            log.debug("start batch query. statusHandle:{}", JsonTools.toJSONString(statusHandle));
+            BaseResponse response = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_STATUS,
+                statusHandle, BaseResponse.class);
+            resMap.put(contractAddress, response.getData());
+        }
+        log.debug("end queryContractStatus. frontRsp:{}", JsonTools.toJSONString(resMap));
+        return resMap;
     }
 }
