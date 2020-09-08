@@ -23,6 +23,7 @@ import lombok.Data;
 @Data
 public class TbGovernVote {
     private Integer id;
+    private Integer groupId;
     /**
      * blockHeight of ten times BlockLimit at voting time
      */
@@ -32,7 +33,7 @@ public class TbGovernVote {
      * vote type: 1-grantCommittee, 2-revokeCommittee,
      * 3-updateCommitteeWeight, 4-updateThreshold
      */
-    private String type;
+    private Integer type;
     private String toAddress;
     /**
      * depends on type:
@@ -42,4 +43,5 @@ public class TbGovernVote {
      */
     private String detail;
     private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
 }

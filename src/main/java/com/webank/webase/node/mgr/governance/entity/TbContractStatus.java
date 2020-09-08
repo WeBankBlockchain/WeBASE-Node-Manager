@@ -23,6 +23,7 @@ import lombok.Data;
 @Data
 public class TbContractStatus {
     private Integer id;
+    private Integer groupId;
     private String contractAddress;
     /**
      * FreezeStatus: 0-normal, 1-frozen
@@ -34,4 +35,5 @@ public class TbContractStatus {
      */
     private String modifyAddress;
     private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
 }
