@@ -17,11 +17,16 @@ package com.webank.webase.node.mgr.governance;
 import com.webank.webase.node.mgr.governance.entity.GovernParam;
 import com.webank.webase.node.mgr.governance.entity.TbContractStatus;
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 public interface ContractStatusMapper {
 
-    int add(TbContractStatus tbContractStatus);
+    Integer add(TbContractStatus tbContractStatus);
 
     List<TbContractStatus> getList(GovernParam param);
+
+    Integer getCount(GovernParam param);
+
+    void deleteById(@Param("id") Integer id);
 
 }
