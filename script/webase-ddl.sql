@@ -440,7 +440,7 @@ CREATE TABLE IF NOT EXISTS tb_govern_vote (
   id int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '链治理委员投票记录ID',
   group_id int(11) NOT NULL COMMENT '群组ID',
   -- enable_num bigint DEFAULT NULL COMMENT '投票时间，enable_num',
-  time_limit bigint NOT NULL COMMENT '投票截止块高',
+  time_limit bigint DEFAULT NULL COMMENT '投票截止块高',
   from_address varchar(64) NOT NULL COMMENT '管理员地址',
   type tinyint(8) NOT NULL COMMENT '投票类型，1-选举，2-去除，3-修改委员权重，4,-修改阈值',
   to_address varchar(64) DEFAULT NULL COMMENT '选举/去除的地址',
