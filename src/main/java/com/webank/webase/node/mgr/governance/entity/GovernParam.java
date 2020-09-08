@@ -16,8 +16,14 @@ package com.webank.webase.node.mgr.governance.entity;
 
 import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
+@NoArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class GovernParam extends BaseQueryParam {
     private Integer groupId;
 }
