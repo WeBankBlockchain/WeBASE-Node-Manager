@@ -110,7 +110,6 @@ public class FrontRestTools {
     public static final String URI_GOVERNANCE_OPERATOR = "governance/operator";
     public static final String URI_GOVERNANCE_OPERATOR_LIST = "governance/operator/list";
     public static final String URI_GOVERNANCE_ACCOUNT_STATUS = "governance/account/status";
-    public static final String URI_GOVERNANCE_ACCOUNT_STATUS_LIST = "governance/account/status/list";
     public static final String URI_GOVERNANCE_ACCOUNT_FREEZE = "governance/account/freeze";
     public static final String URI_GOVERNANCE_ACCOUNT_UNFREEZE = "governance/account/unfreeze";
 

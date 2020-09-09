@@ -213,11 +213,17 @@ public class ChainGovernService {
 
     public Map<String, String> listAccountStatus(AddressStatusHandle addressStatusHandle) {
         log.debug("start getAccountStatus. reqAccountStatus:{}" , addressStatusHandle);
-        Integer groupId = Integer.MAX_VALUE;
-        Map frontRsp = frontRestTools.postForEntity(groupId,
-            FrontRestTools.URI_GOVERNANCE_ACCOUNT_STATUS_LIST, addressStatusHandle, Map.class);
-        log.debug("end getAccountStatus. frontRsp:{}", JsonTools.toJSONString(frontRsp));
-        return frontRsp;
+        // response
+        Map<String, String> resMap = new HashMap<>();
+
+        Integer groupId = addressStatusHandle.getGroupId();
+        List<String> addressList = addressStatusHandle.getAddressList();
+        for (String address: addressList) {
+            String frontRsp = this.getAccountStatus(groupId, address);
+            resMap.put(address, frontRsp);
+        }
+        log.debug("end getAccountStatus. resMap:{}", JsonTools.toJSONString(resMap));
+        return resMap;
     }
 
     /**
