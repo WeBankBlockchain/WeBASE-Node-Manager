@@ -271,7 +271,7 @@ public class ChainGovernController extends BaseController {
 
         Instant startTime = Instant.now();
         log.info("start getAccountStatus startTime:{}", startTime.toEpochMilli());
-        Object res = chainGovernService.listAccountStatus(addressStatusHandle);
+        Map<String, String> res = chainGovernService.listAccountStatus(addressStatusHandle);
 
         log.info("end getAccountStatus useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
