@@ -266,7 +266,7 @@ public class ChainGovernController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
-    @GetMapping("account/status/list")
+    @PostMapping("account/status/list")
     public BaseResponse listAccountStatus(@RequestBody AddressStatusHandle addressStatusHandle) {
 
         Instant startTime = Instant.now();
