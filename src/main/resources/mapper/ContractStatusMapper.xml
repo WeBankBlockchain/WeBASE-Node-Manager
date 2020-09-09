@@ -38,7 +38,7 @@
     </if>
   </select>
 
-  <select id="listOfUser" parameterType="com.webank.webase.node.mgr.governance.entity.GovernParam"
+  <select id="getList" parameterType="com.webank.webase.node.mgr.governance.entity.GovernParam"
     resultMap="statusMap">
     select * from tb_contract_status where 1=1
     <if test="groupId != null and groupId != ''">

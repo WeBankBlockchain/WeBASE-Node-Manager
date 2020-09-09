@@ -53,7 +53,7 @@ public class GovernVoteController {
             param.setPageSize(pageSize);
             Integer start = (pageNumber - 1) * pageSize;
             param.setStart(start);
-            List<TbGovernVote> resList = governVoteService.getStatusList(param);
+            List<TbGovernVote> resList = governVoteService.getVoteList(param);
             response.setData(resList);
             response.setTotalCount(count);
         }
