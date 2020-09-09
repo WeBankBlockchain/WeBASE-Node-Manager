@@ -22,12 +22,17 @@ import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.governance.GovernVoteService;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.RspCommitteeInfo;
 import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.KeyPair;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +57,24 @@ public class ChainGovernService {
         List frontRsp = frontRestTools.getForEntity(groupId, uri, List.class);
         log.debug("end listCommittee. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
+    }
+
+    public List<RspCommitteeInfo> listCommitteeWithWeight(Integer groupId) {
+        log.debug("start listCommitteeWithWeight. groupId:{}" , groupId);
+        // result
+        List<RspCommitteeInfo> resList = new ArrayList<>();
+        // get committee info list
+        List data = this.listCommittee(groupId);
+        List<PermissionInfo> committeeList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), PermissionInfo.class);
+        committeeList.forEach(cOnchain -> {
+            RspCommitteeInfo committeeInfo = new RspCommitteeInfo();
+            BeanUtils.copyProperties(cOnchain, committeeInfo);
+            Integer weight = this.getCommitteeWeight(groupId, cOnchain.getAddress());
+            committeeInfo.setWeight(weight);
+            resList.add(committeeInfo);
+        });
+        log.debug("end listCommittee. resList:{}", JsonTools.toJSONString(resList));
+        return resList;
     }
 
     /**
@@ -79,13 +102,13 @@ public class ChainGovernService {
         return frontRsp;
     }
 
-    public Object getCommitteeWeight(Integer groupId, String address) {
+    public Integer getCommitteeWeight(Integer groupId, String address) {
         log.debug("start getCommitteeWeight. groupId:{},address:{}", groupId, address);
         Map<String, String> map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
         map.put("address", address);
         String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_GOVERNANCE_COMMITTEE_WEIGHT, map);
-        Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
+        Integer frontRsp = frontRestTools.getForEntity(groupId, uri, Integer.class);
         log.debug("end getCommitteeWeight. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
@@ -100,6 +123,25 @@ public class ChainGovernService {
         log.debug("end updateCommitteeWeight. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_COMMITTEE_WEIGHT, null);
         return frontRsp;
+    }
+
+    public Map<String, Object> listCommitteeWeight(AddressStatusHandle addressStatusHandle) {
+        log.debug("start getCommitteeWeight. addressStatusHandle:{}", addressStatusHandle);
+        Integer groupId = addressStatusHandle.getGroupId();
+        Map<String, String> map = new HashMap<>();
+        map.put("groupId", String.valueOf(groupId));
+        List<String> addressList = addressStatusHandle.getAddressList();
+        // response
+        Map<String, Object> resMap = new HashMap<>();
+        for (String address: addressList) {
+            map.put("address", address);
+            String uri = HttpRequestTools
+                .getQueryUri(FrontRestTools.URI_GOVERNANCE_COMMITTEE_WEIGHT, map);
+            Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
+            resMap.put(address, frontRsp);
+        }
+        log.debug("end getCommitteeWeight. frontRsp:{}", JsonTools.toJSONString(resMap));
+        return resMap;
     }
 
     public BigInteger getThreshold(Integer groupId) {

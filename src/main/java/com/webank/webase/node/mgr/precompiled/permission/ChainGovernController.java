@@ -25,9 +25,11 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.pagetools.List2Page;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.RspCommitteeInfo;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +75,23 @@ public class ChainGovernController extends BaseController {
         return new BasePageResponse(ConstantCode.SUCCESS, finalList, totalCount);
     }
 
+    @GetMapping("committee/list/sorted")
+    public BasePageResponse listCommitteeWithWeight(
+        @RequestParam(defaultValue = "1") Integer groupId,
+        @RequestParam(defaultValue = "10") Integer pageSize,
+        @RequestParam(defaultValue = "1") Integer pageNumber) {
+
+        Instant startTime = Instant.now();
+        log.info("start listCommitteeWithWeight startTime:{}", startTime.toEpochMilli());
+        List<RspCommitteeInfo> resList = chainGovernService.listCommitteeWithWeight(groupId);
+        int totalCount = resList.size();
+        List2Page list2Page = new List2Page(resList, pageSize, pageNumber);
+        List<RspCommitteeInfo> finalList = list2Page.getPagedList();
+        log.info("end listCommitteeWithWeight useTime:{} finalList:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(finalList));
+        return new BasePageResponse(ConstantCode.SUCCESS, finalList, totalCount);
+    }
+
 
     @PostMapping("committee")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
@@ -113,10 +132,27 @@ public class ChainGovernController extends BaseController {
 
         Instant startTime = Instant.now();
         log.info("start getCommitteeWeight startTime:{}", startTime.toEpochMilli());
-        Object res = chainGovernService.getCommitteeWeight(groupId, address);
+        Integer res = chainGovernService.getCommitteeWeight(groupId, address);
 
         log.info("end getCommitteeWeight useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+        return new BaseResponse(ConstantCode.SUCCESS, res);
+    }
+
+    @PostMapping("committee/weight/list")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse listCommitteeWeight(@Valid @RequestBody AddressStatusHandle addressStatusHandle,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start listCommitteeWeight startTime:{} addressStatusHandle:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(addressStatusHandle));
+
+        Map<String, Object> res = chainGovernService.listCommitteeWeight(addressStatusHandle);
+
+        log.info("end listCommitteeWeight useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
