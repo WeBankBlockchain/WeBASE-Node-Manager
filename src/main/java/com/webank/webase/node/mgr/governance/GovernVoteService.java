@@ -62,7 +62,7 @@ public class GovernVoteService {
         log.debug("saveGovernVote tbGovernVote:{}", tbGovernVote);
     }
 
-    public List<TbGovernVote> getStatusList(GovernParam governParam) {
+    public List<TbGovernVote> getVoteList(GovernParam governParam) {
         return governVoteMapper.getList(governParam);
     }
 
