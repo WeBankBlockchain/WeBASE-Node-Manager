@@ -581,6 +581,12 @@ public class FrontInterfaceService {
 
     public List<String> getNodeIdList(int groupId) {
         return frontRestTools.getForEntity(groupId, FrontRestTools.URI_NODEID_LIST, List.class);
+    }
 
+    /**
+     * get block limit of node cache
+     */
+    public BigInteger getBlockLimit(int groupId) {
+        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_BLOCK_LIMIT, BigInteger.class);
     }
 }
