@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.precompiled.entity;
 
+import java.math.BigDecimal;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,4 +27,5 @@ import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 @EqualsAndHashCode(callSuper = true)
 public class RspCommitteeInfo extends PermissionInfo {
     private Integer weight;
+    private BigDecimal weightRate;
 }
