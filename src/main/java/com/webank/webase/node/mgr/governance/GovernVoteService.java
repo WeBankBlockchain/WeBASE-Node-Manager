@@ -47,7 +47,7 @@ public class GovernVoteService {
      */
     public void saveGovernVote(ChainGovernanceHandle governanceHandle, GovernType governType) {
         log.debug("saveGovernVote governanceHandle:{},governType:{}", governanceHandle, governType);
-        BigInteger blockLimit = frontInterfaceService.getBlockLimit(governanceHandle.getGroupId());
+        BigInteger blockNumber = frontInterfaceService.getLatestBlockNumber(governanceHandle.getGroupId());
 
         TbGovernVote tbGovernVote = new TbGovernVote();
         tbGovernVote.setGroupId(governanceHandle.getGroupId());
@@ -55,8 +55,8 @@ public class GovernVoteService {
         tbGovernVote.setToAddress(governanceHandle.getAddress());
         // type
         tbGovernVote.setType(governType.getValue());
-        // time limit = block limit * 10
-        tbGovernVote.setTimeLimit(blockLimit.longValue() * 10L);
+        // time limit = block limit + blockHeight
+        tbGovernVote.setTimeLimit(blockNumber.longValue() + 10000L);
         // detail
         if (governType.equals(GovernType.UPDATE_COMMITTEE_WEIGHT)) {
             tbGovernVote.setDetail("weight: " + governanceHandle.getWeight());
