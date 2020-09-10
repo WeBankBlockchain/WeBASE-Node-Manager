@@ -27,7 +27,7 @@
   <insert id="add" parameterType="com.webank.webase.node.mgr.governance.entity.TbGovernVote">
     insert into
     tb_govern_vote(group_id,time_limit,from_address,type,to_address,detail,create_time,modify_time)
-    values(#{groupId},#{timeLimit},#{fromAddress},#{type},#{toAddress},#{detail},NOW(),NOW(),NOW())
+    values(#{groupId},#{timeLimit},#{fromAddress},#{type},#{toAddress},#{detail},NOW(),NOW())
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
