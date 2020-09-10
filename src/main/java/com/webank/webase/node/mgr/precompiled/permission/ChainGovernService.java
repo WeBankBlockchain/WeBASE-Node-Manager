@@ -18,14 +18,16 @@ import com.webank.webase.node.mgr.base.enums.GovernType;
 import com.webank.webase.node.mgr.base.enums.RequestType;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.governance.GovernVoteService;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.RspCommitteeInfo;
 import com.webank.webase.node.mgr.user.UserService;
-import com.webank.webase.node.mgr.user.entity.KeyPair;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,16 +65,29 @@ public class ChainGovernService {
         log.debug("start listCommitteeWithWeight. groupId:{}" , groupId);
         // result
         List<RspCommitteeInfo> resList = new ArrayList<>();
+        // weight sum
+        Integer weightSum = 0;
         // get committee info list
         List data = this.listCommittee(groupId);
         List<PermissionInfo> committeeList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), PermissionInfo.class);
-        committeeList.forEach(cOnchain -> {
+        for (PermissionInfo cOnChain: committeeList) {
             RspCommitteeInfo committeeInfo = new RspCommitteeInfo();
-            BeanUtils.copyProperties(cOnchain, committeeInfo);
-            Integer weight = this.getCommitteeWeight(groupId, cOnchain.getAddress());
+            BeanUtils.copyProperties(cOnChain, committeeInfo);
+            Integer weight = this.getCommitteeWeight(groupId, cOnChain.getAddress());
             committeeInfo.setWeight(weight);
             resList.add(committeeInfo);
-        });
+            // add sum
+            weightSum += weight;
+        }
+        // add rate of weight in result
+        for (RspCommitteeInfo res: resList) {
+            // cal weight divide weightSum, ex 1/2, 1/3
+            BigDecimal calRate = BigDecimal.valueOf(res.getWeight().doubleValue() / weightSum);
+            // ex: 0.500, 0.333(1/3)
+            BigDecimal rate = calRate.setScale(3, RoundingMode.FLOOR);
+            // ex: set as 50.0, 33.3
+            res.setWeightRate(rate.multiply(BigDecimal.valueOf(100L)));
+        }
         log.debug("end listCommittee. resList:{}", JsonTools.toJSONString(resList));
         return resList;
     }
@@ -91,12 +106,12 @@ public class ChainGovernService {
             frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE,
                 governanceHandle, Object.class);
-            governVoteService.saveGovernVote(governanceHandle, GovernType.GRANT_COMMITTEE, null);
+            governVoteService.saveGovernVote(governanceHandle, GovernType.GRANT_COMMITTEE);
         } else if (requestType == RequestType.DELETE) {
             frontRsp = frontRestTools.deleteForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE,
                 governanceHandle, Object.class);
-            governVoteService.saveGovernVote(governanceHandle, GovernType.REVOKE_COMMITTEE, null);
+            governVoteService.saveGovernVote(governanceHandle, GovernType.REVOKE_COMMITTEE);
         }
         log.debug("end handleCommittee. frontRsp:{}", frontRsp);
         return frontRsp;
@@ -121,7 +136,7 @@ public class ChainGovernService {
         Object frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE_WEIGHT,
             governanceHandle, Object.class);
         log.debug("end updateCommitteeWeight. frontRsp:{}", JsonTools.toJSONString(frontRsp));
-        governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_COMMITTEE_WEIGHT, null);
+        governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_COMMITTEE_WEIGHT);
         return frontRsp;
     }
 
@@ -162,7 +177,7 @@ public class ChainGovernService {
         Object frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_GOVERNANCE_THRESHOLD,
             governanceHandle, Object.class);
         log.debug("end updateThreshold. frontRsp:{}", JsonTools.toJSONString(frontRsp));
-        governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_COMMITTEE_WEIGHT, null);
+        governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_COMMITTEE_WEIGHT);
         return frontRsp;
     }
 
