@@ -64,10 +64,13 @@ public class ConstantProperties {
     private Boolean isBlockPullFromZero = false;
 
     //receive http request
-    private Integer verificationCodeMaxAge = 300; // seconds
     private Integer authTokenMaxAge = 900; // seconds
     private Boolean isUseSecurity = true;
     private String ignoreCheckFront = null;
+    // verification code settings
+    private Integer verificationCodeMaxAge = 300; // seconds
+    private Boolean enableVerificationCode = true;
+    private String verificationCodeValue = "8888";
 
     //front http request
     private String frontUrl;
