@@ -222,14 +222,14 @@ public class ChainGovernController extends BaseController {
 
     @PostMapping("operator")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object grantOperator(@Valid @RequestBody ChainGovernanceHandle governanceHandle,
+    public BaseResponse grantOperator(@Valid @RequestBody ChainGovernanceHandle governanceHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start grantOperator startTime:{} governanceHandle:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(governanceHandle));
 
-        Object res = chainGovernService.handleOperator(governanceHandle, RequestType.POST);
+        BaseResponse res = chainGovernService.handleOperator(governanceHandle, RequestType.POST);
 
         log.info("end grantOperator useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
@@ -239,14 +239,14 @@ public class ChainGovernController extends BaseController {
 
     @DeleteMapping("operator")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object revokeOperator(@Valid @RequestBody ChainGovernanceHandle governanceHandle,
+    public BaseResponse revokeOperator(@Valid @RequestBody ChainGovernanceHandle governanceHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start revokeOperator startTime:{} governanceHandle:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(governanceHandle));
 
-        Object res = chainGovernService.handleOperator(governanceHandle, RequestType.DELETE);
+        BaseResponse res = chainGovernService.handleOperator(governanceHandle, RequestType.DELETE);
 
         log.info("end revokeOperator useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
@@ -280,14 +280,14 @@ public class ChainGovernController extends BaseController {
 
     @PostMapping("account")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object freezeAccount(@Valid @RequestBody ChainGovernanceHandle governanceHandle,
+    public BaseResponse freezeAccount(@Valid @RequestBody ChainGovernanceHandle governanceHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start freezeAccount startTime:{} governanceHandle:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(governanceHandle));
 
-        Object res = chainGovernService.handleAccountStatus(governanceHandle, RequestType.POST);
+        BaseResponse res = chainGovernService.handleAccountStatus(governanceHandle, RequestType.POST);
 
         log.info("end freezeAccount useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
@@ -297,14 +297,14 @@ public class ChainGovernController extends BaseController {
 
     @DeleteMapping("account")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object unfreezeAccount(@Valid @RequestBody ChainGovernanceHandle governanceHandle,
+    public BaseResponse unfreezeAccount(@Valid @RequestBody ChainGovernanceHandle governanceHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start unfreezeAccount startTime:{} governanceHandle:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(governanceHandle));
 
-        Object res = chainGovernService.handleAccountStatus(governanceHandle, RequestType.DELETE);
+        BaseResponse res = chainGovernService.handleAccountStatus(governanceHandle, RequestType.DELETE);
 
         log.info("end unfreezeAccount useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
