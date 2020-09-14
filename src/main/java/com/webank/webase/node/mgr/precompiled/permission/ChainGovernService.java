@@ -14,11 +14,12 @@
 
 package com.webank.webase.node.mgr.precompiled.permission;
 
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GovernType;
 import com.webank.webase.node.mgr.base.enums.RequestType;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.base.tools.PrecompiledTools;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.governance.GovernVoteService;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
@@ -95,26 +96,26 @@ public class ChainGovernService {
     /**
      *  POST => grant, DELETE => revoke
      */
-    public Object handleCommittee(ChainGovernanceHandle governanceHandle, RequestType requestType) {
+    public BaseResponse handleCommittee(ChainGovernanceHandle governanceHandle, RequestType requestType) {
         log.debug("start handleCommittee. governanceHandle:{},requestType:{}",
             JsonTools.toJSONString(governanceHandle), requestType);
         int groupId = governanceHandle.getGroupId();
         String signUserId = userService.getSignUserIdByAddress(groupId, governanceHandle.getFromAddress());
         governanceHandle.setSignUserId(signUserId);
-        Object frontRsp = null;
+        String frontRsp = null;
         if (requestType == RequestType.POST) {
             frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE,
-                governanceHandle, Object.class);
+                governanceHandle, String.class);
             governVoteService.saveGovernVote(governanceHandle, GovernType.GRANT_COMMITTEE);
         } else if (requestType == RequestType.DELETE) {
             frontRsp = frontRestTools.deleteForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE,
-                governanceHandle, Object.class);
+                governanceHandle, String.class);
             governVoteService.saveGovernVote(governanceHandle, GovernType.REVOKE_COMMITTEE);
         }
         log.debug("end handleCommittee. frontRsp:{}", frontRsp);
-        return frontRsp;
+        return PrecompiledTools.processResponse(frontRsp);
     }
 
     public Integer getCommitteeWeight(Integer groupId, String address) {
@@ -128,16 +129,16 @@ public class ChainGovernService {
         return frontRsp;
     }
 
-    public Object updateCommitteeWeight(ChainGovernanceHandle governanceHandle) {
+    public BaseResponse updateCommitteeWeight(ChainGovernanceHandle governanceHandle) {
         log.debug("start updateCommitteeWeight.  governanceHandle:{}", governanceHandle);
         int groupId = governanceHandle.getGroupId();
         String signUserId = userService.getSignUserIdByAddress(groupId, governanceHandle.getFromAddress());
         governanceHandle.setSignUserId(signUserId);
-        Object frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE_WEIGHT,
-            governanceHandle, Object.class);
+        String frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE_WEIGHT,
+            governanceHandle, String.class);
         log.debug("end updateCommitteeWeight. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_COMMITTEE_WEIGHT);
-        return frontRsp;
+        return PrecompiledTools.processResponse(frontRsp);
     }
 
     public Map<String, Object> listCommitteeWeight(AddressStatusHandle addressStatusHandle) {
@@ -152,8 +153,8 @@ public class ChainGovernService {
             map.put("address", address);
             String uri = HttpRequestTools
                 .getQueryUri(FrontRestTools.URI_GOVERNANCE_COMMITTEE_WEIGHT, map);
-            Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-            resMap.put(address, frontRsp);
+            Integer weightValue = frontRestTools.getForEntity(groupId, uri, Integer.class);
+            resMap.put(address, weightValue);
         }
         log.debug("end getCommitteeWeight. frontRsp:{}", JsonTools.toJSONString(resMap));
         return resMap;
@@ -169,39 +170,39 @@ public class ChainGovernService {
         return frontRsp;
     }
 
-    public Object updateThreshold(ChainGovernanceHandle governanceHandle) {
+    public BaseResponse updateThreshold(ChainGovernanceHandle governanceHandle) {
         log.debug("start updateThreshold.  governanceHandle:{}", governanceHandle);
         int groupId = governanceHandle.getGroupId();
         String signUserId = userService.getSignUserIdByAddress(groupId, governanceHandle.getFromAddress());
         governanceHandle.setSignUserId(signUserId);
-        Object frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_GOVERNANCE_THRESHOLD,
-            governanceHandle, Object.class);
+        String frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_GOVERNANCE_THRESHOLD,
+            governanceHandle, String.class);
         log.debug("end updateThreshold. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_COMMITTEE_WEIGHT);
-        return frontRsp;
+        return PrecompiledTools.processResponse(frontRsp);
     }
 
     /**
      *  POST => grant, DELETE => revoke
      */
-    public Object handleOperator(ChainGovernanceHandle governanceHandle, RequestType requestType) {
+    public BaseResponse handleOperator(ChainGovernanceHandle governanceHandle, RequestType requestType) {
         log.debug("start grantOperator. governanceHandle:{},requestType:{}",
             JsonTools.toJSONString(governanceHandle), requestType);
         int groupId = governanceHandle.getGroupId();
         String signUserId = userService.getSignUserIdByAddress(groupId, governanceHandle.getFromAddress());
         governanceHandle.setSignUserId(signUserId);
-        Object frontRsp = null;
+        String frontRsp = null;
         if (requestType == RequestType.POST) {
             frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_OPERATOR,
-                governanceHandle, Object.class);
+                governanceHandle, String.class);
         } else if (requestType == RequestType.DELETE) {
             frontRsp = frontRestTools.deleteForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_OPERATOR,
-                governanceHandle, Object.class);
+                governanceHandle, String.class);
         }
         log.debug("end handleOperator. frontRsp:{}", frontRsp);
-        return frontRsp;
+        return PrecompiledTools.processResponse(frontRsp);
     }
 
 
@@ -215,6 +216,10 @@ public class ChainGovernService {
         return frontRsp;
     }
 
+    /**
+     * get status code of account, 0-normal, 1-frozen
+     * @return 0 or 1
+     */
     public String getAccountStatus(Integer groupId, String address) {
         log.debug("start getAccountStatus. groupId:{}" , groupId);
         Map<String, String> map = new HashMap<>();
@@ -234,8 +239,8 @@ public class ChainGovernService {
         Integer groupId = addressStatusHandle.getGroupId();
         List<String> addressList = addressStatusHandle.getAddressList();
         for (String address: addressList) {
-            String frontRsp = this.getAccountStatus(groupId, address);
-            resMap.put(address, frontRsp);
+            String statusCode = this.getAccountStatus(groupId, address);
+            resMap.put(address, statusCode);
         }
         log.debug("end getAccountStatus. resMap:{}", JsonTools.toJSONString(resMap));
         return resMap;
@@ -244,24 +249,25 @@ public class ChainGovernService {
     /**
      * POST => FREEZE, DELETE => UNFREEZE
      */
-    public Object handleAccountStatus(ChainGovernanceHandle governanceHandle, RequestType requestType) {
+    public BaseResponse handleAccountStatus(ChainGovernanceHandle governanceHandle, RequestType requestType) {
         log.debug("start handleAccountStatus. governanceHandle:{},requestType:{}",
             JsonTools.toJSONString(governanceHandle), requestType);
         int groupId = governanceHandle.getGroupId();
         String signUserId = userService.getSignUserIdByAddress(groupId, governanceHandle.getFromAddress());
         governanceHandle.setSignUserId(signUserId);
-        Object frontRsp = null;
+        String frontRsp = null;
         if (requestType == RequestType.POST) {
             frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_ACCOUNT_FREEZE,
-                governanceHandle, Object.class);
+                governanceHandle, String.class);
         } else if (requestType == RequestType.DELETE) {
             frontRsp = frontRestTools.deleteForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_ACCOUNT_UNFREEZE,
-                governanceHandle, Object.class);
+                governanceHandle, String.class);
         }
         log.debug("end handleAccountStatus. frontRsp:{}", frontRsp);
-        return frontRsp;
+        return PrecompiledTools.processResponse(frontRsp);
     }
+
 
 }
