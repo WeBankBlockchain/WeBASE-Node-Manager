@@ -15,6 +15,8 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import java.time.Duration;
@@ -150,7 +152,7 @@ public class PrecompiledController extends BaseController {
 
     @PostMapping(value = "contract/status/list")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Map<String, Object> listContractStatus(@RequestBody @Valid AddressStatusHandle addressStatusHandle,
+    public BaseResponse listContractStatus(@RequestBody @Valid AddressStatusHandle addressStatusHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
@@ -163,6 +165,6 @@ public class PrecompiledController extends BaseController {
         log.info("end crud useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
-        return res;
+        return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 }
