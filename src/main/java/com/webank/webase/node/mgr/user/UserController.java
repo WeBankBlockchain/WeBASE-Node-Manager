@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -23,7 +23,6 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.PemUtils;
 import com.webank.webase.node.mgr.user.entity.*;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -58,23 +57,24 @@ public class UserController extends BaseController {
      * add new user info.
      */
     @PostMapping(value = "/userInfo")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse addUserInfo(@RequestBody @Valid NewUserInputParam user,
-        BindingResult result) throws NodeMgrException {
+            BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
         // add user row
-        Integer userId = userService.addUserInfo(user.getGroupId(),
-                user.getUserName(), user.getDescription(), user.getUserType(), null);
+        Integer userId = userService.addUserInfo(user.getGroupId(), user.getUserName(),
+                user.getAccount(), user.getDescription(), user.getUserType(), null);
 
         // query user row
         TbUser userRow = userService.queryByUserId(userId);
         baseResponse.setData(userRow);
 
         log.info("end addUserInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -82,9 +82,9 @@ public class UserController extends BaseController {
      * bind user info.
      */
     @PostMapping(value = "/bind")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse bindUserInfo(@RequestBody @Valid BindUserInputParam user,
-        BindingResult result) throws NodeMgrException {
+            BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -97,7 +97,8 @@ public class UserController extends BaseController {
         baseResponse.setData(userRow);
 
         log.info("end bindUserInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -105,14 +106,14 @@ public class UserController extends BaseController {
      * update user info.
      */
     @PutMapping(value = "/userInfo")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse updateUserInfo(@RequestBody @Valid UpdateUserInputParam user,
-        BindingResult result) throws NodeMgrException {
+            BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start updateUserInfo startTime:{} User:{}", startTime.toEpochMilli(),
-            JsonTools.toJSONString(user));
+                JsonTools.toJSONString(user));
 
         // update user row
         userService.updateUser(user);
@@ -121,7 +122,8 @@ public class UserController extends BaseController {
         baseResponse.setData(userRow);
 
         log.info("end updateUserInfo useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -130,25 +132,26 @@ public class UserController extends BaseController {
      */
     @GetMapping(value = "/userList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse userList(@PathVariable("groupId") Integer groupId,
-        @PathVariable("pageNumber") Integer pageNumber,
-        @PathVariable("pageSize") Integer pageSize,
-        @RequestParam(value = "userParam", required = false) String commParam)
-        throws NodeMgrException {
+            @PathVariable("pageNumber") Integer pageNumber,
+            @PathVariable("pageSize") Integer pageSize,
+            @RequestParam(value = "account", required = false) String account,
+            @RequestParam(value = "userParam", required = false) String commParam)
+            throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start userList startTime:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
-            startTime.toEpochMilli(), groupId, pageNumber, pageSize,
-            commParam);
+                startTime.toEpochMilli(), groupId, pageNumber, pageSize, commParam);
 
         UserParam param = new UserParam();
         param.setGroupId(groupId);
+        param.setAccount(account);
         param.setCommParam(commParam);
         param.setPageSize(pageSize);
 
         Integer count = userService.countOfUser(param);
         if (count != null && count > 0) {
-            Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
-                .orElse(null);
+            Integer start =
+                    Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize).orElse(null);
             param.setStart(start);
             param.setPageSize(pageSize);
 
@@ -158,13 +161,15 @@ public class UserController extends BaseController {
         }
 
         log.info("end userList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
     @PostMapping("/import")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse importPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport, BindingResult result) {
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse importPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport,
+            BindingResult result) {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -173,26 +178,29 @@ public class UserController extends BaseController {
         String privateKeyEncoded = reqImport.getPrivateKey();
         // add user row
         Integer userId = userService.addUserInfo(reqImport.getGroupId(), reqImport.getUserName(),
-                reqImport.getDescription(), reqImport.getUserType(), privateKeyEncoded);
+                reqImport.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
+                privateKeyEncoded);
 
         // query user row
         TbUser userRow = userService.queryByUserId(userId);
         baseResponse.setData(userRow);
 
         log.info("end importPrivateKey useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
     @PostMapping("/importPem")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem, BindingResult result) {
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem,
+            BindingResult result) {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
         String pemContent = reqImportPem.getPemContent();
-        if(!pemContent.startsWith(PemUtils.crtContentHead)) {
+        if (!pemContent.startsWith(PemUtils.crtContentHead)) {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
@@ -202,16 +210,17 @@ public class UserController extends BaseController {
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
     @PostMapping("/importP12")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
-                                            @RequestParam(required = false, defaultValue = "") String p12Password,
-                                            @RequestParam Integer groupId, @RequestParam String userName,
-                                            @RequestParam(required = false) String description) {
+            @RequestParam(required = false, defaultValue = "") String p12Password,
+            @RequestParam Integer groupId, @RequestParam String userName,
+            @RequestParam String account, @RequestParam(required = false) String description) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
@@ -221,14 +230,15 @@ public class UserController extends BaseController {
         if (p12File.getSize() == 0) {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
-        Integer userId = userService.importKeyStoreFromP12(p12File, p12Password,
-                groupId, userName, description);
+        Integer userId = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
+                account, description);
         // query user row
         TbUser userRow = userService.queryByUserId(userId);
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
