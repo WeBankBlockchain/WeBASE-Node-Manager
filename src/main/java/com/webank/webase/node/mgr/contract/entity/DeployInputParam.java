@@ -29,6 +29,8 @@ public class DeployInputParam {
      * user's address, to identify signUserId
      */
     @NotBlank
+    private String account;
+    @NotBlank
     private String user;
     @NotNull
     private Integer groupId;
