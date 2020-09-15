@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.precompiled.permission;
+package com.webank.webase.node.mgr.precompiled.entity;
+
 
 import lombok.Data;
 
 @Data
-public class PermissionState {
-    private int deployAndCreate;
-    private int cns;
-    private int sysConfig;
-    private int node;
+public class PermissionParam {
+
+    private int groupId;
+    private String permissionType;
+    private String fromAddress;
+    private String signUserId;
+    private String address;
+    private String tableName;
+    private PermissionState permissionState;
 }

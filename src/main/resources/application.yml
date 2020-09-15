@@ -1,5 +1,5 @@
 # server version
-version: v1.4.0
+version: v1.4.1
 
 #server config
 server:
@@ -39,8 +39,15 @@ logging:
 #constants
 constant:
   ###http request
-  isUseSecurity: true   # login's authorization
+  # login's authorization
+  isUseSecurity: true
+  # verification code expire time (s)
   verificationCodeMaxAge: 300
+  # if disabled as false
+  enableVerificationCode: true
+  # verification code solid value, only when enableVerificationCode is false works
+  verificationCodeValue: "8888"
+  # auth token code expire time (s)
   authTokenMaxAge: 1800
   ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find,,/group/generate,/group/start
   ###front http request

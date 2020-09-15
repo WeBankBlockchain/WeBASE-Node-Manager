@@ -15,6 +15,8 @@
  */
 package com.webank.webase.node.mgr.precompiled.permission;
 
+import com.webank.webase.node.mgr.precompiled.entity.PermissionParam;
+import com.webank.webase.node.mgr.precompiled.entity.PermissionState;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;

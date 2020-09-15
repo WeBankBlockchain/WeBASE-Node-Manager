@@ -28,6 +28,9 @@ import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.governance.ContractStatusService;
+import com.webank.webase.node.mgr.governance.entity.GovernParam;
+import com.webank.webase.node.mgr.governance.entity.TbContractStatus;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -45,6 +48,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Log4j2
@@ -54,6 +58,8 @@ public class ContractController extends BaseController {
 
     @Autowired
     private ContractService contractService;
+    @Autowired
+    private ContractStatusService contractStatusService;
 
     /**
      * add new contract info.
@@ -220,4 +226,36 @@ public class ContractController extends BaseController {
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
+
+    /**
+     * get contract freeze record list
+     */
+    @GetMapping("status/record/list")
+    public BasePageResponse listContractStatusRecord(@RequestParam Integer groupId,
+        @RequestParam(defaultValue = "1") Integer pageNumber,
+        @RequestParam(defaultValue = "10") Integer pageSize) {
+        BasePageResponse response = new BasePageResponse(ConstantCode.SUCCESS);
+        GovernParam param = new GovernParam();
+        param.setGroupId(groupId);
+        int count = contractStatusService.getCount(param);
+        if (count > 0) {
+            param.setPageSize(pageSize);
+            Integer start = (pageNumber - 1) * pageSize;
+            param.setStart(start);
+            List<TbContractStatus> resList = contractStatusService.getStatusList(param);
+            response.setData(resList);
+            response.setTotalCount(count);
+        }
+        return response;
+    }
+
+    /**
+     * delete contract status record
+     */
+    @DeleteMapping("status/record/{statusId}")
+    public BaseResponse deleteContractStatusRecord(@PathVariable("statusId") Integer statusId) {
+        contractStatusService.deleteStatus(statusId);
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
 }

@@ -581,6 +581,6 @@ public class FrontInterfaceService {
 
     public List<String> getNodeIdList(int groupId) {
         return frontRestTools.getForEntity(groupId, FrontRestTools.URI_NODEID_LIST, List.class);
-
     }
+
 }
