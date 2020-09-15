@@ -110,6 +110,8 @@ public class ConstantCode {
             .mark(202035, "contract has been deployed");
 
     public static final RetCode PUBLICKEY_NULL = RetCode.mark(202036, "publicKey cannot be empty");
+    
+    public static final RetCode ACCOUNT_CANNOT_BE_EMPTY = RetCode.mark(202037, "associated account cannot be empty");
 
     public static final RetCode CONTRACT_DEPLOY_FAIL = RetCode
             .mark(202040, "contract deploy not success");

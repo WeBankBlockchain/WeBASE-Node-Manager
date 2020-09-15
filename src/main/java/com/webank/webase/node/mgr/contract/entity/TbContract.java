@@ -30,6 +30,7 @@ public class TbContract {
     private String contractPath;
     private String contractVersion;
     private String contractName;
+    private String account;
     private Integer contractStatus;
     private Integer groupId;
     private Integer contractType;
