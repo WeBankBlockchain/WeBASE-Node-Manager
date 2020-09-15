@@ -59,6 +59,9 @@ public class AccountController extends BaseController {
     private AccountService accountService;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private ConstantProperties constants;
+
     private static final int PICTURE_CHECK_CODE_CHAR_NUMBER = 4;
 
     /**
@@ -69,7 +72,13 @@ public class AccountController extends BaseController {
         log.info("start getPictureCheckCode");
 
         // random code
-        String checkCode = NodeMgrTools.randomString(PICTURE_CHECK_CODE_CHAR_NUMBER);
+        String checkCode;
+        if (constants.getEnableVerificationCode()) {
+            checkCode = NodeMgrTools.randomString(PICTURE_CHECK_CODE_CHAR_NUMBER);
+        } else {
+            checkCode = constants.getVerificationCodeValue();
+            log.debug("getPictureCheckCode: already disabled check code, and default value is {}", checkCode);
+        }
 
         String token = tokenService.createToken(checkCode, 2);
         log.info("new checkCode:" + checkCode);
