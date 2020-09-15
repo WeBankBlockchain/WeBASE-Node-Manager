@@ -30,6 +30,8 @@ public class BindUserInputParam {
     @NotBlank
     private String userName;
     @NotBlank
+    private String account;
+    @NotBlank
     private String publicKey;
     @NotNull
     private Integer groupId;

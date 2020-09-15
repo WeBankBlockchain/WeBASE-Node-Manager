@@ -103,9 +103,12 @@ public class  ContractService {
      * save new contract.
      */
     private TbContract newContract(Contract contract) {
+        if (contract.getAccount() == null) {
+            throw new NodeMgrException(ConstantCode.ACCOUNT_CANNOT_BE_EMPTY);
+        }
         //check contract not exist.
         verifyContractNotExist(contract.getGroupId(), contract.getContractName(),
-            contract.getContractPath());
+            contract.getContractPath(), contract.getAccount());
 
         //add to database.
         TbContract tbContract = new TbContract();
@@ -124,7 +127,7 @@ public class  ContractService {
             contract.getGroupId());
         //check contractName
         verifyContractNameNotExist(contract.getGroupId(), contract.getContractPath(),
-            contract.getContractName(), contract.getContractId());
+            contract.getContractName(), contract.getAccount(), contract.getContractId());
         BeanUtils.copyProperties(contract, tbContract);
         contractMapper.update(tbContract);
         return tbContract;
@@ -221,7 +224,7 @@ public class  ContractService {
         verifyContractNotDeploy(inputParam.getContractId(), inputParam.getGroupId());
         //check contractName
         verifyContractNameNotExist(inputParam.getGroupId(), inputParam.getContractPath(),
-            inputParam.getContractName(), inputParam.getContractId());
+            inputParam.getContractName(), inputParam.getAccount(), inputParam.getContractId());
 
         List<AbiDefinition> abiArray = JsonTools.toJavaObjectList(inputParam.getContractAbi(), AbiDefinition.class);
         if (abiArray == null || abiArray.isEmpty()) {
@@ -326,8 +329,8 @@ public class  ContractService {
     /**
      * verify that the contract does not exist.
      */
-    private void verifyContractNotExist(int groupId, String name, String path) {
-        ContractParam param = new ContractParam(groupId, path, name);
+    private void verifyContractNotExist(int groupId, String name, String path, String account) {
+        ContractParam param = new ContractParam(groupId, path, name, account);
         TbContract contract = queryContract(param);
         if (Objects.nonNull(contract)) {
             log.warn("contract is exist. groupId:{} name:{} path:{}", groupId, name, path);
@@ -375,8 +378,8 @@ public class  ContractService {
     /**
      * contract name can not be repeated.
      */
-    private void verifyContractNameNotExist(int groupId, String path, String name, int contractId) {
-        ContractParam param = new ContractParam(groupId, path, name);
+    private void verifyContractNameNotExist(int groupId, String path, String name, String account, int contractId) {
+        ContractParam param = new ContractParam(groupId, path, name, account);
         TbContract localContract = queryContract(param);
         if (Objects.isNull(localContract)) {
             return;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
@@ -31,7 +30,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.enums.UserType;
@@ -49,7 +47,6 @@ import com.webank.webase.node.mgr.user.entity.ReqImportPem;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
-
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -73,21 +70,21 @@ public class UserService {
      * add new user data.
      */
     @Transactional
-    public Integer addUserInfo(Integer groupId, String userName, String description,
-                               Integer userType, String privateKeyEncoded) throws NodeMgrException {
-        log.debug("start addUserInfo groupId:{},userName:{},description:{},userType:{},",
-                groupId, userName, description, userType);
+    public Integer addUserInfo(Integer groupId, String userName, String account, String description,
+            Integer userType, String privateKeyEncoded) throws NodeMgrException {
+        log.debug("start addUserInfo groupId:{},userName:{},description:{},userType:{},", groupId,
+                userName, description, userType);
         // check group id
         groupService.checkGroupId(groupId);
 
         // check userName
-        TbUser userRow = queryByName(groupId, userName);
+        TbUser userRow = queryByName(groupId, userName, account);
         if (userRow != null) {
             log.warn("fail addUserInfo. user info already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
         // add user by webase-front->webase-sign
-        String signUserId = UUID.randomUUID().toString().replaceAll("-","");
+        String signUserId = UUID.randomUUID().toString().replaceAll("-", "");
         // group id as appId
         String appId = groupId.toString();
 
@@ -115,8 +112,8 @@ public class UserService {
         }
 
         // add row
-        TbUser newUserRow = new TbUser(HasPk.HAS.getValue(), userType, userName,
-                groupId, address, publicKey, description);
+        TbUser newUserRow = new TbUser(HasPk.HAS.getValue(), userType, userName, account, groupId,
+                address, publicKey, description);
         newUserRow.setSignUserId(signUserId);
         newUserRow.setAppId(appId);
         Integer affectRow = userMapper.addUserRow(newUserRow);
@@ -147,7 +144,7 @@ public class UserService {
         }
 
         if (publicKey.length() != ConstantProperties.PUBLICKEY_LENGTH
-            && publicKey.length() != ConstantProperties.ADDRESS_LENGTH) {
+                && publicKey.length() != ConstantProperties.ADDRESS_LENGTH) {
             log.info("fail bindUserInfo. publicKey length error");
             throw new NodeMgrException(ConstantCode.PUBLICKEY_LENGTH_ERROR);
         }
@@ -156,7 +153,7 @@ public class UserService {
         groupService.checkGroupId(user.getGroupId());
 
         // check userName
-        TbUser userRow = queryByName(user.getGroupId(), user.getUserName());
+        TbUser userRow = queryByName(user.getGroupId(), user.getUserName(), user.getAccount());
         if (Objects.nonNull(userRow)) {
             log.warn("fail bindUserInfo. userName is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
@@ -167,7 +164,7 @@ public class UserService {
         }
 
         // check address
-        TbUser addressRow = queryUser(null, user.getGroupId(), null, address);
+        TbUser addressRow = queryUser(null, user.getGroupId(), null, address, user.getAccount());
         if (Objects.nonNull(addressRow)) {
             log.warn("fail bindUserInfo. address is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
@@ -175,7 +172,8 @@ public class UserService {
 
         // add row
         TbUser newUserRow = new TbUser(HasPk.NONE.getValue(), user.getUserType(),
-            user.getUserName(), user.getGroupId(), address, publicKey, user.getDescription());
+                user.getUserName(), user.getAccount(), user.getGroupId(), address, publicKey,
+                user.getDescription());
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {
             log.warn("bindUserInfo affect 0 rows of tb_user");
@@ -199,21 +197,13 @@ public class UserService {
 
         try {
             Integer count = userMapper.countOfUser(userParam);
-            log.debug("end countOfUser userParam:{} count:{}", JsonTools.toJSONString(userParam), count);
+            log.debug("end countOfUser userParam:{} count:{}", JsonTools.toJSONString(userParam),
+                    count);
             return count;
         } catch (RuntimeException ex) {
             log.error("fail countOfUser userParam:{}", JsonTools.toJSONString(userParam), ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
-    }
-
-    /**
-     * query count of user.
-     */
-    private Integer countOfUser(Integer userId) throws NodeMgrException {
-        UserParam userParam = new UserParam();
-        userParam.setUserId(userId);
-        return countOfUser(userParam);
     }
 
     /**
@@ -230,19 +220,18 @@ public class UserService {
     /**
      * query user row.
      */
-    public TbUser queryUser(Integer userId, Integer groupId, String userName, String address)
-        throws NodeMgrException {
-        log.debug("start queryUser userId:{} groupId:{} userName:{} address:{}", userId,
-            groupId, userName, address);
+    public TbUser queryUser(Integer userId, Integer groupId, String userName, String address,
+            String account) throws NodeMgrException {
+        log.debug("start queryUser userId:{} groupId:{} userName:{} address:{}", userId, groupId,
+                userName, address);
         try {
-            TbUser userRow = userMapper.queryUser(userId, groupId, userName, address);
-            log.debug(
-                "end queryUser userId:{} groupId:{} userName:{}  address:{} TbUser:{}",
-                userId, groupId, userName, address, JsonTools.toJSONString(userRow));
+            TbUser userRow = userMapper.queryUser(userId, groupId, userName, address, account);
+            log.debug("end queryUser userId:{} groupId:{} userName:{}  address:{} TbUser:{}",
+                    userId, groupId, userName, address, JsonTools.toJSONString(userRow));
             return userRow;
         } catch (RuntimeException ex) {
-            log.error("fail queryUser userId:{} groupId:{} userName:{}  address:{}",
-                userId, groupId, userName, address, ex);
+            log.error("fail queryUser userId:{} groupId:{} userName:{}  address:{}", userId,
+                    groupId, userName, address, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }
@@ -250,16 +239,16 @@ public class UserService {
     /**
      * query by groupId、userName.
      */
-    public TbUser queryUser(Integer groupId, String userName)
-        throws NodeMgrException {
-        return queryUser(null, groupId, userName, null);
+    public TbUser queryUser(Integer groupId, String userName) throws NodeMgrException {
+        return queryUser(null, groupId, userName, null, null);
     }
 
     /**
      * query by userName.
      */
-    public TbUser queryByName(int groupId, String userName) throws NodeMgrException {
-        return queryUser(null, groupId, userName, null);
+    public TbUser queryByName(int groupId, String userName, String account)
+            throws NodeMgrException {
+        return queryUser(null, groupId, userName, null, account);
     }
 
 
@@ -267,14 +256,14 @@ public class UserService {
      * query by userId.
      */
     public TbUser queryByUserId(Integer userId) throws NodeMgrException {
-        return queryUser(userId, null, null, null);
+        return queryUser(userId, null, null, null, null);
     }
 
     /**
      * query by group id and address.
      */
     public String getSignUserIdByAddress(int groupId, String address) throws NodeMgrException {
-        TbUser user = queryUser(null, groupId, null, address);
+        TbUser user = queryUser(null, groupId, null, address, null);
         if (user == null) {
             throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
         }
@@ -322,15 +311,14 @@ public class UserService {
     /**
      * get user name by address.
      */
-    public String queryUserNameByAddress(Integer groupId, String address)
-        throws NodeMgrException {
+    public String queryUserNameByAddress(Integer groupId, String address) throws NodeMgrException {
         log.debug("queryUserNameByAddress address:{} ", address);
         String userName = userMapper.queryUserNameByAddress(groupId, address);
         log.debug("end queryUserNameByAddress");
         return userName;
     }
 
-    public void deleteByAddress(String address) throws NodeMgrException{
+    public void deleteByAddress(String address) throws NodeMgrException {
         log.debug("deleteByAddress address:{} ", address);
         userMapper.deleteByAddress(address);
         log.debug("end deleteByAddress");
@@ -338,6 +326,7 @@ public class UserService {
 
     /**
      * import pem file to import privateKey
+     * 
      * @param reqImportPem
      * @return userId
      */
@@ -348,7 +337,7 @@ public class UserService {
             String pemContent = reqImportPem.getPemContent();
             pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
             privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("importKeyStoreFromPem error:[]", e);
             throw new NodeMgrException(ConstantCode.PEM_CONTENT_ERROR);
         }
@@ -357,26 +346,28 @@ public class UserService {
 
         // store local and save in sign
         Integer userId = addUserInfo(reqImportPem.getGroupId(), reqImportPem.getUserName(),
-                reqImportPem.getDescription(), reqImportPem.getUserType(), privateKeyEncoded);
+                reqImportPem.getAccount(), reqImportPem.getDescription(),
+                reqImportPem.getUserType(), privateKeyEncoded);
         return userId;
     }
 
     /**
      * import keystore info from p12 file input stream and its password
+     * 
      * @param p12File
      * @param p12Password
      * @param userName
      * @return KeyStoreInfo
      */
     public Integer importKeyStoreFromP12(MultipartFile p12File, String p12Password, Integer groupId,
-                                         String userName, String description) {
+            String userName, String account, String description) {
         P12Manager p12Manager = new P12Manager();
         String privateKey;
         try {
             p12Manager.setPassword(p12Password);
             p12Manager.load(p12File.getInputStream(), p12Password);
             privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
-        } catch ( IOException e) {
+        } catch (IOException e) {
             log.error("importKeyStoreFromP12 error:[]", e);
             if (e.getMessage().contains("password")) {
                 throw new NodeMgrException(ConstantCode.P12_PASSWORD_ERROR);
@@ -390,8 +381,8 @@ public class UserService {
         String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
 
         // store local and save in sign
-        Integer userId = addUserInfo(groupId, userName, description, UserType.GENERALUSER.getValue(),
-                privateKeyEncoded);
+        Integer userId = addUserInfo(groupId, userName, account, description,
+                UserType.GENERALUSER.getValue(), privateKeyEncoded);
 
         return userId;
     }
