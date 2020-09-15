@@ -29,5 +29,6 @@ public class UserParam extends BaseQueryParam {
     private Integer orgId;
     private Integer userId;
     private String userName;
+    private String account;
     private String commParam;
 }

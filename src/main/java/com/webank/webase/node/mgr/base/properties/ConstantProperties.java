@@ -52,6 +52,7 @@ public class ConstantProperties {
     public static final int PUBLICKEY_LENGTH = 130;
     public static final int ADDRESS_LENGTH = 42;
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
+    public static final String HAS_ROLE_ADMIN_OR_DEVELOPER = "hasRole('admin') or hasRole('developer')";
 
     private BigInteger transRetainMax = new BigInteger("10000");
     private String groupInvalidGrayscaleValue;  //y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
