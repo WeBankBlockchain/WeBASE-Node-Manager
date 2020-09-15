@@ -249,9 +249,11 @@ public class FrontRestTools {
 
     /**
      * build  url of front service.
+     * @remind v1.4.1 rm random
      */
     private FrontUrlInfo buildFrontUrl(ArrayList<FrontGroup> list, String uri, HttpMethod httpMethod) {
-        Collections.shuffle(list);//random one
+        //random one
+        // Collections.shuffle(list);
         log.info("====================map list:{}",JsonTools.toJSONString(list));
         Iterator<FrontGroup> iterator = list.iterator();
         while (iterator.hasNext()) {
