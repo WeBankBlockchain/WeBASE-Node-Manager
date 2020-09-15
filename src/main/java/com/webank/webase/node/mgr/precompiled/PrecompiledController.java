@@ -15,9 +15,14 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import java.time.Duration;
 import java.time.Instant;
 
+import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,5 +128,43 @@ public class PrecompiledController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
+    }
+
+    /**
+     * contract status control.
+     */
+    @PostMapping(value = "contract/status")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public Object contractStatusManage(@RequestBody @Valid ContractStatusHandle contractStatusHandle,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start crud startTime:{} contractStatusHandle:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(contractStatusHandle));
+
+        Object res = precompiledService.contractStatusManage(contractStatusHandle);
+
+        log.info("end crud useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+
+        return res;
+    }
+
+    @PostMapping(value = "contract/status/list")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse listContractStatus(@RequestBody @Valid AddressStatusHandle addressStatusHandle,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start crud startTime:{} addressStatusHandle:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(addressStatusHandle));
+
+        // return map of <contractAddress, response.data>
+        Map<String, Object> res = precompiledService.queryContractStatus(addressStatusHandle);
+
+        log.info("end crud useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+
+        return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 }

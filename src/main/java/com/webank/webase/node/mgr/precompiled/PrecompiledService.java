@@ -15,6 +15,10 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.governance.ContractStatusService;
+import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +26,7 @@ import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +67,13 @@ public class PrecompiledService {
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private FrontMapper frontMapper;
+    @Autowired
+    private ContractStatusService contractStatusService;
+
+    private static final String CONTRACT_MANAGE_GETSTATUS = "getStatus";
+    private static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
+    private static final String CONTRACT_MANAGE_FREEZE = "freeze";
+    private static final String CONTRACT_MANAGE_UNFREEZE = "unfreeze";
 
     /**
      * get cns list /{groupId}/{pathValue} /a?groupId=xx
@@ -122,7 +134,7 @@ public class PrecompiledService {
         List<String> sealerList = this.frontInterfaceService.getSealerList(groupId);
         sealerList.remove(consensusHandle.getNodeId());
         // at least 2 sealers in group after remove
-        if(CollectionUtils.size(sealerList) < 2){
+        if (CollectionUtils.size(sealerList) < 2){
             log.error("fail nodeManageService. Group only has [{}] sealers after remove.");
             throw new NodeMgrException(ConstantCode.TWO_SEALER_IN_GROUP_AT_LEAST);
         }
@@ -144,9 +156,8 @@ public class PrecompiledService {
     }
 
     /**
-     *  post CRUD opperation
+     *  post CRUD operation
      */
-
     public Object crudService(CrudHandle crudHandle) {
         log.debug("start crudService. crudHandle:{}", JsonTools.toJSONString(crudHandle));
         if (Objects.isNull(crudHandle)) {
@@ -161,5 +172,66 @@ public class PrecompiledService {
                 crudHandle, Object.class);
         log.debug("end crudService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
+    }
+
+    /**
+     *  post contract status operation
+     */
+    public Object contractStatusManage(ContractStatusHandle contractStatusHandle) {
+        log.debug("start contractStatusManage. contractStatusHandle:{}", JsonTools.toJSONString(contractStatusHandle));
+        if (Objects.isNull(contractStatusHandle)) {
+            log.error("fail contractStatusManage. request param is null");
+            throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
+        }
+        int groupId = contractStatusHandle.getGroupId();
+        String handleType = contractStatusHandle.getHandleType();
+        Object frontRsp;
+        if (CONTRACT_MANAGE_GETSTATUS.equals(handleType) || CONTRACT_MANAGE_LISTMANAGER.equals(handleType)) {
+            // no need to set signUserId
+            frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_STATUS,
+                contractStatusHandle, Object.class);
+        } else {
+            String signUserId = userService.getSignUserIdByAddress(groupId,
+                contractStatusHandle.getFromAddress());
+            contractStatusHandle.setSignUserId(signUserId);
+            frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_STATUS,
+                contractStatusHandle, Object.class);
+        }
+        log.debug("end contractStatusManage. frontRsp:{}", JsonTools.toJSONString(frontRsp));
+        // if success, save record
+        if (CONTRACT_MANAGE_FREEZE.equals(handleType) || CONTRACT_MANAGE_UNFREEZE.equals(handleType)) {
+            contractStatusService.saveContractStatus(contractStatusHandle);
+        }
+        return frontRsp;
+    }
+
+    /**
+     * query status of contract address list
+     * @param addressStatusHandle
+     * @return
+     */
+    public Map<String, Object> queryContractStatus(AddressStatusHandle addressStatusHandle) {
+        log.debug("start queryContractStatus. addressStatusHandle:{}", JsonTools.toJSONString(addressStatusHandle));
+        if (Objects.isNull(addressStatusHandle)) {
+            log.error("fail queryContractStatus. request param is null");
+            throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
+        }
+        Map<String, Object> resMap = new HashMap<>();
+
+        int groupId = addressStatusHandle.getGroupId();
+        List<String> addressList = addressStatusHandle.getAddressList();
+        // init param
+        ContractStatusHandle statusHandle = new ContractStatusHandle();
+        statusHandle.setGroupId(groupId);
+        statusHandle.setHandleType(CONTRACT_MANAGE_GETSTATUS);
+        for (String contractAddress: addressList) {
+            statusHandle.setContractAddress(contractAddress);
+            log.debug("start batch query. statusHandle:{}", JsonTools.toJSONString(statusHandle));
+            BaseResponse response = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_STATUS,
+                statusHandle, BaseResponse.class);
+            resMap.put(contractAddress, response.getData());
+        }
+        log.debug("end queryContractStatus. frontRsp:{}", JsonTools.toJSONString(resMap));
+        return resMap;
     }
 }
