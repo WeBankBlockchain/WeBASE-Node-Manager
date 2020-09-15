@@ -22,6 +22,8 @@ import lombok.Data;
  */
 @Data
 public class Contract {
+    @NotBlank
+    private String account;
     @NotNull
     private Integer groupId;
     private Integer contractId;

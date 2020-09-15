@@ -184,7 +184,7 @@
   </select>
 
   <select id="queryUnusualTxhash" resultType="java.lang.String">
-        select trans_hash_lastest
+        select max(trans_hash_lastest) as transHashLastest
         from ${tableName}
         where contract_name = #{contractBin}
           and (trans_unusual_type = 1 or trans_unusual_type = 2)
