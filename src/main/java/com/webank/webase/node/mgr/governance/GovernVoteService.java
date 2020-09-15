@@ -15,16 +15,12 @@
 package com.webank.webase.node.mgr.governance;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.FreezeStatus;
 import com.webank.webase.node.mgr.base.enums.GovernType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.governance.entity.GovernParam;
-import com.webank.webase.node.mgr.governance.entity.TbContractStatus;
 import com.webank.webase.node.mgr.governance.entity.TbGovernVote;
-import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
-import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import java.math.BigInteger;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;

@@ -134,7 +134,7 @@ public class PrecompiledService {
         List<String> sealerList = this.frontInterfaceService.getSealerList(groupId);
         sealerList.remove(consensusHandle.getNodeId());
         // at least 2 sealers in group after remove
-        if(CollectionUtils.size(sealerList) < 2){
+        if (CollectionUtils.size(sealerList) < 2){
             log.error("fail nodeManageService. Group only has [{}] sealers after remove.");
             throw new NodeMgrException(ConstantCode.TWO_SEALER_IN_GROUP_AT_LEAST);
         }
