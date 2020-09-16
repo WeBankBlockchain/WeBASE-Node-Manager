@@ -14,7 +14,6 @@
 
 package node.mgr.test.chaingovernance;
 
-import com.webank.webase.node.mgr.governance.ContractStatusService;
 import com.webank.webase.node.mgr.governance.GovernVoteService;
 import com.webank.webase.node.mgr.governance.entity.GovernParam;
 import node.mgr.test.gm.TestBase;
@@ -24,16 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ContractStatusServiceTest extends TestBase {
 
     @Autowired
-    private ContractStatusService contractStatusService;
-    @Autowired
     private GovernVoteService governVoteService;
-
-    @Test
-    public void testListStatus() {
-        GovernParam param = new GovernParam();
-        param.setGroupId(1);
-        System.out.println(contractStatusService.getStatusList(param));
-    }
 
     @Test
     public void testListVote() {
