@@ -30,17 +30,8 @@ public class ConstantCode {
 
     /* system exception */
     public static final RetCode SYSTEM_EXCEPTION = RetCode.mark(102000, "system exception");
-    public static final RetCode SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL = RetCode.mark(102000, "system exception: please check front");
-
-    /* front error code */
-    public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "No group belongs to this groupId(node not belongs to this group)");
-    public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied");
-    public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
-    public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
-    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201234, "Pem file content error");
-    public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201235, "p12's password cannot be chinese");
-    public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(201236, "p12's password not match");
-    public static final RetCode P12_FILE_ERROR = RetCode.mark(201237, "P12 file content error");
+    public static final RetCode SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL = RetCode.mark(102001, "system exception: please check front");
+    public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(102002, "No group belongs to this groupId(node not belongs to this group)");
 
     /**
      * Business exception.
@@ -168,14 +159,21 @@ public class ConstantCode {
     /* Json parse error */
     public static final RetCode FAIL_PARSE_JSON = RetCode.mark(202111, "Fail to parse json");
 
+    /* cert import error */
+    public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(202121, "Cert file not found, please check cert path in config");
+    public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(202122, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
+    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(202123, "Pem file content error");
+    public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(202124, "p12's password cannot be chinese");
+    public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(202125, "p12's password not match");
+    public static final RetCode P12_FILE_ERROR = RetCode.mark(202126, "P12 file content error");
+
     /* dynamic group manage */
     public static final RetCode GROUP_ID_EXISTS = RetCode.mark(202300, "group id already exists");
     public static final RetCode NODE_NOT_EXISTS = RetCode.mark(202301, "node's front not exists");
 
     /* chain governance */
-    public static final RetCode CONTRACT_STATUS_RECORD_NOT_EXIST = RetCode.mark(202310, "contract status record not exist");
-    public static final RetCode GOVERN_VOTE_RECORD_NOT_EXIST = RetCode.mark(202311, "govern vote record not exist");
-    public static final RetCode GOVERN_FAIL = RetCode.mark(202312, "govern handle fail in front");
+    public static final RetCode GOVERN_VOTE_RECORD_NOT_EXIST = RetCode.mark(202310, "govern vote record not exist");
+    public static final RetCode PERMISSION_DENIED_ON_CHAIN = RetCode.mark(202311, "permission denied on chain");
 
     // add in v1.4.0
     public static final RetCode NO_DOCKER_TAG_UPDATE_URL_ERROR = RetCode.mark(202401, "No docker image tag update url.");

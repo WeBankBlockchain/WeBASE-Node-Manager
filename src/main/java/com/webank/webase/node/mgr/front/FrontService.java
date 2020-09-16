@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -874,5 +875,17 @@ public class FrontService {
 
     public static byte getEncryptType(String frontImageTag){
         return  (byte)(StringUtils.endsWith(frontImageTag,"-gm") ? EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
+    }
+
+    public TbFront getRandomFrontByGroupId(Integer groupId) {
+        FrontParam param = new FrontParam();
+        param.setGroupId(groupId);
+        List<TbFront> frontList = this.getFrontList(param);
+        if (!frontList.isEmpty()) {
+            Random random = new Random();
+            return frontList.get(random.nextInt(frontList.size()));
+        } else {
+            throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT);
+        }
     }
 }

@@ -82,6 +82,10 @@ public class ChainGovernService {
         }
         // add rate of weight in result
         for (RspCommitteeInfo res: resList) {
+            // weight sum must not be 0
+            if (weightSum == 0) {
+                continue;
+            }
             // cal weight divide weightSum, ex 1/2, 1/3
             BigDecimal calRate = BigDecimal.valueOf(res.getWeight().doubleValue() / weightSum);
             // ex: 0.500, 0.333(1/3)
@@ -89,7 +93,7 @@ public class ChainGovernService {
             // ex: set as 50.0, 33.3
             res.setWeightRate(rate.multiply(BigDecimal.valueOf(100L)));
         }
-        log.debug("end listCommittee. resList:{}", JsonTools.toJSONString(resList));
+        log.debug("end listCommitteeWithWeight. resList:{}", JsonTools.toJSONString(resList));
         return resList;
     }
 
