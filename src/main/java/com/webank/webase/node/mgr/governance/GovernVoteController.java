@@ -18,7 +18,6 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.governance.entity.GovernParam;
-import com.webank.webase.node.mgr.governance.entity.TbContractStatus;
 import com.webank.webase.node.mgr.governance.entity.TbGovernVote;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
