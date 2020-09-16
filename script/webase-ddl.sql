@@ -420,21 +420,6 @@ CREATE TABLE IF NOT EXISTS `tb_host` (
   UNIQUE KEY `unq_agency_id,ip` (`agency_id`,`ip`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物理主机信息';
 
-
--- ----------------------------
--- Table structure for tb_contract_status
--- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_contract_status (
-  id int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '合约状态记录ID',
-  group_id int(11) NOT NULL COMMENT '群组ID',
-  contract_address varchar(64) NOT NULL COMMENT '冻结/解冻的合约地址',
-  status tinyint(8) NOT NULL DEFAULT 0 COMMENT '合约状态，0-正常，1-冻结',
-  modify_address varchar(64) NOT NULL COMMENT '管理员地址',
-  create_time datetime NOT NULL COMMENT '创建时间',
-  modify_time datetime NOT NULL COMMENT '最近一次更新时间',
-  PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='合约冻结状态信息';
-
 -- ----------------------------
 -- Table structure for tb_govern_vote
 -- ----------------------------
