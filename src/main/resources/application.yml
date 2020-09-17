@@ -85,7 +85,7 @@ constant:
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
 
-  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**, /encrypt, /version
+  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/encrypt,/version,/front/refresh
 
   #### 1.4.0 visual deploy
   #### deployType 部署方式：
