@@ -28,14 +28,18 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 public interface FrontMapper {
 
     int add(TbFront tbFront);
-
+    
     int update(TbFront tbFront);
+    
+    int updateBasicInfo(TbFront tbFront);
 
     int remove(@Param("frontId") int frontId);
 
     Integer getCount(FrontParam param);
 
     List<TbFront> getList(FrontParam param);
+    
+    List<TbFront> getAllList();
 
     TbFront getById(@Param("frontId") int frontId);
 

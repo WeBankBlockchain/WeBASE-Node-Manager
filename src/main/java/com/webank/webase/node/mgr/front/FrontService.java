@@ -136,8 +136,61 @@ public class FrontService {
 	// interval of check front status
 	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
+	/**
+	 * refresh front, group, frontGroupMap, nodeList
+	 */
+	@Transactional
+	public void refreshFront() {
+		//get all front
+        List<TbFront> frontList = frontMapper.getAllList();
+        if (frontList == null || frontList.size() == 0) {
+        	log.info("refreshFront. not find any front.");
+            return;
+        }
+        for (TbFront tbFront : frontList) {
+        	try {
+	            String frontIp = tbFront.getFrontIp();
+	            Integer frontPort = tbFront.getFrontPort();
+				// query group list from chain
+				List<String> groupIdList;
+					groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+				// get syncStatus
+				SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
+						frontPort, Integer.valueOf(groupIdList.get(0)));
+				// get version info
+				NodeVersion.Version versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
+						frontPort, Integer.valueOf(groupIdList.get(0)));
+				String clientVersion = versionResponse.getVersion();
+				String supportVersion = versionResponse.getSupportedVersion();
+				// get front server version and sign server version
+		        try {
+		            String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
+		            String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
+		            tbFront.setFrontVersion(frontVersion);
+		            tbFront.setSignVersion(signVersion);
+		        } catch (Exception e) {
+		            // catch old version front and sign that not have '/version' api
+		            log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
+		        }
+				//copy attribute
+				tbFront.setNodeId(syncStatus.getNodeId());
+				tbFront.setClientVersion(clientVersion);
+				tbFront.setSupportVersion(supportVersion);
+				//update front info
+				frontMapper.updateBasicInfo(tbFront);
+				// save group info
+				saveGroup(groupIdList, tbFront);
+        	} catch (Exception ex) {
+				log.error("refreshFront fail. frontId:{}", tbFront.getFrontId(), ex);
+				continue;
+			}
+		}
+		// clear cache
+		frontGroupMapCache.clearMapList();
+	}
+	
     /**
-     * add new front, save front, frontGroupMap, check front's groupStatus, refersh nodeList
+     * add new front, save front, frontGroupMap, check front's groupStatus, refresh nodeList
      */
     @Transactional
     public TbFront newFront(FrontInfo frontInfo) {
@@ -202,41 +255,53 @@ public class FrontService {
                 JsonTools.toJSONString(tbFront), e);
             throw new NodeMgrException(ConstantCode.SAVE_FRONT_FAIL.getCode(), e.getMessage());
         }
-        for (String groupId : groupIdList) {
-            Integer group = Integer.valueOf(groupId);
-            //peer in group
-            List<String> groupPeerList = frontInterface
-                .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
-            //get peers on chain
-            PeerInfo[] peerArr = frontInterface
-                .getPeersFromSpecificFront(frontIp, frontPort, group);
-            List<PeerInfo> peerList = Arrays.asList(peerArr);
-            //add group
-            // check group not existed or node count differs
-            TbGroup checkGroup = groupService.getGroupById(group);
-            if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
-                groupService.saveGroup(group, groupPeerList.size(), "synchronous",
-                        GroupType.SYNC, GroupStatus.NORMAL,0,"");
-            }
-            //save front group map
-            frontGroupMapService.newFrontGroup(tbFront, group);
-            //save nodes
-            for (String nodeId : groupPeerList) {
-                PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools
-                    .object2JavaBean(p, PeerInfo.class))
-                    .filter(peer -> nodeId.equals(peer.getNodeId()))
-                    .findFirst().orElseGet(() -> new PeerInfo(nodeId));
-                nodeService.addNodeInfo(group, newPeer);
-            }
-            // add sealer(consensus node) and observer in nodeList
-             refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
-        }
+        // save group info
+        saveGroup(groupIdList, tbFront);
         // pull cert from new front and its node
         CertTools.isPullFrontCertsDone = false;
         // clear cache
         frontGroupMapCache.clearMapList();
         return tbFront;
     }
+    
+    /**
+     * save group, frontGroupMap, nodeList
+     * @param groupIdList
+     * @param tbFront
+     */
+    private void saveGroup(List<String> groupIdList, TbFront tbFront){
+		String frontIp = tbFront.getFrontIp();
+		Integer frontPort = tbFront.getFrontPort();
+		for (String groupId : groupIdList) {
+			Integer group = Integer.valueOf(groupId);
+			//peer in group
+			List<String> groupPeerList = frontInterface
+					.getGroupPeersFromSpecificFront(frontIp, frontPort, group);
+			//get peers on chain
+			PeerInfo[] peerArr = frontInterface
+					.getPeersFromSpecificFront(frontIp, frontPort, group);
+			List<PeerInfo> peerList = Arrays.asList(peerArr);
+			//add group
+			// check group not existed or node count differs
+			TbGroup checkGroup = groupService.getGroupById(group);
+			if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
+				groupService.saveGroup(group, groupPeerList.size(), "synchronous",
+						GroupType.SYNC, GroupStatus.NORMAL,0,"");
+			}
+			//save front group map
+			frontGroupMapService.newFrontGroup(tbFront, group);
+			//save nodes
+			for (String nodeId : groupPeerList) {
+				PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools
+						.object2JavaBean(p, PeerInfo.class))
+						.filter(peer -> nodeId.equals(peer.getNodeId()))
+						.findFirst().orElseGet(() -> new PeerInfo(nodeId));
+				nodeService.addNodeInfo(group, newPeer);
+			}
+			// add sealer(consensus node) and observer in nodeList
+			refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
+		}
+	}
 
     /**
      * add sealer(consensus node) and observer in nodeList
