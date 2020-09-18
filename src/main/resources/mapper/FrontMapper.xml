@@ -57,6 +57,17 @@
     </if>
     where front_id = #{frontId}
   </update>
+  
+  <update id="updateBasicInfo" parameterType="com.webank.webase.node.mgr.front.entity.TbFront">
+    update tb_front 
+    set node_id = #{nodeId},
+        client_version = #{clientVersion},
+        support_version = #{supportVersion},
+        front_version = #{frontVersion},
+        sign_version = #{signVersion},
+        modify_time = now()
+    where front_id = #{frontId}
+  </update>
 
   <delete id="remove" parameterType="java.lang.Integer">
     delete from tb_front where front_id=#{frontId}
@@ -96,6 +107,10 @@
     <if test="frontPort != null and frontPort !=''">
       and front_port = #{frontPort}
     </if>
+  </select>
+  
+  <select id="getAllList" resultMap="frontMap">
+    select * from tb_front
   </select>
 
   <select id="getById" resultMap="frontMap" parameterType="java.lang.Integer">
