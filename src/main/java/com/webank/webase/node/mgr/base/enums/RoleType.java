@@ -16,7 +16,7 @@
 package com.webank.webase.node.mgr.base.enums;
 
 public enum RoleType {
-    ADMIN(100000), VISITOR(100001);
+    ADMIN(100000), VISITOR(100001), DEVELOPER(100002);
 
     private Integer value;
 
