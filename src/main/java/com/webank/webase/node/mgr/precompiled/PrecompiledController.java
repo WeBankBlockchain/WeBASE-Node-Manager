@@ -114,7 +114,7 @@ public class PrecompiledController extends BaseController {
      * crud control.
      */
     @PostMapping(value = "crud")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public Object crud(@RequestBody @Valid CrudHandle crudHandle,
                                    BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -134,7 +134,7 @@ public class PrecompiledController extends BaseController {
      * contract status control.
      */
     @PostMapping(value = "contract/status")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public Object contractStatusManage(@RequestBody @Valid ContractStatusHandle contractStatusHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -151,7 +151,7 @@ public class PrecompiledController extends BaseController {
     }
 
     @PostMapping(value = "contract/status/list")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse listContractStatus(@RequestBody @Valid AddressStatusHandle addressStatusHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
