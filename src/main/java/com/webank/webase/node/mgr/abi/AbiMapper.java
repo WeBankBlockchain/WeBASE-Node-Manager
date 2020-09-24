@@ -28,15 +28,17 @@ public interface AbiMapper {
 
 	List<AbiInfo> listOfAbi(@Param("param") ReqAbiListParam param);
 
-	Integer countOfAbi();
+	Integer countOfAbi(@Param("param") ReqAbiListParam param);
 
 	AbiInfo queryByAbiId(@Param("abiId") int abiId);
 
 	AbiInfo queryByGroupIdAndAddress(@Param("groupId") int groupId,
-									 @Param("contractAddress") String contractAddress);
+			 @Param("account") String account,
+			 @Param("contractAddress") String contractAddress);
 
 	AbiInfo queryByGroupIdAndContractName(@Param("groupId") int groupId,
-									 @Param("contractName") String contractName);
+			 @Param("account") String account,
+			 @Param("contractName") String contractName);
 	void add(AbiInfo abiInfo);
 
 	void update(AbiInfo abiInfo);

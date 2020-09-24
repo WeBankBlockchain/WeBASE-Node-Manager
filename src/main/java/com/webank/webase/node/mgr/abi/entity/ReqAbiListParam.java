@@ -29,6 +29,7 @@ import lombok.ToString;
 public class ReqAbiListParam extends BaseQueryParam {
 
 	private Integer groupId;
+	private String account;
 	public ReqAbiListParam(Integer start, Integer pageSize,
 						   String flagSortedByTime) {
 		super(start, pageSize, flagSortedByTime);
