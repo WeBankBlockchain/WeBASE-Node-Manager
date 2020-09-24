@@ -30,6 +30,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ReqImportAbi {
 	private Integer abiId;
+	@NotBlank
+    private String account;
 	@NotNull
 	private Integer groupId;
 	@NotBlank
