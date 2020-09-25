@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.BeanUtils;
@@ -247,7 +248,7 @@ public class  ContractService {
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
             FrontRestTools.URI_CONTRACT_DEPLOY_WITH_SIGN, params, String.class);
-        if (StringUtils.isBlank(contractAddress)) {
+        if (StringUtils.isBlank(contractAddress) || Address.DEFAULT.getValue().equals(contractAddress)) {
             log.error("fail deploy, contractAddress is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
         }
