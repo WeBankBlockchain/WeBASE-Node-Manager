@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 public class AbiInfo {
 	private Integer abiId;
 	private Integer groupId;
+	private String account;
 	private String contractName;
 	private String contractAddress;
 	private String contractAbi;

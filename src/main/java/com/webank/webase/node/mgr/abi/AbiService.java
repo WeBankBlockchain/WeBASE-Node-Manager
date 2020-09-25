@@ -62,6 +62,7 @@ public class AbiService {
 	@Transactional
 	public void insertAbiInfo(ReqImportAbi param) {
 		int groupId = param.getGroupId();
+		String account = param.getAccount();
 		String contractName = param.getContractName();
 		String contractAddress = param.getContractAddress();
 		String contractAbiStr;
@@ -74,7 +75,7 @@ public class AbiService {
 		// check address
 		String contractBin = getAddressRuntimeBin(groupId, contractAddress);
 		// check name and address of abi not exist
-		checkAbiExist(groupId, contractName, contractAddress);
+		checkAbiExist(groupId, account, contractName, contractAddress);
 
 		AbiInfo saveAbi = new AbiInfo();
 		BeanUtils.copyProperties(param, saveAbi);
@@ -113,12 +114,12 @@ public class AbiService {
 		abiMapper.deleteByAbiId(id);
 	}
 
-	private void checkAbiExist(int groupId, String contractName, String address) {
-		AbiInfo checkAbiName = abiMapper.queryByGroupIdAndContractName(groupId, contractName);
+	private void checkAbiExist(int groupId, String account, String contractName, String address) {
+		AbiInfo checkAbiName = abiMapper.queryByGroupIdAndContractName(groupId, account, contractName);
 		if (Objects.nonNull(checkAbiName)) {
 			throw new NodeMgrException(ConstantCode.CONTRACT_NAME_REPEAT);
 		}
-		AbiInfo checkAbiAddressExist = abiMapper.queryByGroupIdAndAddress(groupId, address);
+		AbiInfo checkAbiAddressExist = abiMapper.queryByGroupIdAndAddress(groupId, account, address);
 		if (Objects.nonNull(checkAbiAddressExist)) {
 			throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_ALREADY_EXISTS);
 		}
@@ -136,7 +137,7 @@ public class AbiService {
 	}
 
 	public AbiInfo getAbiByGroupIdAndAddress(Integer groupId, String contractAddress) {
-		AbiInfo abiInfo = abiMapper.queryByGroupIdAndAddress(groupId, contractAddress);
+		AbiInfo abiInfo = abiMapper.queryByGroupIdAndAddress(groupId, null, contractAddress);
 		if (Objects.isNull(abiInfo)) {
 			throw new NodeMgrException(ConstantCode.ABI_INFO_NOT_EXISTS);
 		}
@@ -168,10 +169,10 @@ public class AbiService {
 		return runtimeBin;
 	}
 
-	public int countOfAbi() {
+	public int countOfAbi(ReqAbiListParam param) {
 		log.debug("start countOfAbi ");
 		try {
-			int count = abiMapper.countOfAbi();
+			int count = abiMapper.countOfAbi(param);
 			log.debug("end countOfAbi count:{}", count);
 			return count;
 		}catch (Exception e) {
