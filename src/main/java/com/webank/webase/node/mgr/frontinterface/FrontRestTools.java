@@ -81,6 +81,8 @@ public class FrontRestTools {
     public static final String URI_OPERATE_GROUP = "web3/operateGroup/%1s";
     public static final String URI_QUERY_GROUP_STATUS = "web3/queryGroupStatus";
     public static final String URI_REFRESH_FRONT = "web3/refresh";
+    public static final String URI_BLOCK_HEADER_BY_NUMBER = "web3/blockHeaderByNumber/%1d";
+    public static final String URI_BLOCK_HEADER_BY_HASH = "web3/blockHeaderByHash/%1s";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s";
