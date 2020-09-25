@@ -182,7 +182,7 @@ public class ChainGovernService {
         String frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_GOVERNANCE_THRESHOLD,
             governanceHandle, String.class);
         log.debug("end updateThreshold. frontRsp:{}", JsonTools.toJSONString(frontRsp));
-        governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_COMMITTEE_WEIGHT);
+        governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_THRESHOLD);
         return PrecompiledTools.processResponse(frontRsp);
     }
 
