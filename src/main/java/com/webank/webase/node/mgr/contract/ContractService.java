@@ -76,7 +76,6 @@ public class  ContractService {
     private AbiService abiService;
     @Autowired
     private PermissionManageService permissionManageService;
-
     /**
      * add new contract data.
      */
@@ -471,7 +470,7 @@ public class  ContractService {
             // if not in the list, permission denied
             if (count == 0) {
                 log.error("checkDeployPermission permission denied for user:{}", userAddress);
-                throw new NodeMgrException(ConstantCode.PERMISSION_DENIED);
+                throw new NodeMgrException(ConstantCode.PERMISSION_DENIED_ON_CHAIN);
             }
         }
     }

@@ -151,7 +151,6 @@ public class PrecompiledController extends BaseController {
     }
 
     @PostMapping(value = "contract/status/list")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse listContractStatus(@RequestBody @Valid AddressStatusHandle addressStatusHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
