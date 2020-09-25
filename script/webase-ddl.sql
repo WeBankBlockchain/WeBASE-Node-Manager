@@ -334,6 +334,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_log (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_abi (
   abi_id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约ABI的编号',
+  account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
   group_id int(11) NOT NULL COMMENT '合约ABI所属群组的编号',
   contract_name varchar(120) NOT NULL COMMENT '合约ABI的合约名',
   contract_address varchar(64) NOT NULL COMMENT '合约ABI的合约地址',
@@ -342,8 +343,8 @@ CREATE TABLE IF NOT EXISTS tb_abi (
   create_time datetime DEFAULT NULL COMMENT '合约ABI的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '合约ABI的修改时间',
   PRIMARY KEY (abi_id),
-  UNIQUE KEY unique_address (group_id,contract_address),
-  UNIQUE KEY unique_name (group_id,contract_name)
+  UNIQUE KEY unique_address (group_id,account,contract_address),
+  UNIQUE KEY unique_name (group_id,account,contract_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约ABI表';
 
 
@@ -426,7 +427,6 @@ CREATE TABLE IF NOT EXISTS `tb_host` (
 CREATE TABLE IF NOT EXISTS tb_govern_vote (
   id int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '链治理委员投票记录ID',
   group_id int(11) NOT NULL COMMENT '群组ID',
-  -- enable_num bigint DEFAULT NULL COMMENT '投票时间，enable_num',
   time_limit bigint DEFAULT NULL COMMENT '投票截止块高',
   from_address varchar(64) NOT NULL COMMENT '管理员地址',
   type tinyint(8) NOT NULL COMMENT '投票类型，1-选举，2-去除，3-修改委员权重，4,-修改阈值',
