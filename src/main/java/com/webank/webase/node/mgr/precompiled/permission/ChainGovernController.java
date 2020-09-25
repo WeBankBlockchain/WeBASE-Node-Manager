@@ -140,7 +140,6 @@ public class ChainGovernController extends BaseController {
     }
 
     @PostMapping("committee/weight/list")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse listCommitteeWeight(@Valid @RequestBody AddressStatusHandle addressStatusHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
