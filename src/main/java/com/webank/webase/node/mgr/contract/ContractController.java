@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Log4j2
@@ -59,7 +60,7 @@ public class ContractController extends BaseController {
      * add new contract info.
      */
     @PostMapping(value = "/save")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse saveContract(@RequestBody @Valid Contract contract, BindingResult result)
         throws NodeMgrException {
         checkBindResult(result);
@@ -83,7 +84,7 @@ public class ContractController extends BaseController {
      * delete contract by id.
      */
     @DeleteMapping(value = "/{groupId}/{contractId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse deleteContract(@PathVariable("groupId") Integer groupId,
         @PathVariable("contractId") Integer contractId)
         throws NodeMgrException, Exception {
@@ -158,7 +159,7 @@ public class ContractController extends BaseController {
      * deploy deployInputParam.
      */
     @PostMapping(value = "/deploy")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse deployContract(@RequestBody @Valid DeployInputParam deployInputParam,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -180,7 +181,7 @@ public class ContractController extends BaseController {
      * send transaction.
      */
     @PostMapping(value = "/transaction")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse sendTransaction(@RequestBody @Valid TransactionInputParam param,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -220,4 +221,6 @@ public class ContractController extends BaseController {
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
+
+
 }

@@ -12,6 +12,8 @@
       property="contractPath"/>
     <result column="contract_version" javaType="java.lang.String" jdbcType="VARCHAR"
       property="contractVersion"/>
+    <result column="account" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="account"/>
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="groupId"/>
     <result column="contract_source" javaType="java.lang.String" jdbcType="VARCHAR"
@@ -41,8 +43,8 @@
 
   <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     insert into
-    tb_contract(group_id,contract_path,contract_version,contract_name,contract_source,contract_abi,contract_bin,bytecodeBin,contract_address,description,deploy_time,create_time,modify_time)
-    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW())
+    tb_contract(group_id,contract_path,contract_version,contract_name,account,contract_source,contract_abi,contract_bin,bytecodeBin,contract_address,description,deploy_time,create_time,modify_time)
+    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{account},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW())
     <selectKey keyProperty="contractId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -122,6 +124,9 @@
     <if test="contractVersion != null and contractVersion != ''">
       and contract_version = #{contractVersion}
     </if>
+    <if test="account != null and account != ''">
+      and account = #{account}
+    </if>
     <if test="contractType != null">
       and contract_type = #{contractType}
     </if>
@@ -148,6 +153,9 @@
     </if>
     <if test="contractName != null and contractName != ''">
       and contract_name = #{contractName}
+    </if>
+    <if test="account != null and account != ''">
+      and account = #{account}
     </if>
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address = #{contractAddress}
@@ -178,6 +186,9 @@
     </if>
     <if test="contractName != null and contractName != ''">
       and contract_name = #{contractName}
+    </if>
+    <if test="account != null and account != ''">
+      and account = #{account}
     </if>
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address = #{contractAddress}

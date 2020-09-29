@@ -47,7 +47,7 @@ List jaxb = [
 ]
 
 List web3sdk = [
-    "org.fisco-bcos:web3sdk:2.4.2" 
+    "org.fisco-bcos:web3sdk:2.6.1"
 ]
 
 List lombok = [
@@ -83,7 +83,7 @@ dependencies {
     compile "mysql:mysql-connector-java:8.0.13"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
-    compile 'org.bouncycastle:bcprov-jdk15on:1.54'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.60'
     // cover old version
     compile 'com.google.guava:guava:28.2-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
@@ -92,6 +92,7 @@ dependencies {
     compile 'org.ini4j:ini4j:0.5.4'
     compile ('com.github.docker-java:docker-java:3.2.1') {
         exclude group: 'io.netty'
+        exclude group: 'org.bouncycastle'
     }
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
     compile 'ognl:ognl:3.2.14'
