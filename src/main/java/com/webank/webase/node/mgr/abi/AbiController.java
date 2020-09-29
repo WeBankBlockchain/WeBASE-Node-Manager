@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.webank.webase.node.mgr.abi.entity.AbiInfo;
@@ -59,7 +60,8 @@ public class AbiController extends BaseController {
 	public Object listAbi(
 			@PathVariable("groupId") Integer groupId,
 			@PathVariable("pageNumber") Integer pageNumber,
-			@PathVariable("pageSize") Integer pageSize) {
+			@PathVariable("pageSize") Integer pageSize,
+            @RequestParam(value = "account", required = false) String account) {
 		Instant startTime = Instant.now();
 		if (pageNumber < 1 || pageSize <= 0) {
 			return new BaseResponse(ConstantCode.PARAM_EXCEPTION);
@@ -72,9 +74,10 @@ public class AbiController extends BaseController {
 		ReqAbiListParam param = new ReqAbiListParam(start, pageSize,
 				SqlSortType.DESC.getValue());
 		param.setGroupId(groupId);
-		List<AbiInfo> resList = abiService.getListByGroupId(param);
+		param.setAccount(account);
 		// total count
-		int count = abiService.countOfAbi();
+		int count = abiService.countOfAbi(param);
+		List<AbiInfo> resList = abiService.getListByGroupId(param);
 
 		log.info("end listAbi. useTime:{}, resList:{}",
 				Duration.between(startTime, Instant.now()).toMillis(), resList);
@@ -93,7 +96,7 @@ public class AbiController extends BaseController {
 	}
 
 	@PostMapping("")
-	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 	public Object saveAbi(@Valid @RequestBody ReqImportAbi param, BindingResult result) {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
@@ -110,7 +113,7 @@ public class AbiController extends BaseController {
 	 * @return
 	 */
 	@PutMapping("")
-	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 	public Object updateAbi(@RequestBody ReqImportAbi param, BindingResult result) {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
@@ -127,7 +130,7 @@ public class AbiController extends BaseController {
 	}
 
 	@DeleteMapping("/{abiId}")
-	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 	public BaseResponse deleteAbi(@PathVariable("abiId") Integer abiId) {
 		log.debug("start deleteAbi. abiId:{}", abiId);
 		abiService.delete(abiId);

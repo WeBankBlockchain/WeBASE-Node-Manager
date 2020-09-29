@@ -30,6 +30,8 @@ import lombok.NoArgsConstructor;
 public class NewUserInputParam {
     @NotBlank
     private String userName;
+    @NotBlank
+    private String account;
     @NotNull
     private Integer groupId;
     private String description;

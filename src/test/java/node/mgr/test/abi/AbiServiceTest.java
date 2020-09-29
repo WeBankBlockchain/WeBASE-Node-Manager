@@ -40,7 +40,7 @@ public class AbiServiceTest {
 
 	@Test
 	public void testInsert() {
-		int count = abiService.countOfAbi();
+		int count = abiService.countOfAbi(new ReqAbiListParam());
 		ReqImportAbi abiInsert = new ReqImportAbi();
 		abiInsert.setGroupId(1);
 		abiInsert.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
@@ -48,7 +48,7 @@ public class AbiServiceTest {
 		String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
 		abiInsert.setContractAbi(JsonTools.toJavaObjectList(abiStr, Object.class));
 		abiService.saveAbi(abiInsert);
-		int afterCount = abiService.countOfAbi();
+		int afterCount = abiService.countOfAbi(new ReqAbiListParam());
 		Assert.assertTrue("insert failed", afterCount > count);
 	}
 
@@ -64,9 +64,9 @@ public class AbiServiceTest {
 
 	@Test
 	public void testDeleteAbi() {
-		int count = abiService.countOfAbi();
+		int count = abiService.countOfAbi(new ReqAbiListParam());
 		abiService.delete(1);
-		int afterCount = abiService.countOfAbi();
+		int afterCount = abiService.countOfAbi(new ReqAbiListParam());
 		Assert.assertTrue("insert failed", afterCount < count);
 	}
 }

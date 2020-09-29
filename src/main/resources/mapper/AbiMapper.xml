@@ -8,6 +8,8 @@
             property="abiId" />
         <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="groupId" />
+        <result column="account" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="account" />
         <result column="contract_name" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="contractName" />
         <result column="contract_address" javaType="java.lang.String" jdbcType="VARCHAR"
@@ -24,9 +26,9 @@
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.abi.entity.AbiInfo">
-        REPLACE INTO tb_abi(group_id,contract_name,contract_address,contract_abi,contract_bin,
+        REPLACE INTO tb_abi(group_id,account,contract_name,contract_address,contract_abi,contract_bin,
         create_time,modify_time)
-        VALUES (#{groupId},#{contractName},#{contractAddress},#{contractAbi},#{contractBin}, now(), now())
+        VALUES (#{groupId},#{account},#{contractName},#{contractAddress},#{contractAbi},#{contractBin}, now(), now())
     </insert>
 
     <delete id="deleteByAbiId" parameterType="java.lang.Integer">
@@ -55,6 +57,9 @@
             resultMap="abiMap">
         select a.* from tb_abi a
         where 1=1 and group_id = #{param.groupId}
+        <if test="param.account != null and param.account != ''">
+            and account = #{param.account}
+        </if>
         <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
             order by a.create_time ${param.flagSortedByTime}
         </if>
@@ -64,7 +69,10 @@
     </select>
 
     <select id="countOfAbi" resultType="java.lang.Integer">
-        select count(1) from tb_abi where 1=1
+        select count(1) from tb_abi where 1=1 and group_id = #{param.groupId}
+        <if test="param.account != null and param.account != ''">
+            and account = #{param.account}
+        </if>
     </select>
 
     <select id="queryByAbiId" parameterType="java.lang.Integer"
@@ -76,12 +84,18 @@
     <select id="queryByGroupIdAndAddress" resultMap="abiMap">
         SELECT a.* FROM tb_abi a
         WHERE group_id = #{groupId}
+        <if test="account != null and account != ''">
+            and account = #{account}
+        </if>
         and contract_address = #{contractAddress}
         limit 1
     </select>
     <select id="queryByGroupIdAndContractName" resultMap="abiMap">
         SELECT a.* FROM tb_abi a
         WHERE group_id = #{groupId}
+        <if test="account != null and account != ''">
+            and account = #{account}
+        </if>
         and contract_name = #{contractName}
         limit 1
     </select>
