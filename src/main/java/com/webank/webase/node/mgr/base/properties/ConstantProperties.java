@@ -59,6 +59,7 @@ public class ConstantProperties {
     private String notSupportFrontIp;
 
     //block into
+    private boolean developerModeEnable = false;
     private BigInteger blockRetainMax = new BigInteger("10000");
     private BigInteger pullBlockInitCnts = new BigInteger("100");
     private Long pullBlockSleepTime = 20L; //20 mills
