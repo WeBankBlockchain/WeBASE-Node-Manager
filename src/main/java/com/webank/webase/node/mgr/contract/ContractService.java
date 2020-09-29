@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.BeanUtils;
@@ -76,7 +77,6 @@ public class  ContractService {
     private AbiService abiService;
     @Autowired
     private PermissionManageService permissionManageService;
-
     /**
      * add new contract data.
      */
@@ -103,9 +103,12 @@ public class  ContractService {
      * save new contract.
      */
     private TbContract newContract(Contract contract) {
+        if (contract.getAccount() == null) {
+            throw new NodeMgrException(ConstantCode.ACCOUNT_CANNOT_BE_EMPTY);
+        }
         //check contract not exist.
         verifyContractNotExist(contract.getGroupId(), contract.getContractName(),
-            contract.getContractPath());
+            contract.getContractPath(), contract.getAccount());
 
         //add to database.
         TbContract tbContract = new TbContract();
@@ -124,7 +127,7 @@ public class  ContractService {
             contract.getGroupId());
         //check contractName
         verifyContractNameNotExist(contract.getGroupId(), contract.getContractPath(),
-            contract.getContractName(), contract.getContractId());
+            contract.getContractName(), contract.getAccount(), contract.getContractId());
         BeanUtils.copyProperties(contract, tbContract);
         contractMapper.update(tbContract);
         return tbContract;
@@ -221,7 +224,7 @@ public class  ContractService {
         verifyContractNotDeploy(inputParam.getContractId(), inputParam.getGroupId());
         //check contractName
         verifyContractNameNotExist(inputParam.getGroupId(), inputParam.getContractPath(),
-            inputParam.getContractName(), inputParam.getContractId());
+            inputParam.getContractName(), inputParam.getAccount(), inputParam.getContractId());
 
         List<AbiDefinition> abiArray = JsonTools.toJavaObjectList(inputParam.getContractAbi(), AbiDefinition.class);
         if (abiArray == null || abiArray.isEmpty()) {
@@ -245,7 +248,7 @@ public class  ContractService {
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
             FrontRestTools.URI_CONTRACT_DEPLOY_WITH_SIGN, params, String.class);
-        if (StringUtils.isBlank(contractAddress)) {
+        if (StringUtils.isBlank(contractAddress) || Address.DEFAULT.getValue().equals(contractAddress)) {
             log.error("fail deploy, contractAddress is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
         }
@@ -298,7 +301,7 @@ public class  ContractService {
             //check contract deploy
             verifyContractDeploy(param.getContractId(), param.getGroupId());
         } else {
-            // send tx by abi
+            // send tx by TABLE abi
             // get from db and it's deployed
             AbiInfo abiInfo = abiService.getAbiByGroupIdAndAddress(param.getGroupId(), param.getContractAddress());
             contractAbiStr = abiInfo.getContractAbi();
@@ -326,8 +329,8 @@ public class  ContractService {
     /**
      * verify that the contract does not exist.
      */
-    private void verifyContractNotExist(int groupId, String name, String path) {
-        ContractParam param = new ContractParam(groupId, path, name);
+    private void verifyContractNotExist(int groupId, String name, String path, String account) {
+        ContractParam param = new ContractParam(groupId, path, name, account);
         TbContract contract = queryContract(param);
         if (Objects.nonNull(contract)) {
             log.warn("contract is exist. groupId:{} name:{} path:{}", groupId, name, path);
@@ -375,8 +378,8 @@ public class  ContractService {
     /**
      * contract name can not be repeated.
      */
-    private void verifyContractNameNotExist(int groupId, String path, String name, int contractId) {
-        ContractParam param = new ContractParam(groupId, path, name);
+    private void verifyContractNameNotExist(int groupId, String path, String name, String account, int contractId) {
+        ContractParam param = new ContractParam(groupId, path, name, account);
         TbContract localContract = queryContract(param);
         if (Objects.isNull(localContract)) {
             return;
@@ -468,7 +471,7 @@ public class  ContractService {
             // if not in the list, permission denied
             if (count == 0) {
                 log.error("checkDeployPermission permission denied for user:{}", userAddress);
-                throw new NodeMgrException(ConstantCode.PERMISSION_DENIED);
+                throw new NodeMgrException(ConstantCode.PERMISSION_DENIED_ON_CHAIN);
             }
         }
     }

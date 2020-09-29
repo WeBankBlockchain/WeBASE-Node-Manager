@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.precompiled.sysconf;
 
+import com.webank.webase.node.mgr.precompiled.entity.SysConfigParam;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

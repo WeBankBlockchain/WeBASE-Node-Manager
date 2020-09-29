@@ -1,3 +1,23 @@
+
+### v1.4.1(2020-09-18)
+
+**Add**
+- 新增ChainGovernance接口，包含链委员与运维管理、合约冻结功能
+- 新增getBlockHeader接口
+- 新增开发者模式，区别与普通用户与管理员用户
+
+**Fix**
+- 修复bouncy-castle版本兼容问题，统一为1.60版本
+- 优化调用节点前置策略，不再随机选择前置访问，优先访问最新的可用前置
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本及以上版本
+- WeBASE-Web v1.4.0+
+- WeBASE-Front v1.4.1+
+- WeBASE-Sign v1.4.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.4.0(2020-08-06)
 
 **Add**
@@ -6,7 +26,7 @@
 - 可视化部署链后，重置链后重新部署的功能；
 - `/front/find` 接口增加字段：节点版本号（`clientVersion`）和节点最高支持版本号（`supportVersion`）；
 
-**Optimization & Bugfix**
+**Fix**
 - 增加返回 FISCO-BCOS 和 WeBASE-Front Version 版本接口
 - 修改`tb_contract`表中合约ABI, BIN字段为`mediumtext`
 - 支持ChainGovernance/ContractLifeCycle预编译合约的交易解析

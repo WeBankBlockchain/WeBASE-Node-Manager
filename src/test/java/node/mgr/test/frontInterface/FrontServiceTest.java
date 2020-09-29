@@ -79,7 +79,7 @@ public class FrontServiceTest {
 
     @Test
     public void getblockFromFrontByHashTest() {
-        BlockInfo blockInfo = frontInterface.getblockByHash(groupId, blockHash);
+        BlockInfo blockInfo = frontInterface.getBlockByHash(groupId, blockHash);
         assert (blockInfo != null);
         System.out.println(JsonTools.toJSONString(blockInfo));
     }
