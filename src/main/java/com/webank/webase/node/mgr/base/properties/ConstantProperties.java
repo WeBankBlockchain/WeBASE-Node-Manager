@@ -54,6 +54,7 @@ public class ConstantProperties {
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
     public static final String HAS_ROLE_ADMIN_OR_DEVELOPER = "hasRole('admin') or hasRole('developer')";
 
+    private boolean developerModeEnable = false;
     private BigInteger transRetainMax = new BigInteger("10000");
     private String groupInvalidGrayscaleValue;  //y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
     private String notSupportFrontIp;

@@ -13,25 +13,11 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.channel.client.P12Manager;
-import org.fisco.bcos.channel.client.PEMManager;
-import org.fisco.bcos.web3j.utils.Numeric;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
+import com.webank.webase.node.mgr.account.AccountService;
+import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HasPk;
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -47,7 +33,24 @@ import com.webank.webase.node.mgr.user.entity.ReqImportPem;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.channel.client.P12Manager;
+import org.fisco.bcos.channel.client.PEMManager;
+import org.fisco.bcos.web3j.utils.Numeric;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * services for user data.
@@ -56,6 +59,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class UserService {
 
+    @Autowired
+    private AccountService accountService;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -78,7 +83,14 @@ public class UserService {
         groupService.checkGroupId(groupId);
 
         // check userName
-        TbUser userRow = queryByName(groupId, userName, account);
+        TbAccountInfo accountRow = accountService.queryByAccount(account);
+        TbUser userRow = new TbUser();
+        if (RoleType.ADMIN.getValue().equals(accountRow.getRoleId())) {
+            userRow = queryByName(groupId, userName, null);
+        } else {
+            userName = account + "_" + userName;
+            userRow = queryByName(groupId, userName, account);
+        }
         if (userRow != null) {
             log.warn("fail addUserInfo. user info already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
