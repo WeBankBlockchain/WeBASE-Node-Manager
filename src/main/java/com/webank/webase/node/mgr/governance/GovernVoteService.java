@@ -57,7 +57,7 @@ public class GovernVoteService {
         if (governType.equals(GovernType.UPDATE_COMMITTEE_WEIGHT)) {
             tbGovernVote.setDetail("weight: " + governanceHandle.getWeight());
         } else if (governType.equals(GovernType.UPDATE_THRESHOLD)) {
-            tbGovernVote.setDetail("threshold: " + governanceHandle.getWeight());
+            tbGovernVote.setDetail("threshold: " + governanceHandle.getThreshold());
         }
         governVoteMapper.add(tbGovernVote);
         log.debug("saveGovernVote tbGovernVote:{}", tbGovernVote);
