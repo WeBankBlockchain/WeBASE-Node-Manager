@@ -59,6 +59,7 @@ constant:
   sleepWhenHttpMaxFail: 60000
 
   ###common
+  developerModeEnable: false
   isDeleteInfo: true
   transRetainMax: 10000
   deleteInfoCron: "0 0/1 * * * ?"
