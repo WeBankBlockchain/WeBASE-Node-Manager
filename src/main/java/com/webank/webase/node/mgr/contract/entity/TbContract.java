@@ -43,7 +43,7 @@ public class TbContract {
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
-
+    private String deployAddress;
     /**
      * init by contractId、contractName、groupId、contractPath.
      */
