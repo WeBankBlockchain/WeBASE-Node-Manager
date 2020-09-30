@@ -16,6 +16,7 @@
 package node.mgr.test.contract;
 
 
+import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import java.util.Arrays;
 import java.util.List;
 
@@ -79,4 +80,10 @@ public class ContractServiceTest {
         assert (transRsp!=null);
     }
 
+    @Test
+    public void testGetContractList() {
+        List<TbContract> resList = contractService.qureyContractList(new ContractParam());
+        System.out.println("list:");
+        System.out.println(resList);
+    }
 }
