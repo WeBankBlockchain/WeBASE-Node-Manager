@@ -48,7 +48,7 @@
   <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     insert into
     tb_contract(group_id,contract_path,contract_version,contract_name,account,contract_source,contract_abi,contract_bin,bytecodeBin,contract_address,description,deploy_time,create_time,modify_time,deploy_address,deploy_user_name)
-    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{account},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW(),deployAddress,deployUserName)
+    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{account},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW(),#{deployAddress},#{deployUserName})
     <selectKey keyProperty="contractId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
