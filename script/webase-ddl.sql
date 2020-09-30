@@ -113,6 +113,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   description text COMMENT '描述',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  deploy_address varchar(64) DEFAULT NULL COMMENT '合约部署者地址',
   PRIMARY KEY (contract_id),
   UNIQUE KEY uk_group_path_name (group_id,contract_path,contract_name,account)
 ) ENGINE=InnoDB AUTO_INCREMENT=200001 DEFAULT CHARSET=utf8 COMMENT='合约表';

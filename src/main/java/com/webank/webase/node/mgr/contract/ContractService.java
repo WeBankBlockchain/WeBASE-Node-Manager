@@ -256,6 +256,7 @@ public class  ContractService {
         //save contract
         TbContract tbContract = new TbContract();
         BeanUtils.copyProperties(inputParam, tbContract);
+        tbContract.setDeployAddress(inputParam.getUser());
         tbContract.setContractAddress(contractAddress);
         tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
         //tbContract.setContractVersion(version);
