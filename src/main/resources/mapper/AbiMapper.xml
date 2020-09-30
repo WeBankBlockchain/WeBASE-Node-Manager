@@ -58,7 +58,7 @@
         select a.* from tb_abi a
         where 1=1 and group_id = #{param.groupId}
         <if test="param.account != null and param.account != ''">
-            account = #{param.account}
+            and account = #{param.account}
         </if>
         <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
             order by a.create_time ${param.flagSortedByTime}
@@ -71,7 +71,7 @@
     <select id="countOfAbi" resultType="java.lang.Integer">
         select count(1) from tb_abi where 1=1 and group_id = #{param.groupId}
         <if test="param.account != null and param.account != ''">
-            account = #{param.account}
+            and account = #{param.account}
         </if>
     </select>
 
@@ -85,7 +85,7 @@
         SELECT a.* FROM tb_abi a
         WHERE group_id = #{groupId}
         <if test="account != null and account != ''">
-            account = #{account}
+            and account = #{account}
         </if>
         and contract_address = #{contractAddress}
         limit 1
@@ -94,7 +94,7 @@
         SELECT a.* FROM tb_abi a
         WHERE group_id = #{groupId}
         <if test="account != null and account != ''">
-            account = #{account}
+            and account = #{account}
         </if>
         and contract_name = #{contractName}
         limit 1
