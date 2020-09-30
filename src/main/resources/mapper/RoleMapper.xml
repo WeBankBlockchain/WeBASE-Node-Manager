@@ -41,6 +41,12 @@
     <if test="param.roleName != null and param.roleName != ''">
       and role_name = #{param.roleName}
     </if>
+    <if test="param.roleIdListNotIn != null and param.roleIdListNotIn.size() > 0">
+      and role_id not in
+	  <foreach collection="param.roleIdListNotIn" index="index" item="item" open="(" separator="," close=")">  
+	    #{item}  
+	  </foreach>
+    </if>
     <if test="param.roleNameZh != null and param.roleNameZh != ''">
       and role_name_zh = #{param.roleNameZh}
     </if>
@@ -58,6 +64,12 @@
     </if>
     <if test="param.roleNameZh != null and param.roleNameZh != ''">
       and role_name_zh = #{param.roleNameZh}
+    </if>
+    <if test="param.roleIdListNotIn != null and param.roleIdListNotIn.size() > 0">
+      and role_id not in
+	  <foreach collection="param.roleIdListNotIn" index="index" item="item" open="(" separator="," close=")">  
+	    #{item}  
+	  </foreach>
     </if>
     <if test="param.start != null and param.pageSize != null">
       limit #{param.start},#{param.pageSize}
