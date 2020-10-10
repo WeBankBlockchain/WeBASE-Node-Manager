@@ -282,6 +282,14 @@ public class UserService {
         return user.getSignUserId();
     }
 
+    public String getUserNameByAddress(int groupId, String address) throws NodeMgrException {
+        TbUser user = queryUser(null, groupId, null, address, null);
+        if (user == null) {
+            throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
+        }
+        return user.getUserName();
+    }
+
     /**
      * update user info.
      */

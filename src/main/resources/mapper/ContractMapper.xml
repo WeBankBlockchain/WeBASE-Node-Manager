@@ -38,13 +38,17 @@
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
+    <result column="deploy_address" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="deployAddress"/>
+    <result column="deploy_user_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="deployUserName"/>
   </resultMap>
 
 
   <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     insert into
-    tb_contract(group_id,contract_path,contract_version,contract_name,account,contract_source,contract_abi,contract_bin,bytecodeBin,contract_address,description,deploy_time,create_time,modify_time)
-    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{account},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW())
+    tb_contract(group_id,contract_path,contract_version,contract_name,account,contract_source,contract_abi,contract_bin,bytecodeBin,contract_address,description,deploy_time,create_time,modify_time,deploy_address,deploy_user_name)
+    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{account},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW(),#{deployAddress},#{deployUserName})
     <selectKey keyProperty="contractId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -91,6 +95,12 @@
     <if test="description != null and description != ''">
       ,description = #{description}
     </if>
+    <if test="deployAddress != null and deployAddress != ''">
+      ,deploy_address = #{deployAddress}
+    </if>
+    <if test="deployUserName != null and deployUserName != ''">
+      ,deploy_user_name = #{deployUserName}
+    </if>
     where contract_id = #{contractId}
   </update>
 
@@ -133,6 +143,9 @@
     <if test="contractStatus != null and contractStatus != ''">
       and contract_status = #{contractStatus}
     </if>
+    <if test="deployAddress != null and deployAddress != ''">
+      and deploy_address = #{deployAddress}
+    </if>
   </select>
 
 
@@ -159,6 +172,9 @@
     </if>
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address = #{contractAddress}
+    </if>
+    <if test="deployAddress != null and deployAddress != ''">
+      and deploy_address = #{deployAddress}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
       order by modify_time ${flagSortedByTime}
@@ -192,6 +208,9 @@
     </if>
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address = #{contractAddress}
+    </if>
+    <if test="deployAddress != null and deployAddress != ''">
+      and deploy_address = #{deployAddress}
     </if>
     <if test="contractStatus != null and contractStatus != ''">
       and contract_status = #{contractStatus}
