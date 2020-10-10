@@ -99,5 +99,5 @@ INSERT INTO `tb_mail_server_config`(`server_name`,`host`,`port`,`username`,`pass
 -- ----------------------------
 -- 8、init tb_config
 -- ----------------------------
-INSERT INTO `tb_config`(`config_name`, `config_type`, `config_value`, `create_time`, `modify_time`) VALUES ('docker 镜像版本', 1, 'v2.5.0', '2020-07-22 17:14:23', '2020-07-22 17:14:23');
-INSERT INTO `tb_config`(`config_name`, `config_type`, `config_value`, `create_time`, `modify_time`) VALUES ('docker 镜像版本', 1, 'v2.5.0-gm', '2020-07-22 17:14:23', '2020-07-22 17:14:23');
+INSERT INTO `tb_config`(`config_name`, `config_type`, `config_value`, `create_time`, `modify_time`) VALUES ('docker 镜像版本', 1, 'v2.6.0', '2020-09-22 17:14:23', '2020-09-22 17:14:23');
+INSERT INTO `tb_config`(`config_name`, `config_type`, `config_value`, `create_time`, `modify_time`) VALUES ('docker 镜像版本', 1, 'v2.6.0-gm', '2020-09-22 17:14:23', '2020-09-22 17:14:23');
