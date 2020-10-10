@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.contract;
 
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -253,9 +254,13 @@ public class  ContractService {
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
         }
 
+        // get deploy user name
+        String userName = userService.getUserNameByAddress(groupId, inputParam.getUser());
         //save contract
         TbContract tbContract = new TbContract();
         BeanUtils.copyProperties(inputParam, tbContract);
+        tbContract.setDeployAddress(inputParam.getUser());
+        tbContract.setDeployUserName(userName);
         tbContract.setContractAddress(contractAddress);
         tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
         //tbContract.setContractVersion(version);

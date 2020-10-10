@@ -36,6 +36,7 @@ public class ContractParam extends BaseQueryParam {
     private Integer contractStatus;
     private Integer contractType;
     private String partOfBytecodeBin;
+    private String deployAddress;
 
     /**
      * init by contractId.
