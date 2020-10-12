@@ -114,11 +114,6 @@ public class PrecompiledService {
 
     public Object nodeManageService(ConsensusHandle consensusHandle) {
         log.debug("start nodeManageService. consensusHandle:{}", JsonTools.toJSONString(consensusHandle));
-        TbFront front = this.frontMapper.getByNodeId(consensusHandle.getNodeId());
-        if (front == null){
-            log.error("nodeManageService. node id not exists");
-            throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
-        }
 
         if (Objects.isNull(consensusHandle)) {
             log.error("fail nodeManageService. request param is null");
@@ -141,10 +136,12 @@ public class PrecompiledService {
                 groupId, FrontRestTools.URI_CONSENSUS,
                 consensusHandle, Object.class);
 
-        if (StringUtils.equalsIgnoreCase("remove",consensusHandle.getNodeType())){
+        // update front group map if remove node from sealer/observer
+        TbFront front = this.frontMapper.getByNodeId(consensusHandle.getNodeId());
+        if (StringUtils.equalsIgnoreCase("remove",consensusHandle.getNodeType()) && front != null){
             log.info("remove node/front:[{}] from group:[{}], change front group map status to [{}]",
                     front.getFrontId(), groupId, GroupStatus.MAINTAINING);
-            frontGroupMapService.updateFrontMapStatus(front.getFrontId(),groupId,GroupStatus.MAINTAINING);
+            frontGroupMapService.updateFrontMapStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
         }
 
         log.debug("end nodeManageService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
