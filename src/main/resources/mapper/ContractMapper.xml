@@ -49,8 +49,6 @@
       property="contractPath"/>
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="groupId"/>
-    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
-      property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
   </resultMap>
@@ -250,7 +248,9 @@
 	</select>
 
   <select id="queryContractPathList" resultMap="contractPathMap">
-    select (contract_path,group_id,create_time,modify_time) from tb_contract where group_id = #{groupId}
+    select distinct contract_path,group_id from tb_contract
+    where group_id = #{groupId}
+    order by modify_time asc
   </select>
 
 
