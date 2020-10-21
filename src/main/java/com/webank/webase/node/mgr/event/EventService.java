@@ -16,8 +16,10 @@
 
 package com.webank.webase.node.mgr.event;
 
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
+import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -56,5 +58,11 @@ public class EventService {
 		return eventList;
 	}
 
+	/**
+	 * 同步获取event log列表
+	 */
+	public BasePageResponse getEventLogList(ReqEventLogList param) {
+		return frontInterfaceService.getEventLogList(param);
+	}
 
 }
