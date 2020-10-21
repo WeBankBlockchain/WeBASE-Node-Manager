@@ -249,7 +249,6 @@
 		select contract_bin from tb_contract where group_id = #{groupId} and contract_name = #{contractName}
 	</select>
 
-
   <select id="queryContractPathList" resultMap="contractPathMap">
     select (contract_path,group_id,create_time,modify_time) from tb_contract where group_id = #{groupId}
   </select>

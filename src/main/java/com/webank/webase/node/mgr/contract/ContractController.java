@@ -26,6 +26,7 @@ import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
+import com.webank.webase.node.mgr.contract.entity.RspContractPath;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import java.time.Duration;
@@ -222,5 +223,22 @@ public class ContractController extends BaseController {
         return baseResponse;
     }
 
+    /**
+     * qurey contract info list.
+     */
+    @PostMapping(value = "/contractPathList/{groupId}")
+    public BasePageResponse queryContractPathList(@PathVariable("groupId") Integer groupId) {
+        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start queryContractPathList. startTime:{} groupId:{}",
+            startTime.toEpochMilli(), groupId);
 
+        List<RspContractPath> result = contractService.getContractPathList(groupId);
+        pagesponse.setData(result);
+        pagesponse.setTotalCount(result.size());
+
+        log.info("end queryContractPathList. useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
+        return pagesponse;
+    }
 }
