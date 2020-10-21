@@ -49,8 +49,6 @@
       property="contractPath"/>
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="groupId"/>
-    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
-      property="modifyTime"/>
   </resultMap>
 
 
