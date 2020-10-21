@@ -482,8 +482,13 @@ public class  ContractService {
      * get contract path list
      */
     public List<RspContractPath> getContractPathList(Integer groupId) {
-        List<RspContractPath> resList = contractMapper.queryContractPathList(groupId);
-        return resList;
+        List<RspContractPath> pathList = contractMapper.queryContractPathList(groupId);
+        List<RspContractPath> resultList = new ArrayList<>();
+        if (pathList != null) {
+            resultList.addAll(pathList);
+        }
+        // todo 去重
+        return resultList;
     }
 
 }
