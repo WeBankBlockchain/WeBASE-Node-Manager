@@ -44,6 +44,17 @@
       property="deployUserName"/>
   </resultMap>
 
+  <resultMap id="contractPathMap" type="com.webank.webase.node.mgr.contract.entity.RspContractPath">
+    <id column="contract_path" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractPath"/>
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
 
   <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     insert into
@@ -129,7 +140,7 @@
       and contract_address = #{contractAddress}
     </if>
     <if test="contractPath != null and contractPath != ''">
-      and contract_path = #{contractVersion}
+      and contract_path = #{contractPath}
     </if>
     <if test="contractVersion != null and contractVersion != ''">
       and contract_version = #{contractVersion}
@@ -175,6 +186,9 @@
     </if>
     <if test="deployAddress != null and deployAddress != ''">
       and deploy_address = #{deployAddress}
+    </if>
+    <if test="contractPath != null and contractPath != ''">
+      and contract_path = #{contractPath}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
       order by modify_time ${flagSortedByTime}
@@ -234,5 +248,11 @@
   <select id="querySystemContractBin" resultType="java.lang.String">
 		select contract_bin from tb_contract where group_id = #{groupId} and contract_name = #{contractName}
 	</select>
+
+
+  <select id="queryContractPathList" resultMap="contractPathMap">
+    select (contract_path,group_id,create_time,modify_time) from tb_contract where group_id = #{groupId}
+  </select>
+
 
 </mapper>

@@ -16,6 +16,7 @@
 package com.webank.webase.node.mgr.contract;
 
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.RspContractPath;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -52,4 +53,7 @@ public interface ContractMapper {
         @Param("contractAddress") String contractAddress);
 
     void removeByGroupId(@Param("groupId") Integer groupId);
+
+    List<RspContractPath> queryContractPathList(@Param("groupId") Integer groupId);
+
 }

@@ -25,6 +25,6 @@ public class QueryContractParam {
     private Integer contractStatus;
     private Integer pageNumber;
     private Integer pageSize;
-
+    private String contractPath;
 
 }
