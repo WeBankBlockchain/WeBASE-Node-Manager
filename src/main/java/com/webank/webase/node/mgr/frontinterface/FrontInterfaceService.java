@@ -15,6 +15,8 @@ package com.webank.webase.node.mgr.frontinterface;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CONTAIN_GROUP_ID;
 
+import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
+import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -608,5 +610,14 @@ public class FrontInterfaceService {
         return blockInfo;
     }
 
-
+    /**
+     * get event log list from front
+     */
+    public BasePageResponse getEventLogList(ReqEventLogList param) {
+        log.debug("start getEventLogList. param:{}", param);
+        BasePageResponse resultList = frontRestTools.postForEntity(Integer.MAX_VALUE,
+            FrontRestTools.URI_EVENT_LOG_LIST, param, BasePageResponse.class);
+        log.debug("end getEventLogList. resultList:{}", JsonTools.toJSONString(resultList));
+        return resultList;
+    }
 }
