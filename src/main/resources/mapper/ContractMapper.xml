@@ -248,7 +248,7 @@
   <select id="queryContractPathList" resultMap="contractPathMap">
     select distinct contract_path,group_id from tb_contract
     where group_id = #{groupId}
-    order by modify_time asc
+    order by modify_time desc
   </select>
 
 
