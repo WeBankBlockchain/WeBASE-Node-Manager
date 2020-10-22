@@ -615,7 +615,7 @@ public class FrontInterfaceService {
      */
     public BasePageResponse getEventLogList(ReqEventLogList param) {
         log.debug("start getEventLogList. param:{}", param);
-        BasePageResponse resultList = frontRestTools.postForEntity(Integer.MAX_VALUE,
+        BasePageResponse resultList = frontRestTools.postForEntity(param.getGroupId(),
             FrontRestTools.URI_EVENT_LOG_LIST, param, BasePageResponse.class);
         log.debug("end getEventLogList. resultList:{}", JsonTools.toJSONString(resultList));
         return resultList;
