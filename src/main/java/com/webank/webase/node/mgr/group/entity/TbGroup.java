@@ -59,7 +59,7 @@ public class TbGroup {
 
 
     public TbGroup(Integer groupId, String groupName, Integer nodeCount, String description,
-                   GroupType groupType, GroupStatus groupStatus, int chainId, String chainName){
+                   GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName){
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
