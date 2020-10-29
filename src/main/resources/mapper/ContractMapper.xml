@@ -68,11 +68,6 @@
   <delete id="removeByGroupId" parameterType="java.lang.Integer">
 		delete from tb_contract where group_id = #{groupId}
 	</delete>
-  <delete id="removeByContractPath" parameterType="com.webank.webase.node.mgr.contract.entity.ContractPathParam">
-    delete from tb_contract
-    where group_id = #{groupId}
-    and contract_path = #{contractPath}
-  </delete>
 
   <update id="update" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     update tb_contract set modify_time = now()

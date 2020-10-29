@@ -247,22 +247,19 @@ public class ContractController extends BaseController {
     /**
      * delete contract by id.
      */
-//    @DeleteMapping(value = "/batch/path")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-//    public BaseResponse deleteContract(@Valid @RequestBody ContractPathParam param,
-//        @PathVariable("contractId") Integer contractId)
-//        throws NodeMgrException, Exception {
-//        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-//        Instant startTime = Instant.now();
-//        log.info("start deleteContract startTime:{} contractId:{} groupId:{}",
-//            startTime.toEpochMilli(),
-//            contractId, groupId);
-//
-//        contractService.deleteContractByPath(groupId);
-//
-//        log.info("end deleteContract useTime:{} result:{}",
-//            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
-//        return baseResponse;
-//    }
+    @DeleteMapping(value = "/batch/path")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param) {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start deleteContractByPath startTime:{} ContractPathParam:{}",
+            startTime.toEpochMilli(), param);
+
+        contractService.deleteByContractPath(param);
+
+        log.info("end deleteContractByPath useTime:{}",
+            Duration.between(startTime, Instant.now()).toMillis());
+        return baseResponse;
+    }
 
 }
