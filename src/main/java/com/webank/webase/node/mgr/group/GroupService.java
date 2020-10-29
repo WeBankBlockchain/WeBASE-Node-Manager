@@ -903,7 +903,7 @@ public class GroupService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public TbGroup saveGroup(int groupId, int nodeCount, String groupDesc,
-                             GroupType groupType, GroupStatus groupStatus, int chainId, String chainName) {
+                             GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
         if (groupId == 0) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
@@ -921,7 +921,7 @@ public class GroupService {
     @Transactional
     public TbGroup saveGroup(int groupId, int nodeCount, String description,
                              GroupType groupType, GroupStatus groupStatus, BigInteger timestamp, List<String> nodeIdList,
-                             int chainId,String chainName) {
+                             Integer chainId,String chainName) {
 
         if (groupId == 0) {
             return null;
@@ -985,7 +985,7 @@ public class GroupService {
 
     @Transactional
     public TbGroup insertIfNew(int groupId, int nodeCount, String groupDesc,
-                               GroupType groupType, GroupStatus groupStatus, int chainId, String chainName) {
+                               GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
 
         TbGroup group = this.groupMapper.getGroupByChainIdAndGroupId(chainId,groupId);
         if (group != null){
@@ -1008,7 +1008,7 @@ public class GroupService {
      * @param chainName
      * @return return true if insert.
      */
-    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(int groupId, int num, int chainId, String chainName) {
+    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(int groupId, int num, Integer chainId, String chainName) {
         TbGroup group = this.getGroupById(groupId);
         if (group == null) {
             // group not exists, insert a new one
