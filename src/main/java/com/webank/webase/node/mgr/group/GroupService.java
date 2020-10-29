@@ -988,7 +988,7 @@ public class GroupService {
 
     @Transactional
     public TbGroup insertIfNew(int groupId, int nodeCount, String groupDesc,
-                               GroupType groupType, GroupStatus groupStatus, int chainId, String chainName) {
+                               GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
 
         TbGroup group = this.groupMapper.getGroupByChainIdAndGroupId(chainId,groupId);
         if (group != null){
@@ -1011,7 +1011,7 @@ public class GroupService {
      * @param chainName
      * @return return true if insert.
      */
-    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(int groupId, int num, int chainId, String chainName) {
+    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(int groupId, int num, Integer chainId, String chainName) {
         TbGroup group = this.getGroupById(groupId);
         if (group == null) {
             // group not exists, insert a new one
@@ -1128,7 +1128,7 @@ public class GroupService {
                 .collect(Collectors.toList());
 
         // copy group.x.[genesis|conf] from old front
-        TbNode oldNode = this.nodeService.getOldestNodeByChainIdAndGroupId(chainId,groupId);
+        TbNode oldNode = this.nodeService.getOldestNodeByChainIdAndGroupId(chainId, groupId);
         TbFront oldFront = null;
         if (oldNode != null){
              oldFront = this.frontMapper.getByNodeId(oldNode.getNodeId());
