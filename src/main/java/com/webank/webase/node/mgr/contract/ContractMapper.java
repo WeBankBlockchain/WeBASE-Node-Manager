@@ -55,6 +55,5 @@ public interface ContractMapper {
 
     void removeByGroupId(@Param("groupId") Integer groupId);
 
-    int removeByContractPath(ContractPathParam param);
 
 }

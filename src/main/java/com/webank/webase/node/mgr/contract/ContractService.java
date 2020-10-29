@@ -25,7 +25,6 @@ import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.RspContractPath;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
@@ -42,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
@@ -505,7 +505,20 @@ public class  ContractService {
         return resultList;
     }
 
-    public int deleteByContractPath(Integer groupId, String contractPath) {
-        return contractMapper.removeByContractPath(new ContractPathParam(groupId, contractPath));
+    public void deleteByContractPath(ContractPathParam param) {
+        log.debug("start deleteByContractPath ContractPathParam:{}", JsonTools.toJSONString(param));
+        ContractParam listParam = new ContractParam();
+        BeanUtils.copyProperties(param, listParam);
+        List<TbContract> contractList = contractMapper.listOfContract(listParam);
+        if (contractList == null || contractList.isEmpty()) {
+            return;
+        }
+        // batch delete contract by path that not deployed
+        contractList.stream()
+            .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
+            .forEach( c ->
+                deleteContract(c.getContractId(), c.getGroupId()));
+        log.debug("end deleteByContractPath. ");
+
     }
 }
