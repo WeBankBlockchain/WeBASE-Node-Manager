@@ -715,7 +715,7 @@ public class GroupService {
 
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
                 req.getDescription(), GroupType.MANUAL, GroupStatus.MAINTAINING,
-                req.getTimestamp(), req.getNodeList(),tbFront.getChainId(),tbFront.getChainName());
+                req.getTimestamp(), req.getNodeList(), tbFront.getChainId(), tbFront.getChainName());
         return tbGroup;
     }
 
