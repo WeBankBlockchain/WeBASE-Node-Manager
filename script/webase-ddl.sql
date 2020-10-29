@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS tb_group (
     node_id_list text COMMENT '群组成员节点的ID',
     create_time datetime DEFAULT NULL COMMENT '创建时间',
     modify_time datetime DEFAULT NULL COMMENT '修改时间',
-    chain_id int(10) unsigned NULL DEFAULT '0' COMMENT '所属链 ID',
+    chain_id int(10) unsigned DEFAULT '0' COMMENT '所属链 ID',
     chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
     PRIMARY KEY (group_id),
   UNIQUE KEY `unique_chain_id_group_id` (`chain_id`,`group_id`)
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS tb_front (
   jsonrpc_port int(6) DEFAULT '8545' COMMENT 'jsonrpc 端口',
   p2p_port int(6) DEFAULT '30303' COMMENT 'p2p 端口',
   channel_port int(6) DEFAULT '20200' COMMENT 'channel 端口',
-  chain_id int(10) unsigned NULL DEFAULT '0' COMMENT '所属链 ID',
+  chain_id int(10) unsigned DEFAULT '0' COMMENT '所属链 ID',
   chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
   PRIMARY KEY (`front_id`),
   UNIQUE KEY `unique_node_id` (`node_id`),
