@@ -68,7 +68,11 @@
   <delete id="removeByGroupId" parameterType="java.lang.Integer">
 		delete from tb_contract where group_id = #{groupId}
 	</delete>
-
+  <delete id="removeByContractPath" parameterType="com.webank.webase.node.mgr.contract.entity.ContractPathParam">
+    delete from tb_contract
+    where group_id = #{groupId}
+    and contract_path = #{contractPath}
+  </delete>
 
   <update id="update" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     update tb_contract set modify_time = now()
@@ -245,11 +249,7 @@
 		select contract_bin from tb_contract where group_id = #{groupId} and contract_name = #{contractName}
 	</select>
 
-  <select id="queryContractPathList" resultMap="contractPathMap">
-    select distinct contract_path,group_id from tb_contract
-    where group_id = #{groupId}
-    order by modify_time desc
-  </select>
+
 
 
 </mapper>
