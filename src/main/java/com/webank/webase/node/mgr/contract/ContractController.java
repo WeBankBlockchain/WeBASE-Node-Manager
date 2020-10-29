@@ -23,11 +23,13 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
 import com.webank.webase.node.mgr.contract.entity.RspContractPath;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import java.time.Duration;
 import java.time.Instant;
@@ -233,7 +235,7 @@ public class ContractController extends BaseController {
         log.info("start queryContractPathList. startTime:{} groupId:{}",
             startTime.toEpochMilli(), groupId);
 
-        List<RspContractPath> result = contractService.getContractPathList(groupId);
+        List<TbContractPath> result = contractService.queryContractPathList(groupId);
         pagesponse.setData(result);
         pagesponse.setTotalCount(result.size());
 
@@ -241,4 +243,26 @@ public class ContractController extends BaseController {
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
+
+    /**
+     * delete contract by id.
+     */
+//    @DeleteMapping(value = "/batch/path")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    public BaseResponse deleteContract(@Valid @RequestBody ContractPathParam param,
+//        @PathVariable("contractId") Integer contractId)
+//        throws NodeMgrException, Exception {
+//        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//        log.info("start deleteContract startTime:{} contractId:{} groupId:{}",
+//            startTime.toEpochMilli(),
+//            contractId, groupId);
+//
+//        contractService.deleteContractByPath(groupId);
+//
+//        log.info("end deleteContract useTime:{} result:{}",
+//            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+//        return baseResponse;
+//    }
+
 }

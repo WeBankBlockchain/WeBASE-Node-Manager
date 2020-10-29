@@ -23,9 +23,11 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.RspContractPath;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
@@ -75,6 +77,8 @@ public class  ContractService {
     private AbiService abiService;
     @Autowired
     private PermissionManageService permissionManageService;
+    @Autowired
+    private ContractPathService contractPathService;
     /**
      * add new contract data.
      */
@@ -82,12 +86,14 @@ public class  ContractService {
         log.debug("start addContractInfo Contract:{}", JsonTools.toJSONString(contract));
         TbContract tbContract;
         if (contract.getContractId() == null) {
-            tbContract = newContract(contract);//new
+            //new
+            tbContract = newContract(contract);
         } else {
-            tbContract = updateContract(contract);//update
+            //update
+            tbContract = updateContract(contract);
         }
 
-        if (Objects.nonNull(tbContract) && StringUtils.isNotBlank(tbContract.getContractBin())) {
+        if (StringUtils.isNotBlank(tbContract.getContractBin())) {
             // update monitor unusual deployInputParam's info
             monitorService.updateUnusualContract(tbContract.getGroupId(),
                 tbContract.getContractName(), tbContract.getContractBin());
@@ -111,7 +117,12 @@ public class  ContractService {
         //add to database.
         TbContract tbContract = new TbContract();
         BeanUtils.copyProperties(contract, tbContract);
+        log.debug("newContract save contract");
         contractMapper.add(tbContract);
+        // save contract path
+        log.debug("newContract save contract path");
+        // if exist, auto not save
+        contractPathService.save(contract.getGroupId(), contract.getContractPath());
         return tbContract;
     }
 
@@ -399,7 +410,10 @@ public class  ContractService {
         if (groupId == 0) {
             return;
         }
+        log.info("delete contract by groupId");
         contractMapper.removeByGroupId(groupId);
+        log.info("delete contract path by groupId");
+        contractPathService.removeByGroupId(groupId);
     }
 
 
@@ -481,14 +495,17 @@ public class  ContractService {
     /**
      * get contract path list
      */
-    public List<RspContractPath> getContractPathList(Integer groupId) {
-        List<RspContractPath> pathList = contractMapper.queryContractPathList(groupId);
-        List<RspContractPath> resultList = new ArrayList<>();
+    public List<TbContractPath> queryContractPathList(Integer groupId) {
+        List<TbContractPath> pathList = contractPathService.listContractPath(groupId);
+        // not return null, but return empty list
+        List<TbContractPath> resultList = new ArrayList<>();
         if (pathList != null) {
             resultList.addAll(pathList);
         }
-        // todo 去重
         return resultList;
     }
 
+    public int deleteByContractPath(Integer groupId, String contractPath) {
+        return contractMapper.removeByContractPath(new ContractPathParam(groupId, contractPath));
+    }
 }
