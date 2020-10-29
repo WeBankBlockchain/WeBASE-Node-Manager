@@ -43,9 +43,9 @@ constant:
   isUseSecurity: true
   # verification code expire time (s)
   verificationCodeMaxAge: 300
-  # if disabled as false
+  # if disabled as false, code would be constant value
   enableVerificationCode: true
-  # verification code solid value, only when enableVerificationCode is false works
+  # verification code constant value, only when enableVerificationCode is false works
   verificationCodeValue: "8888"
   # auth token code expire time (s)
   authTokenMaxAge: 1800
@@ -85,7 +85,6 @@ constant:
   auditMonitorTaskFixedDelay: 300000
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
-
   permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/encrypt,/version,/front/refresh
 
   #### 1.4.0 visual deploy
