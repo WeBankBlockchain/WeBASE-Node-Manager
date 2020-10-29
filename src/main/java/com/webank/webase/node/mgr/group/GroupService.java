@@ -468,7 +468,7 @@ public class GroupService {
             int groupId = tbGroup.getGroupId();
             String lastBlockHash = "";
             for (TbFront front : frontList) {
-                if( ! FrontStatusEnum.isRunning(front.getStatus())){
+                if( ! FrontStatusEnum.isRunning(front.getStatus()) ){
                     log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
                     continue;
                 }
@@ -711,6 +711,8 @@ public class GroupService {
         // fetch group config file
         this.pullAllGroupFiles(generateGroupId, tbFront);
         // save group, saved as invalid status until start
+        log.info("generateToSingleNode generateGroupInfo:{},req:{},tbFront:{}", generateGroupInfo, req, tbFront);
+
         TbGroup tbGroup = saveGroup(generateGroupId, req.getNodeList().size(),
                 req.getDescription(), GroupType.MANUAL, GroupStatus.MAINTAINING,
                 req.getTimestamp(), req.getNodeList(),tbFront.getChainId(),tbFront.getChainName());
@@ -903,7 +905,7 @@ public class GroupService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public TbGroup saveGroup(int groupId, int nodeCount, String groupDesc,
-                             GroupType groupType, GroupStatus groupStatus, int chainId, String chainName) {
+                             GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
         if (groupId == 0) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
@@ -921,8 +923,8 @@ public class GroupService {
     @Transactional
     public TbGroup saveGroup(int groupId, int nodeCount, String description,
                              GroupType groupType, GroupStatus groupStatus, BigInteger timestamp, List<String> nodeIdList,
-                             int chainId,String chainName) {
-
+                             Integer chainId, String chainName) {
+        log.debug("start saveGroup");
         if (groupId == 0) {
             return null;
         }
@@ -933,6 +935,7 @@ public class GroupService {
                         groupType, groupStatus,chainId,chainName);
         tbGroup.setGroupTimestamp(timestamp.toString(10));
         tbGroup.setNodeIdList(JsonTools.toJSONString(nodeIdList));
+        log.debug("saveGroup tbGroup:{}", tbGroup);
         groupMapper.save(tbGroup);
         // create table by group id
         tableService.newTableByGroupId(groupId);
