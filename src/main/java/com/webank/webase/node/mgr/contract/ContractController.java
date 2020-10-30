@@ -266,6 +266,7 @@ public class ContractController extends BaseController {
 
     /**
      * delete contract by id.
+     * only admin batch delete contract
      */
     @DeleteMapping(value = "/batch/path")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
