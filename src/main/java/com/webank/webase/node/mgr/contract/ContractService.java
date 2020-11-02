@@ -37,11 +37,14 @@ import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService
 import com.webank.webase.node.mgr.user.UserService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
@@ -51,6 +54,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * services for contract data.
@@ -479,7 +483,7 @@ public class  ContractService {
         }
 
         // check user in the list
-        if (deployUserList.isEmpty()) {
+        if (deployUserList == null || deployUserList.isEmpty()) {
             return;
         } else {
             long count = 0;
@@ -514,10 +518,19 @@ public class  ContractService {
             return;
         }
         // batch delete contract by path that not deployed
-        contractList.stream()
+        Collection<TbContract> unDeployedList = contractList.stream()
             .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
-            .forEach( c ->
-                deleteContract(c.getContractId(), c.getGroupId()));
+            .collect(Collectors.toList());
+        // unDeployed's size == list's size, list is all unDeployed
+        if (unDeployedList.size() == contractList.size()) {
+            log.debug("deleteByContractPath delete contract in path");
+            unDeployedList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
+        } else {
+            log.error("end deleteByContractPath for contain deployed contract");
+            throw new NodeMgrException(ConstantCode.CONTRACT_PATH_CONTAIN_DEPLOYED);
+        }
+        log.debug("deleteByContractPath delete path");
+        contractPathService.removeByPathName(param);
         log.debug("end deleteByContractPath. ");
 
     }
