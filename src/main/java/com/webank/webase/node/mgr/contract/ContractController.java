@@ -138,8 +138,8 @@ public class ContractController extends BaseController {
             pagesponse.setTotalCount(count);
         }
 
-        log.info("end contractList. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
+        log.info("end contractList. useTime:{} result count:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), count);
         return pagesponse;
     }
 
