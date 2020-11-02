@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,10 @@ public class ContractController extends BaseController {
         log.info("start saveContract startTime:{} contract:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(contract));
 
+        // default path /
+        if ("".equals(contract.getContractPath())) {
+            contract.setContractPath("/");
+        }
         // add contract row
         TbContract tbContract = contractService.saveContract(contract);
 
@@ -236,7 +241,11 @@ public class ContractController extends BaseController {
         log.info("start addContractPath. startTime:{} param:{}",
             startTime.toEpochMilli(), param);
 
-        int result = contractPathService.save(param.getGroupId(), param.getContractPath());
+        String contractPath = param.getContractPath();
+        if ("".equals(contractPath)) {
+            contractPath = "/";
+        }
+        int result = contractPathService.save(param.getGroupId(), contractPath);
         response.setData(result);
 
         log.info("end addContractPath. useTime:{} add result:{}",

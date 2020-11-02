@@ -53,6 +53,9 @@ public class ContractPathService {
         return contractPathMapper.add(contractPath);
     }
 
+    /**
+     * update contract path: update all related contract
+     */
     public int updatePath(Integer pathId, String pathName) {
         TbContractPath contractPath = new TbContractPath();
         contractPath.setContractPath(pathName);
@@ -62,6 +65,11 @@ public class ContractPathService {
 
     public int remove(Integer pathId) {
         return contractPathMapper.remove(pathId);
+    }
+
+    public int removeByPathName(ContractPathParam param) {
+        log.info("removeByPathName param:{}", param);
+        return contractPathMapper.removeByPathName(param);
     }
 
     public void removeByGroupId(Integer groupId) {

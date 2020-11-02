@@ -175,6 +175,9 @@ public class ConstantCode {
     public static final RetCode GOVERN_VOTE_RECORD_NOT_EXIST = RetCode.mark(202310, "govern vote record not exist");
     public static final RetCode PERMISSION_DENIED_ON_CHAIN = RetCode.mark(202311, "permission denied on chain");
 
+    public static final RetCode CONTRACT_PATH_CONTAIN_DEPLOYED = RetCode.mark(202321, "path contains deployed contract, please delete one by one.");
+    public static final RetCode CONTRACT_PATH_CANNOT_BE_BLANK = RetCode.mark(202322, "contract path cannot be blank(use \"/\" instead) ");
+
     // add in v1.4.0
     public static final RetCode NO_DOCKER_TAG_UPDATE_URL_ERROR = RetCode.mark(202401, "No docker image tag update url.");
     public static final RetCode UPDATE_DOCKER_TAG_ERROR = RetCode.mark(202402, "Update docker tag from registry error.");

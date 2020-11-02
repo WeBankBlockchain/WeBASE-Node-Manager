@@ -26,6 +26,8 @@ public interface ContractPathMapper {
 
     Integer remove(@Param("contractPathId") Integer contractPathId);
 
+    Integer removeByPathName(ContractPathParam param);
+
     Integer update(TbContractPath tbContractPath);
 
     TbContractPath findOne(ContractPathParam param);

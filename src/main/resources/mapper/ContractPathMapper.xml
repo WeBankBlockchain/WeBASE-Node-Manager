@@ -35,6 +35,12 @@
     where id = #{id}
   </update>
 
+  <delete id="removeByPathName" parameterType="com.webank.webase.node.mgr.contract.entity.ContractPathParam">
+    delete from tb_contract_path
+    where group_id = #{groupId}
+    and contract_path = #{contractPath}
+  </delete>
+
   <delete id="removeByGroupId" parameterType="java.lang.Integer">
     delete from tb_contract_path where group_id = #{groupId}
   </delete>
