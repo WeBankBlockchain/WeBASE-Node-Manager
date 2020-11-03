@@ -32,8 +32,14 @@ public interface GroupMapper {
 
     /**
      * add group info
+     * @deprecated
      */
     int save(TbGroup tbGroup);
+
+    /**
+     * insert selective
+     */
+    int insertSelective(TbGroup tbGroup);
 
     /**
      * remove by id.

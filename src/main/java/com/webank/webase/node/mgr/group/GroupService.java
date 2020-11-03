@@ -913,7 +913,7 @@ public class GroupService {
         TbGroup tbGroup = new TbGroup(groupId,
                 String.format("group%s", groupId),
                 nodeCount, groupDesc, groupType, groupStatus, chainId, chainName);
-        groupMapper.save(tbGroup);
+        groupMapper.insertSelective(tbGroup);
 
         //create table by group id
         tableService.newTableByGroupId(groupId);
@@ -936,7 +936,7 @@ public class GroupService {
         tbGroup.setGroupTimestamp(timestamp.toString(10));
         tbGroup.setNodeIdList(JsonTools.toJSONString(nodeIdList));
         log.debug("saveGroup tbGroup:{}", tbGroup);
-        groupMapper.save(tbGroup);
+        groupMapper.insertSelective(tbGroup);
         // create table by group id
         tableService.newTableByGroupId(groupId);
         return tbGroup;
