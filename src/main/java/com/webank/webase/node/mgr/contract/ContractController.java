@@ -27,6 +27,7 @@ import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
+import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
@@ -36,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,6 +139,34 @@ public class ContractController extends BaseController {
         }
 
         log.info("end contractList. useTime:{} result count:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), count);
+        return pagesponse;
+    }
+
+    /**
+     * qurey contract info list by groupId without abi/bin
+     */
+    @GetMapping(value = "/contractList/all/light/{groupId}")
+    public BasePageResponse queryContractListNoAbi(@PathVariable("groupId") Integer groupId)
+        throws NodeMgrException {
+        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start queryContractListNoAbi. startTime:{} groupId:{}",
+            startTime.toEpochMilli(), groupId);
+
+        //param
+        ContractParam queryParam = new ContractParam();
+        queryParam.setGroupId(groupId);
+
+        int count = contractService.countOfContract(queryParam);
+        if (count > 0) {
+            // query list
+            List<RspContractNoAbi> listOfContract = contractService.qureyContractListNoAbi(queryParam);
+            pagesponse.setData(listOfContract);
+            pagesponse.setTotalCount(count);
+        }
+
+        log.info("end queryContractListNoAbi. useTime:{} result count:{}",
             Duration.between(startTime, Instant.now()).toMillis(), count);
         return pagesponse;
     }
