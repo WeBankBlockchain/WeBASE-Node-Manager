@@ -25,6 +25,7 @@ import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
+import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
@@ -171,6 +172,25 @@ public class  ContractService {
         log.debug("end qureyContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
         return listOfContract;
     }
+
+    /**
+     * query contract list.
+     */
+    public List<RspContractNoAbi> qureyContractListNoAbi(ContractParam param) throws NodeMgrException {
+        log.debug("start qureyContractList ContractListParam:{}", JsonTools.toJSONString(param));
+
+        // query contract list
+        List<TbContract> listOfContract = contractMapper.listOfContract(param);
+        List<RspContractNoAbi> resultList = new ArrayList<>();
+        listOfContract.forEach(c -> {
+            RspContractNoAbi rsp = new RspContractNoAbi();
+            BeanUtils.copyProperties(c, rsp);
+            resultList.add(rsp);
+        });
+        log.debug("end qureyContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
+        return resultList;
+    }
+
 
 
     /**
