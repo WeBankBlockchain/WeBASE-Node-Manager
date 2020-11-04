@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   contract_version varchar(120) DEFAULT NULL COMMENT '合约版本',
   account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
-  contract_source text COMMENT '合约源码',
+  contract_source mediumtext COMMENT '合约源码',
   contract_abi mediumtext COMMENT '编译合约生成的abi文件内容',
   contract_bin mediumtext COMMENT '合约binary',
   bytecodeBin mediumtext COMMENT '合约bin',
