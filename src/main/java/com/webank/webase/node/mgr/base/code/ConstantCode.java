@@ -177,6 +177,8 @@ public class ConstantCode {
 
     public static final RetCode CONTRACT_PATH_CONTAIN_DEPLOYED = RetCode.mark(202321, "path contains deployed contract, please delete one by one.");
     public static final RetCode CONTRACT_PATH_CANNOT_BE_BLANK = RetCode.mark(202322, "contract path cannot be blank(use \"/\" instead) ");
+    public static final RetCode PRIVATE_KEY_DECODE_FAIL = RetCode.mark(202323, "privateKey decode fail");
+    public static final RetCode PASSWORD_DECODE_FAIL = RetCode.mark(202324, "password decode fail");
 
     // add in v1.4.0
     public static final RetCode NO_DOCKER_TAG_UPDATE_URL_ERROR = RetCode.mark(202401, "No docker image tag update url.");

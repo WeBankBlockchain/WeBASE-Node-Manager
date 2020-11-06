@@ -23,6 +23,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import java.util.Base64;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,6 +51,8 @@ public class MailServerConfigController {
         log.info("start getServerConfig. startTime:{} serverId:{}",
                 startTime.toEpochMilli(), serverId);
         TbMailServerConfig res = mailServerConfigService.queryByServerId(serverId);
+        String pwd = res.getPassword();
+        res.setPassword(Base64.getEncoder().encodeToString(pwd.getBytes()));
         log.info("end getServerConfig. useTime:{}, res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), res);
         return new BaseResponse(ConstantCode.SUCCESS, res);
@@ -62,7 +65,10 @@ public class MailServerConfigController {
                 startTime.toEpochMilli());
         try{
             List<TbMailServerConfig> resList = mailServerConfigService.getAllMailServerConfig();
-
+            resList.forEach(config -> {
+                String pwd = config.getPassword();
+                config.setPassword(Base64.getEncoder().encodeToString(pwd.getBytes()));
+            });
             log.info("end listServerConfig. useTime:{}, resList:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), resList);
             return new BaseResponse(ConstantCode.SUCCESS, resList);
@@ -88,6 +94,14 @@ public class MailServerConfigController {
             log.debug("updateMailServerConfig, error:{} ",
                     ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
             return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
+        }
+        String passwordEncoded = param.getPassword();
+        try {
+            String pwdDecoded = new String(Base64.getDecoder().decode(passwordEncoded));
+            param.setPassword(pwdDecoded);
+        } catch (Exception e) {
+            log.error("decode password error:[]", e);
+            return new BaseResponse(ConstantCode.PASSWORD_DECODE_FAIL, e.getMessage());
         }
         try{
             mailServerConfigService.updateMailServerConfig(param);
