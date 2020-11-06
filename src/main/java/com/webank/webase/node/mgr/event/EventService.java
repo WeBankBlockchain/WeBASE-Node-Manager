@@ -16,14 +16,23 @@
 
 package com.webank.webase.node.mgr.event;
 
+import com.webank.webase.node.mgr.abi.AbiService;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.enums.ContractStatus;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
+import com.webank.webase.node.mgr.event.entity.RspContractInfo;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +45,12 @@ public class EventService {
 	private FrontInterfaceService frontInterfaceService;
 	@Autowired
 	private FrontService frontService;
+	@Autowired
+	private ContractService contractService;
+	@Autowired
+	private AbiService abiService;
+	private static final String TYPE_CONTRACT = "contract";
+	private static final String TYPE_ABI_INFO = "abi";
 
 	public List<NewBlockEventInfo> getNewBlockEventInfoList(int groupId) {
 		//get all front
@@ -64,5 +79,39 @@ public class EventService {
 	public BasePageResponse getEventLogList(ReqEventLogList param) {
 		return frontInterfaceService.getEventLogList(param);
 	}
+
+	/**
+	 * list contract info from contract & abi
+	 */
+	public List<RspContractInfo> listContractInfoBoth(int groupId) {
+		// find contract list
+		ContractParam contractParam = new ContractParam();
+		contractParam.setGroupId(groupId);
+		contractParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
+		List<RspContractNoAbi> contractList = contractService.qureyContractListNoAbi(contractParam);
+		// find abi list
+		List<RspContractNoAbi> abiInfoList = abiService.listByGroupIdNoAbi(groupId);
+		// add abi info and contract info in result list
+		List<RspContractInfo> resultList = new ArrayList<>();
+		contractList.forEach(c -> resultList.add(new RspContractInfo(TYPE_CONTRACT, c.getContractAddress(), c.getContractName())));
+		abiInfoList.forEach(c -> resultList.add(new RspContractInfo(TYPE_ABI_INFO, c.getContractAddress(), c.getContractName())));
+
+		return resultList;
+	}
+
+
+	public Object getAbiByAddressFromBoth(int groupId, String type, String contractAddress) {
+		if (TYPE_CONTRACT.equals(type)) {
+			ContractParam param = new ContractParam();
+			param.setGroupId(groupId);
+			param.setContractAddress(contractAddress);
+			return contractService.queryContract(param);
+		} else if (TYPE_ABI_INFO.equals(type)) {
+			return abiService.getAbiByGroupIdAndAddress(groupId, contractAddress);
+		} else {
+			throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
+		}
+	}
+
 
 }

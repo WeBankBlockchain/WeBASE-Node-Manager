@@ -23,7 +23,11 @@ import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
+import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import java.util.ArrayList;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -180,4 +184,24 @@ public class AbiService {
 			throw new NodeMgrException(ConstantCode.DB_EXCEPTION.getCode(),
 					e.getMessage());
 		}
-	}}
+	}
+
+	/**
+	 * query contract list.
+	 */
+	public List<RspContractNoAbi> listByGroupIdNoAbi(int groupId) throws NodeMgrException {
+		log.debug("start listByGroupIdNoAbi groupId:{}", groupId);
+		ReqAbiListParam param = new ReqAbiListParam();
+		param.setGroupId(groupId);
+		List<RspContractNoAbi> resultList = new ArrayList<>();
+		// query contract list
+		List<AbiInfo> listOfAbi = abiMapper.listOfAbi(param);
+		listOfAbi.forEach(c -> {
+			RspContractNoAbi rsp = new RspContractNoAbi();
+			BeanUtils.copyProperties(c, rsp);
+			resultList.add(rsp);
+		});
+		log.debug("end listByGroupIdNoAbi resultList:{}", JsonTools.toJSONString(resultList));
+		return resultList;
+	}
+}
