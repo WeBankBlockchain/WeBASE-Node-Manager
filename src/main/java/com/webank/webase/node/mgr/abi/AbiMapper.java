@@ -39,6 +39,7 @@ public interface AbiMapper {
 	AbiInfo queryByGroupIdAndContractName(@Param("groupId") int groupId,
 			 @Param("account") String account,
 			 @Param("contractName") String contractName);
+
 	void add(AbiInfo abiInfo);
 
 	void update(AbiInfo abiInfo);

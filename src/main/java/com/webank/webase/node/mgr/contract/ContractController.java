@@ -13,20 +13,24 @@
  */
 package com.webank.webase.node.mgr.contract;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
+import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import java.time.Duration;
 import java.time.Instant;
@@ -55,6 +59,8 @@ public class ContractController extends BaseController {
 
     @Autowired
     private ContractService contractService;
+    @Autowired
+    private ContractPathService contractPathService;
 
     /**
      * add new contract info.
@@ -69,6 +75,10 @@ public class ContractController extends BaseController {
         log.info("start saveContract startTime:{} contract:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(contract));
 
+        // default path /
+        if ("".equals(contract.getContractPath())) {
+            contract.setContractPath("/");
+        }
         // add contract row
         TbContract tbContract = contractService.saveContract(contract);
 
@@ -130,8 +140,37 @@ public class ContractController extends BaseController {
             pagesponse.setTotalCount(count);
         }
 
-        log.info("end contractList. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
+        log.info("end contractList. useTime:{} result count:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), count);
+        return pagesponse;
+    }
+
+    /**
+     * qurey contract info list by groupId without abi/bin
+     */
+    @GetMapping(value = "/contractList/all/light/{groupId}")
+    public BasePageResponse queryContractListNoAbi(@PathVariable("groupId") Integer groupId)
+        throws NodeMgrException {
+        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start queryContractListNoAbi. startTime:{} groupId:{}",
+            startTime.toEpochMilli(), groupId);
+
+        //param
+        ContractParam queryParam = new ContractParam();
+        queryParam.setGroupId(groupId);
+        queryParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
+
+        int count = contractService.countOfContract(queryParam);
+        if (count > 0) {
+            // query list
+            List<RspContractNoAbi> listOfContract = contractService.qureyContractListNoAbi(queryParam);
+            pagesponse.setData(listOfContract);
+            pagesponse.setTotalCount(count);
+        }
+
+        log.info("end queryContractListNoAbi. useTime:{} result count:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), count);
         return pagesponse;
     }
 
@@ -222,5 +261,66 @@ public class ContractController extends BaseController {
         return baseResponse;
     }
 
+    /**
+     * add contract path
+     */
+    @PostMapping(value = "/contractPath")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse addContractPath(@Valid @RequestBody ContractPathParam param) {
+        BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start addContractPath. startTime:{} param:{}",
+            startTime.toEpochMilli(), param);
+
+        String contractPath = param.getContractPath();
+        if ("".equals(contractPath)) {
+            contractPath = "/";
+        }
+        int result = contractPathService.save(param.getGroupId(), contractPath);
+        response.setData(result);
+
+        log.info("end addContractPath. useTime:{} add result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), result);
+        return response;
+    }
+
+
+    /**
+     * qurey contract info list.
+     */
+    @PostMapping(value = "/contractPath/list/{groupId}")
+    public BasePageResponse queryContractPathList(@PathVariable("groupId") Integer groupId) {
+        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start queryContractPathList. startTime:{} groupId:{}",
+            startTime.toEpochMilli(), groupId);
+
+        List<TbContractPath> result = contractService.queryContractPathList(groupId);
+        pagesponse.setData(result);
+        pagesponse.setTotalCount(result.size());
+
+        log.info("end queryContractPathList. useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
+        return pagesponse;
+    }
+
+    /**
+     * delete contract by id.
+     * only admin batch delete contract
+     */
+    @DeleteMapping(value = "/batch/path")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param) {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start deleteContractByPath startTime:{} ContractPathParam:{}",
+            startTime.toEpochMilli(), param);
+
+        contractService.deleteByContractPath(param);
+
+        log.info("end deleteContractByPath useTime:{}",
+            Duration.between(startTime, Instant.now()).toMillis());
+        return baseResponse;
+    }
 
 }
