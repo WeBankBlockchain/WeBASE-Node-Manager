@@ -29,6 +29,9 @@ public class ContractParam extends BaseQueryParam {
     private Integer groupId;
     private Integer contractId;
     private String contractName;
+    /**
+     * v1.4.2 query by contract path
+     */
     private String contractPath;
     private String contractVersion;
     private String account;

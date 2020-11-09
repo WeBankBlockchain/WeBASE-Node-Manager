@@ -34,6 +34,7 @@ public class ReqMailServerConfigParam {
     // 邮箱地址
     private String username;
     // 邮箱授权码
+    // v1.4.2 base64混淆后传输
     private String password;
     // 邮箱协议：smtp, pop3, imap
     private String protocol;

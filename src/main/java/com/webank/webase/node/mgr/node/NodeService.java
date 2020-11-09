@@ -397,7 +397,7 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(int chainId,final int groupId){
+    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId,final int groupId){
         // select all fronts by all agencies
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
 
