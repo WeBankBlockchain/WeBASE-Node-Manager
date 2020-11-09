@@ -13,23 +13,6 @@
  */
 package com.webank.webase.node.mgr.contract;
 
-import com.webank.webase.node.mgr.user.entity.TbUser;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-
 import com.webank.webase.node.mgr.abi.AbiService;
 import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -40,8 +23,11 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
+import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
@@ -50,8 +36,26 @@ import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
 import com.webank.webase.node.mgr.user.UserService;
-
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * services for contract data.
@@ -78,6 +82,8 @@ public class  ContractService {
     private AbiService abiService;
     @Autowired
     private PermissionManageService permissionManageService;
+    @Autowired
+    private ContractPathService contractPathService;
     /**
      * add new contract data.
      */
@@ -85,12 +91,14 @@ public class  ContractService {
         log.debug("start addContractInfo Contract:{}", JsonTools.toJSONString(contract));
         TbContract tbContract;
         if (contract.getContractId() == null) {
-            tbContract = newContract(contract);//new
+            //new
+            tbContract = newContract(contract);
         } else {
-            tbContract = updateContract(contract);//update
+            //update
+            tbContract = updateContract(contract);
         }
 
-        if (Objects.nonNull(tbContract) && StringUtils.isNotBlank(tbContract.getContractBin())) {
+        if (StringUtils.isNotBlank(tbContract.getContractBin())) {
             // update monitor unusual deployInputParam's info
             monitorService.updateUnusualContract(tbContract.getGroupId(),
                 tbContract.getContractName(), tbContract.getContractBin());
@@ -114,7 +122,12 @@ public class  ContractService {
         //add to database.
         TbContract tbContract = new TbContract();
         BeanUtils.copyProperties(contract, tbContract);
+        log.debug("newContract save contract");
         contractMapper.add(tbContract);
+        // save contract path
+        log.debug("newContract save contract path");
+        // if exist, auto not save
+        contractPathService.save(contract.getGroupId(), contract.getContractPath());
         return tbContract;
     }
 
@@ -159,6 +172,25 @@ public class  ContractService {
         log.debug("end qureyContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
         return listOfContract;
     }
+
+    /**
+     * query contract list.
+     */
+    public List<RspContractNoAbi> qureyContractListNoAbi(ContractParam param) throws NodeMgrException {
+        log.debug("start qureyContractList ContractListParam:{}", JsonTools.toJSONString(param));
+
+        // query contract list
+        List<TbContract> listOfContract = contractMapper.listOfContract(param);
+        List<RspContractNoAbi> resultList = new ArrayList<>();
+        listOfContract.forEach(c -> {
+            RspContractNoAbi rsp = new RspContractNoAbi();
+            BeanUtils.copyProperties(c, rsp);
+            resultList.add(rsp);
+        });
+        log.debug("end qureyContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
+        return resultList;
+    }
+
 
 
     /**
@@ -402,7 +434,10 @@ public class  ContractService {
         if (groupId == 0) {
             return;
         }
+        log.info("delete contract by groupId");
         contractMapper.removeByGroupId(groupId);
+        log.info("delete contract path by groupId");
+        contractPathService.removeByGroupId(groupId);
     }
 
 
@@ -468,7 +503,7 @@ public class  ContractService {
         }
 
         // check user in the list
-        if (deployUserList.isEmpty()) {
+        if (deployUserList == null || deployUserList.isEmpty()) {
             return;
         } else {
             long count = 0;
@@ -481,4 +516,42 @@ public class  ContractService {
         }
     }
 
+    /**
+     * get contract path list
+     */
+    public List<TbContractPath> queryContractPathList(Integer groupId) {
+        List<TbContractPath> pathList = contractPathService.listContractPath(groupId);
+        // not return null, but return empty list
+        List<TbContractPath> resultList = new ArrayList<>();
+        if (pathList != null) {
+            resultList.addAll(pathList);
+        }
+        return resultList;
+    }
+
+    public void deleteByContractPath(ContractPathParam param) {
+        log.debug("start deleteByContractPath ContractPathParam:{}", JsonTools.toJSONString(param));
+        ContractParam listParam = new ContractParam();
+        BeanUtils.copyProperties(param, listParam);
+        List<TbContract> contractList = contractMapper.listOfContract(listParam);
+        if (contractList == null || contractList.isEmpty()) {
+            return;
+        }
+        // batch delete contract by path that not deployed
+        Collection<TbContract> unDeployedList = contractList.stream()
+            .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
+            .collect(Collectors.toList());
+        // unDeployed's size == list's size, list is all unDeployed
+        if (unDeployedList.size() == contractList.size()) {
+            log.debug("deleteByContractPath delete contract in path");
+            unDeployedList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
+        } else {
+            log.error("end deleteByContractPath for contain deployed contract");
+            throw new NodeMgrException(ConstantCode.CONTRACT_PATH_CONTAIN_DEPLOYED);
+        }
+        log.debug("deleteByContractPath delete path");
+        contractPathService.removeByPathName(param);
+        log.debug("end deleteByContractPath. ");
+
+    }
 }

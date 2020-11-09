@@ -35,6 +35,7 @@ import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -375,12 +376,21 @@ public class UserService {
      * import keystore info from p12 file input stream and its password
      * 
      * @param p12File
-     * @param p12Password
+     * @param p12PasswordEncoded
      * @param userName
      * @return KeyStoreInfo
      */
-    public Integer importKeyStoreFromP12(MultipartFile p12File, String p12Password, Integer groupId,
+    public Integer importKeyStoreFromP12(MultipartFile p12File, String p12PasswordEncoded, Integer groupId,
             String userName, String account, String description) {
+        // decode p12 password
+        String p12Password;
+        try{
+            p12Password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
+        } catch (Exception e) {
+            log.error("decode password error:[]", e);
+            throw new NodeMgrException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
+        }
+
         P12Manager p12Manager = new P12Manager();
         String privateKey;
         try {

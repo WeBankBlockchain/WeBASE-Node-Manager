@@ -46,9 +46,80 @@
 
     <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
         insert into tb_group
-        (group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time,chain_id, chain_name)
+        (group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time,chain_id,chain_name)
         values(#{groupId},#{groupName},#{nodeCount},#{description},#{groupType},#{groupStatus},
         #{groupTimestamp},#{nodeIdList},NOW(),NOW(),#{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR})
+        ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
+    </insert>
+
+    <insert id="insertSelective" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
+        insert into tb_group
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="groupId != null" >
+                group_id,
+            </if>
+            <if test="groupName != null" >
+                group_name,
+            </if>
+            <if test="nodeCount != null" >
+                node_count,
+            </if>
+            <if test="description != null" >
+                description,
+            </if>
+            <if test="groupType != null" >
+                group_type,
+            </if>
+            <if test="groupStatus != null" >
+                group_status,
+            </if>
+            <if test="groupTimestamp != null" >
+                group_timestamp,
+            </if>
+            <if test="nodeIdList != null" >
+                node_id_list,
+            </if>
+            <if test="chainId != null" >
+                chain_id,
+            </if>
+            <if test="chainName != null" >
+                chain_name,
+            </if>
+            create_time,modify_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="groupId != null" >
+                #{groupId,jdbcType=BIGINT},
+            </if>
+            <if test="groupName != null" >
+                #{groupName},
+            </if>
+            <if test="nodeCount != null" >
+                #{nodeCount},
+            </if>
+            <if test="description != null" >
+                #{description},
+            </if>
+            <if test="groupType != null" >
+                #{groupType},
+            </if>
+            <if test="groupStatus != null" >
+                #{groupStatus},
+            </if>
+            <if test="groupTimestamp != null" >
+                #{groupTimestamp},
+            </if>
+            <if test="nodeIdList != null" >
+                #{nodeIdList},
+            </if>
+            <if test="chainId != null" >
+                #{chainId},
+            </if>
+            <if test="chainName != null" >
+                #{chainName},
+            </if>
+            NOW(),NOW(),
+        </trim>
         ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
     </insert>
 
