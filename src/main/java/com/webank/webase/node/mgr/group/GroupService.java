@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
+import com.webank.webase.node.mgr.base.enums.DeployType;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -731,6 +732,13 @@ public class GroupService {
             throw new NodeMgrException(ConstantCode.GROUP_ID_EXISTS);
         }
         List<String> nodeIdList = req.getNodeList();
+        // check for visual_deploy at least 2 sealer
+        if (constantProperties.getDeployType() == DeployType.VISUAL_DEPLOY.getValue()
+        && nodeIdList.size() < ConstantProperties.LEAST_SEALER_TWO) {
+            log.error("fail generateGroup. Group must contain 2 sealers at least.(visual_deploy)");
+            throw new NodeMgrException(ConstantCode.TWO_SEALER_IN_GROUP_AT_LEAST);
+        }
+
         List<RspOperateResult> resOperateList = new ArrayList<>(nodeIdList.size());
         int chainId = 0;
         String  chainName = null;
