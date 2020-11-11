@@ -98,6 +98,7 @@ public class ConstantProperties {
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
     public static final int MAX_NODE_ON_HOST = 4;
+    public static final int LEAST_SEALER_TWO = 2;
 
     private int deployType = 0;
     private String webaseSignAddress = "127.0.0.1:5004";
