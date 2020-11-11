@@ -102,7 +102,7 @@ public class EventController {
 	}
 
 	/**
-	 * add new front
+	 * sync get event logs list
 	 */
 	@PostMapping("/eventLogs/list")
 	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
