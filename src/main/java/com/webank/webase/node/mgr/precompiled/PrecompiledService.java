@@ -15,22 +15,12 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
-import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.DeployType;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.front.FrontMapper;
@@ -39,11 +29,20 @@ import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
 import com.webank.webase.node.mgr.user.UserService;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Precompiled common service
@@ -65,6 +64,8 @@ public class PrecompiledService {
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private FrontMapper frontMapper;
+    @Autowired
+    private ConstantProperties constants;
 
     private static final String CONTRACT_MANAGE_GETSTATUS = "getStatus";
     private static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
@@ -124,9 +125,10 @@ public class PrecompiledService {
         // check sealer num in group
         List<String> sealerList = this.frontInterfaceService.getSealerList(groupId);
         sealerList.remove(consensusHandle.getNodeId());
-        // at least 2 sealers in group after remove
-        if (CollectionUtils.size(sealerList) < 2){
-            log.error("fail nodeManageService. Group only has [{}] sealers after remove.");
+        // @visual-deploy: at least 2 sealers in group after remove
+        if (constants.getDeployType() == DeployType.VISUAL_DEPLOY.getValue()
+            && CollectionUtils.size(sealerList) < ConstantProperties.LEAST_SEALER_TWO) {
+            log.error("fail nodeManageService. Group only has [{}] sealers after remove.(visual_deploy)");
             throw new NodeMgrException(ConstantCode.TWO_SEALER_IN_GROUP_AT_LEAST);
         }
 

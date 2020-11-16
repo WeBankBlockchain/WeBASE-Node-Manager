@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   contract_source mediumtext COMMENT '合约源码',
   contract_abi mediumtext COMMENT '编译合约生成的abi文件内容',
   contract_bin mediumtext COMMENT '合约binary',
-  bytecodeBin mediumtext COMMENT '合约bin',
+  bytecode_bin mediumtext COMMENT '合约bin',
   contract_address varchar(64) DEFAULT NULL COMMENT '合约地址',
   deploy_time datetime DEFAULT NULL COMMENT '部署时间',
   contract_status int(1) DEFAULT '1' COMMENT '部署状态（1：未部署，2：部署成功，3：部署失败）',
