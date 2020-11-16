@@ -25,6 +25,7 @@ import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
+import com.webank.webase.node.mgr.contract.entity.ReqListContract;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TbContractPath;
@@ -553,5 +554,26 @@ public class  ContractService {
         contractPathService.removeByPathName(param);
         log.debug("end deleteByContractPath. ");
 
+    }
+
+    /**
+     * query contract list by multi path
+     */
+    public List<TbContract> qureyContractListMultiPath(ReqListContract param) throws NodeMgrException {
+        log.debug("start qureyContractListMultiPath ReqListContract:{}", JsonTools.toJSONString(param));
+        int groupId = param.getGroupId();
+        String account = param.getAccount();
+        List<String> pathList = param.getContractPathList();
+
+        List<TbContract> resultList = new ArrayList<>();
+        for (String path: pathList) {
+            // query contract list
+            ContractParam listParam = new ContractParam(groupId, account, path);
+            List<TbContract> listOfContract = contractMapper.listOfContract(listParam);
+            resultList.addAll(listOfContract);
+        }
+
+        log.debug("end qureyContractListMultiPath listOfContract size:{}", resultList.size());
+        return resultList;
     }
 }
