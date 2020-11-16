@@ -28,6 +28,7 @@ import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
+import com.webank.webase.node.mgr.contract.entity.ReqListContract;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TbContractPath;
@@ -323,6 +324,24 @@ public class ContractController extends BaseController {
         log.info("end deleteContractByPath useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
         return baseResponse;
+    }
+
+    /**
+     * qurey contract info list by multi path
+     */
+    @PostMapping(value = "/contractList/multiPath")
+    public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam)
+        throws NodeMgrException {
+        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start listContractByMultiPath. startTime:{} inputParam:{}",
+            startTime.toEpochMilli(), JsonTools.toJSONString(inputParam));
+        List<TbContract> contractList = contractService.qureyContractListMultiPath(inputParam);
+        pagesponse.setTotalCount(contractList.size());
+        pagesponse.setData(contractList);
+        log.info("end listContractByMultiPath. useTime:{} result count:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), contractList.size());
+        return pagesponse;
     }
 
 }
