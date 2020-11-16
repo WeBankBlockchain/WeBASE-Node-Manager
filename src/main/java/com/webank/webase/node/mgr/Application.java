@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -82,6 +83,7 @@ public class Application {
 
         ObjectMapper om = new ObjectMapper();
         om.registerModule(javaTimeModule);
+        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return om;
     }
 }
