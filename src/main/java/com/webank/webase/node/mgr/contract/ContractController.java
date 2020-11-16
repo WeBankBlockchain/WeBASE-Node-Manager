@@ -28,6 +28,7 @@ import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
+import com.webank.webase.node.mgr.contract.entity.ReqListContract;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TbContractPath;
@@ -146,36 +147,6 @@ public class ContractController extends BaseController {
     }
 
     /**
-     * qurey contract info list by groupId without abi/bin
-     */
-    @GetMapping(value = "/contractList/all/light/{groupId}")
-    public BasePageResponse queryContractListNoAbi(@PathVariable("groupId") Integer groupId)
-        throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start queryContractListNoAbi. startTime:{} groupId:{}",
-            startTime.toEpochMilli(), groupId);
-
-        //param
-        ContractParam queryParam = new ContractParam();
-        queryParam.setGroupId(groupId);
-        queryParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
-
-        int count = contractService.countOfContract(queryParam);
-        if (count > 0) {
-            // query list
-            List<RspContractNoAbi> listOfContract = contractService.qureyContractListNoAbi(queryParam);
-            pagesponse.setData(listOfContract);
-            pagesponse.setTotalCount(count);
-        }
-
-        log.info("end queryContractListNoAbi. useTime:{} result count:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), count);
-        return pagesponse;
-    }
-
-
-    /**
      * query by contract id.
      */
     @GetMapping(value = "/{contractId}")
@@ -261,6 +232,38 @@ public class ContractController extends BaseController {
         return baseResponse;
     }
 
+
+    /**
+     * qurey contract info list by groupId without abi/bin
+     */
+    @GetMapping(value = "/contractList/all/light")
+    public BasePageResponse queryContractListNoAbi(@RequestParam Integer groupId,
+        @RequestParam Integer contractStatus)
+        throws NodeMgrException {
+        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start queryContractListNoAbi. startTime:{} groupId:{}",
+            startTime.toEpochMilli(), groupId);
+
+        //param
+        ContractParam queryParam = new ContractParam();
+        queryParam.setGroupId(groupId);
+        queryParam.setContractStatus(contractStatus);
+
+        int count = contractService.countOfContract(queryParam);
+        if (count > 0) {
+            // query list
+            List<RspContractNoAbi> listOfContract = contractService.qureyContractListNoAbi(queryParam);
+            pagesponse.setData(listOfContract);
+            pagesponse.setTotalCount(count);
+        }
+
+        log.info("end queryContractListNoAbi. useTime:{} result count:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), count);
+        return pagesponse;
+    }
+
+
     /**
      * add contract path
      */
@@ -321,6 +324,24 @@ public class ContractController extends BaseController {
         log.info("end deleteContractByPath useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
         return baseResponse;
+    }
+
+    /**
+     * qurey contract info list by multi path
+     */
+    @PostMapping(value = "/contractList/multiPath")
+    public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam)
+        throws NodeMgrException {
+        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start listContractByMultiPath. startTime:{} inputParam:{}",
+            startTime.toEpochMilli(), JsonTools.toJSONString(inputParam));
+        List<TbContract> contractList = contractService.qureyContractListMultiPath(inputParam);
+        pagesponse.setTotalCount(contractList.size());
+        pagesponse.setData(contractList);
+        log.info("end listContractByMultiPath. useTime:{} result count:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), contractList.size());
+        return pagesponse;
     }
 
 }
