@@ -1,4 +1,22 @@
 
+### v1.4.2(2020-11-19)
+
+**Add**
+- 新增EventLog查询功能
+
+**Fix**
+- 优化合约IDE合约加载
+- 修复创建群组/加入群组异常
+- 修复节点共识类型问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本及以上版本
+- WeBASE-Web v1.4.0+
+- WeBASE-Front v1.4.2+
+- WeBASE-Sign v1.4.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.4.1(2020-09-18)
 
 **Add**
