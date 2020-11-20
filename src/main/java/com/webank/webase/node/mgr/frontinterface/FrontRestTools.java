@@ -256,13 +256,13 @@ public class FrontRestTools {
      * @remind v1.4.1 rm random
      */
     private FrontUrlInfo buildFrontUrl(ArrayList<FrontGroup> list, String uri, HttpMethod httpMethod) {
-        //random one
-        // Collections.shuffle(list);
-        log.info("====================map list:{}",JsonTools.toJSONString(list));
+        // v1.4.2 recover random one
+        Collections.shuffle(list);
+        log.info("====================map list:{}", JsonTools.toJSONString(list));
         Iterator<FrontGroup> iterator = list.iterator();
         while (iterator.hasNext()) {
             FrontGroup frontGroup = iterator.next();
-            log.info("============frontGroup:{}",JsonTools.toJSONString(frontGroup));
+            log.info("============frontGroup:{}", JsonTools.toJSONString(frontGroup));
             FrontUrlInfo frontUrlInfo = new FrontUrlInfo();
             frontUrlInfo.setFrontId(frontGroup.getFrontId());
 
