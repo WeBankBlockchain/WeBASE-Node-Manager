@@ -536,6 +536,8 @@ public class  ContractService {
         BeanUtils.copyProperties(param, listParam);
         List<TbContract> contractList = contractMapper.listOfContract(listParam);
         if (contractList == null || contractList.isEmpty()) {
+            log.debug("deleteByContractPath contract list empty, direct delete path");
+            contractPathService.removeByPathName(param);
             return;
         }
         // batch delete contract by path that not deployed
