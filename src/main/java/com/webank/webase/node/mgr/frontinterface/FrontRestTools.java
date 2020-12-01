@@ -352,8 +352,12 @@ public class FrontRestTools {
             // build until find success url and return
             // while loop use the same list, try again until get response
             FrontUrlInfo frontUrlInfo = buildFrontUrl(list, uri, method);//build url
-            String url = frontUrlInfo.getUrl();
             // check url available
+            if (frontUrlInfo == null) {
+                log.warn("restTemplateExchange buildFrontUrl frontUrlInfo is null.");
+                throw new NodeMgrException(ConstantCode.AVAILABLE_FRONT_URL_IS_NULL);
+            }
+            String url = frontUrlInfo.getUrl();
             if (StringUtils.isBlank(uri)) {
                 log.warn("restTemplateExchange buildFrontUrl get null url:{}", list);
                 throw new NodeMgrException(ConstantCode.AVAILABLE_FRONT_URL_IS_NULL);
