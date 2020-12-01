@@ -14,16 +14,33 @@
 package com.webank.webase.node.mgr.frontinterface;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CONTAIN_GROUP_ID;
-
-import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.block.entity.BlockInfo;
+import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
+import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
+import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
+import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
+import com.webank.webase.node.mgr.frontinterface.entity.GroupHandleResult;
+import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
+import com.webank.webase.node.mgr.monitor.ChainTransInfo;
+import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
+import com.webank.webase.node.mgr.user.entity.KeyPair;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
@@ -35,29 +52,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
-import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
-import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
-import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
-import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.frontinterface.entity.GroupHandleResult;
-import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
-import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
-import com.webank.webase.node.mgr.monitor.ChainTransInfo;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
-import com.webank.webase.node.mgr.user.entity.KeyPair;
-
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
@@ -89,6 +85,9 @@ public class FrontInterfaceService {
             HttpEntity entity = FrontRestTools.buildHttpEntity(param);// build entity
             ResponseEntity<T> response = genericRestTemplate.exchange(url, method, entity, clazz);
             return response.getBody();
+        } catch (ResourceAccessException e) {
+            log.error("requestSpecificFront. ResourceAccessException:{}", e);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
         } catch (HttpStatusCodeException ex) {
             JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
             log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error));
