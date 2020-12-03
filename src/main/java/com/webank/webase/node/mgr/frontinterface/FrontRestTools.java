@@ -124,6 +124,8 @@ public class FrontRestTools {
     // server version
     public static final String URI_FRONT_VERSION = "version";
     public static final String URI_SIGN_VERSION = "version/sign";
+    // event log list api
+    public static final String URI_EVENT_LOG_LIST = "event/eventLogs/list";
 
     //不需要在url的前面添加groupId的
     private static final List<String> URI_NOT_PREPEND_GROUP_ID = Arrays
@@ -137,7 +139,7 @@ public class FrontRestTools {
                 URI_GOVERNANCE_COMMITTEE_WEIGHT, URI_GOVERNANCE_THRESHOLD,
                 URI_GOVERNANCE_OPERATOR, URI_GOVERNANCE_OPERATOR_LIST,
                 URI_GOVERNANCE_ACCOUNT_STATUS, URI_GOVERNANCE_ACCOUNT_FREEZE, URI_GOVERNANCE_ACCOUNT_UNFREEZE,
-                URI_CONTRACT_STATUS);
+                URI_CONTRACT_STATUS, URI_EVENT_LOG_LIST);
 
     public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 
@@ -254,13 +256,13 @@ public class FrontRestTools {
      * @remind v1.4.1 rm random
      */
     private FrontUrlInfo buildFrontUrl(ArrayList<FrontGroup> list, String uri, HttpMethod httpMethod) {
-        //random one
-        // Collections.shuffle(list);
-        log.info("====================map list:{}",JsonTools.toJSONString(list));
+        // v1.4.2 recover random one
+        Collections.shuffle(list);
+        log.info("====================map list:{}", JsonTools.toJSONString(list));
         Iterator<FrontGroup> iterator = list.iterator();
         while (iterator.hasNext()) {
             FrontGroup frontGroup = iterator.next();
-            log.info("============frontGroup:{}",JsonTools.toJSONString(frontGroup));
+            log.info("============frontGroup:{}", JsonTools.toJSONString(frontGroup));
             FrontUrlInfo frontUrlInfo = new FrontUrlInfo();
             frontUrlInfo.setFrontId(frontGroup.getFrontId());
 
@@ -350,8 +352,12 @@ public class FrontRestTools {
             // build until find success url and return
             // while loop use the same list, try again until get response
             FrontUrlInfo frontUrlInfo = buildFrontUrl(list, uri, method);//build url
-            String url = frontUrlInfo.getUrl();
             // check url available
+            if (frontUrlInfo == null) {
+                log.warn("restTemplateExchange buildFrontUrl frontUrlInfo is null.");
+                throw new NodeMgrException(ConstantCode.AVAILABLE_FRONT_URL_IS_NULL);
+            }
+            String url = frontUrlInfo.getUrl();
             if (StringUtils.isBlank(uri)) {
                 log.warn("restTemplateExchange buildFrontUrl get null url:{}", list);
                 throw new NodeMgrException(ConstantCode.AVAILABLE_FRONT_URL_IS_NULL);

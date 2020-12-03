@@ -175,6 +175,11 @@ public class ConstantCode {
     public static final RetCode GOVERN_VOTE_RECORD_NOT_EXIST = RetCode.mark(202310, "govern vote record not exist");
     public static final RetCode PERMISSION_DENIED_ON_CHAIN = RetCode.mark(202311, "permission denied on chain");
 
+    public static final RetCode CONTRACT_PATH_CONTAIN_DEPLOYED = RetCode.mark(202321, "path contains deployed contract, please delete one by one.");
+    public static final RetCode CONTRACT_PATH_CANNOT_BE_BLANK = RetCode.mark(202322, "contract path cannot be blank(use \"/\" instead) ");
+    public static final RetCode PRIVATE_KEY_DECODE_FAIL = RetCode.mark(202323, "privateKey decode fail");
+    public static final RetCode PASSWORD_DECODE_FAIL = RetCode.mark(202324, "password decode fail");
+
     // add in v1.4.0
     public static final RetCode NO_DOCKER_TAG_UPDATE_URL_ERROR = RetCode.mark(202401, "No docker image tag update url.");
     public static final RetCode UPDATE_DOCKER_TAG_ERROR = RetCode.mark(202402, "Update docker tag from registry error.");
@@ -244,6 +249,9 @@ public class ConstantCode {
     public static final RetCode IMAGE_NOT_EXISTS_ON_HOST = RetCode.mark(202466, "Image not exists on host.");
     public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(202467, "Max 4 nodes on a same host.");
     public static final RetCode SAME_HOST_ERROR = RetCode.mark(202468, "Cannot install node and WeBASE-Node-Manager on same host.");
+    
+    // add in v1.4.2
+    public static final RetCode CONTRACT_PATH_IS_EXISTS = RetCode.mark(202501, "contract path is exists.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

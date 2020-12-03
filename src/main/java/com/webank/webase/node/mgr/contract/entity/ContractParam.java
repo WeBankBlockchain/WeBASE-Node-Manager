@@ -29,6 +29,9 @@ public class ContractParam extends BaseQueryParam {
     private Integer groupId;
     private Integer contractId;
     private String contractName;
+    /**
+     * v1.4.2 query by contract path
+     */
     private String contractPath;
     private String contractVersion;
     private String account;
@@ -56,6 +59,17 @@ public class ContractParam extends BaseQueryParam {
         this.contractName = contractName;
         this.contractPath = contractPath;
         this.account = account;
+    }
+
+
+    /**
+     * init by groupId, account, contractPath.
+     */
+    public ContractParam(int groupId, String account, String contractPath) {
+        super();
+        this.groupId = groupId;
+        this.account = account;
+        this.contractPath = contractPath;
     }
 
 }

@@ -102,10 +102,10 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   contract_version varchar(120) DEFAULT NULL COMMENT '合约版本',
   account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
-  contract_source text COMMENT '合约源码',
+  contract_source mediumtext COMMENT '合约源码',
   contract_abi mediumtext COMMENT '编译合约生成的abi文件内容',
   contract_bin mediumtext COMMENT '合约binary',
-  bytecodeBin mediumtext COMMENT '合约bin',
+  bytecode_bin mediumtext COMMENT '合约bin',
   contract_address varchar(64) DEFAULT NULL COMMENT '合约地址',
   deploy_time datetime DEFAULT NULL COMMENT '部署时间',
   contract_status int(1) DEFAULT '1' COMMENT '部署状态（1：未部署，2：部署成功，3：部署失败）',
@@ -438,6 +438,17 @@ CREATE TABLE IF NOT EXISTS tb_govern_vote (
   modify_time datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链治理委员投票信息';
+
+CREATE TABLE IF NOT EXISTS tb_contract_path (
+  id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约路径编号',
+  contract_path varchar(24) binary NOT NULL COMMENT '合约所在目录',
+  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_group_path_name (group_id,contract_path)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约路径表';
+
 
 
 SET FOREIGN_KEY_CHECKS = 1;
