@@ -197,6 +197,10 @@ public class FrontService {
         log.debug("start newFront frontInfo:{}", frontInfo);
         TbFront tbFront = new TbFront();
         tbFront.setRunType(RunTypeEnum.COMMAND.getId());
+        // set default chainId
+        tbFront.setChainId(0);
+        tbFront.setChainName("default");
+
         String frontIp = frontInfo.getFrontIp();
         Integer frontPort = frontInfo.getFrontPort();
         //check valid ip
