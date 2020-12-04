@@ -128,7 +128,11 @@ public class  ContractService {
         // save contract path
         log.debug("newContract save contract path");
         // if exist, auto not save
-        contractPathService.save(contract.getGroupId(), contract.getContractPath());
+        try {
+            contractPathService.save(contract.getGroupId(), contract.getContractPath());
+        } catch (NodeMgrException e) {
+            log.warn("newContract and contract path exist, not save path");
+        }
         return tbContract;
     }
 
