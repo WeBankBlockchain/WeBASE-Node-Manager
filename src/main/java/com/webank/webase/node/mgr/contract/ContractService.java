@@ -127,12 +127,8 @@ public class  ContractService {
         contractMapper.add(tbContract);
         // save contract path
         log.debug("newContract save contract path");
-        // if exist, auto not save
-        try {
-            contractPathService.save(contract.getGroupId(), contract.getContractPath());
-        } catch (NodeMgrException e) {
-            log.warn("newContract and contract path exist, not save path");
-        }
+        // if exist, auto not save (ignor)
+        contractPathService.save(contract.getGroupId(), contract.getContractPath(), true);
         return tbContract;
     }
 
