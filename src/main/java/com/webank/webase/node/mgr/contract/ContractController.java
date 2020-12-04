@@ -279,7 +279,7 @@ public class ContractController extends BaseController {
         if ("".equals(contractPath)) {
             contractPath = "/";
         }
-        int result = contractPathService.save(param.getGroupId(), contractPath);
+        int result = contractPathService.save(param.getGroupId(), contractPath, false);
         response.setData(result);
 
         log.info("end addContractPath. useTime:{} add result:{}",
