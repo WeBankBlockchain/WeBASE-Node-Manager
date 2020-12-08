@@ -47,7 +47,7 @@
 
 [compatibility]
     ; supported_version should nerver be changed
-    supported_version=2.5.0
+    supported_version=2.7.0
 
 [log]
     enable=true
