@@ -352,8 +352,8 @@ public class  ContractService {
         String signUserId = "empty";
         // func is not constant or stateMutability is not equal to 'view' or 'pure'
         // fit in solidity 0.6
-        boolean isConstant = STATE_MUTABILITY_VIEW.equals(funcAbi.getStateMutability())
-            || STATE_MUTABILITY_PURE.equals(funcAbi.getStateMutability());
+        boolean isConstant = (STATE_MUTABILITY_VIEW.equals(funcAbi.getStateMutability()) ||
+            STATE_MUTABILITY_PURE.equals(funcAbi.getStateMutability()));
         if (!isConstant) {
             // !funcAbi.isConstant()
             signUserId = userService.getSignUserIdByAddress(param.getGroupId(), param.getUser());
