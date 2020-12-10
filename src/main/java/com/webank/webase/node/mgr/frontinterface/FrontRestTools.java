@@ -260,13 +260,14 @@ public class FrontRestTools {
         Collections.shuffle(list);
         log.info("====================map list:{}", JsonTools.toJSONString(list));
         Iterator<FrontGroup> iterator = list.iterator();
+        String uriTemp = uri;
         while (iterator.hasNext()) {
             FrontGroup frontGroup = iterator.next();
             log.info("============frontGroup:{}", JsonTools.toJSONString(frontGroup));
             FrontUrlInfo frontUrlInfo = new FrontUrlInfo();
             frontUrlInfo.setFrontId(frontGroup.getFrontId());
 
-            uri = uriAddGroupId(frontGroup.getGroupId(), uri);//append groupId to uri
+            uri = uriAddGroupId(frontGroup.getGroupId(), uriTemp);//append groupId to uri
             String url = String
                 .format(cproperties.getFrontUrl(), frontGroup.getFrontIp(),
                     frontGroup.getFrontPort(), uri)
@@ -352,8 +353,12 @@ public class FrontRestTools {
             // build until find success url and return
             // while loop use the same list, try again until get response
             FrontUrlInfo frontUrlInfo = buildFrontUrl(list, uri, method);//build url
-            String url = frontUrlInfo.getUrl();
             // check url available
+            if (frontUrlInfo == null) {
+                log.warn("restTemplateExchange buildFrontUrl frontUrlInfo is null.");
+                throw new NodeMgrException(ConstantCode.AVAILABLE_FRONT_URL_IS_NULL);
+            }
+            String url = frontUrlInfo.getUrl();
             if (StringUtils.isBlank(uri)) {
                 log.warn("restTemplateExchange buildFrontUrl get null url:{}", list);
                 throw new NodeMgrException(ConstantCode.AVAILABLE_FRONT_URL_IS_NULL);

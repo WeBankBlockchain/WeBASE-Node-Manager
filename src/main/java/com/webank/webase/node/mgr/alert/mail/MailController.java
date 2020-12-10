@@ -23,6 +23,7 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import java.util.Base64;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -72,6 +73,13 @@ public class MailController {
             checkParamEmpty(reqMailServerConfigParam);
         }catch (NodeMgrException e){
             return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
+        }
+        try {
+            String pwdDecoded = new String(Base64.getDecoder().decode(reqMailServerConfigParam.getPassword()));
+            reqMailServerConfigParam.setPassword(pwdDecoded);
+        } catch (Exception e) {
+            log.error("decode password error:[]", e);
+            return new BaseResponse(ConstantCode.PASSWORD_DECODE_FAIL, e.getMessage());
         }
         // get configuration from web and refresh JavaMailSender
         mailService.refreshJavaMailSenderConfigFromWeb(reqMailServerConfigParam);
