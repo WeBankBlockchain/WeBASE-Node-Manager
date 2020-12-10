@@ -249,6 +249,9 @@ public class ConstantCode {
     public static final RetCode IMAGE_NOT_EXISTS_ON_HOST = RetCode.mark(202466, "Image not exists on host.");
     public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(202467, "Max 4 nodes on a same host.");
     public static final RetCode SAME_HOST_ERROR = RetCode.mark(202468, "Cannot install node and WeBASE-Node-Manager on same host.");
+    
+    // add in v1.4.2
+    public static final RetCode CONTRACT_PATH_IS_EXISTS = RetCode.mark(202501, "contract path is exists.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

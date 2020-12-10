@@ -14,8 +14,9 @@
 
 package com.webank.webase.node.mgr.contract;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TbContractPath;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
@@ -41,11 +42,15 @@ public class ContractPathService {
      * @param pathName
      * @return
      */
-    public int save(Integer groupId, String pathName) {
+    public int save(Integer groupId, String pathName, boolean ignoreRepeat) {
         TbContractPath check = contractPathMapper.findOne(new ContractPathParam(groupId, pathName));
         if (check != null) {
-            log.info("save path, path exists check:{}", check);
-            return 0;
+            if (ignoreRepeat) {
+                return 0;
+            } else {
+                log.error("save path, path exists check:{}", check);
+                throw new NodeMgrException(ConstantCode.CONTRACT_PATH_IS_EXISTS);
+            }
         }
         TbContractPath contractPath = new TbContractPath();
         contractPath.setContractPath(pathName);

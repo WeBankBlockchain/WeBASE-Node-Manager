@@ -232,8 +232,10 @@ public class GroupService {
         GroupGeneral generalInfo = groupMapper.getGeneral(groupId);
         if (generalInfo != null) {
             TotalTransCountInfo transCountInfo = frontInterface.getTotalTransactionCount(groupId);
-            generalInfo.setLatestBlock(transCountInfo.getBlockNumber());
-            generalInfo.setTransactionCount(transCountInfo.getTxSum());
+            if (transCountInfo != null) {
+                generalInfo.setLatestBlock(transCountInfo.getBlockNumber());
+                generalInfo.setTransactionCount(transCountInfo.getTxSum());
+            }
         }
         return generalInfo;
     }

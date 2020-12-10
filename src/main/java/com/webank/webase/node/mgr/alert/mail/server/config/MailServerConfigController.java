@@ -25,6 +25,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import java.util.Base64;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -90,19 +91,21 @@ public class MailServerConfigController {
         Instant startTime = Instant.now();
         log.info("start updateMailServerConfig. startTime:{} ReqMailServerConfigParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(param));
-        if(param.getServerId() == null) {
+        if (param.getServerId() == null) {
             log.debug("updateMailServerConfig, error:{} ",
                     ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
             return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
         }
-        String passwordEncoded = param.getPassword();
-        try {
-            String pwdDecoded = new String(Base64.getDecoder().decode(passwordEncoded));
-            param.setPassword(pwdDecoded);
-        } catch (Exception e) {
-            log.error("decode password error:[]", e);
-            return new BaseResponse(ConstantCode.PASSWORD_DECODE_FAIL, e.getMessage());
+        if (StringUtils.isNotBlank(param.getPassword())) {
+            try {
+                String pwdDecoded = new String(Base64.getDecoder().decode(param.getPassword()));
+                param.setPassword(pwdDecoded);
+            } catch (Exception e) {
+                log.error("decode password error:[]", e);
+                return new BaseResponse(ConstantCode.PASSWORD_DECODE_FAIL, e.getMessage());
+            }
         }
+        // enable alert or update config
         try{
             mailServerConfigService.updateMailServerConfig(param);
         }catch (NodeMgrException e) {

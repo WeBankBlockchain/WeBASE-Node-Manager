@@ -47,7 +47,7 @@ days=36500 # 100 years
 timestamp=$(($(date '+%s')*1000))
 chain_id=1
 compatibility_version=""
-default_version="2.5.0"
+default_version="2.7.0"
 macOS=""
 x86_64_arch="true"
 download_timeout=240
@@ -1458,11 +1458,11 @@ fi
 dir_must_not_exists "${output_dir}"
 mkdir -p "${output_dir}"
 
-if [ -z "${compatibility_version}" ];then
-    set +e
-    compatibility_version=$(curl -s https://api.github.com/repos/FISCO-BCOS/FISCO-BCOS/releases | grep "tag_name" | grep "\"v2\.[0-9]\.[0-9]\"" | sort -u | tail -n 1 | cut -d \" -f 4 | sed "s/^[vV]//")
-    set -e
-fi
+#if [ -z "${compatibility_version}" ];then
+#    set +e
+#    compatibility_version=$(curl -s https://api.github.com/repos/FISCO-BCOS/FISCO-BCOS/releases | grep "tag_name" | grep "\"v2\.[0-9]\.[0-9]\"" | sort -u | tail -n 1 | cut -d \" -f 4 | sed "s/^[vV]//")
+#    set -e
+#fi
 
 # use default version as compatibility_version
 if [ -z "${compatibility_version}" ];then
