@@ -260,13 +260,14 @@ public class FrontRestTools {
         Collections.shuffle(list);
         log.info("====================map list:{}", JsonTools.toJSONString(list));
         Iterator<FrontGroup> iterator = list.iterator();
+        String uriTemp = uri;
         while (iterator.hasNext()) {
             FrontGroup frontGroup = iterator.next();
             log.info("============frontGroup:{}", JsonTools.toJSONString(frontGroup));
             FrontUrlInfo frontUrlInfo = new FrontUrlInfo();
             frontUrlInfo.setFrontId(frontGroup.getFrontId());
 
-            uri = uriAddGroupId(frontGroup.getGroupId(), uri);//append groupId to uri
+            uri = uriAddGroupId(frontGroup.getGroupId(), uriTemp);//append groupId to uri
             String url = String
                 .format(cproperties.getFrontUrl(), frontGroup.getFrontIp(),
                     frontGroup.getFrontPort(), uri)
