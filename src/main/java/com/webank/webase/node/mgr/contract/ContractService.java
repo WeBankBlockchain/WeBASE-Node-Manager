@@ -67,6 +67,8 @@ public class  ContractService {
 
     private static final int CONTRACT_ADDRESS_LENGTH = 42;
     private static final String PERMISSION_TYPE_DEPLOY_AND_CREATE = "deployAndCreate";
+    public static final String STATE_MUTABILITY_VIEW = "view";
+    public static final String STATE_MUTABILITY_PURE = "pure";
 
     @Autowired
     private ContractMapper contractMapper;
@@ -348,7 +350,12 @@ public class  ContractService {
         // if constant, signUserId is useless
         AbiDefinition funcAbi = Web3Tools.getAbiDefinition(param.getFuncName(), contractAbiStr);
         String signUserId = "empty";
-        if (!funcAbi.isConstant()) {
+        // func is not constant or stateMutability is not equal to 'view' or 'pure'
+        // fit in solidity 0.6
+        boolean isConstant = (STATE_MUTABILITY_VIEW.equals(funcAbi.getStateMutability()) ||
+            STATE_MUTABILITY_PURE.equals(funcAbi.getStateMutability()));
+        if (!isConstant) {
+            // !funcAbi.isConstant()
             signUserId = userService.getSignUserIdByAddress(param.getGroupId(), param.getUser());
         }
 
