@@ -43,6 +43,7 @@ fi
 # install rsync for synchronizing node files
 install wget wget
 install curl curl
+install netstat netstat
 #install vim vim
 #install rsync rsync
 #install nslookup bind-utils
