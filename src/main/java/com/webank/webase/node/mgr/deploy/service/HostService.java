@@ -151,7 +151,7 @@ public class HostService {
 
                             // exec host init shell script
                             try {
-                                deployShellService.execHostOperate(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
+                                deployShellService.execHostOperateToInit(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
                                         PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
                             } catch (Exception e) {
                                 log.error("Exec host init shell script on host:[{}] failed", tbHost.getIp(), e);
@@ -241,7 +241,6 @@ public class HostService {
     }
 
     /**
-     *
      * @param chainId
      * @return
      */
@@ -349,7 +348,7 @@ public class HostService {
     }
 
     /**
-     *
+     * todo add check
      * @param chainId
      */
     public int hostProgress(int chainId){
@@ -394,5 +393,73 @@ public class HostService {
                 throw new NodeMgrException(ConstantCode.IMAGE_NOT_EXISTS_ON_HOST.attach(ip));
             }
         }
+    }
+
+    /**
+     * todo check before init
+     * check host memory/cpu/dependencies
+     */
+    public boolean batchCheckHostShell(List<TbHost> tbHostList) throws InterruptedException {
+
+        final CountDownLatch checkHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
+        // check success count
+        AtomicInteger checkSuccessCount = new AtomicInteger(0);
+        Map<Integer, Future> taskMap = new HashedMap<>();
+
+        for (final TbHost tbHost : tbHostList) {
+            log.info("Check host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
+
+            Future<?> task = threadPoolTaskScheduler.submit(() -> {
+                try {
+                    // check if host check success
+                    if (HostStatusEnum.checkSuccess(tbHost.getStatus())) {
+                        log.info("Check host:[{}] by exec shell script:[{}]", tbHost.getIp(),
+                            constant.getNodeOperateShell());
+
+                        // exec host check shell script
+                        try {
+                            deployShellService.execHostCheck(tbHost.getIp(), tbHost.getSshPort(),
+                                    tbHost.getSshUser());
+                        } catch (Exception e) {
+                            log.error("Exec host check shell script on host:[{}] failed",
+                                tbHost.getIp(), e);
+                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                "Execute host check shell script failed, please check the host's network.");
+                            return;
+                        }
+                    }
+                    // update as check success
+                    tbHost.setStatus(HostStatusEnum.CHECK_SUCCESS.getId());
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_SUCCESS, "");
+                    checkSuccessCount.incrementAndGet();
+                } catch (Exception e) {
+                    log.error("Check host:[{}] with unknown error", tbHost.getIp(), e);
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                        "Check host with unknown error, check from log files.");
+                } finally {
+                    checkHostLatch.countDown();
+                }
+            });
+            taskMap.put(tbHost.getId(), task);
+        }
+        checkHostLatch.await(constant.getExecHostCheckTimeout(), TimeUnit.MILLISECONDS);
+        log.error("Check host timeout, cancel unfinished tasks.");
+        taskMap.entrySet().forEach((entry)->{
+            int hostId = entry.getKey();
+            Future<?> task = entry.getValue();
+            if(! task.isDone()){
+                log.error("Check host:[{}] timeout, cancel the task.", hostId );
+                this.updateStatus(hostId, HostStatusEnum.INIT_FAILED, "Check host timeout.");
+                task.cancel(false);
+            }
+        });
+
+        boolean hostInitSuccess = checkSuccessCount.get() == CollectionUtils.size(tbHostList);
+        // check if all host init success
+        log.log(hostInitSuccess ? Level.INFO: Level.ERROR,
+            "Host init result, total:[{}], success:[{}]",
+            CollectionUtils.size(tbHostList),checkSuccessCount.get());
+
+        return hostInitSuccess;
     }
 }

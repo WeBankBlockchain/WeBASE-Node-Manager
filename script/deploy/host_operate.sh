@@ -228,7 +228,6 @@ function init() {
         echo "Remote host init SUCCESS!!! "
     fi
 }
-init
 
 # check host after init
 function check() {
@@ -261,7 +260,13 @@ function check() {
         echo "Check remote host SUCCESS!!! "
     fi
 }
-check
+
+case $1 in
+init)
+    init;;
+check)
+    check;;
+esac
 
 exit ${SUCCESS}
 
