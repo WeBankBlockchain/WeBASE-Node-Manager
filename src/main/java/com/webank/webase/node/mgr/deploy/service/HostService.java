@@ -395,6 +395,60 @@ public class HostService {
         }
     }
 
+
+
+    /**
+     * check host memory/cpu/dependencies
+     * at least 8g/4core
+     */
+    public boolean checkSingleHost(TbHost tbHost) {
+            int hostId = tbHost.getId();
+            log.info("Check host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
+
+            Future<?> task = threadPoolTaskScheduler.submit(() -> {
+                try {
+                    // check if host check success
+                    if (HostStatusEnum.checkSuccess(tbHost.getStatus())) {
+                        log.info("Check host:[{}] by exec shell script:[{}]", tbHost.getIp(),
+                            constant.getNodeOperateShell());
+
+                        // exec host check shell script
+                        try {
+                            deployShellService.execHostCheck(tbHost.getIp(), tbHost.getSshPort(),
+                                tbHost.getSshUser());
+                        } catch (Exception e) {
+                            log.error("Exec host check shell script on host:[{}] failed",
+                                tbHost.getIp(), e);
+                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                "Execute host check shell script failed, please check the host's network.");
+                            return;
+                        }
+                    }
+                    // update as check success
+                    tbHost.setStatus(HostStatusEnum.CHECK_SUCCESS.getId());
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_SUCCESS, "");
+                } catch (Exception e) {
+                    log.error("Check host:[{}] with unknown error", tbHost.getIp(), e);
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                        "Check host with unknown error, check from log files.");
+                }
+            });
+
+        log.error("Check host timeout, cancel unfinished tasks.");
+
+        if(!task.isDone()){
+            log.error("Check host:[{}] timeout, cancel the task.", hostId );
+            tbHost.setStatus(HostStatusEnum.CHECK_SUCCESS.getId());
+            this.updateStatus(hostId, HostStatusEnum.CHECK_FAILED, "Check host timeout.");
+            task.cancel(false);
+        }
+        boolean hostCheckSuccess = HostStatusEnum.checkSuccess(tbHost.getStatus());
+        // check if all host init success
+        log.log(hostCheckSuccess ? Level.INFO: Level.ERROR, "Host check result, host:[{}]", tbHost);
+
+        return hostCheckSuccess;
+    }
+
     /**
      * todo check before init
      * check host memory/cpu/dependencies
@@ -444,22 +498,22 @@ public class HostService {
         }
         checkHostLatch.await(constant.getExecHostCheckTimeout(), TimeUnit.MILLISECONDS);
         log.error("Check host timeout, cancel unfinished tasks.");
-        taskMap.entrySet().forEach((entry)->{
-            int hostId = entry.getKey();
-            Future<?> task = entry.getValue();
-            if(! task.isDone()){
-                log.error("Check host:[{}] timeout, cancel the task.", hostId );
-                this.updateStatus(hostId, HostStatusEnum.INIT_FAILED, "Check host timeout.");
+        taskMap.forEach((key, value) -> {
+            int hostId = key;
+            Future<?> task = value;
+            if (!task.isDone()) {
+                log.error("Check host:[{}] timeout, cancel the task.", hostId);
+                this.updateStatus(hostId, HostStatusEnum.CHECK_FAILED, "Check host timeout.");
                 task.cancel(false);
             }
         });
 
-        boolean hostInitSuccess = checkSuccessCount.get() == CollectionUtils.size(tbHostList);
+        boolean hostCheckSuccess = checkSuccessCount.get() == CollectionUtils.size(tbHostList);
         // check if all host init success
-        log.log(hostInitSuccess ? Level.INFO: Level.ERROR,
-            "Host init result, total:[{}], success:[{}]",
+        log.log(hostCheckSuccess ? Level.INFO: Level.ERROR,
+            "Host check result, total:[{}], success:[{}]",
             CollectionUtils.size(tbHostList),checkSuccessCount.get());
 
-        return hostInitSuccess;
+        return hostCheckSuccess;
     }
 }
