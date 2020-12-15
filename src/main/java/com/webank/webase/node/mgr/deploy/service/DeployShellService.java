@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ReactiveTypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -50,6 +51,8 @@ public class DeployShellService {
     private ConstantProperties constant;
     @Autowired
     private PathService pathService;
+    private static final String OPERATE_FUNCTION_CHECK = "check";
+    private static final String OPERATE_FUNCTION_INIT = "init";
 
     /**
      * @param typeEnum
@@ -94,8 +97,11 @@ public class DeployShellService {
      * @param chainRoot chain root on host, default is /opt/fisco/{chain_name}.
      * @return
      */
-    public void execHostOperate(String ip, int port, String user, String chainRoot) {
-        this.execHostOperate(ip, port, user, "", chainRoot);
+    public void execHostOperateToInit(String ip, int port, String user, String chainRoot) {
+        ExecuteResult result = this.execHostOperate(ip, port, user, "", chainRoot, OPERATE_FUNCTION_INIT);
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.EXEC_HOST_INIT_SCRIPT_ERROR.attach(result.getExecuteOut()));
+        }
     }
 
     /**
@@ -104,9 +110,10 @@ public class DeployShellService {
      * @param user      Default root.
      * @param pwd       Not required.
      * @param chainRoot chain root on host, default is /opt/fisco/{chain_name}.
+     * @param function command for host_operate.sh, init or check, default init
      * @return
      */
-    public void execHostOperate(String ip, int port, String user, String pwd, String chainRoot) {
+    public ExecuteResult execHostOperate(String ip, int port, String user, String pwd, String chainRoot, String function) {
         log.info("Exec execHostOperate method for [{}@{}:{}#{}]", user, ip, port, pwd);
 
         int newport = port <= 0 || port > 65535 ? SshTools.DEFAULT_SSH_PORT : port;
@@ -114,18 +121,18 @@ public class DeployShellService {
         String useDockerCommand = constant.isUseDockerSDK() ? "" : "-c";
         String passwordParam = StringUtils.isBlank(pwd) ? "" : String.format(" -p %s ", pwd);
         String chainRootParam = StringUtils.isBlank(chainRoot) ? "" : String.format(" -n %s ",chainRoot);
+        // default init
+        String commandParam = StringUtils.isBlank(function) ? OPERATE_FUNCTION_INIT : OPERATE_FUNCTION_CHECK;
 
-        String command = String.format("bash -x -e %s -H %s -P %s -u %s %s %s %s ",
-                constant.getNodeOperateShell(), ip, newport, newUser,passwordParam, chainRootParam, useDockerCommand);
+        String command = String.format("bash -x -e %s %s -H %s -P %s -u %s %s %s %s ",
+                constant.getNodeOperateShell(), commandParam, ip, newport, newUser, passwordParam, chainRootParam, useDockerCommand);
 
-        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
-        if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.EXEC_HOST_INIT_SCRIPT_ERROR.attach(result.getExecuteOut()));
-        }
+        return JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
     }
 
     /**
-     *
+     * build_chain.sh
+     * todo 指定多个ip port进行生成
      * @param encryptType
      * @param ipLines
      * @return
@@ -244,5 +251,24 @@ public class DeployShellService {
         );
 
         return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+    }
+
+    /**
+     * check host memory/cpu/port
+     * check docker/compose hello_world:
+     * but install docker and compose in host_init
+     * todo install dos2unix
+     * @param ip        Required.
+     * @param port      Default 22.
+     * @param user      Default root.
+     * @return
+     */
+    public void execHostCheck(String ip, int port, String user) {
+        log.info("Exec execHostCheck method for [{}@{}:{}]", user, ip, port);
+
+        ExecuteResult result = this.execHostOperate(ip, port, user, "", "", OPERATE_FUNCTION_CHECK);
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
+        }
     }
 }
