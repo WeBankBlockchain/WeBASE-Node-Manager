@@ -250,7 +250,8 @@ public class ConstantCode {
     public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(202467, "Max 4 nodes on a same host.");
     public static final RetCode SAME_HOST_ERROR = RetCode.mark(202468, "Cannot install node and WeBASE-Node-Manager on same host.");
     // add in 1.4.3
-    public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR = RetCode.mark(202469, "Check host mem/cpu report fail.");
+    public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM = RetCode.mark(202470, "Check host memory not enough for nodes(s)");
+    public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_CPU = RetCode.mark(202471, "Check host cpu core count not enough for node(s)");
 
 
     // add in v1.4.2

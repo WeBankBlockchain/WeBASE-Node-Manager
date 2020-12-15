@@ -98,7 +98,7 @@ public class DeployShellService {
      * @return
      */
     public void execHostOperateToInit(String ip, int port, String user, String chainRoot) {
-        ExecuteResult result = this.execHostOperate(ip, port, user, "", chainRoot, OPERATE_FUNCTION_INIT);
+        ExecuteResult result = this.execHostOperate(ip, port, user, "", chainRoot, OPERATE_FUNCTION_INIT, 0);
         if (result.failed()) {
             throw new NodeMgrException(ConstantCode.EXEC_HOST_INIT_SCRIPT_ERROR.attach(result.getExecuteOut()));
         }
@@ -113,19 +113,23 @@ public class DeployShellService {
      * @param function command for host_operate.sh, init or check, default init
      * @return
      */
-    public ExecuteResult execHostOperate(String ip, int port, String user, String pwd, String chainRoot, String function) {
-        log.info("Exec execHostOperate method for [{}@{}:{}#{}]", user, ip, port, pwd);
-
+    public ExecuteResult execHostOperate(String ip, int port, String user, String pwd, String chainRoot,
+        String function, int nodeCount) {
+        log.info("Exec execHostOperate method for [{}@{}:{}#{}],function:{},nodeCount:{}",
+            user, ip, port, pwd, function, nodeCount);
+        // init or check: default init
+        String commandParam = StringUtils.isBlank(function) ? OPERATE_FUNCTION_INIT : OPERATE_FUNCTION_CHECK;
         int newport = port <= 0 || port > 65535 ? SshTools.DEFAULT_SSH_PORT : port;
         String newUser = StringUtils.isBlank(user) ? SshTools.DEFAULT_SSH_USER : user;
         String useDockerCommand = constant.isUseDockerSDK() ? "" : "-c";
         String passwordParam = StringUtils.isBlank(pwd) ? "" : String.format(" -p %s ", pwd);
         String chainRootParam = StringUtils.isBlank(chainRoot) ? "" : String.format(" -n %s ",chainRoot);
-        // default init
-        String commandParam = StringUtils.isBlank(function) ? OPERATE_FUNCTION_INIT : OPERATE_FUNCTION_CHECK;
+        String nodeCountParam = nodeCount == 0 ? "" : String.format(" -C %d ", nodeCount);
 
-        String command = String.format("bash -x -e %s %s -H %s -P %s -u %s %s %s %s ",
-                constant.getNodeOperateShell(), commandParam, ip, newport, newUser, passwordParam, chainRootParam, useDockerCommand);
+
+        String command = String.format("bash -x -e %s %s -H %s -P %s -u %s %s %s %s %s ",
+                constant.getNodeOperateShell(), commandParam, ip, newport, newUser, passwordParam,
+            chainRootParam, nodeCountParam, useDockerCommand);
 
         return JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
     }
@@ -257,18 +261,23 @@ public class DeployShellService {
      * check host memory/cpu/port
      * check docker/compose hello_world:
      * but install docker and compose in host_init
-     * todo install dos2unix
      * @param ip        Required.
      * @param port      Default 22.
      * @param user      Default root.
+     * @param nodeCount      Node count in single host
      * @return
      */
-    public void execHostCheck(String ip, int port, String user) {
+    public void execHostCheck(String ip, int port, String user, int nodeCount) {
         log.info("Exec execHostCheck method for [{}@{}:{}]", user, ip, port);
 
-        ExecuteResult result = this.execHostOperate(ip, port, user, "", "", OPERATE_FUNCTION_CHECK);
+        ExecuteResult result = this.execHostOperate(ip, port, user, "", "", OPERATE_FUNCTION_CHECK, nodeCount);
         if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
+            if (result.getExitCode() == 3) {
+                throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM.attach(result.getExecuteOut()));
+            }
+            if (result.getExitCode() == 4) {
+                throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_CPU.attach(result.getExecuteOut()));
+            }
         }
     }
 }
