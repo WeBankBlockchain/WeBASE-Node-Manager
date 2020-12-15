@@ -21,7 +21,7 @@ import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 
 /**
- *
+ * added->check->docker_check->init
  */
 
 @Getter
@@ -35,6 +35,8 @@ public enum HostStatusEnum {
     INIT_FAILED((byte) 3, "host init failed"),
     CHECK_SUCCESS((byte) 4, "host check success"),
     CHECK_FAILED((byte) 5, "host check failed"),
+    DOCKER_SUCCESS((byte) 6, "host docker run success"),
+    DOCKER_FAIL((byte) 7, "host docker run success")
     ;
 
     private byte id;
@@ -72,7 +74,7 @@ public enum HostStatusEnum {
     }
 
 
-    public static boolean checkSuccess(byte status){
+    public static boolean hostCheckSuccess(byte status){
         HostStatusEnum statusEnum = HostStatusEnum.getById(status);
         if (statusEnum == null) {
             log.error("Host with unknown status:[{}].", status);
@@ -81,7 +83,31 @@ public enum HostStatusEnum {
 
         // check host status
         switch (statusEnum){
+            // if init or init ing means already checked
+            case INIT_SUCCESS:
+            case INITIATING:
+            case INIT_FAILED:
             case CHECK_SUCCESS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static boolean hostDockerSuccess(byte status){
+        HostStatusEnum statusEnum = HostStatusEnum.getById(status);
+        if (statusEnum == null) {
+            log.error("Host with unknown status:[{}].", status);
+            return false;
+        }
+
+        // check host status
+        switch (statusEnum){
+            // if init or init ing means already checked
+            case INIT_SUCCESS:
+            case INITIATING:
+            case INIT_FAILED:
+            case DOCKER_SUCCESS:
                 return true;
             default:
                 return false;
