@@ -47,6 +47,7 @@ install netstat netstat
 #install vim vim
 #install rsync rsync
 #install nslookup bind-utils
+# todo install dos2unix
 
 # install docker
 if [[ ! $(command -v docker) ]]; then

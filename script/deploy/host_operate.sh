@@ -46,6 +46,7 @@ port=22
 user=root
 password=
 node_root=/opt/fisco
+node_count=1
 use_docker_sdk=yes
 
 ####### error code
@@ -66,6 +67,7 @@ Usage:
     -p     Required, password.
     -n     Node config root directory, default is /opt/fisco
     -c     Use docker command instead of using docker SDK api, default no.
+    -C     Node count in single host.
     -d     Use debug model, default no.
     -h     Show help info.
 USAGE
@@ -73,7 +75,7 @@ USAGE
 }
 
 
-while getopts H:P:u:p:n:dch OPT;do
+while getopts H:P:u:p:n:dcC:h OPT;do
     case ${OPT} in
         H)
             host=$OPTARG
@@ -95,6 +97,9 @@ while getopts H:P:u:p:n:dch OPT;do
             ;;
         c)
             use_docker_sdk="no"
+            ;;
+        c)
+            node_count=$OPTARG
             ;;
         h)
             usage
@@ -250,7 +255,8 @@ function check() {
     else
         echo "Checking remote server ....."
         # scp host_check.sh to remote and exec
-        cat "${__dir}/host_check.sh" | sshExec bash -e -x
+        # -C pass node_count to host_check.sh
+        cat "${__dir}/host_check.sh" | sshExec bash -e -x -C $node_count
         status=($?)
         if [[ $status != 0 ]] ;then
             echo "Check remote server ERROR!!!"

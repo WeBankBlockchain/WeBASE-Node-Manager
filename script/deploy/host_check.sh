@@ -1,91 +1,78 @@
 #!/usr/bin/env bash
 
-function checkMem(){}
-  MEM_FREE=`awk '($1 == "MemFree:"){print $2/1048576}' /proc/meminfo 2>&1`
-  if [ $(echo "$MEM_FREE < 7"|bc) -eq 1 ];
+####### error code
+SUCCESS=0
+PARAM_ERROR=2
+MEM_ERROR=3
+CPU_ERROR=4
+
+## default one host, one node+front
+node_count=1
+
+####### 参数解析 #######
+cmdname=$(basename "$0")
+
+# usage help doc.
+usage() {
+    cat << USAGE  >&2
+Usage:
+    $cmdname [-C node_count]
+
+    -C     Node count in single host
+USAGE
+    exit ${PARAM_ERROR}
+}
+
+
+while getopts C:h OPT;do
+    case ${OPT} in
+        C)
+            node_count="$OPTARG"
+            ;;
+        h)
+            usage
+            exit ${PARAM_ERROR}
+            ;;
+        \?)
+            usage
+            exit ${PARAM_ERROR}
+            ;;
+    esac
+done
+
+# 通过剩余可用的内存+节点数，单节点至少1G
+function checkMem(){
+  MEM_FREE=$(awk '($1 == "MemFree:"){print $2/1048576}' /proc/meminfo 2>&1)
+  # todo one node+front needs 0.5G
+  if [[ $(echo "$MEM_FREE > ${node_count}"|bc) -eq 1 ]];
   then
-      echo 'ERROR: free mem is too low!'
-      exit 1
-  else
       echo 'free mem is ready'
+  else
+      echo 'ERROR: free mem is too low!'
+      exit ${MEM_ERROR}
   fi
 }
 checkMem
 
 function checkCpu() {
-  CPU_CORE=`cat /proc/cpuinfo | grep processor | wc -l 2>&1`
-  if [ $CPU_CORE -ge 4 ]
+  least_core=2
+  # 3个及以上节点，需要4核
+  if [[ ${node_count} -ge 3 ]]
+      then ${least_core}=4
+  fi
+  # 8个及以上节点，需要8核
+  if [[ ${node_count} -ge 8 ]]
+      then ${least_core}=8
+  fi
+  CPU_CORE=$(cat /proc/cpuinfo | grep processor | wc -l 2>&1)
+  if [[ $CPU_CORE -ge ${least_core} ]]
       then echo 'CPU is ready'
   else
-      echo 'ERROR: CPU CORE is too low(at least 4 core)'
-      exit 1
+      echo "ERROR: CPU CORE is too low(at least ${least_core} core)"
+      exit ${CPU_ERROR}
   fi
 }
 checkCpu
 
-function checkDocker() {
-
-  if [[ ! $(command -v docker) ]]; then
-      echo "ERROR: cannot find docker cmd!"
-      exit 1
-  fi
-
-  # stop hello world first
-  TEST_CNT_NAME='webase_test'
-  CNT_ID=`docker ps -a | grep $TEST_CNT_NAME | awk '{print $1}' 2>&1` || :
-  if [ -n "$CNT_ID" ]
-      then echo "remove cnt-->$CNT_ID"
-      docker stop $CNT_ID
-      docker rm $CNT_ID
-  fi
-
-  # run test hello world
-  TEST_RESULT=`docker run --name $TEST_CNT_NAME hello-world 2>&1` || :
-  if [[ $TEST_RESULT =~ "Hello from Docker" ]]
-      then echo 'docker test passed!'
-  else
-      echo "ERROR: docker run failed-->$TEST_RESULT"
-      exit 1
-  fi
-
-  # stop hello world
-  CNT_ID=`docker ps -a | grep $TEST_CNT_NAME | awk '{print $1}' 2>&1` || :
-  if [ -n "$CNT_ID" ]
-      then echo "remove cnt-->$CNT_ID"
-      docker stop $CNT_ID
-      docker rm $CNT_ID
-  fi
-}
-# not run checkDocker
-# checkDocker
-
-# need input param
-function checkPort() {
-  NODE_PORT=$1
-
-  if [[ ! $(command -v netstat) ]]; then
-      echo "ERROR: cannot find netstat cmd!"
-      exit 1
-  fi
-
-  if [[ ! $(command -v curl) ]]; then
-      echo "ERROR: cannot find curl cmd!"
-      exit 1
-  fi
-
-  if [ -z "$NODE_PORT" ]
-      then echo 'igno check port'
-  else
-      STAT=`netstat -pan | grep -E "${NODE_PORT}.*LISTEN"`
-      if [[ $STAT =~ "LISTEN" ]]
-      then
-          echo "ERROR: port is using"
-          exit 1
-      else
-          echo "port is ready"
-      fi
-  fi
-}
-
 echo "all check passed!"
-#exit 0
+exit ${SUCCESS}
