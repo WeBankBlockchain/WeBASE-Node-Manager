@@ -33,6 +33,8 @@ public enum HostStatusEnum {
     INITIATING((byte) 1, "host is initiating"),
     INIT_SUCCESS((byte) 2, "host init success"),
     INIT_FAILED((byte) 3, "host init failed"),
+    CHECK_SUCCESS((byte) 4, "host check success"),
+    CHECK_FAILED((byte) 5, "host check failed"),
     ;
 
     private byte id;
@@ -63,6 +65,23 @@ public enum HostStatusEnum {
         switch (statusEnum){
             case INIT_SUCCESS:
             case INITIATING:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+
+    public static boolean checkSuccess(byte status){
+        HostStatusEnum statusEnum = HostStatusEnum.getById(status);
+        if (statusEnum == null) {
+            log.error("Host with unknown status:[{}].", status);
+            return false;
+        }
+
+        // check host status
+        switch (statusEnum){
+            case CHECK_SUCCESS:
                 return true;
             default:
                 return false;

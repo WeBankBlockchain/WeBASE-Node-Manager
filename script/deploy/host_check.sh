@@ -56,7 +56,8 @@ function checkDocker() {
       docker rm $CNT_ID
   fi
 }
-checkDocker
+# not run checkDocker
+# checkDocker
 
 # need input param
 function checkPort() {
