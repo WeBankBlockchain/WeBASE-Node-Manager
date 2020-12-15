@@ -126,6 +126,7 @@ public class ConstantProperties {
     private int defaultFrontPort = 5002;
 
     // timeout config
+    private long execHostCheckTimeout = 60 * 1000L;
     private long execHostInitTimeout = 10 * 60 * 1000L;
     private long execBuildChainTimeout = 10 * 60 * 1000L;
     private long execShellTimeout = 10 * 60 * 1000L;
