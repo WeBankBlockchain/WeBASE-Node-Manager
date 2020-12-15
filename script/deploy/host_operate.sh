@@ -228,8 +228,41 @@ function init() {
         echo "Remote host init SUCCESS!!! "
     fi
 }
-
 init
+
+# check host after init
+function check() {
+    if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
+        echo "Checking local server ....."
+
+        case $(uname | tr '[:upper:]' '[:lower:]') in
+          linux*)
+            # GNU/Linux操作系统
+            # Debian(Ubuntu) or RHEL(CentOS)
+            bash -e -x "${__dir}/host_check.sh"
+            status=($?)
+            if [[ $status != 0 ]] ;then
+                echo "Check local server ERROR!!!"
+                exit "$status"
+            fi
+            ;;
+        esac
+        echo "Checking local host SUCCESS!!! "
+    else
+        echo "Checking remote server ....."
+        # scp host_check.sh to remote and exec
+        cat "${__dir}/host_check.sh" | sshExec bash -e -x
+        status=($?)
+        if [[ $status != 0 ]] ;then
+            echo "Check remote server ERROR!!!"
+            exit "$status"
+        fi
+
+        echo "Check remote host SUCCESS!!! "
+    fi
+}
+check
+
 exit ${SUCCESS}
 
 
