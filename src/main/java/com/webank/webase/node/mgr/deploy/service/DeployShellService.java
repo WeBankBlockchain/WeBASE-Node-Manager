@@ -52,6 +52,7 @@ public class DeployShellService {
     @Autowired
     private PathService pathService;
     private static final String OPERATE_FUNCTION_CHECK = "check";
+    private static final String OPERATE_FUNCTION_DOCKER = "docker";
     private static final String OPERATE_FUNCTION_INIT = "init";
 
     /**
@@ -110,7 +111,7 @@ public class DeployShellService {
      * @param user      Default root.
      * @param pwd       Not required.
      * @param chainRoot chain root on host, default is /opt/fisco/{chain_name}.
-     * @param function command for host_operate.sh, init or check, default init
+     * @param function command for host_operate.sh, init or check, docker
      * @return
      */
     public ExecuteResult execHostOperate(String ip, int port, String user, String pwd, String chainRoot,
@@ -118,7 +119,6 @@ public class DeployShellService {
         log.info("Exec execHostOperate method for [{}@{}:{}#{}],function:{},nodeCount:{}",
             user, ip, port, pwd, function, nodeCount);
         // init or check: default init
-        String commandParam = StringUtils.isBlank(function) ? OPERATE_FUNCTION_INIT : OPERATE_FUNCTION_CHECK;
         int newport = port <= 0 || port > 65535 ? SshTools.DEFAULT_SSH_PORT : port;
         String newUser = StringUtils.isBlank(user) ? SshTools.DEFAULT_SSH_USER : user;
         String useDockerCommand = constant.isUseDockerSDK() ? "" : "-c";
@@ -128,7 +128,7 @@ public class DeployShellService {
 
 
         String command = String.format("bash -x -e %s %s -H %s -P %s -u %s %s %s %s %s ",
-                constant.getNodeOperateShell(), commandParam, ip, newport, newUser, passwordParam,
+                constant.getNodeOperateShell(), function, ip, newport, newUser, passwordParam,
             chainRootParam, nodeCountParam, useDockerCommand);
 
         return JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
@@ -259,8 +259,6 @@ public class DeployShellService {
 
     /**
      * check host memory/cpu/port
-     * check docker/compose hello_world:
-     * but install docker and compose in host_init
      * @param ip        Required.
      * @param port      Default 22.
      * @param user      Default root.
@@ -278,6 +276,22 @@ public class DeployShellService {
             if (result.getExitCode() == 4) {
                 throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_CPU.attach(result.getExecuteOut()));
             }
+        }
+    }
+
+    /**
+     * check host docker/docker-compose hello_world
+     * @param ip        Required.
+     * @param port      Default 22.
+     * @param user      Default root.
+     * @return
+     */
+    public void execDockerCheck(String ip, int port, String user) {
+        log.info("Exec execHostCheck method for [{}@{}:{}]", user, ip, port);
+
+        ExecuteResult result = this.execHostOperate(ip, port, user, "", "", OPERATE_FUNCTION_DOCKER, 0);
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
         }
     }
 }
