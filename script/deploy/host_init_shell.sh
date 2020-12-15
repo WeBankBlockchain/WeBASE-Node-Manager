@@ -49,22 +49,15 @@ install netstat netstat
 #install nslookup bind-utils
 # todo install dos2unix
 
+#### check docker by docker_check.sh
 # install docker
-if [[ ! $(command -v docker) ]]; then
-    echo "Install docker..."
-    bash <(curl -s -L get.docker.com)
-fi
-
-# install docker-compose
-#if [[ ! $(command -v docker-compose) ]]; then
-#    echo "Install docker-compose..."
-#    curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-#    chmod +x /usr/local/bin/docker-compose
+#if [[ ! $(command -v docker) ]]; then
+#    echo "Install docker..."
+#    bash <(curl -s -L get.docker.com)
 #fi
 
-
 # check docker started
-if [[ "$(systemctl is-active docker)" != "active" ]] ; then
-    sudo systemctl start docker
-fi
+#if [[ "$(systemctl is-active docker)" != "active" ]] ; then
+#    sudo systemctl start docker
+#fi
 

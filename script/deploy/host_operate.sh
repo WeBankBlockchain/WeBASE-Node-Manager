@@ -267,11 +267,48 @@ function check() {
     fi
 }
 
+
+# check host after init
+function docker() {
+    if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
+        echo "Checking docker in local server ....."
+
+        case $(uname | tr '[:upper:]' '[:lower:]') in
+          linux*)
+            # GNU/Linux操作系统
+            # Debian(Ubuntu) or RHEL(CentOS)
+            bash -e -x "${__dir}/docker_check.sh"
+            status=($?)
+            if [[ $status != 0 ]] ;then
+                echo "Check docker in local server ERROR!!!"
+                exit "$status"
+            fi
+            ;;
+        esac
+        echo "Checking docker in local host SUCCESS!!! "
+    else
+        echo "Checking docker in remote server ....."
+        # scp host_check.sh to remote and exec
+        # -C pass node_count to host_check.sh
+        cat "${__dir}/docker_check.sh" | sshExec bash -e -x
+        status=($?)
+        if [[ $status != 0 ]] ;then
+            echo "Check docker in remote server ERROR!!!"
+            exit "$status"
+        fi
+
+        echo "Check docker in remote host SUCCESS!!! "
+    fi
+}
+
+
 case $1 in
 init)
     init;;
 check)
     check;;
+docker)
+    docker;;
 esac
 
 exit ${SUCCESS}
