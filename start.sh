@@ -21,7 +21,7 @@ fi
 copyArial(){
     arialFolder="/usr/share/fonts/arial"
     if [ ! -d "$arialFolder" ]; then
-        sudo mkdir "$arialFolder" && sudo cp $ARIAL_DIR/arial*.ttf $arialFolder/
+        sudo mkdir -p "$arialFolder" && sudo cp $ARIAL_DIR/arial*.ttf $arialFolder/
     fi
 }
 
