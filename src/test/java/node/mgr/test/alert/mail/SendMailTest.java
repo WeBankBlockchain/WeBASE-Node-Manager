@@ -58,10 +58,11 @@ public class SendMailTest {
     AuditMonitorTask auditMonitorTask;
 
     public static final String testTitle = "WeBase-Node-Manager测试邮件，请勿回复";
-    public static final String fromMailAddress = "yourmail@163.com";
-    public static final String toMailAddress = "yourmail@163.com";
+    public static final String fromMailAddress = "yourmail@163.com"; 
+    public static final String toMailAddress = "yourmail@163.com"; 
     public static final String testContent = "【这是节点管理的测试邮件，请勿回复】";
 
+    
     /**
      * test alert_rule
      * INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval`,`alert_content`,`content_param_list`,`description`,`is_all_user`,`user_list`,`create_time`,`modify_time`,`less_than`,`less_and_equal`,`larger_than`,`larger_and_equal`,`equal`)VALUES ('测试告警', 0, 2, 'low', 3600, '这是测试邮件，来自from', '["from"]', '', 0, '["yourmail@163.com"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30', '','','','','');
