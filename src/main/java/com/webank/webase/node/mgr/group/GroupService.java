@@ -1001,7 +1001,7 @@ public class GroupService {
                                GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
 
         TbGroup group = this.groupMapper.getGroupByChainIdAndGroupId(chainId,groupId);
-        if (group != null){
+        if (group != null) {
             return group;
         }
 
@@ -1120,6 +1120,7 @@ public class GroupService {
 //    }
 
     /**
+     * generate group.x.ini group.x.genesis
      * @param newGroup
      * @param chain
      * @param groupId
@@ -1134,7 +1135,7 @@ public class GroupService {
         String chainName = chain.getChainName();
         long now = System.currentTimeMillis();
 
-        List<String> nodeIdList = newFrontList.stream().map(tbFront -> tbFront.getNodeId())
+        List<String> nodeIdList = newFrontList.stream().map(TbFront::getNodeId)
                 .collect(Collectors.toList());
 
         // copy group.x.[genesis|conf] from old front

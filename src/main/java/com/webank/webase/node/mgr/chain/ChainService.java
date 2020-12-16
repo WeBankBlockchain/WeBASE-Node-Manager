@@ -221,7 +221,7 @@ public class ChainService {
     }
 
     /**
-     *
+     * delete db data and local config files by chainName
      * @param chainName
      */
     @Transactional
@@ -253,7 +253,7 @@ public class ChainService {
     }
 
     /**
-     *
+     * gen chain config and init chain db data
      * @param chainName
      * @param ipConf
      * @param tagId
@@ -278,12 +278,12 @@ public class ChainService {
         // parse ipConf config
         log.info("Parse ipConf content....");
         List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf,
-                sshUser,sshPort,constant.getPrivateKey());
+                sshUser, sshPort, constant.getPrivateKey());
 
         // check docker image exists
         if (DockerImageTypeEnum.MANUAL ==  dockerImageTypeEnum){
             Set<String> ipSet = ipConfigParseList.stream().map(IpConfigParse::getIp).collect(Collectors.toSet());
-            this.hostService.checkImageExists(ipSet,sshUser,sshPort,imageConfig.getConfigValue());
+            this.hostService.checkImageExists(ipSet, sshUser, sshPort, imageConfig.getConfigValue());
         }
 
         byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
@@ -335,11 +335,11 @@ public class ChainService {
         // insert agency, host , group
         ipConfigParseList.forEach((config) -> {
             // insert agency if new
-            TbAgency agency = this.agencyService.insertIfNew(config.getAgencyName(),newChain.getId(),chainName);
+            TbAgency agency = this.agencyService.insertIfNew(config.getAgencyName(), newChain.getId(), chainName);
 
             // insert host if new
             TbHost host = this.hostService.insertIfNew(agency.getId(), agency.getAgencyName(), config.getIp(), rootDirOnHost,
-                    sshUser,sshPort,dockerPort,"");
+                    sshUser, sshPort, dockerPort, "");
 
             // insert group if new
             config.getGroupIdSet().forEach((groupId) -> {
@@ -347,7 +347,7 @@ public class ChainService {
                         GroupStatus.MAINTAINING, newChain.getId(), newChain.getChainName());
             });
 
-            newIpHostMap.putIfAbsent(config.getIp(),host);
+            newIpHostMap.putIfAbsent(config.getIp(), host);
         });
 
         // insert nodes for all hosts. there may be multiple nodes on a host.
