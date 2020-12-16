@@ -49,15 +49,4 @@ install netstat netstat
 #install nslookup bind-utils
 # todo install dos2unix
 
-#### check docker by docker_check.sh
-# install docker
-#if [[ ! $(command -v docker) ]]; then
-#    echo "Install docker..."
-#    bash <(curl -s -L get.docker.com)
-#fi
-
-# check docker started
-#if [[ "$(systemctl is-active docker)" != "active" ]] ; then
-#    sudo systemctl start docker
-#fi
 

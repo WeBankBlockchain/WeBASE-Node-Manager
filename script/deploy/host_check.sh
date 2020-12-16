@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# todo check port in use
+# todo install netstat or lsof -i:{port}
+
 ####### error code
 SUCCESS=0
 PARAM_ERROR=2
@@ -61,9 +64,9 @@ function checkCpu() {
       then ${least_core}=4
   fi
   # 8个及以上节点，需要8核
-  if [[ ${node_count} -ge 8 ]]
-      then ${least_core}=8
-  fi
+#  if [[ ${node_count} -ge 8 ]]
+#      then ${least_core}=8
+#  fi
   CPU_CORE=$(cat /proc/cpuinfo | grep processor | wc -l 2>&1)
   if [[ $CPU_CORE -ge ${least_core} ]]
       then echo 'CPU is ready'
