@@ -321,18 +321,17 @@ public class FrontService {
         observerList.stream().forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
         log.debug("refreshSealerAndObserverInNodeList sealerList:{},observerList:{}",
                 sealerList, observerList);
-        sealerAndObserverList.stream()
-                .forEach(peerInfo -> {
-                    NodeParam checkParam = new NodeParam();
-                    checkParam.setGroupId(groupId);
-                    checkParam.setNodeId(peerInfo.getNodeId());
-                    int existedNodeCount = nodeService.countOfNode(checkParam);
-                    log.debug("addSealerAndObserver peerInfo:{},existedNodeCount:{}",
-                            peerInfo, existedNodeCount);
-                    if(existedNodeCount == 0) {
-                        nodeService.addNodeInfo(groupId, peerInfo);
-                    }
-                });
+        sealerAndObserverList.forEach(peerInfo -> {
+            NodeParam checkParam = new NodeParam();
+            checkParam.setGroupId(groupId);
+            checkParam.setNodeId(peerInfo.getNodeId());
+            int existedNodeCount = nodeService.countOfNode(checkParam);
+            log.debug("addSealerAndObserver peerInfo:{},existedNodeCount:{}",
+                    peerInfo, existedNodeCount);
+            if(existedNodeCount == 0) {
+                nodeService.addNodeInfo(groupId, peerInfo);
+            }
+        });
         log.debug("end addSealerAndObserver");
     }
 
@@ -541,9 +540,23 @@ public class FrontService {
     }
 
 
+    /**
+     * gen node cert and gen front's yml, and new front ind db
+     * @param num
+     * @param chain
+     * @param host
+     * @param agencyId
+     * @param agencyName
+     * @param group
+     * @param frontStatusEnum
+     * @return
+     * @throws NodeMgrException
+     * @throws IOException
+     */
     @Transactional(propagation = Propagation.REQUIRED)
     public List<TbFront> initFrontAndNode(int num, TbChain chain, TbHost host, int agencyId,
-                                          String agencyName, TbGroup group,FrontStatusEnum frontStatusEnum) throws NodeMgrException, IOException {
+                                          String agencyName, TbGroup group,FrontStatusEnum frontStatusEnum)
+        throws NodeMgrException, IOException {
 
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
@@ -642,7 +655,7 @@ public class FrontService {
     }
 
     /**
-     *
+     * not generate but update existed node config.ini of existed nodes
      * @param chain
      * @param groupId
      * @throws IOException
@@ -674,7 +687,7 @@ public class FrontService {
         }
 
         // scp to remote
-        this.scpNodeConfigIni(chain,groupId);
+        this.scpNodeConfigIni(chain, groupId);
     }
 
     /**
