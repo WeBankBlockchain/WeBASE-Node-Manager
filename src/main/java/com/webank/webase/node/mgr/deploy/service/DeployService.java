@@ -81,7 +81,7 @@ public class DeployService {
 
     /**
      * Add in v1.4.0 deploy.
-     *
+     * generate chain config locally and async deploy chain
      * @param ipConf
      * @param tagId
      * @param rootDirOnHost
@@ -107,12 +107,12 @@ public class DeployService {
         }
 
         // generate config files and insert data to db
-        this.chainService.generateChainConfig(chainName,ipConf,tagId,rootDirOnHost,webaseSignAddr, imageTypeEnum,
+        this.chainService.generateChainConfig(chainName, ipConf, tagId, rootDirOnHost, webaseSignAddr, imageTypeEnum,
                 constantProperties.getSshDefaultUser(), constantProperties.getSshDefaultPort(),
                 constantProperties.getDockerDaemonPort() );
 
         // init host and start node
-        this.nodeAsyncService.asyncDeployChain(chainName,OptionType.DEPLOY_CHAIN);
+        this.nodeAsyncService.asyncDeployChain(chainName, OptionType.DEPLOY_CHAIN);
     }
 
 
@@ -143,7 +143,7 @@ public class DeployService {
     }
 
     /**
-     * Add a node.
+     * Add a node. 扩容节点
      *
      * @param add
      * @return
@@ -164,6 +164,7 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
         }
 
+        // todo agree
         if (IPUtil.isLocal(ip)){
             throw new NodeMgrException(SAME_HOST_ERROR);
         }
@@ -174,7 +175,8 @@ public class DeployService {
         }
 
         log.info("Add node check ip reachable:[{}]...", ip);
-        if (!SshTools.connect(ip,constantProperties.sshDefaultUser,constantProperties.sshDefaultPort,constantProperties.getPrivateKey())) {
+        if (!SshTools.connect(ip, constantProperties.sshDefaultUser, constantProperties.sshDefaultPort,
+            constantProperties.getPrivateKey())) {
             throw new NodeMgrException(ConstantCode.HOST_CONNECT_ERROR);
         }
 
@@ -182,8 +184,10 @@ public class DeployService {
         List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
 
         // check host exists by ip
-        TbHost tbHostExists = tbHostList.stream().filter(host -> StringUtils.equalsIgnoreCase(ip, host.getIp())).findFirst().orElse(null);
+        TbHost tbHostExists = tbHostList.stream().filter(host ->
+            StringUtils.equalsIgnoreCase(ip, host.getIp())).findFirst().orElse(null);
 
+        // init agency cert
         TbAgency agency = null;
         if (tbHostExists == null) {
             log.info("Add node check num:[{}]...", num);
@@ -203,7 +207,6 @@ public class DeployService {
                 this.hostService.checkImageExists(Collections.singleton(ip), constantProperties.getSshDefaultUser(),
                         constantProperties.getSshDefaultPort(), chain.getVersion());
             }
-
 
             // a new host IP address, check agency name is new
             agency = this.agencyService.initAgencyIfNew(
@@ -234,13 +237,14 @@ public class DeployService {
 
         // init front and node
         try {
+            // gen node cert and gen front's yml
             List<TbFront> newFrontList = this.frontService.initFrontAndNode(num, chain,
                     tbHostExists, agency.getId(), agency.getAgencyName(), group, FrontStatusEnum.ADDING);
 
-            // generate related node config files
+            // generate(or update existed) related node config files
             this.frontService.updateNodeConfigIniByGroupId(chain, groupId);
 
-            // generate new nodes config files and scp to remote
+            // generate(or update existed) new group(node) config files and scp to remote
             this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId,
                     tbHostExists.getIp(), newFrontList, tbHostExists.getSshUser(),tbHostExists.getSshPort());
 

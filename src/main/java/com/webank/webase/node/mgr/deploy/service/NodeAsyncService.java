@@ -73,7 +73,7 @@ public class NodeAsyncService {
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     /**
-     *
+     * init host and start chain
      * @param chainName
      */
     @Async("deployAsyncScheduler")
@@ -106,14 +106,15 @@ public class NodeAsyncService {
             // 1. install docker and docker-compose,
             // 2. send node config to remote host
             // 3. docker pull image
+            // todo split init from start
             boolean deploySuccess = this.hostService.initHostList(chain, tbHostList, true);
-            if (deploySuccess){
+            if (deploySuccess) {
                 // start chain
-                this.asyncStartChain(chain.getId(),optionType, ChainStatusEnum.RUNNING, ChainStatusEnum.DEPLOY_FAILED,
-                        FrontStatusEnum.INITIALIZED,FrontStatusEnum.RUNNING,FrontStatusEnum.STOPPED);
+                this.asyncStartChain(chain.getId(), optionType, ChainStatusEnum.RUNNING, ChainStatusEnum.DEPLOY_FAILED,
+                        FrontStatusEnum.INITIALIZED, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
 
                 return;
-            }else{
+            } else {
                 log.error("Init host list failed:[{}]", chainName);
                 chainService.updateStatus(chain.getId(), ChainStatusEnum.DEPLOY_FAILED);
             }
@@ -129,16 +130,16 @@ public class NodeAsyncService {
      */
     @Async("deployAsyncScheduler")
     public void asyncStartChain(int chainId, OptionType optionType, ChainStatusEnum success, ChainStatusEnum failed ,
-                                FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess,FrontStatusEnum frontFailed )   {
-        final boolean startSuccess = this.restartChain(chainId,optionType,frontBefore,frontSuccess,frontFailed);
-        threadPoolTaskScheduler.schedule(()->{
-            chainService.updateStatus(chainId,startSuccess ? success : failed);
-        }, Instant.now().plusMillis( 1L));
+                                FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess,FrontStatusEnum frontFailed ) {
+        final boolean startSuccess = this.restartChain(chainId, optionType, frontBefore, frontSuccess, frontFailed);
+        threadPoolTaskScheduler.schedule(() ->
+            chainService.updateStatus(chainId, startSuccess ? success : failed),
+            Instant.now().plusMillis(1L));
     }
 
 
     /**
-     *
+     * if add new node or delete old node
      * @param chainId
      * @param groupIdSet
      * @param optionType
@@ -153,7 +154,7 @@ public class NodeAsyncService {
         this.restartFrontOfGroupSet(chainId, groupIdSet, optionType, frontBefore,frontSuccess, frontFailed);
 
         // update chain to running
-        threadPoolTaskScheduler.schedule(()->{
+        threadPoolTaskScheduler.schedule(() -> {
             this.chainService.updateStatus(chainId, ChainStatusEnum.RUNNING);
 
             // set pull cert to false
@@ -190,7 +191,7 @@ public class NodeAsyncService {
 
     }
     /**
-     *
+     * if add new node or delete old node, update node's p2p list of ip
      * @param chainId
      * @param groupIdSet
      * @param optionType
@@ -232,7 +233,7 @@ public class NodeAsyncService {
         Map<Integer, List<TbFront>> hostFrontListMap = tbFrontList.stream().collect(Collectors.groupingBy(TbFront::getHostId));
 
         // restart by host one by one
-        return restartFrontByHost(chainId,optionType,hostFrontListMap,before,success,failed);
+        return restartFrontByHost(chainId, optionType, hostFrontListMap, before, success, failed);
     }
 
     /**
@@ -253,7 +254,7 @@ public class NodeAsyncService {
         // set maxWaitTime
         final AtomicLong maxWaitTime = new AtomicLong();
 
-        hostFrontListMap.values().stream().forEach(frontList ->{
+        hostFrontListMap.values().forEach(frontList -> {
             // add to total
             totalFrontCount.addAndGet(CollectionUtils.size(frontList));
 
