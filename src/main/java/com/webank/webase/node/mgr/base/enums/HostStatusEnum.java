@@ -84,9 +84,9 @@ public enum HostStatusEnum {
         // check host status
         switch (statusEnum){
             // if init or init ing means already checked
+            // if init failed ,check again available
             case INIT_SUCCESS:
             case INITIATING:
-            case INIT_FAILED:
             case CHECK_SUCCESS:
                 return true;
             default:
@@ -104,9 +104,9 @@ public enum HostStatusEnum {
         // check host status
         switch (statusEnum){
             // if init or init ing means already checked
+            // if init failed ,check again available
             case INIT_SUCCESS:
             case INITIATING:
-            case INIT_FAILED:
             case DOCKER_SUCCESS:
                 return true;
             default:
