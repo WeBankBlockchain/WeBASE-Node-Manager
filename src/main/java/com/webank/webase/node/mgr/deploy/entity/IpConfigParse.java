@@ -93,6 +93,7 @@ public class IpConfigParse {
             hostAgencyMap.put(ipConfigParse.getIp(), ipConfigParse.getAgencyName());
 
             // check ip is local
+            // todo agree
             if (IPUtil.isLocal(ipConfigParse.getIp())){
                 throw new NodeMgrException(SAME_HOST_ERROR.attach(ipConfigParse.getIp()));
             }

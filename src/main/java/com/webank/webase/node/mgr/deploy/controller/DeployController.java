@@ -92,7 +92,7 @@ public class DeployController extends BaseController {
     }
 
     /**
-     *
+     * 扩容一个节点
      * @param add
      * @param result
      * @return

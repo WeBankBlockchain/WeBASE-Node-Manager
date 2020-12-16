@@ -259,6 +259,8 @@ public class DeployShellService {
 
     /**
      * check host memory/cpu/port
+     * TODO check node port, front port;
+     * todo if ssh fail, ip port user error
      * @param ip        Required.
      * @param port      Default 22.
      * @param user      Default root.
