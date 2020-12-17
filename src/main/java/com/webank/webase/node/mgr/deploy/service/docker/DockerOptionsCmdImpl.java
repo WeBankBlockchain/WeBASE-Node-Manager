@@ -1,5 +1,6 @@
 package com.webank.webase.node.mgr.deploy.service.docker;
 
+import com.webank.webase.node.mgr.base.properties.VersionProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import lombok.extern.log4j.Log4j2;
 public class DockerOptionsCmdImpl implements DockerOptions{
 
     @Autowired private ConstantProperties constant;
+    @Autowired
+    private VersionProperties versionProperties;
 
     @Override
     public boolean checkImageExists(String ip, int dockerPort, String sshUser, int sshPort, String imageTag) {
@@ -35,17 +38,37 @@ public class DockerOptionsCmdImpl implements DockerOptions{
      * @param dockerPort
      * @param sshPort
      * @param imageTag
+     * @param loadFromCdn default false
      * @return
      */
     @Override
-    public void pullImage(String ip, int dockerPort,String sshUser, int sshPort, String imageTag) {
-        String image = getImageRepositoryTag(constant.getDockerRepository(),constant.getDockerRegistryMirror(),imageTag);
-        String dockerPullCommand = String.format("sudo docker pull %s",image);
+    public void pullImage(String ip, int dockerPort, String sshUser, int sshPort, String imageTag, boolean loadFromCdn) {
+        if (!loadFromCdn) {
+            String image = getImageRepositoryTag(constant.getDockerRepository(),
+                constant.getDockerRegistryMirror(), imageTag);
+            String dockerPullCommand = String.format("sudo docker pull %s", image);
+            // kill exists docker pull process
+            SshTools.killCommand(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
 
-        // kill exists docker pull process
-        SshTools.killCommand(ip,dockerPullCommand,sshUser,sshPort,constant.getPrivateKey());
+            SshTools.execDocker(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
+        } else {
+            // default pull from cdn
+            // change imageTag to webase version
+            String webaseVersion = versionProperties.getVersion();
+            String cdnUrl = String.format(constant.getWebaseDockerImageUrl(), webaseVersion);
+            // todo docker file path, after download, delete file
+            String wgetCommand = String.format("wget %s", cdnUrl);
+            // wget
+            // ssh tool
+            // docker load -i docker-fisco-webase.tar
+            // ssh tool
+            // todo check download finished
+            String dockerPullCommand = String.format("sudo docker load -i %s", constant.getDockerTarFileName());
+            // todo kill exists docker pull process
+            // SshTools.killCommand(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
 
-        SshTools.execDocker(ip,dockerPullCommand,sshUser,sshPort,constant.getPrivateKey());
+//            SshTools.execPullCdnAndLoadDocker(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
+        }
     }
 
 
@@ -65,7 +88,7 @@ public class DockerOptionsCmdImpl implements DockerOptions{
                 "-v %s:/data/sdk " +
                 "-v %s:/front/log " +
                 "-e SPRING_PROFILES_ACTIVE=docker " +
-                "--network=host -w=/data %s ", containerName , nodeRootOnHost, yml,sdk,front_log, image);
+                "--network=host -w=/data %s ", containerName , nodeRootOnHost, yml, sdk, front_log, image);
         log.info("Host:[{}] run container:[{}].", ip, containerName);
         SshTools.execDocker(ip,dockerCreateCommand,sshUser,sshPort,constant.getPrivateKey());
     }

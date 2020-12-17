@@ -107,7 +107,7 @@ public class NodeAsyncService {
             // 2. send node config to remote host
             // 3. docker pull image
             // todo split init from start
-            boolean deploySuccess = this.hostService.initHostList(chain, tbHostList, true);
+            boolean deploySuccess = this.hostService.initHostList(chain, tbHostList, true, false);
             if (deploySuccess) {
                 // start chain
                 this.asyncStartChain(chain.getId(), optionType, ChainStatusEnum.RUNNING, ChainStatusEnum.DEPLOY_FAILED,
@@ -174,7 +174,7 @@ public class NodeAsyncService {
     public void asyncAddNode(TbChain chain, TbHost host, TbGroup group, OptionType optionType, List<TbFront> newFrontList) {
         try {
             int groupId = group.getGroupId();
-            boolean initSuccess = this.hostService.initHostList(chain, Arrays.asList(host), false);
+            boolean initSuccess = this.hostService.initHostList(chain, Arrays.asList(host), false, false);
             log.info("Init host:[{}], result:[{}]",host.getIp(), initSuccess);
             if (initSuccess) {
                 // start front and  related front

@@ -74,7 +74,7 @@ public class DockerOptionsSDKImpl implements DockerOptions{
      * @return
      */
     @Override
-    public void pullImage(String ip, int dockerPort,String sshUser, int sshPort, String imageTag) {
+    public void pullImage(String ip, int dockerPort, String sshUser, int sshPort, String imageTag, boolean loadFromCdn) {
         String image = getImageRepositoryTag(constant.getDockerRepository(),constant.getDockerRegistryMirror(),imageTag);
         log.info("Host:[{}] pull image:[{}].", ip, image);
         boolean optionSuccess = false;
@@ -97,7 +97,7 @@ public class DockerOptionsSDKImpl implements DockerOptions{
     @Override
     public void run(String ip, int dockerPort, String sshUser, int sshPort, String imageTag, String containerName, String chainRootOnHost, int nodeIndex) {
         // pull image
-        this.pullImage(ip,dockerPort,sshUser,sshPort,imageTag);
+        this.pullImage(ip, dockerPort, sshUser, sshPort, imageTag, false);
 
         String containerId = this.create(ip, dockerPort,sshUser, sshPort, imageTag, containerName, chainRootOnHost, nodeIndex);
         if (StringUtils.isBlank(containerId)) {

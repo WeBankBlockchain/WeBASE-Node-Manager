@@ -126,7 +126,8 @@ public class ConstantProperties {
     private int defaultFrontPort = 5002;
 
     // timeout config
-    private long execHostCheckTimeout = 60 * 1000L;
+    private long execDockerCheckTimeout = 10 * 60 * 1000L;
+    private long execHostCheckTimeout = 10 * 60 * 1000L;
     private long execHostInitTimeout = 10 * 60 * 1000L;
     private long execBuildChainTimeout = 10 * 60 * 1000L;
     private long execShellTimeout = 10 * 60 * 1000L;
@@ -137,6 +138,9 @@ public class ConstantProperties {
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
     private String dockerRepository= "fiscoorg/fisco-webase";
+    private String dockerTarFileName= "docker-fisco-webase.tar";
+    // %s to v1.4.x
+    private String webaseDockerImageUrl = "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/releases/download/%s/docker-fisco-webase.tar";
 //    private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
