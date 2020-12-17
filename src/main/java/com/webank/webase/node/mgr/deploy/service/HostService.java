@@ -122,17 +122,19 @@ public class HostService {
 
     /**
      * Init hosts:
-     * 1. Install docker and docker-compose;
+     * 1. Install docker;
      * 2. Send node config to remote hosts;
      * 3. docker pull image;
      * todo: split batch init to single init
      * @param tbChain
      * @param tbHostList
+     * @param pullFromCdn default false
      * @return
      */
-    public boolean initHostList(TbChain tbChain, List<TbHost> tbHostList, boolean scpNodeConfig) throws InterruptedException {
+    public boolean initHostList(TbChain tbChain, List<TbHost> tbHostList, boolean scpNodeConfig, boolean pullFromCdn) throws InterruptedException {
         log.info("Start init chain:[{}:{}] hosts:[{}].", tbChain.getId(), tbChain.getChainName(), CollectionUtils.size(tbHostList));
-
+        // todo default false
+//        pullFromCdn = false;
         final CountDownLatch initHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
         AtomicInteger initSuccessCount = new AtomicInteger(0);
@@ -183,7 +185,7 @@ public class HostService {
 
                     // docker pull image
                     try {
-                        this.dockerOptions.pullImage(tbHost.getIp(), tbHost.getDockerPort(), tbHost.getSshUser(),tbHost.getSshPort(), tbChain.getVersion());
+                        this.dockerOptions.pullImage(tbHost.getIp(), tbHost.getDockerPort(), tbHost.getSshUser(),tbHost.getSshPort(), tbChain.getVersion(), pullFromCdn);
                     } catch (Exception e) {
                         log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
                         this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
@@ -395,61 +397,6 @@ public class HostService {
     }
 
 
-
-    /**
-     * check host memory/cpu
-     * at least 8g/4core
-     * todo get nodeCount
-     */
-    public boolean checkSingleHost(TbHost tbHost) {
-        int nodeCount = 1;
-        int hostId = tbHost.getId();
-        log.info("Check host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
-
-        Future<?> task = threadPoolTaskScheduler.submit(() -> {
-            try {
-                // check if host check success
-                if (!HostStatusEnum.hostCheckSuccess(tbHost.getStatus())) {
-                    log.info("Check host:[{}] by exec shell script:[{}]", tbHost.getIp(),
-                        constant.getNodeOperateShell());
-
-                    // exec host check shell script
-                    try {
-                        deployShellService.execHostCheck(tbHost.getIp(), tbHost.getSshPort(),
-                            tbHost.getSshUser(), nodeCount);
-                    } catch (Exception e) {
-                        log.error("Exec host check shell script on host:[{}] failed",
-                            tbHost.getIp(), e);
-                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
-                            "Execute host check shell script failed, please check the host's network.");
-                        return;
-                    }
-                }
-                // update as check success
-                tbHost.setStatus(HostStatusEnum.CHECK_SUCCESS.getId());
-                this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_SUCCESS, "");
-            } catch (Exception e) {
-                log.error("Check host:[{}] with unknown error", tbHost.getIp(), e);
-                this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_FAILED,
-                    "Check host with unknown error, check from log files.");
-            }
-        });
-
-        log.error("Check host timeout, cancel unfinished tasks.");
-
-        if(!task.isDone()){
-            log.error("Check host:[{}] timeout, cancel the task.", hostId );
-            tbHost.setStatus(HostStatusEnum.CHECK_FAILED.getId());
-            this.updateStatus(hostId, HostStatusEnum.CHECK_FAILED, "Check host timeout.");
-            task.cancel(false);
-        }
-        boolean hostCheckSuccess = HostStatusEnum.hostCheckSuccess(tbHost.getStatus());
-        // check if all host init success
-        log.log(hostCheckSuccess ? Level.INFO: Level.ERROR, "Host check result, host:[{}]", tbHost);
-
-        return hostCheckSuccess;
-    }
-
     /**
      * check host docker
      */
@@ -510,166 +457,221 @@ public class HostService {
      * @param tbHost
      * @return
      */
-    public boolean initSingleHost(TbChain tbChain, TbHost tbHost, boolean scpNodeConfig) {
-        log.info("Start init chain:[{}:{}] host:[{}].", tbChain.getId(), tbChain.getChainName(), tbHost);
-        log.info("Init host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
-        int hostId = tbHost.getId();
-        Future<?> task = threadPoolTaskScheduler.submit(() -> {
-            try {
-                // check if host init shell script executed
-                if (!HostStatusEnum.successOrInitiating(tbHost.getStatus())){
-                    boolean success = this.updateStatus(tbHost.getId(), HostStatusEnum.INITIATING, "Initiating...");
-                    if (success){
-                        log.info("Init host:[{}] by exec shell script:[{}]", tbHost.getIp(), constant.getNodeOperateShell());
-
-                        // exec host init shell script
-                        try {
-                            deployShellService.execHostOperateToInit(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
-                                PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
-                        } catch (Exception e) {
-                            log.error("Exec host init shell script on host:[{}] failed", tbHost.getIp(), e);
-                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
-                                "Execute host init shell script failed, please check the host's network.");
-                            return ;
-                        }
-
-                    }
-                }
-
-                if(scpNodeConfig) {
-                    // scp config files from local to remote
-                    // local: NODES_ROOT/[chainName]/[ip] TO remote: /opt/fisco/[chainName]
-                    String src = String.format("%s/*", pathService.getHost(tbChain.getChainName(), tbHost.getIp()).toString());
-                    String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName());
-                    try {
-                        deployShellService.scp(ScpTypeEnum.UP,tbHost.getSshUser(), tbHost.getIp(),tbHost.getSshPort(), src, dst);
-                        log.info("Send files from:[{}] to:[{}@{}#{}:{}] success.",
-                            src, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), dst);
-                    } catch (Exception e) {
-                        log.error("Send file to host :[{}] failed", tbHost.getIp(), e);
-                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
-                            "Scp configuration files to host failed, please check the host's network or disk usage.");
-                        return ;
-                    }
-
-                }
-
-                // docker pull image
-                try {
-                    this.dockerOptions.pullImage(tbHost.getIp(), tbHost.getDockerPort(), tbHost.getSshUser(),tbHost.getSshPort(), tbChain.getVersion());
-                } catch (Exception e) {
-                    log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
-                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
-                        "Docker pull image failed, please check the host's network or configuration of Docker.");
-                    return;
-                }
-
-                // check port
-                Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(tbHost.getIp(), 2000, constant.getDefaultChannelPort(), constant.getDefaultP2pPort(), constant.getDefaultFrontPort(), constant.getDefaultJsonrpcPort());
-                if(portReachable.getKey()){
-                    log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), tbHost.getIp() );
-                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
-                        String.format("Port:[%s] is in use.",portReachable.getValue()));
-                    return ;
-                }
-
-                // update host status only when chain is deploying
-                TbChain newTbChain = this.tbChainMapper.getByChainName(tbChain.getChainName());
-                if (ChainStatusEnum.DEPLOY_FAILED.getId() == newTbChain.getChainStatus()) {
-                    // chain is already deploy failed, skip updating host status
-                    return;
-                }
-                tbHost.setStatus(HostStatusEnum.INIT_SUCCESS.getId());
-                this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_SUCCESS, "");
-            } catch (Exception e) {
-                log.error("Init host:[{}] with unknown error", tbHost.getIp(), e);
-                this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED, "Init host with unknown error, check from log files.");
-            }
-        });
-
-
-        log.error("Init host timeout, cancel unfinished tasks.");
-        if(! task.isDone()){
-            log.error("Init host:[{}] timeout, cancel the task.", hostId );
-            this.updateStatus(hostId, HostStatusEnum.INIT_FAILED, "Init host timeout.");
-            task.cancel(false);
-        }
-
-
-        boolean hostInitSuccess = HostStatusEnum.successOrInitiating(tbHost.getStatus());
-        // check if all host init success
-        log.log(hostInitSuccess ? Level.INFO: Level.ERROR,
-            "Host of chain:[{}] init result:[{}]",
-            tbChain.getChainName(), tbHost);
-
-        return hostInitSuccess;
-    }
-
-    /**
-     * todo check before init
-     * check host memory/cpu/dependencies
-     */
-//    public boolean batchCheckHostShell(List<TbHost> tbHostList) throws InterruptedException {
+//    public boolean initSingleHost(TbChain tbChain, TbHost tbHost, boolean scpNodeConfig) {
+//        log.info("Start init chain:[{}:{}] host:[{}].", tbChain.getId(), tbChain.getChainName(), tbHost);
+//        log.info("Init host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
+//        int hostId = tbHost.getId();
+//        Future<?> task = threadPoolTaskScheduler.submit(() -> {
+//            try {
+//                // check if host init shell script executed
+//                if (!HostStatusEnum.successOrInitiating(tbHost.getStatus())){
+//                    boolean success = this.updateStatus(tbHost.getId(), HostStatusEnum.INITIATING, "Initiating...");
+//                    if (success){
+//                        log.info("Init host:[{}] by exec shell script:[{}]", tbHost.getIp(), constant.getNodeOperateShell());
 //
-//        final CountDownLatch checkHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
-//        // check success count
-//        AtomicInteger checkSuccessCount = new AtomicInteger(0);
-//        Map<Integer, Future> taskMap = new HashedMap<>();
-//
-//        for (final TbHost tbHost : tbHostList) {
-//            log.info("Check host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
-//
-//            Future<?> task = threadPoolTaskScheduler.submit(() -> {
-//                try {
-//                    // check if host check success
-//                    if (HostStatusEnum.checkSuccess(tbHost.getStatus())) {
-//                        log.info("Check host:[{}] by exec shell script:[{}]", tbHost.getIp(),
-//                            constant.getNodeOperateShell());
-//
-//                        // exec host check shell script
+//                        // exec host init shell script
 //                        try {
-//                            deployShellService.execHostCheck(tbHost.getIp(), tbHost.getSshPort(),
-//                                    tbHost.getSshUser());
+//                            deployShellService.execHostOperateToInit(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
+//                                PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
 //                        } catch (Exception e) {
-//                            log.error("Exec host check shell script on host:[{}] failed",
-//                                tbHost.getIp(), e);
+//                            log.error("Exec host init shell script on host:[{}] failed", tbHost.getIp(), e);
 //                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
-//                                "Execute host check shell script failed, please check the host's network.");
-//                            return;
+//                                "Execute host init shell script failed, please check the host's network.");
+//                            return ;
 //                        }
+//
 //                    }
-//                    // update as check success
-//                    tbHost.setStatus(HostStatusEnum.CHECK_SUCCESS.getId());
-//                    this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_SUCCESS, "");
-//                    checkSuccessCount.incrementAndGet();
-//                } catch (Exception e) {
-//                    log.error("Check host:[{}] with unknown error", tbHost.getIp(), e);
-//                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
-//                        "Check host with unknown error, check from log files.");
-//                } finally {
-//                    checkHostLatch.countDown();
 //                }
-//            });
-//            taskMap.put(tbHost.getId(), task);
-//        }
-//        checkHostLatch.await(constant.getExecHostCheckTimeout(), TimeUnit.MILLISECONDS);
-//        log.error("Check host timeout, cancel unfinished tasks.");
-//        taskMap.forEach((key, value) -> {
-//            int hostId = key;
-//            Future<?> task = value;
-//            if (!task.isDone()) {
-//                log.error("Check host:[{}] timeout, cancel the task.", hostId);
-//                this.updateStatus(hostId, HostStatusEnum.CHECK_FAILED, "Check host timeout.");
-//                task.cancel(false);
+//
+//                if(scpNodeConfig) {
+//                    // scp config files from local to remote
+//                    // local: NODES_ROOT/[chainName]/[ip] TO remote: /opt/fisco/[chainName]
+//                    String src = String.format("%s/*", pathService.getHost(tbChain.getChainName(), tbHost.getIp()).toString());
+//                    String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName());
+//                    try {
+//                        deployShellService.scp(ScpTypeEnum.UP,tbHost.getSshUser(), tbHost.getIp(),tbHost.getSshPort(), src, dst);
+//                        log.info("Send files from:[{}] to:[{}@{}#{}:{}] success.",
+//                            src, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), dst);
+//                    } catch (Exception e) {
+//                        log.error("Send file to host :[{}] failed", tbHost.getIp(), e);
+//                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+//                            "Scp configuration files to host failed, please check the host's network or disk usage.");
+//                        return ;
+//                    }
+//
+//                }
+//
+//                // docker pull image
+//                try {
+//                    this.dockerOptions.pullImage(tbHost.getIp(), tbHost.getDockerPort(), tbHost.getSshUser(),tbHost.getSshPort(), tbChain.getVersion(), true);
+//                } catch (Exception e) {
+//                    log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
+//                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+//                        "Docker pull image failed, please check the host's network or configuration of Docker.");
+//                    return;
+//                }
+//
+//                // check port
+//                Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(tbHost.getIp(), 2000, constant.getDefaultChannelPort(), constant.getDefaultP2pPort(), constant.getDefaultFrontPort(), constant.getDefaultJsonrpcPort());
+//                if(portReachable.getKey()){
+//                    log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), tbHost.getIp() );
+//                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+//                        String.format("Port:[%s] is in use.",portReachable.getValue()));
+//                    return ;
+//                }
+//
+//                // update host status only when chain is deploying
+//                TbChain newTbChain = this.tbChainMapper.getByChainName(tbChain.getChainName());
+//                if (ChainStatusEnum.DEPLOY_FAILED.getId() == newTbChain.getChainStatus()) {
+//                    // chain is already deploy failed, skip updating host status
+//                    return;
+//                }
+//                tbHost.setStatus(HostStatusEnum.INIT_SUCCESS.getId());
+//                this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_SUCCESS, "");
+//            } catch (Exception e) {
+//                log.error("Init host:[{}] with unknown error", tbHost.getIp(), e);
+//                this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED, "Init host with unknown error, check from log files.");
 //            }
 //        });
 //
-//        boolean hostCheckSuccess = checkSuccessCount.get() == CollectionUtils.size(tbHostList);
-//        // check if all host init success
-//        log.log(hostCheckSuccess ? Level.INFO: Level.ERROR,
-//            "Host check result, total:[{}], success:[{}]",
-//            CollectionUtils.size(tbHostList),checkSuccessCount.get());
 //
-//        return hostCheckSuccess;
+//        log.error("Init host timeout, cancel unfinished tasks.");
+//        if(! task.isDone()){
+//            log.error("Init host:[{}] timeout, cancel the task.", hostId );
+//            this.updateStatus(hostId, HostStatusEnum.INIT_FAILED, "Init host timeout.");
+//            task.cancel(false);
+//        }
+//
+//
+//        boolean hostInitSuccess = HostStatusEnum.successOrInitiating(tbHost.getStatus());
+//        // check if all host init success
+//        log.log(hostInitSuccess ? Level.INFO: Level.ERROR,
+//            "Host of chain:[{}] init result:[{}]",
+//            tbChain.getChainName(), tbHost);
+//
+//        return hostInitSuccess;
 //    }
+
+    /**
+     * check host memory/cpu/dependencies
+     */
+    public boolean batchCheckHostList(List<TbHost> tbHostList) throws InterruptedException {
+        // todo record node count in host
+        int nodeCount = 1;
+
+        final CountDownLatch checkHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
+        // check success count
+        AtomicInteger checkSuccessCount = new AtomicInteger(0);
+        Map<Integer, Future> taskMap = new HashedMap<>();
+
+        for (final TbHost tbHost : tbHostList) {
+            log.info("Check host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
+
+            Future<?> task = threadPoolTaskScheduler.submit(() -> {
+                try {
+                    // check if host check success
+                    if (!HostStatusEnum.hostCheckSuccess(tbHost.getStatus())) {
+                        log.info("Check host:[{}] by exec shell script:[{}]", tbHost.getIp(),
+                            constant.getNodeOperateShell());
+
+                        // exec host check shell script
+                        try {
+                            deployShellService.execHostCheck(tbHost.getIp(), tbHost.getSshPort(),
+                                    tbHost.getSshUser(), nodeCount);
+                        } catch (Exception e) {
+                            log.error("Exec host check shell script on host:[{}] failed",
+                                tbHost.getIp(), e);
+                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                "Execute host check shell script failed, please check the host's network.");
+                            return;
+                        }
+                    }
+                    // update as check success
+                    tbHost.setStatus(HostStatusEnum.CHECK_SUCCESS.getId());
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_SUCCESS, "");
+                    checkSuccessCount.incrementAndGet();
+                } catch (Exception e) {
+                    log.error("Check host:[{}] with unknown error", tbHost.getIp(), e);
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                        "Check host with unknown error, check from log files.");
+                } finally {
+                    checkHostLatch.countDown();
+                }
+            });
+            taskMap.put(tbHost.getId(), task);
+        }
+        checkHostLatch.await(constant.getExecHostCheckTimeout(), TimeUnit.MILLISECONDS);
+        log.error("Check host timeout, cancel unfinished tasks.");
+        taskMap.forEach((key, value) -> {
+            int hostId = key;
+            Future<?> task = value;
+            if (!task.isDone()) {
+                log.error("Check host:[{}] timeout, cancel the task.", hostId);
+                this.updateStatus(hostId, HostStatusEnum.CHECK_FAILED, "Check host timeout.");
+                task.cancel(false);
+            }
+        });
+
+        boolean hostCheckSuccess = checkSuccessCount.get() == CollectionUtils.size(tbHostList);
+        // check if all host init success
+        log.log(hostCheckSuccess ? Level.INFO: Level.ERROR,
+            "Host check result, total:[{}], success:[{}]",
+            CollectionUtils.size(tbHostList),checkSuccessCount.get());
+
+        return hostCheckSuccess;
+    }
+
+    /**
+     * check host memory/cpu
+     * at least 8g/4core
+     * todo get nodeCount
+     */
+    public boolean checkSingleHost(TbHost tbHost, int nodeCount) {
+        int hostId = tbHost.getId();
+        log.info("Check host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
+
+        Future<?> task = threadPoolTaskScheduler.submit(() -> {
+            try {
+                // check if host check success
+                if (!HostStatusEnum.hostCheckSuccess(tbHost.getStatus())) {
+                    log.info("Check host:[{}] by exec shell script:[{}]", tbHost.getIp(),
+                        constant.getNodeOperateShell());
+
+                    // exec host check shell script
+                    try {
+                        deployShellService.execHostCheck(tbHost.getIp(), tbHost.getSshPort(),
+                            tbHost.getSshUser(), nodeCount);
+                    } catch (Exception e) {
+                        log.error("Exec host check shell script on host:[{}] failed",
+                            tbHost.getIp(), e);
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                            "Execute host check shell script failed, please check the host's network.");
+                        return;
+                    }
+                }
+                // update as check success
+                tbHost.setStatus(HostStatusEnum.CHECK_SUCCESS.getId());
+                this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_SUCCESS, "");
+            } catch (Exception e) {
+                log.error("Check host:[{}] with unknown error", tbHost.getIp(), e);
+                this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_FAILED,
+                    "Check host with unknown error, check from log files.");
+            }
+        });
+
+        log.error("Check host timeout, cancel unfinished tasks.");
+
+        if(!task.isDone()){
+            log.error("Check host:[{}] timeout, cancel the task.", hostId );
+            tbHost.setStatus(HostStatusEnum.CHECK_FAILED.getId());
+            this.updateStatus(hostId, HostStatusEnum.CHECK_FAILED, "Check host timeout.");
+            task.cancel(false);
+        }
+        boolean hostCheckSuccess = HostStatusEnum.hostCheckSuccess(tbHost.getStatus());
+        // check if all host init success
+        log.log(hostCheckSuccess ? Level.INFO: Level.ERROR, "Host check result, host:[{}]", tbHost);
+
+        return hostCheckSuccess;
+    }
+
 }

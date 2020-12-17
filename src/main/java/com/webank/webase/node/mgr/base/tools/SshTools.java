@@ -214,9 +214,22 @@ public class SshTools {
      */
     public static Pair<Boolean,String> execDocker(String ip, String originalCommand, String sshUser,int sshPort,String privateKey) {
         log.info("Execute docker command:[{}] on host:[{}]", originalCommand, ip);
-        return exec(ip,originalCommand,sshUser,sshPort,privateKey);
+        return exec(ip, originalCommand, sshUser, sshPort, privateKey);
     }
 
+    /**
+     * Exec docker command.
+     *
+     * @param ip
+     * @param originalCommand
+     * @param sshUser
+     * @param sshPort
+     * @return
+     */
+    public static Pair<Boolean,String> execPullCdnAndLoadDocker(String ip, String originalCommand, String sshUser,int sshPort,String privateKey) {
+        log.info("Execute docker command:[{}] on host:[{}]", originalCommand, ip);
+        return exec(ip, originalCommand, sshUser, sshPort, privateKey);
+    }
     /**
      * kill an executing command.
      *
@@ -227,7 +240,7 @@ public class SshTools {
      * @param privateKey
      * @return
      */
-    public static boolean killCommand(String ip, String commandToKill, String sshUser,int sshPort,String privateKey) {
+    public static boolean killCommand(String ip, String commandToKill, String sshUser, int sshPort,String privateKey) {
         String newCommand= String.format("sudo pkill -f '%s'", commandToKill);
         log.info("Execute kill command:[{}] on host:[{}]", newCommand, ip);
         return exec(ip,newCommand,sshUser,sshPort,privateKey).getKey();

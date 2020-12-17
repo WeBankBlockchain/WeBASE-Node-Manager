@@ -171,7 +171,7 @@ public class NodeConfig {
      * @return order : <jsonrpcPort, channelPort, p2pPort>
      * @throws IOException
      */
-    public static Pair<Long, List<String>> getGroupConfig(Path nodePath,Integer groupId) throws IOException {
+    public static Pair<Long, List<String>> getGroupConfig(Path nodePath, Integer groupId) throws IOException {
         Path groupGenesisIni = PathService.getGroupGenesisPath(nodePath,groupId);
         if (Files.exists(groupGenesisIni)){
             Ini ini = new Ini(groupGenesisIni.toFile());
