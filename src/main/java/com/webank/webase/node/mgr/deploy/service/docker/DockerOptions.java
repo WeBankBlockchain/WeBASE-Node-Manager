@@ -52,7 +52,7 @@ public interface DockerOptions {
      * @param sshPort
      * @param imageTag
      */
-    public void pullImage(String ip, int dockerPort,String sshUser, int sshPort, String imageTag);
+    public void pullImage(String ip, int dockerPort, String sshUser, int sshPort, String imageTag, boolean loadFromCdn);
 
 
 

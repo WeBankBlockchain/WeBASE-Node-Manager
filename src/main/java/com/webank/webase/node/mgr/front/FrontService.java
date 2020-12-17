@@ -732,7 +732,7 @@ public class FrontService {
     }
 
     /**
-     *
+     * start front and node
      * @param nodeId
      * @return
      */
@@ -757,6 +757,7 @@ public class FrontService {
 
         log.info("Docker start container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
         try {
+            // todo run node docker in guomi way
             this.dockerOptions.run(
                     front.getFrontIp(), host.getDockerPort(), host.getSshUser(), host.getSshPort(),
                     front.getImageTag(), front.getContainerName(),
@@ -785,7 +786,7 @@ public class FrontService {
                 }else if (optionType == OptionType.MODIFY_CHAIN){
                     // check front is in group
                     Path nodePath = this.pathService.getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());
-                    Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath,encryptType);
+                    Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
                     Optional.of(groupIdSet).ifPresent(idSet -> idSet.forEach ( groupId ->{
                         List<String> list = frontInterface.getGroupPeers(groupId);
                         if(CollectionUtils.containsAny(list,front.getNodeId())){
