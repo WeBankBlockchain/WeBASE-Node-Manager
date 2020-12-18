@@ -24,6 +24,7 @@ import lombok.ToString;
 public enum DockerImageTypeEnum {
     MANUAL((byte) 0, "Download docker image and unzip manually."),
     PULL_OFFICIAL((byte) 1, "Pull image from docker registry."),
+    PULL_CDN((byte) 2, "Pull image tar from cdn and load."),
     ;
 
     private byte id;

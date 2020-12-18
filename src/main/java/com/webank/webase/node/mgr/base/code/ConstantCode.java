@@ -253,6 +253,8 @@ public class ConstantCode {
     public static final RetCode EXEC_DOCKER_CHECK_SCRIPT_ERROR = RetCode.mark(202469, "Check docker installed and running of host");
     public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM = RetCode.mark(202470, "Check host memory not enough for nodes(s)");
     public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_CPU = RetCode.mark(202471, "Check host cpu core count not enough for node(s)");
+    public static final RetCode EXEC_CHECK_SCRIPT_INTERRUPT = RetCode.mark(202472, "Host check had been interrupt");
+    public static final RetCode CONFIG_CHAIN_LOCALLY_FAIL = RetCode.mark(202475, "Fail to generate chain and front config locally");
 
 
     // add in v1.4.2

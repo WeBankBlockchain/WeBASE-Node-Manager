@@ -21,8 +21,12 @@ import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_CONFIG_LINE_E
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_FORMAT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.NODES_NUM_EXCEED_MAX_ERROR;
-import static com.webank.webase.node.mgr.base.code.ConstantCode.SAME_HOST_ERROR;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.SshTools;
+import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,21 +35,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
+import lombok.Data;
+import lombok.ToString;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.IPUtil;
-import com.webank.webase.node.mgr.base.tools.SshTools;
-import com.webank.webase.node.mgr.base.tools.ValidateUtil;
-
-import lombok.Data;
-import lombok.ToString;
-
+/**
+ * todo parse host + port to IpConfigParse
+ */
 @Data
 @ToString
 public class IpConfigParse {
@@ -94,9 +92,9 @@ public class IpConfigParse {
 
             // check ip is local
             // todo agree
-            if (IPUtil.isLocal(ipConfigParse.getIp())){
-                throw new NodeMgrException(SAME_HOST_ERROR.attach(ipConfigParse.getIp()));
-            }
+//            if (IPUtil.isLocal(ipConfigParse.getIp())){
+//                throw new NodeMgrException(SAME_HOST_ERROR.attach(ipConfigParse.getIp()));
+//            }
 
             // SSH to host ip
             if (!SshTools.connect(ipConfigParse.getIp(),sshUser,sshPort,privateKey)) {
@@ -190,6 +188,26 @@ public class IpConfigParse {
         }
         return ipConfigParse;
     }
+
+//    public String[] hostList2IpConf(List<TbHost> hostList, String agencyName) {
+//        String[] ipConf = new String[hostList.size()];
+//        for (int index = 0; index < hostList.size(); index++) {
+//            TbHost host = hostList.get(index);
+//            StringBuilder ipConfLine = new StringBuilder();
+//            // default one line one node
+//            ipConfLine.append(host.getIp() + ":1");
+//            ipConfLine.append(" ");
+//            ipConfLine.append(agencyName);
+//            ipConfLine.append(" ");
+//            // default group 1
+//            ipConfLine.append("1");
+//            ipConfLine.append("1");
+//
+//            ipConfLine += ;
+//            ipConf
+//        }
+//    }
+    
 
 }
 

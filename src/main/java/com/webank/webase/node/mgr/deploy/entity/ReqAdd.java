@@ -20,7 +20,7 @@ import javax.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 /**
- *
+ * add new node
  */
 @Data
 public class ReqAdd {

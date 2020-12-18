@@ -52,7 +52,6 @@ public class DeployShellService {
     @Autowired
     private PathService pathService;
     private static final String OPERATE_FUNCTION_CHECK = "check";
-    private static final String OPERATE_FUNCTION_DOCKER = "docker";
     private static final String OPERATE_FUNCTION_INIT = "init";
 
     /**
@@ -141,14 +140,14 @@ public class DeployShellService {
      * @param ipLines
      * @return
      */
-    public void execBuildChain(byte encryptType,
+    public void execBuildChain(int encryptType,
                                         String[] ipLines,
                                         String chainName) {
         Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
                 JsonTools.toJSONString(ipLines), chainName, ipConf.toString());
         try {
-            if ( ! Files.exists(ipConf.getParent())) {
+            if (!Files.exists(ipConf.getParent())) {
                 Files.createDirectories(ipConf.getParent());
             }
             Files.write(ipConf, Arrays.asList(ipLines));
@@ -259,8 +258,6 @@ public class DeployShellService {
 
     /**
      * check host memory/cpu/port
-     * TODO check node port, front port;
-     * todo if ssh fail, ip port user error
      * @param ip        Required.
      * @param port      Default 22.
      * @param user      Default root.
@@ -278,22 +275,25 @@ public class DeployShellService {
             if (result.getExitCode() == 4) {
                 throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_CPU.attach(result.getExecuteOut()));
             }
+            if (result.getExitCode() == 5) {
+                throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
+            }
         }
     }
 
-    /**
-     * check host docker/docker-compose hello_world
-     * @param ip        Required.
-     * @param port      Default 22.
-     * @param user      Default root.
-     * @return
-     */
-    public void execDockerCheck(String ip, int port, String user) {
-        log.info("Exec execHostCheck method for [{}@{}:{}]", user, ip, port);
-
-        ExecuteResult result = this.execHostOperate(ip, port, user, "", "", OPERATE_FUNCTION_DOCKER, 0);
-        if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
-        }
-    }
+//    /**
+//     * check host docker/docker-compose hello_world
+//     * @param ip        Required.
+//     * @param port      Default 22.
+//     * @param user      Default root.
+//     * @return
+//     */
+//    public void execDockerCheck(String ip, int port, String user) {
+//        log.info("Exec execHostCheck method for [{}@{}:{}]", user, ip, port);
+//
+//        ExecuteResult result = this.execHostOperate(ip, port, user, "", "", OPERATE_FUNCTION_DOCKER, 0);
+//        if (result.failed()) {
+//            throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
+//        }
+//    }
 }

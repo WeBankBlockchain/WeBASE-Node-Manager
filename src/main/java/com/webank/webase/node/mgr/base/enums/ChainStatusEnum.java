@@ -32,12 +32,18 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public enum ChainStatusEnum {
     INITIALIZED((byte) 0, "初始化"),
-    DEPLOYING((byte) 1, "部署中"),
-    DEPLOY_FAILED((byte) 2, "部署失败"),
+    // generate config file and scp
+    // CONFIGURING -> CONFIG_SUCCESS -> RUNNING
+    STARTING((byte) 1, "启动中"),
+//    DEPLOYING((byte) 1, "部署中"),
+    START_FAIL((byte) 2, "启动失败"),
+//    DEPLOY_FAILED((byte) 2, "部署失败"),
     RUNNING((byte) 3, "运行"),
     RESTARTING((byte) 4, "重启中"),
     UPGRADING((byte) 5, "升级中"),
     UPGRADING_FAILED((byte) 6, "升级失败"),
+    CONFIG_SUCCESS((byte) 7, "配置链成功（包含front）"),
+    CONFIG_FAIL((byte) 9, "启动失败"),
     ;
 
     private byte id;
@@ -70,7 +76,7 @@ public enum ChainStatusEnum {
 
         // check chain status
         switch (statusEnum){
-            case DEPLOYING:
+//            case DEPLOYING:
             case RUNNING:
                 return true;
             default:
@@ -92,7 +98,7 @@ public enum ChainStatusEnum {
 
         // check chain status
         switch (statusEnum){
-            case DEPLOY_FAILED:
+//            case DEPLOY_FAILED:
             case UPGRADING_FAILED:
                 return NumberUtil.PERCENTAGE_FAILED;
 
