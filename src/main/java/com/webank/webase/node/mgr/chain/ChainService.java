@@ -253,16 +253,16 @@ public class ChainService {
     }
 
     /**
-     * gen chain config and init chain db data
+     * gen chain config(cert&config) and init chain db data, generate front'yml
      * @param chainName
      * @param ipConf
      * @param tagId
      * @param rootDirOnHost
+     * @return whether gen success
      */
     @Transactional
-    public void generateChainConfig(String chainName, String[] ipConf, int tagId, String rootDirOnHost,
-                                    String webaseSignAddr, DockerImageTypeEnum dockerImageTypeEnum,
-                                    String sshUser, int sshPort, int dockerPort){
+    public boolean generateChainAndFrontConfigLocal(String chainName, String[] ipConf, int tagId, int encryptType, String rootDirOnHost,
+                                    String webaseSignAddr, String sshUser, int sshPort, int dockerPort, String agencyName) {
         log.info("Check chainName exists....");
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain != null) {
@@ -270,6 +270,7 @@ public class ChainService {
         }
 
         // check tagId existed
+        // 1.4.3 only version tag, not include encryptType
         TbConfig imageConfig = this.tbConfigMapper.selectByPrimaryKey(tagId);
         if (imageConfig == null || StringUtils.isBlank(imageConfig.getConfigValue())) {
             throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
@@ -280,22 +281,20 @@ public class ChainService {
         List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf,
                 sshUser, sshPort, constant.getPrivateKey());
 
-        // check docker image exists
-        if (DockerImageTypeEnum.MANUAL ==  dockerImageTypeEnum){
-            Set<String> ipSet = ipConfigParseList.stream().map(IpConfigParse::getIp).collect(Collectors.toSet());
-            this.hostService.checkImageExists(ipSet, sshUser, sshPort, imageConfig.getConfigValue());
-        }
-
-        byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
-                EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
+        // check docker image exists todo check before start
+//        if (DockerImageTypeEnum.MANUAL ==  dockerImageTypeEnum) {
+//            Set<String> ipSet = ipConfigParseList.stream().map(IpConfigParse::getIp).collect(Collectors.toSet());
+//            this.hostService.checkImageExists(ipSet, sshUser, sshPort, imageConfig.getConfigValue());
+//        }
 
         // exec build_chain.sh shell script
+        // generate config and cert
         deployShellService.execBuildChain(encryptType, ipConf, chainName);
 
         try {
-            // generate chain config
-            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName,ipConfigParseList,
-                    rootDirOnHost,webaseSignAddr,imageConfig,encryptType,sshUser,sshPort,dockerPort);
+            // save chain data in db, generate front's yml
+            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName, ipConfigParseList,
+                    rootDirOnHost, webaseSignAddr, imageConfig, (byte)encryptType, sshUser, sshPort, dockerPort, agencyName);
         } catch (Exception e) {
             log.error("Init chain:[{}] data error. remove generated files:[{}]",
                     chainName, this.pathService.getChainRoot(chainName), e);
@@ -307,11 +306,13 @@ public class ChainService {
             }
             throw e;
         }
+        return true;
+//        boolean success = this.chainService.updateStatus(chain.getId(), ChainStatusEnum.CONFIGURING);
 
     }
 
     /**
-     *
+     * init chain data and gen front yml
      * @param chainName
      * @param ipConfigParseList
      * @param rootDirOnHost
@@ -322,11 +323,11 @@ public class ChainService {
     @Transactional
     public void initChainDbData(String chainName, List<IpConfigParse> ipConfigParseList, String rootDirOnHost,
                                 String webaseSignAddr, TbConfig imageConfig, byte encryptType, String sshUser,
-                                int sshPort, int dockerPort){
+                                int sshPort, int dockerPort, String agencyName){
 
         // insert chain
         final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
-                imageConfig.getConfigValue(), encryptType, ChainStatusEnum.INITIALIZED, rootDirOnHost,
+                imageConfig.getConfigValue(), (byte) encryptType, ChainStatusEnum.INITIALIZED, rootDirOnHost,
                 RunTypeEnum.DOCKER, webaseSignAddr);
 
         // all host ips
@@ -335,10 +336,10 @@ public class ChainService {
         // insert agency, host , group
         ipConfigParseList.forEach((config) -> {
             // insert agency if new
-            TbAgency agency = this.agencyService.insertIfNew(config.getAgencyName(), newChain.getId(), chainName);
+            TbAgency agency = this.agencyService.insertIfNew(agencyName, newChain.getId(), chainName);
 
             // insert host if new
-            TbHost host = this.hostService.insertIfNew(agency.getId(), agency.getAgencyName(), config.getIp(), rootDirOnHost,
+            TbHost host = this.hostService.insertIfNew(config.getIp(), rootDirOnHost,
                     sshUser, sshPort, dockerPort, "");
 
             // insert group if new
@@ -361,7 +362,7 @@ public class ChainService {
 
             for (Path nodeRoot : CollectionUtils.emptyIfNull(nodePathList)) {
                 // get node properties
-                NodeConfig nodeConfig = NodeConfig.read(nodeRoot,encryptType);
+                NodeConfig nodeConfig = NodeConfig.read(nodeRoot, encryptType);
 
                 // frontPort = 5002 + indexOnHost(0,1,2,3...)
                 int frontPort = constant.getDefaultFrontPort() + nodeConfig.getHostIndex();
@@ -369,10 +370,10 @@ public class ChainService {
                 // host
                 TbHost host = newIpHostMap.get(ip);
                 // agency
-                TbAgency agency = this.tbAgencyMapper.selectByPrimaryKey(host.getAgencyId());
+                TbAgency agency = this.tbAgencyMapper.getByChainIdAndAgencyName(newChain.getId(), agencyName);
                 // insert front
                 TbFront front = TbFront.init(nodeConfig.getNodeId(), ip, frontPort,
-                        agency.getId(),agency.getAgencyName(), imageConfig.getConfigValue(),
+                        agency.getId(), agency.getAgencyName(), imageConfig.getConfigValue(),
                         RunTypeEnum.DOCKER , host.getId(), nodeConfig.getHostIndex(),
                         imageConfig.getConfigValue(), DockerOptions.getContainerName(rootDirOnHost, chainName,
                         nodeConfig.getHostIndex()), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
@@ -473,4 +474,6 @@ public class ChainService {
         log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
         return isChainRunning.get();
     }
+
+
 }
