@@ -20,7 +20,7 @@ public class DockerOptionsCmdImpl implements DockerOptions{
 
     @Override
     public boolean checkImageExists(String ip, int dockerPort, String sshUser, int sshPort, String imageTag) {
-        String image = getImageRepositoryTag(constant.getDockerRepository(),constant.getDockerRegistryMirror(),imageTag);
+        String image = getImageRepositoryTag(constant.getDockerRepository(), constant.getDockerRegistryMirror(), imageTag);
 
         String dockerListImageCommand = String.format("sudo docker images -a %s | grep -v 'IMAGE ID'",image);
 
@@ -55,19 +55,20 @@ public class DockerOptionsCmdImpl implements DockerOptions{
             // default pull from cdn
             // change imageTag to webase version
             String webaseVersion = versionProperties.getVersion();
-            String cdnUrl = String.format(constant.getWebaseDockerImageUrl(), webaseVersion);
-            // todo docker file path, after download, delete file
-            String wgetCommand = String.format("wget %s", cdnUrl);
-            // wget
-            // ssh tool
-            // docker load -i docker-fisco-webase.tar
-            // ssh tool
-            // todo check download finished
-            String dockerPullCommand = String.format("sudo docker load -i %s", constant.getDockerTarFileName());
-            // todo kill exists docker pull process
-            // SshTools.killCommand(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
-
-//            SshTools.execPullCdnAndLoadDocker(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
+            // todo download by shell, get webase-version by tag version
+//            String cdnUrl = String.format(constant.getWebaseDockerImageUrl(), webaseVersion);
+//            // todo docker file path, after download, delete file
+//            String wgetCommand = String.format("wget %s", cdnUrl);
+//            // wget
+//            // ssh tool
+//            // docker load -i docker-fisco-webase.tar
+//            // ssh tool
+//            // todo check download finished
+//            String dockerPullCommand = String.format("sudo docker load -i %s", constant.getDockerTarFileName());
+//            // todo kill exists docker pull process
+//            // SshTools.killCommand(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
+//            // todo check local image same as latest sha, ex: a2a5c41f4d87
+////            SshTools.execPullCdnAndLoadDocker(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
         }
     }
 

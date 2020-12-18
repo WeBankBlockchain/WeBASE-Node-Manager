@@ -139,12 +139,15 @@ public class ConstantProperties {
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
     private String dockerRepository= "fiscoorg/fisco-webase";
     private String dockerTarFileName= "docker-fisco-webase.tar";
-    // %s to v1.4.x
+    // %s to v1.x.x
     private String webaseDockerImageUrl = "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/releases/download/%s/docker-fisco-webase.tar";
 //    private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
     private String nodesRootTmpDir = "NODES_ROOT_TMP";
+
+    // v1.4.3
+    private String defaultAgencyName;
 
     /**
      * Docker client connect daemon ip with proxy ip.
@@ -181,6 +184,7 @@ public class ConstantProperties {
             log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
             fiscoBcosBinary = "";
         }
+        // todo add log of constant
 
     }
 

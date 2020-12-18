@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.deploy.entity;
 
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -20,10 +21,10 @@ import javax.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 /**
- *
+ * deploy batch node
  */
 @Data
-public class ReqDeploy {
+public class ReqConfigInit {
     @NotNull
     private String[] ipconf;
 
@@ -38,4 +39,9 @@ public class ReqDeploy {
     private String rootDirOnHost="/opt/fisco";
 
     private String webaseSignAddr;
+
+    private int encryptType;
+    private String agencyName = "fisco";
+    private List<Integer> hostIdList;
 }
+
