@@ -60,7 +60,7 @@ cmdname=$(basename "$0")
 usage() {
     cat << USAGE  >&2
 Usage:
-    $cmdname [-H host] [-P port] [-u user] [-p password] [-n node_root] [-c] [-d] [-h]
+    $cmdname [init|check|docker] [-H host] [-P port] [-u user] [-p password] [-n node_root] [-c] [-d] [-h]
     -H     Required, remote host.
     -P     Not required, remote port, default is 22.
     -u     Not required, remote userName, default is root.
@@ -268,7 +268,6 @@ function check() {
 }
 
 
-# check host after init
 function docker() {
     if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
         echo "Checking docker in local server ....."
@@ -306,8 +305,7 @@ case $1 in
 init)
     init;;
 check)
-    check;;
-docker)
+    check
     docker;;
 esac
 

@@ -764,8 +764,8 @@ public class FrontService {
                     PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()), front.getHostIndex());
 
             threadPoolTaskScheduler.schedule(()->{
-                // update front status
-                this.updateStatus(front.getFrontId(),success);
+                // update front status as start success
+                this.updateStatus(front.getFrontId(), success);
 
                 // update front version
                 if (StringUtils.isBlank(front.getFrontVersion())
@@ -782,7 +782,7 @@ public class FrontService {
                 }
 
                 if (optionType == OptionType.DEPLOY_CHAIN){
-                    this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.NORMAL);
+                    this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.NORMAL);
                 }else if (optionType == OptionType.MODIFY_CHAIN){
                     // check front is in group
                     Path nodePath = this.pathService.getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());

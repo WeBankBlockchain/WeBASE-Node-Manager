@@ -2,6 +2,7 @@
 
 ####### error code
 SUCCESS=0
+DOCKER_FAIL=5
 
 function checkDocker(){
   # install docker
@@ -43,7 +44,7 @@ function helloDocker() {
       then echo '2. docker run test passed!'
   else
       echo "ERROR: docker run failed-->$TEST_RESULT"
-      exit 1
+      exit ${DOCKER_FAIL}
   fi
 
 
