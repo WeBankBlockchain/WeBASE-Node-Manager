@@ -15,11 +15,15 @@
 package com.webank.webase.node.mgr.deploy.controller;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
+import com.webank.webase.node.mgr.deploy.entity.ReqAddHost;
+import com.webank.webase.node.mgr.deploy.entity.ReqCheckHost;
+import com.webank.webase.node.mgr.deploy.entity.ReqConfigInit;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.HostService;
@@ -43,12 +47,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 @RestController
 @RequestMapping("host")
-public class HostController {
+public class HostController extends BaseController {
     @Autowired
     private TbHostMapper tbHostMapper;
     @Autowired
     private HostService hostService;
-
+    @Autowired private ConstantProperties constantProperties;
     /**
      * list added host
      * @return
@@ -65,9 +69,55 @@ public class HostController {
     /**
      * Deploy by ipconf and tagId.
      */
-//    @PostMapping(value = "add")
+    @PostMapping(value = "add")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse addHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
+        try {
+            // save host info
+            this.hostService.insert(reqAddHost.getSshIp(), reqAddHost.getSshUser(), reqAddHost.getSshPort(),
+                reqAddHost.getRootDir(), HostStatusEnum.ADDED, reqAddHost.getDockerPort(), "");
+
+            return new BaseResponse(ConstantCode.SUCCESS);
+        } catch (NodeMgrException e) {
+            return new BaseResponse(e.getRetCode());
+        }
+    }
+
+    /**
+     * check mem/cpu and docker dependency
+     */
+    @PostMapping(value = "check")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse checkHostList(@RequestBody @Valid ReqCheckHost reqCheckHost,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("Start check:[{}], start:[{}]", JsonTools.toJSONString(reqCheckHost), startTime);
+
+        try {
+            // check port and  check docker
+            this.hostService.batchCheckHostList(reqCheckHost.getHostIdList());
+
+            return new BaseResponse(ConstantCode.SUCCESS);
+        } catch (NodeMgrException e) {
+            return new BaseResponse(e.getRetCode());
+        } catch (InterruptedException e) {
+            log.error("Error check ex:", e);
+            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
+        }
+    }
+
+    /**
+     *  a. check docker and cpu/mem
+     *  b. gene config locally
+     *  c. init host and scp
+     */
+//    @PostMapping(value = "init")
 //    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-//    public BaseResponse addHost(@RequestBody @Valid ReqDeploy deploy,
+//    public BaseResponse initHost(@RequestBody @Valid ReqConfigInit deploy,
 //        BindingResult result) throws NodeMgrException {
 //        checkBindResult(result);
 //        Instant startTime = Instant.now();
@@ -76,8 +126,8 @@ public class HostController {
 //        log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(deploy), startTime);
 //
 //        try {
-//            // generate node config and return shell execution log
-//            this.deployService.deployChain(deploy.getChainName(),
+//            // gen config  and init host and scp config
+//            hostService.configChainAndinitHostList(deploy.getChainName(),
 //                deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost(),
 //                deploy.getWebaseSignAddr(),deploy.getDockerImageType());
 //

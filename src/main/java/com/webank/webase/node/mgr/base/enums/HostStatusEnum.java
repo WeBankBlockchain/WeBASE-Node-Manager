@@ -87,6 +87,8 @@ public enum HostStatusEnum {
             // if init failed ,check again available
             case INIT_SUCCESS:
             case INITIATING:
+            // make sure check first, docker_check later
+            case DOCKER_SUCCESS:
             case CHECK_SUCCESS:
                 return true;
             default:

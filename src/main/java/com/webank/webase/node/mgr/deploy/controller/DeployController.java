@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.deploy.controller;
 
+import com.webank.webase.node.mgr.deploy.service.HostService;
 import java.io.IOException;
 import java.time.Instant;
 
@@ -40,7 +41,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
-import com.webank.webase.node.mgr.deploy.entity.ReqDeploy;
+import com.webank.webase.node.mgr.deploy.entity.ReqConfigInit;
 import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
 import com.webank.webase.node.mgr.deploy.entity.ReqUpgrade;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
@@ -63,15 +64,18 @@ public class DeployController extends BaseController {
     @Autowired private TbHostMapper tbHostMapper;
 
     @Autowired private DeployService deployService;
+    @Autowired private HostService hostService;
     @Autowired private ResetGroupListTask resetGroupListTask;
     @Autowired private ConstantProperties constantProperties;
 
     /**
-     * Deploy by ipconf and tagId.
+     *  a. check docker and cpu/mem
+     *  b. gene config locally
+     *  c. init host and scp
      */
-    @PostMapping(value = "init")
+    @PostMapping(value = "config")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse deployChain(@RequestBody @Valid ReqDeploy deploy,
+    public BaseResponse configChain(@RequestBody @Valid ReqConfigInit deploy,
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
@@ -81,13 +85,15 @@ public class DeployController extends BaseController {
 
         try {
             // generate node config and return shell execution log
-            this.deployService.deployChain(deploy.getChainName(),
-                    deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost(),
-                    deploy.getWebaseSignAddr(),deploy.getDockerImageType());
+            hostService.configChainAndinitHostList(deploy.getChainName(), deploy.getHostIdList(),
+                    deploy.getIpconf(), deploy.getTagId(), deploy.getEncryptType(), deploy.getRootDirOnHost(),
+                    deploy.getWebaseSignAddr(), deploy.getDockerImageType());
 
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
+        } catch (InterruptedException e) {
+            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
     }
 

@@ -44,9 +44,9 @@ public interface TbHostMapper {
             "select",
             TbHostSqlProvider.ALL_COLUMN_FIELDS,
             "from tb_host",
-            "where agency_id=#{agencyId,jdbcType=INTEGER} and ip = #{ip,jdbcType=VARCHAR}"
+            "where ip = #{ip,jdbcType=VARCHAR}"
     })
-    TbHost getByAgencyIdAndIp(@Param("agencyId") int agencyId,@Param("ip") String ip);
+    TbHost getByIp(@Param("ip") String ip);
 
 
     @Update({

@@ -16,6 +16,8 @@ package com.webank.webase.node.mgr.deploy.service;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.SAME_HOST_ERROR;
 
+import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
+import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -82,19 +84,30 @@ public class DeployService {
     /**
      * Add in v1.4.0 deploy.
      * generate chain config locally and async deploy chain
+     * @param chain
      * @param ipConf
      * @param tagId
+     * @param encryptType
      * @param rootDirOnHost
      * @param webaseSignAddr
+     * @param agencyName one agency
+     * manually or pull from hub or pull cdn
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deployChain(String chainName, String[] ipConf,
-                            int tagId, String rootDirOnHost, String webaseSignAddr, byte dockerImageType) throws NodeMgrException {
-        DockerImageTypeEnum imageTypeEnum = DockerImageTypeEnum.getById(dockerImageType);
-        if (imageTypeEnum == null){
-            throw new NodeMgrException(ConstantCode.UNKNOWN_DOCKER_IMAGE_TYPE);
+    public boolean configChain(TbChain chain, String[] ipConf,
+        int tagId, int encryptType, String rootDirOnHost, String webaseSignAddr, String agencyName)
+        throws NodeMgrException {
+        String chainName = chain.getChainName();
+        // if initChainData fail, transactional revert
+        if (chain.getChainStatus() == ChainStatusEnum.INITIALIZED.getId()) {
+            return true;
         }
+
+//        DockerImageTypeEnum imageTypeEnum = DockerImageTypeEnum.getById(dockerImageType);
+//        if (imageTypeEnum == null){
+//            throw new NodeMgrException(ConstantCode.UNKNOWN_DOCKER_IMAGE_TYPE);
+//        }
 
         if (StringUtils.isBlank(chainName)) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
@@ -106,16 +119,46 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.WEBASE_SIGN_CONFIG_ERROR);
         }
 
-        // generate config files and insert data to db
-        this.chainService.generateChainConfig(chainName, ipConf, tagId, rootDirOnHost, webaseSignAddr, imageTypeEnum,
+        // generate config files(chain's config&cert) gen front's yml
+        // and insert data to db （chain update as initialized
+        boolean genSuccess = chainService.generateChainAndFrontConfigLocal(chainName, ipConf, tagId, encryptType, rootDirOnHost, webaseSignAddr,
                 constantProperties.getSshDefaultUser(), constantProperties.getSshDefaultPort(),
-                constantProperties.getDockerDaemonPort() );
+                constantProperties.getDockerDaemonPort(), agencyName);
 
-        // init host and start node
-        this.nodeAsyncService.asyncDeployChain(chainName, OptionType.DEPLOY_CHAIN);
+        return genSuccess;
+        // todo add status of chain have node config
+        // start node and start front
+//        this.nodeAsyncService.asyncConfigChain(chainName, OptionType.DEPLOY_CHAIN);
     }
 
+    /**
+     * split config and start chain
+     * todo check chain status(all host init success) before start
+     * only config finished, start
+     * @param chainName
+     * @param optionType
+     */
+    public void startChain(String chainName, OptionType optionType) {
+        TbChain chain = this.tbChainMapper.getByChainName(chainName);
+        if (chain == null) {
+            log.error("No chain:[{}] to deploy.", chainName);
+            return;
+        }
 
+        boolean scpConfigSuccess = chain.getChainStatus() == ChainStatusEnum.CONFIG_SUCCESS.getId();
+//            boolean initSuccess = this.hostService.initHostList(chain, tbHostList, true, false);
+        if (scpConfigSuccess) {
+            // start chain
+            nodeAsyncService.asyncStartChain(chain.getId(), optionType, ChainStatusEnum.RUNNING, ChainStatusEnum.START_FAIL,
+                FrontStatusEnum.INITIALIZED, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
+
+            return;
+        } else {
+            log.error("Init host list not success:[{}]", chainName);
+            chainService.updateStatus(chain.getId(), ChainStatusEnum.START_FAIL);
+        }
+
+    }
 
     /**
      *
@@ -165,9 +208,9 @@ public class DeployService {
         }
 
         // todo agree
-        if (IPUtil.isLocal(ip)){
-            throw new NodeMgrException(SAME_HOST_ERROR);
-        }
+//        if (IPUtil.isLocal(ip)){
+//            throw new NodeMgrException(SAME_HOST_ERROR);
+//        }
 
         log.info("Add node check ip format:[{}]...", ip);
         if (!ValidateUtil.ipv4Valid(ip)) {
@@ -221,7 +264,7 @@ public class DeployService {
                     constantProperties.getDockerDaemonPort());
         } else {
             // exist host
-            agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chain.getId(), tbHostExists.getAgencyName());
+            agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chain.getId(), agencyName);
 
             int currentNodeNum = this.frontMapper.countByHostId(tbHostExists.getId());
             if (currentNodeNum + num > ConstantProperties.MAX_NODE_ON_HOST){
@@ -235,6 +278,7 @@ public class DeployService {
         TbGroup group = isNewGroup.getKey();
         boolean newGroup = isNewGroup.getValue();
 
+        // todo add node split gene config and start
         // init front and node
         try {
             // gen node cert and gen front's yml
@@ -251,7 +295,7 @@ public class DeployService {
             // init host
             // start all front on the host
             // restart related front
-            this.nodeAsyncService.asyncAddNode(chain,tbHostExists,group,OptionType.MODIFY_CHAIN,newFrontList);
+            this.nodeAsyncService.asyncAddNode(chain, tbHostExists, group, OptionType.MODIFY_CHAIN, newFrontList);
         } catch (Exception e) {
             log.error("Add node error", e);
             throw new NodeMgrException(ConstantCode.ADD_NODE_WITH_UNKNOWN_EXCEPTION_ERROR, e);

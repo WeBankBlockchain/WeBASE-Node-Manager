@@ -14,6 +14,8 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,60 +74,47 @@ public class NodeAsyncService {
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
-    /**
-     * init host and start chain
-     * @param chainName
-     */
-    @Async("deployAsyncScheduler")
-    public void asyncDeployChain(String chainName, OptionType optionType) {
-        TbChain chain = this.tbChainMapper.getByChainName(chainName);
-        if (chain == null) {
-            log.error("No chain:[{}] to deploy.", chainName);
-            return;
-        }
-        try {
-            // check chain status
-            if (ChainStatusEnum.successOrDeploying(chain.getChainStatus())){
-                log.error("Chain:[{}] is running or deploying", chainName);
-                return;
-            }
-            boolean success = this.chainService.updateStatus(chain.getId(), ChainStatusEnum.DEPLOYING);
-            if (! success) {
-                log.error("Update chain:[{}] status to DEPLOYING failed when deploying.", chainName);
-                return;
-            }
+//    /**
+//     * scp local chain config and front config to host
+//     * @param chainName
+//     */
+//    @Async("deployAsyncScheduler")
+//    public void asyncConfigChain(String chainName, OptionType optionType) {
+//        TbChain chain = this.tbChainMapper.getByChainName(chainName);
+//        if (chain == null) {
+//            log.error("No chain:[{}] to deploy.", chainName);
+//            return;
+//        }
+//
+//        try {
+//            // check chain status
+//            if (ChainStatusEnum.successOrDeploying(chain.getChainStatus())){
+//                log.error("Chain:[{}] is running or deploying", chainName);
+//                return;
+//            }
+//            boolean success = this.chainService.updateStatus(chain.getId(), ChainStatusEnum.CONFIGURING);
+//            if (!success) {
+//                log.error("Update chain:[{}] status to DEPLOYING failed when deploying.", chainName);
+//                return;
+//            }
+//
+//            // select all host to init
+//            List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
+//            if (CollectionUtils.isEmpty(tbHostList)) {
+//                log.error("Chain:[{}:{}] has no host.", chain.getId(), chain.getChainName());
+//                return;
+//            }
+//
+////
+//        } catch (Exception e) {
+//            log.error("Init host list and start chain:[{}] error", chainName, e);
+//            chainService.updateStatus(chain.getId(), ChainStatusEnum.CONFIG_FAILED);
+//        }
+//    }
 
-            // select all host to init
-            List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
-            if (CollectionUtils.isEmpty(tbHostList)) {
-                log.error("Chain:[{}:{}] has no host.", chain.getId(), chain.getChainName());
-                return;
-            }
-
-            // init host
-            // 1. install docker and docker-compose,
-            // 2. send node config to remote host
-            // 3. docker pull image
-            // todo split init from start
-            boolean deploySuccess = this.hostService.initHostList(chain, tbHostList, true, false);
-            if (deploySuccess) {
-                // start chain
-                this.asyncStartChain(chain.getId(), optionType, ChainStatusEnum.RUNNING, ChainStatusEnum.DEPLOY_FAILED,
-                        FrontStatusEnum.INITIALIZED, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
-
-                return;
-            } else {
-                log.error("Init host list failed:[{}]", chainName);
-                chainService.updateStatus(chain.getId(), ChainStatusEnum.DEPLOY_FAILED);
-            }
-        } catch (Exception e) {
-            log.error("Init host list and start chain:[{}] error", chainName, e);
-            chainService.updateStatus(chain.getId(), ChainStatusEnum.DEPLOY_FAILED);
-        }
-    }
 
     /**
-     *
+     * start chain
      * @param chainId
      */
     @Async("deployAsyncScheduler")
@@ -163,7 +152,7 @@ public class NodeAsyncService {
     }
 
     /**
-     *
+     * 扩容节点
      * @param chain
      * @param host
      * @param group
@@ -174,7 +163,7 @@ public class NodeAsyncService {
     public void asyncAddNode(TbChain chain, TbHost host, TbGroup group, OptionType optionType, List<TbFront> newFrontList) {
         try {
             int groupId = group.getGroupId();
-            boolean initSuccess = this.hostService.initHostList(chain, Arrays.asList(host), false, false);
+            boolean initSuccess = this.hostService.initHostList(chain, Arrays.asList(host.getId()), false, false);
             log.info("Init host:[{}], result:[{}]",host.getIp(), initSuccess);
             if (initSuccess) {
                 // start front and  related front
@@ -237,7 +226,7 @@ public class NodeAsyncService {
     }
 
     /**
-     *
+     * start front after
      * @param chainId
      * @param optionType
      * @param hostFrontListMap
@@ -304,6 +293,7 @@ public class NodeAsyncService {
 
         return startSuccess;
     }
+
 }
 
 
