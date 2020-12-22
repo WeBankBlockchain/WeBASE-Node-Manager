@@ -53,6 +53,7 @@ public class HostController extends BaseController {
     private TbHostMapper tbHostMapper;
     @Autowired
     private HostService hostService;
+    @Autowired
     private AnsibleService ansibleService;
     @Autowired private ConstantProperties constantProperties;
     /**
@@ -113,6 +114,18 @@ public class HostController extends BaseController {
             log.error("Error check ex:", e);
             throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
+    }
+
+    /**
+     * check ansible installed
+     */
+    @PostMapping(value = "ansible")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse checkAnsibleInstalled() throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("Start checkAnsibleInstalled start:[{}]", startTime);
+        ansibleService.checkAnsible();
+        return new BaseResponse(ConstantCode.SUCCESS);
     }
 
     /**

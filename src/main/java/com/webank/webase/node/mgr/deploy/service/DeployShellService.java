@@ -63,6 +63,7 @@ public class DeployShellService {
      * @param src
      * @param dst
      * @return
+     * todo pull by ansible
      */
     public void scp(ScpTypeEnum typeEnum, String sshUser, String ip, int sshPort, String src, String dst) {
         if (typeEnum == ScpTypeEnum.UP) {
@@ -136,7 +137,6 @@ public class DeployShellService {
 
     /**
      * build_chain.sh
-     * todo 指定多个ip port进行生成
      * @param encryptType
      * @param ipLines
      * @return
@@ -163,7 +163,7 @@ public class DeployShellService {
 
         // build_chain.sh only support docker on linux
         // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ]
-        String command = String.format("bash -e %s -S -f %s -o %s %s %s %s %s",
+        String command = String.format("bash -e %s -S -f %s -o %s %s %s %s",
                 // build_chain.sh shell script
                 constant.getBuildChainShell(),
                 // ipconf file path
@@ -171,7 +171,7 @@ public class DeployShellService {
                 // output path
                 pathService.getChainRootString(chainName),
                 // port param
-                shellPortParam,
+                //shellPortParam,
                 // guomi or standard
                 encryptType == EncryptType.SM2_TYPE ? "-g " : "",
                 // only linux supports docker model

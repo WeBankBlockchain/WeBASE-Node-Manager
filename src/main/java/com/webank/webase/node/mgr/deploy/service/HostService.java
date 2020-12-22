@@ -66,7 +66,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * added host, check->docker_check->init
+ * added host, check->generate->init+scp
+ *  a. check docker and cpu/mem(host_init shell)
+ *  b. gene config locally,
+ *  c. init host and scp(pull docker and scp config)
  */
 
 @Log4j2
@@ -128,22 +131,24 @@ public class HostService {
     public void configChainAndinitHostList(String chainName, List<DeployNodeInfo> deployNodeInfoList, String[] ipConf,
             int tagId, int encrtypType, String rootDirOnHost, String webaseSignAddr, byte dockerImageTypeEnum, String agencyName)
         throws InterruptedException {
+
         if (StringUtils.isBlank(agencyName)) {
             agencyName = constant.getDefaultAgencyName();
         }
-
+        // config locally
         boolean configSuccess = deployService.configChain(chainName, ipConf, tagId, encrtypType,
             rootDirOnHost, webaseSignAddr, agencyName);
-
+        // config success, use ansible to scp config & load image
         if (configSuccess) {
             TbChain chain = tbChainMapper.getByChainName(chainName);
             boolean pullCdn = (int)dockerImageTypeEnum == DockerImageTypeEnum.PULL_CDN.getId();
-            // select distinct host
+            // convert to host id list by distinct id
             List<Integer> hostIdList = deployNodeInfoList.stream().map(DeployNodeInfo::getHostId).collect(
                 Collectors.toList());
+            // init host: load image, scp
             boolean initSuccess = this.initHostList(chain, hostIdList, true, pullCdn);
             if (!initSuccess) {
-                throw new NodeMgrException(ConstantCode.EXEC_HOST_INIT_SCRIPT_ERROR);
+                throw new NodeMgrException(ConstantCode.ANSIBLE_INIT_HOST_CDN_SCP_NOT_ALL_SUCCESS);
             }
         } else {
             throw new NodeMgrException(ConstantCode.CONFIG_CHAIN_LOCALLY_FAIL);
@@ -152,14 +157,11 @@ public class HostService {
 
     /**
      * do host_init(host_opearate) after generate_config and host_check and docker_check
-     *  a. check docker and cpu/mem
-     *  b. gene config locally,
-     *  c. init host and scp
-     * Init hosts:
-     * 1. host_operate: check docker and docker port 3000(todo not install docker);
-     * 2. check chain's port(channel,p2p,rpc)
-     * 3. pull image and load image
-     * 4. Send node config to remote hosts;
+     *
+     * C step: Init hosts and scp
+     * 1. check chain's port(channel,p2p,rpc)
+     * 2. pull image and load image
+     * 3. Send node config to remote hosts;
      * @param tbChain
      * @param hostIdList
      * @param scpNodeConfig default true
@@ -189,8 +191,15 @@ public class HostService {
 
                             // exec host init shell script
                             try {
-                                deployShellService.execHostOperateToInit(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
-                                        PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
+//                                deployShellService.execHostOperateToInit(tbHost.getIp(), tbHost.getSshPort(), tbHost.getSshUser(),
+//                                    PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
+                                ansibleService.execHostInit(tbHost.getIp(), PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName()));
+                            }  catch (NodeMgrException e) {
+                                log.error("Exec host init shell script on host:[{}] failed",
+                                    tbHost.getIp(), e);
+                                this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                    e.getRetCode().getAttachment());
+                                return;
                             } catch (Exception e) {
                                 log.error("Exec host init shell script on host:[{}] failed", tbHost.getIp(), e);
                                 this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
@@ -203,11 +212,11 @@ public class HostService {
 
                     // check chain port
                     Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(tbHost.getIp(), 2000, constant.getDefaultChannelPort(), constant.getDefaultP2pPort(), constant.getDefaultFrontPort(), constant.getDefaultJsonrpcPort());
-                    if(portReachable.getKey()){
+                    if (portReachable.getKey()){
                         log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), tbHost.getIp() );
-                        this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_FAILED,
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
                             String.format("Port:[%s] is in use.",portReachable.getValue()));
-                        return ;
+                        return;
                     }
 
 
@@ -218,9 +227,10 @@ public class HostService {
                         String src = String.format("%s/*", pathService.getHost(tbChain.getChainName(), tbHost.getIp()).toString());
                         String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), tbChain.getChainName());
                         try {
-                            deployShellService.scp(ScpTypeEnum.UP, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), src, dst);
-                            log.info("Send files from:[{}] to:[{}@{}#{}:{}] success.",
-                                    src, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), dst);
+//                            deployShellService.scp(ScpTypeEnum.UP, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), src, dst);
+                            ansibleService.scp(ScpTypeEnum.UP, tbHost.getIp(), src, dst);
+                            log.info("Send files from:[{}] to:[{}:{}] success.",
+                                    src, tbHost.getIp(), dst);
                         } catch (Exception e) {
                             log.error("Send file to host :[{}] failed", tbHost.getIp(), e);
                             this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
@@ -466,15 +476,20 @@ public class HostService {
                         int nodeCount = Integer.parseInt(tbHost.getRemark());
                         // exec host check shell script
                         try {
-                            ansibleService.checkAnsible();
                             ansibleService.execPing(tbHost.getIp());
                             ansibleService.execHostCheckShell(tbHost.getIp(), nodeCount);
                             ansibleService.execDockerCheckShell(tbHost.getIp());
+                        } catch (NodeMgrException e) {
+                            log.error("Exec host check shell script on host:[{}] failed",
+                                tbHost.getIp(), e);
+                            this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_FAILED,
+                                e.getRetCode().getAttachment());
+                            return;
                         } catch (Exception e) {
                             log.error("Exec host check shell script on host:[{}] failed",
                                 tbHost.getIp(), e);
                             this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_FAILED,
-                                "Execute host check shell script failed, please check the host's network.");
+                                "Execute host check shell script failed, please check the host's network. detail:" + e.getMessage());
                             return;
                         }
                     }

@@ -129,7 +129,6 @@ public class DeployService {
                 constantProperties.getDockerDaemonPort(), agencyName);
 
         return genSuccess;
-        // todo add status of chain have node config
         // start node and start front
 //        this.nodeAsyncService.asyncConfigChain(chainName, OptionType.DEPLOY_CHAIN);
     }
