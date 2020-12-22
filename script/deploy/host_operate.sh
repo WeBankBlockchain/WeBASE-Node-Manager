@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# deprecated
+
 # install sshpass
 # ssh-keygen if id_rsa.pub not exists
 # upload id_rsa.pub to remote server
