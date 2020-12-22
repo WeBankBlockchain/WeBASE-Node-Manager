@@ -261,7 +261,7 @@ public class ChainService {
      * @return whether gen success
      */
     @Transactional
-    public boolean generateChainAndFrontConfigLocal(String chainName, String[] ipConf, int tagId, int encryptType, String rootDirOnHost,
+    public boolean generateConfigLocalAndInitDb(String chainName, String[] ipConf, int tagId, int encryptType, String rootDirOnHost,
                                     String webaseSignAddr, String sshUser, int sshPort, int dockerPort, String agencyName) {
         log.info("Check chainName exists....");
         TbChain chain = tbChainMapper.getByChainName(chainName);
