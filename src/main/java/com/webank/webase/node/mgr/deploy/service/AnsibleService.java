@@ -18,14 +18,18 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.IPUtil;
-import com.webank.webase.node.mgr.base.tools.SshTools;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +46,7 @@ public class AnsibleService {
      * check ansible installed
      */
     public void checkAnsible() {
+        log.info("checkAnsible installed");
         String command = "ansible --version";
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
@@ -97,7 +102,6 @@ public class AnsibleService {
         return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
     }
 
-    // todo host check
     /**
      * host_check shell
      * @param ip
@@ -108,7 +112,13 @@ public class AnsibleService {
         String command = String.format("ansible %s -m script -a \"%s -C %d\"", ip, constant.getHostCheckShell(), nodeCount);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.ANSIBLE_PING_NOT_REACH.attach(result.getExecuteOut()));
+            if (result.getExitCode() == 3) {
+                throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM.attach(result.getExecuteOut()));
+            }
+            if (result.getExitCode() == 4) {
+                throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_CPU.attach(result.getExecuteOut()));
+            }
+            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_FAIL_FOR_PARAM);
         }
     }
 
@@ -117,7 +127,10 @@ public class AnsibleService {
         String command = String.format("ansible %s -m script -a \"%s\"", ip, constant.getDockerCheckShell());
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.ANSIBLE_PING_NOT_REACH.attach(result.getExecuteOut()));
+            if (result.getExitCode() == 5) {
+                throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
+            }
+            throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
         }
     }
 
@@ -128,6 +141,11 @@ public class AnsibleService {
      * param ip        Required.
      * param chainRoot chain root on host, default is /opt/fisco/{chain_name}.
      */
+    public void execHostInit(String ip, String chainRoot) {
+        this.execHostInitScript(ip);
+        this.execCreateDir(ip, chainRoot);
+    }
+
     public void execHostInitScript(String ip) {
         log.info("execHostInitScript ip:{}", ip);
         // mkdir
@@ -152,23 +170,76 @@ public class AnsibleService {
         return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
     }
 
+
+
     /**
-     * pull image by cdn
+     * build_chain.sh
+     * @param encryptType
+     * @param ipLines
+     * @return
+     */
+    public void execBuildChainShell(int encryptType, String[] ipLines, String chainName) {
+        Path ipConf = pathService.getIpConfig(chainName);
+        log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
+            JsonTools.toJSONString(ipLines), chainName, ipConf.toString());
+        try {
+            if (!Files.exists(ipConf.getParent())) {
+                Files.createDirectories(ipConf.getParent());
+            }
+            Files.write(ipConf, Arrays.asList(ipLines));
+        } catch (IOException e) {
+            log.error("Write ip conf file:[{}] error", ipConf.toAbsolutePath().toString(), e);
+            throw new NodeMgrException(ConstantCode.SAVE_IP_CONFIG_FILE_ERROR);
+        }
+
+        // ports start
+        String shellPortParam = String.format(" -p %s,%s,%s",
+            constant.getDefaultP2pPort(), constant.getDefaultChannelPort(), constant.getDefaultJsonrpcPort());
+
+        // build_chain.sh only support docker on linux
+        // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ]
+        String command = String.format("ansible  %s -S -f %s -o %s %s %s %s %s",
+            // build_chain.sh shell script
+            constant.getBuildChainShell(),
+            // ipconf file path
+            ipConf.toString(),
+            // output path
+            pathService.getChainRootString(chainName),
+            // port param
+//            shellPortParam,
+            // guomi or standard
+            encryptType == EncryptType.SM2_TYPE ? "-g " : "",
+            // only linux supports docker model
+            SystemUtils.IS_OS_LINUX ? " -d " : "",
+            // use binary local
+            StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
+                String.format(" -e %s ", constant.getFiscoBcosBinary())
+        );
+
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
+
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.EXEC_BUILD_CHAIN_ERROR.attach(result.getExecuteOut()));
+        }
+    }
+    // todo gen agency cert
+
+    // todo gen node
+
+    /**
+     * pull and load image by cdn
      * @param ip
      * @param outputDir
      * @param webaseVersion
      * @return
      */
-    public ExecuteResult execPullDockerCdnShell(String ip, String outputDir, String webaseVersion) {
-        log.info("execHostInitScript ip:{},outputDir:{},webaseVersion:{}", ip, outputDir, webaseVersion);
+    public void execPullDockerCdnShell(String ip, String outputDir, String webaseVersion) {
+        log.info("execPullDockerCdnShell ip:{},outputDir:{},webaseVersion:{}", ip, outputDir, webaseVersion);
         String command = String.format("ansible %s -m script -a \"%s -d %s -v %s\"", ip, constant.getDockerCheckShell(), outputDir, webaseVersion);
-        return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.EXEC_BUILD_CHAIN_ERROR.attach(result.getExecuteOut()));
+        }
     }
 
-
-    // todo build chain
-
-    // todo gen agency cert
-
-    // todo gen node
 }
