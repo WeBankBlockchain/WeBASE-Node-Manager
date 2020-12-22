@@ -387,19 +387,19 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `tb_host` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
-  `agency_id` int(10) unsigned NOT NULL DEFAULT '1' COMMENT '所属机构 ID',
-  `agency_name` varchar(64) DEFAULT NULL COMMENT '所属机构名称，冗余字段',
+--  `agency_id` int(10) unsigned NOT NULL DEFAULT '1' COMMENT '所属机构 ID',
+--  `agency_name` varchar(64) DEFAULT NULL COMMENT '所属机构名称，冗余字段',
   `ip` varchar(16) NOT NULL COMMENT '主机IP',
   `ssh_user` varchar(64) NOT NULL DEFAULT 'root' COMMENT 'SSH 登录账号',
   `ssh_port` int(10) unsigned NOT NULL DEFAULT '22' COMMENT 'SSH 端口',
   `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
-  `docker_port` int(10) unsigned NOT NULL DEFAULT '2375' COMMENT 'Docker demon 的端口',
+  `docker_port` int(10) unsigned NOT NULL DEFAULT '3000' COMMENT 'Docker deamon 的端口',
   `status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '主机状态：0，新建；1，初始化；2，运行等等',
   `remark` varchar(512) DEFAULT '' COMMENT 'remark',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unq_agency_id,ip` (`agency_id`,`ip`) USING BTREE
+  UNIQUE KEY `unique_ip` (`ip`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物理主机信息';
 
 -- ----------------------------
