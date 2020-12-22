@@ -289,6 +289,7 @@ public class ChainService {
 
         // exec build_chain.sh shell script
         // generate config and cert
+        // 1.4.3 use bash generate not ansible
         deployShellService.execBuildChain(encryptType, ipConf, chainName);
 
         try {
@@ -327,7 +328,7 @@ public class ChainService {
 
         // insert chain
         final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
-                imageConfig.getConfigValue(), (byte) encryptType, ChainStatusEnum.INITIALIZED, rootDirOnHost,
+                imageConfig.getConfigValue(), encryptType, ChainStatusEnum.INITIALIZED, rootDirOnHost,
                 RunTypeEnum.DOCKER, webaseSignAddr);
 
         // all host ips

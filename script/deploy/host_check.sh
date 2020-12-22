@@ -2,9 +2,10 @@
 
 ####### error code
 SUCCESS=0
-PARAM_ERROR=2
+
 MEM_ERROR=3
 CPU_ERROR=4
+PARAM_ERROR=5
 
 ## default one host, one node+front
 node_count=1
@@ -44,7 +45,7 @@ done
 function checkMem(){
   MEM_FREE=$(awk '($1 == "MemFree:"){print $2/1048576}' /proc/meminfo 2>&1)
   # node+front needs 0.5G free
-  mem_require=$("${node_count}*0.5"bc)
+  mem_require=$(echo "${node_count}*0.5"|bc)
   if [[ $(echo "$MEM_FREE > ${mem_require}"|bc) -eq 1 ]];
   then
       echo 'free mem is ready'
