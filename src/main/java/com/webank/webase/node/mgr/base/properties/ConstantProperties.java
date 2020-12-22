@@ -116,7 +116,7 @@ public class ConstantProperties {
     private String genNodeShell = "./script/deploy/gen_node_cert.sh";
     private String scpShell = "./script/deploy/file_trans_util.sh";
     private String hostCheckShell = "./script/deploy/host_check.sh";
-    private String dockerCheckShell = "./script/deploy/docker_check.sh";
+    private String dockerCheckShell = "./script/deploy/host_docker_check.sh";
     private String dockerPullCdnShell = "./script/deploy/docker_cdn.sh";
     private String hostDockerTcpShell = "./script/deploy/host_docker_tcp.sh";
     private String hostInitShell = "./script/deploy/docker_init_shell.sh";
