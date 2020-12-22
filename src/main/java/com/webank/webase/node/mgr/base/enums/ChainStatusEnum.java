@@ -108,4 +108,28 @@ public enum ChainStatusEnum {
                 return NumberUtil.PERCENTAGE_IN_PROGRESS;
         }
     }
+
+    /**
+     * ONLY config success can run/start/start_fail
+     * @param status
+     * @return
+     */
+    public static boolean configFinished(byte status){
+        ChainStatusEnum statusEnum = ChainStatusEnum.getById(status);
+        if (statusEnum == null) {
+            log.error("Chain with unknown status:[{}].", status);
+            return false;
+        }
+
+        // check chain status
+        switch (statusEnum){
+            case STARTING:
+            case START_FAIL:
+            case RUNNING:
+            case CONFIG_SUCCESS:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

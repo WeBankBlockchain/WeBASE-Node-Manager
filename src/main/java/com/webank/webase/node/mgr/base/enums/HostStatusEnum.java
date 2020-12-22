@@ -34,9 +34,7 @@ public enum HostStatusEnum {
     INIT_SUCCESS((byte) 2, "host init success"),
     INIT_FAILED((byte) 3, "host init failed"),
     CHECK_SUCCESS((byte) 4, "host check success"),
-    CHECK_FAILED((byte) 5, "host check failed"),
-    DOCKER_SUCCESS((byte) 6, "host docker run success"),
-    DOCKER_FAIL((byte) 7, "host docker run success")
+    CHECK_FAILED((byte) 5, "host check failed")
     ;
 
     private byte id;
@@ -87,29 +85,7 @@ public enum HostStatusEnum {
             // if init failed ,check again available
             case INIT_SUCCESS:
             case INITIATING:
-            // make sure check first, docker_check later
-            case DOCKER_SUCCESS:
             case CHECK_SUCCESS:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    public static boolean hostDockerSuccess(byte status){
-        HostStatusEnum statusEnum = HostStatusEnum.getById(status);
-        if (statusEnum == null) {
-            log.error("Host with unknown status:[{}].", status);
-            return false;
-        }
-
-        // check host status
-        switch (statusEnum){
-            // if init or init ing means already checked
-            // if init failed ,check again available
-            case INIT_SUCCESS:
-            case INITIATING:
-            case DOCKER_SUCCESS:
                 return true;
             default:
                 return false;
