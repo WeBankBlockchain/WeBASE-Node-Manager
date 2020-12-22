@@ -25,12 +25,19 @@ import lombok.Data;
  */
 @Data
 public class ReqConfigInit {
+
+    /**
+     * init chain config
+     */
     @NotNull
     private String[] ipconf;
 
     @Positive
     private int tagId;
 
+    /**
+     * manually load, pull from dockerhub, pull from cdn&load
+     */
     @PositiveOrZero
     private byte dockerImageType;
 
@@ -39,9 +46,15 @@ public class ReqConfigInit {
     private String rootDirOnHost="/opt/fisco";
 
     private String webaseSignAddr;
-
-    private int encryptType;
     private String agencyName = "fisco";
-    private List<Integer> hostIdList;
+
+    /**
+     * 0, 1
+     */
+    private int encryptType;
+    /**
+     * init host info list
+     */
+    private List<DeployNodeInfo> deployNodeInfoList;
 }
 

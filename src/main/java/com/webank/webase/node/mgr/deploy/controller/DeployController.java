@@ -69,9 +69,11 @@ public class DeployController extends BaseController {
     @Autowired private ConstantProperties constantProperties;
 
     /**
+     *  @check:(in /host/check)
      *  a. check docker and cpu/mem
-     *  b. gene config locally
-     *  c. init host and scp
+     *  @config:
+     *  b. generate config locally
+     *  c. init host and scp config
      */
     @PostMapping(value = "config")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
@@ -85,10 +87,9 @@ public class DeployController extends BaseController {
 
         try {
             // generate node config and return shell execution log
-            hostService.configChainAndinitHostList(deploy.getChainName(), deploy.getHostIdList(),
+            hostService.configChainAndinitHostList(deploy.getChainName(), deploy.getDeployNodeInfoList(),
                     deploy.getIpconf(), deploy.getTagId(), deploy.getEncryptType(), deploy.getRootDirOnHost(),
-                    deploy.getWebaseSignAddr(), deploy.getDockerImageType());
-
+                    deploy.getWebaseSignAddr(), deploy.getDockerImageType(), deploy.getAgencyName());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
