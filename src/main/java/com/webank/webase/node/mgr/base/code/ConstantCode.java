@@ -254,7 +254,12 @@ public class ConstantCode {
     public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM = RetCode.mark(202470, "Check host memory not enough for nodes(s)");
     public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_CPU = RetCode.mark(202471, "Check host cpu core count not enough for node(s)");
     public static final RetCode EXEC_CHECK_SCRIPT_INTERRUPT = RetCode.mark(202472, "Host check had been interrupt");
+    public static final RetCode EXEC_CHECK_SCRIPT_FAIL_FOR_PARAM = RetCode.mark(202473, "Host check fail for inpurt param");
     public static final RetCode CONFIG_CHAIN_LOCALLY_FAIL = RetCode.mark(202475, "Fail to generate chain and front config locally");
+    // ansible
+    public static final RetCode ANSIBLE_NOT_INSTALLED = RetCode.mark(202480, "Ansible not installed!");
+    public static final RetCode ANSIBLE_FETCH_NOT_DIR = RetCode.mark(202481, "Ansible fetch not support fetch directory");
+    public static final RetCode ANSIBLE_PING_NOT_REACH = RetCode.mark(202482, "Ansible ping cannot reach target ip");
 
 
     // add in v1.4.2
