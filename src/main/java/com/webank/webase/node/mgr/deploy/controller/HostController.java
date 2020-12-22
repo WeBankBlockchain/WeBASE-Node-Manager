@@ -26,6 +26,7 @@ import com.webank.webase.node.mgr.deploy.entity.ReqCheckHost;
 import com.webank.webase.node.mgr.deploy.entity.ReqConfigInit;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import java.io.IOException;
 import java.time.Instant;
@@ -52,6 +53,7 @@ public class HostController extends BaseController {
     private TbHostMapper tbHostMapper;
     @Autowired
     private HostService hostService;
+    private AnsibleService ansibleService;
     @Autowired private ConstantProperties constantProperties;
     /**
      * list added host
@@ -76,6 +78,8 @@ public class HostController extends BaseController {
         Instant startTime = Instant.now();
         log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
+            // check before add
+            ansibleService.execPing(reqAddHost.getSshIp());
             // save host info
             this.hostService.insert(reqAddHost.getSshIp(), reqAddHost.getSshUser(), reqAddHost.getSshPort(),
                 reqAddHost.getRootDir(), HostStatusEnum.ADDED, reqAddHost.getDockerPort(), "");
@@ -85,6 +89,7 @@ public class HostController extends BaseController {
             return new BaseResponse(e.getRetCode());
         }
     }
+
 
     /**
      * check mem/cpu and docker dependency
@@ -99,9 +104,9 @@ public class HostController extends BaseController {
 
         try {
             // check port and  check docker
-            this.hostService.batchCheckHostList(reqCheckHost.getHostIdList());
+            boolean checkStatus = this.hostService.batchCheckHostList(reqCheckHost.getHostIdList());
 
-            return new BaseResponse(ConstantCode.SUCCESS);
+            return new BaseResponse(ConstantCode.SUCCESS, checkStatus);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
         } catch (InterruptedException e) {
