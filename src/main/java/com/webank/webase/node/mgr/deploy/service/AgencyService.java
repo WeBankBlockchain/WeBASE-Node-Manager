@@ -175,18 +175,19 @@ public class AgencyService {
      */
     @Transactional
     public void deleteAgencyWithNoNode(boolean deleteAgency, int agencyId){
-        TbAgency agency = this.tbAgencyMapper.selectByPrimaryKey(agencyId);
-        if (agency == null){
-            log.warn("Agency:[{}] not exists.", agencyId);
-            return;
-        }
-
-        List<TbHost> hostList = this.tbHostMapper.selectByAgencyId(agencyId);
-        if (CollectionUtils.isEmpty(hostList)
-                && deleteAgency) {
-            this.tbAgencyMapper.deleteByPrimaryKey(agencyId);
-            log.warn("Delete agency:[{}].", agencyId);
-        }
+        //todo
+//        TbAgency agency = this.tbAgencyMapper.selectByPrimaryKey(agencyId);
+//        if (agency == null){
+//            log.warn("Agency:[{}] not exists.", agencyId);
+//            return;
+//        }
+//
+//        List<TbHost> hostList = this.tbHostMapper.selectByAgencyId(agencyId);
+//        if (CollectionUtils.isEmpty(hostList)
+//                && deleteAgency) {
+//            this.tbAgencyMapper.deleteByPrimaryKey(agencyId);
+//            log.warn("Delete agency:[{}].", agencyId);
+//        }
     }
 
     /**
