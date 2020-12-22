@@ -4,7 +4,7 @@
 SUCCESS=0
 PARAM_ERROR=1
 # file not exist
-DOWNLOAD_ERROR=
+DOWNLOAD_ERROR=2
 
 #### input param
 # ex: /opt/fisco/download/v1.4.2
@@ -14,7 +14,6 @@ webase_version="v1.4.2"
 # constant param
 # url ex: https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/releases/download/v1.4.2/docker-fisco-webase.tar
 
-# TODO use ansible+javaCommand to call this
 function pullCdn() {
   tar_path="${download_path}/docker-fisco-webase.tar"
   echo "Start download docker image tar of webase:${webase_version}..."

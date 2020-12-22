@@ -9,11 +9,11 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         [ -d "/etc/docker" ] || sduo mkdir "/etc/docker";
 
         # update docker demon listen tcp on 3000
-sduo cat << EOF > "/etc/docker/daemon.json"
+sudo bash -c 'cat << EOF > "/etc/docker/daemon.json"
 {
   "hosts": ["unix:///var/run/docker.sock", "tcp://0.0.0.0:3000"]
 }
-EOF
+EOF'
         # update docker systemctl config and start docker service
         if [[ $(command -v systemctl) ]]; then
             ## update docker.service, fix https://stackoverflow.com/questions/44052054/unable-to-start-docker-after-configuring-hosts-in-daemon-json
