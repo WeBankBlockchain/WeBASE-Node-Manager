@@ -42,9 +42,9 @@ public class JavaCommandExecutor {
         Future<Integer> executeFuture = null;
         try {
             log.info("exec command:[{}]", command);
-            // String[] commandArray = { "/bin/bash", "-c", command };
-            // process = Runtime.getRuntime().exec(commandArray);
-            process = Runtime.getRuntime().exec(command);
+            String[] commandArray = { "/bin/bash", "-c", command };
+            process = Runtime.getRuntime().exec(commandArray);
+//            process = Runtime.getRuntime().exec(command);
             final Process p = process;
 
             // close process's output stream.

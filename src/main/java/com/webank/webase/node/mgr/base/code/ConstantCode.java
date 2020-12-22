@@ -260,6 +260,7 @@ public class ConstantCode {
     public static final RetCode ANSIBLE_NOT_INSTALLED = RetCode.mark(202480, "Ansible not installed!");
     public static final RetCode ANSIBLE_FETCH_NOT_DIR = RetCode.mark(202481, "Ansible fetch not support fetch directory");
     public static final RetCode ANSIBLE_PING_NOT_REACH = RetCode.mark(202482, "Ansible ping cannot reach target ip");
+    public static final RetCode ANSIBLE_INIT_HOST_CDN_SCP_NOT_ALL_SUCCESS = RetCode.mark(202483, "Ansible init host of image and scp config not all success");
 
 
     // add in v1.4.2
