@@ -26,19 +26,19 @@ public interface TbHostMapper {
     })
     List<TbHost> selectAll();
 
-    @Delete({
-            "delete from tb_host",
-            "where agency_id = #{agencyId,jdbcType=INTEGER}"
-    })
-    int deleteByAgencyId(@Param("agencyId") Integer agencyId);
+//    @Delete({
+//            "delete from tb_host",
+//            "where agency_id = #{agencyId,jdbcType=INTEGER}"
+//    })
+//    int deleteByAgencyId(@Param("agencyId") Integer agencyId);
 
-    @Select({
-            "select",
-            TbHostSqlProvider.ALL_COLUMN_FIELDS,
-            "from tb_host",
-            "where agency_id = #{agencyId,jdbcType=INTEGER}"
-    })
-    List<TbHost> selectByAgencyId(@Param("agencyId") int agencyId);
+//    @Select({
+//            "select",
+//            TbHostSqlProvider.ALL_COLUMN_FIELDS,
+//            "from tb_host",
+//            "where agency_id = #{agencyId,jdbcType=INTEGER}"
+//    })
+//    List<TbHost> selectByAgencyId(@Param("agencyId") int agencyId);
 
     @Select({
             "select",
@@ -84,15 +84,13 @@ public interface TbHostMapper {
      */
     @Select({
         "select",
-        "id, agency_id, agency_name, ip, ssh_user, ssh_port, root_dir, docker_port,remark, status, ",
+        "id, ip, ssh_user, ssh_port, root_dir, docker_port,remark, status, ",
         "create_time, modify_time",
         "from tb_host",
         "where id = #{id,jdbcType=INTEGER}"
     })
     @Results({
         @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
-        @Result(column="agency_id", property="agencyId", jdbcType=JdbcType.INTEGER),
-        @Result(column="agency_name", property="agencyName", jdbcType=JdbcType.VARCHAR),
         @Result(column="ip", property="ip", jdbcType=JdbcType.VARCHAR),
         @Result(column="ssh_user", property="sshUser", jdbcType=JdbcType.VARCHAR),
         @Result(column="ssh_port", property="sshPort", jdbcType=JdbcType.SMALLINT),
@@ -123,14 +121,13 @@ public interface TbHostMapper {
     @Options(useGeneratedKeys = true,keyProperty="id",keyColumn = "id")
     @Insert({
     "<script>",
-        "insert into tb_host (agency_id, ",
-        "agency_name, ip, ",
+        "insert into tb_host (ip, ",
         "ssh_user, ssh_port, ",
         "root_dir, docker_port, ",
         "status,remark, create_time, ",
         "modify_time)",
-        "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.agencyId,jdbcType=INTEGER}, ",
-        "#{detail.agencyName,jdbcType=VARCHAR}, #{detail.ip,jdbcType=VARCHAR}, ",
+        "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\"> ",
+        "( #{detail.ip,jdbcType=VARCHAR}, ",
         "#{detail.sshUser,jdbcType=VARCHAR}, #{detail.sshPort,jdbcType=SMALLINT}, ",
         "#{detail.rootDir,jdbcType=VARCHAR}, #{detail.dockerPort,jdbcType=SMALLINT}, ",
         "#{detail.status,jdbcType=TINYINT},#{detail.remark,jdbcType=VARCHAR}, #{detail.createTime,jdbcType=TIMESTAMP}, ",
