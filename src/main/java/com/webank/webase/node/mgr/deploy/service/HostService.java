@@ -27,6 +27,7 @@ import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
@@ -53,6 +54,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.springframework.aop.framework.AopContext;
@@ -81,6 +83,7 @@ public class HostService {
     @Autowired private PathService pathService;
     @Autowired private DeployShellService deployShellService;
     @Autowired private DeployService deployService;
+    @Autowired private AnsibleService ansibleService;
 
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
@@ -122,20 +125,28 @@ public class HostService {
     /**
      * generate: save chain config and front config in db, async generate in remote host
      */
-    public boolean configChainAndinitHostList(String chainName, List<Integer> hostIdList, String[] ipConf,
-            int tagId, int encrtypType, String rootDirOnHost, String webaseSignAddr, byte dockerImageTypeEnum)
+    public void configChainAndinitHostList(String chainName, List<DeployNodeInfo> deployNodeInfoList, String[] ipConf,
+            int tagId, int encrtypType, String rootDirOnHost, String webaseSignAddr, byte dockerImageTypeEnum, String agencyName)
         throws InterruptedException {
-        String agencyName = constant.getDefaultAgencyName();
-        TbChain chain = tbChainMapper.getByChainName(chainName);
+        if (StringUtils.isBlank(agencyName)) {
+            agencyName = constant.getDefaultAgencyName();
+        }
 
-        boolean configSuccess = deployService.configChain(chain, ipConf, tagId, encrtypType,
+        boolean configSuccess = deployService.configChain(chainName, ipConf, tagId, encrtypType,
             rootDirOnHost, webaseSignAddr, agencyName);
 
-        if (!configSuccess) {
-            throw new NodeMgrException(ConstantCode.CONFIG_CHAIN_LOCALLY_FAIL);
+        if (configSuccess) {
+            TbChain chain = tbChainMapper.getByChainName(chainName);
+            boolean pullCdn = (int)dockerImageTypeEnum == DockerImageTypeEnum.PULL_CDN.getId();
+            // select distinct host
+            List<Integer> hostIdList = deployNodeInfoList.stream().map(DeployNodeInfo::getHostId).collect(
+                Collectors.toList());
+            boolean initSuccess = this.initHostList(chain, hostIdList, true, pullCdn);
+            if (!initSuccess) {
+                throw new NodeMgrException(ConstantCode.EXEC_HOST_INIT_SCRIPT_ERROR);
+            }
         } else {
-            boolean initSuccess = this.initHostList(chain, hostIdList, true, true);
-            return initSuccess;
+            throw new NodeMgrException(ConstantCode.CONFIG_CHAIN_LOCALLY_FAIL);
         }
     }
 
@@ -157,6 +168,7 @@ public class HostService {
      */
     public boolean initHostList(TbChain tbChain, List<Integer> hostIdList, boolean scpNodeConfig, boolean pullFromCdn) throws InterruptedException {
         List<TbHost> tbHostList = this.selectDistinctHostListById(hostIdList);
+
         log.info("Start init chain:[{}:{}] hosts:[{}].", tbChain.getId(), tbChain.getChainName(), CollectionUtils.size(tbHostList));
         final CountDownLatch initHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
@@ -272,22 +284,23 @@ public class HostService {
      * @param chainId
      * @return
      */
-    public List<TbHost> selectHostListByChainId(int chainId){
+    public List<TbHost> selectHostListByChainId(int chainId) {
         // select all agencies by chainId
         List<TbAgency> tbAgencyList = this.agencyService.selectAgencyListByChainId(chainId);
-
+        // todo
+        return null;
         // select all hosts by all agencies
-        List<TbHost> tbHostList = tbAgencyList.stream()
-                .map((agency) -> tbHostMapper.selectByAgencyId(agency.getId()))
-                .filter((host) -> host != null)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(tbHostList)) {
-            log.error("Chain:[{}] has no host.", chainId);
-            return Collections.emptyList();
-        }
-        return tbHostList;
+//        List<TbHost> tbHostList = tbAgencyList.stream()
+//                .map((agency) -> tbHostMapper.selectByAgencyId(agency.getId()))
+//                .filter((host) -> host != null)
+//                .flatMap(List::stream)
+//                .collect(Collectors.toList());
+//
+//        if (CollectionUtils.isEmpty(tbHostList)) {
+//            log.error("Chain:[{}] has no host.", chainId);
+//            return Collections.emptyList();
+//        }
+//        return tbHostList;
     }
 
     /**
@@ -360,18 +373,19 @@ public class HostService {
      */
     @Transactional
     public void deleteHostByAgencyId(String chainName, int agencyId){
-        List<TbHost> hostList = this.tbHostMapper.selectByAgencyId(agencyId);
-        if(CollectionUtils.isNotEmpty(hostList)){
-            for (TbHost host : hostList) {
-                // move chain config files
-                ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),chainName,host.getSshUser(),
-                        host.getSshPort(),constant.getPrivateKey());
-            }
-        }
-
-        // delete host in batch
-        log.info("Delete host data by agency id:[{}].", agencyId);
-        this.tbHostMapper.deleteByAgencyId(agencyId);
+        // todo
+//        List<TbHost> hostList = this.tbHostMapper.selectByAgencyId(agencyId);
+//        if(CollectionUtils.isNotEmpty(hostList)){
+//            for (TbHost host : hostList) {
+//                // move chain config files
+//                ChainService.mvChainOnRemote(host.getIp(),host.getRootDir(),chainName,host.getSshUser(),
+//                        host.getSshPort(),constant.getPrivateKey());
+//            }
+//        }
+//
+//        // delete host in batch
+//        log.info("Delete host data by agency id:[{}].", agencyId);
+//        this.tbHostMapper.deleteByAgencyId(agencyId);
     }
 
     /**
@@ -424,12 +438,14 @@ public class HostService {
     }
 
     /**
-     * check host memory/cpu/dependencies(docker)
+     * check host memory/cpu/dependencies(docker, docker hello-world)
      */
     public boolean batchCheckHostList(List<Integer> hostIdList) throws InterruptedException {
+        log.info("batchCheckHostList hostIdList:{}", hostIdList);
         // save repeat time in "remark"
         List<TbHost> tbHostList = this.selectDistinctHostListById(hostIdList);
-        // store node count in
+        log.info("batchCheckHostList tbHostList:{}", tbHostList);
+
 
         final CountDownLatch checkHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
@@ -450,8 +466,10 @@ public class HostService {
                         int nodeCount = Integer.parseInt(tbHost.getRemark());
                         // exec host check shell script
                         try {
-                            deployShellService.execHostCheck(tbHost.getIp(), tbHost.getSshPort(),
-                                    tbHost.getSshUser(), nodeCount);
+                            ansibleService.checkAnsible();
+                            ansibleService.execPing(tbHost.getIp());
+                            ansibleService.execHostCheckShell(tbHost.getIp(), nodeCount);
+                            ansibleService.execDockerCheckShell(tbHost.getIp());
                         } catch (Exception e) {
                             log.error("Exec host check shell script on host:[{}] failed",
                                 tbHost.getIp(), e);
@@ -466,7 +484,7 @@ public class HostService {
                     checkSuccessCount.incrementAndGet();
                 } catch (Exception e) {
                     log.error("Check host:[{}] with unknown error", tbHost.getIp(), e);
-                    this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_FAILED,
                         "Check host with unknown error, check from log files.");
                 } finally {
                     checkHostLatch.countDown();
@@ -490,7 +508,7 @@ public class HostService {
         // check if all host init success
         log.log(hostCheckSuccess ? Level.INFO: Level.ERROR,
             "Host check result, total:[{}], success:[{}]",
-            CollectionUtils.size(tbHostList),checkSuccessCount.get());
+            CollectionUtils.size(tbHostList), checkSuccessCount.get());
 
         return hostCheckSuccess;
     }
@@ -527,6 +545,5 @@ public class HostService {
         }
         return hostList;
     }
-
 
 }

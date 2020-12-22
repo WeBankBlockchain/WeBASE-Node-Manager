@@ -84,7 +84,7 @@ public class DeployService {
     /**
      * Add in v1.4.0 deploy.
      * generate chain config locally and async deploy chain
-     * @param chain
+     * @param chainName
      * @param ipConf
      * @param tagId
      * @param encryptType
@@ -95,14 +95,8 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean configChain(TbChain chain, String[] ipConf,
-        int tagId, int encryptType, String rootDirOnHost, String webaseSignAddr, String agencyName)
-        throws NodeMgrException {
-        String chainName = chain.getChainName();
-        // if initChainData fail, transactional revert
-        if (chain.getChainStatus() == ChainStatusEnum.INITIALIZED.getId()) {
-            return true;
-        }
+    public boolean configChain(String chainName, String[] ipConf, int tagId, int encryptType,
+        String rootDirOnHost, String webaseSignAddr, String agencyName) throws NodeMgrException {
 
 //        DockerImageTypeEnum imageTypeEnum = DockerImageTypeEnum.getById(dockerImageType);
 //        if (imageTypeEnum == null){
@@ -113,6 +107,15 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
 
+        // check already init
+        TbChain chain = tbChainMapper.getByChainName(chainName);
+        // if initChainData fail, transactional revert
+        if (chain != null && chain.getChainStatus() == ChainStatusEnum.INITIALIZED.getId()) {
+            log.info("chain :{} has already been initialized", chain.getChainName());
+            return true;
+        }
+
+
         // check WeBASE Sign accessible
         if (StringUtils.isBlank(webaseSignAddr)
                 || ! NetUtils.checkAddress(webaseSignAddr, 2000) ) {
@@ -121,7 +124,7 @@ public class DeployService {
 
         // generate config files(chain's config&cert) gen front's yml
         // and insert data to db （chain update as initialized
-        boolean genSuccess = chainService.generateChainAndFrontConfigLocal(chainName, ipConf, tagId, encryptType, rootDirOnHost, webaseSignAddr,
+        boolean genSuccess = chainService.generateConfigLocalAndInitDb(chainName, ipConf, tagId, encryptType, rootDirOnHost, webaseSignAddr,
                 constantProperties.getSshDefaultUser(), constantProperties.getSshDefaultPort(),
                 constantProperties.getDockerDaemonPort(), agencyName);
 
@@ -290,7 +293,7 @@ public class DeployService {
 
             // generate(or update existed) new group(node) config files and scp to remote
             this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId,
-                    tbHostExists.getIp(), newFrontList, tbHostExists.getSshUser(),tbHostExists.getSshPort());
+                    tbHostExists.getIp(), newFrontList, tbHostExists.getSshUser(), tbHostExists.getSshPort());
 
             // init host
             // start all front on the host
