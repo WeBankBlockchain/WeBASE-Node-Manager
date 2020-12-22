@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# todo check port in use
-# todo install netstat or lsof -i:{port}
-
 ####### error code
 SUCCESS=0
 PARAM_ERROR=2
@@ -46,8 +43,9 @@ done
 # 通过剩余可用的内存+节点数，单节点至少1G
 function checkMem(){
   MEM_FREE=$(awk '($1 == "MemFree:"){print $2/1048576}' /proc/meminfo 2>&1)
-  # todo one node+front needs 0.5G
-  if [[ $(echo "$MEM_FREE > ${node_count}"|bc) -eq 1 ]];
+  # node+front needs 0.5G free
+  mem_require=$("${node_count}*0.5"bc)
+  if [[ $(echo "$MEM_FREE > ${mem_require}"|bc) -eq 1 ]];
   then
       echo 'free mem is ready'
   else
@@ -61,7 +59,7 @@ function checkCpu() {
   least_core=2
   # 3个及以上节点，需要4核
   if [[ ${node_count} -ge 3 ]]
-      then ${least_core}=4
+      then least_core=4
   fi
   # 8个及以上节点，需要8核
 #  if [[ ${node_count} -ge 8 ]]

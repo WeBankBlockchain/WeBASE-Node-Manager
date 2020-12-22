@@ -41,13 +41,8 @@ __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on
 # install sshpass
 
 debug=no
-host=
-port=22
-user=root
-password=
 node_root=/opt/fisco
-node_count=1
-use_docker_sdk=yes
+use_docker_sdk=no
 
 ####### error code
 SUCCESS=0
@@ -60,14 +55,8 @@ cmdname=$(basename "$0")
 usage() {
     cat << USAGE  >&2
 Usage:
-    $cmdname [init|check|docker] [-H host] [-P port] [-u user] [-p password] [-n node_root] [-c] [-d] [-h]
-    -H     Required, remote host.
-    -P     Not required, remote port, default is 22.
-    -u     Not required, remote userName, default is root.
-    -p     Required, password.
+    $cmdname [-n node_root] [-d] [-h]
     -n     Node config root directory, default is /opt/fisco
-    -c     Use docker command instead of using docker SDK api, default no.
-    -C     Node count in single host.
     -d     Use debug model, default no.
     -h     Show help info.
 USAGE
@@ -75,31 +64,13 @@ USAGE
 }
 
 
-while getopts H:P:u:p:n:dcC:h OPT;do
+while getopts n:dh OPT;do
     case ${OPT} in
-        H)
-            host=$OPTARG
-            ;;
-        P)
-            port=$OPTARG
-            ;;
-        u)
-            user=$OPTARG
-            ;;
-        p)
-            password=$OPTARG
-            ;;
         d)
             debug=yes
             ;;
         n)
             node_root="$OPTARG"
-            ;;
-        c)
-            use_docker_sdk="no"
-            ;;
-        c)
-            node_count=$OPTARG
             ;;
         h)
             usage
@@ -112,202 +83,39 @@ while getopts H:P:u:p:n:dcC:h OPT;do
     esac
 done
 
-echo "Init server, debug:[${debug}] : ${user}@${host}:${port}#${password}..."
-
-if [[ "${debug}"x == "yes"x ]] ; then
-  host=
-  port=22
-  user=root
-  password=
-fi
-
-
-function sshExec(){
-    ssh -q -o "StrictHostKeyChecking=no" \
-    -o "LogLevel=ERROR" \
-    -o "UserKnownHostsFile=/dev/null" \
-    -o "PubkeyAuthentication=yes" \
-    -o "PasswordAuthentication=no" \
-     "${user}"@"${host}" -p "${port}" $@
-}
-
 function init() {
-    if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
-        echo "Initialing local server ....."
+    echo "Initialing server ....."
 
-        case $(uname | tr '[:upper:]' '[:lower:]') in
-          linux*)
-            # GNU/Linux操作系统
-            # Debian(Ubuntu) or RHEL(CentOS)
-            bash -e -x "${__dir}/host_init_shell.sh"
-            status=($?)
-            if [[ $status != 0 ]] ;then
-                echo "Local init node ERROR!!!"
-                exit "$status"
-            fi
-            
-            ## config docker listen on tcp:3000
-            if [[ "${use_docker_sdk}"x == "yes"x ]] ; then
-                cat "${__dir}/host_docker_tcp.sh" | sshExec bash -e -x
-                status=($?)
-                if [[ $status != 0 ]] ;then
-                    echo "Config docker list on tcp:3000 ERROR!!!"
-                    exit "$status"
-                fi
-            fi
-            ;;
-        esac
-        echo "mkdir node root ${node_root} on local"
-        sudo mkdir -p ${node_root}
-
-        echo "Local host init SUCCESS!!! "
-    else
-        echo "Initialing remote server ....."
-#        if [[ "$password"x != ""x ]] ; then
-#          cmd="yum"
-#          # install sshpass
-#          case $(uname | tr '[:upper:]' '[:lower:]') in
-#            linux*)
-#              # GNU/Linux操作系统
-#              # Debian(Ubuntu) or RHEL(CentOS)
-#              if [[ $(command -v apt) ]]; then
-#                  cmd="apt"
-#              fi
-#
-#              # install sshpass for ssh-copy-id
-#              if [[ ! $(command -v sshpass) ]]; then
-#                  # install ufw
-#                  echo "Installing sshpass on node..."
-#                  sudo ${cmd} install -y sshpass
-#              fi
-#              ;;
-#            darwin*)
-#              cmd="brew"
-#              # install sshpass
-#              if [[ ! $(command -v sshpass) ]]; then
-#                  echo "Installing sshpass on mac ....."
-#                  ${cmd} install http://git.io/sshpass.rb
-#              fi
-#              ;;
-#            *)
-#              LOG_WARN "Unsupported Windows yet."
-#              ;;
-#          esac
-#
-#        fi
-
-        # ssh-keygen
-#        if [[ ! -f ~/.ssh/id_rsa.pub ]]; then
-#            echo "Executing ssh-keygen ...."
-#            sudo ssh-keygen -q -b 4096 -t rsa -N '' -f ~/.ssh/id_rsa
-#        fi
-#
-#
-#        if [[ "$password"x != ""x ]] ; then
-#          # scp id_rsa.pub to remote`
-#          echo "Start ssh-copy-id to remote server..."
-#          sudo sshpass -p "${password}" ssh-copy-id -i ~/.ssh/id_rsa.pub -o "StrictHostKeyChecking=no" -o "LogLevel=ERROR" -o "UserKnownHostsFile=/dev/null" ${user}@${host} -p ${port}
-#        fi
-
-        # scp node-init.sh to remote and exec
-        cat "${__dir}/host_init_shell.sh" | sshExec bash -e -x
+    case $(uname | tr '[:upper:]' '[:lower:]') in
+      linux*)
+        # GNU/Linux操作系统
+        # Debian(Ubuntu) or RHEL(CentOS)
+        bash -e -x "${__dir}/host_init_shell.sh"
         status=($?)
         if [[ $status != 0 ]] ;then
-            echo "Remote init node ERROR!!!"
+            echo "Local init node ERROR!!!"
             exit "$status"
         fi
-        
+
         ## config docker listen on tcp:3000
         if [[ "${use_docker_sdk}"x == "yes"x ]] ; then
-            cat "${__dir}/host_docker_tcp.sh" | sshExec bash -e -x
+            cat "${__dir}/host_docker_tcp.sh" | bash -e -x
             status=($?)
             if [[ $status != 0 ]] ;then
                 echo "Config docker list on tcp:3000 ERROR!!!"
                 exit "$status"
             fi
         fi
+        ;;
+    esac
+    echo "mkdir node root ${node_root} on local"
+    sudo mkdir -p ${node_root}
 
-        echo "mkdir node root ${node_root} on remote"
-        sshExec "sudo mkdir -p ${node_root} && sudo chown -R ${user} ${node_root} && sudo chgrp -R ${user} ${node_root}"
+    echo "Local host init SUCCESS!!! "
 
-        echo "Remote host init SUCCESS!!! "
-    fi
 }
+init
 
-# check host after init
-function check() {
-    if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
-        echo "Checking local server ....."
-
-        case $(uname | tr '[:upper:]' '[:lower:]') in
-          linux*)
-            # GNU/Linux操作系统
-            # Debian(Ubuntu) or RHEL(CentOS)
-            bash -e -x "${__dir}/host_check.sh"
-            status=($?)
-            if [[ $status != 0 ]] ;then
-                echo "Check local server ERROR!!!"
-                exit "$status"
-            fi
-            ;;
-        esac
-        echo "Checking local host SUCCESS!!! "
-    else
-        echo "Checking remote server ....."
-        # scp host_check.sh to remote and exec
-        # -C pass node_count to host_check.sh
-        cat "${__dir}/host_check.sh" | sshExec bash -e -x -C $node_count
-        status=($?)
-        if [[ $status != 0 ]] ;then
-            echo "Check remote server ERROR!!!"
-            exit "$status"
-        fi
-
-        echo "Check remote host SUCCESS!!! "
-    fi
-}
-
-
-function docker() {
-    if [[ "$host"x == "127.0.0.1"x || "$host"x == "localhost"x ]] ; then
-        echo "Checking docker in local server ....."
-
-        case $(uname | tr '[:upper:]' '[:lower:]') in
-          linux*)
-            # GNU/Linux操作系统
-            # Debian(Ubuntu) or RHEL(CentOS)
-            bash -e -x "${__dir}/docker_check.sh"
-            status=($?)
-            if [[ $status != 0 ]] ;then
-                echo "Check docker in local server ERROR!!!"
-                exit "$status"
-            fi
-            ;;
-        esac
-        echo "Checking docker in local host SUCCESS!!! "
-    else
-        echo "Checking docker in remote server ....."
-        # scp host_check.sh to remote and exec
-        # -C pass node_count to host_check.sh
-        cat "${__dir}/docker_check.sh" | sshExec bash -e -x
-        status=($?)
-        if [[ $status != 0 ]] ;then
-            echo "Check docker in remote server ERROR!!!"
-            exit "$status"
-        fi
-
-        echo "Check docker in remote host SUCCESS!!! "
-    fi
-}
-
-
-case $1 in
-init)
-    init;;
-check)
-    check
-    docker;;
-esac
 
 exit ${SUCCESS}
 
