@@ -42,6 +42,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * Java call shell script and system command.
+ * todo use ansible
  */
 @Log4j2
 @Component
@@ -268,6 +269,7 @@ public class DeployShellService {
         log.info("Exec execHostCheck method for [{}@{}:{}]", user, ip, port);
 
         ExecuteResult result = this.execHostOperate(ip, port, user, "", "", OPERATE_FUNCTION_CHECK, nodeCount);
+        log.info("execHostCheck result:{}", result);
         if (result.failed()) {
             if (result.getExitCode() == 3) {
                 throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM.attach(result.getExecuteOut()));
@@ -278,22 +280,9 @@ public class DeployShellService {
             if (result.getExitCode() == 5) {
                 throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
             }
+            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_FAIL_FOR_PARAM);
         }
     }
 
-//    /**
-//     * check host docker/docker-compose hello_world
-//     * @param ip        Required.
-//     * @param port      Default 22.
-//     * @param user      Default root.
-//     * @return
-//     */
-//    public void execDockerCheck(String ip, int port, String user) {
-//        log.info("Exec execHostCheck method for [{}@{}:{}]", user, ip, port);
-//
-//        ExecuteResult result = this.execHostOperate(ip, port, user, "", "", OPERATE_FUNCTION_DOCKER, 0);
-//        if (result.failed()) {
-//            throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
-//        }
-//    }
+
 }
