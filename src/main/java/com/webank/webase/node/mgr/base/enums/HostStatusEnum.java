@@ -34,7 +34,9 @@ public enum HostStatusEnum {
     INIT_SUCCESS((byte) 2, "host init success"),
     INIT_FAILED((byte) 3, "host init failed"),
     CHECK_SUCCESS((byte) 4, "host check success"),
-    CHECK_FAILED((byte) 5, "host check failed")
+    CHECK_FAILED((byte) 5, "host check failed"),
+    CONFIG_SUCCESS((byte) 6, "host config failed"),
+    CONFIG_FAIL((byte) 7, "host config failed")
     ;
 
     private byte id;
@@ -63,6 +65,8 @@ public enum HostStatusEnum {
 
         // check host status
         switch (statusEnum){
+            case CONFIG_FAIL:
+            case CONFIG_SUCCESS:
             case INIT_SUCCESS:
             case INITIATING:
                 return true;
@@ -83,6 +87,8 @@ public enum HostStatusEnum {
         switch (statusEnum){
             // if init or init ing means already checked
             // if init failed ,check again available
+            case CONFIG_FAIL:
+            case CONFIG_SUCCESS:
             case INIT_SUCCESS:
             case INITIATING:
             case CHECK_SUCCESS:

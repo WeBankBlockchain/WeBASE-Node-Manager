@@ -256,11 +256,21 @@ public class ConstantCode {
     public static final RetCode EXEC_CHECK_SCRIPT_INTERRUPT = RetCode.mark(202472, "Host check had been interrupt");
     public static final RetCode EXEC_CHECK_SCRIPT_FAIL_FOR_PARAM = RetCode.mark(202473, "Host check fail for inpurt param");
     public static final RetCode CONFIG_CHAIN_LOCALLY_FAIL = RetCode.mark(202475, "Fail to generate chain and front config locally");
+    public static final RetCode NOT_ALL_HOST_INIT_SUCCESS = RetCode.mark(202476, "Not all host init success");
+    public static final RetCode NODE_PORT_CONFIG_ERROR = RetCode.mark(202477, "Ipconf's node port config error");
+    public static final RetCode DEPLOY_INFO_NOT_MATCH_IP_CONF = RetCode.mark(202478, "Ipconf not match with deploy info list");
+    public static final RetCode DELETE_HOST_FAIL_FOR_STILL_CONTAIN_NODE = RetCode.mark(202479, "Delete host fail for host contains node(front)");
     // ansible
     public static final RetCode ANSIBLE_NOT_INSTALLED = RetCode.mark(202480, "Ansible not installed!");
     public static final RetCode ANSIBLE_FETCH_NOT_DIR = RetCode.mark(202481, "Ansible fetch not support fetch directory");
     public static final RetCode ANSIBLE_PING_NOT_REACH = RetCode.mark(202482, "Ansible ping cannot reach target ip");
     public static final RetCode ANSIBLE_INIT_HOST_CDN_SCP_NOT_ALL_SUCCESS = RetCode.mark(202483, "Ansible init host of image and scp config not all success");
+    public static final RetCode ANSIBLE_PULL_DOCKER_HUB_ERROR = RetCode.mark(202484, "Ansible pull docker hub fail");
+    public static final RetCode ANSIBLE_PULL_DOCKER_CDN_ERROR = RetCode.mark(202485, "Ansible pull docker cdn fail");
+    public static final RetCode ANSIBLE_DOCKER_COMMAND_ERROR = RetCode.mark(202486, "Ansible run docker command fail");
+    public static final RetCode ANSIBLE_COMMON_COMMAND_ERROR = RetCode.mark(202487, "Ansible exec command error");
+    public static final RetCode ANSIBLE_SCP_COPY_ERROR = RetCode.mark(202488, "Ansible exec scp(copy) error");
+    public static final RetCode ANSIBLE_SCP_FETCH_ERROR = RetCode.mark(202489, "Ansible exec scp(copy) error");
 
 
     // add in v1.4.2

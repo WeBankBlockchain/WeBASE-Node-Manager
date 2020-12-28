@@ -55,7 +55,7 @@ public class NetUtils {
      */
     public static boolean checkAddress(String address, int timeout) {
         String[] ipPortArray = address.split(":");
-        if (ArrayUtils.getLength(ipPortArray) != 2){
+        if (ArrayUtils.getLength(ipPortArray) != 2) {
             log.error("Address:[{}] format error, should be [ip:port], like 129.204.174.191:6004.", address);
             return false;
         }

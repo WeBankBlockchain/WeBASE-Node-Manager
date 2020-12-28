@@ -42,8 +42,6 @@ public enum ChainStatusEnum {
     RESTARTING((byte) 4, "重启中"),
     UPGRADING((byte) 5, "升级中"),
     UPGRADING_FAILED((byte) 6, "升级失败"),
-    CONFIG_SUCCESS((byte) 7, "配置链成功（包含front）"),
-    CONFIG_FAIL((byte) 9, "启动失败"),
     ;
 
     private byte id;
@@ -126,7 +124,6 @@ public enum ChainStatusEnum {
             case STARTING:
             case START_FAIL:
             case RUNNING:
-            case CONFIG_SUCCESS:
                 return true;
             default:
                 return false;
