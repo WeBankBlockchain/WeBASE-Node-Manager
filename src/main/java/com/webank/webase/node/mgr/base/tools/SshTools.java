@@ -88,10 +88,10 @@ public class SshTools {
                 if (status < 0) {
                     log.error("Exec command:[{}] on remote host:[{}], no exit status:[{}] not set, log:[{}].",
                             newCommand, ip, status, execLog.toString());
-                    return Pair.of(true,execLog.toString());
+                    return Pair.of(true, execLog.toString());
                 } else if (status == 0) {
                     log.info("Exec command:[{}] on remote host:[{}] success, log:[{}].", newCommand, ip, execLog.toString());
-                    return Pair.of(true,execLog.toString());
+                    return Pair.of(true, execLog.toString());
                 } else {
                     log.error("Exec command:[{}] on remote host:[{}] with error[{}], log:[{}].", newCommand, ip, status, execLog.toString());
                 }
@@ -179,7 +179,6 @@ public class SshTools {
     }
 
     /**
-     *
      * @param ip
      * @param dir
      */
@@ -190,7 +189,6 @@ public class SshTools {
     }
 
     /**
-     *
      * @param ip
      * @param src
      * @param dst

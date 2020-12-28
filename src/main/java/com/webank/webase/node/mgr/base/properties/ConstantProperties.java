@@ -103,6 +103,7 @@ public class ConstantProperties {
     private int deployType = 0;
     private String webaseSignAddress = "127.0.0.1:5004";
     private String rootDirOnHost = "/opt/fisco-webase";
+    private String downloadDirOnHost = rootDirOnHost + "/download";
 
     private boolean useDockerSDK = false;
     public int dockerDaemonPort = 3000;
@@ -117,9 +118,11 @@ public class ConstantProperties {
     private String scpShell = "./script/deploy/file_trans_util.sh";
     private String hostCheckShell = "./script/deploy/host_check.sh";
     private String dockerCheckShell = "./script/deploy/host_docker_check.sh";
-    private String dockerPullCdnShell = "./script/deploy/docker_cdn.sh";
+    private String dockerPullCdnShell = "./script/deploy/host_docker_cdn.sh";
     private String hostDockerTcpShell = "./script/deploy/host_docker_tcp.sh";
-    private String hostInitShell = "./script/deploy/docker_init_shell.sh";
+    private String hostInitShell = "./script/deploy/host_init_shell.sh";
+    // to support | & > $
+    private String ansibleCommandShell = "./script/deploy/check_image_exist.sh";
     private String privateKey = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "id_rsa";
     private String fiscoBcosBinary =  "";
 
@@ -130,7 +133,7 @@ public class ConstantProperties {
     private int defaultChannelPort = 20200;
     private int defaultFrontPort = 5002;
 
-    // timeout config
+    // timeout config todo update timeout in ansible
     private long execDockerCheckTimeout = 10 * 60 * 1000L;
     private long execHostCheckTimeout = 10 * 60 * 1000L;
     private long execHostInitTimeout = 10 * 60 * 1000L;
@@ -143,9 +146,6 @@ public class ConstantProperties {
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
     private String dockerRepository= "fiscoorg/fisco-webase";
-    private String dockerTarFileName= "docker-fisco-webase.tar";
-    // %s to v1.x.x
-    private String webaseDockerImageUrl = "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/releases/download/%s/docker-fisco-webase.tar";
 //    private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";

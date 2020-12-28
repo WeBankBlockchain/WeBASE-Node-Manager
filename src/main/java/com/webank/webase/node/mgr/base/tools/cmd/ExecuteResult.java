@@ -40,7 +40,6 @@ public class ExecuteResult {
         return exitCode == 0;
     }
     public boolean failed(){
-
         return !success();
     }
 }

@@ -35,18 +35,10 @@ public class ReqConfigInit {
     @Positive
     private int tagId;
 
-    /**
-     * manually load, pull from dockerhub, pull from cdn&load
-     */
-    @PositiveOrZero
-    private byte dockerImageType;
-
-    private String chainName = "default_chain";
-
-    private String rootDirOnHost="/opt/fisco";
+    private String chainName;
 
     private String webaseSignAddr;
-    private String agencyName = "fisco";
+    private String agencyName;
 
     /**
      * 0, 1
