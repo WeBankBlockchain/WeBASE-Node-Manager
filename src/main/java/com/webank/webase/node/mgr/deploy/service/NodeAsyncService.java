@@ -120,6 +120,7 @@ public class NodeAsyncService {
     @Async("deployAsyncScheduler")
     public void asyncStartChain(int chainId, OptionType optionType, ChainStatusEnum success, ChainStatusEnum failed ,
                                 FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess,FrontStatusEnum frontFailed ) {
+        log.info("asyncStartChain chainId:{},optionType:{}", chainId, optionType);
         final boolean startSuccess = this.restartChain(chainId, optionType, frontBefore, frontSuccess, frontFailed);
         threadPoolTaskScheduler.schedule(() ->
             chainService.updateStatus(chainId, startSuccess ? success : failed),
@@ -163,7 +164,8 @@ public class NodeAsyncService {
     public void asyncAddNode(TbChain chain, TbHost host, TbGroup group, OptionType optionType, List<TbFront> newFrontList) {
         try {
             int groupId = group.getGroupId();
-            boolean initSuccess = this.hostService.initHostList(chain, Arrays.asList(host.getId()), false, false);
+//            boolean initSuccess = this.hostService.initHostAndDocker(chain, Arrays.asList(host.getId()), false);
+            boolean initSuccess = false;
             log.info("Init host:[{}], result:[{}]",host.getIp(), initSuccess);
             if (initSuccess) {
                 // start front and  related front
@@ -210,18 +212,24 @@ public class NodeAsyncService {
      * @throws InterruptedException
      */
     private boolean restartChain(int chainId, OptionType optionType,
-                                 FrontStatusEnum before, FrontStatusEnum success,FrontStatusEnum failed ) {
-        // host of chain
-        List<TbHost> hostList = this.hostService.selectHostListByChainId(chainId);
+                                 FrontStatusEnum before, FrontStatusEnum success, FrontStatusEnum failed ) {
+        log.info("restartChain chainId:{},optionType:{}", chainId, optionType);
+//        // host of chain
+//        List<TbHost> hostList = this.hostService.selectHostListByChainId(chainId);
+//        log.info("restartChain hostList:{}", hostList);
 
         // select all front of host
-        List<TbFront> tbFrontList = hostList.stream()
-                .map(host -> this.frontMapper.selectByHostId(host.getId())).flatMap(List::stream).collect(Collectors.toList());
+//        List<TbFront> tbFrontList = hostList.stream()
+//                .map(host -> this.frontMapper.selectByHostId(host.getId())).flatMap(List::stream).collect(Collectors.toList());
+//        log.info("restartChain tbFrontList:{}", tbFrontList);
+        List<TbFront> tbFrontList = frontService.selectFrontListByChainId(chainId);
+        log.info("restartChain tbFrontList:{}", tbFrontList);
 
         // group front by host
         Map<Integer, List<TbFront>> hostFrontListMap = tbFrontList.stream().collect(Collectors.groupingBy(TbFront::getHostId));
+        log.info("restartChain hostFrontListMap:{}", hostFrontListMap);
 
-        // restart by host one by one
+        // restart by host(hostFrontMap) one by one
         return restartFrontByHost(chainId, optionType, hostFrontListMap, before, success, failed);
     }
 
@@ -234,7 +242,8 @@ public class NodeAsyncService {
      * @throws InterruptedException
      */
     private boolean restartFrontByHost(int chainId, OptionType optionType, Map<Integer, List<TbFront>> hostFrontListMap,
-                                       FrontStatusEnum before, FrontStatusEnum success,FrontStatusEnum failed) {
+                                       FrontStatusEnum before, FrontStatusEnum success, FrontStatusEnum failed) {
+        log.info("restartFrontByHost chainId:{},optionType:{},hostFrontListMap:{}", chainId, optionType, hostFrontListMap);
         final CountDownLatch startLatch = new CountDownLatch(CollectionUtils.size(hostFrontListMap));
 
         final AtomicInteger totalFrontCount = new AtomicInteger(0);
@@ -254,7 +263,7 @@ public class NodeAsyncService {
             }
         });
         maxWaitTime.addAndGet(constant.getDockerRestartPeriodTime());
-
+        // start front
         for (Integer tbHostId : CollectionUtils.emptyIfNull(hostFrontListMap.keySet())) {
             threadPoolTaskScheduler.submit(() -> {
                 List<TbFront> frontListToRestart = hostFrontListMap.get(tbHostId);

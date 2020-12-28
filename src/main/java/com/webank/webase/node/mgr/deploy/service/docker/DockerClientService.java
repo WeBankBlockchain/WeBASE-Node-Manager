@@ -20,10 +20,10 @@ public class DockerClientService{
 
     @Bean
     public DockerOptions dockerOptions() {
-        if (constantProperties.isUseDockerSDK()){
-            log.info("Use docker SDK.");
-            return new DockerOptionsSDKImpl();
-        }
+//        if (constantProperties.isUseDockerSDK()){
+//            log.info("Use docker SDK.");
+//            return new DockerOptionsSDKImpl();
+//        }
         log.info("Use docker command.");
         return new DockerOptionsCmdImpl();
     }

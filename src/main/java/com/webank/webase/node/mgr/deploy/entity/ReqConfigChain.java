@@ -24,7 +24,7 @@ import lombok.Data;
  * deploy batch node
  */
 @Data
-public class ReqConfigInit {
+public class ReqConfigChain {
 
     /**
      * init chain config

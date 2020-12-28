@@ -18,18 +18,13 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
-import java.io.IOException;
+import com.webank.webase.node.mgr.deploy.service.docker.DockerOptionsCmdImpl;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,13 +36,16 @@ public class AnsibleService {
     private ConstantProperties constant;
     @Autowired
     private PathService pathService;
+    @Autowired
+    private DockerOptionsCmdImpl dockerOptionsCmd;
 
     /**
      * check ansible installed
      */
     public void checkAnsible() {
         log.info("checkAnsible installed");
-        String command = "ansible --version";
+//        String command = "ansible --version";
+        String command = "ansible --version | grep \"ansible.cfg\"";
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
             throw new NodeMgrException(ConstantCode.ANSIBLE_NOT_INSTALLED.attach(result.getExecuteOut()));
@@ -55,13 +53,31 @@ public class AnsibleService {
     }
 
     /**
-     * check ansible ping
+     * ansible exec command
+     */
+    public void exec(String ip, String command) {
+        String ansibleCommand = String.format("ansible %s -m command -a \"%s\"", ip, command);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(ansibleCommand, constant.getExecShellTimeout());
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.ANSIBLE_COMMON_COMMAND_ERROR.attach(result.getExecuteOut()));
+        }
+    }
+
+    /**
+     * check ansible ping, code is always 0(success)
+     * @case1: ip configured in ansible, output not empty. ex: 127.0.0.1 | SUCCESS => xxxxx
+     * @case2: if ip not in ansible's host, output is empty. ex: Exec command success: code:[0], OUTPUT:[]
      */
     public void execPing(String ip) {
         // ansible webase(ip) -m ping
+//        String command = String.format("ansible %s -m command -a \"ping %s\"", ip, ip);
         String command = String.format("ansible %s -m ping", ip);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
-        if (result.failed()) {
+        // if success
+        if (result.getExecuteOut().contains(ip)) {
+            log.info("execPing success output:{}", result.getExecuteOut());
+            return;
+        } else {
             throw new NodeMgrException(ConstantCode.ANSIBLE_PING_NOT_REACH.attach(result.getExecuteOut()));
         }
     }
@@ -70,11 +86,13 @@ public class AnsibleService {
     /**
      * copy, fetch, file(dir
      * scp: copy from local to remote, fetch from remote to local
+     * todo check fetch, ex: new group, new node
      */
-    public ExecuteResult scp(ScpTypeEnum typeEnum, String ip, String src, String dst) {
+    public void scp(ScpTypeEnum typeEnum, String ip, String src, String dst) {
         log.info("scp typeEnum:{},ip:{},src:{},dst:{}", typeEnum, ip, src, dst);
         boolean isSrcDirectory = Files.isDirectory(Paths.get(src));
         boolean isSrcFile = Files.isRegularFile(Paths.get(src));
+        // exec ansible copy or fetch
         String command;
         if (typeEnum == ScpTypeEnum.UP) {
             // handle file's dir local or remote
@@ -87,20 +105,62 @@ public class AnsibleService {
                 // if src is directory, create dst on remote
                 this.execCreateDir(ip, dst);
             }
-            command = String.format("ansible %s -m copy -a \"src=%s dest=%s\"", ip, src, dst);
-
+            // synchronized cost less time
+//            command = String.format("ansible %s -m copy -a \"src=%s dest=%s\"", ip, src, dst);
+            command = String.format("ansible %s -m synchronize -a \"src=%s dest=%s\"", ip, src, dst);
+            log.info("exec scp copy command: [{}]", command);
+            ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+            if (result.failed()) {
+                throw new NodeMgrException(ConstantCode.ANSIBLE_SCP_COPY_ERROR.attach(result.getExecuteOut()));
+            }
         } else { // DOWNLOAD
             // fetch file from remote
             if (isSrcDirectory) {
+                // fetch not support fetch directory
                 log.error("ansible fetch not support fetch directory!");
                 throw new NodeMgrException(ConstantCode.ANSIBLE_FETCH_NOT_DIR);
             }
-            command = String.format("ansible %s -m fetch -a \"src=%s dest=%s\"", ip, src, dst);
+            // use synchronize, mode=pull
+            // command = String.format("ansible %s -m fetch -a \"src=%s dest=%s\"", ip, src, dst);
+            command = String.format("ansible %s -m synchronize -a \"mode=pull src=%s dest=%s\"", ip, src, dst);
+            log.info("exec scp copy command: [{}]", command);
+            ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+            if (result.failed()) {
+                throw new NodeMgrException(ConstantCode.ANSIBLE_SCP_COPY_ERROR.attach(result.getExecuteOut()));
+            }
         }
-        log.info("exec scp command: [{}]", command);
-        // exec ansible copy or fetch
-        return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
     }
+
+    // optimize fetch
+//    command = String.format("ansible %s -m fetch -a \"src=%s dest=%s\"", ip, src, dst);
+//            log.info("exec scp fetch command: [{}]", command);
+//    ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+//            if (result.failed()) {
+//        throw new NodeMgrException(ConstantCode.ANSIBLE_SCP_FETCH_ERROR.attach(result.getExecuteOut()));
+//    }
+//            log.info("scp download fetch success, now use JavaCommander to mv file and delete duplicated directory");
+//            if (!dst.endsWith("/")) {
+//        dst = dst + "/";
+//    }
+//    String localFetchDir = dst + ip + src;
+//            log.info("fetch localFetchDir:{}", localFetchDir);
+//    // ex: src is remote's "/data/1.txt", dest is local "/backup", host is 127.0.0.1
+//    // ex: after fetch, file would save in local "/backup/127.0.0.1/data", concat locall and hostIp(domain) and remote dir
+//
+//    // mv /backup/{ip}/data/1.txt /backup/1.txt
+//    String mvFileCommand = String.format("mv %s/* %s", localFetchDir, dst);
+//            log.info("fetch mvFileCommand:{}", mvFileCommand);
+//    ExecuteResult mvResult = JavaCommandExecutor.executeCommand(mvFileCommand, constant.getExecShellTimeout());
+//            if (mvResult.failed()) {
+//        throw new NodeMgrException(ConstantCode.ANSIBLE_SCP_FETCH_ERROR.attach(result.getExecuteOut()));
+//    }
+//    // rm /backup/{ip}
+//    String rmFileCommand = String.format("rm -r %s/", dst + ip);
+//            log.info("fetch rmFileCommand:{}", rmFileCommand);
+//    ExecuteResult rmResult = JavaCommandExecutor.executeCommand(rmFileCommand, constant.getExecShellTimeout());
+//            if (rmResult.failed()) {
+//        throw new NodeMgrException(ConstantCode.ANSIBLE_SCP_FETCH_ERROR.attach(result.getExecuteOut()));
+//    }
 
     /**
      * host_check shell
@@ -148,8 +208,7 @@ public class AnsibleService {
 
     public void execHostInitScript(String ip) {
         log.info("execHostInitScript ip:{}", ip);
-        // mkdir
-        String command = String.format("ansible %s -m command -a \"%s\"", ip, constant.getHostInitShell());
+        String command = String.format("ansible %s -m script -a \"%s\"", ip, constant.getHostInitShell());
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
             throw new NodeMgrException(ConstantCode.ANSIBLE_PING_NOT_REACH.attach(result.getExecuteOut()));
@@ -163,68 +222,28 @@ public class AnsibleService {
      * @return
      */
     public ExecuteResult execCreateDir(String ip, String dir) {
-        log.info("execHostInitScript ip:{},dir:{}", ip, dir);
-        // mkdir
-        String mkdirCommand = String.format("sudo mkdir -p %s", dir);
+        log.info("execCreateDir ip:{},dir:{}", ip, dir);
+        // mkdir todo not use sudo to make dir, check access
+//        String mkdirCommand = String.format("sudo mkdir -p %s", dir);
+        String mkdirCommand = String.format("mkdir -p %s", dir);
         String command = String.format("ansible %s -m command -a \"%s\"", ip, mkdirCommand);
         return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
     }
 
+    /* docker operation: checkImageExists, pullImage run stop */
 
+    public boolean checkImageExists(String ip, String imageFullName) {
+        log.info("checkImageExists ip:{},imageFullName:{}", ip, imageFullName);
 
-    /**
-     * build_chain.sh
-     * @param encryptType
-     * @param ipLines
-     * @return
-     */
-    public void execBuildChainShell(int encryptType, String[] ipLines, String chainName) {
-        Path ipConf = pathService.getIpConfig(chainName);
-        log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
-            JsonTools.toJSONString(ipLines), chainName, ipConf.toString());
-        try {
-            if (!Files.exists(ipConf.getParent())) {
-                Files.createDirectories(ipConf.getParent());
-            }
-            Files.write(ipConf, Arrays.asList(ipLines));
-        } catch (IOException e) {
-            log.error("Write ip conf file:[{}] error", ipConf.toAbsolutePath().toString(), e);
-            throw new NodeMgrException(ConstantCode.SAVE_IP_CONFIG_FILE_ERROR);
-        }
-
-        // ports start
-        String shellPortParam = String.format(" -p %s,%s,%s",
-            constant.getDefaultP2pPort(), constant.getDefaultChannelPort(), constant.getDefaultJsonrpcPort());
-
-        // build_chain.sh only support docker on linux
-        // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ]
-        String command = String.format("ansible  %s -S -f %s -o %s %s %s %s %s",
-            // build_chain.sh shell script
-            constant.getBuildChainShell(),
-            // ipconf file path
-            ipConf.toString(),
-            // output path
-            pathService.getChainRootString(chainName),
-            // port param
-//            shellPortParam,
-            // guomi or standard
-            encryptType == EncryptType.SM2_TYPE ? "-g " : "",
-            // only linux supports docker model
-            SystemUtils.IS_OS_LINUX ? " -d " : "",
-            // use binary local
-            StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
-                String.format(" -e %s ", constant.getFiscoBcosBinary())
-        );
-
-        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
-
-        if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.EXEC_BUILD_CHAIN_ERROR.attach(result.getExecuteOut()));
-        }
+//        String dockerListImageCommand = String.format("sudo docker images -a %s | grep -v 'IMAGE ID'", imageFullName);
+        String command = String.format("ansible %s -m script -a \"%s -i %s\"", ip, constant.getAnsibleCommandShell(), imageFullName);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getDockerPullTimeout());
+        return result.success();
+//        if (StringUtils.isNotBlank(result.getExecuteOut())) {
+//            return true;
+//        }
+//        return false;
     }
-    // todo gen agency cert
-
-    // todo gen node
 
     /**
      * pull and load image by cdn
@@ -233,13 +252,47 @@ public class AnsibleService {
      * @param webaseVersion
      * @return
      */
-    public void execPullDockerCdnShell(String ip, String outputDir, String webaseVersion) {
-        log.info("execPullDockerCdnShell ip:{},outputDir:{},webaseVersion:{}", ip, outputDir, webaseVersion);
-        String command = String.format("ansible %s -m script -a \"%s -d %s -v %s\"", ip, constant.getDockerCheckShell(), outputDir, webaseVersion);
-        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+    public void execPullDockerCdnShell(String ip, String outputDir, String imageTag, String webaseVersion) {
+        log.info("execPullDockerCdnShell ip:{},outputDir:{},imageTag:{},webaseVersion:{}", ip, outputDir, imageTag, webaseVersion);
+        boolean imageExist = this.checkImageExists(ip, imageTag);
+        if (imageExist) {
+            log.info("image of {} already exist, jump over pull", imageTag);
+            return;
+        }
+        String command = String.format("ansible %s -m script -a \"%s -d %s -v %s\"", ip, constant.getDockerPullCdnShell(), outputDir, webaseVersion);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getDockerPullTimeout());
         if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.EXEC_BUILD_CHAIN_ERROR.attach(result.getExecuteOut()));
+            throw new NodeMgrException(ConstantCode.ANSIBLE_PULL_DOCKER_CDN_ERROR.attach(result.getExecuteOut()));
         }
     }
+
+
+    public void execDocker(String ip, String dockerCommand) {
+        String command = String.format("ansible %s -m command -a \"%s\"", ip, dockerCommand);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getDockerRestartPeriodTime());
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.ANSIBLE_DOCKER_COMMAND_ERROR.attach(result.getExecuteOut()));
+        }
+    }
+
+    /**
+     * mv dir on remote
+     */
+    public void mvDirOnRemote(String ip, String src, String dst){
+        if (StringUtils.isNoneBlank(ip, src, dst)) {
+            // String rmCommand = String.format("sudo mv -fv %s %s", src, dst);
+            // todo rm sudo
+            String rmCommand = String.format("sudo mv -fv %s %s", src, dst);
+            log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
+            this.exec(ip, rmCommand);
+        }
+    }
+
+//    public static void createDirOnRemote(String ip, String dir, String sshUser, int sshPort,String privateKey){
+//        exec(ip, String.format("sudo mkdir -p %s", dir));
+//        exec(ip, String.format("sudo chown -R %s %s ", sshUser,dir));
+//        exec(ip, String.format("sudo chgrp -R %s %s ", sshUser,dir));
+//    }
+
 
 }
