@@ -18,13 +18,17 @@ function pullCdn() {
   tar_path="${download_path}/docker-fisco-webase.tar"
   echo "Start download docker image tar of webase:${webase_version}..."
   # check exist
-  if [[ -f "${tar_path}" ]];then
-    echo "Move existed tar to old one"
-    mv $tar_path "${tar_path}_old"
+#  if [[  -f "${tar_path}" ]];then
+#    echo "Move existed tar to old one"
+#    mv $tar_path "${tar_path}_old"
+#  fi
+  if [[ ! -f "${tar_path}" ]];then
+    # download
+    wget -P "$download_path" "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/releases/download/${webase_version}/docker-fisco-webase.tar"
+    echo "Download finish in:[${tar_path}]."
+  else
+    echo "File exist, skip download."
   fi
-  # download
-  wget -P "$download_path" "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/releases/download/${webase_version}/docker-fisco-webase.tar"
-  echo "Download finish in:[${tar_path}]."
 }
 
 function loadTar() {
@@ -61,7 +65,7 @@ USAGE
 while getopts d:v:h OPT;do
     case ${OPT} in
         d)
-            node_count="$OPTARG"
+            download_path="$OPTARG"
             ;;
         v)
             webase_version="$OPTARG"
