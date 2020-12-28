@@ -53,6 +53,13 @@ public interface FrontMapper {
                      @Param("status")int status,
                      @Param("modifyTime")LocalDateTime now);
 
+    int updateDeployStatus(@Param("frontId") int frontId,
+                     @Param("deployStatus")int deployStatus,
+                     @Param("modifyTime")LocalDateTime now);
+
+    TbFront getByIpPort(@Param("frontIp")String frontIp, @Param("frontPort")int frontPort);
+
+
     @Select({
             "select  max(host_index) from tb_front",
             "where host_id = #{hostId,jdbcType=INTEGER}"

@@ -71,6 +71,10 @@ public class TbFront {
 
     private Integer chainId;
     private String chainName;
+    /**
+     * v1.4.3 deploy status, 0-added, 1-check success, 2- check fail, 3-running
+     */
+    private Integer deployStatus;
 
     public static TbFront init(
             String nodeId, String ip, int port,
@@ -78,7 +82,7 @@ public class TbFront {
             RunTypeEnum runTypeEnum, int hostId, int hostIndex,
             String imageTag, String containerName , int jsonrpcPort,
             int p2pPort, int channelPort, int chainId,
-            String chainName, FrontStatusEnum frontStatusEnum ){
+            String chainName, FrontStatusEnum frontStatusEnum){
 
         String frontClientVersion = StringUtils.removeStart(clientVersion, "v");
 
