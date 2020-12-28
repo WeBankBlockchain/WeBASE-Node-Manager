@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.group;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
 import com.webank.webase.node.mgr.base.enums.DeployType;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -137,6 +138,7 @@ public class GroupService {
     private ConstantProperties constantProperties;
 
     @Autowired private ChainService chainService;
+    @Autowired private AnsibleService ansibleService;
 
     public static final String RUNNING_GROUP = "RUNNING";
     public static final String OPERATE_START_GROUP = "start";
@@ -1061,17 +1063,19 @@ public class GroupService {
         // path pattern: /host.getRootDir/chain_name
         // ex: (in the remote host) /opt/fisco/chain1
         String remoteChainPath = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
+        // todo ".*" fit in ansible
         // ex: (in the remote host) /opt/fisco/chain1/node0/conf/group.1001.*
-        String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.*",
-                remoteChainPath, nodeIndex, generateGroupId);
+        // String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.*", remoteChainPath, nodeIndex, generateGroupId);
+        String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.ini", remoteChainPath, nodeIndex, generateGroupId);
+        String remoteGroupGenesisSource = String.format("%s/node%s/conf/group.%s.genesis", remoteChainPath, nodeIndex, generateGroupId);
         // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
         String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
         String localDst = String.format("%s/conf/", localNodePath, generateGroupId);
         // copy group config files to local node's conf dir
-        deployShellService.scp(ScpTypeEnum.DOWNLOAD,tbHost.getSshUser(),
-                tbHost.getIp(), tbHost.getSshPort(), remoteGroupConfSource, localDst);
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupConfSource, localDst);
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupGenesisSource, localDst);
     }
 
 
@@ -1105,8 +1109,7 @@ public class GroupService {
             }
         }
         // copy group status file to local node's conf dir
-        deployShellService.scp(ScpTypeEnum.DOWNLOAD,  tbHost.getSshUser(),
-                tbHost.getIp(), tbHost.getSshPort(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
     }
 
 //    private void pullGroupFile(int groupId,TbFront tbFront){
@@ -1130,7 +1133,7 @@ public class GroupService {
      */
     public void generateNewNodesGroupConfigsAndScp(
            boolean newGroup, TbChain chain, int groupId, String ip,
-           List<TbFront> newFrontList, String sshUser, int sshPort) throws IOException {
+           List<TbFront> newFrontList) throws IOException {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
         long now = System.currentTimeMillis();
@@ -1165,11 +1168,11 @@ public class GroupService {
             String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
             String dst = PathService.getChainRootOnHost(chain.getRootDir(),chainName);
 
-            log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, sshUser, ip, sshPort, dst);
+            log.info("Send files from:[{}] to:[{}:{}].", src, ip, dst);
             try {
-                this.deployShellService.scp(ScpTypeEnum.UP,sshUser, ip,sshPort, src, dst);
+                ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
             } catch (Exception e) {
-                log.info("Send files from:[{}] to:[{}@{}#{}:{}] error.", src, sshUser, ip, sshPort, dst, e);
+                log.info("Send files from:[{}] to:[{}:{}] error.", src, ip, dst, e);
             }
         }
     }

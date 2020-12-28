@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -65,6 +66,8 @@ public class NodeService {
     private ChainService chainService;
     @Autowired
     private ConstantProperties constantProperties;
+    @Autowired
+    private AnsibleService ansibleService;
     /**
      * update front status
      */
@@ -442,17 +445,13 @@ public class NodeService {
     }
 
     /**
-     * @param ip
-     * @param rooDirOnHost
-     * @param chainName
-     * @param hostIndex
-     * @param nodeId
+     * mv one node on host
+     * @related with hostService mvHostChainDirByIdList(batch mv)
      */
-    public static void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId,
-            String sshUser, int sshPort,String privateKey) {
+    public void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId) {
         // create /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss as a parent
         String chainDeleteRootOnHost = PathService.getChainDeletedRootOnHost(rooDirOnHost, chainName);
-        SshTools.createDirOnRemote(ip, chainDeleteRootOnHost,sshUser,sshPort,privateKey);
+        ansibleService.execCreateDir(ip, chainDeleteRootOnHost);
 
         // e.g. /opt/fisco/default_chain
         String chainRootOnHost = PathService.getChainRootOnHost(rooDirOnHost, chainName);
@@ -463,6 +462,6 @@ public class NodeService {
         String dst_nodeDeletedRootOnHost =
                 PathService.getNodeDeletedRootOnHost(chainDeleteRootOnHost, nodeId);
         // move
-        SshTools.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost,sshUser,sshPort,privateKey);
+        ansibleService.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
     }
 }
