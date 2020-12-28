@@ -16,16 +16,15 @@ package com.webank.webase.node.mgr.deploy.entity;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.AGENCY_NAME_CONFIG_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.GROUPS_CONFIG_ERROR;
-import static com.webank.webase.node.mgr.base.code.ConstantCode.HOST_CONNECT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_CONFIG_LINE_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_FORMAT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.NODES_NUM_EXCEED_MAX_ERROR;
+import static com.webank.webase.node.mgr.base.code.ConstantCode.NODE_PORT_CONFIG_ERROR;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,9 +40,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * todo parse host + port to IpConfigParse
- */
 @Data
 @ToString
 public class IpConfigParse {
@@ -52,6 +48,9 @@ public class IpConfigParse {
     private int num;
     private String agencyName;
     private Set<Integer> groupIdSet;
+    private int channelPort;
+    private int p2pPort;
+    private int rpcPort;
 
     /**
      * Validate ipConf.
@@ -60,8 +59,7 @@ public class IpConfigParse {
      * @return List<ConfigLine> entity of config for build_chain.
      * @throws NodeMgrException
      */
-    public static List<IpConfigParse> parseIpConf(String[] ipConf,
-                                                  String sshUser, int sshPort, String privateKey) throws NodeMgrException {
+    public static List<IpConfigParse> parseIpConf(String[] ipConf) throws NodeMgrException {
         if (ArrayUtils.isEmpty(ipConf)){
             throw new NodeMgrException(ConstantCode.IP_CONF_PARAM_NULL_ERROR);
         }
@@ -97,10 +95,10 @@ public class IpConfigParse {
 //            }
 
             // SSH to host ip
-            if (!SshTools.connect(ipConfigParse.getIp(),sshUser,sshPort,privateKey)) {
-                // cannot SSH to IP
-                throw new NodeMgrException(HOST_CONNECT_ERROR.attach(ipConfigParse.getIp()));
-            }
+//            if (!SshTools.connect(ipConfigParse.getIp(), sshUser, sshPort, privateKey)) {
+//                // cannot SSH to IP
+//                throw new NodeMgrException(HOST_CONNECT_ERROR.attach(ipConfigParse.getIp()));
+//            }
 
             if (ipConfigParse.getNum() <= 0) {
                 throw new NodeMgrException(IP_NUM_ERROR.attach(line));
@@ -134,7 +132,7 @@ public class IpConfigParse {
 
     /**
      *
-     * @param line
+     * @param line 127.0.0.1:1 agency1 1,2 20200,30300,8645
      * @return
      * @throws NodeMgrException
      */
@@ -186,8 +184,24 @@ public class IpConfigParse {
         } catch (Exception e) {
             throw new NodeMgrException(GROUPS_CONFIG_ERROR.attach(configArray[2]), e);
         }
+
+        // 20200,30300,8645
+        String[] nodePortArray = configArray[3].split(",");
+        if (ArrayUtils.getLength(nodePortArray) < 3) {
+            throw new NodeMgrException(IP_CONFIG_LINE_ERROR.attach(newLine));
+        }
+        try {
+            ipConfigParse.channelPort = Integer.parseInt(nodePortArray[0]);
+            ipConfigParse.p2pPort = Integer.parseInt(nodePortArray[1]);
+            ipConfigParse.rpcPort = Integer.parseInt(nodePortArray[2]);
+        } catch (Exception e) {
+            throw new NodeMgrException(NODE_PORT_CONFIG_ERROR.attach(configArray[3]), e);
+        }
+
         return ipConfigParse;
     }
+
+
 
 //    public String[] hostList2IpConf(List<TbHost> hostList, String agencyName) {
 //        String[] ipConf = new String[hostList.size()];

@@ -17,6 +17,8 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.SAME_HOST_ERROR;
 
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
+import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,6 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +84,64 @@ public class DeployService {
     @Autowired private NodeAsyncService nodeAsyncService;
     @Autowired private PathService pathService;
     @Autowired private ConstantProperties constantProperties;
+    @Autowired private NodeService nodeService;
+
+
+    /**
+     * generate chain config and front config in db, scp to remote and async start
+     */
+    public void configChainAndScp(String chainName, List<DeployNodeInfo> deployNodeInfoList, String[] ipConf,
+        int tagId, int encrtypType, String webaseSignAddr, String agencyName)
+        throws InterruptedException {
+        // convert to host id list by distinct id
+        List<Integer> hostIdList = deployNodeInfoList.stream().map(DeployNodeInfo::getHostId).collect(
+            Collectors.toList());
+        if (StringUtils.isBlank(agencyName)) {
+            agencyName = constantProperties.getDefaultAgencyName();
+        }
+        log.info("configChainAndScp chainName:{},deployNodeInfoList:{},ipConf:{},tagId:{},encrtypType:{},"
+                + "webaseSignAddr:{},agencyName:{}", chainName, deployNodeInfoList, ipConf, tagId, encrtypType,
+            webaseSignAddr, agencyName);
+
+        log.info("configChainAndScp check allHostInitSuccess");
+        // check all host success
+        AtomicBoolean allHostInitSuccess = new AtomicBoolean(true);
+        hostIdList.forEach(hId -> {
+            TbHost host = tbHostMapper.selectByPrimaryKey(hId);
+            if (HostStatusEnum.INIT_SUCCESS.getId() != host.getStatus()) {
+                allHostInitSuccess.set(false);
+            }
+        });
+        if (!allHostInitSuccess.get()) {
+            log.error("configChainAndScp stop for not all host init success");
+            throw new NodeMgrException(ConstantCode.NOT_ALL_HOST_INIT_SUCCESS);
+        }
+
+        log.info("configChainAndScp configChain and init db data");
+        // config locally
+        boolean configSuccess = this.configChain(chainName, deployNodeInfoList, ipConf, tagId, encrtypType,
+            webaseSignAddr, agencyName);
+        // config success, use ansible to scp config & load image
+        if (!configSuccess) {
+            log.error("configChainAndScp fail to config chain and init db data");
+            throw new NodeMgrException(ConstantCode.CONFIG_CHAIN_LOCALLY_FAIL);
+        }
+        // scp config to host
+        log.info("configChainAndScp start scpConfigHostList chainName:{},hostIdList:{}", chainName, hostIdList);
+        boolean configHostSuccess = hostService.scpConfigHostList(chainName, hostIdList);
+        if (!configHostSuccess) {
+            log.error("configChainAndScp config success but image not on remote host, cannot start chain!");
+            throw new NodeMgrException(ConstantCode.ANSIBLE_INIT_HOST_CDN_SCP_NOT_ALL_SUCCESS);
+        }
+        // check image
+        hostService.checkImageExistRemote(ipConf, tagId);
+        // start
+        log.info("configChainAndScp asyncStartChain chainName:{}", chainName);
+        TbChain chain = tbChainMapper.getByChainName(chainName);
+        nodeAsyncService.asyncStartChain(chain.getId(), OptionType.DEPLOY_CHAIN, ChainStatusEnum.RUNNING, ChainStatusEnum.START_FAIL,
+            FrontStatusEnum.INITIALIZED, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
+    }
+
 
     /**
      * Add in v1.4.0 deploy.
@@ -88,16 +150,15 @@ public class DeployService {
      * @param ipConf
      * @param tagId
      * @param encryptType
-     * @param rootDirOnHost
      * @param webaseSignAddr
      * @param agencyName one agency
      * manually or pull from hub or pull cdn
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean configChain(String chainName, String[] ipConf, int tagId, int encryptType,
-        String rootDirOnHost, String webaseSignAddr, String agencyName) throws NodeMgrException {
-
+    public boolean configChain(String chainName,  List<DeployNodeInfo> deployNodeInfoList, String[] ipConf, int tagId, int encryptType,
+        String webaseSignAddr, String agencyName) throws NodeMgrException {
+        log.info("start configChain chainName:{},ipConf:{}", chainName, ipConf);
 //        DockerImageTypeEnum imageTypeEnum = DockerImageTypeEnum.getById(dockerImageType);
 //        if (imageTypeEnum == null){
 //            throw new NodeMgrException(ConstantCode.UNKNOWN_DOCKER_IMAGE_TYPE);
@@ -124,9 +185,8 @@ public class DeployService {
 
         // generate config files(chain's config&cert) gen front's yml
         // and insert data to db （chain update as initialized
-        boolean genSuccess = chainService.generateConfigLocalAndInitDb(chainName, ipConf, tagId, encryptType, rootDirOnHost, webaseSignAddr,
-                constantProperties.getSshDefaultUser(), constantProperties.getSshDefaultPort(),
-                constantProperties.getDockerDaemonPort(), agencyName);
+        boolean genSuccess = chainService.generateConfigLocalAndInitDb(chainName, deployNodeInfoList, ipConf,
+            tagId, encryptType, webaseSignAddr, agencyName);
 
         return genSuccess;
         // start node and start front
@@ -135,26 +195,26 @@ public class DeployService {
 
     /**
      * split config and start chain
-     * todo check chain status(all host init success) before start
-     * only config finished, start
      * @param chainName
      * @param optionType
      */
     public void startChain(String chainName, OptionType optionType) {
+        log.info("startChain chainName:{},optionType:{}", chainName, optionType);
         TbChain chain = this.tbChainMapper.getByChainName(chainName);
         if (chain == null) {
             log.error("No chain:[{}] to deploy.", chainName);
             return;
         }
 
-        boolean scpConfigSuccess = chain.getChainStatus() == ChainStatusEnum.CONFIG_SUCCESS.getId();
-//            boolean initSuccess = this.hostService.initHostList(chain, tbHostList, true, false);
-        if (scpConfigSuccess) {
+        boolean configSuccess = chain.getChainStatus() == ChainStatusEnum.INITIALIZED.getId();
+        log.info("startChain configSuccess:{}", configSuccess);
+
+        // todo whether check host init success
+        boolean initSuccess = true;
+        if (configSuccess && initSuccess) {
             // start chain
             nodeAsyncService.asyncStartChain(chain.getId(), optionType, ChainStatusEnum.RUNNING, ChainStatusEnum.START_FAIL,
                 FrontStatusEnum.INITIALIZED, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
-
-            return;
         } else {
             log.error("Init host list not success:[{}]", chainName);
             chainService.updateStatus(chain.getId(), ChainStatusEnum.START_FAIL);
@@ -209,7 +269,7 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
         }
 
-        // todo agree
+        // allow local
 //        if (IPUtil.isLocal(ip)){
 //            throw new NodeMgrException(SAME_HOST_ERROR);
 //        }
@@ -219,6 +279,7 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
+        // todo check ip connect by ansible
         log.info("Add node check ip reachable:[{}]...", ip);
         if (!SshTools.connect(ip, constantProperties.sshDefaultUser, constantProperties.sshDefaultPort,
             constantProperties.getPrivateKey())) {
@@ -245,12 +306,11 @@ public class DeployService {
                 throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
             }
 
-            // check docker image exists
+            // check docker image exists, default pull cdn
             DockerImageTypeEnum dockerImageTypeEnum = DockerImageTypeEnum.getById(dockerImageType);
-            dockerImageTypeEnum = dockerImageTypeEnum == null ? DockerImageTypeEnum.MANUAL : dockerImageTypeEnum;
-            if (DockerImageTypeEnum.MANUAL ==  dockerImageTypeEnum){
-                this.hostService.checkImageExists(Collections.singleton(ip), constantProperties.getSshDefaultUser(),
-                        constantProperties.getSshDefaultPort(), chain.getVersion());
+            dockerImageTypeEnum = dockerImageTypeEnum == null ? DockerImageTypeEnum.PULL_CDN : dockerImageTypeEnum;
+            if (DockerImageTypeEnum.MANUAL == dockerImageTypeEnum){
+                this.hostService.checkImageExists(Collections.singleton(ip), chain.getVersion());
             }
 
             // a new host IP address, check agency name is new
@@ -258,12 +318,8 @@ public class DeployService {
                     agencyName, chain.getId(), chainName, chain.getEncryptType());
 
             // generate sdk config files
-            tbHostExists = this.hostService.generateHostSDKAndScp(chain.getEncryptType(),
-                    chain.getChainName(), chain.getRootDir(),
-                    ip, agency.getId(), agency.getAgencyName(),
-                    constantProperties.getSshDefaultUser(),
-                    constantProperties.getSshDefaultPort(),
-                    constantProperties.getDockerDaemonPort());
+            tbHostExists = this.hostService.generateHostSDKAndScp(chain.getEncryptType(), chain.getChainName(), add.getRootDirOnHost(),
+                ip, agency.getAgencyName());
         } else {
             // exist host
             agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chain.getId(), agencyName);
@@ -292,7 +348,7 @@ public class DeployService {
 
             // generate(or update existed) new group(node) config files and scp to remote
             this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId,
-                    tbHostExists.getIp(), newFrontList, tbHostExists.getSshUser(), tbHostExists.getSshPort());
+                    tbHostExists.getIp(), newFrontList);
 
             // init host
             // start all front on the host
@@ -343,9 +399,9 @@ public class DeployService {
      * @param nodeId
      * @return
      */
-    public void startNode(String nodeId,OptionType optionType,FrontStatusEnum before,
-                          FrontStatusEnum success,FrontStatusEnum failed) {
-        this.frontService.restart(nodeId,optionType,before,success,failed);
+    public void startNode(String nodeId, OptionType optionType, FrontStatusEnum before,
+                          FrontStatusEnum success, FrontStatusEnum failed) {
+        this.frontService.restart(nodeId, optionType, before, success, failed);
     }
 
     /**
@@ -361,7 +417,7 @@ public class DeployService {
 
     /**
      *  @param nodeId
-     * @param deleteHost
+     * @param deleteHost default false
      * @param deleteAgency
      * @return
      */
@@ -369,13 +425,12 @@ public class DeployService {
     public void deleteNode(String nodeId,
                            boolean deleteHost,
                            boolean deleteAgency ) {
+        log.info("deleteNode nodeId:{},deleteHost:{},deleteAgency:{}", nodeId, deleteHost, deleteAgency);
         // remove front
         TbFront front = this.frontMapper.getByNodeId(nodeId);
         if (front == null) {
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
-
-        final byte encryptType = FrontService.getEncryptType(front.getImageTag());
 
         // check front status
         if (FrontStatusEnum.isRunning(front.getStatus())) {
@@ -384,6 +439,7 @@ public class DeployService {
 
         TbChain chain = this.tbChainMapper.selectByPrimaryKey(front.getChainId());
         TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+        final byte encryptType = chain.getEncryptType();
 
         // get delete node's group id list from ./NODES_ROOT/default_chain/ip/node[x]/conf/group.[groupId].genesis
         Path nodePath = this.pathService.getNodeRoot(chain.getChainName(), host.getIp(), front.getHostIndex());
@@ -405,14 +461,16 @@ public class DeployService {
         }
 
         // move node of remote host files to temp directory, e.g./opt/fisco/delete-tmp
-        NodeService.mvNodeOnRemoteHost(host.getIp(), host.getRootDir(), chain.getChainName(), front.getHostIndex(),
-                front.getNodeId(),host.getSshUser(),host.getSshPort(),constantProperties.getPrivateKey());
+        nodeService.mvNodeOnRemoteHost(host.getIp(), host.getRootDir(), chain.getChainName(), front.getHostIndex(),
+                front.getNodeId());
 
         // delete front, node in db
         this.frontService.removeFront(front.getFrontId());
 
-        // delete host
-        this.hostService.deleteHostWithNoNode(deleteHost,host.getId());
+        // delete host, default false
+        if (deleteHost) {
+            this.hostService.deleteHostWithNoNode(host.getId());
+        }
 
         // delete agency
         this.agencyService.deleteAgencyWithNoNode(deleteAgency,host.getId());
@@ -436,5 +494,7 @@ public class DeployService {
 
         return this.chainService.progress(chain);
     }
+
+
 }
 

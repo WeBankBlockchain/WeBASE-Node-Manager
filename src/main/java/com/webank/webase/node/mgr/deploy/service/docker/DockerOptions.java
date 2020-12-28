@@ -24,7 +24,7 @@ public interface DockerOptions {
      *
      * @return
      */
-    default String getImageRepositoryTag(String dockerRepository,String dockerRegistryMirror, String imageTag) {
+    default String getImageRepositoryTag(String dockerRepository, String dockerRegistryMirror, String imageTag) {
         // image repository and tag
         String image = String.format("%s:%s", dockerRepository, imageTag);
         if (StringUtils.isNotBlank(dockerRegistryMirror)) {
@@ -37,36 +37,30 @@ public interface DockerOptions {
     /**
      *
      * @param ip
-     * @param dockerPort
-     * @param sshUser
-     * @param sshPort
      * @param imageTag
      */
-    public boolean checkImageExists(String ip, int dockerPort, String sshUser, int sshPort, String imageTag);
+    public boolean checkImageExists(String ip, String imageTag);
 
     /**
      * Pull image, maybe same tag but newer.
      *
      * @param ip
-     * @param dockerPort
-     * @param sshPort
      * @param imageTag
+     * @param imagePullType
      */
-    public void pullImage(String ip, int dockerPort, String sshUser, int sshPort, String imageTag, boolean loadFromCdn);
+    public void pullImage(String ip, String imageTag, int imagePullType);
 
 
 
 
     /**
      * @param ip
-     * @param dockerPort
-     * @param sshPort
      * @param containerName
      * @param chainRootOnHost
      * @param nodeIndex
      * @return true if run success, false when run failed.
      */
-    public void run(String ip, int dockerPort,String sshUser, int sshPort, String imageTag, String containerName, String chainRootOnHost, int nodeIndex) ;
+    public void run(String ip, String imageTag, String containerName, String chainRootOnHost, int nodeIndex);
 
 
 //    /**
@@ -101,12 +95,10 @@ public interface DockerOptions {
 
     /**
      * @param ip
-     * @param dockerPort
-     * @param sshPort
      * @param containerName
      * @return
      */
-    public void stop(String ip, int dockerPort,String sshUser,int sshPort, String containerName) ;
+    public void stop(String ip, String containerName) ;
 
 }
 

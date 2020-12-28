@@ -53,5 +53,8 @@ public class ReqAdd {
      */
     private String chainName = "default_chain";
 
+    /**
+     * host's root dir
+     */
     private String rootDirOnHost="/opt/fisco";
 }
