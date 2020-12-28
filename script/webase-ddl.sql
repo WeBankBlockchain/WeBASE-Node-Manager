@@ -50,8 +50,10 @@ CREATE TABLE IF NOT EXISTS tb_front (
   channel_port int(6) DEFAULT '20200' COMMENT 'channel 端口',
   chain_id int(10) unsigned DEFAULT '0' COMMENT '所属链 ID',
   chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
+  deploy_status int(11) DEFAULT 0 COMMENT '前置服务状态：0-添加；1，检查成功；2，检查失败；3，启动成功',
   PRIMARY KEY (`front_id`),
   UNIQUE KEY `unique_node_id` (`node_id`),
+  UNIQUE KEY `unique_ip_port` (`front_ip`,`front_port`),
   UNIQUE KEY `unique_agency_id_host_id_front_port` (`agency_id`,`front_ip`,`front_port`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='前置服务信息表';
 
@@ -387,13 +389,8 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `tb_host` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
---  `agency_id` int(10) unsigned NOT NULL DEFAULT '1' COMMENT '所属机构 ID',
---  `agency_name` varchar(64) DEFAULT NULL COMMENT '所属机构名称，冗余字段',
   `ip` varchar(16) NOT NULL COMMENT '主机IP',
-  `ssh_user` varchar(64) NOT NULL DEFAULT 'root' COMMENT 'SSH 登录账号',
-  `ssh_port` int(10) unsigned NOT NULL DEFAULT '22' COMMENT 'SSH 端口',
   `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
-  `docker_port` int(10) unsigned NOT NULL DEFAULT '3000' COMMENT 'Docker deamon 的端口',
   `status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '主机状态：0，新建；1，初始化；2，运行等等',
   `remark` varchar(512) DEFAULT '' COMMENT 'remark',
   `create_time` datetime NOT NULL COMMENT '创建时间',
