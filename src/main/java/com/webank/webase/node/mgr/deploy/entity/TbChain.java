@@ -21,7 +21,6 @@ public class TbChain {
                                 String version,
                                 byte encryptType,
                                 ChainStatusEnum status,
-                               String rootDirOnHost,
                                RunTypeEnum runTypeEnum,
                                String webaseSignAddr
 
@@ -33,7 +32,6 @@ public class TbChain {
         chain.setVersion(version);
         chain.setEncryptType(encryptType);
         chain.setChainStatus(status.getId());
-        chain.setRootDir(rootDirOnHost);
         chain.setCreateTime(now);
         chain.setModifyTime(now);
         chain.setRunType(runTypeEnum.getId());

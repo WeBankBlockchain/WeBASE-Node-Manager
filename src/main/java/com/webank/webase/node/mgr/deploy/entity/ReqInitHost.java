@@ -14,16 +14,24 @@
 
 package com.webank.webase.node.mgr.deploy.entity;
 
-import javax.validation.constraints.NotBlank;
+import java.util.List;
+import javax.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 @Data
-public class ReqAddHost {
-    @NotBlank
-    private String sshIp;
+public class ReqInitHost {
+    // String chainName, String imageTag, List<Integer> hostIdList, boolean pullFromCdn
+    private String chainName;
+    private String imageTag;
     /**
-     * host's default directory
+     * manually load, pull from dockerhub, pull from cdn&load
      */
-    @NotBlank
-    private String rootDir;
+    @PositiveOrZero
+    private byte dockerImageType;
+    /**
+     * force download new image tar and delete old one
+     * @default: false
+     */
+    // private Boolean force;
+    private List<Integer> hostIdList;
 }

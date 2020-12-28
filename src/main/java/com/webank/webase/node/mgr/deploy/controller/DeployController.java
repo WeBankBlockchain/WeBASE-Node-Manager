@@ -13,12 +13,30 @@
  */
 package com.webank.webase.node.mgr.deploy.controller;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.controller.BaseController;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.enums.OptionType;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
+import com.webank.webase.node.mgr.deploy.entity.ReqConfigChain;
+import com.webank.webase.node.mgr.deploy.entity.ReqInitHost;
+import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
+import com.webank.webase.node.mgr.deploy.entity.ReqUpgrade;
+import com.webank.webase.node.mgr.deploy.entity.TbChain;
+import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
+import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
+import com.webank.webase.node.mgr.deploy.service.DeployService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.io.IOException;
 import java.time.Instant;
-
 import javax.validation.Valid;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,27 +48,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.controller.BaseController;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
-import com.webank.webase.node.mgr.base.enums.OptionType;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
-import com.webank.webase.node.mgr.deploy.entity.ReqConfigInit;
-import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
-import com.webank.webase.node.mgr.deploy.entity.ReqUpgrade;
-import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.deploy.service.DeployService;
-import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Controller for node data.
@@ -71,25 +68,58 @@ public class DeployController extends BaseController {
     /**
      *  @check:(in /host/check)
      *  a. check docker and cpu/mem
-     *  @config:
-     *  b. generate config locally
-     *  c. init host and scp config
+     *  @init:
+     *  a. check node port(channel, front, rpc, p2p)
+     *  b. init host docker & dependency
+     *  @config
+     *  c. generate chain config & scp config
+     */
+
+    @PostMapping(value = "init")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse initHostList(@RequestBody @Valid ReqInitHost reqInitHost,
+                               BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("Start initHostList:[{}], start:[{}]", JsonTools.toJSONString(reqInitHost), startTime);
+
+        try {
+            // hostService.checkPortHostList(deploy.getDeployNodeInfoList());
+
+            // generate node config and return shell execution log
+            boolean initDockerSuc = hostService.initHostAndDocker(reqInitHost.getChainName(), reqInitHost.getImageTag(), reqInitHost.getHostIdList(),
+                (int)reqInitHost.getDockerImageType());
+            return new BaseResponse(ConstantCode.SUCCESS, initDockerSuc);
+        } catch (NodeMgrException e) {
+            return new BaseResponse(e.getRetCode());
+        } catch (InterruptedException e) {
+            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
+        }
+    }
+
+    /**
+     * config chain and init db data an async start chain
+     * @param deploy
+     * @param result
+     * @return
+     * @throws NodeMgrException
      */
     @PostMapping(value = "config")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse configChain(@RequestBody @Valid ReqConfigInit deploy,
+    public BaseResponse configChainAndHost(@RequestBody @Valid ReqConfigChain deploy,
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
         deploy.setWebaseSignAddr(constantProperties.getWebaseSignAddress());
-        deploy.setRootDirOnHost(constantProperties.getRootDirOnHost());
-        log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(deploy), startTime);
+        log.info("Start configChainAndHost:[{}], start:[{}]", JsonTools.toJSONString(deploy), startTime);
 
         try {
+            // hostService.checkPortHostList(deploy.getDeployNodeInfoList());
+
             // generate node config and return shell execution log
-            hostService.configChainAndinitHostList(deploy.getChainName(), deploy.getDeployNodeInfoList(),
-                    deploy.getIpconf(), deploy.getTagId(), deploy.getEncryptType(), deploy.getRootDirOnHost(),
-                    deploy.getWebaseSignAddr(), deploy.getDockerImageType(), deploy.getAgencyName());
+            deployService.configChainAndScp(deploy.getChainName(), deploy.getDeployNodeInfoList(),
+                    deploy.getIpconf(), deploy.getTagId(), deploy.getEncryptType(),
+                    deploy.getWebaseSignAddr(), deploy.getAgencyName());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
@@ -99,7 +129,33 @@ public class DeployController extends BaseController {
     }
 
     /**
-     * 扩容一个节点
+     * check host's node's port, include channel p2p rpc front port
+     * @param checkPort
+     * @param result
+     * @return
+     * @throws NodeMgrException
+     */
+    @PostMapping(value = "checkPort")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse checkNodePort(@RequestBody @Valid ReqConfigChain checkPort,
+                               BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(checkPort.getDeployNodeInfoList()), startTime);
+
+        try {
+            // generate node config and return shell execution log
+            boolean checkPortRes = hostService.checkPortHostList(checkPort.getDeployNodeInfoList());
+            return new BaseResponse(ConstantCode.SUCCESS, checkPortRes);
+        } catch (NodeMgrException e) {
+            return new BaseResponse(e.getRetCode());
+        } catch (InterruptedException e) {
+            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
+        }
+    }
+
+    /**
+     * 扩容一个节点：配置节点、更新其他节点配置、启动新节点（重启旧节点）
      * @param add
      * @param result
      * @return
@@ -108,14 +164,14 @@ public class DeployController extends BaseController {
     @PostMapping(value = "node/add")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse addNode(
-            @RequestBody @Valid ReqAdd add,
+            @RequestBody @Valid ReqConfigChain configNew,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
 
-        log.info("Start add node:[{}] , start[{}]", JsonTools.toJSONString(add), startTime);
+        log.info("Start add node configNew:[{}] , start[{}]", JsonTools.toJSONString(configNew), startTime);
 
-        Pair<RetCode, String> addResult = this.deployService.addNodes(add);
+        Pair<RetCode, String> addResult = this.deployService.addNodes(configNew);
         return new BaseResponse(addResult.getKey(), addResult.getValue());
     }
 
@@ -247,11 +303,10 @@ public class DeployController extends BaseController {
     @GetMapping(value = "chain/start")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse startChain(
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-    ) throws IOException {
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName) {
         Instant startTime = Instant.now();
         log.info("Start chain, chainName:[{}], now:[{}]", chainName, startTime);
-
+        deployService.startChain(chainName, OptionType.DEPLOY_CHAIN);
         return new BaseResponse(ConstantCode.SUCCESS );
     }
 
@@ -283,7 +338,7 @@ public class DeployController extends BaseController {
         Instant startTime = Instant.now();
         log.info("Start delete chainName:[{}], startTime:[{}]",
                 chainName, startTime.toEpochMilli());
-
+        // include delete chain files and stop node/front docker container(on remote host), delete chain file locally too
         RetCode deleteResult = this.deployService.deleteChain(chainName);
         return new BaseResponse(deleteResult);
     }
@@ -300,15 +355,15 @@ public class DeployController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, constantProperties.getDeployType());
     }
 
-    /**
-     *
-     * @return
-     * @throws IOException
-     */
-    @GetMapping(value = "host/list")
-    public BaseResponse listHost() throws IOException {
-        Instant startTime = Instant.now();
-        log.info("Start get host list info, now:[{}]",  startTime);
-        return new BaseResponse(ConstantCode.SUCCESS, this.tbHostMapper.selectAll());
-    }
+//    /**
+//     *
+//     * @return
+//     * @throws IOException
+//     */
+//    @GetMapping(value = "host/list")
+//    public BaseResponse listHost() throws IOException {
+//        Instant startTime = Instant.now();
+//        log.info("Start get host list info, now:[{}]",  startTime);
+//        return new BaseResponse(ConstantCode.SUCCESS, this.tbHostMapper.selectAll());
+//    }
 }

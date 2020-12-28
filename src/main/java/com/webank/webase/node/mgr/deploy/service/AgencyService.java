@@ -18,6 +18,8 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.AGENCY_NAME_CONFIG_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_AGENCY_ERROR;
 
+import com.webank.webase.node.mgr.front.FrontMapper;
+import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,6 +56,7 @@ public class AgencyService {
 
     @Autowired private TbAgencyMapper tbAgencyMapper;
     @Autowired private TbHostMapper tbHostMapper;
+    @Autowired private FrontMapper frontMapper;
 
     @Autowired private DeployShellService deployShellService;
     @Autowired private PathService pathService;
@@ -169,25 +172,24 @@ public class AgencyService {
     }
 
     /**
-     *
+     * check agency with no front
      * @param deleteAgency
      * @param agencyId
      */
     @Transactional
     public void deleteAgencyWithNoNode(boolean deleteAgency, int agencyId){
-        //todo
-//        TbAgency agency = this.tbAgencyMapper.selectByPrimaryKey(agencyId);
-//        if (agency == null){
-//            log.warn("Agency:[{}] not exists.", agencyId);
-//            return;
-//        }
-//
-//        List<TbHost> hostList = this.tbHostMapper.selectByAgencyId(agencyId);
-//        if (CollectionUtils.isEmpty(hostList)
-//                && deleteAgency) {
-//            this.tbAgencyMapper.deleteByPrimaryKey(agencyId);
-//            log.warn("Delete agency:[{}].", agencyId);
-//        }
+        TbAgency agency = this.tbAgencyMapper.selectByPrimaryKey(agencyId);
+        if (agency == null){
+            log.warn("Agency:[{}] not exists.", agencyId);
+            return;
+        }
+
+        List<TbFront> frontList = frontMapper.selectByAgencyId(agencyId);
+        if (CollectionUtils.isEmpty(frontList)
+                && deleteAgency) {
+            this.tbAgencyMapper.deleteByPrimaryKey(agencyId);
+            log.warn("Delete agency:[{}].", agencyId);
+        }
     }
 
     /**
@@ -205,13 +207,14 @@ public class AgencyService {
         }
 
         for (TbAgency agency : tbAgencyList) {
-            // delete front
-            this.frontService.deleteFrontByAgencyId(agency.getId());
+            // delete front(db) and mv host's dir
+            this.frontService.deleteFrontByAgencyId(agency.getChainName(), agency.getId());
 
             // delete host
-            this.hostService.deleteHostByAgencyId(agency.getChainName(),agency.getId());
+            // v1.4.3 delete all host after delete chain
+            // this.hostService.deleteHostByAgencyId(agency.getChainName(),agency.getId());
         }
-
+        log.info("delete agency by chain id");
         this.tbAgencyMapper.deleteByChainId(chainId);
     }
 }

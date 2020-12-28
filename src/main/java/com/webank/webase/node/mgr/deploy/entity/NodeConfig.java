@@ -57,11 +57,12 @@ public class NodeConfig {
      * @return
      * @throws IOException
      */
-    public static NodeConfig read(Path nodePath,byte encryptType)  {
+    public static NodeConfig read(Path nodePath, byte encryptType)  {
         NodeConfig config = new NodeConfig();
         try {
-            config.nodeId= PathService.getNodeId(nodePath,encryptType);
+            config.nodeId= PathService.getNodeId(nodePath, encryptType);
             try {
+                // get host index from generated node's config
                 config.hostIndex = Integer.parseInt(nodePath.getFileName().toString().replaceAll("node", ""));
             } catch (Exception e) {
                 log.error("parse host index:[{}] error", nodePath.toAbsolutePath().toString(), e);

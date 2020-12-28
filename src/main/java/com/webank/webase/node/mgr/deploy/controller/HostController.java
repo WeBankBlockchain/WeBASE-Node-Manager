@@ -23,7 +23,6 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.deploy.entity.ReqAddHost;
 import com.webank.webase.node.mgr.deploy.entity.ReqCheckHost;
-import com.webank.webase.node.mgr.deploy.entity.ReqConfigInit;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
@@ -43,7 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * todo add host, delete host, init host
+ * add host, delete host, init host
  */
 @Log4j2
 @RestController
@@ -77,14 +76,31 @@ public class HostController extends BaseController {
     public BaseResponse addHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
+        log.info("Start addHost:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
             // check before add
             ansibleService.execPing(reqAddHost.getSshIp());
             // save host info
-            this.hostService.insert(reqAddHost.getSshIp(), reqAddHost.getSshUser(), reqAddHost.getSshPort(),
-                reqAddHost.getRootDir(), HostStatusEnum.ADDED, reqAddHost.getDockerPort(), "");
+            this.hostService.insert(reqAddHost.getSshIp(), reqAddHost.getRootDir(), HostStatusEnum.ADDED,  "");
 
+            return new BaseResponse(ConstantCode.SUCCESS);
+        } catch (NodeMgrException e) {
+            return new BaseResponse(e.getRetCode());
+        }
+    }
+
+    /**
+     * Deploy by ipconf and tagId.
+     */
+    @PostMapping(value = "ping")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse pingHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("Start ping:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
+        try {
+            // check before add
+           ansibleService.execPing(reqAddHost.getSshIp());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
@@ -106,7 +122,6 @@ public class HostController extends BaseController {
         try {
             // check port and  check docker
             boolean checkStatus = this.hostService.batchCheckHostList(reqCheckHost.getHostIdList());
-
             return new BaseResponse(ConstantCode.SUCCESS, checkStatus);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
@@ -154,5 +169,8 @@ public class HostController extends BaseController {
 //            return new BaseResponse(e.getRetCode());
 //        }
 //    }
+
+    // todo deleteHostWithNoNode
+
 
 }
