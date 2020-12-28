@@ -13,6 +13,12 @@
  */
 package com.webank.webase.node.mgr.front;
 
+import com.webank.webase.node.mgr.base.enums.FrontDeployStatusEnum;
+import com.webank.webase.node.mgr.base.tools.NetUtils;
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
+import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
+import com.webank.webase.node.mgr.deploy.service.HostService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,15 +30,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.Level;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.aop.framework.AopContext;
@@ -104,6 +118,8 @@ public class FrontService {
     private NodeMapper nodeMapper;
     @Autowired
     private FrontGroupMapMapper frontGroupMapMapper;
+    @Autowired
+    private TbChainMapper tbChainMapper;
 
     @Autowired
     private NodeService nodeService;
@@ -129,6 +145,10 @@ public class FrontService {
     private ConstantProperties constant;
     @Autowired
     private DockerOptions dockerOptions;
+    @Autowired
+    private AnsibleService ansibleService;
+    @Autowired
+    private HostService hostService;
 
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
@@ -561,7 +581,7 @@ public class FrontService {
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
         // the node dir on remote host
-        String rootDirOnHost = chain.getRootDir();
+        String rootDirOnHost = host.getRootDir();
         String imageTag = chain.getVersion();
         int hostId = host.getId();
         String ip = host.getIp();
@@ -724,10 +744,10 @@ public class FrontService {
             String localScr = PathService.getConfigIniPath(localNodePath).toAbsolutePath().toString();
 
             // ex: (node-mgr local) /opt/fisco/chain1/node0/config.ini
-            String remoteDst = String.format("%s/%s/node%s/config.ini", chain.getRootDir(),chain.getChainName(),hostIndex);
+            String remoteDst = String.format("%s/%s/node%s/config.ini", host.getRootDir(), chain.getChainName(),hostIndex);
 
             // copy group config files to local node's conf dir
-            this.deployShellService.scp(ScpTypeEnum.UP,host.getSshUser(),  host.getIp(),host.getSshPort(),localScr, remoteDst);
+            ansibleService.scp(ScpTypeEnum.UP, host.getIp(), localScr, remoteDst);
         }
     }
 
@@ -738,7 +758,7 @@ public class FrontService {
      */
     @Transactional(rollbackFor = Throwable.class)
     public boolean restart(String nodeId, OptionType optionType, FrontStatusEnum before,
-                           FrontStatusEnum success,FrontStatusEnum failed){
+                           FrontStatusEnum success, FrontStatusEnum failed){
         log.info("Restart node:[{}]", nodeId );
         // get front
         TbFront front = this.getByNodeId(nodeId);
@@ -746,7 +766,9 @@ public class FrontService {
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
 
-        final byte encryptType = FrontService.getEncryptType(front.getImageTag());
+        TbChain chain = tbChainMapper.selectByPrimaryKey(front.getChainId());
+        byte encryptType = chain.getEncryptType();
+//        final byte encryptType = FrontService.getEncryptType(front.getImageTag());
 
         // set front status to stopped to avoid error for time task.
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), before);
@@ -757,10 +779,8 @@ public class FrontService {
 
         log.info("Docker start container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
         try {
-            // todo run node docker in guomi way
             this.dockerOptions.run(
-                    front.getFrontIp(), host.getDockerPort(), host.getSshUser(), host.getSshPort(),
-                    front.getImageTag(), front.getContainerName(),
+                    front.getFrontIp(), front.getImageTag(), front.getContainerName(),
                     PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()), front.getHostIndex());
 
             threadPoolTaskScheduler.schedule(()->{
@@ -883,8 +903,7 @@ public class FrontService {
         TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        this.dockerOptions.stop( front.getFrontIp(), hostInDb.getDockerPort(), hostInDb.getSshUser(),
-                hostInDb.getSshPort(), front.getContainerName());
+        this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
 
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
     }
@@ -897,15 +916,18 @@ public class FrontService {
         }
         TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        this.dockerOptions.stop( front.getFrontIp(), hostInDb.getDockerPort(), hostInDb.getSshUser(),
-                hostInDb.getSshPort(), front.getContainerName());
+        this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
 
         this.nodeMapper.deleteByNodeId(nodeId);
     }
 
 
+    /**
+     * delete front
+     * @param agencyId
+     */
     @Transactional
-    public void deleteFrontByAgencyId(int agencyId){
+    public void deleteFrontByAgencyId(String chainName, int agencyId){
         log.info("Delete front data by agency id:[{}].", agencyId);
 
         // select host, front, group in agency
@@ -915,21 +937,29 @@ public class FrontService {
             return ;
         }
 
+        List<Integer> hostIdList = new ArrayList<>();
         for (TbFront front : frontList) {
             TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
-
+            log.info("rm host container by host ip:{}", host.getIp());
             // remote docker container
-            this.dockerOptions.stop(host.getIp(),host.getDockerPort(), host.getSshUser(),host.getSshPort(), front.getContainerName());
+            this.dockerOptions.stop(host.getIp(), front.getContainerName());
 
-            log.info("Delete node data by node id:[{}].", front.getNodeId());
-            this.nodeMapper.deleteByNodeId(front.getNodeId());
+            // delete in deleteAllGroupData
+//            log.info("Delete node data by node id:[{}].", front.getNodeId());
+//            this.nodeMapper.deleteByNodeId(front.getNodeId());
 
-            log.info("Delete front group map data by front id:[{}].", front.getFrontId());
-            this.frontGroupMapMapper.removeByFrontId(front.getFrontId());
+//            log.info("Delete front group map data by front id:[{}].", front.getFrontId());
+//            this.frontGroupMapMapper.removeByFrontId(front.getFrontId());
+            // record host id to mv host's chain dir(might repeat and don't mind)
+            hostIdList.add(host.getId());
         }
 
         // delete front in batch
         this.frontMapper.deleteByAgencyId(agencyId);
+        log.info("end deleteFrontByAgencyId");
+        // delete front->host(related but no more front host)
+        log.info("start deleteFrontByAgencyId chainName:{}, hostIdList:{}", chainName, hostIdList);
+        hostService.mvHostChainDirByIdList(chainName, hostIdList);
     }
 
     /**
@@ -971,4 +1001,10 @@ public class FrontService {
             throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT);
         }
     }
+//
+//    public void updateDeployStatus(int frontId, FrontDeployStatusEnum deployStatusEnum) {
+//        frontMapper.updateDeployStatus(frontId, deployStatusEnum.getId(), LocalDateTime.now());
+//    }
+
+
 }
