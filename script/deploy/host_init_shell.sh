@@ -29,7 +29,7 @@ function UpdateDNS() {
     [[ "$(grep -i "$var" "$file")" == "" ]] && sudo echo "nameserver $var" >> "$file"
   done
 }
-UpdateDNS
+#UpdateDNS
 
 # GNU/Linux操作系统
 if [[ $(command -v apt) ]]; then
