@@ -102,8 +102,6 @@ public class ConstantProperties {
 
     private int deployType = 0;
     private String webaseSignAddress = "127.0.0.1:5004";
-    private String rootDirOnHost = "/opt/fisco-webase";
-    private String downloadDirOnHost = rootDirOnHost + "/download";
 
     private boolean useDockerSDK = false;
     public int dockerDaemonPort = 3000;
@@ -122,7 +120,8 @@ public class ConstantProperties {
     private String hostDockerTcpShell = "./script/deploy/host_docker_tcp.sh";
     private String hostInitShell = "./script/deploy/host_init_shell.sh";
     // to support | & > $
-    private String ansibleCommandShell = "./script/deploy/check_image_exist.sh";
+    private String ansibleImageCheckShell = "./script/deploy/check_image_exist.sh";
+    private String ansibleContainerCheckShell = "./script/deploy/check_container_exist.sh";
     private String privateKey = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "id_rsa";
     private String fiscoBcosBinary =  "";
 
@@ -172,8 +171,6 @@ public class ConstantProperties {
 
 //        this.imageTagUpdateUrl = String.format(this.imageTagUpdateUrl,dockerRepository);
 //        log.info("Init constant properties, imageTagUpdateUrl: [{}]", this.imageTagUpdateUrl);
-
-        log.info("Init constant properties, rootOnHostDir: [{}]", rootDirOnHost);
 
         log.info("Init constant properties, private key: [{}]", privateKey);
 
