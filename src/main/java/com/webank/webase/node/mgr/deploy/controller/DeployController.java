@@ -145,16 +145,18 @@ public class DeployController extends BaseController {
 
         try {
             // generate node config and return shell execution log
-            boolean checkPortRes = hostService.checkPortHostList(checkPort.getDeployNodeInfoList());
+            // boolean checkPortRes = hostService.checkPortHostList(checkPort.getDeployNodeInfoList());
+            boolean checkPortRes = hostService.syncCheckPortHostList(checkPort.getDeployNodeInfoList());
             if (!checkPortRes) {
                 return new BaseResponse(ConstantCode.CHECK_HOST_PORT_IN_USE);
             }
             return new BaseResponse(ConstantCode.SUCCESS, checkPortRes);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
-        } catch (InterruptedException e) {
-            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
+//        catch (InterruptedException e) {
+//            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
+//        }
     }
 
     /**
@@ -238,7 +240,7 @@ public class DeployController extends BaseController {
 
         log.info("Delete node delete:[{}], now:[{}]", delete, startTime);
 
-        this.deployService.deleteNode(delete.getNodeId());
+        this.deployService.deleteNode(nodeId);
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 

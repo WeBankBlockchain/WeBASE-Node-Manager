@@ -389,6 +389,7 @@ public class DeployService {
         Path nodePath = this.pathService.getNodeRoot(chain.getChainName(), host.getIp(), front.getHostIndex());
         Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
         try {
+            log.info("deleteNode updateNodeConfigIniByGroupList chain:{}, groupIdSet:{}", chain, groupIdSet);
             // update related node's config.ini file, e.g. p2p
             this.frontService.updateNodeConfigIniByGroupList(chain, groupIdSet);
         } catch (IOException e) {
@@ -410,9 +411,6 @@ public class DeployService {
 
         // delete front, node in db
         this.frontService.removeFront(front.getFrontId());
-
-        // delete agency
-//        this.agencyService.deleteAgencyWithNoNode(deleteAgency,host.getId());
 
         // restart related node
         this.nodeAsyncService.asyncRestartRelatedFront(chain.getId(), groupIdSet, OptionType.MODIFY_CHAIN,

@@ -515,7 +515,7 @@ public class HostService {
                         return;
                     }
 
-                    // if already check success once time, no nedd check again
+                    // if already check success once time, no need check again
                     if (!HostStatusEnum.hostCheckSuccess(tbHost.getStatus())) {
                         log.info("Check host:[{}] by exec shell script:[{},{}]", tbHost.getIp(),
                             constant.getHostCheckShell(), constant.getDockerCheckShell());
@@ -619,6 +619,7 @@ public class HostService {
     }
 
     /**
+     * todo check synchronized
      * check host chain's port before init host, after check host mem/cpu
      */
     public boolean checkPortHostList(List<DeployNodeInfo> deployNodeInfoList) throws InterruptedException {
@@ -632,14 +633,14 @@ public class HostService {
 
         // todo 一个host多个端口时，需要通过host来检测
         for (final DeployNodeInfo nodeInfo : deployNodeInfoList) {
-            log.info("Check host:[{}]", nodeInfo.getIp());
+            log.info("Check host port:[{}]", nodeInfo.getIp());
 
             Future<?> task = threadPoolTaskScheduler.submit(() -> {
                 try {
                     // check chain port
                     Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(nodeInfo.getIp(), 2000,
                         nodeInfo.getChannelPort(), nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
-                    if (portReachable.getKey()) {
+                    if (!portReachable.getKey()) {
                         log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), nodeInfo.getIp() );
                         this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, "Port is in use!");
                         return;
@@ -647,7 +648,7 @@ public class HostService {
                     this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_SUCCESS, "");
                     checkSuccessCount.incrementAndGet();
                 } catch (Exception e) {
-                    log.error("Check host:[{}] with unknown error", nodeInfo.getIp(), e);
+                    log.error("Check host port:[{}] with unknown error", nodeInfo.getIp(), e);
                     this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, e.getMessage());
                 } finally {
                     checkHostLatch.countDown();
@@ -662,11 +663,11 @@ public class HostService {
             String frontIpPort = key;
             Future<?> task = value;
             if (!task.isDone()) {
-                log.error("Check host:[{}] timeout, cancel the task.", frontIpPort);
+                log.error("Check host port:[{}] timeout, cancel the task.", frontIpPort);
                 String ip = frontIpPort.split("_")[0];
                 int port = Integer.parseInt(frontIpPort.split("_")[1]);
                 TbFront front = frontMapper.getByIpPort(ip, port);
-                this.updateStatus(front.getHostId(), HostStatusEnum.CHECK_FAILED, "Check host timeout.");
+                this.updateStatus(front.getHostId(), HostStatusEnum.CHECK_FAILED, "Check host port timeout.");
                 task.cancel(false);
             }
         });
@@ -674,7 +675,7 @@ public class HostService {
         boolean hostPorkCheckSuccess = checkSuccessCount.get() == CollectionUtils.size(deployNodeInfoList);
         // check if all host init success
         log.log(hostPorkCheckSuccess ? Level.INFO: Level.ERROR,
-            "Host check result, total:[{}], success:[{}]",
+            "Host port check result, total:[{}], success:[{}]",
             CollectionUtils.size(deployNodeInfoList), checkSuccessCount.get());
 
         return hostPorkCheckSuccess;
@@ -714,5 +715,44 @@ public class HostService {
             throw new NodeMgrException(ConstantCode.NOT_ALL_HOST_INIT_SUCCESS);
         }
     }
+
+    /**
+     * check synchronized
+     * check host chain's port before init host, after check host mem/cpu
+     */
+    public boolean syncCheckPortHostList(List<DeployNodeInfo> deployNodeInfoList) {
+        log.info("syncCheckPortHostList deployNodeInfoList:{}", deployNodeInfoList);
+        int successCount = 0;
+        for (final DeployNodeInfo nodeInfo : deployNodeInfoList) {
+            log.info("Check host port:[{}]", nodeInfo.getIp());
+            try {
+                // check chain port
+                Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(nodeInfo.getIp(), 2000,
+                    nodeInfo.getChannelPort(), nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
+                // if reachable, means in use
+                if (portReachable.getKey()) {
+                    log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), nodeInfo.getIp() );
+                    this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, portReachable.getValue() + " Port is in use!");
+                    break;
+                }
+                this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_SUCCESS, "");
+                successCount++;
+            } catch (Exception e) {
+                log.error("Check host:[{}] with unknown error", nodeInfo.getIp(), e);
+                this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, e.getMessage());
+                break;
+            }
+
+        }
+
+        boolean hostPorkCheckSuccess = successCount == CollectionUtils.size(deployNodeInfoList);
+        // check if all host init success
+        log.log(hostPorkCheckSuccess ? Level.INFO: Level.ERROR,
+            "Host check result, total:[{}], success:[{}]",
+            CollectionUtils.size(deployNodeInfoList), successCount);
+
+        return hostPorkCheckSuccess;
+    }
+
 
 }
