@@ -14,15 +14,14 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
-import static com.webank.webase.node.mgr.base.code.ConstantCode.SAME_HOST_ERROR;
-
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
+import com.webank.webase.node.mgr.deploy.entity.ReqAddNode;
+import com.webank.webase.node.mgr.deploy.entity.ReqConfigChain;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -37,18 +36,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.enums.DockerImageTypeEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
-import com.webank.webase.node.mgr.base.tools.SshTools;
-import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
-import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
@@ -91,41 +85,31 @@ public class DeployService {
      * generate chain config and front config in db, scp to remote and async start
      */
     public void configChainAndScp(String chainName, List<DeployNodeInfo> deployNodeInfoList, String[] ipConf,
-        int tagId, int encrtypType, String webaseSignAddr, String agencyName)
+        String imageTag, int encrtypType, String webaseSignAddr, String agencyName)
         throws InterruptedException {
         // convert to host id list by distinct id
         List<Integer> hostIdList = deployNodeInfoList.stream().map(DeployNodeInfo::getHostId).collect(
             Collectors.toList());
-        if (StringUtils.isBlank(agencyName)) {
-            agencyName = constantProperties.getDefaultAgencyName();
-        }
-        log.info("configChainAndScp chainName:{},deployNodeInfoList:{},ipConf:{},tagId:{},encrtypType:{},"
-                + "webaseSignAddr:{},agencyName:{}", chainName, deployNodeInfoList, ipConf, tagId, encrtypType,
+//        if (StringUtils.isBlank(agencyName)) {
+//            agencyName = constantProperties.getDefaultAgencyName();
+//        }
+        log.info("configChainAndScp chainName:{},deployNodeInfoList:{},ipConf:{},imageTag:{},encrtypType:{},"
+                + "webaseSignAddr:{},agencyName:{}", chainName, deployNodeInfoList, ipConf, imageTag, encrtypType,
             webaseSignAddr, agencyName);
 
-        log.info("configChainAndScp check allHostInitSuccess");
+        log.info("configChainAndScp check all host init success");
         // check all host success
-        AtomicBoolean allHostInitSuccess = new AtomicBoolean(true);
-        hostIdList.forEach(hId -> {
-            TbHost host = tbHostMapper.selectByPrimaryKey(hId);
-            if (HostStatusEnum.INIT_SUCCESS.getId() != host.getStatus()) {
-                allHostInitSuccess.set(false);
-            }
-        });
-        if (!allHostInitSuccess.get()) {
-            log.error("configChainAndScp stop for not all host init success");
-            throw new NodeMgrException(ConstantCode.NOT_ALL_HOST_INIT_SUCCESS);
-        }
+        hostService.checkAllHostInitSuc(hostIdList);
 
         log.info("configChainAndScp configChain and init db data");
         // config locally
-        boolean configSuccess = this.configChain(chainName, deployNodeInfoList, ipConf, tagId, encrtypType,
+        boolean configSuccess = this.configChain(chainName, deployNodeInfoList, ipConf, imageTag, encrtypType,
             webaseSignAddr, agencyName);
-        // config success, use ansible to scp config & load image
         if (!configSuccess) {
             log.error("configChainAndScp fail to config chain and init db data");
             throw new NodeMgrException(ConstantCode.CONFIG_CHAIN_LOCALLY_FAIL);
         }
+
         // scp config to host
         log.info("configChainAndScp start scpConfigHostList chainName:{},hostIdList:{}", chainName, hostIdList);
         boolean configHostSuccess = hostService.scpConfigHostList(chainName, hostIdList);
@@ -134,7 +118,7 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.ANSIBLE_INIT_HOST_CDN_SCP_NOT_ALL_SUCCESS);
         }
         // check image
-        hostService.checkImageExistRemote(ipConf, tagId);
+        hostService.checkImageExistRemote(ipConf, imageTag);
         // start
         log.info("configChainAndScp asyncStartChain chainName:{}", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
@@ -148,7 +132,7 @@ public class DeployService {
      * generate chain config locally and async deploy chain
      * @param chainName
      * @param ipConf
-     * @param tagId
+     * @param imageTag
      * @param encryptType
      * @param webaseSignAddr
      * @param agencyName one agency
@@ -156,13 +140,9 @@ public class DeployService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean configChain(String chainName,  List<DeployNodeInfo> deployNodeInfoList, String[] ipConf, int tagId, int encryptType,
-        String webaseSignAddr, String agencyName) throws NodeMgrException {
+    public boolean configChain(String chainName, List<DeployNodeInfo> deployNodeInfoList, String[] ipConf, String imageTag,
+        int encryptType, String webaseSignAddr, String agencyName) throws NodeMgrException {
         log.info("start configChain chainName:{},ipConf:{}", chainName, ipConf);
-//        DockerImageTypeEnum imageTypeEnum = DockerImageTypeEnum.getById(dockerImageType);
-//        if (imageTypeEnum == null){
-//            throw new NodeMgrException(ConstantCode.UNKNOWN_DOCKER_IMAGE_TYPE);
-//        }
 
         if (StringUtils.isBlank(chainName)) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
@@ -176,7 +156,6 @@ public class DeployService {
             return true;
         }
 
-
         // check WeBASE Sign accessible
         if (StringUtils.isBlank(webaseSignAddr)
                 || ! NetUtils.checkAddress(webaseSignAddr, 2000) ) {
@@ -186,7 +165,7 @@ public class DeployService {
         // generate config files(chain's config&cert) gen front's yml
         // and insert data to db （chain update as initialized
         boolean genSuccess = chainService.generateConfigLocalAndInitDb(chainName, deployNodeInfoList, ipConf,
-            tagId, encryptType, webaseSignAddr, agencyName);
+            imageTag, encryptType, webaseSignAddr, agencyName);
 
         return genSuccess;
         // start node and start front
@@ -249,19 +228,23 @@ public class DeployService {
 
     /**
      * Add a node. 扩容节点
-     *
-     * @param add
-     * @return
-     * @throws NodeMgrException
+     * include: gen config & update other nodes & restart all node
+     * after check host and init host(dependency,port,image)
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<RetCode, String> addNodes(ReqAdd add) throws NodeMgrException {
-        String chainName = add.getChainName();
-        String ip = add.getIp() ;
-        int num = add.getNum();
-        String agencyName = add.getAgencyName();
-        byte dockerImageType = add.getDockerImageType();
-        int groupId = add.getGroupId();
+    public Pair<RetCode, String> addNodes(ReqAddNode addNode) throws NodeMgrException {
+
+        int groupId = addNode.getGroupId();
+        String chainName = addNode.getChainName();
+        String agencyName = addNode.getAgencyName();
+
+        List<DeployNodeInfo> deployNodeInfoList = addNode.getDeployNodeInfoList();
+        // convert to host id list by distinct id
+        List<Integer> hostIdList = deployNodeInfoList.stream().map(DeployNodeInfo::getHostId).collect(
+            Collectors.toList());
+//        if (StringUtils.isBlank(agencyName)) {
+//            agencyName = constantProperties.getDefaultAgencyName();
+//        }
 
         log.info("Add node check chain name:[{}] exists...", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
@@ -269,95 +252,60 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
         }
 
-        // allow local
-//        if (IPUtil.isLocal(ip)){
-//            throw new NodeMgrException(SAME_HOST_ERROR);
-//        }
+        log.info("addNodes chainName:{},deployNodeInfoList:{},tagId:{},encrtypType:{},"
+                + "webaseSignAddr:{},agencyName:{}", chainName, deployNodeInfoList,
+            chain.getVersion(), chain.getEncryptType(), chain.getWebaseSignAddr(), agencyName);
 
-        log.info("Add node check ip format:[{}]...", ip);
-        if (!ValidateUtil.ipv4Valid(ip)) {
-            throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
-        }
+        // check all host success (old or new host will set as init success in step init_host)
+        hostService.checkAllHostInitSuc(hostIdList);
 
-        // todo check ip connect by ansible
-        log.info("Add node check ip reachable:[{}]...", ip);
-        if (!SshTools.connect(ip, constantProperties.sshDefaultUser, constantProperties.sshDefaultPort,
-            constantProperties.getPrivateKey())) {
-            throw new NodeMgrException(ConstantCode.HOST_CONNECT_ERROR);
-        }
+        TbAgency agency = this.agencyService.initAgencyIfNew(
+            agencyName, chain.getId(), chainName, chain.getEncryptType());
 
-        // select host list by agency id
-        List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
+        // store node count in tbHost's remark
+        List<TbHost> hostList = hostService.selectDistinctHostListById(hostIdList);
+        for (TbHost tbHost : hostList) {
+            // node number in one host when adding
+            int num = Integer.parseInt(tbHost.getRemark());
+            // generate new sdk cert and scp to host todo if exist host, gen agency cert again?
+            log.info("addNodes generateHostSDKAndScp");
+            hostService.generateHostSDKAndScp(chain.getEncryptType(), chain.getChainName(), tbHost, agency.getAgencyName());
 
-        // check host exists by ip
-        TbHost tbHostExists = tbHostList.stream().filter(host ->
-            StringUtils.equalsIgnoreCase(ip, host.getIp())).findFirst().orElse(null);
+            // update group node count
+            log.info("addNodes saveOrUpdateNodeCount groupId:{},new node num:{}", groupId, num);
+            groupService.saveOrUpdateNodeCount(groupId, num, chain.getId(), chainName);
 
-        // init agency cert
-        TbAgency agency = null;
-        if (tbHostExists == null) {
-            log.info("Add node check num:[{}]...", num);
-            if (num <= 0 || num > ConstantProperties.MAX_NODE_ON_HOST) {
-                throw new NodeMgrException(ConstantCode.NODES_NUM_EXCEED_MAX_ERROR);
+            // init front and node (gen node cert & init db)
+            try {
+                // gen node cert and gen front's yml
+                log.info("addNodes initFrontAndNode");
+                List<TbFront> newFrontList = frontService.initFrontAndNode(num, chain,
+                    tbHost, agency.getId(), agency.getAgencyName(), groupId, FrontStatusEnum.ADDING);
+
+                // generate(or update existed) related node config files
+                log.info("addNodes updateNodeConfigIniByGroupId groupId:{}", groupId);
+                frontService.updateNodeConfigIniByGroupId(chain, groupId);
+
+                // generate(or update existed) new group(node) config files and scp to remote
+                log.info("addNodes generateNewNodesGroupConfigsAndScp chain:{},groupId:{},ip:{},newFrontList:{}",
+                    chain, groupId, tbHost.getIp(), newFrontList);
+                groupService.generateNewNodesGroupConfigsAndScp(chain, groupId,
+                    tbHost.getIp(), newFrontList);
+
+                // init host
+                // start all front on the host
+                // restart related front
+                log.info("addNodes asyncAddNode");
+                nodeAsyncService.asyncAddNode(chain, tbHost, groupId, OptionType.MODIFY_CHAIN, newFrontList);
+            } catch (Exception e) {
+                log.error("Add node error", e);
+                throw new NodeMgrException(ConstantCode.ADD_NODE_WITH_UNKNOWN_EXCEPTION_ERROR, e);
             }
 
-            if (StringUtils.isBlank(agencyName)) {
-                // agency name cannot be blank when host ip is new
-                throw new NodeMgrException(ConstantCode.AGENCY_NAME_EMPTY_ERROR);
-            }
-
-            // check docker image exists, default pull cdn
-            DockerImageTypeEnum dockerImageTypeEnum = DockerImageTypeEnum.getById(dockerImageType);
-            dockerImageTypeEnum = dockerImageTypeEnum == null ? DockerImageTypeEnum.PULL_CDN : dockerImageTypeEnum;
-            if (DockerImageTypeEnum.MANUAL == dockerImageTypeEnum){
-                this.hostService.checkImageExists(Collections.singleton(ip), chain.getVersion());
-            }
-
-            // a new host IP address, check agency name is new
-            agency = this.agencyService.initAgencyIfNew(
-                    agencyName, chain.getId(), chainName, chain.getEncryptType());
-
-            // generate sdk config files
-            tbHostExists = this.hostService.generateHostSDKAndScp(chain.getEncryptType(), chain.getChainName(), add.getRootDirOnHost(),
-                ip, agency.getAgencyName());
-        } else {
-            // exist host
-            agency = this.tbAgencyMapper.getByChainIdAndAgencyName(chain.getId(), agencyName);
-
-            int currentNodeNum = this.frontMapper.countByHostId(tbHostExists.getId());
-            if (currentNodeNum + num > ConstantProperties.MAX_NODE_ON_HOST){
-                throw new NodeMgrException(ConstantCode.NODES_NUM_EXCEED_MAX_ERROR);
-            }
         }
 
-        // init group, if group is new, return true
-        Pair<TbGroup, Boolean> isNewGroup = this.groupService.saveOrUpdateNodeCount(groupId,
-                num, chain.getId(), chainName);
-        TbGroup group = isNewGroup.getKey();
-        boolean newGroup = isNewGroup.getValue();
 
-        // todo add node split gene config and start
-        // init front and node
-        try {
-            // gen node cert and gen front's yml
-            List<TbFront> newFrontList = this.frontService.initFrontAndNode(num, chain,
-                    tbHostExists, agency.getId(), agency.getAgencyName(), group, FrontStatusEnum.ADDING);
 
-            // generate(or update existed) related node config files
-            this.frontService.updateNodeConfigIniByGroupId(chain, groupId);
-
-            // generate(or update existed) new group(node) config files and scp to remote
-            this.groupService.generateNewNodesGroupConfigsAndScp(newGroup, chain, groupId,
-                    tbHostExists.getIp(), newFrontList);
-
-            // init host
-            // start all front on the host
-            // restart related front
-            this.nodeAsyncService.asyncAddNode(chain, tbHostExists, group, OptionType.MODIFY_CHAIN, newFrontList);
-        } catch (Exception e) {
-            log.error("Add node error", e);
-            throw new NodeMgrException(ConstantCode.ADD_NODE_WITH_UNKNOWN_EXCEPTION_ERROR, e);
-        }
 
         return Pair.of(ConstantCode.SUCCESS, "success");
     }
@@ -417,15 +365,11 @@ public class DeployService {
 
     /**
      *  @param nodeId
-     * @param deleteHost default false
-     * @param deleteAgency
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteNode(String nodeId,
-                           boolean deleteHost,
-                           boolean deleteAgency ) {
-        log.info("deleteNode nodeId:{},deleteHost:{},deleteAgency:{}", nodeId, deleteHost, deleteAgency);
+    public void deleteNode(String nodeId) {
+        log.info("deleteNode nodeId:{}", nodeId);
         // remove front
         TbFront front = this.frontMapper.getByNodeId(nodeId);
         if (front == null) {
@@ -443,7 +387,7 @@ public class DeployService {
 
         // get delete node's group id list from ./NODES_ROOT/default_chain/ip/node[x]/conf/group.[groupId].genesis
         Path nodePath = this.pathService.getNodeRoot(chain.getChainName(), host.getIp(), front.getHostIndex());
-        Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath,encryptType);
+        Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
         try {
             // update related node's config.ini file, e.g. p2p
             this.frontService.updateNodeConfigIniByGroupList(chain, groupIdSet);
@@ -467,17 +411,12 @@ public class DeployService {
         // delete front, node in db
         this.frontService.removeFront(front.getFrontId());
 
-        // delete host, default false
-        if (deleteHost) {
-            this.hostService.deleteHostWithNoNode(host.getId());
-        }
-
         // delete agency
-        this.agencyService.deleteAgencyWithNoNode(deleteAgency,host.getId());
+//        this.agencyService.deleteAgencyWithNoNode(deleteAgency,host.getId());
 
         // restart related node
         this.nodeAsyncService.asyncRestartRelatedFront(chain.getId(), groupIdSet, OptionType.MODIFY_CHAIN,
-                FrontStatusEnum.STARTING,FrontStatusEnum.RUNNING,FrontStatusEnum.STOPPED);
+                FrontStatusEnum.STARTING, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
     }
 
     /**
@@ -494,7 +433,6 @@ public class DeployService {
 
         return this.chainService.progress(chain);
     }
-
 
 }
 

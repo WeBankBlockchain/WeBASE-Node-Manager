@@ -28,6 +28,7 @@ import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
+import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
@@ -92,6 +93,8 @@ public class HostService {
     @Autowired private FrontService frontService;
     @Autowired private TbConfigMapper tbConfigMapper;
     @Autowired private ChainService chainService;
+    @Autowired
+    private ConfigService configService;
 
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
@@ -183,7 +186,7 @@ public class HostService {
                         // docker pull image(ansible already check exist before pull)
                         try {
                             log.info("initHostAndDocker pull docker ip:{}, imageTag:{}, imagePullType:{}", tbHost.getIp(), imageTag, imagePullType);
-                            this.dockerOptions.pullImage(tbHost.getIp(), imageTag, imagePullType);
+                            this.dockerOptions.pullImage(tbHost.getIp(), imageTag, imagePullType, tbHost.getRootDir());
                         } catch (Exception e) {
                             log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
                             this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
@@ -287,7 +290,7 @@ public class HostService {
         }
 
         initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
-        log.error("Check init host time, cancel unfinished tasks.");
+        log.info("Check init host time, cancel unfinished tasks.");
         taskMap.entrySet().forEach((entry)->{
             int hostId = entry.getKey();
             Future<?> task = entry.getValue();
@@ -329,34 +332,35 @@ public class HostService {
     }
 
     /**
-     * Init a host, generate sdk files(crt files and node.[key,crt])
-     * and insert into db.
+     * generate sdk files(crt files and node.[key,crt]) and scp to host
      *
      * when add node
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbHost generateHostSDKAndScp(byte encryptType, String chainName, String rootDirOnHost, String ip, String agencyName)
+    public void generateHostSDKAndScp(byte encryptType, String chainName, TbHost host, String agencyName)
         throws NodeMgrException {
+        log.info("start generateHostSDKAndScp encryptType:{},chainName:{},host:{},agencyName:{}", encryptType, chainName, host, agencyName);
+        String ip = host.getIp();
         // new host, generate sdk dir first
         Path sdkPath = this.pathService.getSdk(chainName, ip);
 
         if (Files.exists(sdkPath)){
-            log.warn("Exists sdk dir of host:[{}:{}], delete first.", ip,sdkPath.toAbsolutePath().toAbsolutePath());
+            log.warn("generateHostSDKAndScp Exists sdk dir of host:[{}:{}], delete first.",
+                ip, sdkPath.toAbsolutePath().toAbsolutePath());
             try {
                 FileUtils.deleteDirectory(sdkPath.toFile());
             } catch (IOException e) {
                 throw new NodeMgrException(ConstantCode.DELETE_OLD_SDK_DIR_ERROR);
             }
         }
-
+        log.info("generateHostSDKAndScp execGenNode");
         // call shell to generate new node config(private key and crt)
         ExecuteResult executeResult = this.deployShellService.execGenNode(
                 encryptType, chainName, agencyName, sdkPath.toAbsolutePath().toString());
         if (executeResult.failed()) {
+            log.error("exec gen node cert shell error!");
              throw new NodeMgrException(ConstantCode.EXEC_GEN_SDK_ERROR);
         }
-        // get host dir by ip
-        TbHost host = tbHostMapper.getByIp(ip);
 
         // init sdk dir
         NodeConfig.initSdkDir(encryptType, sdkPath);
@@ -365,12 +369,10 @@ public class HostService {
         String src = String.format("%s", sdkPath.toAbsolutePath().toString());
         String dst = PathService.getChainRootOnHost(host.getRootDir(), chainName);
 
-        log.info("Send files from:[{}] to:[{}:{}].", src, ip, dst);
+        log.info("generateHostSDKAndScp scp: Send files from:[{}] to:[{}:{}].", src, ip, dst);
         ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
+        log.info("end generateHostSDKAndScp");
 
-        // insert host into db
-        return ((HostService) AopContext.currentProxy())
-                .insert(ip, rootDirOnHost, HostStatusEnum.ADDED,"");
     }
 
     /**
@@ -378,8 +380,8 @@ public class HostService {
      * @param hostId
      */
     @Transactional
-    public void deleteHostWithNoNode(int hostId){
-        log.info("deleteHostWithNoNode hostId:{}", hostId);
+    public void deleteHostWithoutNode(int hostId){
+        log.info("deleteHostWithoutNode hostId:{}", hostId);
         TbHost host = this.tbHostMapper.selectByPrimaryKey(hostId);
         if (host == null){
             log.warn("Host:[{}] not exists.", hostId);
@@ -394,6 +396,17 @@ public class HostService {
             log.error("host still have node on it");
             throw new NodeMgrException(ConstantCode.DELETE_HOST_FAIL_FOR_STILL_CONTAIN_NODE);
         }
+    }
+
+
+    /**
+     * deleteHostChainDir b chain id
+     */
+    public void deleteHostChainDir(TbChain chain) {
+        log.info("start deleteHostChainDir chain:{}", chain);
+        List<TbFront> frontList = frontService.selectFrontListByChainId(chain.getId());
+        List<Integer> hostIdList = frontList.stream().map(TbFront::getHostId).collect(Collectors.toList());
+        this.mvHostChainDirByIdList(chain.getChainName(), hostIdList);
     }
 
     /**
@@ -415,7 +428,6 @@ public class HostService {
     }
 
     /**
-     * todo add check
      * @param chainId
      */
     public int hostProgress(int chainId){
@@ -476,21 +488,42 @@ public class HostService {
         Map<Integer, Future> taskMap = new HashedMap<>();
 
         for (final TbHost tbHost : tbHostList) {
-            log.info("Check host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
+            log.info("Check host:[{}], status:[{}], remark:[{}]", tbHost.getIp(), tbHost.getStatus(), tbHost.getRemark());
 
+            // check if host check success
             Future<?> task = threadPoolTaskScheduler.submit(() -> {
                 try {
-                    // check if host check success
+                    // fetch remark's nodeCount
+                    int nodeCount = Integer.parseInt(tbHost.getRemark());
+
+                    log.info("Check host memory/cpu:[{}] nodeCount:{}, by exec shell script:[{}]",
+                        tbHost.getIp(), nodeCount, constant.getHostCheckShell());
+                    // check memory every time
+                    try {
+                        ansibleService.execHostCheckShell(tbHost.getIp(), nodeCount);
+                    } catch (NodeMgrException e) {
+                        log.error("Check mem/cpu on host:[{}] failed",
+                            tbHost.getIp(), e);
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_FAILED,
+                            e.getRetCode().getAttachment());
+                        return;
+                    } catch (Exception e) {
+                        log.error("Check mem/cpu on host:[{}] failed",
+                            tbHost.getIp(), e);
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.CHECK_FAILED,
+                            e.getMessage());
+                        return;
+                    }
+
+                    // if already check success once time, no nedd check again
                     if (!HostStatusEnum.hostCheckSuccess(tbHost.getStatus())) {
                         log.info("Check host:[{}] by exec shell script:[{},{}]", tbHost.getIp(),
                             constant.getHostCheckShell(), constant.getDockerCheckShell());
 
-                        // fetch remark's nodeCount
-                        int nodeCount = Integer.parseInt(tbHost.getRemark());
                         // exec host check shell script
                         try {
                             ansibleService.execPing(tbHost.getIp());
-                            ansibleService.execHostCheckShell(tbHost.getIp(), nodeCount);
+                            // ansibleService.execHostCheckShell(tbHost.getIp(), nodeCount);
                             ansibleService.execDockerCheckShell(tbHost.getIp());
                         } catch (NodeMgrException e) {
                             log.error("Exec host check shell script on host:[{}] failed",
@@ -521,7 +554,7 @@ public class HostService {
             taskMap.put(tbHost.getId(), task);
         }
         checkHostLatch.await(constant.getExecHostCheckTimeout(), TimeUnit.MILLISECONDS);
-        log.error("Verify check_host time, cancel unfinished tasks.");
+        log.info("Verify check_host time, cancel unfinished tasks.");
         taskMap.forEach((key, value) -> {
             int hostId = key;
             Future<?> task = value;
@@ -559,15 +592,26 @@ public class HostService {
         return hostList;
     }
 
+    /**
+     * select host list by id list
+     * distinct host and save node count(repeat time) in host's remark
+     * @param hostIdList
+     * @return
+     */
     public List<TbHost> selectDistinctHostListById(List<Integer> hostIdList){
         // distinct repeat hostId
         Map<Integer, Long> distinctHostIdMap = hostIdList.stream().collect(Collectors.groupingBy(h -> h, Collectors.counting()));
+        log.info("selectDistinctHostListById distinctHostIdMap:{}", distinctHostIdMap);
         // mark repeat time in Host's remark
         List<TbHost> hostList = new ArrayList<>();
         for (Integer hostId: distinctHostIdMap.keySet()) {
+            int count = 0;
             Long repeatTime = distinctHostIdMap.get(hostId);
+            count = repeatTime.intValue();
+
             TbHost host = tbHostMapper.selectByPrimaryKey(hostId);
-            host.setRemark(repeatTime.toString());
+            // store repeat time as node count
+            host.setRemark(String.valueOf(count));
             // add in list
             hostList.add(host);
         }
@@ -586,15 +630,15 @@ public class HostService {
         AtomicInteger checkSuccessCount = new AtomicInteger(0);
         Map<String, Future> taskMap = new HashedMap<>(); //key is ip+"_"+frontPort
 
+        // todo 一个host多个端口时，需要通过host来检测
         for (final DeployNodeInfo nodeInfo : deployNodeInfoList) {
             log.info("Check host:[{}]", nodeInfo.getIp());
 
             Future<?> task = threadPoolTaskScheduler.submit(() -> {
                 try {
                     // check chain port
-                    Pair<Boolean, Integer> portReachable = NetUtils
-                        .checkPorts(nodeInfo.getIp(), 2000,
-                            nodeInfo.getChannelPort(), nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
+                    Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(nodeInfo.getIp(), 2000,
+                        nodeInfo.getChannelPort(), nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
                     if (portReachable.getKey()) {
                         log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), nodeInfo.getIp() );
                         this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, "Port is in use!");
@@ -613,7 +657,7 @@ public class HostService {
             taskMap.put(taskKey, task);
         }
         checkHostLatch.await(constant.getExecHostCheckTimeout(), TimeUnit.MILLISECONDS);
-        log.error("Verify check_port time, cancel unfinished tasks.");
+        log.info("Verify check_port time, cancel unfinished tasks.");
         taskMap.forEach((key, value) -> {
             String frontIpPort = key;
             Future<?> task = value;
@@ -639,20 +683,36 @@ public class HostService {
     /**
      * check image before start chain
      * @param ipConf
-     * @param tagId
+     * @param imageTag
      */
-    public void checkImageExistRemote(String[] ipConf, int tagId) {
+    public void checkImageExistRemote(String[] ipConf, String imageTag) {
         // parse ipConf config
         log.info("Parse ipConf content....");
         List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf);
-        TbConfig imageConfig = tbConfigMapper.selectByPrimaryKey(tagId);
-        if (imageConfig == null || StringUtils.isBlank(imageConfig.getConfigValue())) {
-            throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
-        }
+        configService.checkValueInDb(imageTag);
         // check docker image exists before start
         Set<String> ipSet = ipConfigParseList.stream().map(IpConfigParse::getIp).collect(Collectors.toSet());
-        this.checkImageExists(ipSet, imageConfig.getConfigValue());
+        this.checkImageExists(ipSet, imageTag);
     }
 
+    /**
+     * if not all, throw error
+     * @return void
+     * @param hostIdList
+     */
+    public void checkAllHostInitSuc(List<Integer> hostIdList) {
+        log.info("check all hosts to add node");
+        AtomicBoolean allHostInitSuccess = new AtomicBoolean(true);
+        hostIdList.forEach(hId -> {
+            TbHost host = tbHostMapper.selectByPrimaryKey(hId);
+            if (HostStatusEnum.INIT_SUCCESS.getId() != host.getStatus()) {
+                allHostInitSuccess.set(false);
+            }
+        });
+        if (!allHostInitSuccess.get()) {
+            log.error("configChainAndScp stop for not all host init success");
+            throw new NodeMgrException(ConstantCode.NOT_ALL_HOST_INIT_SUCCESS);
+        }
+    }
 
 }

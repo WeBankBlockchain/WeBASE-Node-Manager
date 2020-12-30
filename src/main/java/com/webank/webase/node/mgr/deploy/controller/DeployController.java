@@ -22,7 +22,7 @@ import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.deploy.entity.ReqAdd;
+import com.webank.webase.node.mgr.deploy.entity.ReqAddNode;
 import com.webank.webase.node.mgr.deploy.entity.ReqConfigChain;
 import com.webank.webase.node.mgr.deploy.entity.ReqInitHost;
 import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
@@ -118,7 +118,7 @@ public class DeployController extends BaseController {
 
             // generate node config and return shell execution log
             deployService.configChainAndScp(deploy.getChainName(), deploy.getDeployNodeInfoList(),
-                    deploy.getIpconf(), deploy.getTagId(), deploy.getEncryptType(),
+                    deploy.getIpconf(), deploy.getImageTag(), deploy.getEncryptType(),
                     deploy.getWebaseSignAddr(), deploy.getAgencyName());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
@@ -141,11 +141,14 @@ public class DeployController extends BaseController {
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(checkPort.getDeployNodeInfoList()), startTime);
+        log.info("Start checkNodePort:[{}], start:[{}]", JsonTools.toJSONString(checkPort.getDeployNodeInfoList()), startTime);
 
         try {
             // generate node config and return shell execution log
             boolean checkPortRes = hostService.checkPortHostList(checkPort.getDeployNodeInfoList());
+            if (!checkPortRes) {
+                return new BaseResponse(ConstantCode.CHECK_HOST_PORT_IN_USE);
+            }
             return new BaseResponse(ConstantCode.SUCCESS, checkPortRes);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
@@ -156,7 +159,7 @@ public class DeployController extends BaseController {
 
     /**
      * 扩容一个节点：配置节点、更新其他节点配置、启动新节点（重启旧节点）
-     * @param add
+     * @param addNode
      * @param result
      * @return
      * @throws NodeMgrException
@@ -164,14 +167,14 @@ public class DeployController extends BaseController {
     @PostMapping(value = "node/add")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse addNode(
-            @RequestBody @Valid ReqConfigChain configNew,
+            @RequestBody @Valid ReqAddNode addNode,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
 
-        log.info("Start add node configNew:[{}] , start[{}]", JsonTools.toJSONString(configNew), startTime);
+        log.info("Start add node configNew:[{}] , start[{}]", JsonTools.toJSONString(addNode), startTime);
 
-        Pair<RetCode, String> addResult = this.deployService.addNodes(configNew);
+        Pair<RetCode, String> addResult = this.deployService.addNodes(addNode);
         return new BaseResponse(addResult.getKey(), addResult.getValue());
     }
 
@@ -233,10 +236,9 @@ public class DeployController extends BaseController {
         String nodeId = delete.getNodeId();
         Instant startTime = Instant.now();
 
-        log.info("Delete node nodeId:[{}], now:[{}]", nodeId, startTime);
+        log.info("Delete node delete:[{}], now:[{}]", delete, startTime);
 
-        this.deployService.deleteNode(delete.getNodeId(),
-                delete.isDeleteHost(),delete.isDeleteAgency());
+        this.deployService.deleteNode(delete.getNodeId());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
