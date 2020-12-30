@@ -10,13 +10,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- *
+ * check port by telnet: if connection reachable, it means port in use
+ * todo 防火墙将导致联不通，即，无法通过telnet测试是否端口已启用
  */
 
 @Slf4j
 public class NetUtils {
 
-    public static Pair<Boolean,Integer> checkPorts(String ip, int timeout, int ... portArray) {
+    public static Pair<Boolean, Integer> checkPorts(String ip, int timeout, int ... portArray) {
         if (ArrayUtils.isEmpty(portArray)){
             return Pair.of(false,0);
         }
