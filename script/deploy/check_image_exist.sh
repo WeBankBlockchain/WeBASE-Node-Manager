@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SUCCESS=0
+FOUND=0
 NOT_FOUND=1
 PARAM_ERROR=2
 
@@ -47,7 +47,7 @@ function grepImage() {
       exit $NOT_FOUND
   else
       echo "Found ${imageFullName}"
-      exit $SUCCESS
+      exit $FOUND
   fi
 }
 grepImage
