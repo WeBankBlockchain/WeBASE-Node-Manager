@@ -313,7 +313,7 @@ public class AnsibleService {
     public void mvDirOnRemote(String ip, String src, String dst){
         if (StringUtils.isNoneBlank(ip, src, dst)) {
             // String rmCommand = String.format("sudo mv -fv %s %s", src, dst);
-            // todo rm sudo
+            // rm sudo
             String rmCommand = String.format("mv -fv %s %s", src, dst);
             log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
             this.exec(ip, rmCommand);
