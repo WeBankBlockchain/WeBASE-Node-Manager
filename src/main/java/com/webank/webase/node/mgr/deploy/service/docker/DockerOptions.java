@@ -47,8 +47,9 @@ public interface DockerOptions {
      * @param ip
      * @param imageTag
      * @param imagePullType
+     * @param downloadPath
      */
-    public void pullImage(String ip, String imageTag, int imagePullType);
+    public void pullImage(String ip, String imageTag, int imagePullType, String downloadPath);
 
 
 
