@@ -13,51 +13,6 @@
  */
 package com.webank.webase.node.mgr.front;
 
-import com.webank.webase.node.mgr.base.enums.FrontDeployStatusEnum;
-import com.webank.webase.node.mgr.base.tools.NetUtils;
-import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
-import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
-import com.webank.webase.node.mgr.deploy.service.AnsibleService;
-import com.webank.webase.node.mgr.deploy.service.HostService;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.map.HashedMap;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.Level;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
-import org.springframework.aop.framework.AopContext;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
@@ -78,9 +33,12 @@ import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AgencyService;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
+import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
@@ -100,8 +58,36 @@ import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
-
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * service of web3.
@@ -567,7 +553,7 @@ public class FrontService {
      * @param host
      * @param agencyId
      * @param agencyName
-     * @param group
+     * @param groupId
      * @param frontStatusEnum
      * @return
      * @throws NodeMgrException
@@ -575,9 +561,9 @@ public class FrontService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public List<TbFront> initFrontAndNode(int num, TbChain chain, TbHost host, int agencyId,
-                                          String agencyName, TbGroup group,FrontStatusEnum frontStatusEnum)
+                                          String agencyName, int groupId, FrontStatusEnum frontStatusEnum)
         throws NodeMgrException, IOException {
-
+        log.info("start initFrontAndNode ");
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
         // the node dir on remote host
@@ -585,7 +571,6 @@ public class FrontService {
         String imageTag = chain.getVersion();
         int hostId = host.getId();
         String ip = host.getIp();
-        int groupId = group.getGroupId();
 
         // if host is a new one, currentIndexOnHost will be null
         Integer maxIndexOnHost = this.frontMapper.getNodeMaxIndex(hostId);
@@ -768,7 +753,6 @@ public class FrontService {
 
         TbChain chain = tbChainMapper.selectByPrimaryKey(front.getChainId());
         byte encryptType = chain.getEncryptType();
-//        final byte encryptType = FrontService.getEncryptType(front.getImageTag());
 
         // set front status to stopped to avoid error for time task.
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), before);
@@ -814,7 +798,7 @@ public class FrontService {
                         }
                     }));
                 }
-            }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
+            }, Instant.now().plusMillis(constant.getDockerRestartPeriodTime()));
             return true;
         } catch (Exception e) {
             log.error("Start front:[{}:{}] failed.",front.getFrontIp(), front.getHostIndex(),e);
@@ -927,7 +911,7 @@ public class FrontService {
      * @param agencyId
      */
     @Transactional
-    public void deleteFrontByAgencyId(String chainName, int agencyId){
+    public void deleteFrontByAgencyId(int agencyId){
         log.info("Delete front data by agency id:[{}].", agencyId);
 
         // select host, front, group in agency
@@ -937,7 +921,6 @@ public class FrontService {
             return ;
         }
 
-        List<Integer> hostIdList = new ArrayList<>();
         for (TbFront front : frontList) {
             TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
             log.info("rm host container by host ip:{}", host.getIp());
@@ -950,16 +933,11 @@ public class FrontService {
 
 //            log.info("Delete front group map data by front id:[{}].", front.getFrontId());
 //            this.frontGroupMapMapper.removeByFrontId(front.getFrontId());
-            // record host id to mv host's chain dir(might repeat and don't mind)
-            hostIdList.add(host.getId());
         }
 
         // delete front in batch
         this.frontMapper.deleteByAgencyId(agencyId);
         log.info("end deleteFrontByAgencyId");
-        // delete front->host(related but no more front host)
-        log.info("start deleteFrontByAgencyId chainName:{}, hostIdList:{}", chainName, hostIdList);
-        hostService.mvHostChainDirByIdList(chainName, hostIdList);
     }
 
     /**
