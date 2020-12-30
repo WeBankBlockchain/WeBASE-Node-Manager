@@ -247,19 +247,21 @@ public class GroupService {
      */
     @Transactional
     public synchronized void resetGroupList() {
-        if (! chainService.runTask()) {
-            return ;
+        if (!chainService.runTask()) {
+            log.warn("resetGroupList jump over for runTask");
+            return;
         }
 
         Instant startTime = Instant.now();
         log.info("start resetGroupList. startTime:{}", startTime.toEpochMilli());
 
-        //all groupId from chain and all node, to check the whole group whether normal
+        // all groupId from chain and all node, to check the whole group whether normal
         Set<Integer> allGroupSet = new HashSet<>();
 
-        //get all front
-        List<TbFront> frontList = frontService.getFrontList(new FrontParam());
+        // get all front
+        List<TbFront> frontList = frontMapper.getAllList();
         if (frontList == null || frontList.size() == 0) {
+            log.info("resetGroupList frontList empty, jump over");
             return;
         }
 
@@ -300,6 +302,7 @@ public class GroupService {
 	 * @param allGroupSet to record all group from each front
 	 */
 	private void saveDataOfGroup(List<TbFront> frontList, Set<Integer> allGroupSet) {
+	    log.info("saveDataOfGroup frontList:{}", frontList);
 		for (TbFront front : frontList) {
             String frontIp = front.getFrontIp();
 			int frontPort = front.getFrontPort();
@@ -312,7 +315,8 @@ public class GroupService {
 				continue;
 			}
 			// update by group list on chain
-			for (String groupId : groupIdList) {
+            log.info("saveDataOfGroup groupIdList:{}", groupIdList);
+            for (String groupId : groupIdList) {
 				Integer gId = Integer.valueOf(groupId);
 
 				allGroupSet.add(gId);
@@ -331,7 +335,7 @@ public class GroupService {
 				TbGroup checkGroupExist = getGroupById(gId);
 				if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
 					saveGroup(gId, groupPeerList.size(), "synchronous",
-							GroupType.SYNC, GroupStatus.NORMAL,front.getChainId(),front.getChainName());
+							GroupType.SYNC, GroupStatus.NORMAL, front.getChainId(),front.getChainName());
 				}
 				// refresh front group map by group list on chain
 				// different from checkGroupMapByLocalGroupList which update by local groupList
@@ -413,11 +417,13 @@ public class GroupService {
      * @param allGroupOnChain if groupid not in allGroupSet, remove it
      */
     private void checkAndUpdateGroupStatus(Set<Integer> allGroupOnChain) {
+        log.info("checkAndUpdateGroupStatus allGroupOnChain:{}", allGroupOnChain);
         if (CollectionUtils.isEmpty(allGroupOnChain)) {
             return;
         }
 
         List<TbGroup> allLocalGroup = getGroupList(null);
+        log.info("checkAndUpdateGroupStatus allLocalGroup:{}", allLocalGroup);
         if (CollectionUtils.isEmpty(allLocalGroup)) {
             return;
         }
@@ -675,17 +681,17 @@ public class GroupService {
         }
         checkGroupId(groupId);
         log.warn("removeAllDataByGroupId! groupId:{}", groupId);
-        //remove groupId.
+        // remove groupId.
         groupMapper.remove(groupId);
-        //remove mapping.
+        // remove mapping.
         frontGroupMapService.removeByGroupId(groupId);
-        //remove contract
+        // remove contract
         contractService.deleteByGroupId(groupId);
-        //remove method
+        // remove method
         methodService.deleteByGroupId(groupId);
-        //remove node
+        // remove node
         nodeService.deleteByGroupId(groupId);
-        //remove transDaily
+        // remove transDaily
         transDailyService.deleteByGroupId(groupId);
         //drop table.
         tableService.dropTableByGroupId(groupId);
@@ -918,6 +924,7 @@ public class GroupService {
     @Transactional(propagation = Propagation.REQUIRED)
     public TbGroup saveGroup(int groupId, int nodeCount, String groupDesc,
                              GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
+        log.info("saveGroup groupId:{},groupStatus:{}", groupId, groupStatus);
         if (groupId == 0) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
@@ -1124,16 +1131,14 @@ public class GroupService {
 
     /**
      * generate group.x.ini group.x.genesis
-     * @param newGroup
      * @param chain
      * @param groupId
      * @param ip
      * @param newFrontList
      * @throws IOException
      */
-    public void generateNewNodesGroupConfigsAndScp(
-           boolean newGroup, TbChain chain, int groupId, String ip,
-           List<TbFront> newFrontList) throws IOException {
+    public void generateNewNodesGroupConfigsAndScp(TbChain chain, int groupId, String ip,
+           List<TbFront> newFrontList) {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
         long now = System.currentTimeMillis();
@@ -1152,21 +1157,22 @@ public class GroupService {
             // local node root
             Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
 
-            if (newGroup) {
-                // generate conf/group.[groupId].ini
-                ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
-            } else {
+//            if (newGroup) {
+//                // generate conf/group.[groupId].ini
+//                ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
                 // copy old group files
-                if (oldFront != null) {
-                    Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
-                    NodeConfig.copyGroupConfigFiles(oldNodePath, nodeRoot, groupId);
-                }
+            if (oldFront != null) {
+                Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
+                NodeConfig.copyGroupConfigFiles(oldNodePath, nodeRoot, groupId);
             }
+
 
             // scp node to remote host
             // NODES_ROOT/[chainName]/[ip]/node[index] as a {@link Path}, a directory.
             String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
-            String dst = PathService.getChainRootOnHost(chain.getRootDir(),chainName);
+            // get host root dir
+            TbHost tbHost = tbHostMapper.getByIp(ip);
+            String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
 
             log.info("Send files from:[{}] to:[{}:{}].", src, ip, dst);
             try {
