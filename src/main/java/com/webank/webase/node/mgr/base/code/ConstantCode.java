@@ -271,6 +271,10 @@ public class ConstantCode {
     public static final RetCode ANSIBLE_COMMON_COMMAND_ERROR = RetCode.mark(202487, "Ansible exec command error");
     public static final RetCode ANSIBLE_SCP_COPY_ERROR = RetCode.mark(202488, "Ansible exec scp(copy) error");
     public static final RetCode ANSIBLE_SCP_FETCH_ERROR = RetCode.mark(202489, "Ansible exec scp(copy) error");
+    public static final RetCode ANSIBLE_CHECK_DOCKER_IMAGE_ERROR = RetCode.mark(202490, "Ansible check image exist error for param");
+    public static final RetCode ANSIBLE_CHECK_CONTAINER_ERROR = RetCode.mark(202490, "Ansible check docker container exist error for param");
+    public static final RetCode CHECK_HOST_MEM_CPU_DOCKER_FAIL = RetCode.mark(202491, "Check host free memory/cpu or docker fail, please check host remark");
+    public static final RetCode CHECK_HOST_PORT_IN_USE = RetCode.mark(202492, "Check host port is in use, please check host remark");
 
 
     // add in v1.4.2
