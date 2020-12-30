@@ -156,28 +156,27 @@ public class NodeAsyncService {
      * 扩容节点
      * @param chain
      * @param host
-     * @param group
+     * @param groupId
      * @param optionType
      * @param newFrontList
      */
     @Async("deployAsyncScheduler")
-    public void asyncAddNode(TbChain chain, TbHost host, TbGroup group, OptionType optionType, List<TbFront> newFrontList) {
+    public void asyncAddNode(TbChain chain, TbHost host, int groupId, OptionType optionType, List<TbFront> newFrontList) {
         try {
-            int groupId = group.getGroupId();
 //            boolean initSuccess = this.hostService.initHostAndDocker(chain, Arrays.asList(host.getId()), false);
-            boolean initSuccess = false;
-            log.info("Init host:[{}], result:[{}]",host.getIp(), initSuccess);
-            if (initSuccess) {
-                // start front and  related front
-                this.asyncRestartRelatedFront(chain.getId(), Collections.singleton(groupId), optionType,
-                        FrontStatusEnum.STARTING,FrontStatusEnum.RUNNING,FrontStatusEnum.STOPPED);
-            }else{
-                newFrontList.forEach((tbFront -> {
-                    this.frontService.updateStatus(tbFront.getFrontId(), FrontStatusEnum.ADD_FAILED);
-                }));
-            }
+//            boolean initSuccess = false;
+            log.info("asyncAddNode Init host:[{}]",host.getIp());
+            // start front and  related front
+            this.asyncRestartRelatedFront(chain.getId(), Collections.singleton(groupId), optionType,
+                        FrontStatusEnum.STARTING, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
+//            } else {
+//                newFrontList.forEach((tbFront -> {
+//                    this.frontService.updateStatus(tbFront.getFrontId(), FrontStatusEnum.ADD_FAILED);
+//                }));
+//            }
         } catch (Exception e) {
             log.error("Init host:[{}] list and start chain:[{}] error",host.getIp() ,chain.getChainName(), e);
+            newFrontList.forEach((tbFront -> this.frontService.updateStatus(tbFront.getFrontId(), FrontStatusEnum.ADD_FAILED)));
         }
 
     }

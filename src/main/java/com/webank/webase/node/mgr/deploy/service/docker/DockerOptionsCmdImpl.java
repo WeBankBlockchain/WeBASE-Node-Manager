@@ -1,7 +1,10 @@
 package com.webank.webase.node.mgr.deploy.service.docker;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DockerImageTypeEnum;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.VersionProperties;
+import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -39,14 +42,15 @@ public class DockerOptionsCmdImpl implements DockerOptions{
 
     /**
      * Pull image, maybe same tag but newer.
-     *
+     * todo use webase version to pull, to use imageTag pull
      * @param ip
      * @param imageTag
      * @param imagePullType default false
+     * @param downloadPath temp dir to save file from cdn
      * @return
      */
     @Override
-    public void pullImage(String ip, String imageTag, int imagePullType) {
+    public void pullImage(String ip, String imageTag, int imagePullType, String downloadPath) {
         log.info("start pullImage ip:{}, imageTage:{}, pullType:{}", ip, imageTag, imagePullType);
         String imageFullName = getImageRepositoryTag(constant.getDockerRepository(),
             constant.getDockerRegistryMirror(), imageTag);
@@ -62,13 +66,16 @@ public class DockerOptionsCmdImpl implements DockerOptions{
             String dockerPullCommand = String.format("sudo docker pull %s", imageFullName);
             // kill exists docker pull process
 //            SshTools.killCommand(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
-            ansibleService.execDocker(ip, dockerPullCommand);
+            ExecuteResult result = ansibleService.execDocker(ip, dockerPullCommand);
+            if (result.failed()) {
+                throw new NodeMgrException(ConstantCode.ANSIBLE_PULL_DOCKER_HUB_ERROR.attach(result.getExecuteOut()));
+            }
         } else if (DockerImageTypeEnum.MANUAL.getId() == imagePullType){
             log.info("pullImage by manually load image");
             return;
         } else {
             log.info("pullImage from cdn");
-            ansibleService.execPullDockerCdnShell(ip, constant.getDownloadDirOnHost(), imageTag, webaseVersion);
+            ansibleService.execPullDockerCdnShell(ip, downloadPath + "/download", imageTag, webaseVersion);
 
         }
     }
@@ -98,9 +105,18 @@ public class DockerOptionsCmdImpl implements DockerOptions{
 
     @Override
     public void stop(String ip, String containerName) {
+        log.info("stop ip:{}, containerName:{}", ip, containerName);
+        boolean containerExist = ansibleService.checkContainerExists(ip, containerName);
+        if (!containerExist) {
+            log.info("stop container jump over, not found container");
+            return;
+        }
         String dockerRmCommand = String.format("sudo docker rm -f %s ", containerName);
-//        SshTools.execDocker(ip,dockerRmCommand,sshUser,sshPort,constant.getPrivateKey());
-        ansibleService.execDocker(ip, dockerRmCommand);
+        ExecuteResult result = ansibleService.execDocker(ip, dockerRmCommand);
+        if (result.failed()) {
+            throw new NodeMgrException(ConstantCode.STOP_NODE_ERROR.attach(result.getExecuteOut()));
+        }
     }
+
 }
 

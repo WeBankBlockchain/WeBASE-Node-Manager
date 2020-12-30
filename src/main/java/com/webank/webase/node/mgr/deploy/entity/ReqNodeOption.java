@@ -32,12 +32,12 @@ public class ReqNodeOption {
     /**
      *  Whether delete node when trying to delete the last node on a host.
      */
-    private boolean deleteHost;
+    // private boolean deleteHost;
 
     /**
      *  Whether delete agency when trying to delete the last node on a host.
      *
      */
-    private boolean deleteAgency;
+    // private boolean deleteAgency;
 
 }

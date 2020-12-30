@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.deploy.entity;
 
+import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -23,38 +24,26 @@ import lombok.Data;
  * add new node
  */
 @Data
-public class ReqAdd {
-
-    /**
-     * Host runs new node, maybe a new host.
-     */
-    @NotBlank
-    private String ip;
-
-    @Positive
-    private int groupId;
-
-    /**
-     * If host ip is new one, agency name should not be null.
-     */
-    private String agencyName="";
-
-    /**
-     * Count of new nodes , default is 1.
-     */
-    @Positive
-    private int num = 1;
-
-    @PositiveOrZero
-    private byte dockerImageType;
-
+public class ReqAddNode {
     /**
      * If agency name is a new one, chain name should not be null.
      */
-    private String chainName = "default_chain";
-
+    private String chainName;
     /**
-     * host's root dir
+     * init host info list
      */
-    private String rootDirOnHost="/opt/fisco";
+    private List<DeployNodeInfo> deployNodeInfoList;
+    /**
+     * default 1
+     */
+    private int groupId;
+    /**
+     * default one same agency
+     */
+    private String agencyName;
+    /**
+     * 0, 1
+     */
+    private int encryptType;
+
 }

@@ -39,6 +39,7 @@ public class AnsibleService {
     @Autowired
     private DockerOptionsCmdImpl dockerOptionsCmd;
 
+    private static final String NOT_FOUND_FLAG = "not found";
     /**
      * check ansible installed
      */
@@ -178,7 +179,7 @@ public class AnsibleService {
             if (result.getExitCode() == 4) {
                 throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_CPU.attach(result.getExecuteOut()));
             }
-            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_FAIL_FOR_PARAM);
+            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_FAIL_FOR_PARAM.attach(result.getExecuteOut()));
         }
     }
 
@@ -232,17 +233,50 @@ public class AnsibleService {
 
     /* docker operation: checkImageExists, pullImage run stop */
 
+    /**
+     * if not found, ansible exit code not same as script's exit code, use String to distinguish "not found"
+     * @param ip
+     * @param imageFullName
+     * @return
+     */
     public boolean checkImageExists(String ip, String imageFullName) {
         log.info("checkImageExists ip:{},imageFullName:{}", ip, imageFullName);
 
 //        String dockerListImageCommand = String.format("sudo docker images -a %s | grep -v 'IMAGE ID'", imageFullName);
-        String command = String.format("ansible %s -m script -a \"%s -i %s\"", ip, constant.getAnsibleCommandShell(), imageFullName);
+        String command = String.format("ansible %s -m script -a \"%s -i %s\"", ip, constant.getAnsibleImageCheckShell(), imageFullName);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getDockerPullTimeout());
-        return result.success();
-//        if (StringUtils.isNotBlank(result.getExecuteOut())) {
-//            return true;
-//        }
-//        return false;
+        if (result.failed()) {
+            // NOT FOUND IMAGE
+            if (result.getExecuteOut().contains(NOT_FOUND_FLAG)) {
+                return false;
+            }
+            // PARAM ERROR
+            if (result.getExitCode() == 2) {
+                throw new NodeMgrException(ConstantCode.ANSIBLE_CHECK_DOCKER_IMAGE_ERROR.attach(result.getExecuteOut()));
+            }
+        }
+        // found
+        return true;
+    }
+
+    public boolean checkContainerExists(String ip, String containerName) {
+        log.info("checkContainerExists ip:{},containerName:{}", ip, containerName);
+
+        // sudo docker ps | grep "${containerName}"
+        String command = String.format("ansible %s -m script -a \"%s -c %s\"", ip, constant.getAnsibleContainerCheckShell(), containerName);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getDockerPullTimeout());
+        if (result.failed()) {
+            // NOT FOUND CONTAINER
+            if (result.getExecuteOut().contains(NOT_FOUND_FLAG)) {
+                return false;
+            }
+            // PARAM ERROR
+            if (result.getExitCode() == 2) {
+                throw new NodeMgrException(ConstantCode.ANSIBLE_CHECK_CONTAINER_ERROR.attach(result.getExecuteOut()));
+            }
+        }
+        // found
+        return true;
     }
 
     /**
@@ -267,12 +301,10 @@ public class AnsibleService {
     }
 
 
-    public void execDocker(String ip, String dockerCommand) {
+    public ExecuteResult execDocker(String ip, String dockerCommand) {
         String command = String.format("ansible %s -m command -a \"%s\"", ip, dockerCommand);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getDockerRestartPeriodTime());
-        if (result.failed()) {
-            throw new NodeMgrException(ConstantCode.ANSIBLE_DOCKER_COMMAND_ERROR.attach(result.getExecuteOut()));
-        }
+        return result;
     }
 
     /**
@@ -282,17 +314,10 @@ public class AnsibleService {
         if (StringUtils.isNoneBlank(ip, src, dst)) {
             // String rmCommand = String.format("sudo mv -fv %s %s", src, dst);
             // todo rm sudo
-            String rmCommand = String.format("sudo mv -fv %s %s", src, dst);
+            String rmCommand = String.format("mv -fv %s %s", src, dst);
             log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
             this.exec(ip, rmCommand);
         }
     }
-
-//    public static void createDirOnRemote(String ip, String dir, String sshUser, int sshPort,String privateKey){
-//        exec(ip, String.format("sudo mkdir -p %s", dir));
-//        exec(ip, String.format("sudo chown -R %s %s ", sshUser,dir));
-//        exec(ip, String.format("sudo chgrp -R %s %s ", sshUser,dir));
-//    }
-
 
 }

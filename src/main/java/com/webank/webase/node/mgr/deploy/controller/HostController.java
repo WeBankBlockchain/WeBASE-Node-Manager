@@ -35,7 +35,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -89,6 +91,22 @@ public class HostController extends BaseController {
         }
     }
 
+     /**
+     * Delete host without node(front)
+     */
+    @DeleteMapping("/{hostId}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse deleteHostWithout(@PathVariable("hostId") Integer hostId) throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("Start deleteHost hostId:[{}], start:[{}]", hostId, startTime);
+        try {
+            hostService.deleteHostWithoutNode(hostId);
+            return new BaseResponse(ConstantCode.SUCCESS);
+        } catch (NodeMgrException e) {
+            return new BaseResponse(e.getRetCode());
+        }
+    }
+
     /**
      * Deploy by ipconf and tagId.
      */
@@ -122,6 +140,9 @@ public class HostController extends BaseController {
         try {
             // check port and  check docker
             boolean checkStatus = this.hostService.batchCheckHostList(reqCheckHost.getHostIdList());
+            if (!checkStatus) {
+                return new BaseResponse(ConstantCode.CHECK_HOST_MEM_CPU_DOCKER_FAIL);
+            }
             return new BaseResponse(ConstantCode.SUCCESS, checkStatus);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());

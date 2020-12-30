@@ -18,11 +18,13 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.AGENCY_NAME_CONFIG_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_AGENCY_ERROR;
 
+import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -198,6 +200,7 @@ public class AgencyService {
     @Transactional
     public void deleteByChainId(int chainId){
         log.info("Delete agency data by chain id:[{}].", chainId);
+
         // select agency list
         List<TbAgency> tbAgencyList = tbAgencyMapper.selectByChainId(chainId);
 
@@ -208,7 +211,8 @@ public class AgencyService {
 
         for (TbAgency agency : tbAgencyList) {
             // delete front(db) and mv host's dir
-            this.frontService.deleteFrontByAgencyId(agency.getChainName(), agency.getId());
+            log.info("delete front  by agency id:{}", agency.getId());
+            this.frontService.deleteFrontByAgencyId(agency.getId());
 
             // delete host
             // v1.4.3 delete all host after delete chain
@@ -216,5 +220,6 @@ public class AgencyService {
         }
         log.info("delete agency by chain id");
         this.tbAgencyMapper.deleteByChainId(chainId);
+
     }
 }
