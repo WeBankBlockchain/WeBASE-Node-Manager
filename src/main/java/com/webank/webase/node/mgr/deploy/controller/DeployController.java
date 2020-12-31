@@ -224,7 +224,7 @@ public class DeployController extends BaseController {
     }
 
     /**
-     *
+     * todo update related node by db's config value with template when delete node
      * @param delete
      * @param result
      * @return

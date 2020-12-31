@@ -233,11 +233,12 @@ public class ChainService {
 
     /**
      * delete db data and local config files by chainName
-     * todo delete anyway, not blocked by one step
      * @param chainName
      */
     @Transactional
-    public void delete(String chainName) throws IOException {
+    public void delete(String chainName) {
+        log.info("start delete chain:{}", chainName);
+        int errorFlag = 0;
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain == null) {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
@@ -246,11 +247,11 @@ public class ChainService {
         isChainRunning.set(false);
 
         log.info("Delete host's chain dir by chain id:[{}].", chain.getId());
-        this.hostService.deleteHostChainDir(chain);
+        hostService.deleteHostChainDir(chain);
 
         log.info("Delete agency and front data by chain id:[{}].", chain.getId());
         // delete agency and front by chain id and mv host's old chain dir
-        this.agencyService.deleteByChainId(chain.getId());
+        agencyService.deleteByChainId(chain.getId());
 
 
         // delete group data
@@ -260,13 +261,25 @@ public class ChainService {
         this.tbChainMapper.deleteByPrimaryKey(chain.getId());
 
         log.info("Delete chain:[{}] config files", chainName);
-        this.pathService.deleteChain(chainName);
+        try {
+            this.pathService.deleteChain(chainName);
+        } catch (IOException e) {
+            errorFlag++;
+            log.error("Delete chain config files error:[]", e);
+            log.error("Please delete/move chain config files manually");
+        }
 
         // delete all certs
         this.certService.deleteAll();
 
         // set pull cert to false
         CertTools.isPullFrontCertsDone = false;
+
+        // if error occur, throw out finally
+        if (errorFlag != 0) {
+            log.error("Delete chain config files error. Check out upper error log");
+            throw new NodeMgrException(ConstantCode.DELETE_NODE_DIR_ERROR);
+        }
     }
 
     /**
@@ -294,11 +307,6 @@ public class ChainService {
         log.info("Parse ipConf content....");
         List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf);
 
-        // check docker image exists before start
-//        Set<String> ipSet = ipConfigParseList.stream().map(IpConfigParse::getIp).collect(Collectors.toSet());
-//        this.hostService.checkImageExists(ipSet, imageConfig.getConfigValue());
-
-
         // exec build_chain.sh shell script generate config and cert
         // 1.4.3 use bash to generate not ansible
         log.info("Locally exec build_chain....");
@@ -319,10 +327,6 @@ public class ChainService {
             }
             throw e;
         }
-
-        // update chain status
-//        log.info("update chain chainId:{} config success", chain.getId());
-//        boolean updateSuccess = this.updateStatus(chain.getId(), ChainStatusEnum.CONFIG_SUCCESS);
 
         return true;
 

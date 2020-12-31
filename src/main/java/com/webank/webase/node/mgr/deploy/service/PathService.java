@@ -429,6 +429,7 @@ public class PathService {
      * @throws IOException
      */
     private void move(Path src, Path dst) throws IOException {
+        log.info("move file/dir from src:{} to dst:{}", src, dst);
         if (Files.exists(src)){
             if (Files.isDirectory(src)){
                 FileUtils.moveDirectoryToDirectory(src.toFile(),dst.toFile(),true);
@@ -436,5 +437,6 @@ public class PathService {
                 FileUtils.moveFile(src.toFile(),dst.toFile());
             }
         }
+        log.info("end move file/dir");
     }
 }
