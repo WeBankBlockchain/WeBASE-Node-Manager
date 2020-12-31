@@ -27,7 +27,9 @@ public interface GovernVoteMapper {
 
     Integer getCount(GovernParam param);
 
-    TbGovernVote getById(@Param("id") Integer id);
+    TbGovernVote getById(@Param("id") int id);
 
-    void deleteById(Integer id);
+    void deleteById(int id);
+
+    void deleteByGroupId(int groupId);
 }
