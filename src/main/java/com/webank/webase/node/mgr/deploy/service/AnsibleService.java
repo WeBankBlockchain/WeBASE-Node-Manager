@@ -224,7 +224,7 @@ public class AnsibleService {
      */
     public ExecuteResult execCreateDir(String ip, String dir) {
         log.info("execCreateDir ip:{},dir:{}", ip, dir);
-        // mkdir todo not use sudo to make dir, check access
+        // not use sudo to make dir, check access
 //        String mkdirCommand = String.format("sudo mkdir -p %s", dir);
         String mkdirCommand = String.format("mkdir -p %s", dir);
         String command = String.format("ansible %s -m command -a \"%s\"", ip, mkdirCommand);

@@ -80,10 +80,8 @@ public class HostController extends BaseController {
         Instant startTime = Instant.now();
         log.info("Start addHost:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
-            // check before add
-            ansibleService.execPing(reqAddHost.getSshIp());
             // save host info
-            this.hostService.insert(reqAddHost.getSshIp(), reqAddHost.getRootDir(), HostStatusEnum.ADDED,  "");
+            this.hostService.checkDirAndInsert(reqAddHost.getSshIp(), reqAddHost.getRootDir(), HostStatusEnum.ADDED,  "");
 
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {

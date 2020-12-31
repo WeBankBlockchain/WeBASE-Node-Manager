@@ -105,22 +105,34 @@ public class HostService {
         return tbHostMapper.updateHostStatus(hostId,new Date(), newStatus.getId(),remark) == 1;
     }
 
-//    @Transactional(propagation = Propagation.REQUIRED)
-//    public TbHost insertIfNew(String ip, String remark) throws NodeMgrException {
-//        TbHost host = this.tbHostMapper.getByIp(ip);
-//        if (host != null){
-//            return host;
-//        }
-//
-//        // fix call transaction in the same class
-//        return ((HostService) AopContext.currentProxy())
-//                .insert(ip, HostStatusEnum.ADDED, remark);
-//    }
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbHost checkDirAndInsert(String ip, String rootDir, HostStatusEnum hostStatusEnum, String remark)
+        throws NodeMgrException {
+
+        TbHost host = this.tbHostMapper.getByIp(ip);
+        if (host != null){
+            log.error("host already exist ip:{}", ip);
+            throw new NodeMgrException(ConstantCode.HOST_ALREADY_EXIST);
+        }
+        // check before add
+        log.info("check host ip accessible:{}", ip);
+        ansibleService.execPing(ip);
+        log.info("check host root dir accessible:{}", rootDir);
+        ExecuteResult execResult = ansibleService.execCreateDir(ip, rootDir);
+        if (execResult.failed()) {
+            log.error("host create rootDir:{} failed", rootDir);
+            throw new NodeMgrException(ConstantCode.HOST_ROOT_DIR_ACCESS_DENIED);
+        }
+
+        // fix call transaction in the same class
+        return ((HostService) AopContext.currentProxy())
+                .insert(ip, rootDir, hostStatusEnum, remark);
+    }
 
 
     @Transactional(propagation = Propagation.REQUIRED)
     public TbHost insert(String ip, String rootDir, HostStatusEnum hostStatusEnum, String remark) throws NodeMgrException {
-
+        log.info("start checkDirAndInsert ip:{}, rootDir:{}, hostStatusEnum:{}, remark:{}", ip, rootDir, hostStatusEnum, remark);
         TbHost host = TbHost.init(ip, rootDir, hostStatusEnum, remark);
 
         if ( tbHostMapper.insertSelective(host) != 1 || host.getId() <= 0) {
