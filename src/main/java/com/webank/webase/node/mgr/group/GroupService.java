@@ -18,6 +18,7 @@ import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERR
 import com.webank.webase.node.mgr.abi.AbiService;
 import com.webank.webase.node.mgr.base.enums.DeployType;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
+import com.webank.webase.node.mgr.governance.GovernVoteService;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -139,6 +140,8 @@ public class GroupService {
     private ConstantProperties constantProperties;
     @Autowired
     private AbiService abiService;
+    @Autowired
+    private GovernVoteService governVoteService;
 
     @Autowired private ChainService chainService;
     @Autowired private AnsibleService ansibleService;
@@ -698,6 +701,8 @@ public class GroupService {
         transDailyService.deleteByGroupId(groupId);
         // delete imported abi
         abiService.deleteAbiByGroupId(groupId);
+        // delete chain governance vote
+        governVoteService.deleteAllByGroupId(groupId);
         // drop table.
         tableService.dropTableByGroupId(groupId);
         log.warn("end removeAllDataByGroupId");

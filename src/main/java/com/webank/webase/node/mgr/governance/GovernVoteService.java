@@ -79,4 +79,9 @@ public class GovernVoteService {
         }
         governVoteMapper.deleteById(voteId);
     }
+
+    public void deleteAllByGroupId(int groupId) {
+        log.info("deleteAllByGroupId groupId:{}", groupId);
+        governVoteMapper.deleteByGroupId(groupId);
+    }
 }
