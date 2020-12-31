@@ -853,12 +853,12 @@ public class FrontService {
                 runningTotal ++;
             }
         }
-        if ( runningTotal < 2){
+        if (runningTotal < 2){
             log.error("Two running nodes at least of chain:[{}]", chainId);
             throw new NodeMgrException(ConstantCode.TWO_NODES_AT_LEAST);
         }
 
-        if ( ! FrontStatusEnum.isRunning(front.getStatus())){
+        if (!FrontStatusEnum.isRunning(front.getStatus())){
             log.warn("Node:[{}:{}] is already stopped.",front.getFrontIp(),front.getHostIndex());
             return ;
         }
@@ -869,7 +869,7 @@ public class FrontService {
         // node is removed and doesn't belong to any group.
         boolean nodeRemovable = CollectionUtils.isEmpty(nodeList);
 
-        if (! nodeRemovable) {
+        if (!nodeRemovable) {
             // node belongs to some groups, check if it is the last one of each group.
             Set<Integer> groupIdSet = nodeList.stream().map(TbNode::getGroupId)
                     .collect(Collectors.toSet());
