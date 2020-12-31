@@ -202,7 +202,6 @@ public class DeployService {
     }
 
     /**
-     *
      * <p>
      * Delete a chain by chain name.
      *
@@ -215,14 +214,7 @@ public class DeployService {
         if (StringUtils.isBlank(chainName)) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
-
-        try {
-            this.chainService.delete(chainName);
-        } catch (IOException e) {
-            log.error("Delete chain:[{}] error.", chainName, e);
-            throw new NodeMgrException(ConstantCode.DELETE_CHAIN_ERROR);
-        }
-
+        this.chainService.delete(chainName);
         return ConstantCode.SUCCESS;
     }
 
@@ -370,6 +362,7 @@ public class DeployService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteNode(String nodeId) {
         log.info("deleteNode nodeId:{}", nodeId);
+        int errorFlag = 0;
         // remove front
         TbFront front = this.frontMapper.getByNodeId(nodeId);
         if (front == null) {
@@ -388,21 +381,26 @@ public class DeployService {
         // get delete node's group id list from ./NODES_ROOT/default_chain/ip/node[x]/conf/group.[groupId].genesis
         Path nodePath = this.pathService.getNodeRoot(chain.getChainName(), host.getIp(), front.getHostIndex());
         Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
+        log.info("deleteNode updateNodeConfigIniByGroupList chain:{}, groupIdSet:{}", chain, groupIdSet);
+        // update related node's config.ini file, e.g. p2p
         try {
             log.info("deleteNode updateNodeConfigIniByGroupList chain:{}, groupIdSet:{}", chain, groupIdSet);
             // update related node's config.ini file, e.g. p2p
             this.frontService.updateNodeConfigIniByGroupList(chain, groupIdSet);
         } catch (IOException e) {
+            errorFlag++;
             log.error("Delete node, update related group:[{}] node's config error ", groupIdSet, e);
-            throw new NodeMgrException(ConstantCode.UPDATE_RELATED_NODE_ERROR);
+            log.error("Please update related node's group config manually");
         }
+
         // move node directory to tmp
         try {
             this.pathService.deleteNode(chain.getChainName(), host.getIp(), front.getHostIndex(), front.getNodeId());
         } catch (IOException e) {
-            log.error("Delete node:[{}:{}:{}] config files error.",
+            errorFlag++;
+            log.error("Delete node's config files:[{}:{}:{}] error.",
                     chain.getChainName(), host.getIp(), front.getHostIndex(), e);
-            throw new NodeMgrException(ConstantCode.DELETE_NODE_DIR_ERROR);
+            log.error("Please move/rm node's config files manually");
         }
 
         // move node of remote host files to temp directory, e.g./opt/fisco/delete-tmp
@@ -415,6 +413,12 @@ public class DeployService {
         // restart related node
         this.nodeAsyncService.asyncRestartRelatedFront(chain.getId(), groupIdSet, OptionType.MODIFY_CHAIN,
                 FrontStatusEnum.STARTING, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
+
+        // if error occur, throw out finally
+        if (errorFlag != 0) {
+            log.error("Update related group OR delete node's config files error. Check out upper error log");
+            throw new NodeMgrException(ConstantCode.DELETE_NODE_DIR_ERROR);
+        }
     }
 
     /**
