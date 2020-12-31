@@ -898,8 +898,9 @@ public class GroupService {
 					OperateStatus.SUCCESS.getValue());
             // request front to start
             try{
-            	frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
-						OPERATE_START_GROUP);
+                this.operateGroup(nodeId, groupId, OPERATE_START_GROUP);
+//            	frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
+//						OPERATE_START_GROUP);
 				resOperateList.add(operateResult);
 			} catch (NodeMgrException | ResourceAccessException e) {
 				log.error("fail startGroup in frontId:{}, exception:{}",
