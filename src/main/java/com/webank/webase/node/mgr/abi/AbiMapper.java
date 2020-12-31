@@ -45,4 +45,6 @@ public interface AbiMapper {
 	void update(AbiInfo abiInfo);
 
 	void deleteByAbiId(@Param("abiId") int abiId);
+
+	void deleteByGroupId(@Param("groupId") int groupId);
 }

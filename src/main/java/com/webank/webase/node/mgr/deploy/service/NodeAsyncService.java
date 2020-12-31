@@ -163,17 +163,11 @@ public class NodeAsyncService {
     @Async("deployAsyncScheduler")
     public void asyncAddNode(TbChain chain, TbHost host, int groupId, OptionType optionType, List<TbFront> newFrontList) {
         try {
-//            boolean initSuccess = this.hostService.initHostAndDocker(chain, Arrays.asList(host.getId()), false);
-//            boolean initSuccess = false;
+
             log.info("asyncAddNode Init host:[{}]",host.getIp());
             // start front and  related front
             this.asyncRestartRelatedFront(chain.getId(), Collections.singleton(groupId), optionType,
                         FrontStatusEnum.STARTING, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
-//            } else {
-//                newFrontList.forEach((tbFront -> {
-//                    this.frontService.updateStatus(tbFront.getFrontId(), FrontStatusEnum.ADD_FAILED);
-//                }));
-//            }
         } catch (Exception e) {
             log.error("Init host:[{}] list and start chain:[{}] error",host.getIp() ,chain.getChainName(), e);
             newFrontList.forEach((tbFront -> this.frontService.updateStatus(tbFront.getFrontId(), FrontStatusEnum.ADD_FAILED)));

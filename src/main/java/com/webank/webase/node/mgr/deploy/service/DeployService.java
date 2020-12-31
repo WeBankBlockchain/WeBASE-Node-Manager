@@ -14,35 +14,20 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
-import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
-import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
-import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
-import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
-import com.webank.webase.node.mgr.deploy.entity.ReqAddNode;
-import com.webank.webase.node.mgr.deploy.entity.ReqConfigChain;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Set;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
+import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.chain.ChainService;
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
+import com.webank.webase.node.mgr.deploy.entity.ReqAddNode;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
@@ -55,10 +40,19 @@ import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
-
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Component
@@ -79,6 +73,7 @@ public class DeployService {
     @Autowired private PathService pathService;
     @Autowired private ConstantProperties constantProperties;
     @Autowired private NodeService nodeService;
+    @Autowired private CertService certService;
 
 
     /**
@@ -409,6 +404,9 @@ public class DeployService {
 
         // delete front, node in db
         this.frontService.removeFront(front.getFrontId());
+        // delete all certs
+        // set CertTools.isPullFrontCertsDone to false after asyncRestartRelatedFront finished
+        certService.deleteAll();
 
         // restart related node
         this.nodeAsyncService.asyncRestartRelatedFront(chain.getId(), groupIdSet, OptionType.MODIFY_CHAIN,
