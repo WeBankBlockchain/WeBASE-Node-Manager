@@ -4,7 +4,6 @@ FOUND=0
 NOT_FOUND=1
 PARAM_ERROR=2
 
-## default one host, one node+front
 containerName=""
 
 ####### 参数解析 #######
