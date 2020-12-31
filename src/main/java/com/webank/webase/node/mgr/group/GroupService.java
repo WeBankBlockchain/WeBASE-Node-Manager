@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
+import com.webank.webase.node.mgr.abi.AbiService;
 import com.webank.webase.node.mgr.base.enums.DeployType;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import java.io.IOException;
@@ -136,6 +137,8 @@ public class GroupService {
     private PathService pathService;
     @Autowired
     private ConstantProperties constantProperties;
+    @Autowired
+    private AbiService abiService;
 
     @Autowired private ChainService chainService;
     @Autowired private AnsibleService ansibleService;
@@ -693,7 +696,9 @@ public class GroupService {
         nodeService.deleteByGroupId(groupId);
         // remove transDaily
         transDailyService.deleteByGroupId(groupId);
-        //drop table.
+        // delete imported abi
+        abiService.deleteAbiByGroupId(groupId);
+        // drop table.
         tableService.dropTableByGroupId(groupId);
         log.warn("end removeAllDataByGroupId");
     }

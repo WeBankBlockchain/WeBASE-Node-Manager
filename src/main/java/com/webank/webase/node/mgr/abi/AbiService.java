@@ -204,4 +204,9 @@ public class AbiService {
 		log.debug("end listByGroupIdNoAbi resultList:{}", JsonTools.toJSONString(resultList));
 		return resultList;
 	}
+
+	public void deleteAbiByGroupId(int groupId) {
+		log.info("deleteAbiByGroupId groupId:{}", groupId);
+		abiMapper.deleteByGroupId(groupId);
+	}
 }

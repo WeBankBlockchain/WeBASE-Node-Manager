@@ -36,6 +36,11 @@
         where abi_id = #{abiId}
     </delete>
 
+    <delete id="deleteByGroupId" parameterType="java.lang.Integer">
+        delete from tb_abi
+        where group_id = #{groupId}
+    </delete>
+
     <update id="update" parameterType="com.webank.webase.node.mgr.abi.entity.AbiInfo">
         update tb_abi set modify_time = now()
         <if test="contractName != null and contractName != ''">

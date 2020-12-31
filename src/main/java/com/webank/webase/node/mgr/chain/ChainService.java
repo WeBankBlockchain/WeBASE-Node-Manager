@@ -271,7 +271,6 @@ public class ChainService {
 
         // delete all certs
         this.certService.deleteAll();
-
         // set pull cert to false
         CertTools.isPullFrontCertsDone = false;
 
