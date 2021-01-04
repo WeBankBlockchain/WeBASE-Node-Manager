@@ -12,24 +12,26 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.governance;
+package com.webank.webase.node.mgr.deploy.entity;
 
-import com.webank.webase.node.mgr.governance.entity.GovernParam;
-import com.webank.webase.node.mgr.governance.entity.TbGovernVote;
 import java.util.List;
-import org.apache.ibatis.annotations.Param;
+import javax.validation.constraints.PositiveOrZero;
+import lombok.Data;
 
-public interface GovernVoteMapper {
-
-    Integer add(TbGovernVote tbGovernVote);
-
-    List<TbGovernVote> getList(GovernParam param);
-
-    Integer getCount(GovernParam param);
-
-    TbGovernVote getById(@Param("id") int id);
-
-    void deleteById(int id);
-
-    void deleteByGroupId(int groupId);
+@Data
+public class ReqInitHost {
+    // String chainName, String imageTag, List<Integer> hostIdList, boolean pullFromCdn
+    private String chainName;
+    private String imageTag;
+    /**
+     * manually load, pull from dockerhub, pull from cdn&load
+     */
+    @PositiveOrZero
+    private byte dockerImageType;
+    /**
+     * force download new image tar and delete old one
+     * @default: false
+     */
+    // private Boolean force;
+    private List<Integer> hostIdList;
 }

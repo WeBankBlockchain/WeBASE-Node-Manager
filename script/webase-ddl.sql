@@ -50,8 +50,10 @@ CREATE TABLE IF NOT EXISTS tb_front (
   channel_port int(6) DEFAULT '20200' COMMENT 'channel 端口',
   chain_id int(10) unsigned DEFAULT '0' COMMENT '所属链 ID',
   chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
+  deploy_status int(11) DEFAULT 0 COMMENT '前置服务状态：0-添加；1，检查成功；2，检查失败；3，启动成功',
   PRIMARY KEY (`front_id`),
   UNIQUE KEY `unique_node_id` (`node_id`),
+  UNIQUE KEY `unique_ip_port` (`front_ip`,`front_port`),
   UNIQUE KEY `unique_agency_id_host_id_front_port` (`agency_id`,`front_ip`,`front_port`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='前置服务信息表';
 
@@ -176,27 +178,6 @@ CREATE TABLE IF NOT EXISTS tb_user (
   KEY index_address (address),
   UNIQUE KEY unique_uuid (sign_user_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=700001 DEFAULT CHARSET=utf8 COMMENT='用户信息表';
-
-
-
--- ----------------------------
--- @Deprecated: not save privateKey anymore
--- Table structure for tb_user_key_mapping
--- ----------------------------
--- CREATE TABLE IF NOT EXISTS tb_user_key_mapping (
---  map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
---  user_id int(11) NOT NULL COMMENT '用户编号',
---  group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
---  private_key text NOT NULL COMMENT '私钥',
---  map_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
---  create_time datetime DEFAULT NULL COMMENT '创建时间',
---  modify_time datetime DEFAULT NULL COMMENT '修改时间',
---  PRIMARY KEY (map_id),
---  UNIQUE KEY unique_id (user_id)
--- ) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='用户私钥映射表';
-
-
-
 
 -- ----------------------------
 -- Table structure for tb_account_info
@@ -378,7 +359,6 @@ CREATE TABLE IF NOT EXISTS `tb_chain` (
   `version` varchar(64) NOT NULL DEFAULT '' COMMENT '创建链时选择的镜像版本',
   `encrypt_type` tinyint(8) unsigned NOT NULL DEFAULT '1' COMMENT '加密类型：1，标密；2，国密；默认 1 ',
   `chain_status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '链状态：0，初始化；1，部署中；2，部署失败；3，部署成功等等',
-  `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
   `webase_sign_addr` varchar(255) NOT NULL DEFAULT '127.0.0.1:5004' COMMENT 'WeBASE-Sign 的访问地址',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
@@ -408,19 +388,14 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `tb_host` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
-  `agency_id` int(10) unsigned NOT NULL DEFAULT '1' COMMENT '所属机构 ID',
-  `agency_name` varchar(64) DEFAULT NULL COMMENT '所属机构名称，冗余字段',
   `ip` varchar(16) NOT NULL COMMENT '主机IP',
-  `ssh_user` varchar(64) NOT NULL DEFAULT 'root' COMMENT 'SSH 登录账号',
-  `ssh_port` int(10) unsigned NOT NULL DEFAULT '22' COMMENT 'SSH 端口',
   `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
-  `docker_port` int(10) unsigned NOT NULL DEFAULT '2375' COMMENT 'Docker demon 的端口',
   `status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '主机状态：0，新建；1，初始化；2，运行等等',
   `remark` varchar(512) DEFAULT '' COMMENT 'remark',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unq_agency_id,ip` (`agency_id`,`ip`) USING BTREE
+  UNIQUE KEY `unique_ip` (`ip`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物理主机信息';
 
 -- ----------------------------

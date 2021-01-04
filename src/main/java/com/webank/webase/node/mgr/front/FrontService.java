@@ -13,37 +13,6 @@
  */
 package com.webank.webase.node.mgr.front;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
-import org.springframework.aop.framework.AopContext;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
@@ -64,9 +33,12 @@ import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AgencyService;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
+import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
@@ -86,8 +58,36 @@ import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
-
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * service of web3.
@@ -104,6 +104,8 @@ public class FrontService {
     private NodeMapper nodeMapper;
     @Autowired
     private FrontGroupMapMapper frontGroupMapMapper;
+    @Autowired
+    private TbChainMapper tbChainMapper;
 
     @Autowired
     private NodeService nodeService;
@@ -129,6 +131,10 @@ public class FrontService {
     private ConstantProperties constant;
     @Autowired
     private DockerOptions dockerOptions;
+    @Autowired
+    private AnsibleService ansibleService;
+    @Autowired
+    private HostService hostService;
 
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
@@ -321,18 +327,17 @@ public class FrontService {
         observerList.stream().forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
         log.debug("refreshSealerAndObserverInNodeList sealerList:{},observerList:{}",
                 sealerList, observerList);
-        sealerAndObserverList.stream()
-                .forEach(peerInfo -> {
-                    NodeParam checkParam = new NodeParam();
-                    checkParam.setGroupId(groupId);
-                    checkParam.setNodeId(peerInfo.getNodeId());
-                    int existedNodeCount = nodeService.countOfNode(checkParam);
-                    log.debug("addSealerAndObserver peerInfo:{},existedNodeCount:{}",
-                            peerInfo, existedNodeCount);
-                    if(existedNodeCount == 0) {
-                        nodeService.addNodeInfo(groupId, peerInfo);
-                    }
-                });
+        sealerAndObserverList.forEach(peerInfo -> {
+            NodeParam checkParam = new NodeParam();
+            checkParam.setGroupId(groupId);
+            checkParam.setNodeId(peerInfo.getNodeId());
+            int existedNodeCount = nodeService.countOfNode(checkParam);
+            log.debug("addSealerAndObserver peerInfo:{},existedNodeCount:{}",
+                    peerInfo, existedNodeCount);
+            if(existedNodeCount == 0) {
+                nodeService.addNodeInfo(groupId, peerInfo);
+            }
+        });
         log.debug("end addSealerAndObserver");
     }
 
@@ -541,18 +546,31 @@ public class FrontService {
     }
 
 
+    /**
+     * gen node cert and gen front's yml, and new front ind db
+     * @param num
+     * @param chain
+     * @param host
+     * @param agencyId
+     * @param agencyName
+     * @param groupId
+     * @param frontStatusEnum
+     * @return
+     * @throws NodeMgrException
+     * @throws IOException
+     */
     @Transactional(propagation = Propagation.REQUIRED)
     public List<TbFront> initFrontAndNode(int num, TbChain chain, TbHost host, int agencyId,
-                                          String agencyName, TbGroup group,FrontStatusEnum frontStatusEnum) throws NodeMgrException, IOException {
-
+                                          String agencyName, int groupId, FrontStatusEnum frontStatusEnum)
+        throws NodeMgrException, IOException {
+        log.info("start initFrontAndNode ");
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
         // the node dir on remote host
-        String rootDirOnHost = chain.getRootDir();
+        String rootDirOnHost = host.getRootDir();
         String imageTag = chain.getVersion();
         int hostId = host.getId();
         String ip = host.getIp();
-        int groupId = group.getGroupId();
 
         // if host is a new one, currentIndexOnHost will be null
         Integer maxIndexOnHost = this.frontMapper.getNodeMaxIndex(hostId);
@@ -642,7 +660,7 @@ public class FrontService {
     }
 
     /**
-     *
+     * not generate but update existed node config.ini of existed nodes
      * @param chain
      * @param groupId
      * @throws IOException
@@ -674,7 +692,7 @@ public class FrontService {
         }
 
         // scp to remote
-        this.scpNodeConfigIni(chain,groupId);
+        this.scpNodeConfigIni(chain, groupId);
     }
 
     /**
@@ -711,21 +729,21 @@ public class FrontService {
             String localScr = PathService.getConfigIniPath(localNodePath).toAbsolutePath().toString();
 
             // ex: (node-mgr local) /opt/fisco/chain1/node0/config.ini
-            String remoteDst = String.format("%s/%s/node%s/config.ini", chain.getRootDir(),chain.getChainName(),hostIndex);
+            String remoteDst = String.format("%s/%s/node%s/config.ini", host.getRootDir(), chain.getChainName(),hostIndex);
 
             // copy group config files to local node's conf dir
-            this.deployShellService.scp(ScpTypeEnum.UP,host.getSshUser(),  host.getIp(),host.getSshPort(),localScr, remoteDst);
+            ansibleService.scp(ScpTypeEnum.UP, host.getIp(), localScr, remoteDst);
         }
     }
 
     /**
-     *
+     * start front and node
      * @param nodeId
      * @return
      */
     @Transactional(rollbackFor = Throwable.class)
     public boolean restart(String nodeId, OptionType optionType, FrontStatusEnum before,
-                           FrontStatusEnum success,FrontStatusEnum failed){
+                           FrontStatusEnum success, FrontStatusEnum failed){
         log.info("Restart node:[{}]", nodeId );
         // get front
         TbFront front = this.getByNodeId(nodeId);
@@ -733,7 +751,8 @@ public class FrontService {
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
 
-        final byte encryptType = FrontService.getEncryptType(front.getImageTag());
+        TbChain chain = tbChainMapper.selectByPrimaryKey(front.getChainId());
+        byte encryptType = chain.getEncryptType();
 
         // set front status to stopped to avoid error for time task.
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), before);
@@ -745,13 +764,12 @@ public class FrontService {
         log.info("Docker start container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
         try {
             this.dockerOptions.run(
-                    front.getFrontIp(), host.getDockerPort(), host.getSshUser(), host.getSshPort(),
-                    front.getImageTag(), front.getContainerName(),
+                    front.getFrontIp(), front.getImageTag(), front.getContainerName(),
                     PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()), front.getHostIndex());
 
             threadPoolTaskScheduler.schedule(()->{
-                // update front status
-                this.updateStatus(front.getFrontId(),success);
+                // update front status as start success
+                this.updateStatus(front.getFrontId(), success);
 
                 // update front version
                 if (StringUtils.isBlank(front.getFrontVersion())
@@ -768,11 +786,11 @@ public class FrontService {
                 }
 
                 if (optionType == OptionType.DEPLOY_CHAIN){
-                    this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.NORMAL);
+                    this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.NORMAL);
                 }else if (optionType == OptionType.MODIFY_CHAIN){
                     // check front is in group
                     Path nodePath = this.pathService.getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());
-                    Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath,encryptType);
+                    Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
                     Optional.of(groupIdSet).ifPresent(idSet -> idSet.forEach ( groupId ->{
                         List<String> list = frontInterface.getGroupPeers(groupId);
                         if(CollectionUtils.containsAny(list,front.getNodeId())){
@@ -780,7 +798,7 @@ public class FrontService {
                         }
                     }));
                 }
-            }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
+            }, Instant.now().plusMillis(constant.getDockerRestartPeriodTime()));
             return true;
         } catch (Exception e) {
             log.error("Start front:[{}:{}] failed.",front.getFrontIp(), front.getHostIndex(),e);
@@ -835,12 +853,12 @@ public class FrontService {
                 runningTotal ++;
             }
         }
-        if ( runningTotal < 2){
+        if (runningTotal < 2){
             log.error("Two running nodes at least of chain:[{}]", chainId);
             throw new NodeMgrException(ConstantCode.TWO_NODES_AT_LEAST);
         }
 
-        if ( ! FrontStatusEnum.isRunning(front.getStatus())){
+        if (!FrontStatusEnum.isRunning(front.getStatus())){
             log.warn("Node:[{}:{}] is already stopped.",front.getFrontIp(),front.getHostIndex());
             return ;
         }
@@ -851,7 +869,7 @@ public class FrontService {
         // node is removed and doesn't belong to any group.
         boolean nodeRemovable = CollectionUtils.isEmpty(nodeList);
 
-        if (! nodeRemovable) {
+        if (!nodeRemovable) {
             // node belongs to some groups, check if it is the last one of each group.
             Set<Integer> groupIdSet = nodeList.stream().map(TbNode::getGroupId)
                     .collect(Collectors.toSet());
@@ -869,8 +887,7 @@ public class FrontService {
         TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        this.dockerOptions.stop( front.getFrontIp(), hostInDb.getDockerPort(), hostInDb.getSshUser(),
-                hostInDb.getSshPort(), front.getContainerName());
+        this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
 
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
     }
@@ -883,13 +900,16 @@ public class FrontService {
         }
         TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        this.dockerOptions.stop( front.getFrontIp(), hostInDb.getDockerPort(), hostInDb.getSshUser(),
-                hostInDb.getSshPort(), front.getContainerName());
+        this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
 
         this.nodeMapper.deleteByNodeId(nodeId);
     }
 
 
+    /**
+     * delete front
+     * @param agencyId
+     */
     @Transactional
     public void deleteFrontByAgencyId(int agencyId){
         log.info("Delete front data by agency id:[{}].", agencyId);
@@ -903,19 +923,21 @@ public class FrontService {
 
         for (TbFront front : frontList) {
             TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
-
+            log.info("rm host container by host ip:{}", host.getIp());
             // remote docker container
-            this.dockerOptions.stop(host.getIp(),host.getDockerPort(), host.getSshUser(),host.getSshPort(), front.getContainerName());
+            this.dockerOptions.stop(host.getIp(), front.getContainerName());
 
-            log.info("Delete node data by node id:[{}].", front.getNodeId());
-            this.nodeMapper.deleteByNodeId(front.getNodeId());
+            // delete in deleteAllGroupData
+//            log.info("Delete node data by node id:[{}].", front.getNodeId());
+//            this.nodeMapper.deleteByNodeId(front.getNodeId());
 
-            log.info("Delete front group map data by front id:[{}].", front.getFrontId());
-            this.frontGroupMapMapper.removeByFrontId(front.getFrontId());
+//            log.info("Delete front group map data by front id:[{}].", front.getFrontId());
+//            this.frontGroupMapMapper.removeByFrontId(front.getFrontId());
         }
 
         // delete front in batch
         this.frontMapper.deleteByAgencyId(agencyId);
+        log.info("end deleteFrontByAgencyId");
     }
 
     /**
@@ -957,4 +979,10 @@ public class FrontService {
             throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT);
         }
     }
+//
+//    public void updateDeployStatus(int frontId, FrontDeployStatusEnum deployStatusEnum) {
+//        frontMapper.updateDeployStatus(frontId, deployStatusEnum.getId(), LocalDateTime.now());
+//    }
+
+
 }

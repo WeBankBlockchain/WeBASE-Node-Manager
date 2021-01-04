@@ -315,7 +315,7 @@ public class PathService {
      * @return
      * @throws IOException
      */
-    public static String getNodeId(Path nodePath,byte encryptType) throws IOException {
+    public static String getNodeId(Path nodePath, byte encryptType) throws IOException {
         String nodeIdFile = encryptType == EncryptType.ECDSA_TYPE ? "node.nodeid" : "gmnode.nodeid";
 
         List<String> lines = Files.readAllLines(nodePath.resolve("conf/").resolve(nodeIdFile));
@@ -384,15 +384,17 @@ public class PathService {
      * @return
      */
     public void deleteChain(String chainName) throws IOException {
+        log.info("deleteChain mv chain to tmp dir:{}", chainName);
         // mv NODES_ROOT/[chainName]/ to NODES_ROOT_TMP/[chainName]-yyyyMMdd_HHmmss
         Path src_chainRoot = this.getChainRoot(chainName);
         Path dst_deleteChainRoot = this.getChainDeletedRoot(chainName);
-        move(src_chainRoot,dst_deleteChainRoot);
+        move(src_chainRoot, dst_deleteChainRoot);
 
         // mv  NODES_ROOT/[chainName]_ipconf to NODES_ROOT_TMP/[chainName]-yyyyMMdd_HHmmss/[chainName]_ipconf
         Path src_ipConf = this.getIpConfig(chainName);
         Path dst_ipConf = this.getIpConfDeleted(chainName,dst_deleteChainRoot);
-        move(src_ipConf,dst_ipConf);
+        move(src_ipConf, dst_ipConf);
+        log.info("end deleteChain mv chain to tmp dir");
     }
 
     /**
@@ -401,11 +403,11 @@ public class PathService {
      * @param chainName
      * @return
      */
-    public void deleteNode(String chainName,String ip, int hostIndex, String nodeId ) throws IOException {
+    public void deleteNode(String chainName, String ip, int hostIndex, String nodeId ) throws IOException {
         // mv NODES_ROOT/[chainName]/[ip]/node[hostIndex] to NODES_ROOT_TMP/[chainName]-yyyyMMdd_HHmmss/ip/[nodeId]
-        Path src_nodeRoot = this.getNodeRoot(chainName,ip,hostIndex);
-        Path dst_nodeDeleteRoot = this.getNodeDeletedRoot(chainName,ip, nodeId);
-        move(src_nodeRoot,dst_nodeDeleteRoot);
+        Path src_nodeRoot = this.getNodeRoot(chainName, ip, hostIndex);
+        Path dst_nodeDeleteRoot = this.getNodeDeletedRoot(chainName, ip, nodeId);
+        move(src_nodeRoot, dst_nodeDeleteRoot);
     }
 
     /**
@@ -427,6 +429,7 @@ public class PathService {
      * @throws IOException
      */
     private void move(Path src, Path dst) throws IOException {
+        log.info("move file/dir from src:{} to dst:{}", src, dst);
         if (Files.exists(src)){
             if (Files.isDirectory(src)){
                 FileUtils.moveDirectoryToDirectory(src.toFile(),dst.toFile(),true);
@@ -434,5 +437,6 @@ public class PathService {
                 FileUtils.moveFile(src.toFile(),dst.toFile());
             }
         }
+        log.info("end move file/dir");
     }
 }

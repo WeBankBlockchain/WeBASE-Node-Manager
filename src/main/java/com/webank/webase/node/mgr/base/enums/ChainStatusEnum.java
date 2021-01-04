@@ -32,8 +32,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public enum ChainStatusEnum {
     INITIALIZED((byte) 0, "初始化"),
-    DEPLOYING((byte) 1, "部署中"),
-    DEPLOY_FAILED((byte) 2, "部署失败"),
+    // generate config file and scp
+    // CONFIGURING -> CONFIG_SUCCESS -> RUNNING
+    STARTING((byte) 1, "启动中"),
+//    DEPLOYING((byte) 1, "部署中"),
+    START_FAIL((byte) 2, "启动失败"),
+//    DEPLOY_FAILED((byte) 2, "部署失败"),
     RUNNING((byte) 3, "运行"),
     RESTARTING((byte) 4, "重启中"),
     UPGRADING((byte) 5, "升级中"),
@@ -70,7 +74,7 @@ public enum ChainStatusEnum {
 
         // check chain status
         switch (statusEnum){
-            case DEPLOYING:
+//            case DEPLOYING:
             case RUNNING:
                 return true;
             default:
@@ -92,7 +96,7 @@ public enum ChainStatusEnum {
 
         // check chain status
         switch (statusEnum){
-            case DEPLOY_FAILED:
+//            case DEPLOY_FAILED:
             case UPGRADING_FAILED:
                 return NumberUtil.PERCENTAGE_FAILED;
 
@@ -100,6 +104,29 @@ public enum ChainStatusEnum {
                 return NumberUtil.PERCENTAGE_FINISH;
             default:
                 return NumberUtil.PERCENTAGE_IN_PROGRESS;
+        }
+    }
+
+    /**
+     * ONLY config success can run/start/start_fail
+     * @param status
+     * @return
+     */
+    public static boolean configFinished(byte status){
+        ChainStatusEnum statusEnum = ChainStatusEnum.getById(status);
+        if (statusEnum == null) {
+            log.error("Chain with unknown status:[{}].", status);
+            return false;
+        }
+
+        // check chain status
+        switch (statusEnum){
+            case STARTING:
+            case START_FAIL:
+            case RUNNING:
+                return true;
+            default:
+                return false;
         }
     }
 }

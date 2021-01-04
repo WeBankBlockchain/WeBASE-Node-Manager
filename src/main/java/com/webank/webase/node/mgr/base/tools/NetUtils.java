@@ -10,13 +10,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- *
+ * check port by telnet: if connection reachable, it means port in use
+ * todo 防火墙将导致联不通，即，无法通过telnet测试是否端口已启用
  */
 
 @Slf4j
 public class NetUtils {
 
-    public static Pair<Boolean,Integer> checkPorts(String ip, int timeout, int ... portArray) {
+    public static Pair<Boolean, Integer> checkPorts(String ip, int timeout, int ... portArray) {
         if (ArrayUtils.isEmpty(portArray)){
             return Pair.of(false,0);
         }
@@ -42,7 +43,7 @@ public class NetUtils {
             // Return true if connection successful
             return true;
         } catch (IOException e) {
-            log.error("Connect to host:[{}] and port:[{}] with timeout:[{}] is error.", ip, port, newTimeout, e.getMessage() );
+            log.error("Connect to host:[{}] and port:[{}] with timeout:[{}] is error:{}.", ip, port, newTimeout, e.getMessage() );
         }
         return false;
     }
@@ -55,7 +56,7 @@ public class NetUtils {
      */
     public static boolean checkAddress(String address, int timeout) {
         String[] ipPortArray = address.split(":");
-        if (ArrayUtils.getLength(ipPortArray) != 2){
+        if (ArrayUtils.getLength(ipPortArray) != 2) {
             log.error("Address:[{}] format error, should be [ip:port], like 129.204.174.191:6004.", address);
             return false;
         }

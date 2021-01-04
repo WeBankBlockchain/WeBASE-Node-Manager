@@ -15,6 +15,10 @@ package com.webank.webase.node.mgr.chain;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CHAIN;
 
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
+import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
+import com.webank.webase.node.mgr.deploy.service.ConfigService;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -87,6 +91,7 @@ public class ChainService {
     @Autowired private TbChainMapper tbChainMapper;
     @Autowired private TbConfigMapper tbConfigMapper;
     @Autowired private TbAgencyMapper tbAgencyMapper;
+    @Autowired private TbHostMapper tbHostMapper;
 
     @Autowired
     private ConstantProperties cproperties;
@@ -114,6 +119,10 @@ public class ChainService {
     private NodeAsyncService nodeAsyncService;
     @Autowired
     private CertService certService;
+    @Autowired
+    private AnsibleService ansibleService;
+    @Autowired
+    private ConfigService configService;
 
     @Autowired private DockerOptions dockerOptions;
 
@@ -157,9 +166,8 @@ public class ChainService {
 
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbChain insert(String chainName, String chainDesc, String version, byte encryptType, ChainStatusEnum status,
-                          String rootDirOnHost, RunTypeEnum runTypeEnum, String webaseSignAddr ) throws NodeMgrException {
-        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, rootDirOnHost, runTypeEnum,webaseSignAddr);
+    public TbChain insert(String chainName, String chainDesc, String version, byte encryptType, ChainStatusEnum status, RunTypeEnum runTypeEnum, String webaseSignAddr ) throws NodeMgrException {
+        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, runTypeEnum, webaseSignAddr);
 
         if (tbChainMapper.insertSelective(chain) != 1 || chain.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_CHAIN_ERROR);
@@ -207,25 +215,30 @@ public class ChainService {
      * @param rootDirOnHost
      * @param chainName
      */
-    public static void mvChainOnRemote(String ip,String rootDirOnHost,String chainName,String sshUser,int sshPort,String privateKey){
+    public void mvChainOnRemote(String ip, String rootDirOnHost, String chainName){
+        log.info("mvChainOnRemote ip:{}, rootDirHost:{},chainName:{}", ip, rootDirOnHost, chainName);
         // create /opt/fisco/deleted-tmp/ as a parent dir
         String deleteRootOnHost = PathService.getDeletedRootOnHost(rootDirOnHost);
-        SshTools.createDirOnRemote(ip, deleteRootOnHost,sshUser,sshPort,privateKey);
+        ansibleService.execCreateDir(ip, deleteRootOnHost);
 
         // like /opt/fisco/default_chain
         String src_chainRootOnHost = PathService.getChainRootOnHost(rootDirOnHost, chainName);
         // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss
         String dst_chainDeletedRootOnHost = PathService.getChainDeletedRootOnHost(rootDirOnHost, chainName);
 
-        SshTools.mvDirOnRemote(ip,src_chainRootOnHost,dst_chainDeletedRootOnHost,sshUser,sshPort,privateKey);
+        ansibleService.mvDirOnRemote(ip, src_chainRootOnHost, dst_chainDeletedRootOnHost);
+        log.info("end mvChainOnRemote");
+
     }
 
     /**
-     *
+     * delete db data and local config files by chainName
      * @param chainName
      */
     @Transactional
-    public void delete(String chainName) throws IOException {
+    public void delete(String chainName) {
+        log.info("start delete chain:{}", chainName);
+        int errorFlag = 0;
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain == null) {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
@@ -233,36 +246,51 @@ public class ChainService {
 
         isChainRunning.set(false);
 
-        // delete agency
-        this.agencyService.deleteByChainId(chain.getId());
+        log.info("Delete host's chain dir by chain id:[{}].", chain.getId());
+        hostService.deleteHostChainDir(chain);
 
-        // delete group
+        log.info("Delete agency and front data by chain id:[{}].", chain.getId());
+        // delete agency and front by chain id and mv host's old chain dir
+        agencyService.deleteByChainId(chain.getId());
+
+
+        // delete group data
         this.groupService.deleteGroupByChainId(chain.getId());
 
         log.info("Delete chain data by chain id:[{}].", chain.getId());
         this.tbChainMapper.deleteByPrimaryKey(chain.getId());
 
         log.info("Delete chain:[{}] config files", chainName);
-        this.pathService.deleteChain(chainName);
+        try {
+            this.pathService.deleteChain(chainName);
+        } catch (IOException e) {
+            errorFlag++;
+            log.error("Delete chain config files error:[]", e);
+            log.error("Please delete/move chain config files manually");
+        }
 
         // delete all certs
         this.certService.deleteAll();
-
         // set pull cert to false
         CertTools.isPullFrontCertsDone = false;
+
+        // if error occur, throw out finally
+        if (errorFlag != 0) {
+            log.error("Delete chain config files error. Check out upper error log");
+            throw new NodeMgrException(ConstantCode.DELETE_NODE_DIR_ERROR);
+        }
     }
 
     /**
-     *
+     * gen chain config(cert&config) and init chain db data, generate front'yml
      * @param chainName
      * @param ipConf
-     * @param tagId
-     * @param rootDirOnHost
+     * @param imageTag
+     * @return whether gen success
      */
     @Transactional
-    public void generateChainConfig(String chainName, String[] ipConf, int tagId, String rootDirOnHost,
-                                    String webaseSignAddr, DockerImageTypeEnum dockerImageTypeEnum,
-                                    String sshUser, int sshPort, int dockerPort){
+    public boolean generateConfigLocalAndInitDb(String chainName, List<DeployNodeInfo> deployNodeInfoList,
+        String[] ipConf, String imageTag, int encryptType, String webaseSignAddr, String agencyName) {
         log.info("Check chainName exists....");
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain != null) {
@@ -270,32 +298,23 @@ public class ChainService {
         }
 
         // check tagId existed
-        TbConfig imageConfig = this.tbConfigMapper.selectByPrimaryKey(tagId);
-        if (imageConfig == null || StringUtils.isBlank(imageConfig.getConfigValue())) {
-            throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
-        }
+        // 1.4.3 only version tag, not include encryptType in value;
+        // 1.4.3 use imageTag instead of tagId
+        configService.checkValueInDb(imageTag);
 
         // parse ipConf config
         log.info("Parse ipConf content....");
-        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf,
-                sshUser,sshPort,constant.getPrivateKey());
+        List<IpConfigParse> ipConfigParseList = IpConfigParse.parseIpConf(ipConf);
 
-        // check docker image exists
-        if (DockerImageTypeEnum.MANUAL ==  dockerImageTypeEnum){
-            Set<String> ipSet = ipConfigParseList.stream().map(IpConfigParse::getIp).collect(Collectors.toSet());
-            this.hostService.checkImageExists(ipSet,sshUser,sshPort,imageConfig.getConfigValue());
-        }
-
-        byte encryptType = (byte) (imageConfig.getConfigValue().endsWith("-gm") ?
-                EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
-
-        // exec build_chain.sh shell script
+        // exec build_chain.sh shell script generate config and cert
+        // 1.4.3 use bash to generate not ansible
+        log.info("Locally exec build_chain....");
         deployShellService.execBuildChain(encryptType, ipConf, chainName);
 
         try {
-            // generate chain config
-            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName,ipConfigParseList,
-                    rootDirOnHost,webaseSignAddr,imageConfig,encryptType,sshUser,sshPort,dockerPort);
+            log.info("Init chain front node db data....");
+            // save chain data in db, generate front's yml
+            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName, deployNodeInfoList, ipConfigParseList, webaseSignAddr, imageTag, (byte)encryptType, agencyName);
         } catch (Exception e) {
             log.error("Init chain:[{}] data error. remove generated files:[{}]",
                     chainName, this.pathService.getChainRoot(chainName), e);
@@ -308,38 +327,38 @@ public class ChainService {
             throw e;
         }
 
+        return true;
+
     }
 
     /**
-     *
+     * init chain data and gen front yml
      * @param chainName
      * @param ipConfigParseList
-     * @param rootDirOnHost
      * @param webaseSignAddr
-     * @param imageConfig
+     * @param imageTag(from tb_config value)
      * @param encryptType
      */
     @Transactional
-    public void initChainDbData(String chainName, List<IpConfigParse> ipConfigParseList, String rootDirOnHost,
-                                String webaseSignAddr, TbConfig imageConfig, byte encryptType, String sshUser,
-                                int sshPort, int dockerPort){
-
+    public void initChainDbData(String chainName,  List<DeployNodeInfo> deployNodeInfoList, List<IpConfigParse> ipConfigParseList,
+                                String webaseSignAddr, String imageTag, byte encryptType, String agencyName){
+        log.info("start initChainDbData chainName:{}, ipConfigParseList:{}",
+            chainName, ipConfigParseList);
         // insert chain
         final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
-                imageConfig.getConfigValue(), encryptType, ChainStatusEnum.INITIALIZED, rootDirOnHost,
+            imageTag, encryptType, ChainStatusEnum.INITIALIZED,
                 RunTypeEnum.DOCKER, webaseSignAddr);
 
         // all host ips
-        Map<String,TbHost> newIpHostMap = new HashMap<>();
+        Map<String, TbHost> newIpHostMap = new HashMap<>();
 
         // insert agency, host , group
         ipConfigParseList.forEach((config) -> {
             // insert agency if new
-            TbAgency agency = this.agencyService.insertIfNew(config.getAgencyName(),newChain.getId(),chainName);
+            TbAgency agency = this.agencyService.insertIfNew(agencyName, newChain.getId(), chainName);
 
-            // insert host if new
-            TbHost host = this.hostService.insertIfNew(agency.getId(), agency.getAgencyName(), config.getIp(), rootDirOnHost,
-                    sshUser,sshPort,dockerPort,"");
+//            // insert host if new
+            TbHost host = tbHostMapper.getByIp(config.getIp());
 
             // insert group if new
             config.getGroupIdSet().forEach((groupId) -> {
@@ -347,7 +366,7 @@ public class ChainService {
                         GroupStatus.MAINTAINING, newChain.getId(), newChain.getChainName());
             });
 
-            newIpHostMap.putIfAbsent(config.getIp(),host);
+            newIpHostMap.putIfAbsent(config.getIp(), host);
         });
 
         // insert nodes for all hosts. there may be multiple nodes on a host.
@@ -361,31 +380,33 @@ public class ChainService {
 
             for (Path nodeRoot : CollectionUtils.emptyIfNull(nodePathList)) {
                 // get node properties
-                NodeConfig nodeConfig = NodeConfig.read(nodeRoot,encryptType);
+                NodeConfig nodeConfig = NodeConfig.read(nodeRoot, encryptType);
 
-                // frontPort = 5002 + indexOnHost(0,1,2,3...)
-                int frontPort = constant.getDefaultFrontPort() + nodeConfig.getHostIndex();
+                // get frontPort
+                DeployNodeInfo targetNode = this.getFrontPort(deployNodeInfoList, ip, nodeConfig.getChannelPort());
+                if (targetNode == null) {
+                    throw new NodeMgrException(ConstantCode.DEPLOY_INFO_NOT_MATCH_IP_CONF);
+                }
+                int frontPort = targetNode.getFrontPort();
 
                 // host
                 TbHost host = newIpHostMap.get(ip);
                 // agency
-                TbAgency agency = this.tbAgencyMapper.selectByPrimaryKey(host.getAgencyId());
+                TbAgency agency = this.tbAgencyMapper.getByChainIdAndAgencyName(newChain.getId(), agencyName);
                 // insert front
                 TbFront front = TbFront.init(nodeConfig.getNodeId(), ip, frontPort,
-                        agency.getId(),agency.getAgencyName(), imageConfig.getConfigValue(),
-                        RunTypeEnum.DOCKER , host.getId(), nodeConfig.getHostIndex(),
-                        imageConfig.getConfigValue(), DockerOptions.getContainerName(rootDirOnHost, chainName,
+                        agency.getId(), agency.getAgencyName(), imageTag,
+                        RunTypeEnum.DOCKER , host.getId(), nodeConfig.getHostIndex(), imageTag,
+                        DockerOptions.getContainerName(host.getRootDir(), chainName,
                         nodeConfig.getHostIndex()), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
                         nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
                 this.frontService.insert(front);
-
 
                 // insert node and front group mapping
                 nodeConfig.getGroupIdSet().forEach((groupId) -> {
                     // insert node
                     String nodeName = NodeService.getNodeName(groupId, nodeConfig.getNodeId());
-                    this.nodeService.insert(nodeConfig.getNodeId(), nodeName,
-                            groupId, ip, nodeConfig.getP2pPort(),
+                    this.nodeService.insert(nodeConfig.getNodeId(), nodeName, groupId, ip, nodeConfig.getP2pPort(),
                             nodeName, DataStatus.STARTING);
 
                     // insert front group mapping
@@ -404,8 +425,8 @@ public class ChainService {
 
                 // generate front application.yml
                 try {
-                    ThymeleafUtil.newFrontConfig(nodeRoot,encryptType,nodeConfig.getChannelPort(),
-                            frontPort,webaseSignAddr);
+                    ThymeleafUtil.newFrontConfig(nodeRoot,encryptType, nodeConfig.getChannelPort(),
+                            frontPort, webaseSignAddr);
                 } catch (IOException e) {
                     throw new NodeMgrException(ConstantCode.GENERATE_FRONT_YML_ERROR);
                 }
@@ -455,13 +476,12 @@ public class ChainService {
 
     /**
      *  run task.
-     *
      * @return
      */
     public boolean runTask(){
         // 0, original deploy chain first; 1, deploy chain visually
         if (constant.getDeployType() == 0 ){
-            log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
+            log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(), isChainRunning.get());
             return true;
         }
         // set default chain status
@@ -472,5 +492,15 @@ public class ChainService {
 
         log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
         return isChainRunning.get();
+    }
+
+    public DeployNodeInfo getFrontPort(List<DeployNodeInfo> deployNodeInfoList, String ip, int channelPort) {
+        DeployNodeInfo targetNodeInfo = null;
+        for (DeployNodeInfo nodeInfo : deployNodeInfoList) {
+            if (ip.equals(nodeInfo.getIp()) && channelPort == nodeInfo.getChannelPort()) {
+                targetNodeInfo = nodeInfo;
+            }
+        }
+        return targetNodeInfo;
     }
 }

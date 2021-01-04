@@ -15,7 +15,10 @@ package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
+import com.webank.webase.node.mgr.abi.AbiService;
 import com.webank.webase.node.mgr.base.enums.DeployType;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
+import com.webank.webase.node.mgr.governance.GovernVoteService;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -135,8 +138,13 @@ public class GroupService {
     private PathService pathService;
     @Autowired
     private ConstantProperties constantProperties;
+    @Autowired
+    private AbiService abiService;
+    @Autowired
+    private GovernVoteService governVoteService;
 
     @Autowired private ChainService chainService;
+    @Autowired private AnsibleService ansibleService;
 
     public static final String RUNNING_GROUP = "RUNNING";
     public static final String OPERATE_START_GROUP = "start";
@@ -245,19 +253,21 @@ public class GroupService {
      */
     @Transactional
     public synchronized void resetGroupList() {
-        if (! chainService.runTask()) {
-            return ;
+        if (!chainService.runTask()) {
+            log.warn("resetGroupList jump over for runTask");
+            return;
         }
 
         Instant startTime = Instant.now();
         log.info("start resetGroupList. startTime:{}", startTime.toEpochMilli());
 
-        //all groupId from chain and all node, to check the whole group whether normal
+        // all groupId from chain and all node, to check the whole group whether normal
         Set<Integer> allGroupSet = new HashSet<>();
 
-        //get all front
-        List<TbFront> frontList = frontService.getFrontList(new FrontParam());
+        // get all front
+        List<TbFront> frontList = frontMapper.getAllList();
         if (frontList == null || frontList.size() == 0) {
+            log.info("resetGroupList frontList empty, jump over");
             return;
         }
 
@@ -298,6 +308,7 @@ public class GroupService {
 	 * @param allGroupSet to record all group from each front
 	 */
 	private void saveDataOfGroup(List<TbFront> frontList, Set<Integer> allGroupSet) {
+	    log.info("saveDataOfGroup frontList:{}", frontList);
 		for (TbFront front : frontList) {
             String frontIp = front.getFrontIp();
 			int frontPort = front.getFrontPort();
@@ -310,7 +321,8 @@ public class GroupService {
 				continue;
 			}
 			// update by group list on chain
-			for (String groupId : groupIdList) {
+            log.info("saveDataOfGroup groupIdList:{}", groupIdList);
+            for (String groupId : groupIdList) {
 				Integer gId = Integer.valueOf(groupId);
 
 				allGroupSet.add(gId);
@@ -329,7 +341,7 @@ public class GroupService {
 				TbGroup checkGroupExist = getGroupById(gId);
 				if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
 					saveGroup(gId, groupPeerList.size(), "synchronous",
-							GroupType.SYNC, GroupStatus.NORMAL,front.getChainId(),front.getChainName());
+							GroupType.SYNC, GroupStatus.NORMAL, front.getChainId(),front.getChainName());
 				}
 				// refresh front group map by group list on chain
 				// different from checkGroupMapByLocalGroupList which update by local groupList
@@ -411,11 +423,13 @@ public class GroupService {
      * @param allGroupOnChain if groupid not in allGroupSet, remove it
      */
     private void checkAndUpdateGroupStatus(Set<Integer> allGroupOnChain) {
+        log.info("checkAndUpdateGroupStatus allGroupOnChain:{}", allGroupOnChain);
         if (CollectionUtils.isEmpty(allGroupOnChain)) {
             return;
         }
 
         List<TbGroup> allLocalGroup = getGroupList(null);
+        log.info("checkAndUpdateGroupStatus allLocalGroup:{}", allLocalGroup);
         if (CollectionUtils.isEmpty(allLocalGroup)) {
             return;
         }
@@ -673,19 +687,23 @@ public class GroupService {
         }
         checkGroupId(groupId);
         log.warn("removeAllDataByGroupId! groupId:{}", groupId);
-        //remove groupId.
+        // remove groupId.
         groupMapper.remove(groupId);
-        //remove mapping.
+        // remove mapping.
         frontGroupMapService.removeByGroupId(groupId);
-        //remove contract
+        // remove contract
         contractService.deleteByGroupId(groupId);
-        //remove method
+        // remove method
         methodService.deleteByGroupId(groupId);
-        //remove node
+        // remove node
         nodeService.deleteByGroupId(groupId);
-        //remove transDaily
+        // remove transDaily
         transDailyService.deleteByGroupId(groupId);
-        //drop table.
+        // delete imported abi
+        abiService.deleteAbiByGroupId(groupId);
+        // delete chain governance vote
+        governVoteService.deleteAllByGroupId(groupId);
+        // drop table.
         tableService.dropTableByGroupId(groupId);
         log.warn("end removeAllDataByGroupId");
     }
@@ -890,8 +908,9 @@ public class GroupService {
 					OperateStatus.SUCCESS.getValue());
             // request front to start
             try{
-            	frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
-						OPERATE_START_GROUP);
+                this.operateGroup(nodeId, groupId, OPERATE_START_GROUP);
+//            	frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
+//						OPERATE_START_GROUP);
 				resOperateList.add(operateResult);
 			} catch (NodeMgrException | ResourceAccessException e) {
 				log.error("fail startGroup in frontId:{}, exception:{}",
@@ -916,6 +935,7 @@ public class GroupService {
     @Transactional(propagation = Propagation.REQUIRED)
     public TbGroup saveGroup(int groupId, int nodeCount, String groupDesc,
                              GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
+        log.info("saveGroup groupId:{},groupStatus:{}", groupId, groupStatus);
         if (groupId == 0) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
@@ -1001,7 +1021,7 @@ public class GroupService {
                                GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
 
         TbGroup group = this.groupMapper.getGroupByChainIdAndGroupId(chainId,groupId);
-        if (group != null){
+        if (group != null) {
             return group;
         }
 
@@ -1061,17 +1081,19 @@ public class GroupService {
         // path pattern: /host.getRootDir/chain_name
         // ex: (in the remote host) /opt/fisco/chain1
         String remoteChainPath = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
+        // todo ".*" fit in ansible
         // ex: (in the remote host) /opt/fisco/chain1/node0/conf/group.1001.*
-        String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.*",
-                remoteChainPath, nodeIndex, generateGroupId);
+        // String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.*", remoteChainPath, nodeIndex, generateGroupId);
+        String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.ini", remoteChainPath, nodeIndex, generateGroupId);
+        String remoteGroupGenesisSource = String.format("%s/node%s/conf/group.%s.genesis", remoteChainPath, nodeIndex, generateGroupId);
         // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
         String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
         String localDst = String.format("%s/conf/", localNodePath, generateGroupId);
         // copy group config files to local node's conf dir
-        deployShellService.scp(ScpTypeEnum.DOWNLOAD,tbHost.getSshUser(),
-                tbHost.getIp(), tbHost.getSshPort(), remoteGroupConfSource, localDst);
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupConfSource, localDst);
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupGenesisSource, localDst);
     }
 
 
@@ -1105,8 +1127,7 @@ public class GroupService {
             }
         }
         // copy group status file to local node's conf dir
-        deployShellService.scp(ScpTypeEnum.DOWNLOAD,  tbHost.getSshUser(),
-                tbHost.getIp(), tbHost.getSshPort(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
     }
 
 //    private void pullGroupFile(int groupId,TbFront tbFront){
@@ -1120,21 +1141,20 @@ public class GroupService {
 //    }
 
     /**
-     * @param newGroup
+     * generate group.x.ini group.x.genesis
      * @param chain
      * @param groupId
      * @param ip
      * @param newFrontList
      * @throws IOException
      */
-    public void generateNewNodesGroupConfigsAndScp(
-           boolean newGroup, TbChain chain, int groupId, String ip,
-           List<TbFront> newFrontList, String sshUser, int sshPort) throws IOException {
+    public void generateNewNodesGroupConfigsAndScp(TbChain chain, int groupId, String ip,
+           List<TbFront> newFrontList) {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
         long now = System.currentTimeMillis();
 
-        List<String> nodeIdList = newFrontList.stream().map(tbFront -> tbFront.getNodeId())
+        List<String> nodeIdList = newFrontList.stream().map(TbFront::getNodeId)
                 .collect(Collectors.toList());
 
         // copy group.x.[genesis|conf] from old front
@@ -1148,27 +1168,28 @@ public class GroupService {
             // local node root
             Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
 
-            if (newGroup) {
-                // generate conf/group.[groupId].ini
-                ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
-            } else {
+//            if (newGroup) {
+//                // generate conf/group.[groupId].ini
+//                ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
                 // copy old group files
-                if (oldFront != null) {
-                    Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
-                    NodeConfig.copyGroupConfigFiles(oldNodePath, nodeRoot, groupId);
-                }
+            if (oldFront != null) {
+                Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
+                NodeConfig.copyGroupConfigFiles(oldNodePath, nodeRoot, groupId);
             }
+
 
             // scp node to remote host
             // NODES_ROOT/[chainName]/[ip]/node[index] as a {@link Path}, a directory.
             String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
-            String dst = PathService.getChainRootOnHost(chain.getRootDir(),chainName);
+            // get host root dir
+            TbHost tbHost = tbHostMapper.getByIp(ip);
+            String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
 
-            log.info("Send files from:[{}] to:[{}@{}#{}:{}].", src, sshUser, ip, sshPort, dst);
+            log.info("Send files from:[{}] to:[{}:{}].", src, ip, dst);
             try {
-                this.deployShellService.scp(ScpTypeEnum.UP,sshUser, ip,sshPort, src, dst);
+                ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
             } catch (Exception e) {
-                log.info("Send files from:[{}] to:[{}@{}#{}:{}] error.", src, sshUser, ip, sshPort, dst, e);
+                log.info("Send files from:[{}] to:[{}:{}] error.", src, ip, dst, e);
             }
         }
     }
