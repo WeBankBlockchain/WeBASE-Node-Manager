@@ -127,7 +127,7 @@ public class AnsibleService {
             log.info("exec scp copy command: [{}]", command);
             ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
             if (result.failed()) {
-                throw new NodeMgrException(ConstantCode.ANSIBLE_SCP_COPY_ERROR.attach(result.getExecuteOut()));
+                throw new NodeMgrException(ConstantCode.ANSIBLE_SCP_FETCH_ERROR.attach(result.getExecuteOut()));
             }
         }
     }
