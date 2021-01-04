@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,33 +11,34 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.front.entity;
+package com.webank.webase.node.mgr.contract.entity;
 
-import java.util.List;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * param of send transaction to front
+ * Entity class of table tb_contract.
  */
 @Data
 @NoArgsConstructor
-public class TransactionParam {
+public class TbCns {
 
-    @NotNull
+    private Integer id;
     private Integer groupId;
-    private String signUserId;
-    @NotBlank
+    private String contractPath;
     private String contractName;
-    @NotBlank
-    private String funcName;
-    private String contractAddress;
-    private List<Object> contractAbi;
-    private List<Object> funcParam;
-    // 1.4.3
-    private boolean useCns = false;
     private String cnsName;
     private String version;
+    private String contractAddress;
+    private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
+
+    public TbCns(Integer groupId, String contractName, String version, String contractAddress) {
+        this.groupId = groupId;
+        this.contractName = contractName;
+        this.version = version;
+        this.contractAddress = contractAddress;
+    }
+
 }
