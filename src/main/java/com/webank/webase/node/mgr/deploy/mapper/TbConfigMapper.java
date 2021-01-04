@@ -18,6 +18,14 @@ import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 
 public interface TbConfigMapper {
 
+    @Select({
+        "select",
+        TbConfigSqlProvider.ALL_COLUMN_FIELDS,
+        "from tb_config",
+        "where config_value = #{configValue,jdbcType=VARCHAR} order by id desc"
+    })
+    List<TbConfig> selectByConfigValue(@Param("configValue") String configValue);
+
     @Delete({
             "delete from tb_config", "where config_type = #{type,jdbcType=SMALLINT}"
     })

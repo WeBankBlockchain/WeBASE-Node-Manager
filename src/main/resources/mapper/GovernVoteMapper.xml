@@ -64,4 +64,8 @@
     delete from tb_govern_vote where id = #{id}
   </delete>
 
+  <delete id="deleteByGroupId" parameterType="java.lang.Integer">
+    delete from tb_govern_vote where group_id = #{groupId}
+  </delete>
+
 </mapper>

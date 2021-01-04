@@ -13,31 +13,44 @@
  */
 package com.webank.webase.node.mgr.deploy.entity;
 
-import javax.validation.constraints.NotBlank;
+import java.util.List;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import lombok.Data;
 
 /**
- *
+ * deploy batch node
  */
 @Data
-public class ReqNodeOption {
+public class ReqConfigChain {
 
     /**
-     * nodeId.
+     * init chain config
      */
-    @NotBlank
-    private String nodeId;
+    @NotNull
+    private String[] ipconf;
+
+//    @Positive
+//    private int tagId;
+    /**
+     * ex: v2.7.0, v2.7.1 etc.
+     */
+    String imageTag;
+
+    private String chainName;
+
+    private String webaseSignAddr;
+    private String agencyName;
 
     /**
-     *  Whether delete node when trying to delete the last node on a host.
+     * 0, 1
      */
-    // private boolean deleteHost;
-
+    private int encryptType;
     /**
-     *  Whether delete agency when trying to delete the last node on a host.
-     *
+     * init host info list
      */
-    // private boolean deleteAgency;
-
+    private List<DeployNodeInfo> deployNodeInfoList;
 }
+

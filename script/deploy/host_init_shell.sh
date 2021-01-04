@@ -29,7 +29,7 @@ function UpdateDNS() {
     [[ "$(grep -i "$var" "$file")" == "" ]] && sudo echo "nameserver $var" >> "$file"
   done
 }
-UpdateDNS
+#UpdateDNS
 
 # GNU/Linux操作系统
 if [[ $(command -v apt) ]]; then
@@ -43,26 +43,11 @@ fi
 # install rsync for synchronizing node files
 install wget wget
 install curl curl
+install netstat netstat
 #install vim vim
 #install rsync rsync
 #install nslookup bind-utils
-
-# install docker
-if [[ ! $(command -v docker) ]]; then
-    echo "Install docker..."
-    bash <(curl -s -L get.docker.com)
-fi
-
-# install docker-compose
-#if [[ ! $(command -v docker-compose) ]]; then
-#    echo "Install docker-compose..."
-#    curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-#    chmod +x /usr/local/bin/docker-compose
-#fi
+# todo install dos2unix
 
 
-# check docker started
-if [[ "$(systemctl is-active docker)" != "active" ]] ; then
-    sudo systemctl start docker
-fi
 

@@ -102,7 +102,6 @@ public class ConstantProperties {
 
     private int deployType = 0;
     private String webaseSignAddress = "127.0.0.1:5004";
-    private String rootDirOnHost = "/opt/fisco-webase";
 
     private boolean useDockerSDK = false;
     public int dockerDaemonPort = 3000;
@@ -114,7 +113,15 @@ public class ConstantProperties {
     private String buildChainShell = "./script/deploy/build_chain.sh";
     private String genAgencyShell = "./script/deploy/gen_agency_cert.sh";
     private String genNodeShell = "./script/deploy/gen_node_cert.sh";
-    private String scpShell =        "./script/deploy/file_trans_util.sh";
+    private String scpShell = "./script/deploy/file_trans_util.sh";
+    private String hostCheckShell = "./script/deploy/host_check.sh";
+    private String dockerCheckShell = "./script/deploy/host_docker_check.sh";
+    private String dockerPullCdnShell = "./script/deploy/host_docker_cdn.sh";
+    private String hostDockerTcpShell = "./script/deploy/host_docker_tcp.sh";
+    private String hostInitShell = "./script/deploy/host_init_shell.sh";
+    // to support | & > $
+    private String ansibleImageCheckShell = "./script/deploy/check_image_exist.sh";
+    private String ansibleContainerCheckShell = "./script/deploy/check_container_exist.sh";
     private String privateKey = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "id_rsa";
     private String fiscoBcosBinary =  "";
 
@@ -125,7 +132,9 @@ public class ConstantProperties {
     private int defaultChannelPort = 20200;
     private int defaultFrontPort = 5002;
 
-    // timeout config
+    // timeout config todo update timeout in ansible
+    private long execDockerCheckTimeout = 10 * 60 * 1000L;
+    private long execHostCheckTimeout = 10 * 60 * 1000L;
     private long execHostInitTimeout = 10 * 60 * 1000L;
     private long execBuildChainTimeout = 10 * 60 * 1000L;
     private long execShellTimeout = 10 * 60 * 1000L;
@@ -140,6 +149,9 @@ public class ConstantProperties {
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
     private String nodesRootTmpDir = "NODES_ROOT_TMP";
+
+    // v1.4.3
+    private String defaultAgencyName;
 
     /**
      * Docker client connect daemon ip with proxy ip.
@@ -160,8 +172,6 @@ public class ConstantProperties {
 //        this.imageTagUpdateUrl = String.format(this.imageTagUpdateUrl,dockerRepository);
 //        log.info("Init constant properties, imageTagUpdateUrl: [{}]", this.imageTagUpdateUrl);
 
-        log.info("Init constant properties, rootOnHostDir: [{}]", rootDirOnHost);
-
         log.info("Init constant properties, private key: [{}]", privateKey);
 
         log.info("Init constant properties, webase sign server: [{}]", webaseSignAddress);
@@ -176,6 +186,7 @@ public class ConstantProperties {
             log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
             fiscoBcosBinary = "";
         }
+        // todo add log of constant
 
     }
 

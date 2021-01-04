@@ -43,8 +43,8 @@ public class JavaCommandExecutor {
         try {
             log.info("exec command:[{}]", command);
             String[] commandArray = { "/bin/bash", "-c", command };
-
             process = Runtime.getRuntime().exec(commandArray);
+//            process = Runtime.getRuntime().exec(command);
             final Process p = process;
 
             // close process's output stream.
@@ -57,7 +57,7 @@ public class JavaCommandExecutor {
             pErr = process.getErrorStream();
             errorGobbler = new StreamGobbler(pErr, "ERROR");
             errorGobbler.start();
-            long newTimeout = timeout <= 0? DEFAULT_EXEC_TIMEOUT:timeout;
+            long newTimeout = timeout <= 0 ? DEFAULT_EXEC_TIMEOUT : timeout;
 
             p.waitFor(newTimeout, TimeUnit.MILLISECONDS);
             int exitCode = p.exitValue();
