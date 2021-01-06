@@ -163,7 +163,6 @@ public class NodeAsyncService {
     @Async("deployAsyncScheduler")
     public void asyncAddNode(TbChain chain, TbHost host, int groupId, OptionType optionType, List<TbFront> newFrontList) {
         try {
-
             log.info("asyncAddNode Init host:[{}]",host.getIp());
             // start front and  related front
             this.asyncRestartRelatedFront(chain.getId(), Collections.singleton(groupId), optionType,

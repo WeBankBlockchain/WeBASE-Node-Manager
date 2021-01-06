@@ -18,6 +18,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -254,7 +255,7 @@ public class DeployService {
         for (TbHost tbHost : hostList) {
             // node number in one host when adding
             int num = Integer.parseInt(tbHost.getRemark());
-            // generate new sdk cert and scp to host todo if exist host, gen agency cert again?
+            // generate new sdk cert and scp to host
             log.info("addNodes generateHostSDKAndScp");
             hostService.generateHostSDKAndScp(chain.getEncryptType(), chain.getChainName(), tbHost, agency.getAgencyName());
 
@@ -290,9 +291,6 @@ public class DeployService {
             }
 
         }
-
-
-
 
         return Pair.of(ConstantCode.SUCCESS, "success");
     }

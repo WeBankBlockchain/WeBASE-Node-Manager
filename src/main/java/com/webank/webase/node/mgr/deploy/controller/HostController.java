@@ -81,7 +81,7 @@ public class HostController extends BaseController {
         log.info("Start addHost:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
             // save host info
-            this.hostService.checkDirAndInsert(reqAddHost.getSshIp(), reqAddHost.getRootDir(), HostStatusEnum.ADDED,  "");
+            hostService.checkDirAndInsert(reqAddHost.getSshIp(), reqAddHost.getRootDir(), HostStatusEnum.ADDED,  "");
 
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
@@ -116,7 +116,7 @@ public class HostController extends BaseController {
         log.info("Start ping:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
             // check before add
-           ansibleService.execPing(reqAddHost.getSshIp());
+            ansibleService.execPing(reqAddHost.getSshIp());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
@@ -141,7 +141,7 @@ public class HostController extends BaseController {
             if (!checkStatus) {
                 return new BaseResponse(ConstantCode.CHECK_HOST_MEM_CPU_DOCKER_FAIL);
             }
-            return new BaseResponse(ConstantCode.SUCCESS, checkStatus);
+            return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
         } catch (InterruptedException e) {

@@ -598,7 +598,7 @@ public class FrontService {
 
             if (executeResult.failed()) {
                 log.error("Generate node:[{}:{}] key and crt error.", ip, currentIndex);
-                throw new NodeMgrException(ConstantCode.EXEC_GEN_NODE_ERROR);
+                throw new NodeMgrException(ConstantCode.EXEC_GEN_NODE_ERROR.attach(executeResult.getExecuteOut()));
             }
 
             String nodeId = PathService.getNodeId(nodeRoot,encryptType);
