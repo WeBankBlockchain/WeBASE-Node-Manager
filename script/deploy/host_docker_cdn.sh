@@ -14,6 +14,9 @@ webase_version="v1.4.2"
 # constant param
 # url ex: https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/releases/download/v1.4.2/docker-fisco-webase.tar
 
+### case1: if need your custom version of fisco-webase image, put it in this path with the same file name, then it will load this tar
+### case2: if
+
 function pullCdn() {
   tar_path="${download_path}/docker-fisco-webase.tar"
   echo "Start download docker image tar of webase:${webase_version}..."
