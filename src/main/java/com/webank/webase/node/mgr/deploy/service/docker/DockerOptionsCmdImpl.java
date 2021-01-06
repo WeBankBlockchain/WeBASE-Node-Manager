@@ -72,7 +72,14 @@ public class DockerOptionsCmdImpl implements DockerOptions{
             }
         } else if (DockerImageTypeEnum.MANUAL.getId() == imagePullType){
             log.info("pullImage by manually load image");
-            return;
+            boolean imageExist = this.checkImageExists(ip, imageTag);
+            if (imageExist) {
+                log.info("image of {} check exist, success", imageTag);
+                return;
+            } else {
+                log.error("not found manually loaded image of :{}", imageTag);
+                throw new NodeMgrException(ConstantCode.IMAGE_NOT_EXISTS_ON_HOST.attach(imageTag));
+            }
         } else {
             log.info("pullImage from cdn");
             ansibleService.execPullDockerCdnShell(ip, downloadPath + "/download", imageTag, webaseVersion);
