@@ -175,7 +175,8 @@ public class HostService {
 
                         boolean success = this.updateStatus(tbHost.getId(), HostStatusEnum.INITIATING, "Initiating...");
                         if (success) {
-                            log.info("initHostAndDocker host:[{}] by exec shell script:[{}]", tbHost.getIp(), constant.getHostInitShell());
+                            log.info("initHostAndDocker host:[{}] by exec shell script:[{}]",
+                                tbHost.getIp(), constant.getHostInitShell());
 
                             // exec host init shell script
                             try {
@@ -197,7 +198,8 @@ public class HostService {
 
                         // docker pull image(ansible already check exist before pull)
                         try {
-                            log.info("initHostAndDocker pull docker ip:{}, imageTag:{}, imagePullType:{}", tbHost.getIp(), imageTag, imagePullType);
+                            log.info("initHostAndDocker pull docker ip:{}, imageTag:{}, imagePullType:{}",
+                                tbHost.getIp(), imageTag, imagePullType);
                             this.dockerOptions.pullImage(tbHost.getIp(), imageTag, imagePullType, tbHost.getRootDir());
                         } catch (Exception e) {
                             log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
