@@ -96,9 +96,9 @@ public class HostService {
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean updateStatus(int hostId, HostStatusEnum newStatus,String remark) throws NodeMgrException {
-        log.info("Change host status to:[{}:{}:{}]",hostId, newStatus, remark);
-        return tbHostMapper.updateHostStatus(hostId,new Date(), newStatus.getId(),remark) == 1;
+    public boolean updateStatus(int hostId, HostStatusEnum newStatus, String remark) throws NodeMgrException {
+        log.info("Change host status to:[{}:{}:{}]", hostId, newStatus, remark);
+        return tbHostMapper.updateHostStatus(hostId, new Date(), newStatus.getId(), remark) == 1;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -225,7 +225,7 @@ public class HostService {
         }
 
         initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
-        log.error("initHostAndDocker host timeout, cancel unfinished tasks.");
+        log.info("check initHostAndDocker host timeout, cancel unfinished tasks.");
         taskMap.entrySet().forEach((entry)->{
             int hostId = entry.getKey();
             Future<?> task = entry.getValue();
@@ -283,11 +283,17 @@ public class HostService {
                             ansibleService.scp(ScpTypeEnum.UP, tbHost.getIp(), src, dst);
                             log.info("Send files from:[{}] to:[{}:{}] success.",
                                 src, tbHost.getIp(), dst);
+                        } catch (NodeMgrException e) {
+                            log.error("Send file to host:[{}] failed",
+                                tbHost.getIp(), e);
+                            this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_FAIL,
+                                e.getRetCode().getAttachment());
+                            return;
                         } catch (Exception e) {
                             log.error("Send file to host :[{}] failed", tbHost.getIp(), e);
                             this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_FAIL,
                                 "Scp configuration files to host failed, please check the host's network or disk usage.");
-                            return ;
+                            return;
                         }
 
                     }
@@ -355,14 +361,15 @@ public class HostService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void generateHostSDKAndScp(byte encryptType, String chainName, TbHost host, String agencyName)
         throws NodeMgrException {
-        log.info("start generateHostSDKAndScp encryptType:{},chainName:{},host:{},agencyName:{}", encryptType, chainName, host, agencyName);
+        log.info("start generateHostSDKAndScp encryptType:{},chainName:{},host:{},agencyName:{}",
+            encryptType, chainName, host, agencyName);
         String ip = host.getIp();
         // new host, generate sdk dir first
         Path sdkPath = this.pathService.getSdk(chainName, ip);
 
         if (Files.exists(sdkPath)){
-            log.warn("generateHostSDKAndScp Exists sdk dir of host:[{}:{}], delete first.",
-                ip, sdkPath.toAbsolutePath().toAbsolutePath());
+            log.warn("generateHostSDKAndScp Exists sdk dir of host:[{}:{}], delete first.", ip,
+                sdkPath.toAbsolutePath().toAbsolutePath());
             try {
                 FileUtils.deleteDirectory(sdkPath.toFile());
             } catch (IOException e) {
@@ -375,7 +382,8 @@ public class HostService {
                 encryptType, chainName, agencyName, sdkPath.toAbsolutePath().toString());
         if (executeResult.failed()) {
             log.error("exec gen node cert shell error!");
-             throw new NodeMgrException(ConstantCode.EXEC_GEN_SDK_ERROR);
+            this.updateStatus(host.getId(), HostStatusEnum.CONFIG_FAIL, executeResult.getExecuteOut());
+            throw new NodeMgrException(ConstantCode.EXEC_GEN_SDK_ERROR);
         }
 
         // init sdk dir
@@ -386,7 +394,21 @@ public class HostService {
         String dst = PathService.getChainRootOnHost(host.getRootDir(), chainName);
 
         log.info("generateHostSDKAndScp scp: Send files from:[{}] to:[{}:{}].", src, ip, dst);
-        ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
+        try {
+            ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
+            log.info("Send files from:[{}] to:[{}:{}] success.", src, ip, dst);
+        } catch (NodeMgrException e) {
+            log.error("Send file to host:[{}] failed", ip, e);
+            this.updateStatus(host.getId(), HostStatusEnum.CONFIG_FAIL, e.getRetCode().getAttachment());
+            return;
+        } catch (Exception e) {
+            log.error("Send file to host :[{}] failed", ip, e);
+            this.updateStatus(host.getId(), HostStatusEnum.CONFIG_FAIL,
+                "Scp configuration files to host failed, please check the host's network or disk usage.");
+            return;
+        }
+
+        this.updateStatus(host.getId(), HostStatusEnum.CONFIG_SUCCESS, "");
         log.info("end generateHostSDKAndScp");
 
     }
