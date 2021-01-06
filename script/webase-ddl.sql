@@ -391,7 +391,7 @@ CREATE TABLE IF NOT EXISTS `tb_host` (
   `ip` varchar(16) NOT NULL COMMENT '主机IP',
   `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
   `status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '主机状态：0，新建；1，初始化；2，运行等等',
-  `remark` varchar(512) DEFAULT '' COMMENT 'remark',
+  `remark` text DEFAULT NULL COMMENT 'remark',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
