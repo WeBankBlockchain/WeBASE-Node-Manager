@@ -40,7 +40,7 @@ import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
-import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
+import com.webank.webase.node.mgr.deploy.service.docker.DockerOptionsCmdImpl;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -130,7 +130,7 @@ public class FrontService {
     @Autowired
     private ConstantProperties constant;
     @Autowired
-    private DockerOptions dockerOptions;
+    private DockerOptionsCmdImpl dockerOptions;
     @Autowired
     private AnsibleService ansibleService;
     @Autowired
@@ -609,7 +609,7 @@ public class FrontService {
 
 
             TbFront front = TbFront.init(nodeId, ip, frontPort, agencyId, agencyName, imageTag, RunTypeEnum.DOCKER,
-                    hostId, currentIndex, imageTag, DockerOptions.getContainerName(rootDirOnHost, chainName, currentIndex),
+                    hostId, currentIndex, imageTag, DockerOptionsCmdImpl.getContainerName(rootDirOnHost, chainName, currentIndex),
                     jsonrpcPort, p2pPort, channelPort, chain.getId(), chainName, frontStatusEnum);
             // insert front into db
             ((FrontService) AopContext.currentProxy()).insert(front);
