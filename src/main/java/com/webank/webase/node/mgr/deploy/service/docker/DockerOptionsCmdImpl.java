@@ -3,21 +3,20 @@ package com.webank.webase.node.mgr.deploy.service.docker;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DockerImageTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.properties.VersionProperties;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.deploy.service.PathService;
-
+import java.io.File;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Log4j2
-public class DockerOptionsCmdImpl implements DockerOptions{
+@Service
+public class DockerOptionsCmdImpl {
 
     @Autowired private ConstantProperties constant;
     @Autowired
@@ -25,7 +24,35 @@ public class DockerOptionsCmdImpl implements DockerOptions{
     @Autowired
     private AnsibleService ansibleService;
 
-    @Override
+    /**
+     * Get container's name for node.
+     *
+     * @param rootDirOnHost
+     * @param chainName
+     * @param hostIndex
+     * @return delete all {@link File#separator} and blank of node path on host.
+     */
+    public static String getContainerName(String rootDirOnHost, String chainName, int hostIndex) {
+        return String.format("%s%snode%s",
+            rootDirOnHost.replaceAll(File.separator, "").replaceAll(" ", ""), chainName, hostIndex);
+    }
+
+
+    /**
+     *
+     * @return
+     */
+    private String getImageRepositoryTag(String dockerRepository, String dockerRegistryMirror, String imageTag) {
+        // image repository and tag
+        String image = String.format("%s:%s", dockerRepository, imageTag);
+        if (StringUtils.isNotBlank(dockerRegistryMirror)) {
+            // image with mirror
+            image = String.format("%s/%s", dockerRegistryMirror, image);
+        }
+        return image;
+    }
+
+
     public boolean checkImageExists(String ip, String imageTag) {
         String imageFullName = getImageRepositoryTag(constant.getDockerRepository(), constant.getDockerRegistryMirror(), imageTag);
 
@@ -49,7 +76,6 @@ public class DockerOptionsCmdImpl implements DockerOptions{
      * @param downloadPath temp dir to save file from cdn
      * @return
      */
-    @Override
     public void pullImage(String ip, String imageTag, int imagePullType, String downloadPath) {
         log.info("start pullImage ip:{}, imageTage:{}, pullType:{}", ip, imageTag, imagePullType);
         String imageFullName = getImageRepositoryTag(constant.getDockerRepository(),
@@ -88,7 +114,6 @@ public class DockerOptionsCmdImpl implements DockerOptions{
     }
 
 
-    @Override
     public void run(String ip, String imageTag, String containerName, String chainRootOnHost, int nodeIndex) {
         String fullImageName = getImageRepositoryTag(constant.getDockerRepository(), constant.getDockerRegistryMirror(), imageTag);
         this.stop(ip, containerName);
@@ -110,7 +135,6 @@ public class DockerOptionsCmdImpl implements DockerOptions{
         ansibleService.execDocker(ip, dockerCreateCommand);
     }
 
-    @Override
     public void stop(String ip, String containerName) {
         log.info("stop ip:{}, containerName:{}", ip, containerName);
         boolean containerExist = ansibleService.checkContainerExists(ip, containerName);
