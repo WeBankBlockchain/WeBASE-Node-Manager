@@ -73,7 +73,8 @@ public class ConfigService {
 //                            CollectionUtils.size(configList));
 
                 List<TbConfig> configList = tbConfigMapper.selectByType(type.getId());
-                return filterByEncryptType(configList, encryptType.getEncryptType());
+                // return filterByEncryptType(configList, encryptType.getEncryptType());
+                return configList;
             default:
                 break;
         }
