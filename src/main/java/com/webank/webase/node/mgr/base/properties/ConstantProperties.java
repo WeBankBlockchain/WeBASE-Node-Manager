@@ -103,11 +103,6 @@ public class ConstantProperties {
     private int deployType = 0;
     private String webaseSignAddress = "127.0.0.1:5004";
 
-    private boolean useDockerSDK = false;
-    public int dockerDaemonPort = 3000;
-    public String sshDefaultUser = "root";
-    public int sshDefaultPort = 22;
-
     // shell script
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
     private String buildChainShell = "./script/deploy/build_chain.sh";
