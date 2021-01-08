@@ -24,17 +24,15 @@ import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
-import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
-import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
+import com.webank.webase.node.mgr.deploy.service.docker.DockerOptionsCmdImpl;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -42,7 +40,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +54,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.springframework.aop.framework.AopContext;
@@ -84,7 +80,7 @@ public class HostService {
     @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private ConstantProperties constant;
-    @Autowired private DockerOptions dockerOptions;
+    @Autowired private DockerOptionsCmdImpl dockerOptions;
     @Autowired private AgencyService agencyService;
     @Autowired private PathService pathService;
     @Autowired private DeployShellService deployShellService;
@@ -100,9 +96,9 @@ public class HostService {
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean updateStatus(int hostId, HostStatusEnum newStatus,String remark) throws NodeMgrException {
-        log.info("Change host status to:[{}:{}:{}]",hostId, newStatus, remark);
-        return tbHostMapper.updateHostStatus(hostId,new Date(), newStatus.getId(),remark) == 1;
+    public boolean updateStatus(int hostId, HostStatusEnum newStatus, String remark) throws NodeMgrException {
+        log.info("Change host status to:[{}:{}:{}]", hostId, newStatus, remark);
+        return tbHostMapper.updateHostStatus(hostId, new Date(), newStatus.getId(), remark) == 1;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -175,7 +171,8 @@ public class HostService {
 
                         boolean success = this.updateStatus(tbHost.getId(), HostStatusEnum.INITIATING, "Initiating...");
                         if (success) {
-                            log.info("initHostAndDocker host:[{}] by exec shell script:[{}]", tbHost.getIp(), constant.getHostInitShell());
+                            log.info("initHostAndDocker host:[{}] by exec shell script:[{}]",
+                                tbHost.getIp(), constant.getHostInitShell());
 
                             // exec host init shell script
                             try {
@@ -197,8 +194,15 @@ public class HostService {
 
                         // docker pull image(ansible already check exist before pull)
                         try {
-                            log.info("initHostAndDocker pull docker ip:{}, imageTag:{}, imagePullType:{}", tbHost.getIp(), imageTag, imagePullType);
+                            log.info("initHostAndDocker pull docker ip:{}, imageTag:{}, imagePullType:{}",
+                                tbHost.getIp(), imageTag, imagePullType);
                             this.dockerOptions.pullImage(tbHost.getIp(), imageTag, imagePullType, tbHost.getRootDir());
+                        } catch (NodeMgrException e) {
+                            log.error("Docker pull image on host:[{}] failed",
+                                tbHost.getIp(), e);
+                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                e.getRetCode().getAttachment());
+                            return;
                         } catch (Exception e) {
                             log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
                             this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
@@ -221,7 +225,7 @@ public class HostService {
         }
 
         initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
-        log.error("initHostAndDocker host timeout, cancel unfinished tasks.");
+        log.info("check initHostAndDocker host timeout, cancel unfinished tasks.");
         taskMap.entrySet().forEach((entry)->{
             int hostId = entry.getKey();
             Future<?> task = entry.getValue();
@@ -279,11 +283,17 @@ public class HostService {
                             ansibleService.scp(ScpTypeEnum.UP, tbHost.getIp(), src, dst);
                             log.info("Send files from:[{}] to:[{}:{}] success.",
                                 src, tbHost.getIp(), dst);
+                        } catch (NodeMgrException e) {
+                            log.error("Send file to host:[{}] failed",
+                                tbHost.getIp(), e);
+                            this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_FAIL,
+                                e.getRetCode().getAttachment());
+                            return;
                         } catch (Exception e) {
                             log.error("Send file to host :[{}] failed", tbHost.getIp(), e);
                             this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_FAIL,
                                 "Scp configuration files to host failed, please check the host's network or disk usage.");
-                            return ;
+                            return;
                         }
 
                     }
@@ -351,14 +361,15 @@ public class HostService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void generateHostSDKAndScp(byte encryptType, String chainName, TbHost host, String agencyName)
         throws NodeMgrException {
-        log.info("start generateHostSDKAndScp encryptType:{},chainName:{},host:{},agencyName:{}", encryptType, chainName, host, agencyName);
+        log.info("start generateHostSDKAndScp encryptType:{},chainName:{},host:{},agencyName:{}",
+            encryptType, chainName, host, agencyName);
         String ip = host.getIp();
         // new host, generate sdk dir first
         Path sdkPath = this.pathService.getSdk(chainName, ip);
 
         if (Files.exists(sdkPath)){
-            log.warn("generateHostSDKAndScp Exists sdk dir of host:[{}:{}], delete first.",
-                ip, sdkPath.toAbsolutePath().toAbsolutePath());
+            log.warn("generateHostSDKAndScp Exists sdk dir of host:[{}:{}], delete first.", ip,
+                sdkPath.toAbsolutePath().toAbsolutePath());
             try {
                 FileUtils.deleteDirectory(sdkPath.toFile());
             } catch (IOException e) {
@@ -371,7 +382,8 @@ public class HostService {
                 encryptType, chainName, agencyName, sdkPath.toAbsolutePath().toString());
         if (executeResult.failed()) {
             log.error("exec gen node cert shell error!");
-             throw new NodeMgrException(ConstantCode.EXEC_GEN_SDK_ERROR);
+            this.updateStatus(host.getId(), HostStatusEnum.CONFIG_FAIL, executeResult.getExecuteOut());
+            throw new NodeMgrException(ConstantCode.EXEC_GEN_SDK_ERROR);
         }
 
         // init sdk dir
@@ -382,7 +394,21 @@ public class HostService {
         String dst = PathService.getChainRootOnHost(host.getRootDir(), chainName);
 
         log.info("generateHostSDKAndScp scp: Send files from:[{}] to:[{}:{}].", src, ip, dst);
-        ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
+        try {
+            ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
+            log.info("Send files from:[{}] to:[{}:{}] success.", src, ip, dst);
+        } catch (NodeMgrException e) {
+            log.error("Send file to host:[{}] failed", ip, e);
+            this.updateStatus(host.getId(), HostStatusEnum.CONFIG_FAIL, e.getRetCode().getAttachment());
+            return;
+        } catch (Exception e) {
+            log.error("Send file to host :[{}] failed", ip, e);
+            this.updateStatus(host.getId(), HostStatusEnum.CONFIG_FAIL,
+                "Scp configuration files to host failed, please check the host's network or disk usage.");
+            return;
+        }
+
+        this.updateStatus(host.getId(), HostStatusEnum.CONFIG_SUCCESS, "");
         log.info("end generateHostSDKAndScp");
 
     }
@@ -631,8 +657,8 @@ public class HostService {
     }
 
     /**
-     * todo check synchronized
      * check host chain's port before init host, after check host mem/cpu
+     * @related: syncCheckPortHostList， 一个host多个端口时，端口占用的异常会被覆盖，因此采用同步非异步方式检测
      */
     public boolean checkPortHostList(List<DeployNodeInfo> deployNodeInfoList) throws InterruptedException {
         log.info("batchCheckHostList deployNodeInfoList:{}", deployNodeInfoList);
@@ -643,7 +669,6 @@ public class HostService {
         AtomicInteger checkSuccessCount = new AtomicInteger(0);
         Map<String, Future> taskMap = new HashedMap<>(); //key is ip+"_"+frontPort
 
-        // todo 一个host多个端口时，需要通过host来检测
         for (final DeployNodeInfo nodeInfo : deployNodeInfoList) {
             log.info("Check host port:[{}]", nodeInfo.getIp());
 

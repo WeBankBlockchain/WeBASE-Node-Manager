@@ -15,37 +15,9 @@ package com.webank.webase.node.mgr.chain;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CHAIN;
 
-import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.deploy.service.AnsibleService;
-import com.webank.webase.node.mgr.deploy.service.ConfigService;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.springframework.aop.framework.AopContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.DockerImageTypeEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
@@ -57,32 +29,50 @@ import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
-import com.webank.webase.node.mgr.base.tools.SshTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.cert.CertService;
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
+import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AgencyService;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
+import com.webank.webase.node.mgr.deploy.service.ConfigService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.NodeAsyncService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
-import com.webank.webase.node.mgr.deploy.service.docker.DockerOptions;
+import com.webank.webase.node.mgr.deploy.service.docker.DockerOptionsCmdImpl;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
-
+import java.io.IOException;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @Log4j2
 @Service
@@ -124,7 +114,7 @@ public class ChainService {
     @Autowired
     private ConfigService configService;
 
-    @Autowired private DockerOptions dockerOptions;
+    @Autowired private DockerOptionsCmdImpl dockerOptions;
 
     /**
      * get chain info.
@@ -397,7 +387,7 @@ public class ChainService {
                 TbFront front = TbFront.init(nodeConfig.getNodeId(), ip, frontPort,
                         agency.getId(), agency.getAgencyName(), imageTag,
                         RunTypeEnum.DOCKER , host.getId(), nodeConfig.getHostIndex(), imageTag,
-                        DockerOptions.getContainerName(host.getRootDir(), chainName,
+                        DockerOptionsCmdImpl.getContainerName(host.getRootDir(), chainName,
                         nodeConfig.getHostIndex()), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
                         nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
                 this.frontService.insert(front);

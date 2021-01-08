@@ -87,7 +87,6 @@ public class AnsibleService {
     /**
      * copy, fetch, file(dir
      * scp: copy from local to remote, fetch from remote to local
-     * todo check fetch, ex: new group, new node
      */
     public void scp(ScpTypeEnum typeEnum, String ip, String src, String dst) {
         log.info("scp typeEnum:{},ip:{},src:{},dst:{}", typeEnum, ip, src, dst);
@@ -183,10 +182,13 @@ public class AnsibleService {
         }
     }
 
+    /**
+     * @param ip
+     */
     public void execDockerCheckShell(String ip) {
         log.info("execDockerCheckShell ip:{}", ip);
         String command = String.format("ansible %s -m script -a \"%s\"", ip, constant.getDockerCheckShell());
-        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecDockerCheckTimeout());
         if (result.failed()) {
             if (result.getExitCode() == 5) {
                 throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));

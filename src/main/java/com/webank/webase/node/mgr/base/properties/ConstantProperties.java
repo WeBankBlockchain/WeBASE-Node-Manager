@@ -103,11 +103,6 @@ public class ConstantProperties {
     private int deployType = 0;
     private String webaseSignAddress = "127.0.0.1:5004";
 
-    private boolean useDockerSDK = false;
-    public int dockerDaemonPort = 3000;
-    public String sshDefaultUser = "root";
-    public int sshDefaultPort = 22;
-
     // shell script
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
     private String buildChainShell = "./script/deploy/build_chain.sh";
@@ -132,12 +127,13 @@ public class ConstantProperties {
     private int defaultChannelPort = 20200;
     private int defaultFrontPort = 5002;
 
-    // timeout config todo update timeout in ansible
+    // timeout config
     private long execDockerCheckTimeout = 10 * 60 * 1000L;
     private long execHostCheckTimeout = 10 * 60 * 1000L;
     private long execHostInitTimeout = 10 * 60 * 1000L;
     private long execBuildChainTimeout = 10 * 60 * 1000L;
     private long execShellTimeout = 10 * 60 * 1000L;
+    private long execDockerCheckShellTimeout = 50 * 1000L;
     private long dockerRestartPeriodTime = 30 * 1000L;
     private int dockerClientConnectTimeout = 10 * 60 * 1000;
     private int dockerPullTimeout = 10 * 60 * 1000;
@@ -186,7 +182,7 @@ public class ConstantProperties {
             log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
             fiscoBcosBinary = "";
         }
-        // todo add log of constant
+        log.info("Init constant properties, default agency name: [{}]", defaultAgencyName);
 
     }
 

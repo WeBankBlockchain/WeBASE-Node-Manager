@@ -97,12 +97,7 @@ constant:
   dockerRepository: "fiscoorg/fisco-webase"
   # WeBASE-Sign 访问地址
   webaseSignAddress: "127.0.0.1:5004"
-  # 部署区块链服务的节点主机存放节点配置文件和数据的目录，确保机器用户在此目录下有权限
-  rootDirOnHost: "/opt/fisco"
-  # SSH 免密登录的账号
-  sshDefaultUser: root
-  # SSH 服务的端口，默认 22
-  sshDefaultPort: 22
+  # 需要Ansible中配置的免密登录账号，需要配置sudo权限，默认为root，在/etc/ansible/ansible.cfg修改sudo_user
   #### if deployType = 0, ignore upper properties ####
 
 sdk:
