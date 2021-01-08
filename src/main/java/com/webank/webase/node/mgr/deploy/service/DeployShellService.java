@@ -52,8 +52,6 @@ public class DeployShellService {
     private ConstantProperties constant;
     @Autowired
     private PathService pathService;
-    private static final String OPERATE_FUNCTION_CHECK = "check";
-    private static final String OPERATE_FUNCTION_INIT = "init";
 
 
     /**

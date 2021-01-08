@@ -5,6 +5,7 @@ SUCCESS=0
 DOCKER_FAIL=5
 
 function checkDocker(){
+  echo "Check docker active"
   # install docker
   # todo install docker by user: centos auto install might go wrong
   if [[ ! $(command -v docker) ]]; then
@@ -14,7 +15,7 @@ function checkDocker(){
 
   # check docker started
   if [[ $(command -v systemctl) ]]; then
-    if [[ "$(systemctl is-active docker)" != "active" ]] ; then
+    if [[ "$(systemctl is-active docker)"x != "active"x ]] ; then
       echo "Start docker..."
       sudo systemctl start docker
     fi

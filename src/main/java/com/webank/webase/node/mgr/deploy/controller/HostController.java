@@ -81,7 +81,7 @@ public class HostController extends BaseController {
         log.info("Start addHost:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
             // save host info
-            this.hostService.checkDirAndInsert(reqAddHost.getSshIp(), reqAddHost.getRootDir(), HostStatusEnum.ADDED,  "");
+            hostService.checkDirAndInsert(reqAddHost.getSshIp(), reqAddHost.getRootDir(), HostStatusEnum.ADDED,  "");
 
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
@@ -116,7 +116,7 @@ public class HostController extends BaseController {
         log.info("Start ping:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
             // check before add
-           ansibleService.execPing(reqAddHost.getSshIp());
+            ansibleService.execPing(reqAddHost.getSshIp());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
@@ -141,7 +141,7 @@ public class HostController extends BaseController {
             if (!checkStatus) {
                 return new BaseResponse(ConstantCode.CHECK_HOST_MEM_CPU_DOCKER_FAIL);
             }
-            return new BaseResponse(ConstantCode.SUCCESS, checkStatus);
+            return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
         } catch (InterruptedException e) {
@@ -161,35 +161,6 @@ public class HostController extends BaseController {
         ansibleService.checkAnsible();
         return new BaseResponse(ConstantCode.SUCCESS);
     }
-
-    /**
-     *  a. check docker and cpu/mem
-     *  b. gene config locally
-     *  c. init host and scp
-     */
-//    @PostMapping(value = "init")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-//    public BaseResponse initHost(@RequestBody @Valid ReqConfigInit deploy,
-//        BindingResult result) throws NodeMgrException {
-//        checkBindResult(result);
-//        Instant startTime = Instant.now();
-//        deploy.setWebaseSignAddr(constantProperties.getWebaseSignAddress());
-//        deploy.setRootDirOnHost(constantProperties.getRootDirOnHost());
-//        log.info("Start deploy:[{}], start:[{}]", JsonTools.toJSONString(deploy), startTime);
-//
-//        try {
-//            // gen config  and init host and scp config
-//            hostService.configChainAndinitHostList(deploy.getChainName(),
-//                deploy.getIpconf(), deploy.getTagId(), deploy.getRootDirOnHost(),
-//                deploy.getWebaseSignAddr(),deploy.getDockerImageType());
-//
-//            return new BaseResponse(ConstantCode.SUCCESS);
-//        } catch (NodeMgrException e) {
-//            return new BaseResponse(e.getRetCode());
-//        }
-//    }
-
-    // todo deleteHostWithNoNode
 
 
 }

@@ -37,11 +37,19 @@ import lombok.ToString;
  */
 @ToString
 public enum DataStatus {
-    NORMAL(1), INVALID(2), STARTING(3);
+    NORMAL(1), INVALID(2),
+    /**
+     * used in visual deploy
+     */
+    STARTING(3),
+    /**
+     * node is down, but front is normal; used in manually deploy
+     */
+    DOWN(4);
 
     private int value;
 
-    private DataStatus(Integer dataStatus) {
+    DataStatus(Integer dataStatus) {
         this.value = dataStatus;
     }
 

@@ -66,7 +66,7 @@ public class JavaCommandExecutor {
                 log.info("Exec command success: code:[{}], OUTPUT:\n[{}]",
                         exitCode, outputGobbler.getContent());
             } else {
-                log.error("Exec command ERROR: code:[{}], OUTPUT:\n[{}],\nERROR:\n[{}]",
+                log.warn("Exec command code not zero: code:[{}], OUTPUT:\n[{}],\nERROR:\n[{}]",
                         exitCode, outputGobbler.getContent(), errorGobbler.getContent());
             }
 
