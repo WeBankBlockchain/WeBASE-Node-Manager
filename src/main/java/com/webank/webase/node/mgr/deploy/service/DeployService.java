@@ -184,9 +184,7 @@ public class DeployService {
         boolean configSuccess = chain.getChainStatus() == ChainStatusEnum.INITIALIZED.getId();
         log.info("startChain configSuccess:{}", configSuccess);
 
-        // todo whether check host init success
-        boolean initSuccess = true;
-        if (configSuccess && initSuccess) {
+        if (configSuccess) {
             // start chain
             nodeAsyncService.asyncStartChain(chain.getId(), optionType, ChainStatusEnum.RUNNING, ChainStatusEnum.START_FAIL,
                 FrontStatusEnum.INITIALIZED, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);

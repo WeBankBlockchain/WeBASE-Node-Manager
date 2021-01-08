@@ -1081,7 +1081,7 @@ public class GroupService {
         // path pattern: /host.getRootDir/chain_name
         // ex: (in the remote host) /opt/fisco/chain1
         String remoteChainPath = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
-        // todo ".*" fit in ansible
+        // ".*" fit in ansible
         // ex: (in the remote host) /opt/fisco/chain1/node0/conf/group.1001.*
         // String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.*", remoteChainPath, nodeIndex, generateGroupId);
         String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.ini", remoteChainPath, nodeIndex, generateGroupId);

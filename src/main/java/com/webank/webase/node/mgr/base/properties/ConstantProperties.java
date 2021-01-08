@@ -182,7 +182,7 @@ public class ConstantProperties {
             log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
             fiscoBcosBinary = "";
         }
-        // todo add log of constant
+        log.info("Init constant properties, default agency name: [{}]", defaultAgencyName);
 
     }
 
