@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.frontinterface;
 
+import com.webank.webase.node.mgr.node.NodeService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -158,6 +159,12 @@ public class FrontRestTools {
      */
     @Autowired
     private FrontService frontService;
+    /**
+     * update node status
+     */
+    @Autowired
+    private NodeService nodeService;
+    private static final int NODE_IS_DOWN = -1;
 
     private static Map<String, FailInfo> failRequestMap = new HashMap<>();
 
@@ -376,6 +383,7 @@ public class FrontRestTools {
                 frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.NORMAL.getValue());
                 return response.getBody();
             } catch (ResourceAccessException ex) {
+                // case1: request front failed
                 log.warn("fail restTemplateExchange", ex);
                 setFailCount(url, method.toString());
                 if (isServiceSleep(url, method.toString())) {
@@ -385,12 +393,17 @@ public class FrontRestTools {
                 log.info("continue next front", ex);
                 continue;
             } catch (HttpStatusCodeException ex) {
+                // case2: request front success but return fail
                 JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
                 log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error), ex);
                 try {
                     int code = error.get("code").intValue();
                     String errorMessage = error.get("errorMessage").asText();
                     frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
+                    // v1.4.3 if node is down but front normal, return -1
+                    if (code == NODE_IS_DOWN) {
+                        nodeService.updateNodeActiveStatus(frontUrlInfo.getFrontId(), DataStatus.DOWN.getValue());
+                    }
                     throw new NodeMgrException(code, errorMessage);
                 } catch (NullPointerException e) {
                     throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);

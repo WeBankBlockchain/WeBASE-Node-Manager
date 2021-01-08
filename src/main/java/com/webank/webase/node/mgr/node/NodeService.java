@@ -155,7 +155,6 @@ public class NodeService {
         log.debug("start updateNodeInfo  param:{}", JsonTools.toJSONString(tbNode));
         Integer affectRow = 0;
         try {
-
             affectRow = nodeMapper.update(tbNode);
         } catch (RuntimeException ex) {
             log.error("updateNodeInfo exception", ex);
@@ -200,7 +199,8 @@ public class NodeService {
 
 
     /**
-     * check node status
+     * check node status, if pbftView or blockNumber not changing, invalid consensus
+     * @1.4.3: if request consensus status but return -1, node is down
      *
      */
     public void checkAndUpdateNodeStatus(int groupId) {
@@ -209,7 +209,7 @@ public class NodeService {
 
         //getPeerOfConsensusStatus
         List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
-        if(Objects.isNull(consensusList)){
+        if (Objects.isNull(consensusList)){
             log.error("fail checkNodeStatus, consensusList is null");
             return;
         }
@@ -243,7 +243,7 @@ public class NodeService {
 
             BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
             BigInteger latestView = consensusList.stream()
-                .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
+                .filter(cl -> nodeId.equals(cl.getNodeId())).map(PeerOfConsensusStatus::getView).findFirst()
                 .orElse(BigInteger.ZERO);//pbftView
             
             if (nodeType == 0) {    //0-consensus;1-observer
@@ -463,5 +463,24 @@ public class NodeService {
                 PathService.getNodeDeletedRootOnHost(chainDeleteRootOnHost, nodeId);
         // move
         ansibleService.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
+    }
+
+    /**
+     * update node status by frontId and nodeStatus
+     */
+    public void updateNodeActiveStatus(int frontId, int nodeStatus) {
+        TbFront front = frontService.getById(frontId);
+        String nodeId = front.getNodeId();
+        log.info("updateNodeActiveStatus by nodeId:{} of all group, status:{}", nodeId, nodeStatus);
+        List<TbNode> nodeList = nodeMapper.selectByNodeId(nodeId);
+        if (nodeList == null || nodeList.isEmpty()) {
+            log.info("no node list of nodeId, jump over");
+            return;
+        }
+        nodeList.forEach(node -> {
+            node.setNodeActive(nodeStatus);
+            this.updateNode(node);
+        });
+        log.info("end updateNodeActiveStatus affect size:{}", nodeList.size());
     }
 }

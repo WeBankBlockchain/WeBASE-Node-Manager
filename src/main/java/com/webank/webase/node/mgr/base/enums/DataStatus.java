@@ -37,7 +37,11 @@ import lombok.ToString;
  */
 @ToString
 public enum DataStatus {
-    NORMAL(1), INVALID(2), STARTING(3);
+    NORMAL(1), INVALID(2), STARTING(3),
+    /**
+     * node is down, but front is normal
+     */
+    DOWN(4);
 
     private int value;
 
