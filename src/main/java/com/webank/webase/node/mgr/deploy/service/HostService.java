@@ -657,8 +657,8 @@ public class HostService {
     }
 
     /**
-     * todo check synchronized
      * check host chain's port before init host, after check host mem/cpu
+     * @related: syncCheckPortHostList， 一个host多个端口时，端口占用的异常会被覆盖，因此采用同步非异步方式检测
      */
     public boolean checkPortHostList(List<DeployNodeInfo> deployNodeInfoList) throws InterruptedException {
         log.info("batchCheckHostList deployNodeInfoList:{}", deployNodeInfoList);
@@ -669,7 +669,6 @@ public class HostService {
         AtomicInteger checkSuccessCount = new AtomicInteger(0);
         Map<String, Future> taskMap = new HashedMap<>(); //key is ip+"_"+frontPort
 
-        // todo 一个host多个端口时，需要通过host来检测
         for (final DeployNodeInfo nodeInfo : deployNodeInfoList) {
             log.info("Check host port:[{}]", nodeInfo.getIp());
 

@@ -69,7 +69,7 @@ public class DockerOptionsCmdImpl {
 
     /**
      * Pull image, maybe same tag but newer.
-     * todo use webase version to pull, to use imageTag pull
+     * todo: separate fisco and webase version, use webase version to pull, to use imageTag pull
      * @param ip
      * @param imageTag
      * @param imagePullType default false

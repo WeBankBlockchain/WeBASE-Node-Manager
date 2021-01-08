@@ -88,18 +88,6 @@ public class IpConfigParse {
             }
             hostAgencyMap.put(ipConfigParse.getIp(), ipConfigParse.getAgencyName());
 
-            // check ip is local
-            // todo agree
-//            if (IPUtil.isLocal(ipConfigParse.getIp())){
-//                throw new NodeMgrException(SAME_HOST_ERROR.attach(ipConfigParse.getIp()));
-//            }
-
-            // SSH to host ip
-//            if (!SshTools.connect(ipConfigParse.getIp(), sshUser, sshPort, privateKey)) {
-//                // cannot SSH to IP
-//                throw new NodeMgrException(HOST_CONNECT_ERROR.attach(ipConfigParse.getIp()));
-//            }
-
             if (ipConfigParse.getNum() <= 0) {
                 throw new NodeMgrException(IP_NUM_ERROR.attach(line));
             }
