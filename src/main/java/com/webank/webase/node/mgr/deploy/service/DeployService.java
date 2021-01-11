@@ -86,9 +86,6 @@ public class DeployService {
         // convert to host id list by distinct id
         List<Integer> hostIdList = deployNodeInfoList.stream().map(DeployNodeInfo::getHostId).collect(
             Collectors.toList());
-//        if (StringUtils.isBlank(agencyName)) {
-//            agencyName = constantProperties.getDefaultAgencyName();
-//        }
         log.info("configChainAndScp chainName:{},deployNodeInfoList:{},ipConf:{},imageTag:{},encrtypType:{},"
                 + "webaseSignAddr:{},agencyName:{}", chainName, deployNodeInfoList, ipConf, imageTag, encrtypType,
             webaseSignAddr, agencyName);
@@ -107,10 +104,12 @@ public class DeployService {
         }
 
         // scp config to host
-        log.info("configChainAndScp start scpConfigHostList chainName:{},hostIdList:{}", chainName, hostIdList);
+        log.info("configChainAndScp start scpConfigHostList chainName:{}, hostIdList:{}", chainName, hostIdList);
         boolean configHostSuccess = hostService.scpConfigHostList(chainName, hostIdList);
         if (!configHostSuccess) {
             log.error("configChainAndScp config success but image not on remote host, cannot start chain!");
+            chainService.updateStatus(chainName, ChainStatusEnum.START_FAIL);
+            //todo 删已有配置
             throw new NodeMgrException(ConstantCode.ANSIBLE_INIT_HOST_CDN_SCP_NOT_ALL_SUCCESS);
         }
         // check image
@@ -162,10 +161,7 @@ public class DeployService {
         // and insert data to db （chain update as initialized
         boolean genSuccess = chainService.generateConfigLocalAndInitDb(chainName, deployNodeInfoList, ipConf,
             imageTag, encryptType, webaseSignAddr, agencyName);
-
         return genSuccess;
-        // start node and start front
-//        this.nodeAsyncService.asyncConfigChain(chainName, OptionType.DEPLOY_CHAIN);
     }
 
     /**
@@ -228,9 +224,6 @@ public class DeployService {
         // convert to host id list by distinct id
         List<Integer> hostIdList = deployNodeInfoList.stream().map(DeployNodeInfo::getHostId).collect(
             Collectors.toList());
-//        if (StringUtils.isBlank(agencyName)) {
-//            agencyName = constantProperties.getDefaultAgencyName();
-//        }
 
         log.info("Add node check chain name:[{}] exists...", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
@@ -255,6 +248,7 @@ public class DeployService {
             int num = Integer.parseInt(tbHost.getRemark());
             // generate new sdk cert and scp to host
             log.info("addNodes generateHostSDKAndScp");
+            // todo改名
             hostService.generateHostSDKAndScp(chain.getEncryptType(), chain.getChainName(), tbHost, agency.getAgencyName());
 
             // update group node count

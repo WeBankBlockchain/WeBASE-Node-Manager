@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import com.webank.webase.node.mgr.base.enums.ConsensusType;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -340,11 +341,12 @@ public class NodeService {
         List<String> sealerList = frontInterface.getSealerList(groupId);
         List<String> observerList = frontInterface.getObserverList(groupId);
         List<PeerInfo> resList = new ArrayList<>();
-        sealerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
-        observerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
+        sealerList.forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
+        observerList.forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
         log.debug("end getSealerAndObserverList resList:{}", resList);
         return resList;
     }
+
 
     public List<String> getNodeIdListService(int groupId) {
         log.debug("start getSealerAndObserverList groupId:{}", groupId);
@@ -483,4 +485,38 @@ public class NodeService {
         });
         log.info("end updateNodeActiveStatus affect size:{}", nodeList.size());
     }
+
+    /**
+     * check sealer list contain
+     * return: true: is sealer
+     */
+    public boolean checkSealerListContains(int groupId, String nodeId) {
+        log.debug("start checkSealerListContains groupId:{},nodeId:{}", groupId, nodeId);
+        List<String> sealerList = frontInterface.getSealerList(groupId);
+        boolean isSealer = sealerList.stream().anyMatch(n -> n.equals(nodeId));
+        log.debug("end checkSealerListContains isSealer:{}", isSealer);
+        return isSealer;
+    }
+
+    /**
+     * check observer list contain
+     * return: true: is sealer
+     */
+    public boolean checkObserverListContains(int groupId, String nodeId) {
+        log.debug("start checkObserverListContains groupId:{},nodeId:{}", groupId, nodeId);
+        List<String> sealerList = frontInterface.getObserverList(groupId);
+        boolean isObserver = sealerList.stream().anyMatch(n -> n.equals(nodeId));
+        log.debug("end checkObserverListContains isObserver:{}", isObserver);
+        return isObserver;
+    }
+
+    public int checkNodeType(int groupId, String nodeId) {
+        if (checkObserverListContains(groupId, nodeId)) {
+            return ConsensusType.OBSERVER.getValue();
+        } else if (checkSealerListContains(groupId, nodeId)) {
+            return ConsensusType.SEALER.getValue();
+        }
+        return 0;
+    }
+
 }

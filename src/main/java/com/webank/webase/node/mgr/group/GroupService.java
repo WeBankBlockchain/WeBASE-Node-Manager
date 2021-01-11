@@ -345,6 +345,7 @@ public class GroupService {
 				}
 				// refresh front group map by group list on chain
 				// different from checkGroupMapByLocalGroupList which update by local groupList
+                // 1.4.3 add consensus type of front group map
 				frontGroupMapService.newFrontGroup(front, gId);
 
 				//save new peers(tb_node)
