@@ -32,6 +32,10 @@ public class TbFrontGroupMap {
      * @related GroupStatus enum
      */
     private Integer status;
+    /**
+     * consensus type, 1-sealer, 2-observer
+     */
+    private Integer type;
 
     public TbFrontGroupMap(Integer frontId, Integer groupId, Integer status){
         this.frontId = frontId;
@@ -43,4 +47,12 @@ public class TbFrontGroupMap {
         this.frontId = frontId;
         this.groupId = groupId;
     }
+
+    public TbFrontGroupMap(int frontId, int groupId, int status, int type){
+        this.frontId = frontId;
+        this.groupId = groupId;
+        this.status = status;
+        this.type = type;
+    }
+
 }
