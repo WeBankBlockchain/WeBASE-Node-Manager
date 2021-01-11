@@ -24,6 +24,44 @@
         </selectKey>
     </insert>
 
+    <insert id="insertSelective" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
+        insert into tb_front_group_map
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="groupId != null" >
+                group_id,
+            </if>
+            <if test="frontId != null" >
+                front_id,
+            </if>
+            <if test="status != null" >
+                status,
+            </if>
+            <if test="type != null" >
+                type,
+            </if>
+            create_time,modify_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="groupId != null" >
+                #{groupId,jdbcType=BIGINT},
+            </if>
+            <if test="frontId != null" >
+                #{frontId},
+            </if>
+            <if test="status != null" >
+                #{status},
+            </if>
+            <if test="type != null" >
+                #{type},
+            </if>
+            NOW(),NOW(),
+        </trim>
+        <selectKey keyProperty="mapId" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+
     <update id="update" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
         update tb_front_group_map set modify_time = now()
         <if test="status != null and status != ''">

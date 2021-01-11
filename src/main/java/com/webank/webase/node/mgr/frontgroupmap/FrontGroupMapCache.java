@@ -44,6 +44,10 @@ public class FrontGroupMapCache {
         mapList = null;
     }
 
+    /**
+     * get map filter by consensus type, sealer first
+     * @return
+     */
     private List<FrontGroup> getSealerOrObserverMap() {
         MapListParam param = new MapListParam();
         param.setType(ConsensusType.SEALER.getValue());
@@ -78,6 +82,7 @@ public class FrontGroupMapCache {
     }
     /**
      * get mapList.
+     * filter by group status
      */
     public List<FrontGroup> getMapListByGroupId(int groupId) {
         List<FrontGroup> list = getAllMap();

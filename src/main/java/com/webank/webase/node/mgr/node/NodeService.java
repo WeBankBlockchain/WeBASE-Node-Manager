@@ -504,7 +504,7 @@ public class NodeService {
      */
     public boolean checkObserverListContains(int groupId, String nodeId) {
         log.debug("start checkObserverListContains groupId:{},nodeId:{}", groupId, nodeId);
-        List<String> sealerList = frontInterface.getSealerList(groupId);
+        List<String> sealerList = frontInterface.getObserverList(groupId);
         boolean isObserver = sealerList.stream().anyMatch(n -> n.equals(nodeId));
         log.debug("end checkObserverListContains isObserver:{}", isObserver);
         return isObserver;
@@ -513,7 +513,7 @@ public class NodeService {
     public int checkNodeType(int groupId, String nodeId) {
         if (checkObserverListContains(groupId, nodeId)) {
             return ConsensusType.OBSERVER.getValue();
-        } else if (checkObserverListContains(groupId, nodeId)) {
+        } else if (checkSealerListContains(groupId, nodeId)) {
             return ConsensusType.SEALER.getValue();
         }
         return 0;
