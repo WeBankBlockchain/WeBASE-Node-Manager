@@ -28,6 +28,7 @@ import com.webank.webase.node.mgr.deploy.entity.ReqInitHost;
 import com.webank.webase.node.mgr.deploy.entity.ReqNodeOption;
 import com.webank.webase.node.mgr.deploy.entity.ReqUpgrade;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
+import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.DeployService;
@@ -35,6 +36,7 @@ import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
@@ -84,16 +86,36 @@ public class DeployController extends BaseController {
         log.info("Start initHostList:[{}], start:[{}]", JsonTools.toJSONString(reqInitHost), startTime);
 
         try {
-            // hostService.checkPortHostList(deploy.getDeployNodeInfoList());
-
             // generate node config and return shell execution log
-            boolean initDockerSuc = hostService.initHostAndDocker(reqInitHost.getChainName(), reqInitHost.getImageTag(), reqInitHost.getHostIdList(),
-                (int)reqInitHost.getDockerImageType());
-            return new BaseResponse(ConstantCode.SUCCESS, initDockerSuc);
+            hostService.initHostAndDocker(reqInitHost.getChainName(), reqInitHost.getImageTag(), reqInitHost.getHostIdList(),
+                reqInitHost.getDockerImageType());
+            return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
-        } catch (InterruptedException e) {
-            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
+        }
+    }
+
+    /**
+     * check init result and update if init time out
+     * @param reqInitHost
+     * @param result
+     * @return
+     * @throws NodeMgrException
+     */
+    @PostMapping(value = "initCheck")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse initCheckHostList(@RequestBody @Valid ReqInitHost reqInitHost, BindingResult result)
+        throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("Start initCheckHostList:[{}], start:[{}]", JsonTools.toJSONString(reqInitHost), startTime);
+
+        try {
+            // generate node config and return shell execution log
+            List<TbHost> hostList = hostService.checkInitAndListHost(reqInitHost.getHostIdList());
+            return new BaseResponse(ConstantCode.SUCCESS, hostList);
+        } catch (NodeMgrException e) {
+            return new BaseResponse(e.getRetCode());
         }
     }
 

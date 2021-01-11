@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.frontgroupmap;
 
 
+import com.webank.webase.node.mgr.base.enums.ConsensusType;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,15 +45,44 @@ public class FrontGroupMapCache {
     }
 
     /**
+     * get map filter by consensus type, sealer first
+     * @return
+     */
+    private List<FrontGroup> getSealerOrObserverMap() {
+        MapListParam param = new MapListParam();
+        param.setType(ConsensusType.SEALER.getValue());
+        List<FrontGroup> targetMap = null;
+        targetMap = mapService.getList(param);
+        log.info("get sealer map:{} param:{}", targetMap, param);
+        if (targetMap == null || targetMap.isEmpty()) {
+            param.setType(ConsensusType.OBSERVER.getValue());
+            targetMap = mapService.getList(param);
+            log.info("get observer map:{} param:{}", targetMap, param);
+        }
+        return targetMap;
+    }
+
+    /**
      * reset mapList.
+     * 优先选择共识节点
      */
     public List<FrontGroup> resetMapList() {
-        mapList = mapService.getList(new MapListParam());
+        mapList = this.getSealerOrObserverMap();
         return mapList;
     }
 
     /**
+     * get all mapList.
+     */
+    public List<FrontGroup> getAllMap() {
+        if (mapList == null || mapList.size() == 0) {
+            mapList = resetMapList();
+        }
+        return mapList;
+    }
+    /**
      * get mapList.
+     * filter by group status
      */
     public List<FrontGroup> getMapListByGroupId(int groupId) {
         List<FrontGroup> list = getAllMap();
@@ -69,13 +99,5 @@ public class FrontGroupMapCache {
         return map;
     }
 
-    /**
-     * get all mapList.
-     */
-    public List<FrontGroup> getAllMap() {
-        if (mapList == null || mapList.size() == 0) {
-            mapList = resetMapList();
-        }
-        return mapList;
-    }
+
 }

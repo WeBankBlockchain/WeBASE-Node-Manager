@@ -39,6 +39,7 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -150,16 +151,13 @@ public class HostService {
      * @param imagePullType default 2-pull from cdn
      * @return
      */
-    public boolean initHostAndDocker(String chainName, String imageTag, List<Integer> hostIdList, int imagePullType)
-        throws InterruptedException {
+    public boolean  initHostAndDocker(String chainName, String imageTag, List<Integer> hostIdList, int imagePullType) {
         List<TbHost> tbHostList = this.selectDistinctHostListById(hostIdList);
 
         log.info("Start initHostAndDocker chain:[{}] hosts:[{}].", chainName, CollectionUtils.size(tbHostList));
         final CountDownLatch initHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
         AtomicInteger initSuccessCount = new AtomicInteger(0);
-        Map<Integer, Future> taskMap = new HashedMap<>();
-
 
         for (final TbHost tbHost : tbHostList) {
             log.info("initHostAndDocker host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
@@ -221,31 +219,49 @@ public class HostService {
                     initHostLatch.countDown();
                 }
             });
-            taskMap.put(tbHost.getId(), task);
         }
 
-        initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
-        log.info("check initHostAndDocker host timeout, cancel unfinished tasks.");
-        taskMap.entrySet().forEach((entry)->{
-            int hostId = entry.getKey();
-            Future<?> task = entry.getValue();
-            if(! task.isDone()){
-                log.error("initHostAndDocker host:[{}] timeout, cancel the task.", hostId );
-                this.updateStatus(hostId, HostStatusEnum.INIT_FAILED, "initHostAndDocker host timeout.");
-                task.cancel(false);
-            }
-        });
-
-        boolean hostInitSuccess = initSuccessCount.get() == CollectionUtils.size(tbHostList);
-        // check if all host init success
-        log.log(hostInitSuccess ? Level.INFO: Level.ERROR,
-                "Host of chain:[{}] init result, total:[{}], success:[{}]",
-                chainName, CollectionUtils.size(tbHostList),initSuccessCount.get());
-
-        return hostInitSuccess;
+        // 去除await，直接异步check
+//        initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
+//
+//        log.info("check initHostAndDocker host timeout, cancel unfinished tasks.");
+//        taskMap.entrySet().forEach((entry) -> {
+//            int hostId = entry.getKey();
+//            Future<?> task = entry.getValue();
+//            if(!task.isDone()){
+//                log.error("initHostAndDocker host:[{}] timeout, cancel the task.", hostId );
+//                this.updateStatus(hostId, HostStatusEnum.INIT_FAILED, "initHostAndDocker host timeout.");
+//                task.cancel(false);
+//            }
+//        });
+//
+//        boolean hostInitSuccess = initSuccessCount.get() == CollectionUtils.size(tbHostList);
+//        // check if all host init success
+//        log.log(hostInitSuccess ? Level.INFO: Level.ERROR,
+//                "Host of chain:[{}] init result, total:[{}], success:[{}]",
+//                chainName, CollectionUtils.size(tbHostList),initSuccessCount.get());
+        return true;
     }
 
-
+    public List<TbHost> checkInitAndListHost(List<Integer> hostIdList) {
+        log.info("start checkInitAndListHost hostIdList:{}", hostIdList);
+        List<TbHost> hostList = this.selectDistinctHostListById(hostIdList);
+        hostList.stream()
+            .filter(host -> host.getStatus() == HostStatusEnum.INITIATING.getId())
+            .forEach(host -> {
+                Date now = new Date();
+                Date modifyTime = host.getModifyTime();
+                long gap = now.getTime() - modifyTime.getTime();
+                if (gap > constant.getExecHostInitTimeout()) {
+                    log.warn("checkInitAndListHost host init failed for time out");
+                    this.updateStatus(host.getId(), HostStatusEnum.INIT_FAILED, "Host init failed for time out");
+                    host.setStatus(HostStatusEnum.INIT_FAILED.getId());
+                    host.setRemark("Host init failed for time out");
+                }
+            });
+        log.info("end checkInitAndListHost hostList:{}", hostList);
+        return hostList;
+    }
 
     /**
      * after host_init and generate and init chain db
@@ -258,9 +274,9 @@ public class HostService {
         List<TbHost> tbHostList = this.selectDistinctHostListById(hostIdList);
 
         log.info("Start init chain:[{}] hosts:[{}].", chainName, CollectionUtils.size(tbHostList));
-        final CountDownLatch initHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
+        final CountDownLatch configHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
-        AtomicInteger initSuccessCount = new AtomicInteger(0);
+        AtomicInteger configSuccessCount = new AtomicInteger(0);
         Map<Integer, Future> taskMap = new HashedMap<>();
 
         for (final TbHost tbHost : tbHostList) {
@@ -279,7 +295,6 @@ public class HostService {
                         String src = String.format("%s/", pathService.getHost(chainName, tbHost.getIp()).toString());
                         String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
                         try {
-//                            deployShellService.scp(ScpTypeEnum.UP, tbHost.getSshUser(), tbHost.getIp(), tbHost.getSshPort(), src, dst);
                             ansibleService.scp(ScpTypeEnum.UP, tbHost.getIp(), src, dst);
                             log.info("Send files from:[{}] to:[{}:{}] success.",
                                 src, tbHost.getIp(), dst);
@@ -297,23 +312,22 @@ public class HostService {
                         }
 
                     }
-
                     tbHost.setStatus(HostStatusEnum.CONFIG_SUCCESS.getId());
                     this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_SUCCESS, "");
-                    initSuccessCount.incrementAndGet();
+                    configSuccessCount.incrementAndGet();
                 } catch (Exception e) {
                     log.error("Init host:[{}] with unknown error", tbHost.getIp(), e);
                     this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_FAIL, "Init host with unknown error, check from log files.");
                 } finally {
-                    initHostLatch.countDown();
+                    configHostLatch.countDown();
                 }
             });
             taskMap.put(tbHost.getId(), task);
         }
 
-        initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
+        configHostLatch.await(constant.getExecHostConfigTimeout(), TimeUnit.MILLISECONDS);
         log.info("Check init host time, cancel unfinished tasks.");
-        taskMap.entrySet().forEach((entry)->{
+        taskMap.entrySet().forEach((entry) -> {
             int hostId = entry.getKey();
             Future<?> task = entry.getValue();
             if(! task.isDone()){
@@ -323,11 +337,11 @@ public class HostService {
             }
         });
 
-        boolean hostInitSuccess = initSuccessCount.get() == CollectionUtils.size(tbHostList);
+        boolean hostInitSuccess = configSuccessCount.get() == CollectionUtils.size(tbHostList);
         // check if all host init success
         log.log(hostInitSuccess ? Level.INFO: Level.ERROR,
             "Host of chain:[{}] init result, total:[{}], success:[{}]",
-            chainName, CollectionUtils.size(tbHostList),initSuccessCount.get());
+            chainName, CollectionUtils.size(tbHostList), configSuccessCount.get());
 
         return hostInitSuccess;
 
@@ -739,7 +753,7 @@ public class HostService {
      * @param hostIdList
      */
     public void checkAllHostInitSuc(List<Integer> hostIdList) {
-        log.info("check all hosts to add node");
+        log.info("check all hosts to add node hostIdList:{}", hostIdList);
         AtomicBoolean allHostInitSuccess = new AtomicBoolean(true);
         hostIdList.forEach(hId -> {
             TbHost host = tbHostMapper.selectByPrimaryKey(hId);

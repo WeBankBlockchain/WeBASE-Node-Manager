@@ -302,10 +302,11 @@ public class FrontService {
 			frontGroupMapService.newFrontGroup(tbFront, group);
 			//save nodes
 			for (String nodeId : groupPeerList) {
-				PeerInfo newPeer = peerList.stream().map(p -> NodeMgrTools
-						.object2JavaBean(p, PeerInfo.class))
-						.filter(peer -> nodeId.equals(peer.getNodeId()))
-						.findFirst().orElseGet(() -> new PeerInfo(nodeId));
+				PeerInfo newPeer = peerList.stream()
+                    .map(p -> NodeMgrTools.object2JavaBean(p, PeerInfo.class))
+                    .filter(Objects::nonNull)
+                    .filter(peer -> nodeId.equals(peer.getNodeId()))
+                    .findFirst().orElseGet(() -> new PeerInfo(nodeId));
 				nodeService.addNodeInfo(group, newPeer);
 			}
 			// add sealer(consensus node) and observer in nodeList
@@ -979,7 +980,7 @@ public class FrontService {
             throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT);
         }
     }
-//
+
 //    public void updateDeployStatus(int frontId, FrontDeployStatusEnum deployStatusEnum) {
 //        frontMapper.updateDeployStatus(frontId, deployStatusEnum.getId(), LocalDateTime.now());
 //    }

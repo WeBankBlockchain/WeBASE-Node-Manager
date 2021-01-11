@@ -49,19 +49,19 @@ function checkMem(){
   mem_require=$(echo "${node_count}*1.0"|bc)
   if [[ $(echo "$MEM_FREE > ${mem_require}"|bc) -eq 1 ]];
   then
-      echo 'free mem is ready'
+      echo 'free memory is ready'
   else
-      echo 'ERROR: free mem is too low!'
+      echo 'ERROR: free memory is too low!'
       exit ${MEM_ERROR}
   fi
 }
 checkMem
 
 function checkCpu() {
-  least_core=2
-  # 3个及以上节点，需要4核
+  least_core=1
+  # 3个及以上节点，需要2核
   if [[ ${node_count} -ge 3 ]]
-      then least_core=4
+      then least_core=2
   fi
   # 8个及以上节点，需要8核
 #  if [[ ${node_count} -ge 8 ]]

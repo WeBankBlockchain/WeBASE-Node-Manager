@@ -131,6 +131,7 @@ public class ConstantProperties {
     private long execDockerCheckTimeout = 10 * 60 * 1000L;
     private long execHostCheckTimeout = 10 * 60 * 1000L;
     private long execHostInitTimeout = 10 * 60 * 1000L;
+    private long execHostConfigTimeout = 10 * 60 * 1000L;
     private long execBuildChainTimeout = 10 * 60 * 1000L;
     private long execShellTimeout = 10 * 60 * 1000L;
     private long execDockerCheckShellTimeout = 50 * 1000L;

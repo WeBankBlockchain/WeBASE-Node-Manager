@@ -128,7 +128,7 @@ public class PrecompiledService {
         // @visual-deploy: at least 2 sealers in group after remove
         if (constants.getDeployType() == DeployType.VISUAL_DEPLOY.getValue()
             && CollectionUtils.size(sealerList) < ConstantProperties.LEAST_SEALER_TWO) {
-            log.error("fail nodeManageService. Group only has [{}] sealers after remove.(visual_deploy)");
+            log.error("fail nodeManageService. Group only has 1 sealers after remove.(visual_deploy)");
             throw new NodeMgrException(ConstantCode.TWO_SEALER_IN_GROUP_AT_LEAST);
         }
 
