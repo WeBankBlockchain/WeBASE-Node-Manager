@@ -16,9 +16,14 @@ package com.webank.webase.node.mgr.frontgroupmap;
 import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
 import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.front.FrontMapper;
+import com.webank.webase.node.mgr.node.NodeService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ReactiveTypeDescriptor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,9 +50,17 @@ public class FrontGroupMapService {
     private FrontInterfaceService frontInterface;
     @Autowired
     private FrontGroupMapCache frontGroupMapCache;
+    /**
+     * to check map sealer or observer
+     */
+    @Autowired
+    private NodeService nodeService;
+    @Autowired
+    private FrontMapper frontMapper;
 
     /**
-     * add new mapping with group status directly
+     * add or update map with group status
+     * @param: type: map consensus type
      */
     @Transactional
     public TbFrontGroupMap newFrontGroupWithStatus(Integer frontId, Integer groupId, Integer status) {
@@ -56,15 +69,18 @@ public class FrontGroupMapService {
         FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
         log.debug("start newFrontGroup frontGroup query:{}", frontGroup);
 
+        int consensusType = getMapSealerOrObserver(frontId, groupId);
+        log.info("newFrontGroup consensusType:{}", consensusType);
+
         // add db
         TbFrontGroupMap tbFrontGroupMap = null;
-        Integer res;
+        int res;
         if (frontGroup == null) {
-            tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
+            tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status, consensusType);
             log.debug("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
             res = frontGroupMapMapper.add(tbFrontGroupMap);
         } else {
-            tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status);
+            tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status, consensusType);
             tbFrontGroupMap.setMapId(frontGroup.getMapId());
             log.debug("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
             res = frontGroupMapMapper.update(tbFrontGroupMap);
@@ -75,7 +91,7 @@ public class FrontGroupMapService {
     }
 
     /**
-     * add new mapping
+     * add new mapping in visual deploy
      */
     @Transactional
     public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, GroupStatus groupStatus) {
@@ -89,7 +105,8 @@ public class FrontGroupMapService {
 
 
     /**
-     * new front group map
+     * new front group map when refreshing map with group status
+     * v1.4.3: add consensus type of front group map
      */
     @Transactional
     public void newFrontGroup(TbFront front, Integer groupId) {
@@ -173,7 +190,7 @@ public class FrontGroupMapService {
     public void updateFrontMapStatus(int frontId, GroupStatus status) {
         // update status
         log.info("Update front:[{}] all group map to status:[{}]", frontId, status);
-        frontGroupMapMapper.updateAllGroupsStatus(frontId,status.getValue());
+        frontGroupMapMapper.updateAllGroupsStatus(frontId, status.getValue());
         this.frontGroupMapCache.clearMapList();
     }
 
@@ -181,7 +198,29 @@ public class FrontGroupMapService {
     public void updateFrontMapStatus(int frontId, int groupId, GroupStatus status) {
         // update status
         log.info("Update front:[{}] group:[{}] map to status:[{}]", frontId, groupId, status);
-        frontGroupMapMapper.updateOneGroupStatus(frontId,status.getValue(),groupId);
+        frontGroupMapMapper.updateOneGroupStatus(frontId, status.getValue(), groupId);
         this.frontGroupMapCache.clearMapList();
+    }
+
+    /**
+     * 1- sealer, 2-observer
+     * @param frontId
+     * @param groupId
+     * @return
+     */
+    private int getMapSealerOrObserver(int frontId, int groupId) {
+        TbFront front = frontMapper.getById(frontId);
+        if (front == null) {
+            log.error("frontId :{} not exist!", frontId);
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+        }
+        String nodeId = front.getNodeId();
+        log.info("getMapSealerOrObserver groupId:{}, nodeId:{}", groupId, nodeId);
+
+        int type = nodeService.checkNodeType(groupId, nodeId);
+        if (type == 0) {
+            log.error("node consensus type:{} invalid!", type);
+        }
+        return type;
     }
 }

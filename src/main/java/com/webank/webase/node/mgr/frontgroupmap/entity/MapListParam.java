@@ -23,15 +23,17 @@ public class MapListParam {
     private int frontId;
     private int groupId;
     private int status;
+    private int type;
 
     public MapListParam(int frontId, int groupId) {
         this.frontId = frontId;
         this.groupId = groupId;
     }
 
-    public MapListParam(int frontId, int groupId, int status) {
+    public MapListParam(int frontId, int groupId, int status, int type) {
         this.frontId = frontId;
         this.groupId = groupId;
         this.status = status;
+        this.type = type;
     }
 }

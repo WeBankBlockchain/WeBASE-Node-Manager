@@ -48,6 +48,7 @@ public class FrontGroupMapCache {
      */
     public List<FrontGroup> resetMapList() {
         mapList = mapService.getList(new MapListParam());
+        // todo 优先选择共识节点
         return mapList;
     }
 
