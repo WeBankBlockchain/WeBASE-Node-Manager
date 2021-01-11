@@ -169,9 +169,19 @@ public class ChainService {
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int chainId, ChainStatusEnum newStatus) {
         log.info("Update chain:[{}] status to:[{}]",chainId, newStatus.toString());
-        int count =  this.tbChainMapper.updateChainStatus(chainId,new Date(), newStatus.getId());
+        int count =  this.tbChainMapper.updateChainStatus(chainId, new Date(), newStatus.getId());
         return count == 1;
     }
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public boolean updateStatus(String chainName, ChainStatusEnum newStatus) {
+        log.info("Update chain:[{}] status to:[{}]",chainName, newStatus.toString());
+        TbChain chain = tbChainMapper.getByChainName(chainName);
+        int count =  this.tbChainMapper.updateChainStatus(chain.getId(), new Date(), newStatus.getId());
+        return count == 1;
+    }
+
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void upgrade(TbChain chain , String newTagVersion ) {
