@@ -28,6 +28,8 @@ public interface FrontGroupMapMapper {
 
     int add(TbFrontGroupMap tbFrontGroupMap);
 
+    int insertSelective(TbFrontGroupMap tbFrontGroupMap);
+
     int update(TbFrontGroupMap tbFrontGroupMap);
 
     FrontGroup queryFrontGroup(MapListParam mapListParam);

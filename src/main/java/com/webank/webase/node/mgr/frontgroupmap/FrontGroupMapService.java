@@ -78,7 +78,7 @@ public class FrontGroupMapService {
         if (frontGroup == null) {
             tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status, consensusType);
             log.debug("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
-            res = frontGroupMapMapper.add(tbFrontGroupMap);
+            res = frontGroupMapMapper.insertSelective(tbFrontGroupMap);
         } else {
             tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status, consensusType);
             tbFrontGroupMap.setMapId(frontGroup.getMapId());
@@ -98,7 +98,7 @@ public class FrontGroupMapService {
         TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, groupStatus.getValue());
 
         //add db
-        frontGroupMapMapper.add(tbFrontGroupMap);
+        frontGroupMapMapper.insertSelective(tbFrontGroupMap);
 
         return tbFrontGroupMap;
     }
@@ -219,7 +219,7 @@ public class FrontGroupMapService {
 
         int type = nodeService.checkNodeType(groupId, nodeId);
         if (type == 0) {
-            log.error("node consensus type:{} invalid!", type);
+            log.error("node {} consensus type:{} invalid!", nodeId, type);
         }
         return type;
     }
