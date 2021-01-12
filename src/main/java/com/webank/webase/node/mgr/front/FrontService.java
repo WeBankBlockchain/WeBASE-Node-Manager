@@ -27,6 +27,7 @@ import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
+import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
@@ -559,6 +560,8 @@ public class FrontService {
                                           String agencyName, int groupId, FrontStatusEnum frontStatusEnum)
         throws NodeMgrException, IOException {
         log.info("start initFrontAndNode ");
+        ProgressTools.setInitChainData();
+
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
         // the node dir on remote host
