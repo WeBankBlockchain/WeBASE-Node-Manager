@@ -1,4 +1,4 @@
-package com.webank.webase.node.mgr.deploy.service.docker;
+package com.webank.webase.node.mgr.deploy.service;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DockerImageTypeEnum;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Log4j2
 @Service
-public class DockerOptionsCmdImpl {
+public class DockerCommandService {
 
     @Autowired private ConstantProperties constant;
     @Autowired

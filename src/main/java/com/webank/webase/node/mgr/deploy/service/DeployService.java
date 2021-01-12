@@ -214,7 +214,6 @@ public class DeployService {
      * Add a node. 扩容节点
      * include: gen config & update other nodes & restart all node
      * after check host and init host(dependency,port,image)
-     * todo bug! 端口传入
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public Pair<RetCode, String> addNodes(ReqAddNode addNode) throws NodeMgrException {
