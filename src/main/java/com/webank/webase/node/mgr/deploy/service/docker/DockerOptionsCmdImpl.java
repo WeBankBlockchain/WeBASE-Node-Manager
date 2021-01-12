@@ -59,12 +59,6 @@ public class DockerOptionsCmdImpl {
         boolean exist = ansibleService.checkImageExists(ip, imageFullName);
         return exist;
 
-//        String dockerListImageCommand = String.format("sudo docker images -a %s | grep -v 'IMAGE ID'", image);
-//        Pair<Boolean, String> result = SshTools.execDocker(ip, dockerListImageCommand, sshUser, sshPort, constant.getPrivateKey());
-//        if (result.getKey() && StringUtils.isNotBlank(result.getValue())){
-//            return true;
-//        }
-//        return false;
     }
 
     /**
@@ -89,7 +83,7 @@ public class DockerOptionsCmdImpl {
 
         if (DockerImageTypeEnum.PULL_OFFICIAL.getId() == imagePullType) {
             log.info("pullImage from docker hub");
-            String dockerPullCommand = String.format("sudo docker pull %s", imageFullName);
+            String dockerPullCommand = String.format("docker pull %s", imageFullName);
             // kill exists docker pull process
 //            SshTools.killCommand(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
             ExecuteResult result = ansibleService.execDocker(ip, dockerPullCommand);
@@ -109,7 +103,6 @@ public class DockerOptionsCmdImpl {
         } else {
             log.info("pullImage from cdn");
             ansibleService.execPullDockerCdnShell(ip, downloadPath + "/download", imageTag, webaseVersion);
-
         }
     }
 
@@ -123,7 +116,7 @@ public class DockerOptionsCmdImpl {
         String sdk = String.format("%s/sdk", chainRootOnHost);
         String front_log = String.format("%s/front-log", nodeRootOnHost);
 
-        String dockerCreateCommand = String.format("sudo docker run -d --rm --name %s " +
+        String dockerCreateCommand = String.format("docker run -d --rm --name %s " +
                 "-v %s:/data " +
                 "-v %s:/front/conf/application-docker.yml " +
                 "-v %s:/data/sdk " +
@@ -142,7 +135,7 @@ public class DockerOptionsCmdImpl {
             log.info("stop container jump over, not found container");
             return;
         }
-        String dockerRmCommand = String.format("sudo docker rm -f %s ", containerName);
+        String dockerRmCommand = String.format("docker rm -f %s ", containerName);
         ExecuteResult result = ansibleService.execDocker(ip, dockerRmCommand);
         if (result.failed()) {
             throw new NodeMgrException(ConstantCode.STOP_NODE_ERROR.attach(result.getExecuteOut()));

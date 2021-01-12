@@ -216,20 +216,6 @@ public class SshTools {
     }
 
     /**
-     * Exec docker command.
-     *
-     * @param ip
-     * @param originalCommand
-     * @param sshUser
-     * @param sshPort
-     * @return
-     */
-//    public static Pair<Boolean,String> execPullCdnAndLoadDocker(String ip, String originalCommand, String sshUser,int sshPort,String privateKey) {
-//        log.info("Execute docker command:[{}] on host:[{}]", originalCommand, ip);
-//        return exec(ip, originalCommand, sshUser, sshPort, privateKey);
-//    }
-
-    /**
      * kill an executing command.
      *
      * @param ip
