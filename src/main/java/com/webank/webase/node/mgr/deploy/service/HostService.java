@@ -32,14 +32,12 @@ import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.deploy.service.docker.DockerOptionsCmdImpl;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -81,7 +79,7 @@ public class HostService {
     @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private ConstantProperties constant;
-    @Autowired private DockerOptionsCmdImpl dockerOptions;
+    @Autowired private DockerCommandService dockerOptions;
     @Autowired private AgencyService agencyService;
     @Autowired private PathService pathService;
     @Autowired private DeployShellService deployShellService;
@@ -243,6 +241,11 @@ public class HostService {
         return true;
     }
 
+    /**
+     * check async host init finish or not
+     * @param hostIdList
+     * @return
+     */
     public List<TbHost> checkInitAndListHost(List<Integer> hostIdList) {
         log.info("start checkInitAndListHost hostIdList:{}", hostIdList);
         List<TbHost> hostList = this.selectDistinctHostListById(hostIdList);
@@ -532,7 +535,6 @@ public class HostService {
         // save repeat time in "remark"
         List<TbHost> tbHostList = this.selectDistinctHostListById(hostIdList);
         log.info("batchCheckHostList tbHostList:{}", tbHostList);
-
 
         final CountDownLatch checkHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count

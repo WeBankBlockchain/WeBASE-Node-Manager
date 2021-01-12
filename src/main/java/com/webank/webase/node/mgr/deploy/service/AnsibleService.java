@@ -20,7 +20,6 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
-import com.webank.webase.node.mgr.deploy.service.docker.DockerOptionsCmdImpl;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import lombok.extern.log4j.Log4j2;
@@ -37,7 +36,7 @@ public class AnsibleService {
     @Autowired
     private PathService pathService;
     @Autowired
-    private DockerOptionsCmdImpl dockerOptionsCmd;
+    private DockerCommandService dockerOptionsCmd;
 
     private static final String NOT_FOUND_FLAG = "not found";
     /**
