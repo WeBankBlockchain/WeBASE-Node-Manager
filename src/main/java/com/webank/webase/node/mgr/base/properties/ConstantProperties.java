@@ -97,7 +97,6 @@ public class ConstantProperties {
 
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
-    public static final int MAX_NODE_ON_HOST = 4;
     public static final int LEAST_SEALER_TWO = 2;
 
     private int deployType = 0;
@@ -117,28 +116,29 @@ public class ConstantProperties {
     // to support | & > $
     private String ansibleImageCheckShell = "./script/deploy/check_image_exist.sh";
     private String ansibleContainerCheckShell = "./script/deploy/check_container_exist.sh";
-    private String privateKey = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "id_rsa";
+
     private String fiscoBcosBinary =  "";
 
     // default port
     private int defaultChainId = 1;
-    private int defaultJsonrpcPort = 8545;
-    private int defaultP2pPort = 30300;
-    private int defaultChannelPort = 20200;
-    private int defaultFrontPort = 5002;
 
-    // timeout config
-    private long execDockerCheckTimeout = 10 * 60 * 1000L;
-    private long execHostCheckTimeout = 10 * 60 * 1000L;
-    private long execHostInitTimeout = 10 * 60 * 1000L;
-    private long execHostConfigTimeout = 10 * 60 * 1000L;
-    private long execBuildChainTimeout = 10 * 60 * 1000L;
+    // timeout config (ms)
+    // check docker installed and active 1min
+    private long execDockerCheckTimeout = 55 * 1000L;
+    // check memory dependency, check container exist, check image exist
+    private long execHostCheckTimeout = 55 * 1000L;
+    // check port in use
+    private long execHostCheckPortTimeout = 55 * 1000L;
+    // async init host time out. 5min
+    private long execHostInitTimeout = 5 * 60 * 1000L;
+    // generate chain config and scp to host
+    private long execHostConfigTimeout = 55 * 1000L;
+    // generate chain config
+    private long execBuildChainTimeout = 40 * 1000L;
+    // docker command time out
+    private long dockerRestartPeriodTime = 50 * 1000L;
+    // common shell exec time out
     private long execShellTimeout = 10 * 60 * 1000L;
-    private long execDockerCheckShellTimeout = 50 * 1000L;
-    private long dockerRestartPeriodTime = 30 * 1000L;
-    private int dockerClientConnectTimeout = 10 * 60 * 1000;
-    private int dockerPullTimeout = 10 * 60 * 1000;
-    private int dockerClientReadTimeout = 10 * 60 * 1000;
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
     private String dockerRepository= "fiscoorg/fisco-webase";
@@ -166,15 +166,7 @@ public class ConstantProperties {
         log.info("Init constant properties, generate nodes root dir:[{}]", nodesRootDir);
         log.info("Init constant properties, generate nodes root temp dir:[{}]", nodesRootTmpDir);
 
-//        this.imageTagUpdateUrl = String.format(this.imageTagUpdateUrl,dockerRepository);
-//        log.info("Init constant properties, imageTagUpdateUrl: [{}]", this.imageTagUpdateUrl);
-
-        log.info("Init constant properties, private key: [{}]", privateKey);
-
         log.info("Init constant properties, webase sign server: [{}]", webaseSignAddress);
-
-        log.info("Init constant properties, defaultP2pPort:[{}], defaultChannelPort:[{}], defaultJsonrpcPort:[{}], defaultFrontPort:[{}]",
-                defaultP2pPort, defaultChannelPort, defaultJsonrpcPort, defaultFrontPort);
 
         log.info("Init constant properties, dockerProxyMap: [{}]", dockerProxyMap);
 
