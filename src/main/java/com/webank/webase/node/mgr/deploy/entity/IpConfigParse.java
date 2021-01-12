@@ -109,11 +109,11 @@ public class IpConfigParse {
             throw new NodeMgrException(ConstantCode.IP_CONF_PARAM_NULL_ERROR);
         }
 
-        ipNodeCountMap.entrySet().forEach( entry -> {
-            if (entry.getValue().get() > ConstantProperties.MAX_NODE_ON_HOST){
-                throw new NodeMgrException(NODES_NUM_EXCEED_MAX_ERROR.attach(entry.getKey()));
-            }
-        });
+//        ipNodeCountMap.entrySet().forEach( entry -> {
+//            if (entry.getValue().get() > ConstantProperties.MAX_NODE_ON_HOST){
+//                throw new NodeMgrException(NODES_NUM_EXCEED_MAX_ERROR.attach(entry.getKey()));
+//            }
+//        });
 
         return ipConfigParseList;
     }

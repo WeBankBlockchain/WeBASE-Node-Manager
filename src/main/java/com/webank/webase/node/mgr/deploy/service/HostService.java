@@ -575,7 +575,7 @@ public class HostService {
                         // exec host check shell script
                         try {
                             ansibleService.execPing(tbHost.getIp());
-                            // ansibleService.execHostCheckShell(tbHost.getIp(), nodeCount);
+                            // check docker installed, active and no need sudo docker
                             ansibleService.execDockerCheckShell(tbHost.getIp());
                         } catch (NodeMgrException e) {
                             log.error("Exec host check shell script on host:[{}] failed",
@@ -708,7 +708,7 @@ public class HostService {
             String taskKey = nodeInfo.getIp() + "_" + nodeInfo.getFrontPort();
             taskMap.put(taskKey, task);
         }
-        checkHostLatch.await(constant.getExecHostCheckTimeout(), TimeUnit.MILLISECONDS);
+        checkHostLatch.await(constant.getExecHostCheckPortTimeout(), TimeUnit.MILLISECONDS);
         log.info("Verify check_port time, cancel unfinished tasks.");
         taskMap.forEach((key, value) -> {
             String frontIpPort = key;
