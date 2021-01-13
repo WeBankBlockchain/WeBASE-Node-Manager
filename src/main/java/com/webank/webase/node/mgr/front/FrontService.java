@@ -27,8 +27,10 @@ import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
+import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
@@ -40,7 +42,7 @@ import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
-import com.webank.webase.node.mgr.deploy.service.docker.DockerOptionsCmdImpl;
+import com.webank.webase.node.mgr.deploy.service.DockerCommandService;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -130,7 +132,7 @@ public class FrontService {
     @Autowired
     private ConstantProperties constant;
     @Autowired
-    private DockerOptionsCmdImpl dockerOptions;
+    private DockerCommandService dockerOptions;
     @Autowired
     private AnsibleService ansibleService;
     @Autowired
@@ -549,22 +551,17 @@ public class FrontService {
 
     /**
      * gen node cert and gen front's yml, and new front ind db
-     * @param num
-     * @param chain
-     * @param host
-     * @param agencyId
-     * @param agencyName
-     * @param groupId
-     * @param frontStatusEnum
      * @return
      * @throws NodeMgrException
      * @throws IOException
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<TbFront> initFrontAndNode(int num, TbChain chain, TbHost host, int agencyId,
+    public List<TbFront> initFrontAndNode(List<DeployNodeInfo> nodeInfoList, TbChain chain, TbHost host, int agencyId,
                                           String agencyName, int groupId, FrontStatusEnum frontStatusEnum)
         throws NodeMgrException, IOException {
         log.info("start initFrontAndNode ");
+        ProgressTools.setInitChainData();
+
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
         // the node dir on remote host
@@ -581,12 +578,14 @@ public class FrontService {
 
         List<TbFront> newFrontList = new ArrayList<>();
         // call shell to generate new node config(private key and crt)
-        for (int i = 0; i < num; i++) {
+        for (int i = 0; i < nodeInfoList.size(); i++) {
+            DeployNodeInfo nodeInfo = nodeInfoList.get(i);
+
             int currentIndex = startIndex + i;
             Path nodeRoot = pathService.getNodeRoot(chainName, ip, currentIndex);
 
             if(Files.exists(nodeRoot)){
-                log.warn("Exists node:[{}:{}] config, delete first.",ip,nodeRoot.toAbsolutePath().toString());
+                log.warn("Exists node:[{}:{}] config, delete first.", ip, nodeRoot.toAbsolutePath().toString());
                 try {
                     FileUtils.deleteDirectory(nodeRoot.toFile());
                 } catch (IOException e) {
@@ -602,15 +601,16 @@ public class FrontService {
                 throw new NodeMgrException(ConstantCode.EXEC_GEN_NODE_ERROR.attach(executeResult.getExecuteOut()));
             }
 
-            String nodeId = PathService.getNodeId(nodeRoot,encryptType);
-            int frontPort = constant.getDefaultFrontPort() + currentIndex;
-            int channelPort = constant.getDefaultChannelPort() + currentIndex;
-            int p2pPort = constant.getDefaultP2pPort() + currentIndex;
-            int jsonrpcPort = constant.getDefaultJsonrpcPort() + currentIndex;
+            String nodeId = PathService.getNodeId(nodeRoot, encryptType);
+            int frontPort = nodeInfo.getFrontPort();
+            int channelPort = nodeInfo.getChannelPort();
+            int p2pPort = nodeInfo.getP2pPort();
+            int jsonrpcPort = nodeInfo.getRpcPort();
 
 
             TbFront front = TbFront.init(nodeId, ip, frontPort, agencyId, agencyName, imageTag, RunTypeEnum.DOCKER,
-                    hostId, currentIndex, imageTag, DockerOptionsCmdImpl.getContainerName(rootDirOnHost, chainName, currentIndex),
+                    hostId, currentIndex, imageTag, DockerCommandService
+                    .getContainerName(rootDirOnHost, chainName, currentIndex),
                     jsonrpcPort, p2pPort, channelPort, chain.getId(), chainName, frontStatusEnum);
             // insert front into db
             ((FrontService) AopContext.currentProxy()).insert(front);
@@ -625,7 +625,7 @@ public class FrontService {
             this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
 
             // generate front application.yml
-            ThymeleafUtil.newFrontConfig(nodeRoot,encryptType,channelPort, frontPort,chain.getWebaseSignAddr());
+            ThymeleafUtil.newFrontConfig(nodeRoot, encryptType, channelPort, frontPort, chain.getWebaseSignAddr());
         }
         return newFrontList;
     }

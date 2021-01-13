@@ -40,7 +40,7 @@ done
 
 # use shell script for ansible not support | pipe to grep
 function grepContainer() {
-  sudo docker ps | grep "${containerName}"
+  docker ps | grep "${containerName}"
   if [ $? -ne 0 ] ;then
       echo "grep ${containerName} not found"
       exit ${NOT_FOUND}

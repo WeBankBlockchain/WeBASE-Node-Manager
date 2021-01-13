@@ -4,6 +4,7 @@
 SUCCESS=0
 DOCKER_FAIL=5
 
+## use sudo to start docker
 function checkDocker(){
   echo "Check docker active"
   # install docker

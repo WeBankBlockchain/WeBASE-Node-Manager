@@ -39,7 +39,7 @@ function loadTar() {
   tar_path="${download_path}/docker-fisco-webase.tar"
   # check exist
   if [[ -f ${tar_path} ]];then
-    sudo docker load -i $tar_path
+    docker load -i $tar_path
     echo "Load finish from [${tar_path}]."
   else
     echo "${tar_path} not found!"
