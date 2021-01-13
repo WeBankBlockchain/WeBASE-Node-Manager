@@ -48,7 +48,7 @@ constant:
   # verification code constant value, only when enableVerificationCode is false works
   verificationCodeValue: "8888"
   # auth token code expire time (s)
-  authTokenMaxAge: 1800
+  authTokenMaxAge: 3600
   ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find,,/group/generate,/group/start
   ###front http request
   frontUrl: http://%1s:%2d/WeBASE-Front/%3s
