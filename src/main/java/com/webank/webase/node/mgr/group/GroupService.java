@@ -17,6 +17,7 @@ import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERR
 
 import com.webank.webase.node.mgr.abi.AbiService;
 import com.webank.webase.node.mgr.base.enums.DeployType;
+import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.governance.GovernVoteService;
 import java.io.IOException;
@@ -1172,7 +1173,7 @@ public class GroupService {
 //            if (newGroup) {
 //                // generate conf/group.[groupId].ini
 //                ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
-                // copy old group files
+            // copy old group files
             if (oldFront != null) {
                 Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
                 NodeConfig.copyGroupConfigFiles(oldNodePath, nodeRoot, groupId);
@@ -1187,6 +1188,7 @@ public class GroupService {
             String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
 
             log.info("Send files from:[{}] to:[{}:{}].", src, ip, dst);
+            ProgressTools.setScpConfig();
             try {
                 ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
             } catch (Exception e) {

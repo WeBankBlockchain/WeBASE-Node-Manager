@@ -97,11 +97,20 @@ constant:
   dockerRepository: "fiscoorg/fisco-webase"
   # WeBASE-Sign 访问地址
   webaseSignAddress: "127.0.0.1:5004"
-  # 需要Ansible中配置的免密登录账号，需要配置sudo权限，默认为root，在/etc/ansible/ansible.cfg修改sudo_user
+  # 可视化操作的后台超时时间 (unit: ms)
+  execDockerCheckTimeout: 55000
+  execHostCheckTimeout: 55000
+  execHostCheckPortTimeout: 55000
+  execHostInitTimeout: 300000
+  execHostConfigTimeout: 55000
+  execBuildChainTimeout: 40000
+  dockerRestartPeriodTime: 50000
+  execShellTimeout: 600000
   #### if deployType = 0, ignore upper properties ####
 
 sdk:
   # 加密类型：0: 非国密;  1: 国密
+  # 可视化部署时，此配置将决定部署国密或非国密链
   encryptType: 0
 
 # executor config for async pulling data from chain

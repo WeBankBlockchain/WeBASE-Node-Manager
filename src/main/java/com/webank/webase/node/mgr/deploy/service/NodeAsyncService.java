@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.deploy.service;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
@@ -137,6 +138,7 @@ public class NodeAsyncService {
     @Async("deployAsyncScheduler")
     public void asyncRestartRelatedFront(int chainId, Set<Integer> groupIdSet, OptionType optionType,
                          FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess,FrontStatusEnum frontFailed ) {
+        ProgressTools.setStarting();
 
         // update chain to updating
         this.chainService.updateStatus(chainId,ChainStatusEnum.RESTARTING);
@@ -206,14 +208,6 @@ public class NodeAsyncService {
     private boolean restartChain(int chainId, OptionType optionType,
                                  FrontStatusEnum before, FrontStatusEnum success, FrontStatusEnum failed ) {
         log.info("restartChain chainId:{},optionType:{}", chainId, optionType);
-//        // host of chain
-//        List<TbHost> hostList = this.hostService.selectHostListByChainId(chainId);
-//        log.info("restartChain hostList:{}", hostList);
-
-        // select all front of host
-//        List<TbFront> tbFrontList = hostList.stream()
-//                .map(host -> this.frontMapper.selectByHostId(host.getId())).flatMap(List::stream).collect(Collectors.toList());
-//        log.info("restartChain tbFrontList:{}", tbFrontList);
         List<TbFront> tbFrontList = frontService.selectFrontListByChainId(chainId);
         log.info("restartChain tbFrontList:{}", tbFrontList);
 
@@ -236,6 +230,7 @@ public class NodeAsyncService {
     private boolean restartFrontByHost(int chainId, OptionType optionType, Map<Integer, List<TbFront>> hostFrontListMap,
                                        FrontStatusEnum before, FrontStatusEnum success, FrontStatusEnum failed) {
         log.info("restartFrontByHost chainId:{},optionType:{},hostFrontListMap:{}", chainId, optionType, hostFrontListMap);
+        ProgressTools.setStarting();
         final CountDownLatch startLatch = new CountDownLatch(CollectionUtils.size(hostFrontListMap));
 
         final AtomicInteger totalFrontCount = new AtomicInteger(0);

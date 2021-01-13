@@ -76,10 +76,6 @@ public class DeployShellService {
             throw new NodeMgrException(ConstantCode.SAVE_IP_CONFIG_FILE_ERROR);
         }
 
-        // ports start deprecated by ip conf
-//        String shellPortParam = String.format(" -p %s,%s,%s",
-//                constant.getDefaultP2pPort(), constant.getDefaultChannelPort(),constant.getDefaultJsonrpcPort());
-
         // build_chain.sh only support docker on linux
         // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ]
         String command = String.format("bash -e %s -S -f %s -o %s %s %s %s",
@@ -114,16 +110,16 @@ public class DeployShellService {
      * @param newAgencyName
      * @return
      */
-    public ExecuteResult execGenAgency(byte encryptType,
-                                       String chainName,
-                                       String newAgencyName) {
-        log.info("Exec execGenAgency method for chainName:[{}], newAgencyName:[{}:{}]", chainName, newAgencyName, encryptType);
+    public ExecuteResult execGenAgency(byte encryptType, String chainName, String newAgencyName) {
+        log.info("Exec execGenAgency method for chainName:[{}], newAgencyName:[{}:{}]",
+            chainName, newAgencyName, encryptType);
 
         Path certRoot = this.pathService.getCertRoot(chainName);
 
         if (Files.notExists(certRoot)) {
             // file not exists
-            log.error("Chain cert : [{}] not exists in directory:[{}] ", chainName, Paths.get(".").toAbsolutePath().toString());
+            log.error("Chain cert : [{}] not exists in directory:[{}] ",
+                chainName, Paths.get(".").toAbsolutePath().toString());
             throw new NodeMgrException(ConstantCode.CHAIN_CERT_NOT_EXISTS_ERROR);
         }
 
@@ -140,7 +136,7 @@ public class DeployShellService {
                         : ""
         );
 
-        return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+        return JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
     }
 
 
@@ -152,10 +148,7 @@ public class DeployShellService {
      * @param newNodeRoot
      * @return
      */
-    public ExecuteResult execGenNode(byte encryptType,
-                                     String chainName,
-                                     String agencyName,
-                                     String newNodeRoot) {
+    public ExecuteResult execGenNode(byte encryptType, String chainName, String agencyName, String newNodeRoot) {
         log.info("Exec execGenNode method for chainName:[{}], node:[{}:{}:{}]",
                 chainName, encryptType, agencyName, newNodeRoot);
 
@@ -173,7 +166,7 @@ public class DeployShellService {
                         String.format(" -g %s", pathService.getGmAgencyRoot(chainName,agencyName).toAbsolutePath().toString()) : ""
         );
 
-        return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+        return JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
     }
 
 

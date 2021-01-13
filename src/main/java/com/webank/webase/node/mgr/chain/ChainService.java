@@ -29,6 +29,7 @@ import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
+import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
@@ -48,7 +49,7 @@ import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.NodeAsyncService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
-import com.webank.webase.node.mgr.deploy.service.docker.DockerOptionsCmdImpl;
+import com.webank.webase.node.mgr.deploy.service.DockerCommandService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
@@ -114,7 +115,7 @@ public class ChainService {
     @Autowired
     private ConfigService configService;
 
-    @Autowired private DockerOptionsCmdImpl dockerOptions;
+    @Autowired private DockerCommandService dockerOptions;
 
     /**
      * get chain info.
@@ -309,6 +310,7 @@ public class ChainService {
         // exec build_chain.sh shell script generate config and cert
         // 1.4.3 use bash to generate not ansible
         log.info("Locally exec build_chain....");
+        ProgressTools.setGenConfig();
         deployShellService.execBuildChain(encryptType, ipConf, chainName);
 
         try {
@@ -344,6 +346,7 @@ public class ChainService {
                                 String webaseSignAddr, String imageTag, byte encryptType, String agencyName){
         log.info("start initChainDbData chainName:{}, ipConfigParseList:{}",
             chainName, ipConfigParseList);
+        ProgressTools.setInitChainData();
         // insert chain
         final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
             imageTag, encryptType, ChainStatusEnum.INITIALIZED,
@@ -397,7 +400,7 @@ public class ChainService {
                 TbFront front = TbFront.init(nodeConfig.getNodeId(), ip, frontPort,
                         agency.getId(), agency.getAgencyName(), imageTag,
                         RunTypeEnum.DOCKER , host.getId(), nodeConfig.getHostIndex(), imageTag,
-                        DockerOptionsCmdImpl.getContainerName(host.getRootDir(), chainName,
+                        DockerCommandService.getContainerName(host.getRootDir(), chainName,
                         nodeConfig.getHostIndex()), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
                         nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
                 this.frontService.insert(front);
@@ -439,7 +442,7 @@ public class ChainService {
      * @param chain
      * @return
      */
-    public int progress(TbChain chain){
+    public int progress(TbChain chain) {
         int progress = ChainStatusEnum.progress(chain.getChainStatus());
         switch (progress){
             // deploy or upgrade failed
@@ -454,7 +457,7 @@ public class ChainService {
 
         progress = this.hostService.hostProgress(chain.getId());
         // host init error
-        if (progress == NumberUtil.PERCENTAGE_FAILED){
+        if (progress == NumberUtil.PERCENTAGE_FAILED) {
             return NumberUtil.PERCENTAGE_FAILED;
         }
         if(progress < NumberUtil.PERCENTAGE_FINISH){

@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.deploy.entity.ReqAddNode;
 import com.webank.webase.node.mgr.deploy.entity.ReqConfigChain;
 import com.webank.webase.node.mgr.deploy.entity.ReqInitHost;
@@ -287,18 +288,18 @@ public class DeployController extends BaseController {
     }
 
     /**
-     *
+     * 1-检测机器内存与依赖，2-检测Docker服务，3-检测端口占用，4-初始化安装主机依赖，5-初始化加载Docker镜像中
+     * 6-生成链证书与配置，7-初始化链与前置数据，8-传输链配置到主机
+     * 9-配置完成，启动中
      * @return
      * @throws IOException
      */
     @GetMapping(value = "progress")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse progress(
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-         ) throws IOException {
+    public BaseResponse progress() throws IOException {
         Instant startTime = Instant.now();
-        log.info("Start get progress, chainName:[{}], now:[{}]", chainName, startTime);
-        int progress = this.deployService.progress(chainName);
+        log.info("Start get progress now:[{}]", startTime);
+        int progress = ProgressTools.progress();
         return new BaseResponse(ConstantCode.SUCCESS, progress);
     }
 

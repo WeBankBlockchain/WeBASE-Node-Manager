@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
+import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
@@ -32,14 +33,12 @@ import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.deploy.service.docker.DockerOptionsCmdImpl;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -81,7 +80,7 @@ public class HostService {
     @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private ConstantProperties constant;
-    @Autowired private DockerOptionsCmdImpl dockerOptions;
+    @Autowired private DockerCommandService dockerOptions;
     @Autowired private AgencyService agencyService;
     @Autowired private PathService pathService;
     @Autowired private DeployShellService deployShellService;
@@ -159,6 +158,7 @@ public class HostService {
         // check success count
         AtomicInteger initSuccessCount = new AtomicInteger(0);
 
+        ProgressTools.setHostInit();
         for (final TbHost tbHost : tbHostList) {
             log.info("initHostAndDocker host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
 
@@ -194,6 +194,7 @@ public class HostService {
                         try {
                             log.info("initHostAndDocker pull docker ip:{}, imageTag:{}, imagePullType:{}",
                                 tbHost.getIp(), imageTag, imagePullType);
+                            ProgressTools.setPullDocker();
                             this.dockerOptions.pullImage(tbHost.getIp(), imageTag, imagePullType, tbHost.getRootDir());
                         } catch (NodeMgrException e) {
                             log.error("Docker pull image on host:[{}] failed",
@@ -243,6 +244,11 @@ public class HostService {
         return true;
     }
 
+    /**
+     * check async host init finish or not
+     * @param hostIdList
+     * @return
+     */
     public List<TbHost> checkInitAndListHost(List<Integer> hostIdList) {
         log.info("start checkInitAndListHost hostIdList:{}", hostIdList);
         List<TbHost> hostList = this.selectDistinctHostListById(hostIdList);
@@ -279,6 +285,7 @@ public class HostService {
         AtomicInteger configSuccessCount = new AtomicInteger(0);
         Map<Integer, Future> taskMap = new HashedMap<>();
 
+        ProgressTools.setScpConfig();
         for (final TbHost tbHost : tbHostList) {
             log.info("Init host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
 
@@ -373,10 +380,11 @@ public class HostService {
      * when add node
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public void generateHostSDKAndScp(byte encryptType, String chainName, TbHost host, String agencyName)
+    public void generateHostSDKCertAndScp(byte encryptType, String chainName, TbHost host, String agencyName)
         throws NodeMgrException {
         log.info("start generateHostSDKAndScp encryptType:{},chainName:{},host:{},agencyName:{}",
             encryptType, chainName, host, agencyName);
+        ProgressTools.setGenConfig();
         String ip = host.getIp();
         // new host, generate sdk dir first
         Path sdkPath = this.pathService.getSdk(chainName, ip);
@@ -408,6 +416,7 @@ public class HostService {
         String dst = PathService.getChainRootOnHost(host.getRootDir(), chainName);
 
         log.info("generateHostSDKAndScp scp: Send files from:[{}] to:[{}:{}].", src, ip, dst);
+        ProgressTools.setScpConfig();
         try {
             ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
             log.info("Send files from:[{}] to:[{}:{}] success.", src, ip, dst);
@@ -533,12 +542,12 @@ public class HostService {
         List<TbHost> tbHostList = this.selectDistinctHostListById(hostIdList);
         log.info("batchCheckHostList tbHostList:{}", tbHostList);
 
-
         final CountDownLatch checkHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
         AtomicInteger checkSuccessCount = new AtomicInteger(0);
         Map<Integer, Future> taskMap = new HashedMap<>();
 
+        ProgressTools.setHostCheck();
         for (final TbHost tbHost : tbHostList) {
             log.info("Check host:[{}], status:[{}], remark:[{}]", tbHost.getIp(), tbHost.getStatus(), tbHost.getRemark());
 
@@ -571,11 +580,11 @@ public class HostService {
                     if (!HostStatusEnum.hostCheckSuccess(tbHost.getStatus())) {
                         log.info("Check host:[{}] by exec shell script:[{},{}]", tbHost.getIp(),
                             constant.getHostCheckShell(), constant.getDockerCheckShell());
-
+                        ProgressTools.setDockerCheck();
                         // exec host check shell script
                         try {
                             ansibleService.execPing(tbHost.getIp());
-                            // ansibleService.execHostCheckShell(tbHost.getIp(), nodeCount);
+                            // check docker installed, active and no need sudo docker
                             ansibleService.execDockerCheckShell(tbHost.getIp());
                         } catch (NodeMgrException e) {
                             log.error("Exec host check shell script on host:[{}] failed",
@@ -683,6 +692,7 @@ public class HostService {
         AtomicInteger checkSuccessCount = new AtomicInteger(0);
         Map<String, Future> taskMap = new HashedMap<>(); //key is ip+"_"+frontPort
 
+        ProgressTools.setPortCheck();
         for (final DeployNodeInfo nodeInfo : deployNodeInfoList) {
             log.info("Check host port:[{}]", nodeInfo.getIp());
 
@@ -708,7 +718,7 @@ public class HostService {
             String taskKey = nodeInfo.getIp() + "_" + nodeInfo.getFrontPort();
             taskMap.put(taskKey, task);
         }
-        checkHostLatch.await(constant.getExecHostCheckTimeout(), TimeUnit.MILLISECONDS);
+        checkHostLatch.await(constant.getExecHostCheckPortTimeout(), TimeUnit.MILLISECONDS);
         log.info("Verify check_port time, cancel unfinished tasks.");
         taskMap.forEach((key, value) -> {
             String frontIpPort = key;
@@ -773,6 +783,7 @@ public class HostService {
      */
     public boolean syncCheckPortHostList(List<DeployNodeInfo> deployNodeInfoList) {
         log.info("syncCheckPortHostList deployNodeInfoList:{}", deployNodeInfoList);
+        ProgressTools.setPortCheck();
         int successCount = 0;
         for (final DeployNodeInfo nodeInfo : deployNodeInfoList) {
             log.info("Check host port:[{}]", nodeInfo.getIp());

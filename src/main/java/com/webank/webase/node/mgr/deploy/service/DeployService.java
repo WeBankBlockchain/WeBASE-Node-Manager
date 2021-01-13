@@ -18,12 +18,11 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
-import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
+import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
@@ -44,7 +43,10 @@ import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeService;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
@@ -75,7 +77,6 @@ public class DeployService {
     @Autowired private ConstantProperties constantProperties;
     @Autowired private NodeService nodeService;
     @Autowired private CertService certService;
-
 
     /**
      * generate chain config and front config in db, scp to remote and async start
@@ -109,7 +110,6 @@ public class DeployService {
         if (!configHostSuccess) {
             log.error("configChainAndScp config success but image not on remote host, cannot start chain!");
             chainService.updateStatus(chainName, ChainStatusEnum.START_FAIL);
-            //todo 删已有配置
             throw new NodeMgrException(ConstantCode.ANSIBLE_INIT_HOST_CDN_SCP_NOT_ALL_SUCCESS);
         }
         // check image
@@ -241,15 +241,30 @@ public class DeployService {
         TbAgency agency = this.agencyService.initAgencyIfNew(
             agencyName, chain.getId(), chainName, chain.getEncryptType());
 
+        // deployNodeInfo group by host id
+        Map<Integer, List<DeployNodeInfo>> hostIdAndInfoMap = new HashMap<>();
+        for (DeployNodeInfo nodeInfo : deployNodeInfoList) {
+            Integer hostId = nodeInfo.getHostId();
+            List<DeployNodeInfo> value = hostIdAndInfoMap.get(hostId);
+            if (value == null) {
+                value = new ArrayList<>();
+            }
+            value.add(nodeInfo);
+            hostIdAndInfoMap.put(hostId, value);
+        }
+        log.info("addNodes hostIdAndInfoMap:{}", hostIdAndInfoMap);
+
         // store node count in tbHost's remark
-        List<TbHost> hostList = hostService.selectDistinctHostListById(hostIdList);
-        for (TbHost tbHost : hostList) {
+        // List<TbHost> hostList = hostService.selectDistinctHostListById(hostIdList);
+        for (Integer hostId : hostIdAndInfoMap.keySet()) {
+            TbHost tbHost = tbHostMapper.selectByPrimaryKey(hostId);
+            List<DeployNodeInfo> nodeListOnSameHost = hostIdAndInfoMap.get(hostId);
+
             // node number in one host when adding
-            int num = Integer.parseInt(tbHost.getRemark());
+            int num = nodeListOnSameHost.size();
             // generate new sdk cert and scp to host
             log.info("addNodes generateHostSDKAndScp");
-            // todo改名
-            hostService.generateHostSDKAndScp(chain.getEncryptType(), chain.getChainName(), tbHost, agency.getAgencyName());
+            hostService.generateHostSDKCertAndScp(chain.getEncryptType(), chain.getChainName(), tbHost, agency.getAgencyName());
 
             // update group node count
             log.info("addNodes saveOrUpdateNodeCount groupId:{},new node num:{}", groupId, num);
@@ -259,7 +274,7 @@ public class DeployService {
             try {
                 // gen node cert and gen front's yml
                 log.info("addNodes initFrontAndNode");
-                List<TbFront> newFrontList = frontService.initFrontAndNode(num, chain,
+                List<TbFront> newFrontList = frontService.initFrontAndNode(nodeListOnSameHost, chain,
                     tbHost, agency.getId(), agency.getAgencyName(), groupId, FrontStatusEnum.ADDING);
 
                 // generate(or update existed) related node config files
@@ -409,20 +424,6 @@ public class DeployService {
         }
     }
 
-    /**
-     *
-     * @param chainName
-     */
-    public int progress(String chainName) {
-
-        log.info("Progress check chain name:[{}] exists...", chainName);
-        TbChain chain = tbChainMapper.getByChainName(chainName);
-        if (chain == null) {
-            throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
-        }
-
-        return this.chainService.progress(chain);
-    }
 
 }
 

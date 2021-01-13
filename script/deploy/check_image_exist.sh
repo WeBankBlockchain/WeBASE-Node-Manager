@@ -41,7 +41,7 @@ done
 
 # use shell script for ansible not support | pipe to grep
 function grepImage() {
-  sudo docker images -a "${imageFullName}" | grep -v 'IMAGE ID'
+  docker images -a "${imageFullName}" | grep -v 'IMAGE ID'
   if [ $? -ne 0 ] ;then
       echo "grep ${imageFullName} not found"
       exit $NOT_FOUND

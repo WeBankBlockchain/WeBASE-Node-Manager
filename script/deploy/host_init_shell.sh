@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+## use sudo to check dependency installed or install it
+
 function install(){
     # 系统命令
     command=$1
