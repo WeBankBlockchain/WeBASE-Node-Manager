@@ -39,7 +39,7 @@ import lombok.ToString;
 public enum DataStatus {
     NORMAL(1), INVALID(2),
     /**
-     * used in visual deploy
+     * used in visual deploy node status(not front status)
      */
     STARTING(3),
     /**

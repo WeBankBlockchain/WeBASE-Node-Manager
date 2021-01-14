@@ -136,7 +136,7 @@ public class ConstantProperties {
     // generate chain config
     private long execBuildChainTimeout = 40 * 1000L;
     // docker command time out
-    private long dockerRestartPeriodTime = 50 * 1000L;
+    private long dockerRestartPeriodTime = 60 * 1000L;
     // common shell exec time out
     private long execShellTimeout = 10 * 60 * 1000L;
 
