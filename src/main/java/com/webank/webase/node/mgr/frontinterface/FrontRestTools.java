@@ -388,7 +388,7 @@ public class FrontRestTools {
                 setFailCount(url, method.toString());
                 if (isServiceSleep(url, method.toString())) {
                     frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
-                    throw ex;
+                    throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
                 }
                 log.info("continue next front", ex);
                 continue;
