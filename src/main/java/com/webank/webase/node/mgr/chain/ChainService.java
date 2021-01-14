@@ -206,7 +206,7 @@ public class ChainService {
 
         // restart chain
         this.nodeAsyncService.asyncStartChain(chain.getId(), OptionType.MODIFY_CHAIN, ChainStatusEnum.RUNNING ,
-                ChainStatusEnum.UPGRADING_FAILED,FrontStatusEnum.STARTING,FrontStatusEnum.RUNNING,FrontStatusEnum.STOPPED);
+                ChainStatusEnum.UPGRADING_FAILED, FrontStatusEnum.STARTING, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
     }
 
 

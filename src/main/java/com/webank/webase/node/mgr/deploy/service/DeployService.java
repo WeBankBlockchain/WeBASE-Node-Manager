@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -263,7 +264,7 @@ public class DeployService {
             // node number in one host when adding
             int num = nodeListOnSameHost.size();
             // generate new sdk cert and scp to host
-            log.info("addNodes generateHostSDKAndScp");
+            log.info("addNodes generateHostSDKCertAndScp");
             hostService.generateHostSDKCertAndScp(chain.getEncryptType(), chain.getChainName(), tbHost, agency.getAgencyName());
 
             // update group node count
