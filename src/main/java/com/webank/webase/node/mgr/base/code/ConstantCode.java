@@ -274,7 +274,7 @@ public class ConstantCode {
     public static final RetCode ANSIBLE_CHECK_DOCKER_IMAGE_ERROR = RetCode.mark(202491, "Ansible check image exist error for param");
     public static final RetCode ANSIBLE_CHECK_CONTAINER_ERROR = RetCode.mark(202492, "Ansible check docker container exist error for param");
 
-    public static final RetCode CHECK_HOST_MEM_CPU_DOCKER_FAIL = RetCode.mark(202493, "Check host free memory/cpu or docker fail, please check host remark");
+    public static final RetCode CHECK_HOST_MEM_CPU_DOCKER_FAIL = RetCode.mark(202493, "Check host not pass, please check host remark");
     public static final RetCode CHECK_HOST_PORT_IN_USE = RetCode.mark(202494, "Check host port is in use, please check host remark");
     public static final RetCode HOST_ALREADY_EXIST = RetCode.mark(202495, "Host already exist");
     public static final RetCode HOST_ROOT_DIR_ACCESS_DENIED = RetCode.mark(202496, "Host root dir access denied");
