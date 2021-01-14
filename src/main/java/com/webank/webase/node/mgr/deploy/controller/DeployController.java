@@ -177,9 +177,6 @@ public class DeployController extends BaseController {
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
         }
-//        catch (InterruptedException e) {
-//            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
-//        }
     }
 
     /**
