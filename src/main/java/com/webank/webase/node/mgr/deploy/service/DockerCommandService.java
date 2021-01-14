@@ -108,6 +108,8 @@ public class DockerCommandService {
 
 
     public void run(String ip, String imageTag, String containerName, String chainRootOnHost, int nodeIndex) {
+        log.info("stop ip:{}, imageTag:{},containerName:{},chainRootOnHost:{},nodeIndex:{}",
+            ip, imageTag, containerName, chainRootOnHost, nodeIndex);
         String fullImageName = getImageRepositoryTag(constant.getDockerRepository(), constant.getDockerRegistryMirror(), imageTag);
         this.stop(ip, containerName);
 

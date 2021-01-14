@@ -270,6 +270,7 @@ public class AnsibleService {
 
 
     public ExecuteResult execDocker(String ip, String dockerCommand) {
+        log.info("execDocker ip:{},dockerCommad:{}", ip, dockerCommand);
         String command = String.format("ansible %s -m command -a \"%s\"", ip, dockerCommand);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getDockerRestartPeriodTime());
         return result;

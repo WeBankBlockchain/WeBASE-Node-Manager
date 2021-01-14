@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.node;
 
 import com.webank.webase.node.mgr.base.enums.ConsensusType;
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -279,7 +280,12 @@ public class NodeService {
                 if (updateFront != null) {
                     // update front status as long as update node (7.5s internal)
                     log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
-                    updateFront.setStatus(tbNode.getNodeActive());
+                    // update as 2, same as FrontStatuaEnum
+                    if (tbNode.getNodeActive() == DataStatus.NORMAL.getValue()) {
+                        updateFront.setStatus(FrontStatusEnum.RUNNING.getId());
+                    } else if (tbNode.getNodeActive() == DataStatus.INVALID.getValue()) {
+                        updateFront.setStatus(FrontStatusEnum.STOPPED.getId());
+                    }
                     frontService.updateFront(updateFront);
                 }
             }

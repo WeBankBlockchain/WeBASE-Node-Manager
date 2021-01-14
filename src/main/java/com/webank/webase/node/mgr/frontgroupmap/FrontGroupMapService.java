@@ -189,7 +189,7 @@ public class FrontGroupMapService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateFrontMapStatus(int frontId, GroupStatus status) {
         // update status
-        log.info("Update front:[{}] all group map to status:[{}]", frontId, status);
+        log.info("Update frontGroupMap:[{}] all group map to status:[{}]", frontId, status);
         frontGroupMapMapper.updateAllGroupsStatus(frontId, status.getValue());
         this.frontGroupMapCache.clearMapList();
     }
@@ -197,7 +197,7 @@ public class FrontGroupMapService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateFrontMapStatus(int frontId, int groupId, GroupStatus status) {
         // update status
-        log.info("Update front:[{}] group:[{}] map to status:[{}]", frontId, groupId, status);
+        log.info("Update frontGroupMap:[{}] group:[{}] map to status:[{}]", frontId, groupId, status);
         frontGroupMapMapper.updateOneGroupStatus(frontId, status.getValue(), groupId);
         this.frontGroupMapCache.clearMapList();
     }
