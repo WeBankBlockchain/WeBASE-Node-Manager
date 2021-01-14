@@ -446,7 +446,7 @@ public class HostService {
         TbHost host = this.tbHostMapper.selectByPrimaryKey(hostId);
         if (host == null){
             log.warn("Host:[{}] not exists.", hostId);
-            return;
+            throw new NodeMgrException(ConstantCode.HOST_NOT_EXIST);
         }
 
         List<TbFront> frontList = this.frontMapper.selectByHostId(hostId);
@@ -636,24 +636,6 @@ public class HostService {
     }
 
     /**
-     * get distinct host list by host id list, save repeat time in "remark"
-     * @case: if hostId the same, count repeat times in host's remark
-     *
-     * @param hostIdList
-     * @return
-     */
-    public List<TbHost> selectHostListById(List<Integer> hostIdList){
-        // mark repeat time in Host's remark
-        List<TbHost> hostList = new ArrayList<>();
-        hostIdList.forEach(id -> {
-            TbHost host = tbHostMapper.selectByPrimaryKey(id);
-            hostList.add(host);
-        });
-
-        return hostList;
-    }
-
-    /**
      * select host list by id list
      * distinct host and save node count(repeat time) in host's remark
      * @param hostIdList
@@ -671,6 +653,9 @@ public class HostService {
             count = repeatTime.intValue();
 
             TbHost host = tbHostMapper.selectByPrimaryKey(hostId);
+            if (host == null) {
+                throw new NodeMgrException(ConstantCode.HOST_NOT_EXIST);
+            }
             // store repeat time as node count
             host.setRemark(String.valueOf(count));
             // add in list
@@ -767,6 +752,9 @@ public class HostService {
         AtomicBoolean allHostInitSuccess = new AtomicBoolean(true);
         hostIdList.forEach(hId -> {
             TbHost host = tbHostMapper.selectByPrimaryKey(hId);
+            if (host == null) {
+                throw new NodeMgrException(ConstantCode.HOST_NOT_EXIST);
+            }
             if (HostStatusEnum.INIT_SUCCESS.getId() != host.getStatus()) {
                 allHostInitSuccess.set(false);
             }

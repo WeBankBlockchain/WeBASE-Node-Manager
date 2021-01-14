@@ -278,6 +278,7 @@ public class ConstantCode {
     public static final RetCode CHECK_HOST_PORT_IN_USE = RetCode.mark(202494, "Check host port is in use, please check host remark");
     public static final RetCode HOST_ALREADY_EXIST = RetCode.mark(202495, "Host already exist");
     public static final RetCode HOST_ROOT_DIR_ACCESS_DENIED = RetCode.mark(202496, "Host root dir access denied");
+    public static final RetCode HOST_NOT_EXIST = RetCode.mark(202497, "Host not exist or already been deleted");
 
 
     // add in v1.4.2
