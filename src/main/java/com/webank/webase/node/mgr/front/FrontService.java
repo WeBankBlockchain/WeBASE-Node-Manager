@@ -247,7 +247,7 @@ public class FrontService {
                 frontPort, Integer.valueOf(groupIdList.get(0)));
         String clientVersion = versionResponse.getVersion();
         String supportVersion = versionResponse.getSupportedVersion();
-        //copy attribute
+        // copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);

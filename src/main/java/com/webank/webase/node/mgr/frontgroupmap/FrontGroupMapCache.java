@@ -59,6 +59,7 @@ public class FrontGroupMapCache {
             targetMap = mapService.getList(param);
             log.info("get observer map:{} param:{}", targetMap, param);
         }
+        log.info("getSealerOrObserverMap targetMap:{}", targetMap);
         return targetMap;
     }
 
