@@ -40,7 +40,6 @@ function helloDocker() {
       docker rm $CNT_ID
   fi
 
-
   TEST_RESULT=`docker run --name $TEST_CNT_NAME hello-world 2>&1` || :
   if [[ $TEST_RESULT =~ "Hello from Docker" ]]
       then echo '2. docker run test passed!'
@@ -48,7 +47,6 @@ function helloDocker() {
       echo "ERROR: docker run failed-->$TEST_RESULT"
       exit ${DOCKER_FAIL}
   fi
-
 
   CNT_ID=`docker ps -a | grep $TEST_CNT_NAME | awk '{print $1}' 2>&1` || :
   if [ -n "$CNT_ID" ]
