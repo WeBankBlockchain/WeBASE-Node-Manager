@@ -104,8 +104,9 @@ constant:
   execHostInitTimeout: 300000
   execHostConfigTimeout: 55000
   execBuildChainTimeout: 40000
-  dockerRestartPeriodTime: 50000
+  dockerRestartPeriodTime: 40000
   execShellTimeout: 600000
+  # runDockerSleepTime: 600000
   #### if deployType = 0, ignore upper properties ####
 
 sdk:

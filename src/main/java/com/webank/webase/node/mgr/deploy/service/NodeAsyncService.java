@@ -263,7 +263,6 @@ public class NodeAsyncService {
                             log.info("Start front:[{}:{}:{}] success.", front.getFrontIp(), front.getHostIndex(), front.getNodeId());
                             startSuccessCount.incrementAndGet();
                         }
-                        Thread.sleep(constant.getDockerRestartPeriodTime());
                     }
                 } catch (Exception e) {
                     log.error("Start front on host:[{}] error", tbHost.getIp(), e);
