@@ -425,6 +425,19 @@ CREATE TABLE IF NOT EXISTS tb_contract_path (
   UNIQUE KEY uk_group_path_name (group_id,contract_path)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约路径表';
 
+CREATE TABLE IF NOT EXISTS tb_cns (
+  id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  group_id int(11) NOT NULL COMMENT '群组ID',
+  contract_path varchar(24) binary NOT NULL COMMENT '合约所在目录',
+  contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
+  cns_name varchar(120) binary NOT NULL COMMENT 'cns名称',
+  version varchar(120) DEFAULT NULL COMMENT 'cns版本',
+  contract_address varchar(64) DEFAULT NULL COMMENT '合约地址',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_path_name (group_id,contract_path,contract_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='cns信息表';
 
 
 SET FOREIGN_KEY_CHECKS = 1;

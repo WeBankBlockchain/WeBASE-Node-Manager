@@ -283,6 +283,10 @@ public class ConstantCode {
 
     // add in v1.4.2
     public static final RetCode CONTRACT_PATH_IS_EXISTS = RetCode.mark(202501, "contract path is exists.");
+    
+    // add in v1.4.3
+    public static final RetCode VERSION_CANNOT_EMPTY = RetCode.mark(202502, "version cannot be empty.");
+    public static final RetCode CNS_NAME_CANNOT_EMPTY = RetCode.mark(202503, "cns name cannot be empty.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
