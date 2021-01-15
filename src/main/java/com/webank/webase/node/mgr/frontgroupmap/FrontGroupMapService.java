@@ -217,7 +217,7 @@ public class FrontGroupMapService {
         String nodeId = front.getNodeId();
         log.info("getMapSealerOrObserver groupId:{}, nodeId:{}", groupId, nodeId);
 
-        int type = nodeService.checkNodeType(groupId, nodeId);
+        int type = nodeService.checkNodeType(groupId, nodeId, front.getFrontIp(), front.getFrontPort());
         if (type == 0) {
             log.error("node {} consensus type:{} invalid!", nodeId, type);
         }
