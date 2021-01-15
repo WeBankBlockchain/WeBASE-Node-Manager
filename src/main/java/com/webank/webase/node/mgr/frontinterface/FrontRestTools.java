@@ -325,21 +325,36 @@ public class FrontRestTools {
      * get from front for entity.
      */
     public <T> T getForEntity(Integer groupId, String uri, Class<T> clazz) {
-        return restTemplateExchange(groupId, uri, HttpMethod.GET, null, clazz);
+        T response = restTemplateExchange(groupId, uri, HttpMethod.GET, null, clazz);
+        if (response == null) {
+            log.error("getForEntity response is null!");
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
+        return response;
     }
 
     /**
      * post from front for entity.
      */
     public <T> T postForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
-        return restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
+        T response = restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
+        if (response == null) {
+            log.error("postForEntity response is null!");
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
+        return response;
     }
 
     /**
      * delete from front for entity.
      */
     public <T> T deleteForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
-        return restTemplateExchange(groupId, uri, HttpMethod.DELETE, params, clazz);
+        T response = restTemplateExchange(groupId, uri, HttpMethod.DELETE, params, clazz);
+        if (response == null) {
+            log.error("deleteForEntity response is null!");
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
+        return response;
     }
 
     /**
@@ -389,7 +404,7 @@ public class FrontRestTools {
                 setFailCount(url, method.toString());
                 if (isServiceSleep(url, method.toString())) {
                     frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
-                    throw ex;
+                    throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
                 }
                 log.info("continue next front", ex);
                 continue;

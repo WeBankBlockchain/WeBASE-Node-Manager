@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.node;
 
 import com.webank.webase.node.mgr.base.enums.ConsensusType;
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -279,7 +280,12 @@ public class NodeService {
                 if (updateFront != null) {
                     // update front status as long as update node (7.5s internal)
                     log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
-                    updateFront.setStatus(tbNode.getNodeActive());
+                    // update as 2, same as FrontStatuaEnum
+                    if (tbNode.getNodeActive() == DataStatus.NORMAL.getValue()) {
+                        updateFront.setStatus(FrontStatusEnum.RUNNING.getId());
+                    } else if (tbNode.getNodeActive() == DataStatus.INVALID.getValue()) {
+                        updateFront.setStatus(FrontStatusEnum.STOPPED.getId());
+                    }
                     frontService.updateFront(updateFront);
                 }
             }
@@ -490,9 +496,9 @@ public class NodeService {
      * check sealer list contain
      * return: true: is sealer
      */
-    public boolean checkSealerListContains(int groupId, String nodeId) {
+    public boolean checkSealerListContains(int groupId, String nodeId, String ip, int port) {
         log.debug("start checkSealerListContains groupId:{},nodeId:{}", groupId, nodeId);
-        List<String> sealerList = frontInterface.getSealerList(groupId);
+        List<String> sealerList = frontInterface.getSealerListFromSpecificFront(ip, port, groupId);
         boolean isSealer = sealerList.stream().anyMatch(n -> n.equals(nodeId));
         log.debug("end checkSealerListContains isSealer:{}", isSealer);
         return isSealer;
@@ -502,18 +508,18 @@ public class NodeService {
      * check observer list contain
      * return: true: is sealer
      */
-    public boolean checkObserverListContains(int groupId, String nodeId) {
+    public boolean checkObserverListContains(int groupId, String nodeId, String ip, int port) {
         log.debug("start checkObserverListContains groupId:{},nodeId:{}", groupId, nodeId);
-        List<String> sealerList = frontInterface.getObserverList(groupId);
+        List<String> sealerList = frontInterface.getObserverListFromSpecificFront(ip, port, groupId);
         boolean isObserver = sealerList.stream().anyMatch(n -> n.equals(nodeId));
         log.debug("end checkObserverListContains isObserver:{}", isObserver);
         return isObserver;
     }
 
-    public int checkNodeType(int groupId, String nodeId) {
-        if (checkObserverListContains(groupId, nodeId)) {
+    public int checkNodeType(int groupId, String nodeId, String ip, int port) {
+        if (checkObserverListContains(groupId, nodeId, ip, port)) {
             return ConsensusType.OBSERVER.getValue();
-        } else if (checkSealerListContains(groupId, nodeId)) {
+        } else if (checkSealerListContains(groupId, nodeId, ip, port)) {
             return ConsensusType.SEALER.getValue();
         }
         return 0;

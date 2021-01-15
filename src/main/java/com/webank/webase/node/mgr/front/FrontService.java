@@ -18,6 +18,7 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
+import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
@@ -25,6 +26,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
@@ -80,6 +82,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.aop.framework.AopContext;
@@ -244,7 +247,7 @@ public class FrontService {
                 frontPort, Integer.valueOf(groupIdList.get(0)));
         String clientVersion = versionResponse.getVersion();
         String supportVersion = versionResponse.getSupportedVersion();
-        //copy attribute
+        // copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
@@ -475,7 +478,7 @@ public class FrontService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int frontId, FrontStatusEnum newStatus) {
-        log.info("Update front:[{}] status to:[{}]",frontId, newStatus.toString());
+        log.info("Update front:[{}] status to:[{}]", frontId, newStatus.toString());
         return this.frontMapper.updateStatus(frontId, newStatus.getId(), LocalDateTime.now()) == 1;
     }
 
@@ -758,7 +761,7 @@ public class FrontService {
         // set front status to stopped to avoid error for time task.
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), before);
 
-        this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.MAINTAINING);
+        this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
 
         TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
@@ -768,41 +771,65 @@ public class FrontService {
                     front.getFrontIp(), front.getImageTag(), front.getContainerName(),
                     PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()), front.getHostIndex());
 
-            threadPoolTaskScheduler.schedule(()->{
-                // update front status as start success
-                this.updateStatus(front.getFrontId(), success);
+            threadPoolTaskScheduler.schedule(()-> {
+                // add check port is on
+                // check chain port
+                Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(front.getFrontIp(), 2000,
+                    front.getP2pPort(), front.getFrontPort());
+                // if reachable, means in use
+                if (!portReachable.getKey()) {
+                    // update front status as start success
+                    log.error("Docker start failed!");
+                    this.updateStatus(front.getFrontId(), failed);
+                } else {
+                    log.info("Docker start Front ip{}:{} is in use, start success!",
+                        front.getFrontIp(), portReachable.getValue());
+                    this.updateStatus(front.getFrontId(), success);
 
-                // update front version
-                if (StringUtils.isBlank(front.getFrontVersion())
-                        || StringUtils.isBlank(front.getSignVersion())) {
                     // update front version
-                    try {
-                        String frontVersion = frontInterface.getFrontVersionFromSpecificFront(front.getFrontIp(), front.getFrontPort());
-                        String signVersion = frontInterface.getSignVersionFromSpecificFront(front.getFrontIp(), front.getFrontPort());
+                    if (StringUtils.isBlank(front.getFrontVersion())
+                        || StringUtils.isBlank(front.getSignVersion())) {
+                        // update front version
+                        try {
+                            String frontVersion = frontInterface
+                                .getFrontVersionFromSpecificFront(front.getFrontIp(),
+                                    front.getFrontPort());
+                            String signVersion = frontInterface
+                                .getSignVersionFromSpecificFront(front.getFrontIp(),
+                                    front.getFrontPort());
 
-                        this.frontMapper.updateVersion(front.getChainId(), frontVersion, signVersion);
-                    } catch (Exception e) {
-                        log.error("Request front and sign version from front:[{}:{}] error.",front.getFrontIp(),front.getFrontPort(), e);
+                            this.frontMapper
+                                .updateVersion(front.getChainId(), frontVersion, signVersion);
+                        } catch (Exception e) {
+                            log.error("Request front and sign version from front:[{}:{}] error.",
+                                front.getFrontIp(), front.getFrontPort(), e);
+                        }
+                    }
+
+                    if (optionType == OptionType.DEPLOY_CHAIN) {
+                        this.frontGroupMapService
+                            .updateFrontMapStatus(front.getFrontId(), GroupStatus.NORMAL);
+                    } else if (optionType == OptionType.MODIFY_CHAIN) {
+                        // check front is in group
+                        Path nodePath = this.pathService
+                            .getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());
+                        Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
+                        Optional.of(groupIdSet).ifPresent(idSet -> idSet.forEach(groupId -> {
+                            List<String> list = frontInterface.getGroupPeers(groupId);
+                            if (CollectionUtils.containsAny(list, front.getNodeId())) {
+                                this.frontGroupMapService
+                                    .updateFrontMapStatus(front.getFrontId(), GroupStatus.NORMAL);
+                            }
+                        }));
                     }
                 }
-
-                if (optionType == OptionType.DEPLOY_CHAIN){
-                    this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.NORMAL);
-                }else if (optionType == OptionType.MODIFY_CHAIN){
-                    // check front is in group
-                    Path nodePath = this.pathService.getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());
-                    Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
-                    Optional.of(groupIdSet).ifPresent(idSet -> idSet.forEach ( groupId ->{
-                        List<String> list = frontInterface.getGroupPeers(groupId);
-                        if(CollectionUtils.containsAny(list,front.getNodeId())){
-                            this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(),GroupStatus.NORMAL);
-                        }
-                    }));
-                }
             }, Instant.now().plusMillis(constant.getDockerRestartPeriodTime()));
+            // schedule后，等待
+            Thread.sleep(constant.getDockerRestartPeriodTime());
+
             return true;
         } catch (Exception e) {
-            log.error("Start front:[{}:{}] failed.",front.getFrontIp(), front.getHostIndex(),e);
+            log.error("Start front:[{}:{}] failed.", front.getFrontIp(), front.getHostIndex(),e);
             ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), failed);
             throw new NodeMgrException(ConstantCode.START_NODE_ERROR);
         }
@@ -823,23 +850,11 @@ public class FrontService {
 
 
     /**
-     *
      * @param nodeId
      * @return
      */
     @Transactional
-    public void stopNode(String nodeId){
-        ((FrontService) AopContext.currentProxy()).stopNode(null,nodeId);
-    }
-
-    /**
-     *
-     * @param host
-     * @param nodeId
-     * @return
-     */
-    @Transactional
-    public void stopNode(TbHost host, String nodeId){
+    public void stopNode(String nodeId) {
         // get front
         TbFront front = this.getByNodeId(nodeId);
         if (front == null){
@@ -854,12 +869,12 @@ public class FrontService {
                 runningTotal ++;
             }
         }
-        if (runningTotal < 2){
+        if (runningTotal < 2) {
             log.error("Two running nodes at least of chain:[{}]", chainId);
             throw new NodeMgrException(ConstantCode.TWO_NODES_AT_LEAST);
         }
 
-        if (!FrontStatusEnum.isRunning(front.getStatus())){
+        if (!FrontStatusEnum.isRunning(front.getStatus())) {
             log.warn("Node:[{}:{}] is already stopped.",front.getFrontIp(),front.getHostIndex());
             return ;
         }
@@ -882,16 +897,18 @@ public class FrontService {
                 }
             }
         }
-        // Here, tow conditions:
-        //  1. node is not a sealer or an observer
-        //  2. node is is last node it's each group
-        TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
 
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
         this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
+        try {
+            Thread.sleep(constant.getDockerRestartPeriodTime());
+        } catch (InterruptedException e) {
+            log.warn("Docker stop and remove container sleep Interrupted");
+        }
 
-        ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(),FrontStatusEnum.STOPPED);
+        ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), FrontStatusEnum.STOPPED);
     }
+
     @Transactional
     public void deleteNode(TbHost host, String nodeId){
         // get front
@@ -964,26 +981,6 @@ public class FrontService {
         }
         return NumberUtil.percentage(frontFinishCount,frontList.size());
     }
-
-    public static byte getEncryptType(String frontImageTag){
-        return  (byte)(StringUtils.endsWith(frontImageTag,"-gm") ? EncryptType.SM2_TYPE : EncryptType.ECDSA_TYPE);
-    }
-
-    public TbFront getRandomFrontByGroupId(Integer groupId) {
-        FrontParam param = new FrontParam();
-        param.setGroupId(groupId);
-        List<TbFront> frontList = this.getFrontList(param);
-        if (!frontList.isEmpty()) {
-            Random random = new Random();
-            return frontList.get(random.nextInt(frontList.size()));
-        } else {
-            throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT);
-        }
-    }
-
-//    public void updateDeployStatus(int frontId, FrontDeployStatusEnum deployStatusEnum) {
-//        frontMapper.updateDeployStatus(frontId, deployStatusEnum.getId(), LocalDateTime.now());
-//    }
 
 
 }

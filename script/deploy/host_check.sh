@@ -51,7 +51,7 @@ function checkMem(){
   then
       echo 'free memory is ready'
   else
-      echo 'ERROR: free memory is too low!'
+      echo "ERROR: free memory is too low! Least required ${mem_require}Gb for ${node_count} nodes"
       exit ${MEM_ERROR}
   fi
 }
