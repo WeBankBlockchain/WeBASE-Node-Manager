@@ -48,10 +48,10 @@ constant:
   # verification code constant value, only when enableVerificationCode is false works
   verificationCodeValue: "8888"
   # auth token code expire time (s)
-  authTokenMaxAge: 1800
+  authTokenMaxAge: 3600
   ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find,,/group/generate,/group/start
   ###front http request
-  frontUrl: http://%1s:%2d/WeBASE-Front/%3s
+  frontUrl: http://%1s:%2d/WeBASE-Front/ %3s
   httpTimeOut: 5000
   contractDeployTimeOut: 30000
   isPrivateKeyEncrypt: true
@@ -95,17 +95,18 @@ constant:
   #### if deployType = 0, ignore below properties ####
   # 镜像名
   dockerRepository: "fiscoorg/fisco-webase"
-  # WeBASE-Sign 访问地址
+  # WeBASE-Sign 访问地址，供节点前置访问，不能填写localhost或127.0.0.1
   webaseSignAddress: "127.0.0.1:5004"
-  # 可视化操作的后台超时时间 (unit: ms)
+  # 可视化操作的后台超时时间 (unit: ms)，若机器较慢，可动态设置超时时间
   execDockerCheckTimeout: 55000
   execHostCheckTimeout: 55000
   execHostCheckPortTimeout: 55000
   execHostInitTimeout: 300000
   execHostConfigTimeout: 55000
   execBuildChainTimeout: 40000
-  dockerRestartPeriodTime: 50000
+  dockerRestartPeriodTime: 40000
   execShellTimeout: 600000
+  # runDockerSleepTime: 600000
   #### if deployType = 0, ignore upper properties ####
 
 sdk:

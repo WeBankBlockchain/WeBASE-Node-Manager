@@ -137,21 +137,20 @@ public class NodeAsyncService {
      */
     @Async("deployAsyncScheduler")
     public void asyncRestartRelatedFront(int chainId, Set<Integer> groupIdSet, OptionType optionType,
-                         FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess,FrontStatusEnum frontFailed ) {
+                         FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess, FrontStatusEnum frontFailed ) {
         ProgressTools.setStarting();
 
         // update chain to updating
-        this.chainService.updateStatus(chainId,ChainStatusEnum.RESTARTING);
+        this.chainService.updateStatus(chainId, ChainStatusEnum.RESTARTING);
 
-        this.restartFrontOfGroupSet(chainId, groupIdSet, optionType, frontBefore,frontSuccess, frontFailed);
+        this.restartFrontOfGroupSet(chainId, groupIdSet, optionType, frontBefore, frontSuccess, frontFailed);
 
         // update chain to running
         threadPoolTaskScheduler.schedule(() -> {
             this.chainService.updateStatus(chainId, ChainStatusEnum.RUNNING);
-
             // set pull cert to false
             CertTools.isPullFrontCertsDone = false;
-        }, Instant.now().plusMillis( constant.getDockerRestartPeriodTime()));
+        }, Instant.now().plusMillis(constant.getDockerRestartPeriodTime()));
     }
 
     /**
@@ -195,7 +194,7 @@ public class NodeAsyncService {
         Map<Integer, List<TbFront>> hostFrontListMap = frontList.stream().collect(Collectors.groupingBy(TbFront::getHostId));
 
         // restart front by host
-        return this.restartFrontByHost(chainId,optionType,hostFrontListMap, frontBefore,frontSuccess, frontFailed);
+        return this.restartFrontByHost(chainId, optionType, hostFrontListMap, frontBefore, frontSuccess, frontFailed);
     }
 
     /**
@@ -264,7 +263,6 @@ public class NodeAsyncService {
                             log.info("Start front:[{}:{}:{}] success.", front.getFrontIp(), front.getHostIndex(), front.getNodeId());
                             startSuccessCount.incrementAndGet();
                         }
-                        Thread.sleep(constant.getDockerRestartPeriodTime());
                     }
                 } catch (Exception e) {
                     log.error("Start front on host:[{}] error", tbHost.getIp(), e);
@@ -279,7 +277,7 @@ public class NodeAsyncService {
             startLatch.await(maxWaitTime.get(), TimeUnit.MILLISECONDS);
             startSuccess = startSuccessCount.get() == totalFrontCount.get();
         } catch (InterruptedException e) {
-            log.error("Start front of chain:[{}] error",chainId, e);
+            log.error("Start front of chain:[{}] error", chainId, e);
         }
 
         // check if all host init success
