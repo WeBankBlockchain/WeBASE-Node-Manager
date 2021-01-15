@@ -73,6 +73,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 @Log4j2
@@ -149,10 +150,15 @@ public class ChainService {
                 URI_CHAIN);
         url = url + "?" + chainUrlParam;
         log.info("getChainMonitorInfo request url:{}", url);
+        try {
+            Object rspObj = genericRestTemplate.getForObject(url, Object.class);
+            log.debug("end getChainMonitorInfo. rspObj:{}", JsonTools.toJSONString(rspObj));
+            return rspObj;
+        } catch (ResourceAccessException e) {
+            log.error("getChainMonitorInfo. ResourceAccessException:{}", e);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
 
-        Object rspObj = genericRestTemplate.getForObject(url, Object.class);
-        log.debug("end getChainMonitorInfo. rspObj:{}", JsonTools.toJSONString(rspObj));
-        return rspObj;
     }
 
 
