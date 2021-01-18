@@ -863,7 +863,7 @@ public class FrontService {
         int runningTotal = 0;
         List<TbFront> frontList = this.selectFrontListByChainId(chainId);
         for (TbFront tbFront : frontList) {
-            if(FrontStatusEnum.isRunning(tbFront.getStatus())){
+            if (FrontStatusEnum.isRunning(tbFront.getStatus())) {
                 runningTotal ++;
             }
         }
@@ -904,6 +904,9 @@ public class FrontService {
             log.warn("Docker stop and remove container sleep Interrupted");
         }
 
+        // update map
+        this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
+        // update front
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), FrontStatusEnum.STOPPED);
     }
 
@@ -1008,6 +1011,7 @@ public class FrontService {
                 // catch old version front and sign that not have '/version' api
                 log.warn("get version of Front failed, update front as stopped");
                 this.updateStatus(frontId, FrontStatusEnum.STOPPED);
+                return;
             }
             // not update front_group_map
             this.updateStatus(frontId, FrontStatusEnum.RUNNING);
