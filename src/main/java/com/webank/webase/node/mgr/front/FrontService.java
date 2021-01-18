@@ -774,16 +774,16 @@ public class FrontService {
             threadPoolTaskScheduler.schedule(()-> {
                 // add check port is on
                 // check chain port
-                Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(front.getFrontIp(), 2000,
+                Pair<Boolean, Integer> notInUse = ansibleService.checkPorts(front.getFrontIp(),
                     front.getP2pPort(), front.getFrontPort());
-                // if reachable, means in use
-                if (!portReachable.getKey()) {
+                // not in use is true, then not start success
+                if (notInUse.getKey()) {
                     // update front status as start success
                     log.error("Docker start failed!");
                     this.updateStatus(front.getFrontId(), failed);
                 } else {
                     log.info("Docker start Front ip{}:{} is in use, start success!",
-                        front.getFrontIp(), portReachable.getValue());
+                        front.getFrontIp(), notInUse.getValue());
                     this.updateStatus(front.getFrontId(), success);
 
                     // update front version
