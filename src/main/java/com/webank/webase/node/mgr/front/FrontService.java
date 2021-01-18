@@ -988,7 +988,7 @@ public class FrontService {
      */
     @Transactional
     public void refreshFrontStatus() {
-        //get all front
+        // get all front
         List<TbFront> frontList = frontMapper.getAllList();
         if (frontList == null || frontList.size() == 0) {
             log.info("refreshFrontStatus jump over, front not found.");
