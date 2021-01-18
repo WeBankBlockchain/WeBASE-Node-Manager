@@ -113,6 +113,7 @@ public class ConstantProperties {
     private String dockerPullCdnShell = "./script/deploy/host_docker_cdn.sh";
     private String hostDockerTcpShell = "./script/deploy/host_docker_tcp.sh";
     private String hostInitShell = "./script/deploy/host_init_shell.sh";
+    private String hostCheckPortShell = "./script/deploy/host_check_port.sh";
     // to support | & > $
     private String ansibleImageCheckShell = "./script/deploy/check_image_exist.sh";
     private String ansibleContainerCheckShell = "./script/deploy/check_container_exist.sh";

@@ -24,7 +24,9 @@ import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -285,6 +287,61 @@ public class AnsibleService {
             log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
             this.exec(ip, rmCommand);
         }
+    }
+
+    /**
+     * get exec result
+     * @param ip
+     * @param ports
+     * @return
+     */
+    public ExecuteResult checkPortArrayInUse(String ip, int ... ports) {
+        log.info("checkPortArrayInUse ip:{},ports:{}", ip, ports);
+        StringBuilder portArray = new StringBuilder();
+        for (int port : ports) {
+            if (portArray.length() == 0) {
+                portArray.append(port);
+                continue;
+            }
+            portArray.append(",").append(port);
+        }
+        String command = String.format("ansible %s -m script -a \"%s -p %s\"", ip, constant.getHostCheckPortShell(), portArray);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+        return result;
+    }
+
+    /**
+     * check port, if one is in use, break and return false
+     * @param ip
+     * @param portArray
+     * @return Pair of <true, port> true: not in use, false: in use
+     */
+    public Pair<Boolean, Integer> checkPorts(String ip, int ... portArray) {
+        if (ArrayUtils.isEmpty(portArray)){
+            return Pair.of(true,0);
+        }
+
+        for (int port : portArray) {
+            boolean notInUse = checkPortInUse(ip, port);
+            // if false, in use
+            if (!notInUse){
+                return Pair.of(false, port);
+            }
+        }
+        return Pair.of(true,0);
+    }
+
+    /**
+     * check port by ansible script
+     * @param ip
+     * @param port
+     * @return Pair of <true, port> true: not in use, false: in use
+     */
+    private boolean checkPortInUse(String ip, int port) {
+        log.info("checkPortInUse ip:{},port:{}", ip, port);
+        String command = String.format("ansible %s -m script -a \"%s -p %s\"", ip, constant.getHostCheckPortShell(), port);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+        return result.success();
     }
 
 }

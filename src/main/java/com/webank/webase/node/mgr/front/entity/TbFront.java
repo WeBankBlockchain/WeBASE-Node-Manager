@@ -71,10 +71,6 @@ public class TbFront {
 
     private Integer chainId;
     private String chainName;
-    /**
-     * v1.4.3 deploy status, 0-added, 1-check success, 2- check fail, 3-running
-     */
-    private Integer deployStatus;
 
     public static TbFront init(
             String nodeId, String ip, int port,
