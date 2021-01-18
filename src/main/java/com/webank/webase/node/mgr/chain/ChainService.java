@@ -485,6 +485,7 @@ public class ChainService {
 
     /**
      *  run task.
+     *  if chain running, return true
      * @return
      */
     public boolean runTask(){
