@@ -18,7 +18,6 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
@@ -26,12 +25,12 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
@@ -42,9 +41,9 @@ import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AgencyService;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
+import com.webank.webase.node.mgr.deploy.service.DockerCommandService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
-import com.webank.webase.node.mgr.deploy.service.DockerCommandService;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
@@ -75,7 +74,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
@@ -140,6 +138,8 @@ public class FrontService {
     private AnsibleService ansibleService;
     @Autowired
     private HostService hostService;
+    @Autowired
+    private ChainService chainService;
 
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
@@ -982,5 +982,39 @@ public class FrontService {
         return NumberUtil.percentage(frontFinishCount,frontList.size());
     }
 
-
+    /**
+     * refresh front's status only for front status not front_group_map
+     * check if chain already running
+     */
+    @Transactional
+    public void refreshFrontStatus() {
+        //get all front
+        List<TbFront> frontList = frontMapper.getAllList();
+        if (frontList == null || frontList.size() == 0) {
+            log.info("refreshFrontStatus jump over, front not found.");
+            return;
+        }
+        if (!chainService.runTask()) {
+            log.info("refreshFrontStatus jump over, chain not running yet.");
+            return;
+        }
+        for (TbFront tbFront : frontList) {
+            String frontIp = tbFront.getFrontIp();
+            Integer frontPort = tbFront.getFrontPort();
+            // get front server version and sign server version
+            try {
+                frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
+                log.info("get version of Front success, update front as started");
+                tbFront.setStatus(FrontStatusEnum.RUNNING.getId());
+                // not update front_group_map
+            } catch (Exception e) {
+                // catch old version front and sign that not have '/version' api
+                log.warn("get version of Front failed, update front as stopped");
+                tbFront.setStatus(FrontStatusEnum.STOPPED.getId());
+            } finally {
+                // update front status
+                frontMapper.update(tbFront);
+            }
+        }
+    }
 }
