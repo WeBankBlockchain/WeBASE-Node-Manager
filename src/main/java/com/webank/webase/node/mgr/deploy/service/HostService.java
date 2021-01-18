@@ -684,11 +684,12 @@ public class HostService {
             Future<?> task = threadPoolTaskScheduler.submit(() -> {
                 try {
                     // check chain port
-                    Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(nodeInfo.getIp(), 2000,
+                    ExecuteResult checkPortResult = ansibleService.checkPortArrayInUse(nodeInfo.getIp(),
                         nodeInfo.getChannelPort(), nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
-                    if (!portReachable.getKey()) {
-                        log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), nodeInfo.getIp() );
-                        this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, "Port is in use!");
+                    // not in use is true
+                    if (!checkPortResult.success()) {
+                        log.error("Port check on host ip:[{}] not passe0d:{}!", nodeInfo.getIp(), checkPortResult.getExecuteOut());
+                        this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, checkPortResult.getExecuteOut());
                         return;
                     }
                     this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_SUCCESS, "");
@@ -777,12 +778,12 @@ public class HostService {
             log.info("Check host port:[{}]", nodeInfo.getIp());
             try {
                 // check chain port
-                Pair<Boolean, Integer> portReachable = NetUtils.checkPorts(nodeInfo.getIp(), 2000,
+                ExecuteResult checkPortResult = ansibleService.checkPortArrayInUse(nodeInfo.getIp(),
                     nodeInfo.getChannelPort(), nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
-                // if reachable, means in use
-                if (portReachable.getKey()) {
-                    log.error("Port:[{}] is in use on host :[{}] failed", portReachable.getValue(), nodeInfo.getIp() );
-                    this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, portReachable.getValue() + " Port is in use!");
+                // not in use is true
+                if (!checkPortResult.success()) {
+                    log.error("Port check on host ip:[{}] not passe0d:{}!", nodeInfo.getIp(), checkPortResult.getExecuteOut());
+                    this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, checkPortResult.getExecuteOut());
                     break;
                 }
                 this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_SUCCESS, "");
