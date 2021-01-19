@@ -316,6 +316,7 @@ public class GroupService {
 			// query group list from chain
 			List<String> groupIdList;
 			try {
+			    // if observer to removed, this observer would still return groupId
 				groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
 			} catch (Exception ex) {
 				log.error("saveDataOfGroup fail getGroupListFromSpecificFront.", ex);
@@ -372,25 +373,36 @@ public class GroupService {
 			return;
 		}
 		//remove node that's not in groupPeerList and not in sealer/observer list
+        // 1.4.3 if observer is removed, observer's nodeId still in groupPeerList
 		localNodes.stream()
-                .filter(node -> ! DataStatus.starting(node.getNodeActive()))
-				.filter(node ->
-						!groupPeerList.contains(node.getNodeId())
-								&& !checkSealerAndObserverListContains(groupId, node.getNodeId()))
-				.forEach(n ->
-						nodeService.deleteByNodeAndGroupId(n.getNodeId(), groupId));
+                .filter(n -> ! DataStatus.starting(n.getNodeActive()))
+				.forEach(node -> {
+				    boolean isRemoved = !checkSealerAndObserverListContains(groupId, node.getNodeId());
+                    if(isRemoved || !groupPeerList.contains(node.getNodeId()) ) {
+                        nodeService.deleteByNodeAndGroupId(node.getNodeId(), groupId);
+                    }
+				});
 	}
 
+    /**
+     * simular as frontInterface's getGroupPeers
+     * but if observer is removed, observer's nodeId still in groupPeerList
+     * @param groupId
+     * @param nodeId
+     * @return
+     */
 	private boolean checkSealerAndObserverListContains(int groupId, String nodeId) {
-		log.debug("checkSealerAndObserverListNotContains nodeId:{},groupId:{}",
-				nodeId, groupId);
 		//get sealer and observer on chain
 		List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(groupId);
 		for (PeerInfo peerInfo : sealerAndObserverList) {
 			if (nodeId.equals(peerInfo.getNodeId())) {
-				return true;
+                log.debug("checkSealerAndObserverListNotContains true nodeId:{},groupId:{}",
+                    nodeId, groupId);
+                return true;
 			}
 		}
+        log.debug("checkSealerAndObserverListNotContains false nodeId:{},groupId:{} ",
+            nodeId, groupId);
 		return false;
 	}
 

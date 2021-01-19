@@ -64,28 +64,28 @@ public class FrontGroupMapService {
      */
     @Transactional
     public TbFrontGroupMap newFrontGroupWithStatus(Integer frontId, Integer groupId, Integer status) {
-        log.info("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
+        log.debug("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
         MapListParam param = new MapListParam(frontId, groupId);
         FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
         log.debug("start newFrontGroup frontGroup query:{}", frontGroup);
 
         int consensusType = getMapSealerOrObserver(frontId, groupId);
-        log.info("newFrontGroup consensusType:{}", consensusType);
+        log.debug("newFrontGroup consensusType:{}", consensusType);
 
         // add db
         TbFrontGroupMap tbFrontGroupMap = null;
         int res;
         if (frontGroup == null) {
             tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status, consensusType);
-            log.debug("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
+            log.info("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
             res = frontGroupMapMapper.insertSelective(tbFrontGroupMap);
         } else {
             tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, status, consensusType);
             tbFrontGroupMap.setMapId(frontGroup.getMapId());
-            log.debug("newFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
+            log.info("updateFrontGroup tbFrontGroupMap:{}", tbFrontGroupMap);
             res = frontGroupMapMapper.update(tbFrontGroupMap);
         }
-        log.debug("end newFrontGroup res:{}", res);
+        log.info("end newFrontGroup res:{}", res);
 
         return tbFrontGroupMap;
     }
@@ -215,7 +215,7 @@ public class FrontGroupMapService {
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
         }
         String nodeId = front.getNodeId();
-        log.info("getMapSealerOrObserver groupId:{}, nodeId:{}", groupId, nodeId);
+        log.debug("getMapSealerOrObserver groupId:{}, nodeId:{}", groupId, nodeId);
 
         int type = nodeService.checkNodeType(groupId, nodeId, front.getFrontIp(), front.getFrontPort());
         if (type == 0) {
