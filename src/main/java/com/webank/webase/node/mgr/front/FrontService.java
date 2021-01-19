@@ -881,6 +881,7 @@ public class FrontService {
         List<TbNode> nodeList = this.nodeMapper.selectByNodeId(nodeId);
 
         // node is removed and doesn't belong to any group.
+        // if observer to removed, this observer would still return groupId(as a observer)
         boolean nodeRemovable = CollectionUtils.isEmpty(nodeList);
 
         if (!nodeRemovable) {
