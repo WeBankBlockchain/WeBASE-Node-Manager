@@ -140,7 +140,7 @@ public class PrecompiledService {
 
         // update front group map if remove node from sealer/observer
         TbFront front = this.frontMapper.getByNodeId(consensusHandle.getNodeId());
-        if (StringUtils.equalsIgnoreCase("remove",consensusHandle.getNodeType()) && front != null){
+        if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null){
             log.info("remove node/front:[{}] from group:[{}], change front group map status to [{}]",
                     front.getFrontId(), groupId, GroupStatus.MAINTAINING);
             frontGroupMapService.updateFrontMapStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING);

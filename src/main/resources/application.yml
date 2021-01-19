@@ -111,7 +111,8 @@ constant:
 
 sdk:
   # 加密类型：0: 非国密;  1: 国密
-  # 可视化部署时，此配置将决定部署国密或非国密链
+  ## 可视化部署时，此配置将决定部署国密或非国密链
+  ## 国密与非国密链的私钥、合约数据不兼容
   encryptType: 0
 
 # executor config for async pulling data from chain

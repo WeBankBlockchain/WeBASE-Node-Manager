@@ -304,7 +304,7 @@ public class NodeService {
         }
         List<PeerOfSyncStatus> peerList = syncStatus.getPeers();
         BigInteger latestNumber = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
-            .map(s -> s.getBlockNumber()).findFirst().orElse(BigInteger.ZERO);//blockNumber
+            .map(PeerOfSyncStatus::getBlockNumber).findFirst().orElse(BigInteger.ZERO);//blockNumber
         return latestNumber;
     }
 
