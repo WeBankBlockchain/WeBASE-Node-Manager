@@ -807,8 +807,7 @@ public class FrontService {
                     }
 
                     if (optionType == OptionType.DEPLOY_CHAIN) {
-                        this.frontGroupMapService
-                            .updateFrontMapStatus(front.getFrontId(), GroupStatus.NORMAL);
+                        this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.NORMAL);
                     } else if (optionType == OptionType.MODIFY_CHAIN) {
                         // check front is in group
                         Path nodePath = this.pathService
@@ -817,8 +816,7 @@ public class FrontService {
                         Optional.of(groupIdSet).ifPresent(idSet -> idSet.forEach(groupId -> {
                             List<String> list = frontInterface.getGroupPeers(groupId);
                             if (CollectionUtils.containsAny(list, front.getNodeId())) {
-                                this.frontGroupMapService
-                                    .updateFrontMapStatus(front.getFrontId(), GroupStatus.NORMAL);
+                                this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.NORMAL);
                             }
                         }));
                     }
@@ -865,7 +863,7 @@ public class FrontService {
         int runningTotal = 0;
         List<TbFront> frontList = this.selectFrontListByChainId(chainId);
         for (TbFront tbFront : frontList) {
-            if(FrontStatusEnum.isRunning(tbFront.getStatus())){
+            if (FrontStatusEnum.isRunning(tbFront.getStatus())) {
                 runningTotal ++;
             }
         }
@@ -906,6 +904,9 @@ public class FrontService {
             log.warn("Docker stop and remove container sleep Interrupted");
         }
 
+        // update map
+        this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
+        // update front
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), FrontStatusEnum.STOPPED);
     }
 
@@ -1001,20 +1002,19 @@ public class FrontService {
         for (TbFront tbFront : frontList) {
             String frontIp = tbFront.getFrontIp();
             Integer frontPort = tbFront.getFrontPort();
+            int frontId = tbFront.getFrontId();
             // get front server version and sign server version
             try {
                 frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
                 log.info("get version of Front success, update front as started");
-                tbFront.setStatus(FrontStatusEnum.RUNNING.getId());
-                // not update front_group_map
             } catch (Exception e) {
                 // catch old version front and sign that not have '/version' api
                 log.warn("get version of Front failed, update front as stopped");
-                tbFront.setStatus(FrontStatusEnum.STOPPED.getId());
-            } finally {
-                // update front status
-                frontMapper.update(tbFront);
+                this.updateStatus(frontId, FrontStatusEnum.STOPPED);
+                return;
             }
+            // not update front_group_map
+            this.updateStatus(frontId, FrontStatusEnum.RUNNING);
         }
     }
 }
