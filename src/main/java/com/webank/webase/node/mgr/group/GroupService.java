@@ -238,7 +238,7 @@ public class GroupService {
      */
     public GroupGeneral queryGroupGeneral(int groupId) throws NodeMgrException {
         log.debug("start queryGroupGeneral groupId:{}", groupId);
-        GroupGeneral generalInfo = groupMapper.getGeneral(groupId);
+        GroupGeneral generalInfo = this.getGeneralAndUpdateNodeCount(groupId);
         if (generalInfo != null) {
             TotalTransCountInfo transCountInfo = frontInterface.getTotalTransactionCount(groupId);
             if (transCountInfo != null) {
@@ -247,6 +247,18 @@ public class GroupService {
             }
         }
         return generalInfo;
+    }
+
+    /**
+     * update group count when refresh
+     * @param groupId
+     * @return
+     */
+    private GroupGeneral getGeneralAndUpdateNodeCount(int groupId) {
+        List<String> groupPeers = frontInterface.getGroupPeers(groupId);
+        groupMapper.updateNodeCount(groupId, groupPeers.size());
+        log.debug("getGeneralAndUpdateNodeCount gId:{} count:{}", groupId, groupPeers.size());
+        return groupMapper.getGeneral(groupId);
     }
 
     /**
@@ -331,6 +343,7 @@ public class GroupService {
 				// peer in group
 				List<String> groupPeerList;
 				try {
+				    // if observer set removed, it still return itself as observer
 					groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
 				} catch (Exception e) {
 					// case: if front1 group1 stopped, getGroupPeers error, update front1_group1_map invalid fail
@@ -343,7 +356,7 @@ public class GroupService {
 				TbGroup checkGroupExist = getGroupById(gId);
 				if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
 					saveGroup(gId, groupPeerList.size(), "synchronous",
-							GroupType.SYNC, GroupStatus.NORMAL, front.getChainId(),front.getChainName());
+							GroupType.SYNC, GroupStatus.NORMAL, front.getChainId(), front.getChainName());
 				}
 				// refresh front group map by group list on chain
 				// different from checkGroupMapByLocalGroupList which update by local groupList
