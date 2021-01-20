@@ -286,13 +286,13 @@ public class GroupService {
 
         // clear cache
         frontGroupMapCache.clearMapList();
-        //remove invalid peers
-        removeInvalidPeer(frontList);
 
         // save group and nodes(peers, sealer, observer) and front_group_map from chain
 		// update front_group_map by group list on chain
 		saveDataOfGroup(frontList, allGroupSet);
 
+        //remove invalid peers
+        removeInvalidPeer(frontList);
 
         // check group status(normal or maintaining), update by local group list
 		// if groupid not in allGroupSet, remove it
