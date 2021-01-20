@@ -87,6 +87,9 @@
     <if test="nodeId != null and nodeId !=''">
       and node_id = #{nodeId}
     </if>
+    <if test="frontStatus != null and frontStatus !=''">
+      and status = #{frontStatus}
+    </if>
   </select>
 
 
@@ -106,6 +109,9 @@
     </if>
     <if test="frontPort != null and frontPort !=''">
       and front_port = #{frontPort}
+    </if>
+    <if test="frontStatus != null and frontStatus !=''">
+      and status = #{frontStatus}
     </if>
   </select>
   
