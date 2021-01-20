@@ -14,6 +14,8 @@
 package com.webank.webase.node.mgr.scheduler;
 
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,6 +33,9 @@ import lombok.extern.log4j.Log4j2;
 public class ResetGroupListTask {
 
     @Autowired private GroupService groupService;
+    // interval of check node status
+    private static final Long CHECK_GROUP_WAIT_MIN_MILLIS = 5000L;
+    private static Long LAST_TIME_CHECK_GROUP = 0L;
 
     @Scheduled(fixedDelayString = "${constant.resetGroupListCycle}")
     public void taskStart() {
@@ -39,6 +44,7 @@ public class ResetGroupListTask {
 
     /**
      * async reset groupList.
+     * v1.4.3: add internal
      */
     @Async(value = "mgrAsyncExecutor")
     public void asyncResetGroupList() {
@@ -49,6 +55,11 @@ public class ResetGroupListTask {
      * reset groupList.
      */
     public void resetGroupList() {
-        groupService.resetGroupList();
+        long now = System.currentTimeMillis();
+        if (now - LAST_TIME_CHECK_GROUP > CHECK_GROUP_WAIT_MIN_MILLIS) {
+            log.debug("resetGroupList start now:{}.", now);
+            groupService.resetGroupList();
+            LAST_TIME_CHECK_GROUP = now;
+        }
     }
 }

@@ -329,8 +329,8 @@ public class FrontService {
         List<String> sealerList = frontInterface.getSealerListFromSpecificFront(frontIp, frontPort, groupId);
         List<String> observerList = frontInterface.getObserverListFromSpecificFront(frontIp, frontPort, groupId);
         List<PeerInfo> sealerAndObserverList = new ArrayList<>();
-        sealerList.stream().forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
-        observerList.stream().forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
+        sealerList.forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
+        observerList.forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
         log.debug("refreshSealerAndObserverInNodeList sealerList:{},observerList:{}",
                 sealerList, observerList);
         sealerAndObserverList.forEach(peerInfo -> {
