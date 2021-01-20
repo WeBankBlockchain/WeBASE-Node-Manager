@@ -453,10 +453,6 @@ public class MonitorService {
     private UserMonitorResult monitorUser(int groupId, String userAddress) {
         String userName = userService.queryUserNameByAddress(groupId, userAddress);
 
-//        if (StringUtils.isBlank(userName)) {
-//            userName = getSystemUserName(userAddress);
-//        }
-
         int userType = MonitorUserType.NORMAL.getValue();
         if (StringUtils.isBlank(userName)) {
             userName = userAddress;
