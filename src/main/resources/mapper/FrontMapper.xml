@@ -110,7 +110,7 @@
   </select>
   
   <select id="getAllList" resultMap="frontMap">
-    select * from tb_front
+    select * from tb_front order by front_id asc
   </select>
 
   <select id="getById" resultMap="frontMap" parameterType="java.lang.Integer">
