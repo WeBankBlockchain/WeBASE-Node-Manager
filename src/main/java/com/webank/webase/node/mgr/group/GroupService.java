@@ -265,7 +265,7 @@ public class GroupService {
      * reset groupList.
      */
     @Transactional
-    public void resetGroupList() {
+    public synchronized void resetGroupList() {
         if (!chainService.runTask()) {
             log.warn("resetGroupList jump over for runTask");
             return;
@@ -286,19 +286,18 @@ public class GroupService {
 
         // clear cache
         frontGroupMapCache.clearMapList();
+        //remove invalid peers
+        removeInvalidPeer(frontList);
 
         // save group and nodes(peers, sealer, observer) and front_group_map from chain
 		// update front_group_map by group list on chain
 		saveDataOfGroup(frontList, allGroupSet);
 
+
         // check group status(normal or maintaining), update by local group list
 		// if groupid not in allGroupSet, remove it
         checkAndUpdateGroupStatus(allGroupSet);
 
-//        // remove group and front_group_map that front_group_map's status is all invalid
-//        // removeInvalidGroupByMap();
-//        // clear cache
-//        frontGroupMapCache.clearMapList();
 
 		// check group local whether has dirty data by contrast of local blockHash with chain blockHash
 		// if not same, update group as DIRTY
@@ -365,13 +364,51 @@ public class GroupService {
 
 				//save new peers(tb_node)
 				savePeerList(frontIp, frontPort, gId, groupPeerList);
-				//remove invalid peers
-				removeInvalidPeer(gId, groupPeerList);
+
 				//refresh: add sealer and observer no matter validity
 				frontService.refreshSealerAndObserverInNodeList(frontIp, frontPort, gId);
 			}
 		}
 	}
+
+    /**
+     * separated from saveDataOfGroup, separated save and delete, delete first
+     * @param frontList
+     */
+	private void removeInvalidPeer(List<TbFront> frontList) {
+        log.info("removeInvalidPeer frontList:{}", frontList);
+        for (TbFront front : frontList) {
+            String frontIp = front.getFrontIp();
+            int frontPort = front.getFrontPort();
+            // query group list from chain
+            List<String> groupIdList;
+            try {
+                // if observer to removed, this observer would still return groupId
+                groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+            } catch (Exception ex) {
+                log.error("removeInvalidPeer fail getGroupListFromSpecificFront.", ex);
+                continue;
+            }
+            // update by group list on chain
+            log.info("removeInvalidPeer groupIdList:{}", groupIdList);
+            for (String groupId : groupIdList) {
+                Integer gId = Integer.valueOf(groupId);
+
+                // peer in group
+                List<String> groupPeerList;
+                try {
+                    // if observer set removed, it still return itself as observer
+                    groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+                } catch (Exception e) {
+                    // case: if front1 group1 stopped, getGroupPeers error, update front1_group1_map invalid fail
+                    log.warn("saveDataOfGroup getGroupPeersFromSpecificFront fail, frontId:{}, groupId:{}",
+                        front.getFrontId(), groupId);
+                    continue;
+                }
+                removeInvalidPeer(gId, groupPeerList);
+            }
+        }
+    }
 
 	/**
 	 * remove invalid peer.

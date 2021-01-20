@@ -136,4 +136,15 @@
   <delete id="deleteByNodeId">
     delete from tb_node where node_id = #{nodeId}
   </delete>
+
+
+  <select id="getHighestBlockHeight" resultType="java.lang.Integer">
+    SELECT COALESCE(
+      (select IFNULL(block_number,0) block_number from tb_node
+      where group_id = #{groupId}
+      order by block_number desc
+      limit 1)
+    ,0)
+  </select>
+
 </mapper>
