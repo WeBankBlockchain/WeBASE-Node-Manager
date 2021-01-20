@@ -119,7 +119,7 @@
 
 
   <select id="queryUserNameByAddress" resultType="java.lang.String">
-		select user_name from tb_user where group_id = #{groupId} and address = #{address}
+		select user_name from tb_user where group_id = #{groupId} and address = #{address} limit 1
 	</select>
   <select id="querySystemUser" parameterType="java.lang.Integer" resultMap="userMap">
 		select * from tb_user where user_status=1 and user_type = 2 limit 1
