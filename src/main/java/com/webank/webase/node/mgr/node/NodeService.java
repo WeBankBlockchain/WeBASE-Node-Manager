@@ -496,6 +496,7 @@ public class NodeService {
      * check sealer list contain
      * return: true: is sealer
      */
+    @Deprecated
     public boolean checkSealerListContains(int groupId, String nodeId, String ip, int port) {
         log.debug("start checkSealerListContains groupId:{},nodeId:{}", groupId, nodeId);
         List<String> sealerList = frontInterface.getSealerListFromSpecificFront(ip, port, groupId);
@@ -508,6 +509,7 @@ public class NodeService {
      * check observer list contain
      * return: true: is sealer
      */
+    @Deprecated
     public boolean checkObserverListContains(int groupId, String nodeId, String ip, int port) {
         log.debug("start checkObserverListContains groupId:{},nodeId:{}", groupId, nodeId);
         List<String> sealerList = frontInterface.getObserverListFromSpecificFront(ip, port, groupId);
@@ -516,13 +518,31 @@ public class NodeService {
         return isObserver;
     }
 
-    public int checkNodeType(int groupId, String nodeId, String ip, int port) {
-        if (checkObserverListContains(groupId, nodeId, ip, port)) {
-            return ConsensusType.OBSERVER.getValue();
-        } else if (checkSealerListContains(groupId, nodeId, ip, port)) {
+    /**
+     * get local highest block height, if node equal, return 1, else return 2
+     * @param groupId
+     * @param nodeId
+     * @return
+     */
+    public int checkNodeType(int groupId, String nodeId) {
+        int localHighestHeight = nodeMapper.getHighestBlockHeight(groupId);
+        TbNode node = nodeMapper.getByNodeIdAndGroupId(nodeId, groupId);
+        int nodeBlockHeight = node != null ? node.getBlockNumber().intValue() : 0;
+        log.info("local localHighestHeight:{},groupId:{} nodeId:{}, nodeBlockHeight:{}",
+            localHighestHeight, groupId, nodeId, nodeBlockHeight);
+        if (localHighestHeight == nodeBlockHeight) {
             return ConsensusType.SEALER.getValue();
+        } else if (localHighestHeight > nodeBlockHeight) {
+            return ConsensusType.OBSERVER.getValue();
+        } else {
+            return 0;
         }
-        return 0;
+//        if (checkObserverListContains(groupId, nodeId, ip, port)) {
+//            return ConsensusType.OBSERVER.getValue();
+//        } else if (checkSealerListContains(groupId, nodeId, ip, port)) {
+//            return ConsensusType.SEALER.getValue();
+//        }
+//        return 0;
     }
 
 }
