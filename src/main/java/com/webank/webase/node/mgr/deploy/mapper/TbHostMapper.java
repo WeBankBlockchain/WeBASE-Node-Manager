@@ -26,20 +26,6 @@ public interface TbHostMapper {
     })
     List<TbHost> selectAll();
 
-//    @Delete({
-//            "delete from tb_host",
-//            "where agency_id = #{agencyId,jdbcType=INTEGER}"
-//    })
-//    int deleteByAgencyId(@Param("agencyId") Integer agencyId);
-
-//    @Select({
-//            "select",
-//            TbHostSqlProvider.ALL_COLUMN_FIELDS,
-//            "from tb_host",
-//            "where agency_id = #{agencyId,jdbcType=INTEGER}"
-//    })
-//    List<TbHost> selectByAgencyId(@Param("agencyId") int agencyId);
-
     @Select({
             "select",
             TbHostSqlProvider.ALL_COLUMN_FIELDS,
@@ -50,7 +36,7 @@ public interface TbHostMapper {
 
 
     @Update({
-            " update tb_host set status=#{newStatus},remark=#{remark},modify_time=#{modifyTime} where id = #{hostId} and status != #{newStatus}"
+            " update tb_host set status=#{newStatus},remark=#{remark},modify_time=#{modifyTime} where id = #{hostId}"
     })
     int updateHostStatus(@Param("hostId") int hostId, @Param("modifyTime") Date modifyTime, @Param("newStatus") byte newStatus, @Param("remark") String remark);
 

@@ -781,7 +781,7 @@ public class GroupService {
         List<String> nodeIdList = req.getNodeList();
         // check for visual_deploy at least 2 sealer
         if (constantProperties.getDeployType() == DeployType.VISUAL_DEPLOY.getValue()
-        && nodeIdList.size() < ConstantProperties.LEAST_SEALER_TWO) {
+            && nodeIdList.size() < ConstantProperties.LEAST_SEALER_TWO) {
             log.error("fail generateGroup. Group must contain 2 sealers at least.(visual_deploy)");
             throw new NodeMgrException(ConstantCode.TWO_SEALER_IN_GROUP_AT_LEAST);
         }
@@ -917,7 +917,7 @@ public class GroupService {
      * @param req
      */
     public List<RspOperateResult> batchStartGroup(ReqBatchStartGroup req) {
-        log.debug("start batchStartGroup:{}", req);
+        log.info("start batchStartGroup:{}", req);
         Integer groupId = req.getGenerateGroupId();
         // check id
         checkGroupId(groupId);
@@ -934,10 +934,8 @@ public class GroupService {
 			RspOperateResult operateResult = new RspOperateResult(tbFront.getFrontId(),
 					OperateStatus.SUCCESS.getValue());
             // request front to start
-            try{
+            try {
                 this.operateGroup(nodeId, groupId, OPERATE_START_GROUP);
-//            	frontInterface.operateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(), groupId,
-//						OPERATE_START_GROUP);
 				resOperateList.add(operateResult);
 			} catch (NodeMgrException | ResourceAccessException e) {
 				log.error("fail startGroup in frontId:{}, exception:{}",
@@ -948,7 +946,7 @@ public class GroupService {
         }
         // refresh group status
         resetGroupList();
-        log.debug("end batchStartGroup.");
+        log.info("end batchStartGroup.");
         return resOperateList;
     }
 
