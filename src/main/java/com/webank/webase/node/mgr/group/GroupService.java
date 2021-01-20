@@ -265,7 +265,7 @@ public class GroupService {
      * reset groupList.
      */
     @Transactional
-    public synchronized void resetGroupList() {
+    public void resetGroupList() {
         if (!chainService.runTask()) {
             log.warn("resetGroupList jump over for runTask");
             return;
@@ -431,12 +431,15 @@ public class GroupService {
         //save new nodes
         for (String nodeId : groupPeerList) {
             // if local hash node, count = 1
-            long count = localNodeList.stream().filter(
-                    ln -> nodeId.equals(ln.getNodeId()) && groupId == ln.getGroupId()).count();
+            long count = localNodeList.stream()
+                .filter(
+                    ln -> nodeId.equals(ln.getNodeId()) && groupId == ln.getGroupId())
+                .count();
             // local node not contains this one:
             if (count != 1) {
-                PeerInfo newPeer = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
-                        .findFirst().orElseGet(() -> new PeerInfo(nodeId));
+                PeerInfo newPeer = peerList.stream()
+                    .filter(peer -> nodeId.equals(peer.getNodeId()))
+                    .findFirst().orElseGet(() -> new PeerInfo(nodeId));
                 nodeService.addNodeInfo(groupId, newPeer);
             }
         }
