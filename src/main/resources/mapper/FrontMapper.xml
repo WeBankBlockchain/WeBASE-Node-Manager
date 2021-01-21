@@ -87,6 +87,9 @@
     <if test="nodeId != null and nodeId !=''">
       and node_id = #{nodeId}
     </if>
+    <if test="frontStatus != null and frontStatus !=''">
+      and status = #{frontStatus}
+    </if>
   </select>
 
 
@@ -107,10 +110,13 @@
     <if test="frontPort != null and frontPort !=''">
       and front_port = #{frontPort}
     </if>
+    <if test="frontStatus != null and frontStatus !=''">
+      and status = #{frontStatus}
+    </if>
   </select>
   
   <select id="getAllList" resultMap="frontMap">
-    select * from tb_front
+    select * from tb_front order by front_id asc
   </select>
 
   <select id="getById" resultMap="frontMap" parameterType="java.lang.Integer">

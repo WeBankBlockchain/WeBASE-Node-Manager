@@ -176,6 +176,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
   description varchar(250) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (user_id),
   UNIQUE KEY unique_name (group_id,user_name,account),
+  UNIQUE KEY unique_address (group_id,address),
   KEY index_address (address),
   UNIQUE KEY unique_uuid (sign_user_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=700001 DEFAULT CHARSET=utf8 COMMENT='用户信息表';
