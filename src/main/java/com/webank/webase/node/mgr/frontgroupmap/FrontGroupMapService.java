@@ -69,7 +69,7 @@ public class FrontGroupMapService {
         FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
         log.debug("start newFrontGroup frontGroup query:{}", frontGroup);
 
-        int consensusType = getMapSealerOrObserver(frontId, groupId);
+        int consensusType = this.checkFrontGroupType(frontId, groupId);
         log.debug("newFrontGroup consensusType:{}", consensusType);
 
         // add db
@@ -208,18 +208,17 @@ public class FrontGroupMapService {
      * @param groupId
      * @return
      */
-    private int getMapSealerOrObserver(int frontId, int groupId) {
+    private int checkFrontGroupType(int frontId, int groupId) {
         TbFront front = frontMapper.getById(frontId);
         if (front == null) {
             log.error("frontId :{} not exist!", frontId);
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
         }
-        String nodeId = front.getNodeId();
-        log.debug("getMapSealerOrObserver groupId:{}, nodeId:{}", groupId, nodeId);
+        log.debug("getMapSealerOrObserver groupId:{}, nodeId:{}", groupId, front.getNodeId());
 
-        int type = nodeService.checkNodeType(groupId, nodeId, front.getFrontIp(), front.getFrontPort());
+        int type = nodeService.checkNodeType(groupId, front.getNodeId());
         if (type == 0) {
-            log.error("node {} consensus type:{} invalid!", nodeId, type);
+            log.error("node block height larger than local! check later! nodeId:{},consensus type:{}", front.getNodeId(), type);
         }
         return type;
     }

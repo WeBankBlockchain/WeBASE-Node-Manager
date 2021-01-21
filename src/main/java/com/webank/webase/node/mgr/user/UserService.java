@@ -92,10 +92,12 @@ public class UserService {
             userName = account + "_" + userName;
             userRow = queryByName(groupId, userName, account);
         }
+        // check username
         if (userRow != null) {
             log.warn("fail addUserInfo. user info already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
+
         // add user by webase-front->webase-sign
         String signUserId = UUID.randomUUID().toString().replaceAll("-", "");
         // group id as appId
@@ -116,12 +118,19 @@ public class UserService {
             keyPair = frontRestTools.getForEntity(groupId, keyUri, KeyPair.class);
         }
 
-        String publicKey = Optional.ofNullable(keyPair).map(k -> k.getPublicKey()).orElse(null);
-        String address = Optional.ofNullable(keyPair).map(k -> k.getAddress()).orElse(null);
+        String publicKey = Optional.ofNullable(keyPair).map(KeyPair::getPublicKey).orElse(null);
+        String address = Optional.ofNullable(keyPair).map(KeyPair::getAddress).orElse(null);
 
         if (StringUtils.isAnyBlank(publicKey, address)) {
             log.warn("get key pair fail. publicKey:{} address:{}", publicKey, address);
             throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL);
+        }
+
+        // check address
+        TbUser addressRow = queryUser(null, groupId, null, address, account);
+        if (Objects.nonNull(addressRow)) {
+            log.warn("fail bindUserInfo. address is already exists");
+            throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
 
         // add row

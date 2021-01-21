@@ -782,7 +782,7 @@ public class HostService {
                     nodeInfo.getChannelPort(), nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
                 // not in use is true
                 if (!checkPortResult.success()) {
-                    log.error("Port check on host ip:[{}] not passe0d:{}!", nodeInfo.getIp(), checkPortResult.getExecuteOut());
+                    log.error("Port check on host ip:[{}] not passed:{}!", nodeInfo.getIp(), checkPortResult.getExecuteOut());
                     this.updateStatus(nodeInfo.getHostId(), HostStatusEnum.CHECK_FAILED, checkPortResult.getExecuteOut());
                     break;
                 }

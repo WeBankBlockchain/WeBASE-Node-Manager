@@ -42,6 +42,7 @@ public class AnsibleService {
     private DockerCommandService dockerOptionsCmd;
 
     private static final String NOT_FOUND_FLAG = "not found";
+    private static final String FREE_MEMORY_FLAG = "free memory";
     /**
      * check ansible installed
      */
@@ -140,11 +141,8 @@ public class AnsibleService {
         String command = String.format("ansible %s -m script -a \"%s -C %d\"", ip, constant.getHostCheckShell(), nodeCount);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
-            if (result.getExitCode() == 3) {
+            if (result.getExecuteOut().contains(FREE_MEMORY_FLAG)) {
                 throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM.attach(result.getExecuteOut()));
-            }
-            if (result.getExitCode() == 4) {
-                throw new NodeMgrException(ConstantCode.EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_CPU.attach(result.getExecuteOut()));
             }
             throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_FAIL_FOR_PARAM.attach(result.getExecuteOut()));
         }
@@ -158,9 +156,6 @@ public class AnsibleService {
         String command = String.format("ansible %s -m script -a \"%s\"", ip, constant.getDockerCheckShell());
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
-            if (result.getExitCode() == 5) {
-                throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
-            }
             throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
         }
     }
@@ -290,7 +285,7 @@ public class AnsibleService {
     }
 
     /**
-     * get exec result
+     * get exec result in host check
      * @param ip
      * @param ports
      * @return
@@ -312,6 +307,7 @@ public class AnsibleService {
 
     /**
      * check port, if one is in use, break and return false
+     * used in restart chain to make sure process is on
      * @param ip
      * @param portArray
      * @return Pair of <true, port> true: not in use, false: in use

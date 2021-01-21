@@ -107,4 +107,12 @@ public interface NodeMapper {
             "select * from tb_node where group_id=#{groupId,jdbcType=INTEGER}"
     })
     List<TbNode> selectByGroupId(@Param("groupId") int groupId);
+
+    /**
+     * default 0
+     * @param groupId
+     * @return
+     */
+    int getHighestBlockHeight(@Param("groupId") Integer groupId);
+
 }

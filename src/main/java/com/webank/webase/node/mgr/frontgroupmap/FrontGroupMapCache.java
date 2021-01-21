@@ -53,13 +53,13 @@ public class FrontGroupMapCache {
         param.setType(ConsensusType.SEALER.getValue());
         List<FrontGroup> targetMap = null;
         targetMap = mapService.getList(param);
-        log.info("get sealer map:{} param:{}", targetMap, param);
+        log.debug("get sealer map:{} param:{}", targetMap, param);
         if (targetMap == null || targetMap.isEmpty()) {
             param.setType(ConsensusType.OBSERVER.getValue());
             targetMap = mapService.getList(param);
-            log.info("get observer map:{} param:{}", targetMap, param);
+            log.debug("get observer map:{} param:{}", targetMap, param);
         }
-        log.info("getSealerOrObserverMap targetMap:{}", targetMap);
+        log.debug("getSealerOrObserverMap targetMap:{}", targetMap);
         return targetMap;
     }
 
@@ -96,7 +96,7 @@ public class FrontGroupMapCache {
             .filter(m -> groupId == m.getGroupId()
                     && m.getStatus() == GroupStatus.NORMAL.getValue())
             .collect(Collectors.toList());
-        log.info("getMapListByGroupId map size:{}", map.size());
+        log.debug("getMapListByGroupId map size:{}", map.size());
         return map;
     }
 
