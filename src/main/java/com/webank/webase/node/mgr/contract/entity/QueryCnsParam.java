@@ -14,25 +14,36 @@
 
 package com.webank.webase.node.mgr.contract.entity;
 
+import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class QueryCnsParam {
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class QueryCnsParam extends BaseQueryParam {
     private Integer groupId;
     private String contractPath;
     private String contractName;
     private String contractAddress;
+    private String cnsName;
+    private String version;
 
-    public QueryCnsParam(int groupId, String contractPath, String contractName,
-            String contractAddress) {
+    public QueryCnsParam(int groupId, String contractAddress) {
         super();
         this.groupId = groupId;
-        this.contractPath = contractPath;
-        this.contractName = contractName;
         this.contractAddress = contractAddress;
+    }
+    
+    public QueryCnsParam(int groupId, String cnsName, String version) {
+        super();
+        this.groupId = groupId;
+        this.cnsName = cnsName;
+        this.version = version;
     }
 }
