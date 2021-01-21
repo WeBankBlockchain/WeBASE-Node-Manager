@@ -15,7 +15,6 @@
  */
 package com.webank.webase.node.mgr.contract.entity;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -23,9 +22,14 @@ import lombok.Data;
  * ReqQueryCns.
  */
 @Data
-public class ReqQueryCns {
+public class ReqQueryCnsList {
     @NotNull
     private Integer groupId;
-    @NotBlank
+    @NotNull
+    private Integer pageNumber;
+    @NotNull
+    private Integer pageSize;
     private String contractAddress;
+    private String cnsName;
+    private String version;
 }

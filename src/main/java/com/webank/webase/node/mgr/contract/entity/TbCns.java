@@ -31,6 +31,7 @@ public class TbCns {
     private String cnsName;
     private String version;
     private String contractAddress;
+    private String contractAbi;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
