@@ -294,6 +294,9 @@ public class AnsibleService {
      */
     public ExecuteResult checkPortArrayInUse(String ip, int ... ports) {
         log.info("checkPortArrayInUse ip:{},ports:{}", ip, ports);
+        if (ArrayUtils.isEmpty(ports)){
+            return new ExecuteResult(0, "ports input is empty");
+        }
         StringBuilder portArray = new StringBuilder();
         for (int port : ports) {
             if (portArray.length() == 0) {
@@ -343,11 +346,16 @@ public class AnsibleService {
     }
 
     /**
+     * exec on 127.0.0.1
      * check 127.0.0.1 if same with other host ip
      * @param ipList ip to check same with local ip 127.0.0.1
+     * @return true-success, false-failed
      */
     public boolean checkLocalIp(List<String> ipList) {
         log.info("checkLoopIp ipArray:{}", ipList);
+        if (ipList == null || ipList.isEmpty()){
+            return true;
+        }
         StringBuilder ipStrArray = new StringBuilder();
         for (String ip : ipList) {
             if (ipStrArray.length() == 0) {
