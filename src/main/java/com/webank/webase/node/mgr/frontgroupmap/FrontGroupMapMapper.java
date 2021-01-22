@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.frontgroupmap;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -41,6 +42,16 @@ public interface FrontGroupMapMapper {
     int removeByFrontId(@Param("frontId") Integer frontId);
 
     List<FrontGroup> getList(MapListParam mapListParam);
+
+    @Select({
+        "select * from tb_front_group_map where 1=1"
+    })
+    List<FrontGroup> getAllList();
+
+    @Delete({
+        "delete from tb_front_group_map where map_id=#{mapId}"
+    })
+    void removeByMapId(@Param("mapId") Integer mapId);
 
     void removeInvalidMap();
 

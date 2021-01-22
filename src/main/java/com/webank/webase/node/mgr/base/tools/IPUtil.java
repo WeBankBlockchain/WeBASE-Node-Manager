@@ -18,10 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 public class IPUtil {
 
     public final static Set<String> LOCAL_IP_SET = new HashSet<>();
+    public final static String LOCAL_IP_127 = "127.0.0.1";
+    public final static String LOCAL_IP_host = "localhost";
 
     static {
-        LOCAL_IP_SET.add("127.0.0.1");
-        LOCAL_IP_SET.add("localhost");
+        LOCAL_IP_SET.add(LOCAL_IP_127);
+        LOCAL_IP_SET.add(LOCAL_IP_host);
 
         LOCAL_IP_SET.addAll(getLocalIPSet());
     }

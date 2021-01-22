@@ -20,6 +20,7 @@ import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
@@ -40,6 +41,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -113,6 +116,9 @@ public class HostService {
         // check before add
         log.info("check host ip accessible:{}", ip);
         ansibleService.execPing(ip);
+        // check 127.0.0.1
+        this.validateHostLocalIp(ip);
+
         log.info("check host root dir accessible:{}", rootDir);
         ExecuteResult execResult = ansibleService.execCreateDir(ip, rootDir);
         if (execResult.failed()) {
@@ -805,5 +811,39 @@ public class HostService {
         return hostPorkCheckSuccess;
     }
 
+    /**
+     * if 127.0.0.1 was added first, then check
+     * @param ip
+     */
+    private void validateHostLocalIp(String ip) {
+        if (IPUtil.isLocal(ip)) {
+            // if ip is 127.0.0.1, check all other host ip
+            List<TbHost> hostList = tbHostMapper.selectAll();
+            // 127.0.0.1 is the first host
+            if (hostList == null || hostList.isEmpty()) {
+                log.info("host list empty, skip check local");
+                return;
+            } else {
+                List<String> ipList = hostList.stream().map(TbHost::getIp)
+                    .collect(Collectors.toList());
+                if (!ansibleService.checkLocalIp(ipList)) {
+                    log.error("same host of local ip:{}", ip);
+                    throw new NodeMgrException(ConstantCode.SAME_HOST_ERROR);
+                }
+            }
+        } else {
+            // check whether 127.0.0.1 in tb_host
+            TbHost hostOfLocalIp = tbHostMapper.getByIp(IPUtil.LOCAL_IP_127);
+            if (hostOfLocalIp == null) {
+                log.info("host of 127.0.0.1 not in tb_host, skip check local");
+                return;
+            }
+            // 127.0.0.1 existed in tb_host, check this ip whether same with 127.0.0.1
+            if (!ansibleService.checkLocalIp(Collections.singletonList(ip))) {
+                log.error("same host of local ip:{}", ip);
+                throw new NodeMgrException(ConstantCode.SAME_HOST_ERROR);
+            }
+        }
+    }
 
 }

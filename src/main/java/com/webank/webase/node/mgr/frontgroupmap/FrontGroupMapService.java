@@ -17,28 +17,25 @@ import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP
 import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.front.FrontMapper;
-import com.webank.webase.node.mgr.node.NodeService;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ReactiveTypeDescriptor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-
+import com.webank.webase.node.mgr.group.GroupMapper;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.node.NodeService;
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Service
@@ -57,6 +54,8 @@ public class FrontGroupMapService {
     private NodeService nodeService;
     @Autowired
     private FrontMapper frontMapper;
+    @Autowired
+    private GroupMapper groupMapper;
 
     /**
      * add or update map with group status
@@ -141,11 +140,12 @@ public class FrontGroupMapService {
     /**
      * remove by groupId
      */
+    @Transactional(isolation= Isolation.READ_COMMITTED)
     public void removeByGroupId(int groupId) {
         if (groupId == 0) {
             return;
         }
-        //remove by groupId
+        // remove by groupId
         frontGroupMapMapper.removeByGroupId(groupId);
     }
 
@@ -182,8 +182,24 @@ public class FrontGroupMapService {
     /**
      * remove group that not in tb_front or tb_group
      */
+    @Transactional(isolation= Isolation.READ_COMMITTED)
     public void removeInvalidFrontGroupMap() {
-        frontGroupMapMapper.removeInvalidMap();
+        List<FrontGroup> allList = frontGroupMapMapper.getAllList();
+        // all front list
+        List<TbFront> frontList = frontMapper.getAllList();
+        // all group list
+        List<TbGroup> groupList = groupMapper.getList(null);
+        allList.forEach(map -> {
+            int mapId= map.getMapId();
+            int frontId = map.getFrontId();
+            int groupId = map.getGroupId();
+            long frontCount = frontList.stream().filter(f -> frontId == f.getFrontId()).count();
+            long groupCount = groupList.stream().filter(g -> groupId == g.getGroupId()).count();
+            if (frontCount == 0 || groupCount == 0) {
+                log.warn("removeInvalidFrontGroupMap mapId:{} map's group/front is not in table", mapId);
+                frontGroupMapMapper.removeByMapId(mapId);
+            }
+        });
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
