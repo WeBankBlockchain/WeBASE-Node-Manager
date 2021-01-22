@@ -51,7 +51,7 @@ constant:
   authTokenMaxAge: 3600
   ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find,,/group/generate,/group/start
   ###front http request
-  frontUrl: http://%1s:%2d/WeBASE-Front/ %3s
+  frontUrl: http://%1s:%2d/WeBASE-Front/%3s
   httpTimeOut: 5000
   contractDeployTimeOut: 30000
   isPrivateKeyEncrypt: true
@@ -86,7 +86,8 @@ constant:
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
   permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/encrypt,/version,/front/refresh
-
+  ###interval to async refresh group list locally
+  resetGroupListGInterval: 15000
   #### 1.4.0 visual deploy
   #### deployType 部署方式：
   # 0, 先使用 build_chain.sh 部署链并启用 WeBASE-Front 服务，然后手动添加前置; 

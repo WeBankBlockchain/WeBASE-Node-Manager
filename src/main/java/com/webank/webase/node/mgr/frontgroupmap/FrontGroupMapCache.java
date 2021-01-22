@@ -26,6 +26,8 @@ import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Component
@@ -48,6 +50,7 @@ public class FrontGroupMapCache {
      * get map filter by consensus type, sealer first
      * @return
      */
+    @Transactional(isolation= Isolation.READ_COMMITTED)
     private List<FrontGroup> getSealerOrObserverMap() {
         MapListParam param = new MapListParam();
         param.setType(ConsensusType.SEALER.getValue());

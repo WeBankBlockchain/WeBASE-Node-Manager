@@ -95,6 +95,9 @@ public class ConstantProperties {
     private Integer nodeStatusMonitorTaskFixedDelay;
     private Integer certMonitorTaskFixedDelay;
 
+    // default resetGroupList interval gap, default 15000ms(15s)
+    private Long resetGroupListGInterval;
+
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
     public static final int LEAST_SEALER_TWO = 2;
@@ -148,9 +151,6 @@ public class ConstantProperties {
     private String nodesRootDir = "NODES_ROOT";
     private String nodesRootTmpDir = "NODES_ROOT_TMP";
 
-    // v1.4.3
-    private String defaultAgencyName;
-
     /**
      * Docker client connect daemon ip with proxy ip.
      */
@@ -176,7 +176,6 @@ public class ConstantProperties {
             log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
             fiscoBcosBinary = "";
         }
-        log.info("Init constant properties, default agency name: [{}]", defaultAgencyName);
 
     }
 
