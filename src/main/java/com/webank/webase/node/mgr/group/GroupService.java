@@ -44,6 +44,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
@@ -263,8 +264,9 @@ public class GroupService {
 
     /**
      * reset groupList.
+     * synchronized to avoid deadlock
      */
-    @Transactional
+    @Transactional(isolation= Isolation.READ_COMMITTED)
     public synchronized void resetGroupList() {
         if (!chainService.runTask()) {
             log.warn("resetGroupList jump over for runTask");
@@ -306,6 +308,7 @@ public class GroupService {
 		// if not, update group as CONFLICT
 		checkGroupGenesisSameWithEach();
 		// remove front_group_map that not in tb_front or tb_group by local data
+        // v1.4.3 remove
 		frontGroupMapService.removeInvalidFrontGroupMap();
 		// update front_group_map status of local group
 		checkGroupMapByLocalGroupList(frontList);
@@ -747,7 +750,7 @@ public class GroupService {
      * remove all data by groupId.
      * included: tb_group, tb_front_group_map, group contract/trans, group method, group node etc.
      */
-    @Transactional
+    @Transactional(isolation= Isolation.READ_COMMITTED)
     public void removeAllDataByGroupId(int groupId) {
         if (groupId == 0) {
             return;

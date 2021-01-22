@@ -14,16 +14,15 @@
 package com.webank.webase.node.mgr.scheduler;
 
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.group.GroupService;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import com.webank.webase.node.mgr.group.GroupService;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * refresh group list
@@ -33,9 +32,9 @@ import lombok.extern.log4j.Log4j2;
 public class ResetGroupListTask {
 
     @Autowired private GroupService groupService;
+    @Autowired private ConstantProperties constants;
     // interval of check node status
-    private static final Long CHECK_GROUP_WAIT_MIN_MILLIS = 5000L;
-    private static Long LAST_TIME_CHECK_GROUP = 0L;
+    private static LongAdder LAST_TIME_CHECK_GROUP = new LongAdder();
 
     @Scheduled(fixedDelayString = "${constant.resetGroupListCycle}")
     public void taskStart() {
@@ -48,18 +47,21 @@ public class ResetGroupListTask {
      */
     @Async(value = "mgrAsyncExecutor")
     public void asyncResetGroupList() {
-        resetGroupList();
+        long now = System.currentTimeMillis();
+        long gap = now - LAST_TIME_CHECK_GROUP.longValue();
+        if (gap > constants.getResetGroupListGInterval()) {
+            log.info("resetGroupList start gap:{}.", gap);
+            LAST_TIME_CHECK_GROUP.reset();
+            LAST_TIME_CHECK_GROUP.add(now);
+            resetGroupList();
+        }
+        return;
     }
 
     /**
      * reset groupList.
      */
     public void resetGroupList() {
-        long now = System.currentTimeMillis();
-        if (now - LAST_TIME_CHECK_GROUP > CHECK_GROUP_WAIT_MIN_MILLIS) {
-            log.debug("resetGroupList start now:{}.", now);
-            groupService.resetGroupList();
-            LAST_TIME_CHECK_GROUP = now;
-        }
+        groupService.resetGroupList();
     }
 }
