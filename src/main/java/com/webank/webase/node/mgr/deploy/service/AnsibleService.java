@@ -18,11 +18,13 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -340,4 +342,24 @@ public class AnsibleService {
         return result.success();
     }
 
+    /**
+     * check 127.0.0.1 if same with other host ip
+     * @param ipList ip to check same with local ip 127.0.0.1
+     */
+    public boolean checkLocalIp(List<String> ipList) {
+        log.info("checkLoopIp ipArray:{}", ipList);
+        StringBuilder ipStrArray = new StringBuilder();
+        for (String ip : ipList) {
+            if (ipStrArray.length() == 0) {
+                ipStrArray.append(ip);
+                continue;
+            }
+            ipStrArray.append(",").append(ip);
+        }
+        // ansible 127.0.0.1 -m script hostCheckIpShell
+        String command = String.format("ansible %s -m script -a \"%s -p %s\"", IPUtil.LOCAL_IP_127,
+            constant.getHostCheckIpShell(), ipStrArray);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+        return result.success();
+    }
 }

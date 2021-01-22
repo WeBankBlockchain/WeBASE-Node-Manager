@@ -20,6 +20,7 @@ import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
@@ -113,6 +114,16 @@ public class HostService {
         // check before add
         log.info("check host ip accessible:{}", ip);
         ansibleService.execPing(ip);
+        // check if 127.0.0.1
+        if (IPUtil.isLocal(ip)) {
+            List<TbHost> hostList = tbHostMapper.selectAll();
+            List<String> ipList = hostList.stream().map(TbHost::getIp).collect(Collectors.toList());
+            if (!ansibleService.checkLocalIp(ipList)) {
+                log.error("same host of local ip:{}", ip);
+                throw new NodeMgrException(ConstantCode.SAME_HOST_ERROR);
+            }
+        }
+
         log.info("check host root dir accessible:{}", rootDir);
         ExecuteResult execResult = ansibleService.execCreateDir(ip, rootDir);
         if (execResult.failed()) {
