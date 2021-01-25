@@ -526,10 +526,22 @@ public class HostService {
 
     /**
      * check docker image
+     * @param hostIdList
+     * @param imageTag
+     */
+    public void checkImageExists(List<Integer> hostIdList, String imageTag){
+        List<TbHost> hostList = this.selectDistinctHostListById(hostIdList);
+        Set<String> ipSet = hostList.stream().map(TbHost::getIp).collect(Collectors.toSet());
+        this.checkImageExists(ipSet, imageTag);
+    }
+
+    /**
+     * check docker image
      * @param ipSet
      * @param imageTag
      */
     public void checkImageExists(Set<String> ipSet, String imageTag){
+        log.info("checkImageExists ipSet:{}", ipSet);
         for (String ip : ipSet) {
             boolean exists = this.dockerOptions.checkImageExists(ip, imageTag);
             if (!exists) {

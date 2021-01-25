@@ -43,6 +43,8 @@ import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeService;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -95,13 +97,17 @@ public class DeployService {
         log.info("configChainAndScp check all host init success");
         // check all host success
         hostService.checkAllHostInitSuc(hostIdList);
+        // check image
+        log.info("configChainAndScp check image on host:{}", imageTag);
+        hostService.checkImageExistRemote(ipConf, imageTag);
 
         log.info("configChainAndScp configChain and init db data");
-        // config locally
+        // config locally(chain, front, group, front_group_map, agency etc.)
         boolean configSuccess = this.configChain(chainName, deployNodeInfoList, ipConf, imageTag, encrtypType,
             webaseSignAddr, agencyName);
         if (!configSuccess) {
             log.error("configChainAndScp fail to config chain and init db data");
+            chainService.updateStatus(chainName, ChainStatusEnum.START_FAIL);
             throw new NodeMgrException(ConstantCode.CONFIG_CHAIN_LOCALLY_FAIL);
         }
 
@@ -113,8 +119,6 @@ public class DeployService {
             chainService.updateStatus(chainName, ChainStatusEnum.START_FAIL);
             throw new NodeMgrException(ConstantCode.ANSIBLE_INIT_HOST_CDN_SCP_NOT_ALL_SUCCESS);
         }
-        // check image
-        hostService.checkImageExistRemote(ipConf, imageTag);
         // start
         log.info("configChainAndScp asyncStartChain chainName:{}", chainName);
         TbChain chain = tbChainMapper.getByChainName(chainName);
@@ -237,7 +241,12 @@ public class DeployService {
             chain.getVersion(), chain.getEncryptType(), chain.getWebaseSignAddr(), agencyName);
 
         // check all host success (old or new host will set as init success in step init_host)
+        log.info("configChainAndScp check all host init success hostIdList:{}", hostIdList);
         hostService.checkAllHostInitSuc(hostIdList);
+
+        // check image
+        log.info("configChainAndScp check image on host:{}", chain.getVersion());
+        hostService.checkImageExists(hostIdList, chain.getVersion());
 
         TbAgency agency = this.agencyService.initAgencyIfNew(
             agencyName, chain.getId(), chainName, chain.getEncryptType());
@@ -258,6 +267,8 @@ public class DeployService {
         // store node count in tbHost's remark
         // List<TbHost> hostList = hostService.selectDistinctHostListById(hostIdList);
         for (Integer hostId : hostIdAndInfoMap.keySet()) {
+            Instant startTime = Instant.now();
+            log.info("addNodes hostId:{}, startTime:{}", hostId, startTime.toEpochMilli());
             TbHost tbHost = tbHostMapper.selectByPrimaryKey(hostId);
             List<DeployNodeInfo> nodeListOnSameHost = hostIdAndInfoMap.get(hostId);
 
@@ -269,7 +280,8 @@ public class DeployService {
 
             // update group node count
             log.info("addNodes saveOrUpdateNodeCount groupId:{},new node num:{}", groupId, num);
-            groupService.saveOrUpdateNodeCount(groupId, num, chain.getId(), chainName);
+            // 1.4.3 deprecated, when add nodes, not support add group id
+            // groupService.saveOrUpdateNodeCount(groupId, num, chain.getId(), chainName);
 
             // init front and node (gen node cert & init db)
             try {
@@ -293,6 +305,7 @@ public class DeployService {
                 // restart related front
                 log.info("addNodes asyncAddNode");
                 nodeAsyncService.asyncAddNode(chain, tbHost, groupId, OptionType.MODIFY_CHAIN, newFrontList);
+                log.info("addNodes hostId:{}, usedTime:{}", hostId, Duration.between(startTime, Instant.now()).toMillis());
             } catch (Exception e) {
                 log.error("Add node error", e);
                 throw new NodeMgrException(ConstantCode.ADD_NODE_WITH_UNKNOWN_EXCEPTION_ERROR, e);

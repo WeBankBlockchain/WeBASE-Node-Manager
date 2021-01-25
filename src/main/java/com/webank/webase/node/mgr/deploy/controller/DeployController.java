@@ -36,6 +36,7 @@ import com.webank.webase.node.mgr.deploy.service.DeployService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import javax.validation.Valid;
@@ -137,18 +138,20 @@ public class DeployController extends BaseController {
         log.info("Start configChainAndHost:[{}], start:[{}]", JsonTools.toJSONString(deploy), startTime);
 
         try {
-            // hostService.checkPortHostList(deploy.getDeployNodeInfoList());
-
+            // todo 添加重复点击部署的报错提示
             // generate node config and return shell execution log
             deployService.configChainAndScp(deploy.getChainName(), deploy.getDeployNodeInfoList(),
                     deploy.getIpconf(), deploy.getImageTag(), deploy.getEncryptType(),
                     deploy.getWebaseSignAddr(), deploy.getAgencyName());
+            log.info("End configChainAndHost:[{}], usedTime:[{}]", JsonTools.toJSONString(deploy), Duration
+                .between(startTime, Instant.now()).toMillis());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
         } catch (InterruptedException e) {
             throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
+
     }
 
     /**
@@ -194,9 +197,13 @@ public class DeployController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
 
-        log.info("Start add node configNew:[{}] , start[{}]", JsonTools.toJSONString(addNode), startTime);
+        log.info("Start addNodes configNew:[{}] , start[{}]", JsonTools.toJSONString(addNode), startTime);
+        // todo 添加重复点击部署的报错提示
 
         Pair<RetCode, String> addResult = this.deployService.addNodes(addNode);
+        log.info("End addNodes addResult:[{}], usedTime:[{}]", JsonTools.toJSONString(addResult), Duration
+            .between(startTime, Instant.now()).toMillis());
+
         return new BaseResponse(addResult.getKey(), addResult.getValue());
     }
 
