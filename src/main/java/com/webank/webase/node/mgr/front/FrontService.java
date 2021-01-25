@@ -164,7 +164,7 @@ public class FrontService {
 	            Integer frontPort = tbFront.getFrontPort();
 				// query group list from chain
 				List<String> groupIdList;
-					groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+				groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
 				// get syncStatus
 				SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
 						frontPort, Integer.valueOf(groupIdList.get(0)));

@@ -366,7 +366,7 @@ public class ChainService {
             // insert agency if new
             TbAgency agency = this.agencyService.insertIfNew(agencyName, newChain.getId(), chainName);
 
-//            // insert host if new
+            // insert host if new
             TbHost host = tbHostMapper.getByIp(config.getIp());
 
             // insert group if new

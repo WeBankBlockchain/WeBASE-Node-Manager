@@ -1236,9 +1236,10 @@ public class GroupService {
             // local node root
             Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
 
-//            if (newGroup) {
-//                // generate conf/group.[groupId].ini
-//                ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
+            // 1.4.3 not support add group when add node
+            //if (newGroup) {
+            //    // generate conf/group.[groupId].ini
+            //    ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
             // copy old group files
             if (oldFront != null) {
                 Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());

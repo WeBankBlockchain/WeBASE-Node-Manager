@@ -123,9 +123,13 @@ public class NodeAsyncService {
                                 FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess,FrontStatusEnum frontFailed ) {
         log.info("asyncStartChain chainId:{},optionType:{}", chainId, optionType);
         final boolean startSuccess = this.restartChain(chainId, optionType, frontBefore, frontSuccess, frontFailed);
-        threadPoolTaskScheduler.schedule(() ->
-            chainService.updateStatus(chainId, startSuccess ? success : failed),
-            Instant.now().plusMillis(1L));
+        threadPoolTaskScheduler.schedule(() -> {
+            chainService.updateStatus(chainId, startSuccess ? success : failed);
+            if (startSuccess) {
+                log.info("if started, refresh front group map");
+                groupService.resetGroupList();
+            }
+        }, Instant.now().plusMillis(1L));
     }
 
 
