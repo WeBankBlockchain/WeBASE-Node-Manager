@@ -264,8 +264,7 @@ public class DeployService {
         }
         log.info("addNodes hostIdAndInfoMap:{}", hostIdAndInfoMap);
 
-        // store node count in tbHost's remark
-        // List<TbHost> hostList = hostService.selectDistinctHostListById(hostIdList);
+        // todo add progress of node num
         for (Integer hostId : hostIdAndInfoMap.keySet()) {
             Instant startTime = Instant.now();
             log.info("addNodes hostId:{}, startTime:{}", hostId, startTime.toEpochMilli());
@@ -279,7 +278,7 @@ public class DeployService {
             hostService.generateHostSDKCertAndScp(chain.getEncryptType(), chain.getChainName(), tbHost, agency.getAgencyName());
 
             // update group node count
-            log.info("addNodes saveOrUpdateNodeCount groupId:{},new node num:{}", groupId, num);
+            // log.info("addNodes saveOrUpdateNodeCount groupId:{},new node num:{}", groupId, num);
             // 1.4.3 deprecated, when add nodes, not support add group id
             // groupService.saveOrUpdateNodeCount(groupId, num, chain.getId(), chainName);
 
