@@ -1216,14 +1216,14 @@ public class GroupService {
      * @param newFrontList
      * @throws IOException
      */
-    public void generateNewNodesGroupConfigsAndScp(TbChain chain, int groupId, String ip,
-           List<TbFront> newFrontList) {
+    public void generateNewNodesGroupConfigsAndScp(TbChain chain, int groupId, String ip, List<TbFront> newFrontList) {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
-        long now = System.currentTimeMillis();
 
-        List<String> nodeIdList = newFrontList.stream().map(TbFront::getNodeId)
-                .collect(Collectors.toList());
+        // 1.4.3 not support add group when add node
+        // long now = System.currentTimeMillis();
+        // List<String> nodeIdList = newFrontList.stream().map(TbFront::getNodeId)
+        //        .collect(Collectors.toList());
 
         // copy group.x.[genesis|conf] from old front
         TbNode oldNode = this.nodeService.getOldestNodeByChainIdAndGroupId(chainId, groupId);
@@ -1236,9 +1236,10 @@ public class GroupService {
             // local node root
             Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
 
-//            if (newGroup) {
-//                // generate conf/group.[groupId].ini
-//                ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
+            // 1.4.3 not support add group when add node
+            //if (newGroup) {
+            //    // generate conf/group.[groupId].ini
+            //    ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
             // copy old group files
             if (oldFront != null) {
                 Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());

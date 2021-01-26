@@ -366,7 +366,7 @@ public class ChainService {
             // insert agency if new
             TbAgency agency = this.agencyService.insertIfNew(agencyName, newChain.getId(), chainName);
 
-//            // insert host if new
+            // insert host if new
             TbHost host = tbHostMapper.getByIp(config.getIp());
 
             // insert group if new
@@ -490,7 +490,7 @@ public class ChainService {
      */
     public boolean runTask(){
         // 0, original deploy chain first; 1, deploy chain visually
-        if (constant.getDeployType() == 0 ){
+        if (constant.getDeployType() == 0 ) {
             log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(), isChainRunning.get());
             return true;
         }

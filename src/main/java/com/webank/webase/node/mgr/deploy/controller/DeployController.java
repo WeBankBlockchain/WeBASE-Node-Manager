@@ -36,6 +36,7 @@ import com.webank.webase.node.mgr.deploy.service.DeployService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import javax.validation.Valid;
@@ -137,18 +138,20 @@ public class DeployController extends BaseController {
         log.info("Start configChainAndHost:[{}], start:[{}]", JsonTools.toJSONString(deploy), startTime);
 
         try {
-            // hostService.checkPortHostList(deploy.getDeployNodeInfoList());
-
+            // todo 添加重复点击部署的报错提示
             // generate node config and return shell execution log
             deployService.configChainAndScp(deploy.getChainName(), deploy.getDeployNodeInfoList(),
                     deploy.getIpconf(), deploy.getImageTag(), deploy.getEncryptType(),
                     deploy.getWebaseSignAddr(), deploy.getAgencyName());
+            log.info("End configChainAndHost:[{}], usedTime:[{}]", JsonTools.toJSONString(deploy), Duration
+                .between(startTime, Instant.now()).toMillis());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
         } catch (InterruptedException e) {
             throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
+
     }
 
     /**
@@ -194,14 +197,23 @@ public class DeployController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
 
-        log.info("Start add node configNew:[{}] , start[{}]", JsonTools.toJSONString(addNode), startTime);
+        log.info("Start addNodes configNew:[{}] , start[{}]", JsonTools.toJSONString(addNode), startTime);
 
-        Pair<RetCode, String> addResult = this.deployService.addNodes(addNode);
+        Pair<RetCode, String> addResult = null;
+        try {
+            addResult = this.deployService.batchAddNode(addNode);
+        } catch (InterruptedException e) {
+            log.error("Error addNodes interrupted ex:", e);
+            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
+        }
+        log.info("End addNodes addResult:[{}], usedTime:[{}]", JsonTools.toJSONString(addResult), Duration
+            .between(startTime, Instant.now()).toMillis());
+
         return new BaseResponse(addResult.getKey(), addResult.getValue());
     }
 
     /**
-     *
+     * start node
      * @param start
      * @param result
      * @return
@@ -244,6 +256,49 @@ public class DeployController extends BaseController {
     }
 
     /**
+     * stop node force
+     * @param stop
+     * @param result
+     * @return
+     * @throws NodeMgrException
+     */
+    @PostMapping(value = "node/stopForce")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse stopNodeForce(
+            @RequestBody @Valid ReqNodeOption stop, BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        String nodeId = stop.getNodeId();
+        Instant startTime = Instant.now();
+
+        log.info("stopNodeForce nodeId:[{}], now:[{}]", nodeId, startTime);
+
+        deployService.stopNodeForce(stop.getNodeId());
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     * restart node
+     * @param start
+     * @param result
+     * @return
+     * @throws NodeMgrException
+     */
+    @PostMapping(value = "node/restart")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse restartNode(
+        @RequestBody @Valid ReqNodeOption start, BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        String nodeId = start.getNodeId();
+        Instant startTime = Instant.now();
+
+        log.info("restart node nodeId:[{}], now:[{}]", nodeId, startTime);
+
+        this.deployService.startNode(start.getNodeId(), OptionType.MODIFY_CHAIN, FrontStatusEnum.STOPPED,
+            FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
      * todo update related node by db's config value with template when delete node
      * @param delete
      * @param result
@@ -260,7 +315,7 @@ public class DeployController extends BaseController {
 
         log.info("Delete node delete:[{}], now:[{}]", delete, startTime);
 
-        this.deployService.deleteNode(nodeId);
+        deployService.deleteNode(nodeId);
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -348,6 +403,22 @@ public class DeployController extends BaseController {
         Instant startTime = Instant.now();
         log.info("Stop chain, chainName:[{}], now:[{}]", chainName, startTime);
 
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     *
+     * @param chainName
+     * @return
+     * @throws IOException
+     */
+    @GetMapping(value = "chain/restart")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse restartChain(@RequestParam(value = "chainName") String chainName,
+        @RequestParam(value = "groupId") Integer groupId) throws IOException {
+        Instant startTime = Instant.now();
+        log.info("Stop chain, chainName:[{}], groupId:{}, now:[{}]", chainName, groupId, startTime);
+        deployService.restartChain(chainName, groupId);
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 

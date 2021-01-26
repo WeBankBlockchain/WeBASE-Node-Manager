@@ -72,8 +72,15 @@ public class DeployShellService {
             }
             Files.write(ipConf, Arrays.asList(ipLines));
         } catch (IOException e) {
-            log.error("Write ip conf file:[{}] error", ipConf.toAbsolutePath().toString(), e);
+            log.error("execBuildChain Write ip conf file:[{}] error", ipConf.toAbsolutePath().toString(), e);
             throw new NodeMgrException(ConstantCode.SAVE_IP_CONFIG_FILE_ERROR);
+        }
+        Path chainRoot = pathService.getChainRoot(chainName);
+        log.info("execBuildChain output chainRoot:{}", chainRoot.toString());
+
+        if (Files.exists(chainRoot)) {
+            log.error("execBuildChain output chainRoot already exist! please move it manually!");
+            throw new NodeMgrException(ConstantCode.CHAIN_ROOT_DIR_EXIST);
         }
 
         // build_chain.sh only support docker on linux
@@ -84,7 +91,7 @@ public class DeployShellService {
                 // ipconf file path
                 ipConf.toString(),
                 // output path
-                pathService.getChainRootString(chainName),
+                chainRoot.toString(),
                 // port param
                 //shellPortParam,
                 // guomi or standard
@@ -152,7 +159,7 @@ public class DeployShellService {
         log.info("Exec execGenNode method for chainName:[{}], node:[{}:{}:{}]",
                 chainName, encryptType, agencyName, newNodeRoot);
 
-        Path agencyRoot = this.pathService.getAgencyRoot(chainName,agencyName);
+        Path agencyRoot = this.pathService.getAgencyRoot(chainName, agencyName);
 
         // build_chain.sh only support docker on linux
         String command = String.format("bash -x -e %s -c %s -o %s %s",

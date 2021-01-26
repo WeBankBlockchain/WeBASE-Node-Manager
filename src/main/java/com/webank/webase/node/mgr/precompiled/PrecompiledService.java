@@ -29,6 +29,7 @@ import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
@@ -143,7 +144,10 @@ public class PrecompiledService {
         if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null){
             log.info("remove node/front:[{}] from group:[{}], change front group map status to [{}]",
                     front.getFrontId(), groupId, GroupStatus.MAINTAINING);
+            // update map
             frontGroupMapService.updateFrontMapStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
+            // update tb_node rm invalid node
+            groupService.resetGroupList();
         }
 
         log.debug("end nodeManageService. frontRsp:{}", JsonTools.toJSONString(frontRsp));

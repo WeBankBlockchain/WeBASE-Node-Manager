@@ -111,6 +111,7 @@ public class ThymeleafUtil {
     public static void newNodeConfigIni(Path nodeRoot, int channelPort, int p2pPort,
                                         int jsonrpcPort, List<TbFront> peerList, boolean guomi,
                                         int chainIdInConfigIni) throws IOException {
+        log.info("newNodeConfigIni nodeRoot:{},channelPort:{}peerList:{}", nodeRoot, channelPort, peerList);
         String nodeConfigIni = ThymeleafUtil.generate(ThymeleafUtil.NODE_CONFIG_INI,
                 Pair.of("channelPort", channelPort), Pair.of("p2pPort", p2pPort),
                 Pair.of("jsonrpcPort", jsonrpcPort), Pair.of("nodeList", peerList),
@@ -142,7 +143,7 @@ public class ThymeleafUtil {
 
 
     /**
-     *
+     * /NODES_ROOT/IP/NODE[index]/application.yml
      * @param nodeRoot
      * @param encryptType
      * @param channelPort

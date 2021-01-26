@@ -49,7 +49,7 @@ public class ResetGroupListTask {
     public void asyncResetGroupList() {
         long now = System.currentTimeMillis();
         long gap = now - LAST_TIME_CHECK_GROUP.longValue();
-        if (gap > constants.getResetGroupListGInterval()) {
+        if (gap > constants.getResetGroupListInterval()) {
             log.info("resetGroupList start gap:{}.", gap);
             LAST_TIME_CHECK_GROUP.reset();
             LAST_TIME_CHECK_GROUP.add(now);

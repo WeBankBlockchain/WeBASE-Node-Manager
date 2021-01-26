@@ -24,6 +24,8 @@ import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
@@ -94,6 +96,8 @@ public class AnsibleService {
      */
     public void scp(ScpTypeEnum typeEnum, String ip, String src, String dst) {
         log.info("scp typeEnum:{},ip:{},src:{},dst:{}", typeEnum, ip, src, dst);
+        Instant startTime = Instant.now();
+        log.info("scp startTime:{}", startTime.toEpochMilli());
         boolean isSrcDirectory = Files.isDirectory(Paths.get(src));
         boolean isSrcFile = Files.isRegularFile(Paths.get(src));
         // exec ansible copy or fetch
@@ -113,6 +117,7 @@ public class AnsibleService {
             command = String.format("ansible %s -m synchronize -a \"src=%s dest=%s\"", ip, src, dst);
             log.info("exec scp copy command: [{}]", command);
             ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+            log.info("scp usedTime:{}", Duration.between(startTime, Instant.now()).toMillis());
             if (result.failed()) {
                 throw new NodeMgrException(ConstantCode.ANSIBLE_SCP_COPY_ERROR.attach(result.getExecuteOut()));
             }
@@ -127,6 +132,7 @@ public class AnsibleService {
             command = String.format("ansible %s -m synchronize -a \"mode=pull src=%s dest=%s\"", ip, src, dst);
             log.info("exec scp copy command: [{}]", command);
             ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+            log.info("scp usedTime:{}", Duration.between(startTime, Instant.now()).toMillis());
             if (result.failed()) {
                 throw new NodeMgrException(ConstantCode.ANSIBLE_SCP_FETCH_ERROR.attach(result.getExecuteOut()));
             }
@@ -255,6 +261,8 @@ public class AnsibleService {
      */
     public void execPullDockerCdnShell(String ip, String outputDir, String imageTag, String webaseVersion) {
         log.info("execPullDockerCdnShell ip:{},outputDir:{},imageTag:{},webaseVersion:{}", ip, outputDir, imageTag, webaseVersion);
+        Instant startTime = Instant.now();
+        log.info("execPullDockerCdnShell startTime:{}", startTime.toEpochMilli());
         boolean imageExist = this.checkImageExists(ip, imageTag);
         if (imageExist) {
             log.info("image of {} already exist, jump over pull", imageTag);
@@ -262,6 +270,7 @@ public class AnsibleService {
         }
         String command = String.format("ansible %s -m script -a \"%s -d %s -v %s\"", ip, constant.getDockerPullCdnShell(), outputDir, webaseVersion);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+        log.info("execPullDockerCdnShell usedTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         if (result.failed()) {
             throw new NodeMgrException(ConstantCode.ANSIBLE_PULL_DOCKER_CDN_ERROR.attach(result.getExecuteOut()));
         }

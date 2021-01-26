@@ -42,6 +42,7 @@ public enum ChainStatusEnum {
     RESTARTING((byte) 4, "重启中"),
     UPGRADING((byte) 5, "升级中"),
     UPGRADING_FAILED((byte) 6, "升级失败"),
+    NODE_ADDING((byte) 7, "添加节点中"),
     ;
 
     private byte id;

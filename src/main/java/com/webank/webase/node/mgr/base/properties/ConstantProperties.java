@@ -96,7 +96,7 @@ public class ConstantProperties {
     private Integer certMonitorTaskFixedDelay;
 
     // default resetGroupList interval gap, default 15000ms(15s)
-    private Long resetGroupListGInterval;
+    private long resetGroupListInterval = 15000;
 
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
@@ -133,17 +133,21 @@ public class ConstantProperties {
     // check memory dependency, check container exist, check image exist
     private long execHostCheckTimeout = 55 * 1000L;
     // check port in use
-    private long execHostCheckPortTimeout = 55 * 1000L;
+    private long execHostCheckPortTimeout = 50 * 1000L;
     // async init host time out. 5min
     private long execHostInitTimeout = 5 * 60 * 1000L;
     // generate chain config and scp to host
-    private long execHostConfigTimeout = 55 * 1000L;
+    private long execHostConfigTimeout = 40 * 1000L;
     // generate chain config
     private long execBuildChainTimeout = 40 * 1000L;
     // docker command time out
     private long dockerRestartPeriodTime = 30 * 1000L;
     // common shell exec time out
     private long execShellTimeout = 10 * 60 * 1000L;
+    // scp command concurrent await time
+    private long execScpTimeout = 10 * 1000L;
+    // add node concurrent await time
+    private long execAddNodeTimeout = 40 * 1000L;
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
     private String dockerRepository= "fiscoorg/fisco-webase";
