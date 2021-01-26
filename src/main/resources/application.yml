@@ -87,7 +87,7 @@ constant:
   certMonitorTaskFixedDelay: 300000
   permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/encrypt,/version,/front/refresh
   ###interval to async refresh group list locally
-  resetGroupListGInterval: 15000
+  resetGroupListInterval: 15000
   #### 1.4.0 visual deploy
   #### deployType 部署方式：
   # 0, 先使用 build_chain.sh 部署链并启用 WeBASE-Front 服务，然后手动添加前置; 
@@ -101,12 +101,14 @@ constant:
   # 可视化操作的后台超时时间 (unit: ms)，若机器较慢，可动态设置超时时间
   execDockerCheckTimeout: 55000
   execHostCheckTimeout: 55000
-  execHostCheckPortTimeout: 55000
+  execHostCheckPortTimeout: 50000
   execHostInitTimeout: 300000
-  execHostConfigTimeout: 55000
+  execHostConfigTimeout: 40000
   execBuildChainTimeout: 40000
   dockerRestartPeriodTime: 30000
   execShellTimeout: 600000
+  execScpTimeout: 10000
+  execAddNodeTimeout: 40000
   # runDockerSleepTime: 600000
   #### if deployType = 0, ignore upper properties ####
 
