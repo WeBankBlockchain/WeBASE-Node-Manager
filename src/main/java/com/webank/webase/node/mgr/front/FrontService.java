@@ -515,11 +515,12 @@ public class FrontService {
     }
 
     /**
-     *
+     * get front list from normal front_group_map
      * @param groupId
      * @return
      */
     public List<TbFront> selectFrontListByGroupId(int groupId) {
+        log.info("selectFrontListByGroupId groupId:{}", groupId);
         // select all agencies by chainId
         List<TbFrontGroupMap> frontGroupMapList = this.frontGroupMapMapper.selectListByGroupId(groupId);
         if (CollectionUtils.isEmpty(frontGroupMapList)) {
@@ -727,24 +728,31 @@ public class FrontService {
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
 
-        List<TbNode> tbNodeListOfGroup = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
-        log.info("updateNodeConfigIniByGroupId tbNodeListOfGroup:{}", tbNodeListOfGroup);
-        // add new node in db's node list
-        List<String> nodeIdList = tbNodeListOfGroup.stream().map(TbNode::getNodeId).collect(Collectors.toList());
-        List<String> newNodeIdList = newFrontList.stream().map(TbFront::getNodeId).collect(Collectors.toList());
-        nodeIdList.addAll(newNodeIdList);
+        List<TbNode> dbNodeListOfGroup = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
+        log.info("updateNodeConfigIniByGroupId dbNodeListOfGroup:{}", dbNodeListOfGroup);
 
+        // add new node in db's node list
+        List<String> allNodeIdList = dbNodeListOfGroup.stream().map(TbNode::getNodeId).collect(Collectors.toList());
+        List<String> newNodeIdList = newFrontList.stream().map(TbFront::getNodeId).collect(Collectors.toList());
+        allNodeIdList.addAll(newNodeIdList);
+        log.info("updateNodeConfigIniByGroupId nodeIdList:{}", allNodeIdList);
+
+        // all map's normal front added
         // <nodeId, List<FrontReleted> map
         Map<String, List<TbFront>> nodeIdRelatedFrontMap = new HashMap<>();
-        log.info("updateNodeConfigIniByGroupId nodeIdList:{}", nodeIdList);
+
         // all fronts include old and new
-        for (String nodeId : CollectionUtils.emptyIfNull(nodeIdList)) {
+        for (String nodeId : CollectionUtils.emptyIfNull(allNodeIdList)) {
             // select related peers to update node config.ini p2p part
             // select from existed in db
             List<TbFront> dbRelatedFrontList = this.selectRelatedFront(nodeId);
             // add just added nodes' new front
-            dbRelatedFrontList.removeAll(newFrontList);
+            if (dbRelatedFrontList.isEmpty()) {
+                List<TbFront> oldFrontListDb = this.selectFrontListByGroupId(groupId);
+                dbRelatedFrontList.addAll(oldFrontListDb);
+            }
             dbRelatedFrontList.addAll(newFrontList);
+
             // store
             nodeIdRelatedFrontMap.put(nodeId, dbRelatedFrontList);
             // start generate process
@@ -1063,6 +1071,49 @@ public class FrontService {
         this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
         // update front
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), FrontStatusEnum.STOPPED);
+    }
+
+    @Transactional
+    public void stopNodeForce(String nodeId) {
+        log.info("start stopNodeForce nodeId:{}", nodeId);
+        // get front
+        TbFront front = this.getByNodeId(nodeId);
+        if (front == null){
+            throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
+        }
+
+        int chainId = front.getChainId();
+        int runningTotal = 0;
+        List<TbFront> frontList = this.selectFrontListByChainId(chainId);
+        for (TbFront tbFront : frontList) {
+            if (FrontStatusEnum.isRunning(tbFront.getStatus())) {
+                runningTotal ++;
+            }
+        }
+        if (runningTotal < 2) {
+            log.error("Two running nodes at least of chain:[{}]", chainId);
+            throw new NodeMgrException(ConstantCode.TWO_NODES_AT_LEAST);
+        }
+
+        if (!FrontStatusEnum.isRunning(front.getStatus())) {
+            log.warn("Node:[{}:{}] is already stopped.",front.getFrontIp(),front.getHostIndex());
+            return ;
+        }
+
+        log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
+        this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
+        try {
+            Thread.sleep(constant.getDockerRestartPeriodTime());
+        } catch (InterruptedException e) {
+            log.warn("Docker stop and remove container sleep Interrupted");
+        }
+
+        // update map
+        this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
+        // update front
+        ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), FrontStatusEnum.STOPPED);
+        log.info("end stopNodeForce. ");
+
     }
 
     @Transactional

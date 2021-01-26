@@ -387,6 +387,11 @@ public class DeployService {
         this.frontService.stopNode(nodeId);
     }
 
+    public void stopNodeForce(String nodeId) {
+        // two nodes running at least
+        this.frontService.stopNodeForce(nodeId);
+    }
+
     /**
      *  @param nodeId
      * @return
@@ -586,11 +591,11 @@ public class DeployService {
             newFrontIdList.forEach((id -> frontService.updateStatus(id, FrontStatusEnum.ADD_FAILED)));
         }
 
-        // restart one node
-        // nodeAsyncService.asyncStartAddedNode(chain.getId(), OptionType.MODIFY_CHAIN, newFrontIdList);
-        // restart all node to make sure 'nodeIdList' of each node contains removed node
         log.info("batchAddNode asyncStartAddedNode");
-        nodeAsyncService.asyncRestartNode(chain, groupId, OptionType.MODIFY_CHAIN, newFrontIdList);
+        // restart one node
+        nodeAsyncService.asyncStartAddedNode(chain.getId(), OptionType.MODIFY_CHAIN, newFrontIdList);
+        // restart all node to make sure 'nodeIdList' of each node contains removed node
+        // nodeAsyncService.asyncRestartNode(chain, groupId, OptionType.MODIFY_CHAIN, newFrontIdList);
 
         return Pair.of(ConstantCode.SUCCESS, "success");
     }

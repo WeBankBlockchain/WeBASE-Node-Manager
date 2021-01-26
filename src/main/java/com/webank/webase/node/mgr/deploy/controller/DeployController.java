@@ -213,7 +213,7 @@ public class DeployController extends BaseController {
     }
 
     /**
-     *
+     * start node
      * @param start
      * @param result
      * @return
@@ -252,6 +252,49 @@ public class DeployController extends BaseController {
         log.info("Stop node nodeId:[{}], now:[{}]", nodeId, startTime);
 
         this.deployService.stopNode(stop.getNodeId());
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     * stop node force
+     * @param stop
+     * @param result
+     * @return
+     * @throws NodeMgrException
+     */
+    @PostMapping(value = "node/stopForce")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse stopNodeForce(
+            @RequestBody @Valid ReqNodeOption stop, BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        String nodeId = stop.getNodeId();
+        Instant startTime = Instant.now();
+
+        log.info("stopNodeForce nodeId:[{}], now:[{}]", nodeId, startTime);
+
+        deployService.stopNodeForce(stop.getNodeId());
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     * restart node
+     * @param start
+     * @param result
+     * @return
+     * @throws NodeMgrException
+     */
+    @PostMapping(value = "node/restart")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse restartNode(
+        @RequestBody @Valid ReqNodeOption start, BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        String nodeId = start.getNodeId();
+        Instant startTime = Instant.now();
+
+        log.info("restart node nodeId:[{}], now:[{}]", nodeId, startTime);
+
+        this.deployService.startNode(start.getNodeId(), OptionType.MODIFY_CHAIN, FrontStatusEnum.STOPPED,
+            FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
