@@ -152,7 +152,7 @@ public class DeployShellService {
         log.info("Exec execGenNode method for chainName:[{}], node:[{}:{}:{}]",
                 chainName, encryptType, agencyName, newNodeRoot);
 
-        Path agencyRoot = this.pathService.getAgencyRoot(chainName,agencyName);
+        Path agencyRoot = this.pathService.getAgencyRoot(chainName, agencyName);
 
         // build_chain.sh only support docker on linux
         String command = String.format("bash -x -e %s -c %s -o %s %s",

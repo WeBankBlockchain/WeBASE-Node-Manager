@@ -198,9 +198,14 @@ public class DeployController extends BaseController {
         Instant startTime = Instant.now();
 
         log.info("Start addNodes configNew:[{}] , start[{}]", JsonTools.toJSONString(addNode), startTime);
-        // todo 添加重复点击部署的报错提示
 
-        Pair<RetCode, String> addResult = this.deployService.addNodes(addNode);
+        Pair<RetCode, String> addResult = null;
+        try {
+            addResult = this.deployService.batchAddNode(addNode);
+        } catch (InterruptedException e) {
+            log.error("Error addNodes interrupted ex:", e);
+            throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
+        }
         log.info("End addNodes addResult:[{}], usedTime:[{}]", JsonTools.toJSONString(addResult), Duration
             .between(startTime, Instant.now()).toMillis());
 
@@ -267,7 +272,7 @@ public class DeployController extends BaseController {
 
         log.info("Delete node delete:[{}], now:[{}]", delete, startTime);
 
-        this.deployService.deleteNode(nodeId);
+        deployService.deleteNode(nodeId);
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -355,6 +360,22 @@ public class DeployController extends BaseController {
         Instant startTime = Instant.now();
         log.info("Stop chain, chainName:[{}], now:[{}]", chainName, startTime);
 
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     *
+     * @param chainName
+     * @return
+     * @throws IOException
+     */
+    @GetMapping(value = "chain/restart")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse restartChain(@RequestParam(value = "chainName") String chainName,
+        @RequestParam(value = "groupId") Integer groupId) throws IOException {
+        Instant startTime = Instant.now();
+        log.info("Stop chain, chainName:[{}], groupId:{}, now:[{}]", chainName, groupId, startTime);
+        deployService.restartChain(chainName, groupId);
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
