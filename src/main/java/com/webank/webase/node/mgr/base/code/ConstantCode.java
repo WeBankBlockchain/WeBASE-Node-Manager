@@ -189,7 +189,7 @@ public class ConstantCode {
     public static final RetCode IP_CONF_PARAM_NULL_ERROR = RetCode.mark(202406, "ipconf null.");
     public static final RetCode CHAIN_NAME_EXISTS_ERROR = RetCode.mark(202407, "Chain name exists.");
     public static final RetCode INSERT_CHAIN_ERROR = RetCode.mark(202408, "Insert new chain failed.");
-    public static final RetCode NO_CONFIG_FILE_ERROR = RetCode.mark(202409, "No ipconf file.");
+    public static final RetCode CHAIN_ROOT_DIR_EXIST = RetCode.mark(202409, "Chain root dir exist, please move it manually.");
     public static final RetCode EXEC_BUILD_CHAIN_ERROR = RetCode.mark(202410, "Exec build chain script failed.");
     public static final RetCode IP_CONFIG_LINE_ERROR = RetCode.mark(202411, "ipconf line error.");
     public static final RetCode IP_NUM_ERROR = RetCode.mark(202412, "IP and num config error.");
