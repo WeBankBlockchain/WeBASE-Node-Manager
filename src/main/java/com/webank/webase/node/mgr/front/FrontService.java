@@ -18,6 +18,7 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
+import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
@@ -70,17 +71,25 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.Level;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.aop.framework.AopContext;
@@ -164,7 +173,7 @@ public class FrontService {
 	            Integer frontPort = tbFront.getFrontPort();
 				// query group list from chain
 				List<String> groupIdList;
-					groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+				groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
 				// get syncStatus
 				SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
 						frontPort, Integer.valueOf(groupIdList.get(0)));
@@ -489,6 +498,7 @@ public class FrontService {
     public List<TbFront> selectFrontListByChainId(int chainId) {
         // select all agencies by chainId
         List<TbAgency> tbAgencyList = this.agencyService.selectAgencyListByChainId(chainId);
+        log.info("selectFrontListByChainId tbAgencyList:{}", tbAgencyList);
 
         // select all fronts by all agencies
         List<TbFront> tbFrontList = tbAgencyList.stream()
@@ -505,11 +515,12 @@ public class FrontService {
     }
 
     /**
-     *
+     * get front list from normal front_group_map
      * @param groupId
      * @return
      */
     public List<TbFront> selectFrontListByGroupId(int groupId) {
+        log.info("selectFrontListByGroupId groupId:{}", groupId);
         // select all agencies by chainId
         List<TbFrontGroupMap> frontGroupMapList = this.frontGroupMapMapper.selectListByGroupId(groupId);
         if (CollectionUtils.isEmpty(frontGroupMapList)) {
@@ -671,15 +682,18 @@ public class FrontService {
      */
     public void updateNodeConfigIniByGroupId(TbChain chain, int groupId) throws IOException {
         int chainId = chain.getId();
+        log.info("start updateNodeConfigIniByGroupId chainId:{},groupId:{}", chainId, groupId);
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
 
         List<TbNode> tbNodeListOfGroup = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
+        log.info("updateNodeConfigIniByGroupId tbNodeListOfGroup:{}", tbNodeListOfGroup);
 
         // all fronts include old and new
         for (TbNode node : CollectionUtils.emptyIfNull(tbNodeListOfGroup)){
             // select related peers to update node config.ini p2p part
             List<TbFront> nodeRelatedFront = this.selectRelatedFront(node.getNodeId());
+            log.info("updateNodeConfigIniByGroupId nodeRelatedFront:{}", nodeRelatedFront);
 
             TbFront tbFront = this.getByNodeId(node.getNodeId());
 
@@ -694,11 +708,83 @@ public class FrontService {
                     tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedFront, guomi, chainIdInConfigIni);
 
         }
+        log.info("end updateNodeConfigIniByGroupId start batchScpNodeConfigIni");
 
         // scp to remote
         this.scpNodeConfigIni(chain, groupId);
+
     }
 
+    /**
+     * pass new Front list to generate group.ini
+     * @param chain
+     * @param groupId
+     * @param newFrontList when task exec another transaction, this cannot select new front list in db, so pass it
+     * @throws IOException
+     */
+    public void updateConfigIniByGroupIdAndNewFront(TbChain chain, int groupId, List<TbFront> newFrontList) throws IOException {
+        int chainId = chain.getId();
+        log.info("start updateNodeConfigIniByGroupId chainId:{},groupId:{}newFrontList:{}", chainId, groupId, newFrontList);
+        String chainName = chain.getChainName();
+        byte encryptType = chain.getEncryptType();
+
+        List<TbNode> dbNodeListOfGroup = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
+        log.info("updateNodeConfigIniByGroupId dbNodeListOfGroup:{}", dbNodeListOfGroup);
+
+        // add new node in db's node list
+        List<String> allNodeIdList = dbNodeListOfGroup.stream().map(TbNode::getNodeId).collect(Collectors.toList());
+        List<String> newNodeIdList = newFrontList.stream().map(TbFront::getNodeId).collect(Collectors.toList());
+        allNodeIdList.addAll(newNodeIdList);
+        log.info("updateNodeConfigIniByGroupId nodeIdList:{}", allNodeIdList);
+
+        // all map's normal front added
+        // <nodeId, List<FrontReleted> map
+        Map<String, List<TbFront>> nodeIdRelatedFrontMap = new HashMap<>();
+
+        // all fronts include old and new
+        for (String nodeId : CollectionUtils.emptyIfNull(allNodeIdList)) {
+            // select related peers to update node config.ini p2p part
+            // select from existed in db
+            List<TbFront> dbRelatedFrontList = this.selectRelatedFront(nodeId);
+            // add just added nodes' new front
+            if (dbRelatedFrontList.isEmpty()) {
+                List<TbFront> oldFrontListDb = this.selectFrontListByGroupId(groupId);
+                dbRelatedFrontList.addAll(oldFrontListDb);
+            }
+            dbRelatedFrontList.addAll(newFrontList);
+
+            // store
+            nodeIdRelatedFrontMap.put(nodeId, dbRelatedFrontList);
+            // start generate process
+            log.info("updateNodeConfigIniByGroupId nodeRelatedFront:{}", dbRelatedFrontList);
+            // find first target
+            TbFront tbFront = dbRelatedFrontList.stream().filter(f -> f.getNodeId().equals(nodeId)).findFirst().orElse(null);
+            if (tbFront == null) {
+                log.error("updateNodeConfigIniByGroupId cannot find front of nodeId:{}", nodeId);
+                continue;
+            }
+
+            boolean guomi = encryptType == EncryptType.SM2_TYPE;
+            int chainIdInConfigIni = this.constant.getDefaultChainId();
+
+            // local node root
+            Path nodeRoot = this.pathService.getNodeRoot(chainName, tbFront.getFrontIp(), tbFront.getHostIndex());
+
+            // generate config.ini
+            ThymeleafUtil.newNodeConfigIni(nodeRoot, tbFront.getChannelPort(),
+                tbFront.getP2pPort(), tbFront.getJsonrpcPort(), dbRelatedFrontList, guomi, chainIdInConfigIni);
+
+        }
+        log.info("end updateNodeConfigIniByGroupId start batchScpNodeConfigIni");
+
+        // scp to remote
+        // this.scpNodeConfigIni(chain, groupId);
+        try {
+            this.batchScpNodeConfigIni(chain, groupId, nodeIdRelatedFrontMap);
+        } catch (InterruptedException e) {
+            log.error("batchScpNodeConfigIni interrupted:[]", e);
+        }
+    }
     /**
      *
      * @param chain
@@ -714,7 +800,8 @@ public class FrontService {
     }
 
     /**
-     *
+     * sync scp node config init
+     * not multi thread
      * @param chain
      * @param groupId
      */
@@ -738,6 +825,81 @@ public class FrontService {
             // copy group config files to local node's conf dir
             ansibleService.scp(ScpTypeEnum.UP, host.getIp(), localScr, remoteDst);
         }
+    }
+
+     /**
+     * multi scp node config init
+     *  multi thread
+     * @param chain
+     * @param groupId
+     * @param newNodeRelatedFrontMap nodeId include new Front new node
+     */
+    public void batchScpNodeConfigIni(TbChain chain, int groupId, Map<String, List<TbFront>> newNodeRelatedFrontMap) throws InterruptedException {
+       // List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chain.getId(), groupId);
+        log.info("start batchScpNodeConfigIni chainId:{},groupId:{},newNodeRelatedFrontMap:{}",
+            chain.getId(), groupId, newNodeRelatedFrontMap);
+
+        final CountDownLatch checkHostLatch = new CountDownLatch(CollectionUtils.size(newNodeRelatedFrontMap));
+        // check success count
+        AtomicInteger configSuccessCount = new AtomicInteger(0);
+        Map<Integer, Future> taskMap = new HashedMap<>();
+
+        for (final String nodeId : newNodeRelatedFrontMap.keySet()) {
+            // find first target
+            TbFront front = newNodeRelatedFrontMap.get(nodeId).stream().filter(f -> f.getNodeId().equals(nodeId)).findFirst().orElse(null);
+            if (front == null) {
+                log.error("batchScpNodeConfigIni cannot find front of nodeId:{}", nodeId);
+                continue;
+            }
+            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+
+            // scp multi
+            Future<?> task = threadPoolTaskScheduler.submit(() -> {
+                try {
+                    // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]/config.ini
+                    // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/config.ini
+                    int hostIndex = front.getHostIndex();
+                    Path localNodePath = this.pathService
+                        .getNodeRoot(chain.getChainName(), front.getFrontIp(), hostIndex);
+                    String localScr = PathService.getConfigIniPath(localNodePath).toAbsolutePath()
+                        .toString();
+
+                    // ex: (node-mgr local) /opt/fisco/chain1/node0/config.ini
+                    String remoteDst = String
+                        .format("%s/%s/node%s/config.ini", host.getRootDir(), chain.getChainName(),
+                            hostIndex);
+
+                    // copy group config files to local node's conf dir
+                    ansibleService.scp(ScpTypeEnum.UP, host.getIp(), localScr, remoteDst);
+                    configSuccessCount.incrementAndGet();
+                } catch (Exception e) {
+                    log.error("batchScpNodeConfigIni:[{}] with unknown error", host.getIp(), e);
+                    this.updateStatus(front.getFrontId(), FrontStatusEnum.ADD_FAILED);
+                } finally {
+                    checkHostLatch.countDown();
+                }
+            });
+            taskMap.put(host.getId(), task);
+        }
+        // task to scp
+        checkHostLatch.await(constant.getExecScpTimeout(), TimeUnit.MILLISECONDS);
+        log.info("Verify batchScpNodeConfigIni timeout");
+        taskMap.forEach((key, value) -> {
+            int hostId = key;
+            Future<?> task = value;
+            if (!task.isDone()) {
+                log.error("batchScpNodeConfigIni host:[{}] timeout, cancel the task.", hostId);
+                hostService.updateStatus(hostId, HostStatusEnum.CONFIG_FAIL, "config host timeout.");
+                task.cancel(false);
+            }
+        });
+
+        boolean hostCheckSuccess = configSuccessCount.get() == CollectionUtils.size(newNodeRelatedFrontMap);
+        // check if all host init success
+        log.log(hostCheckSuccess ? Level.INFO: Level.ERROR,
+            "batchScpNodeConfigIni result, total:[{}], success:[{}]",
+            CollectionUtils.size(newNodeRelatedFrontMap), configSuccessCount.get());
+
     }
 
     /**
@@ -889,7 +1051,7 @@ public class FrontService {
             Set<Integer> groupIdSet = nodeList.stream().map(TbNode::getGroupId)
                     .collect(Collectors.toSet());
 
-            for (Integer groupId : groupIdSet){
+            for (Integer groupId : groupIdSet) {
                 int nodeCountOfGroup = CollectionUtils.size(this.nodeMapper.selectByGroupId(groupId));
                 if (nodeCountOfGroup != 1){ // group has another node.
                     throw new NodeMgrException(ConstantCode.NODE_NEED_REMOVE_FROM_GROUP_ERROR.attach(groupId));
@@ -909,6 +1071,49 @@ public class FrontService {
         this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
         // update front
         ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), FrontStatusEnum.STOPPED);
+    }
+
+    @Transactional
+    public void stopNodeForce(String nodeId) {
+        log.info("start stopNodeForce nodeId:{}", nodeId);
+        // get front
+        TbFront front = this.getByNodeId(nodeId);
+        if (front == null){
+            throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
+        }
+
+        int chainId = front.getChainId();
+        int runningTotal = 0;
+        List<TbFront> frontList = this.selectFrontListByChainId(chainId);
+        for (TbFront tbFront : frontList) {
+            if (FrontStatusEnum.isRunning(tbFront.getStatus())) {
+                runningTotal ++;
+            }
+        }
+        if (runningTotal < 2) {
+            log.error("Two running nodes at least of chain:[{}]", chainId);
+            throw new NodeMgrException(ConstantCode.TWO_NODES_AT_LEAST);
+        }
+
+        if (!FrontStatusEnum.isRunning(front.getStatus())) {
+            log.warn("Node:[{}:{}] is already stopped.",front.getFrontIp(),front.getHostIndex());
+            return ;
+        }
+
+        log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
+        this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
+        try {
+            Thread.sleep(constant.getDockerRestartPeriodTime());
+        } catch (InterruptedException e) {
+            log.warn("Docker stop and remove container sleep Interrupted");
+        }
+
+        // update map
+        this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
+        // update front
+        ((FrontService) AopContext.currentProxy()).updateStatus(front.getFrontId(), FrontStatusEnum.STOPPED);
+        log.info("end stopNodeForce. ");
+
     }
 
     @Transactional
@@ -1017,5 +1222,18 @@ public class FrontService {
             // not update front_group_map
             this.updateStatus(frontId, FrontStatusEnum.RUNNING);
         }
+    }
+
+    public List<TbFront> selectByFrontIdList(List<Integer> frontIdList){
+        log.info("selectByFrontIdList frontIdList:{}", frontIdList);
+        List<TbFront> frontList = new ArrayList<>();
+        frontIdList.forEach(id -> {
+            TbFront front = frontMapper.getById(id);
+            if (front == null) {
+                throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+            }
+            frontList.add(front);
+        });
+        return frontList;
     }
 }

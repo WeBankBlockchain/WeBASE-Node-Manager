@@ -127,14 +127,14 @@ public class NodeConfig {
     }
 
     /**
-     *
+     * copy oldNode to newNode path
      * @param oldNode
      * @param newNode
      */
-    public static void copyGroupConfigFiles(Path oldNode,Path newNode, int groupId) {
+    public static void copyGroupConfigFiles(Path oldNode, Path newNode, int groupId) {
         if (Files.exists(oldNode)) {
-            String groupGenesisFileName =String.format("conf/group.%s.genesis",groupId);
-            String groupIniFileName =String.format("conf/group.%s.ini",groupId);
+            String groupGenesisFileName =String.format("conf/group.%s.genesis", groupId);
+            String groupIniFileName =String.format("conf/group.%s.ini", groupId);
 
             try {
                 PathService.copyFile(

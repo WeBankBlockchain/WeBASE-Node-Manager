@@ -75,44 +75,6 @@ public class NodeAsyncService {
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
-//    /**
-//     * scp local chain config and front config to host
-//     * @param chainName
-//     */
-//    @Async("deployAsyncScheduler")
-//    public void asyncConfigChain(String chainName, OptionType optionType) {
-//        TbChain chain = this.tbChainMapper.getByChainName(chainName);
-//        if (chain == null) {
-//            log.error("No chain:[{}] to deploy.", chainName);
-//            return;
-//        }
-//
-//        try {
-//            // check chain status
-//            if (ChainStatusEnum.successOrDeploying(chain.getChainStatus())){
-//                log.error("Chain:[{}] is running or deploying", chainName);
-//                return;
-//            }
-//            boolean success = this.chainService.updateStatus(chain.getId(), ChainStatusEnum.CONFIGURING);
-//            if (!success) {
-//                log.error("Update chain:[{}] status to DEPLOYING failed when deploying.", chainName);
-//                return;
-//            }
-//
-//            // select all host to init
-//            List<TbHost> tbHostList = this.hostService.selectHostListByChainId(chain.getId());
-//            if (CollectionUtils.isEmpty(tbHostList)) {
-//                log.error("Chain:[{}:{}] has no host.", chain.getId(), chain.getChainName());
-//                return;
-//            }
-//
-////
-//        } catch (Exception e) {
-//            log.error("Init host list and start chain:[{}] error", chainName, e);
-//            chainService.updateStatus(chain.getId(), ChainStatusEnum.CONFIG_FAILED);
-//        }
-//    }
-
 
     /**
      * start chain
@@ -123,9 +85,13 @@ public class NodeAsyncService {
                                 FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess,FrontStatusEnum frontFailed ) {
         log.info("asyncStartChain chainId:{},optionType:{}", chainId, optionType);
         final boolean startSuccess = this.restartChain(chainId, optionType, frontBefore, frontSuccess, frontFailed);
-        threadPoolTaskScheduler.schedule(() ->
-            chainService.updateStatus(chainId, startSuccess ? success : failed),
-            Instant.now().plusMillis(1L));
+        threadPoolTaskScheduler.schedule(() -> {
+            chainService.updateStatus(chainId, startSuccess ? success : failed);
+            if (startSuccess) {
+                log.info("if started, refresh front group map");
+                groupService.resetGroupList();
+            }
+        }, Instant.now().plusMillis(1L));
     }
 
 
@@ -138,8 +104,8 @@ public class NodeAsyncService {
     @Async("deployAsyncScheduler")
     public void asyncRestartRelatedFront(int chainId, Set<Integer> groupIdSet, OptionType optionType,
                          FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess, FrontStatusEnum frontFailed ) {
+        log.info("start asyncRestartRelatedFront chainName:{}", chainId);
         ProgressTools.setStarting();
-
         // update chain to updating
         this.chainService.updateStatus(chainId, ChainStatusEnum.RESTARTING);
 
@@ -154,26 +120,61 @@ public class NodeAsyncService {
     }
 
     /**
-     * 扩容节点
+     * 扩容节点时，重启所有相关节点
      * @param chain
-     * @param host
      * @param groupId
      * @param optionType
-     * @param newFrontList
+     * @param newFrontIdList
      */
     @Async("deployAsyncScheduler")
-    public void asyncAddNode(TbChain chain, TbHost host, int groupId, OptionType optionType, List<TbFront> newFrontList) {
+    public void asyncRestartNode(TbChain chain, int groupId, OptionType optionType, List<Integer> newFrontIdList) {
         try {
-            log.info("asyncAddNode Init host:[{}]",host.getIp());
+            log.info("start asyncRestartNode newFrontIdList:{}", newFrontIdList);
             // start front and  related front
             this.asyncRestartRelatedFront(chain.getId(), Collections.singleton(groupId), optionType,
                         FrontStatusEnum.STARTING, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
         } catch (Exception e) {
-            log.error("Init host:[{}] list and start chain:[{}] error",host.getIp() ,chain.getChainName(), e);
-            newFrontList.forEach((tbFront -> this.frontService.updateStatus(tbFront.getFrontId(), FrontStatusEnum.ADD_FAILED)));
+            log.error("asyncRestartNode start chain:[{}] error:{}", chain.getChainName(), e);
+            newFrontIdList.forEach((id -> this.frontService.updateStatus(id, FrontStatusEnum.ADD_FAILED)));
         }
-
     }
+
+    /**
+     * 扩容节点，并启动
+     * @param chainId
+     * @param optionType
+     * @param newFrontIdList
+     */
+    @Async("deployAsyncScheduler")
+    public void asyncStartAddedNode(int chainId, OptionType optionType, List<Integer> newFrontIdList) {
+        log.info("asyncStartAddedNode Init newFrontIdList:[{}]", newFrontIdList);
+        List<TbFront> frontList = frontService.selectByFrontIdList(newFrontIdList);
+        // group front by host
+        Map<Integer, List<TbFront>> hostFrontListMap = frontList.stream().collect(Collectors.groupingBy(TbFront::getHostId));
+
+        try {
+            // start one front
+            ProgressTools.setStarting();
+            // update chain to updating
+            this.chainService.updateStatus(chainId, ChainStatusEnum.RESTARTING);
+
+            // restart front by host
+            this.restartFrontByHost(chainId, optionType, hostFrontListMap,
+                FrontStatusEnum.STARTING, FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
+
+            // update chain to running
+            threadPoolTaskScheduler.schedule(() -> {
+                this.chainService.updateStatus(chainId, ChainStatusEnum.RUNNING);
+                // set pull cert to false
+                CertTools.isPullFrontCertsDone = false;
+            }, Instant.now().plusMillis(constant.getDockerRestartPeriodTime()));
+
+        } catch (Exception e) {
+            log.error("asyncStartAddedNode start newFrontIdList:[{}] error", newFrontIdList, e);
+            newFrontIdList.forEach((id -> this.frontService.updateStatus(id, FrontStatusEnum.ADD_FAILED)));
+        }
+    }
+
     /**
      * if add new node or delete old node, update node's p2p list of ip
      * @param chainId
@@ -181,14 +182,14 @@ public class NodeAsyncService {
      * @param optionType
      */
     private boolean restartFrontOfGroupSet(int chainId, Set<Integer> groupIdSet, OptionType optionType,
-                                FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess,FrontStatusEnum frontFailed ){
+                                FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess, FrontStatusEnum frontFailed ){
         List<TbFront> frontList = this.frontService.selectFrontListByGroupIdSet(groupIdSet);
         if (CollectionUtils.isEmpty(frontList)){
             log.info("No front of group id set:[{}]",JsonTools.toJSONString(groupIdSet));
             return false;
         }
 
-        log.info("Restart front of group:[{}]",JsonTools.toJSONString(groupIdSet));
+        log.info("Restart front of group:[{}]", JsonTools.toJSONString(groupIdSet));
 
         // group front by host
         Map<Integer, List<TbFront>> hostFrontListMap = frontList.stream().collect(Collectors.groupingBy(TbFront::getHostId));
