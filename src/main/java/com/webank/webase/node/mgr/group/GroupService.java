@@ -1216,14 +1216,14 @@ public class GroupService {
      * @param newFrontList
      * @throws IOException
      */
-    public void generateNewNodesGroupConfigsAndScp(TbChain chain, int groupId, String ip,
-           List<TbFront> newFrontList) {
+    public void generateNewNodesGroupConfigsAndScp(TbChain chain, int groupId, String ip, List<TbFront> newFrontList) {
         int chainId = chain.getId();
         String chainName = chain.getChainName();
-        long now = System.currentTimeMillis();
 
-        List<String> nodeIdList = newFrontList.stream().map(TbFront::getNodeId)
-                .collect(Collectors.toList());
+        // 1.4.3 not support add group when add node
+        // long now = System.currentTimeMillis();
+        // List<String> nodeIdList = newFrontList.stream().map(TbFront::getNodeId)
+        //        .collect(Collectors.toList());
 
         // copy group.x.[genesis|conf] from old front
         TbNode oldNode = this.nodeService.getOldestNodeByChainIdAndGroupId(chainId, groupId);

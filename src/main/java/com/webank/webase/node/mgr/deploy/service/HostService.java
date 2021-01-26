@@ -388,7 +388,7 @@ public class HostService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void generateHostSDKCertAndScp(byte encryptType, String chainName, TbHost host, String agencyName)
         throws NodeMgrException {
-        log.info("start generateHostSDKAndScp encryptType:{},chainName:{},host:{},agencyName:{}",
+        log.info("start generateHostSDKCertAndScp encryptType:{},chainName:{},host:{},agencyName:{}",
             encryptType, chainName, host, agencyName);
         ProgressTools.setGenConfig();
         String ip = host.getIp();
@@ -396,7 +396,7 @@ public class HostService {
         Path sdkPath = this.pathService.getSdk(chainName, ip);
 
         if (Files.exists(sdkPath)){
-            log.warn("generateHostSDKAndScp Exists sdk dir of host:[{}:{}], delete first.", ip,
+            log.warn("generateHostSDKCertAndScp Exists sdk dir of host:[{}:{}], delete first.", ip,
                 sdkPath.toAbsolutePath().toAbsolutePath());
             try {
                 FileUtils.deleteDirectory(sdkPath.toFile());
@@ -404,7 +404,7 @@ public class HostService {
                 throw new NodeMgrException(ConstantCode.DELETE_OLD_SDK_DIR_ERROR);
             }
         }
-        log.info("generateHostSDKAndScp execGenNode");
+        log.info("generateHostSDKCertAndScp execGenNode");
         // call shell to generate new node config(private key and crt)
         ExecuteResult executeResult = this.deployShellService.execGenNode(
                 encryptType, chainName, agencyName, sdkPath.toAbsolutePath().toString());
@@ -417,11 +417,27 @@ public class HostService {
         // init sdk dir
         NodeConfig.initSdkDir(encryptType, sdkPath);
 
+        this.scpHostSdkCert(chainName, host);
+        log.info("end generateHostSDK");
+
+    }
+
+    /**
+     * separated scp from generate sdk cert
+     * @param chainName
+     * @param host
+     */
+    private void scpHostSdkCert(String chainName, TbHost host) {
+        log.info("start scpHostSdkCert chainName:{},host:{}", chainName, host);
+        String ip = host.getIp();
+        // host's sdk path
+        Path sdkPath = this.pathService.getSdk(chainName, ip);
+
         // scp sdk to remote
         String src = String.format("%s", sdkPath.toAbsolutePath().toString());
         String dst = PathService.getChainRootOnHost(host.getRootDir(), chainName);
 
-        log.info("generateHostSDKAndScp scp: Send files from:[{}] to:[{}:{}].", src, ip, dst);
+        log.info("scpHostSdkCert scp: Send files from:[{}] to:[{}:{}].", src, ip, dst);
         ProgressTools.setScpConfig();
         try {
             ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
@@ -438,10 +454,10 @@ public class HostService {
         }
 
         this.updateStatus(host.getId(), HostStatusEnum.CONFIG_SUCCESS, "");
-        log.info("end generateHostSDKAndScp");
+        log.info("end scpHostSdkCert");
 
     }
-
+    
     /**
      * delete host by
      * @param hostId

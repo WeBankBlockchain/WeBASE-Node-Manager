@@ -184,9 +184,9 @@ public class NodeService {
      * delete by node and group.
      */
     public void deleteByNodeAndGroupId(String nodeId, int groupId) throws NodeMgrException {
-        log.debug("start deleteByNodeAndGroupId nodeId:{} groupId:{}", nodeId, groupId);
+        log.info("start deleteByNodeAndGroupId nodeId:{} groupId:{}", nodeId, groupId);
         nodeMapper.deleteByNodeAndGroup(nodeId, groupId);
-        log.debug("end deleteByNodeAndGroupId");
+        log.info("end deleteByNodeAndGroupId");
     }
 
     /**
@@ -379,7 +379,8 @@ public class NodeService {
             String description,
             final DataStatus dataStatus
     ) throws NodeMgrException {
-        if (! ValidateUtil.ipv4Valid(ip)){
+        log.info("start insert tb_node:{}", nodeId);
+        if (!ValidateUtil.ipv4Valid(ip)){
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
@@ -390,6 +391,8 @@ public class NodeService {
         if (nodeMapper.add(node) != 1) {
             throw new NodeMgrException(ConstantCode.INSERT_NODE_ERROR);
         }
+        log.info("end insert tb_node:{}", node);
+
         return node;
     }
 
@@ -408,18 +411,48 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId,final int groupId){
+    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId, final int groupId){
         // select all fronts by all agencies
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
+        log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}", tbFrontList);
 
         List<TbNode> tbNodeList = tbFrontList.stream()
                 .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(),groupId))
-                .filter((node) -> node != null)
+                .filter(Objects::nonNull)
                 .filter((node) -> node.getGroupId() == groupId)
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(tbNodeList)) {
             log.error("Group of:[{}] chain:[{}] has no node.", groupId, chainId);
+            return Collections.emptyList();
+        }
+        return tbNodeList;
+    }
+
+    /**
+     * specific target frontList in batchAddNode
+     * @param newFrontIdList specific front
+     * @param chainId
+     * @param groupId
+     * @return
+     */
+    public List<TbNode> selectNodeListByChainIdAndGroupId(List<Integer> newFrontIdList, int chainId, final int groupId){
+        log.info("selectNodeListByChainIdAndGroupId frontIdList:{}", newFrontIdList);
+        List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
+
+        List<TbFront> newFrontList = frontService.selectByFrontIdList(newFrontIdList);
+
+        tbFrontList.removeAll(newFrontList);
+        tbFrontList.addAll(newFrontList);
+
+        List<TbNode> tbNodeList = tbFrontList.stream()
+                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(),groupId))
+                .filter(Objects::nonNull)
+                .filter((node) -> node.getGroupId() == groupId )
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(tbNodeList)) {
+            log.error("Group of:[{}] of newFrontIdList:{} has no node.", groupId, newFrontIdList);
             return Collections.emptyList();
         }
         return tbNodeList;
