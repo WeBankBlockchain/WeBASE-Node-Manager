@@ -67,8 +67,6 @@ public class PrecompiledService {
     private FrontMapper frontMapper;
     @Autowired
     private ConstantProperties constants;
-    @Autowired
-    private GroupService groupService;
 
     private static final String CONTRACT_MANAGE_GETSTATUS = "getStatus";
     private static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
