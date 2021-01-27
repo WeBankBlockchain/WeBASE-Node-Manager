@@ -416,8 +416,9 @@ public class NodeService {
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
         log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}", tbFrontList);
 
+        // filter only not removed node will be added
         List<TbNode> tbNodeList = tbFrontList.stream()
-                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(),groupId))
+                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(), groupId))
                 .filter(Objects::nonNull)
                 .filter((node) -> node.getGroupId() == groupId)
                 .collect(Collectors.toList());

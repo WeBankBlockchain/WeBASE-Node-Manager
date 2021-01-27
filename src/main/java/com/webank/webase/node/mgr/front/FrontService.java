@@ -573,7 +573,7 @@ public class FrontService {
     public List<TbFront> initFrontAndNode(List<DeployNodeInfo> nodeInfoList, TbChain chain, TbHost host, int agencyId,
                                           String agencyName, int groupId, FrontStatusEnum frontStatusEnum)
         throws NodeMgrException, IOException {
-        log.info("start initFrontAndNode ");
+        log.info("start initFrontAndNode nodeInfoList:{}, host:{}", nodeInfoList, host);
         ProgressTools.setInitChainData();
 
         String chainName = chain.getChainName();
@@ -599,19 +599,20 @@ public class FrontService {
             Path nodeRoot = pathService.getNodeRoot(chainName, ip, currentIndex);
 
             if(Files.exists(nodeRoot)){
-                log.warn("Exists node:[{}:{}] config, delete first.", ip, nodeRoot.toAbsolutePath().toString());
+                log.warn("initFrontAndNode Exists node:[{}:{}] config, delete first.", ip, nodeRoot.toAbsolutePath().toString());
                 try {
                     FileUtils.deleteDirectory(nodeRoot.toFile());
                 } catch (IOException e) {
                     throw new NodeMgrException(ConstantCode.DELETE_OLD_NODE_DIR_ERROR);
                 }
             }
+            log.info("start initFrontAndNode gen node cert");
             // exec gen_node_cert.sh
             ExecuteResult executeResult = this.deployShellService.execGenNode(encryptType, chainName, agencyName,
                     nodeRoot.toAbsolutePath().toString());
 
             if (executeResult.failed()) {
-                log.error("Generate node:[{}:{}] key and crt error.", ip, currentIndex);
+                log.error("initFrontAndNode Generate node:[{}:{}] key and crt error.", ip, currentIndex);
                 throw new NodeMgrException(ConstantCode.EXEC_GEN_NODE_ERROR.attach(executeResult.getExecuteOut()));
             }
 
@@ -722,17 +723,21 @@ public class FrontService {
      * @param newFrontList when task exec another transaction, this cannot select new front list in db, so pass it
      * @throws IOException
      */
-    public void updateConfigIniByGroupIdAndNewFront(TbChain chain, int groupId, List<TbFront> newFrontList) throws IOException {
+    public void updateConfigIniByGroupIdAndNewFront(TbChain chain, int groupId, final List<TbFront> newFrontList) throws IOException {
         int chainId = chain.getId();
         log.info("start updateNodeConfigIniByGroupId chainId:{},groupId:{}newFrontList:{}", chainId, groupId, newFrontList);
         String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
 
+        // all existed front's nodeid, include removed node's front
+        // 游离的front是否需要选进来。
+        // List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
         List<TbNode> dbNodeListOfGroup = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
         log.info("updateNodeConfigIniByGroupId dbNodeListOfGroup:{}", dbNodeListOfGroup);
 
-        // add new node in db's node list
+        // all node id included removed node's front
         List<String> allNodeIdList = dbNodeListOfGroup.stream().map(TbNode::getNodeId).collect(Collectors.toList());
+        // add new node in db's node list
         List<String> newNodeIdList = newFrontList.stream().map(TbFront::getNodeId).collect(Collectors.toList());
         allNodeIdList.addAll(newNodeIdList);
         log.info("updateNodeConfigIniByGroupId nodeIdList:{}", allNodeIdList);
@@ -748,6 +753,7 @@ public class FrontService {
             List<TbFront> dbRelatedFrontList = this.selectRelatedFront(nodeId);
             // add just added nodes' new front
             if (dbRelatedFrontList.isEmpty()) {
+                // if exist not new front, but removed node's front, not add
                 List<TbFront> oldFrontListDb = this.selectFrontListByGroupId(groupId);
                 dbRelatedFrontList.addAll(oldFrontListDb);
             }
