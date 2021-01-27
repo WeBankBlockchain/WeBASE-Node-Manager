@@ -24,7 +24,7 @@ import java.util.List;
 
 public class PemUtils {
     public static final String crtContentHeadNoLF = "-----BEGIN PRIVATE KEY-----" ;
-    public static final String crtContentHead = "-----BEGIN PRIVATE KEY-----" ;
+    public static final String crtContentHead = "-----BEGIN PRIVATE KEY-----\n" ;
     public static final String crtContentTail = "-----END PRIVATE KEY-----\n" ;
     public static final String crtTailForConcat = "\n-----END PRIVATE KEY-----\n" ;
 
