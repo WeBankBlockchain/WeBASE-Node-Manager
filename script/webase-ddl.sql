@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS tb_front (
   chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
   PRIMARY KEY (`front_id`),
   UNIQUE KEY `unique_node_id` (`node_id`),
+  UNIQUE KEY `unique_ip_port` (`front_ip`,`front_port`),
   UNIQUE KEY `unique_agency_id_host_id_front_port` (`agency_id`,`front_ip`,`front_port`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='前置服务信息表';
 
@@ -66,6 +67,7 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   status int(11) DEFAULT 1 NOT NULL COMMENT '节点（前置）的群组状态，1-normal，2-invalid',
+  type tinyint(4) DEFAULT 1 COMMENT '节点的共识类型：1-共识节点（默认），2-观察节点',
   PRIMARY KEY (map_id),
   unique  unique_front_group (front_id,group_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=600001 DEFAULT CHARSET=utf8 COMMENT='前置群组映射表';
@@ -173,30 +175,10 @@ CREATE TABLE IF NOT EXISTS tb_user (
   description varchar(250) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (user_id),
   UNIQUE KEY unique_name (group_id,user_name,account),
+  UNIQUE KEY unique_address (group_id,address),
   KEY index_address (address),
   UNIQUE KEY unique_uuid (sign_user_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=700001 DEFAULT CHARSET=utf8 COMMENT='用户信息表';
-
-
-
--- ----------------------------
--- @Deprecated: not save privateKey anymore
--- Table structure for tb_user_key_mapping
--- ----------------------------
--- CREATE TABLE IF NOT EXISTS tb_user_key_mapping (
---  map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
---  user_id int(11) NOT NULL COMMENT '用户编号',
---  group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
---  private_key text NOT NULL COMMENT '私钥',
---  map_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
---  create_time datetime DEFAULT NULL COMMENT '创建时间',
---  modify_time datetime DEFAULT NULL COMMENT '修改时间',
---  PRIMARY KEY (map_id),
---  UNIQUE KEY unique_id (user_id)
--- ) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='用户私钥映射表';
-
-
-
 
 -- ----------------------------
 -- Table structure for tb_account_info
@@ -378,7 +360,6 @@ CREATE TABLE IF NOT EXISTS `tb_chain` (
   `version` varchar(64) NOT NULL DEFAULT '' COMMENT '创建链时选择的镜像版本',
   `encrypt_type` tinyint(8) unsigned NOT NULL DEFAULT '1' COMMENT '加密类型：1，标密；2，国密；默认 1 ',
   `chain_status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '链状态：0，初始化；1，部署中；2，部署失败；3，部署成功等等',
-  `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
   `webase_sign_addr` varchar(255) NOT NULL DEFAULT '127.0.0.1:5004' COMMENT 'WeBASE-Sign 的访问地址',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
@@ -408,19 +389,14 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `tb_host` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
-  `agency_id` int(10) unsigned NOT NULL DEFAULT '1' COMMENT '所属机构 ID',
-  `agency_name` varchar(64) DEFAULT NULL COMMENT '所属机构名称，冗余字段',
   `ip` varchar(16) NOT NULL COMMENT '主机IP',
-  `ssh_user` varchar(64) NOT NULL DEFAULT 'root' COMMENT 'SSH 登录账号',
-  `ssh_port` int(10) unsigned NOT NULL DEFAULT '22' COMMENT 'SSH 端口',
   `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
-  `docker_port` int(10) unsigned NOT NULL DEFAULT '2375' COMMENT 'Docker demon 的端口',
   `status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '主机状态：0，新建；1，初始化；2，运行等等',
-  `remark` varchar(512) DEFAULT '' COMMENT 'remark',
+  `remark` text DEFAULT NULL COMMENT 'remark',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unq_agency_id,ip` (`agency_id`,`ip`) USING BTREE
+  UNIQUE KEY `unique_ip` (`ip`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物理主机信息';
 
 -- ----------------------------
@@ -449,6 +425,20 @@ CREATE TABLE IF NOT EXISTS tb_contract_path (
   UNIQUE KEY uk_group_path_name (group_id,contract_path)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约路径表';
 
+CREATE TABLE IF NOT EXISTS tb_cns (
+  id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  group_id int(11) NOT NULL COMMENT '群组ID',
+  contract_path varchar(24) binary NOT NULL COMMENT '合约所在目录',
+  contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
+  cns_name varchar(120) binary NOT NULL COMMENT 'cns名称',
+  version varchar(120) NOT NULL COMMENT 'cns版本',
+  contract_address varchar(64) NOT NULL COMMENT '合约地址',
+  contract_abi mediumtext NOT NULL COMMENT '合约abi内容',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_version (group_id,cns_name,version)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='cns信息表';
 
 
 SET FOREIGN_KEY_CHECKS = 1;

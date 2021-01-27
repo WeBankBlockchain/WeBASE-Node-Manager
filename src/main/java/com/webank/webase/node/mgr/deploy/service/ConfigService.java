@@ -14,6 +14,8 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +30,7 @@ import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.util.ObjectUtils;
 
 @Log4j2
 @Component
@@ -70,7 +73,8 @@ public class ConfigService {
 //                            CollectionUtils.size(configList));
 
                 List<TbConfig> configList = tbConfigMapper.selectByType(type.getId());
-                return filterByEncryptType(configList, encryptType.getEncryptType());
+                // return filterByEncryptType(configList, encryptType.getEncryptType());
+                return configList;
             default:
                 break;
         }
@@ -116,6 +120,19 @@ public class ConfigService {
 
         public void setName(String name) {
             this.name = name;
+        }
+    }
+
+    /**
+     * check config value in db
+     */
+    public void checkValueInDb(String configValue) {
+        log.info("checkValueInDb configValue:{}", configValue);
+        List<TbConfig> configList = tbConfigMapper.selectByConfigValue(configValue);
+        log.info("checkValueInDb get config list:{}", configList);
+        if (configList == null || configList.isEmpty()) {
+            log.error("checkValueInDb configValue:{} not in db!", configValue);
+            throw new NodeMgrException(ConstantCode.TAG_ID_PARAM_ERROR);
         }
     }
 

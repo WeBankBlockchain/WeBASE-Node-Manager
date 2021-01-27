@@ -88,10 +88,10 @@ public class SshTools {
                 if (status < 0) {
                     log.error("Exec command:[{}] on remote host:[{}], no exit status:[{}] not set, log:[{}].",
                             newCommand, ip, status, execLog.toString());
-                    return Pair.of(true,execLog.toString());
+                    return Pair.of(true, execLog.toString());
                 } else if (status == 0) {
                     log.info("Exec command:[{}] on remote host:[{}] success, log:[{}].", newCommand, ip, execLog.toString());
-                    return Pair.of(true,execLog.toString());
+                    return Pair.of(true, execLog.toString());
                 } else {
                     log.error("Exec command:[{}] on remote host:[{}] with error[{}], log:[{}].", newCommand, ip, status, execLog.toString());
                 }
@@ -179,7 +179,6 @@ public class SshTools {
     }
 
     /**
-     *
      * @param ip
      * @param dir
      */
@@ -190,7 +189,6 @@ public class SshTools {
     }
 
     /**
-     *
      * @param ip
      * @param src
      * @param dst
@@ -214,7 +212,7 @@ public class SshTools {
      */
     public static Pair<Boolean,String> execDocker(String ip, String originalCommand, String sshUser,int sshPort,String privateKey) {
         log.info("Execute docker command:[{}] on host:[{}]", originalCommand, ip);
-        return exec(ip,originalCommand,sshUser,sshPort,privateKey);
+        return exec(ip, originalCommand, sshUser, sshPort, privateKey);
     }
 
     /**
@@ -227,7 +225,7 @@ public class SshTools {
      * @param privateKey
      * @return
      */
-    public static boolean killCommand(String ip, String commandToKill, String sshUser,int sshPort,String privateKey) {
+    public static boolean killCommand(String ip, String commandToKill, String sshUser, int sshPort,String privateKey) {
         String newCommand= String.format("sudo pkill -f '%s'", commandToKill);
         log.info("Execute kill command:[{}] on host:[{}]", newCommand, ip);
         return exec(ip,newCommand,sshUser,sshPort,privateKey).getKey();

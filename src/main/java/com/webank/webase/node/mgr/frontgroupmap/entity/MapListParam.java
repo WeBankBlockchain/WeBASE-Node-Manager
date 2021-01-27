@@ -19,19 +19,21 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class MapListParam {
-    private int mapId;
-    private int frontId;
-    private int groupId;
-    private int status;
+    private Integer mapId;
+    private Integer frontId;
+    private Integer groupId;
+    private Integer status;
+    private Integer type;
 
-    public MapListParam(int frontId, int groupId) {
+    public MapListParam(Integer frontId, Integer groupId) {
         this.frontId = frontId;
         this.groupId = groupId;
     }
 
-    public MapListParam(int frontId, int groupId, int status) {
+    public MapListParam(Integer frontId, Integer groupId, Integer status, Integer type) {
         this.frontId = frontId;
         this.groupId = groupId;
         this.status = status;
+        this.type = type;
     }
 }

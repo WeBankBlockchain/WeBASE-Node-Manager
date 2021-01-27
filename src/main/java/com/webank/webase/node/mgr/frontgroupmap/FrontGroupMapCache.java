@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.frontgroupmap;
 
 
+import com.webank.webase.node.mgr.base.enums.ConsensusType;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,8 @@ import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Component
@@ -44,15 +47,47 @@ public class FrontGroupMapCache {
     }
 
     /**
+     * get map filter by consensus type, sealer first
+     * filter by block height
+     * @return
+     */
+    @Transactional(isolation= Isolation.READ_COMMITTED)
+    private List<FrontGroup> getSealerOrObserverMap() {
+        MapListParam param = new MapListParam();
+        param.setType(ConsensusType.SEALER.getValue());
+        List<FrontGroup> targetMap = null;
+        targetMap = mapService.getList(param);
+        log.debug("get sealer map:{} param:{}", targetMap, param);
+        if (targetMap == null || targetMap.isEmpty()) {
+            param.setType(ConsensusType.OBSERVER.getValue());
+            targetMap = mapService.getList(param);
+            log.debug("get observer map:{} param:{}", targetMap, param);
+        }
+        log.debug("getSealerOrObserverMap targetMap:{}", targetMap);
+        return targetMap;
+    }
+
+    /**
      * reset mapList.
+     * 优先选择共识节点
      */
     public List<FrontGroup> resetMapList() {
-        mapList = mapService.getList(new MapListParam());
+        mapList = this.getSealerOrObserverMap();
         return mapList;
     }
 
     /**
+     * get all mapList.
+     */
+    public List<FrontGroup> getAllMap() {
+        if (mapList == null || mapList.size() == 0) {
+            mapList = resetMapList();
+        }
+        return mapList;
+    }
+    /**
      * get mapList.
+     * filter by group status
      */
     public List<FrontGroup> getMapListByGroupId(int groupId) {
         List<FrontGroup> list = getAllMap();
@@ -65,17 +100,9 @@ public class FrontGroupMapCache {
             .filter(m -> groupId == m.getGroupId()
                     && m.getStatus() == GroupStatus.NORMAL.getValue())
             .collect(Collectors.toList());
-        log.info("getMapListByGroupId map size:{}", map.size());
+        log.debug("getMapListByGroupId map size:{}", map.size());
         return map;
     }
 
-    /**
-     * get all mapList.
-     */
-    public List<FrontGroup> getAllMap() {
-        if (mapList == null || mapList.size() == 0) {
-            mapList = resetMapList();
-        }
-        return mapList;
-    }
+
 }
