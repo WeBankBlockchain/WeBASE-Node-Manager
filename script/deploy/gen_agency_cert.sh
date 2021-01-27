@@ -176,7 +176,8 @@ check_and_install_tassl(){
             curl -LO https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl_mac.tar.gz
             mv tassl_mac.tar.gz tassl.tar.gz
         else
-            curl -LO https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl.tar.gz
+            # curl -LO https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl.tar.gz
+            curl -LO https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz
         fi
         tar zxvf tassl.tar.gz && rm tassl.tar.gz
         chmod u+x tassl
