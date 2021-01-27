@@ -36,4 +36,8 @@ public class TransactionParam {
     private String contractAddress;
     private List<Object> contractAbi;
     private List<Object> funcParam;
+    // 1.4.3
+    private boolean useCns = false;
+    private String cnsName;
+    private String version;
 }

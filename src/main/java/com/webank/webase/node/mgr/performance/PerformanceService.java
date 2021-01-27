@@ -31,6 +31,7 @@ import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 @Log4j2
@@ -74,10 +75,15 @@ public class PerformanceService {
                 FRONT_PERFORMANCE_RATIO);
         url = url + "?" + urlParam;
         log.info("getPerformanceRatio request url:{}", url);
-
-        Object rspObj = genericRestTemplate.getForObject(url, Object.class);
-        log.debug("end getPerformanceRatio. rspObj:{}", JsonTools.toJSONString(rspObj));
-        return rspObj;
+        // raw request, not use front group map
+        try {
+            Object rspObj = genericRestTemplate.getForObject(url, Object.class);
+            log.debug("end getPerformanceRatio. rspObj:{}", JsonTools.toJSONString(rspObj));
+            return rspObj;
+        } catch (ResourceAccessException e) {
+            log.error("getPerformanceRatio. ResourceAccessException:{}", e);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
 
     }
 

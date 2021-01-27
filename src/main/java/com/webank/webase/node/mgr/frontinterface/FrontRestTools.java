@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.frontinterface;
 
+import com.webank.webase.node.mgr.node.NodeService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -89,6 +90,7 @@ public class FrontRestTools {
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
     public static final String URI_KEY_PAIR_IMPORT_WITH_SIGN = "privateKey/importWithSign";
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
+    public static final String URI_CONTRACT_REGISTER_CNS = "contract/registerCns";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
     public static final String URI_SEND_TRANSACTION_WITH_SIGN = "trans/handleWithSign";
     public static final String URI_CHAIN = "chain";
@@ -133,7 +135,7 @@ public class FrontRestTools {
                 URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
                 URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE,
-                URI_KEY_PAIR_IMPORT_WITH_SIGN,
+                URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
                 URI_FRONT_VERSION, URI_SIGN_VERSION,
                 URI_GOVERNANCE, URI_GOVERNANCE_COMMITTEE, URI_GOVERNANCE_COMMITTEE_LIST,
                 URI_GOVERNANCE_COMMITTEE_WEIGHT, URI_GOVERNANCE_THRESHOLD,
@@ -158,6 +160,12 @@ public class FrontRestTools {
      */
     @Autowired
     private FrontService frontService;
+    /**
+     * update node status
+     */
+    @Autowired
+    private NodeService nodeService;
+    private static final int NODE_IS_DOWN = -1;
 
     private static Map<String, FailInfo> failRequestMap = new HashMap<>();
 
@@ -258,12 +266,12 @@ public class FrontRestTools {
     private FrontUrlInfo buildFrontUrl(ArrayList<FrontGroup> list, String uri, HttpMethod httpMethod) {
         // v1.4.2 recover random one
         Collections.shuffle(list);
-        log.info("====================map list:{}", JsonTools.toJSONString(list));
+        log.debug("====================map list:{}", JsonTools.toJSONString(list));
         Iterator<FrontGroup> iterator = list.iterator();
         String uriTemp = uri;
         while (iterator.hasNext()) {
             FrontGroup frontGroup = iterator.next();
-            log.info("============frontGroup:{}", JsonTools.toJSONString(frontGroup));
+            log.debug("============frontGroup:{}", JsonTools.toJSONString(frontGroup));
             FrontUrlInfo frontUrlInfo = new FrontUrlInfo();
             frontUrlInfo.setFrontId(frontGroup.getFrontId());
 
@@ -317,21 +325,36 @@ public class FrontRestTools {
      * get from front for entity.
      */
     public <T> T getForEntity(Integer groupId, String uri, Class<T> clazz) {
-        return restTemplateExchange(groupId, uri, HttpMethod.GET, null, clazz);
+        T response = restTemplateExchange(groupId, uri, HttpMethod.GET, null, clazz);
+        if (response == null) {
+            log.error("getForEntity response is null!");
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
+        return response;
     }
 
     /**
      * post from front for entity.
      */
     public <T> T postForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
-        return restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
+        T response = restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
+        if (response == null) {
+            log.error("postForEntity response is null!");
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
+        return response;
     }
 
     /**
      * delete from front for entity.
      */
     public <T> T deleteForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
-        return restTemplateExchange(groupId, uri, HttpMethod.DELETE, params, clazz);
+        T response = restTemplateExchange(groupId, uri, HttpMethod.DELETE, params, clazz);
+        if (response == null) {
+            log.error("deleteForEntity response is null!");
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
+        return response;
     }
 
     /**
@@ -376,21 +399,27 @@ public class FrontRestTools {
                 frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.NORMAL.getValue());
                 return response.getBody();
             } catch (ResourceAccessException ex) {
+                // case1: request front failed
                 log.warn("fail restTemplateExchange", ex);
                 setFailCount(url, method.toString());
                 if (isServiceSleep(url, method.toString())) {
                     frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
-                    throw ex;
+                    throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
                 }
                 log.info("continue next front", ex);
                 continue;
             } catch (HttpStatusCodeException ex) {
+                // case2: request front success but return fail
                 JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
                 log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error), ex);
                 try {
                     int code = error.get("code").intValue();
                     String errorMessage = error.get("errorMessage").asText();
                     frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
+                    // v1.4.3 if node is down but front normal, return -1
+                    if (code == NODE_IS_DOWN) {
+                        nodeService.updateNodeActiveStatus(frontUrlInfo.getFrontId(), DataStatus.DOWN.getValue());
+                    }
                     throw new NodeMgrException(code, errorMessage);
                 } catch (NullPointerException e) {
                     throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);

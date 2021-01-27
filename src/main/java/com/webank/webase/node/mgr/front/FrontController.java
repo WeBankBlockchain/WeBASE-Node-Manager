@@ -90,17 +90,19 @@ public class FrontController extends BaseController {
     @GetMapping(value = "/find")
     public BasePageResponse queryFrontList(
         @RequestParam(value = "frontId", required = false) Integer frontId,
-        @RequestParam(value = "groupId", required = false) Integer groupId)
+        @RequestParam(value = "groupId", required = false) Integer groupId,
+        @RequestParam(value = "frontStatus", required = false) Integer frontStatus)
         throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start queryFrontList startTime:{} frontId:{} groupId:{}",
-            startTime.toEpochMilli(), frontId, groupId);
+        log.info("start queryFrontList startTime:{} frontId:{} groupId:{},frontStatus:{}",
+            startTime.toEpochMilli(), frontId, groupId, frontStatus);
 
         //param
         FrontParam param = new FrontParam();
         param.setFrontId(frontId);
         param.setGroupId(groupId);
+        param.setFrontStatus(frontStatus);
 
         //query front info
         int count = frontService.getFrontCount(param);
@@ -132,4 +134,20 @@ public class FrontController extends BaseController {
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
+
+    /**
+     * qurey front info list.
+     */
+    @GetMapping(value = "/refresh/status")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse refreshFrontStatus() throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start refreshFrontStatus startTime:{} ", startTime.toEpochMilli());
+
+        frontService.refreshFrontStatus();
+
+        log.info("end queryFrontList useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
 }

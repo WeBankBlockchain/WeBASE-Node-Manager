@@ -57,11 +57,12 @@ public class NodeConfig {
      * @return
      * @throws IOException
      */
-    public static NodeConfig read(Path nodePath,byte encryptType)  {
+    public static NodeConfig read(Path nodePath, byte encryptType)  {
         NodeConfig config = new NodeConfig();
         try {
-            config.nodeId= PathService.getNodeId(nodePath,encryptType);
+            config.nodeId= PathService.getNodeId(nodePath, encryptType);
             try {
+                // get host index from generated node's config
                 config.hostIndex = Integer.parseInt(nodePath.getFileName().toString().replaceAll("node", ""));
             } catch (Exception e) {
                 log.error("parse host index:[{}] error", nodePath.toAbsolutePath().toString(), e);
@@ -126,14 +127,14 @@ public class NodeConfig {
     }
 
     /**
-     *
+     * copy oldNode to newNode path
      * @param oldNode
      * @param newNode
      */
-    public static void copyGroupConfigFiles(Path oldNode,Path newNode, int groupId) {
+    public static void copyGroupConfigFiles(Path oldNode, Path newNode, int groupId) {
         if (Files.exists(oldNode)) {
-            String groupGenesisFileName =String.format("conf/group.%s.genesis",groupId);
-            String groupIniFileName =String.format("conf/group.%s.ini",groupId);
+            String groupGenesisFileName =String.format("conf/group.%s.genesis", groupId);
+            String groupIniFileName =String.format("conf/group.%s.ini", groupId);
 
             try {
                 PathService.copyFile(
@@ -171,7 +172,7 @@ public class NodeConfig {
      * @return order : <jsonrpcPort, channelPort, p2pPort>
      * @throws IOException
      */
-    public static Pair<Long, List<String>> getGroupConfig(Path nodePath,Integer groupId) throws IOException {
+    public static Pair<Long, List<String>> getGroupConfig(Path nodePath, Integer groupId) throws IOException {
         Path groupGenesisIni = PathService.getGroupGenesisPath(nodePath,groupId);
         if (Files.exists(groupGenesisIni)){
             Ini ini = new Ini(groupGenesisIni.toFile());

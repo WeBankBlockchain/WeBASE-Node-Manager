@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+## use sudo to check dependency installed or install it
+
+# tassl depend
+TASSL_CMD="${HOME}"/.fisco/tassl
+
 function install(){
     # 系统命令
     command=$1
@@ -29,7 +34,7 @@ function UpdateDNS() {
     [[ "$(grep -i "$var" "$file")" == "" ]] && sudo echo "nameserver $var" >> "$file"
   done
 }
-UpdateDNS
+#UpdateDNS
 
 # GNU/Linux操作系统
 if [[ $(command -v apt) ]]; then
@@ -43,26 +48,27 @@ fi
 # install rsync for synchronizing node files
 install wget wget
 install curl curl
+install netstat netstat
 #install vim vim
 #install rsync rsync
 #install nslookup bind-utils
+# todo install dos2unix
 
-# install docker
-if [[ ! $(command -v docker) ]]; then
-    echo "Install docker..."
-    bash <(curl -s -L get.docker.com)
-fi
-
-# install docker-compose
-#if [[ ! $(command -v docker-compose) ]]; then
-#    echo "Install docker-compose..."
-#    curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-#    chmod +x /usr/local/bin/docker-compose
-#fi
-
-
-# check docker started
-if [[ "$(systemctl is-active docker)" != "active" ]] ; then
-    sudo systemctl start docker
-fi
-
+#
+#TASSL_CMD="${HOME}"/.fisco/tassl
+#check_and_install_tassl(){
+#    if [ ! -f "${TASSL_CMD}" ];then
+#        echo "Downloading tassl binary ..."
+#        if [[ "$(uname)" == "Darwin" ]];then
+#            echo "Visual deploy not support Mac!"
+#        else
+#            # curl -LO https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl.tar.gz
+#            curl -LO https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz
+#        fi
+#        tar zxvf tassl.tar.gz && rm tassl.tar.gz
+#        chmod u+x tassl
+#        mkdir -p "${HOME}"/.fisco
+#        mv tassl "${HOME}"/.fisco/tassl
+#    fi
+#}
+#check_and_install_tassl

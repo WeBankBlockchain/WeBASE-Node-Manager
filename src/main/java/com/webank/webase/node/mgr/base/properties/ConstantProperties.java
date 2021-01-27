@@ -95,44 +95,59 @@ public class ConstantProperties {
     private Integer nodeStatusMonitorTaskFixedDelay;
     private Integer certMonitorTaskFixedDelay;
 
+    // default resetGroupList interval gap, default 15000ms(15s)
+    private long resetGroupListInterval = 15000;
+
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
-    public static final int MAX_NODE_ON_HOST = 4;
     public static final int LEAST_SEALER_TWO = 2;
 
     private int deployType = 0;
     private String webaseSignAddress = "127.0.0.1:5004";
-    private String rootDirOnHost = "/opt/fisco-webase";
-
-    private boolean useDockerSDK = false;
-    public int dockerDaemonPort = 3000;
-    public String sshDefaultUser = "root";
-    public int sshDefaultPort = 22;
 
     // shell script
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
     private String buildChainShell = "./script/deploy/build_chain.sh";
     private String genAgencyShell = "./script/deploy/gen_agency_cert.sh";
     private String genNodeShell = "./script/deploy/gen_node_cert.sh";
-    private String scpShell =        "./script/deploy/file_trans_util.sh";
-    private String privateKey = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "id_rsa";
+    private String scpShell = "./script/deploy/file_trans_util.sh";
+    private String hostCheckShell = "./script/deploy/host_check.sh";
+    private String dockerCheckShell = "./script/deploy/host_docker_check.sh";
+    private String dockerPullCdnShell = "./script/deploy/host_docker_cdn.sh";
+    private String hostDockerTcpShell = "./script/deploy/host_docker_tcp.sh";
+    private String hostInitShell = "./script/deploy/host_init_shell.sh";
+    private String hostCheckPortShell = "./script/deploy/host_check_port.sh";
+    // to support | & > $
+    private String ansibleImageCheckShell = "./script/deploy/check_image_exist.sh";
+    private String ansibleContainerCheckShell = "./script/deploy/check_container_exist.sh";
+    private String hostCheckIpShell = "./script/deploy/host_check_ifconfig.sh";
+
     private String fiscoBcosBinary =  "";
 
     // default port
     private int defaultChainId = 1;
-    private int defaultJsonrpcPort = 8545;
-    private int defaultP2pPort = 30300;
-    private int defaultChannelPort = 20200;
-    private int defaultFrontPort = 5002;
 
-    // timeout config
-    private long execHostInitTimeout = 10 * 60 * 1000L;
-    private long execBuildChainTimeout = 10 * 60 * 1000L;
-    private long execShellTimeout = 10 * 60 * 1000L;
+    // timeout config (ms)
+    // check docker installed and active 1min
+    private long execDockerCheckTimeout = 55 * 1000L;
+    // check memory dependency, check container exist, check image exist
+    private long execHostCheckTimeout = 55 * 1000L;
+    // check port in use
+    private long execHostCheckPortTimeout = 50 * 1000L;
+    // async init host time out. 5min
+    private long execHostInitTimeout = 5 * 60 * 1000L;
+    // generate chain config and scp to host
+    private long execHostConfigTimeout = 40 * 1000L;
+    // generate chain config
+    private long execBuildChainTimeout = 40 * 1000L;
+    // docker command time out
     private long dockerRestartPeriodTime = 30 * 1000L;
-    private int dockerClientConnectTimeout = 10 * 60 * 1000;
-    private int dockerPullTimeout = 10 * 60 * 1000;
-    private int dockerClientReadTimeout = 10 * 60 * 1000;
+    // common shell exec time out
+    private long execShellTimeout = 10 * 60 * 1000L;
+    // scp command concurrent await time
+    private long execScpTimeout = 10 * 1000L;
+    // add node concurrent await time
+    private long execAddNodeTimeout = 40 * 1000L;
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
     private String dockerRepository= "fiscoorg/fisco-webase";
@@ -157,17 +172,7 @@ public class ConstantProperties {
         log.info("Init constant properties, generate nodes root dir:[{}]", nodesRootDir);
         log.info("Init constant properties, generate nodes root temp dir:[{}]", nodesRootTmpDir);
 
-//        this.imageTagUpdateUrl = String.format(this.imageTagUpdateUrl,dockerRepository);
-//        log.info("Init constant properties, imageTagUpdateUrl: [{}]", this.imageTagUpdateUrl);
-
-        log.info("Init constant properties, rootOnHostDir: [{}]", rootDirOnHost);
-
-        log.info("Init constant properties, private key: [{}]", privateKey);
-
         log.info("Init constant properties, webase sign server: [{}]", webaseSignAddress);
-
-        log.info("Init constant properties, defaultP2pPort:[{}], defaultChannelPort:[{}], defaultJsonrpcPort:[{}], defaultFrontPort:[{}]",
-                defaultP2pPort, defaultChannelPort, defaultJsonrpcPort, defaultFrontPort);
 
         log.info("Init constant properties, dockerProxyMap: [{}]", dockerProxyMap);
 

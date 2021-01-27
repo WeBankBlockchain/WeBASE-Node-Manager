@@ -13,6 +13,9 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import com.webank.webase.node.mgr.base.enums.ConsensusType;
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -65,6 +68,8 @@ public class NodeService {
     private ChainService chainService;
     @Autowired
     private ConstantProperties constantProperties;
+    @Autowired
+    private AnsibleService ansibleService;
     /**
      * update front status
      */
@@ -152,7 +157,6 @@ public class NodeService {
         log.debug("start updateNodeInfo  param:{}", JsonTools.toJSONString(tbNode));
         Integer affectRow = 0;
         try {
-
             affectRow = nodeMapper.update(tbNode);
         } catch (RuntimeException ex) {
             log.error("updateNodeInfo exception", ex);
@@ -180,9 +184,9 @@ public class NodeService {
      * delete by node and group.
      */
     public void deleteByNodeAndGroupId(String nodeId, int groupId) throws NodeMgrException {
-        log.debug("start deleteByNodeAndGroupId nodeId:{} groupId:{}", nodeId, groupId);
+        log.info("start deleteByNodeAndGroupId nodeId:{} groupId:{}", nodeId, groupId);
         nodeMapper.deleteByNodeAndGroup(nodeId, groupId);
-        log.debug("end deleteByNodeAndGroupId");
+        log.info("end deleteByNodeAndGroupId");
     }
 
     /**
@@ -197,7 +201,8 @@ public class NodeService {
 
 
     /**
-     * check node status
+     * check node status, if pbftView or blockNumber not changing, invalid consensus
+     * @1.4.3: if request consensus status but return -1, node is down
      *
      */
     public void checkAndUpdateNodeStatus(int groupId) {
@@ -206,7 +211,7 @@ public class NodeService {
 
         //getPeerOfConsensusStatus
         List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
-        if(Objects.isNull(consensusList)){
+        if (Objects.isNull(consensusList)){
             log.error("fail checkNodeStatus, consensusList is null");
             return;
         }
@@ -240,7 +245,7 @@ public class NodeService {
 
             BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
             BigInteger latestView = consensusList.stream()
-                .filter(cl -> nodeId.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
+                .filter(cl -> nodeId.equals(cl.getNodeId())).map(PeerOfConsensusStatus::getView).findFirst()
                 .orElse(BigInteger.ZERO);//pbftView
             
             if (nodeType == 0) {    //0-consensus;1-observer
@@ -275,7 +280,12 @@ public class NodeService {
                 if (updateFront != null) {
                     // update front status as long as update node (7.5s internal)
                     log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
-                    updateFront.setStatus(tbNode.getNodeActive());
+                    // update as 2, same as FrontStatuaEnum
+                    if (tbNode.getNodeActive() == DataStatus.NORMAL.getValue()) {
+                        updateFront.setStatus(FrontStatusEnum.RUNNING.getId());
+                    } else if (tbNode.getNodeActive() == DataStatus.INVALID.getValue()) {
+                        updateFront.setStatus(FrontStatusEnum.STOPPED.getId());
+                    }
                     frontService.updateFront(updateFront);
                 }
             }
@@ -294,7 +304,7 @@ public class NodeService {
         }
         List<PeerOfSyncStatus> peerList = syncStatus.getPeers();
         BigInteger latestNumber = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
-            .map(s -> s.getBlockNumber()).findFirst().orElse(BigInteger.ZERO);//blockNumber
+            .map(PeerOfSyncStatus::getBlockNumber).findFirst().orElse(BigInteger.ZERO);//blockNumber
         return latestNumber;
     }
 
@@ -337,11 +347,12 @@ public class NodeService {
         List<String> sealerList = frontInterface.getSealerList(groupId);
         List<String> observerList = frontInterface.getObserverList(groupId);
         List<PeerInfo> resList = new ArrayList<>();
-        sealerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
-        observerList.stream().forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
+        sealerList.forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
+        observerList.forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
         log.debug("end getSealerAndObserverList resList:{}", resList);
         return resList;
     }
+
 
     public List<String> getNodeIdListService(int groupId) {
         log.debug("start getSealerAndObserverList groupId:{}", groupId);
@@ -368,7 +379,8 @@ public class NodeService {
             String description,
             final DataStatus dataStatus
     ) throws NodeMgrException {
-        if (! ValidateUtil.ipv4Valid(ip)){
+        log.info("start insert tb_node:{}", nodeId);
+        if (!ValidateUtil.ipv4Valid(ip)){
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
@@ -379,6 +391,8 @@ public class NodeService {
         if (nodeMapper.add(node) != 1) {
             throw new NodeMgrException(ConstantCode.INSERT_NODE_ERROR);
         }
+        log.info("end insert tb_node:{}", node);
+
         return node;
     }
 
@@ -397,18 +411,49 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId,final int groupId){
+    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId, final int groupId){
         // select all fronts by all agencies
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
+        log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}", tbFrontList);
 
+        // filter only not removed node will be added
         List<TbNode> tbNodeList = tbFrontList.stream()
-                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(),groupId))
-                .filter((node) -> node != null)
+                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(), groupId))
+                .filter(Objects::nonNull)
                 .filter((node) -> node.getGroupId() == groupId)
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(tbNodeList)) {
             log.error("Group of:[{}] chain:[{}] has no node.", groupId, chainId);
+            return Collections.emptyList();
+        }
+        return tbNodeList;
+    }
+
+    /**
+     * specific target frontList in batchAddNode
+     * @param newFrontIdList specific front
+     * @param chainId
+     * @param groupId
+     * @return
+     */
+    public List<TbNode> selectNodeListByChainIdAndGroupId(List<Integer> newFrontIdList, int chainId, final int groupId){
+        log.info("selectNodeListByChainIdAndGroupId frontIdList:{}", newFrontIdList);
+        List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
+
+        List<TbFront> newFrontList = frontService.selectByFrontIdList(newFrontIdList);
+
+        tbFrontList.removeAll(newFrontList);
+        tbFrontList.addAll(newFrontList);
+
+        List<TbNode> tbNodeList = tbFrontList.stream()
+                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(),groupId))
+                .filter(Objects::nonNull)
+                .filter((node) -> node.getGroupId() == groupId )
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(tbNodeList)) {
+            log.error("Group of:[{}] of newFrontIdList:{} has no node.", groupId, newFrontIdList);
             return Collections.emptyList();
         }
         return tbNodeList;
@@ -442,17 +487,13 @@ public class NodeService {
     }
 
     /**
-     * @param ip
-     * @param rooDirOnHost
-     * @param chainName
-     * @param hostIndex
-     * @param nodeId
+     * mv one node on host
+     * @related with hostService mvHostChainDirByIdList(batch mv)
      */
-    public static void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId,
-            String sshUser, int sshPort,String privateKey) {
+    public void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId) {
         // create /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss as a parent
         String chainDeleteRootOnHost = PathService.getChainDeletedRootOnHost(rooDirOnHost, chainName);
-        SshTools.createDirOnRemote(ip, chainDeleteRootOnHost,sshUser,sshPort,privateKey);
+        ansibleService.execCreateDir(ip, chainDeleteRootOnHost);
 
         // e.g. /opt/fisco/default_chain
         String chainRootOnHost = PathService.getChainRootOnHost(rooDirOnHost, chainName);
@@ -463,6 +504,79 @@ public class NodeService {
         String dst_nodeDeletedRootOnHost =
                 PathService.getNodeDeletedRootOnHost(chainDeleteRootOnHost, nodeId);
         // move
-        SshTools.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost,sshUser,sshPort,privateKey);
+        ansibleService.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
     }
+
+    /**
+     * update node status by frontId and nodeStatus
+     */
+    public void updateNodeActiveStatus(int frontId, int nodeStatus) {
+        TbFront front = frontService.getById(frontId);
+        String nodeId = front.getNodeId();
+        log.info("updateNodeActiveStatus by nodeId:{} of all group, status:{}", nodeId, nodeStatus);
+        List<TbNode> nodeList = nodeMapper.selectByNodeId(nodeId);
+        if (nodeList == null || nodeList.isEmpty()) {
+            log.info("no node list of nodeId, jump over");
+            return;
+        }
+        nodeList.forEach(node -> {
+            node.setNodeActive(nodeStatus);
+            this.updateNode(node);
+        });
+        log.info("end updateNodeActiveStatus affect size:{}", nodeList.size());
+    }
+
+    /**
+     * check sealer list contain
+     * return: true: is sealer
+     */
+    @Deprecated
+    public boolean checkSealerListContains(int groupId, String nodeId, String ip, int port) {
+        log.debug("start checkSealerListContains groupId:{},nodeId:{}", groupId, nodeId);
+        List<String> sealerList = frontInterface.getSealerListFromSpecificFront(ip, port, groupId);
+        boolean isSealer = sealerList.stream().anyMatch(n -> n.equals(nodeId));
+        log.debug("end checkSealerListContains isSealer:{}", isSealer);
+        return isSealer;
+    }
+
+    /**
+     * check observer list contain
+     * return: true: is sealer
+     */
+    @Deprecated
+    public boolean checkObserverListContains(int groupId, String nodeId, String ip, int port) {
+        log.debug("start checkObserverListContains groupId:{},nodeId:{}", groupId, nodeId);
+        List<String> sealerList = frontInterface.getObserverListFromSpecificFront(ip, port, groupId);
+        boolean isObserver = sealerList.stream().anyMatch(n -> n.equals(nodeId));
+        log.debug("end checkObserverListContains isObserver:{}", isObserver);
+        return isObserver;
+    }
+
+    /**
+     * get local highest block height, if node equal, return 1, else return 2
+     * @param groupId
+     * @param nodeId
+     * @return
+     */
+    public int checkNodeType(int groupId, String nodeId) {
+        int localHighestHeight = nodeMapper.getHighestBlockHeight(groupId);
+        TbNode node = nodeMapper.getByNodeIdAndGroupId(nodeId, groupId);
+        int nodeBlockHeight = node != null ? node.getBlockNumber().intValue() : 0;
+        log.info("local localHighestHeight:{},groupId:{} nodeId:{}, nodeBlockHeight:{}",
+            localHighestHeight, groupId, nodeId, nodeBlockHeight);
+        if (localHighestHeight == nodeBlockHeight) {
+            return ConsensusType.SEALER.getValue();
+        } else if (localHighestHeight > nodeBlockHeight) {
+            return ConsensusType.OBSERVER.getValue();
+        } else {
+            return 0;
+        }
+//        if (checkObserverListContains(groupId, nodeId, ip, port)) {
+//            return ConsensusType.OBSERVER.getValue();
+//        } else if (checkSealerListContains(groupId, nodeId, ip, port)) {
+//            return ConsensusType.SEALER.getValue();
+//        }
+//        return 0;
+    }
+
 }

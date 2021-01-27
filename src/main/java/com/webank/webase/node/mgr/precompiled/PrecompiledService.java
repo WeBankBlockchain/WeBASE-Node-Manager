@@ -29,6 +29,7 @@ import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
@@ -128,7 +129,7 @@ public class PrecompiledService {
         // @visual-deploy: at least 2 sealers in group after remove
         if (constants.getDeployType() == DeployType.VISUAL_DEPLOY.getValue()
             && CollectionUtils.size(sealerList) < ConstantProperties.LEAST_SEALER_TWO) {
-            log.error("fail nodeManageService. Group only has [{}] sealers after remove.(visual_deploy)");
+            log.error("fail nodeManageService. Group only has 1 sealers after remove.(visual_deploy)");
             throw new NodeMgrException(ConstantCode.TWO_SEALER_IN_GROUP_AT_LEAST);
         }
 
@@ -140,10 +141,13 @@ public class PrecompiledService {
 
         // update front group map if remove node from sealer/observer
         TbFront front = this.frontMapper.getByNodeId(consensusHandle.getNodeId());
-        if (StringUtils.equalsIgnoreCase("remove",consensusHandle.getNodeType()) && front != null){
+        if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null){
             log.info("remove node/front:[{}] from group:[{}], change front group map status to [{}]",
                     front.getFrontId(), groupId, GroupStatus.MAINTAINING);
+            // update map
             frontGroupMapService.updateFrontMapStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
+            // update tb_node rm invalid node
+            groupService.resetGroupList();
         }
 
         log.debug("end nodeManageService. frontRsp:{}", JsonTools.toJSONString(frontRsp));

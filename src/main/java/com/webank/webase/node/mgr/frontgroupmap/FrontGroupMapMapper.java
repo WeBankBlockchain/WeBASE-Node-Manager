@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.frontgroupmap;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -28,6 +29,8 @@ public interface FrontGroupMapMapper {
 
     int add(TbFrontGroupMap tbFrontGroupMap);
 
+    int insertSelective(TbFrontGroupMap tbFrontGroupMap);
+
     int update(TbFrontGroupMap tbFrontGroupMap);
 
     FrontGroup queryFrontGroup(MapListParam mapListParam);
@@ -40,6 +43,16 @@ public interface FrontGroupMapMapper {
 
     List<FrontGroup> getList(MapListParam mapListParam);
 
+    @Select({
+        "select * from tb_front_group_map where 1=1"
+    })
+    List<FrontGroup> getAllList();
+
+    @Delete({
+        "delete from tb_front_group_map where map_id=#{mapId}"
+    })
+    void removeByMapId(@Param("mapId") Integer mapId);
+
     void removeInvalidMap();
 
     @Select({
@@ -50,7 +63,7 @@ public interface FrontGroupMapMapper {
     @Select({
         "update tb_front_group_map set modify_time = now(),status=#{status} where front_id=#{frontId}"
     })
-    void updateAllGroupsStatus(@Param("frontId") int frontId,@Param("status") int status);
+    void updateAllGroupsStatus(@Param("frontId") int frontId, @Param("status") int status);
 
     @Select({
             "update tb_front_group_map set modify_time = now(),status=#{status} where front_id=#{frontId} and group_id=${groupId}"

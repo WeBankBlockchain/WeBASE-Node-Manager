@@ -200,7 +200,7 @@ public class UserController extends BaseController {
         Instant startTime = Instant.now();
 
         String pemContent = reqImportPem.getPemContent();
-        if (!pemContent.startsWith(PemUtils.crtContentHead)) {
+        if (!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
