@@ -1217,6 +1217,7 @@ public class GroupService {
      * @throws IOException
      */
     public void generateNewNodesGroupConfigsAndScp(TbChain chain, int groupId, String ip, List<TbFront> newFrontList) {
+        log.info("start generateNewNodesGroupConfigsAndScp ip:{},newFrontList:{}", ip, newFrontList);
         int chainId = chain.getId();
         String chainName = chain.getChainName();
 
@@ -1254,12 +1255,13 @@ public class GroupService {
             TbHost tbHost = tbHostMapper.getByIp(ip);
             String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
 
-            log.info("Send files from:[{}] to:[{}:{}].", src, ip, dst);
+            log.info("generateNewNodesGroupConfigsAndScp Send files from:[{}] to:[{}:{}].", src, ip, dst);
             ProgressTools.setScpConfig();
             try {
                 ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
+                log.info("generateNewNodesGroupConfigsAndScp scp success.");
             } catch (Exception e) {
-                log.info("Send files from:[{}] to:[{}:{}] error.", src, ip, dst, e);
+                log.error("generateNewNodesGroupConfigsAndScp Send files from:[{}] to:[{}:{}] error.", src, ip, dst, e);
             }
         }
     }

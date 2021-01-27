@@ -573,7 +573,7 @@ public class FrontService {
     public List<TbFront> initFrontAndNode(List<DeployNodeInfo> nodeInfoList, TbChain chain, TbHost host, int agencyId,
                                           String agencyName, int groupId, FrontStatusEnum frontStatusEnum)
         throws NodeMgrException, IOException {
-        log.info("start initFrontAndNode ");
+        log.info("start initFrontAndNode nodeInfoList:{}, host:{}", nodeInfoList, host);
         ProgressTools.setInitChainData();
 
         String chainName = chain.getChainName();
@@ -599,19 +599,20 @@ public class FrontService {
             Path nodeRoot = pathService.getNodeRoot(chainName, ip, currentIndex);
 
             if(Files.exists(nodeRoot)){
-                log.warn("Exists node:[{}:{}] config, delete first.", ip, nodeRoot.toAbsolutePath().toString());
+                log.warn("initFrontAndNode Exists node:[{}:{}] config, delete first.", ip, nodeRoot.toAbsolutePath().toString());
                 try {
                     FileUtils.deleteDirectory(nodeRoot.toFile());
                 } catch (IOException e) {
                     throw new NodeMgrException(ConstantCode.DELETE_OLD_NODE_DIR_ERROR);
                 }
             }
+            log.info("start initFrontAndNode gen node cert");
             // exec gen_node_cert.sh
             ExecuteResult executeResult = this.deployShellService.execGenNode(encryptType, chainName, agencyName,
                     nodeRoot.toAbsolutePath().toString());
 
             if (executeResult.failed()) {
-                log.error("Generate node:[{}:{}] key and crt error.", ip, currentIndex);
+                log.error("initFrontAndNode Generate node:[{}:{}] key and crt error.", ip, currentIndex);
                 throw new NodeMgrException(ConstantCode.EXEC_GEN_NODE_ERROR.attach(executeResult.getExecuteOut()));
             }
 
