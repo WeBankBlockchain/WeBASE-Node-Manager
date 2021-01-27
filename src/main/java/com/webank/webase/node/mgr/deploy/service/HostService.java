@@ -231,7 +231,7 @@ public class HostService {
         // 去除await，直接异步check
 //        initHostLatch.await(constant.getExecHostInitTimeout(), TimeUnit.MILLISECONDS);
 //
-//        log.info("check initHostAndDocker host timeout, cancel unfinished tasks.");
+//        log.info("check initHostAndDocker host timeout");
 //        taskMap.entrySet().forEach((entry) -> {
 //            int hostId = entry.getKey();
 //            Future<?> task = entry.getValue();
@@ -285,7 +285,7 @@ public class HostService {
 
         List<TbHost> tbHostList = this.selectDistinctHostListById(hostIdList);
 
-        log.info("Start init chain:[{}] hosts:[{}].", chainName, CollectionUtils.size(tbHostList));
+        log.info("Start scpConfigHostList init chain:[{}] hosts:[{}].", chainName, CollectionUtils.size(tbHostList));
         final CountDownLatch configHostLatch = new CountDownLatch(CollectionUtils.size(tbHostList));
         // check success count
         AtomicInteger configSuccessCount = new AtomicInteger(0);
@@ -293,7 +293,7 @@ public class HostService {
 
         ProgressTools.setScpConfig();
         for (final TbHost tbHost : tbHostList) {
-            log.info("Init host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
+            log.info("scpConfigHostList Init host:[{}], status:[{}]", tbHost.getIp(), tbHost.getStatus());
 
             Future<?> task = threadPoolTaskScheduler.submit(() -> {
                 try {
@@ -309,16 +309,16 @@ public class HostService {
                         String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
                         try {
                             ansibleService.scp(ScpTypeEnum.UP, tbHost.getIp(), src, dst);
-                            log.info("Send files from:[{}] to:[{}:{}] success.",
+                            log.info("scpConfigHostList Send files from:[{}] to:[{}:{}] success.",
                                 src, tbHost.getIp(), dst);
                         } catch (NodeMgrException e) {
-                            log.error("Send file to host:[{}] failed",
+                            log.error("scpConfigHostList Send file to host:[{}] failed",
                                 tbHost.getIp(), e);
                             this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_FAIL,
                                 e.getRetCode().getAttachment());
                             return;
                         } catch (Exception e) {
-                            log.error("Send file to host :[{}] failed", tbHost.getIp(), e);
+                            log.error("scpConfigHostList Send file to host :[{}] failed", tbHost.getIp(), e);
                             this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_FAIL,
                                 "Scp configuration files to host failed, please check the host's network or disk usage.");
                             return;
@@ -329,8 +329,9 @@ public class HostService {
                     this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_SUCCESS, "");
                     configSuccessCount.incrementAndGet();
                 } catch (Exception e) {
-                    log.error("Init host:[{}] with unknown error", tbHost.getIp(), e);
-                    this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_FAIL, "Init host with unknown error, check from log files.");
+                    log.error("Config host:[{}] with unknown error", tbHost.getIp(), e);
+                    this.updateStatus(tbHost.getId(), HostStatusEnum.CONFIG_FAIL,
+                        "scpConfigHostList Init host with unknown error, check from log files.");
                 } finally {
                     configHostLatch.countDown();
                 }
@@ -339,13 +340,13 @@ public class HostService {
         }
 
         configHostLatch.await(constant.getExecHostConfigTimeout(), TimeUnit.MILLISECONDS);
-        log.info("Check init host time, cancel unfinished tasks.");
+        log.info("Check config host time");
         taskMap.entrySet().forEach((entry) -> {
             int hostId = entry.getKey();
             Future<?> task = entry.getValue();
             if(! task.isDone()){
-                log.error("Init host:[{}] timeout, cancel the task.", hostId );
-                this.updateStatus(hostId, HostStatusEnum.CONFIG_FAIL, "Init host timeout.");
+                log.error("scpConfigHostList Config host:[{}] timeout, cancel the task.", hostId );
+                this.updateStatus(hostId, HostStatusEnum.CONFIG_FAIL, "scpConfigHostList Config host timeout.");
                 task.cancel(false);
             }
         });
@@ -353,7 +354,7 @@ public class HostService {
         boolean hostInitSuccess = configSuccessCount.get() == CollectionUtils.size(tbHostList);
         // check if all host init success
         log.log(hostInitSuccess ? Level.INFO: Level.ERROR,
-            "Host of chain:[{}] init result, total:[{}], success:[{}]",
+            "scpConfigHostListHost of chain:[{}] init result, total:[{}], success:[{}]",
             chainName, CollectionUtils.size(tbHostList), configSuccessCount.get());
 
         return hostInitSuccess;
@@ -443,13 +444,13 @@ public class HostService {
             ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
             log.info("Send files from:[{}] to:[{}:{}] success.", src, ip, dst);
         } catch (NodeMgrException e) {
-            log.error("Send file to host:[{}] failed", ip, e);
+            log.error("scpHostSdkCert Send file to host:[{}] failed", ip, e);
             this.updateStatus(host.getId(), HostStatusEnum.CONFIG_FAIL, e.getRetCode().getAttachment());
             return;
         } catch (Exception e) {
-            log.error("Send file to host :[{}] failed", ip, e);
+            log.error("scpHostSdkCert Send file to host :[{}] failed", ip, e);
             this.updateStatus(host.getId(), HostStatusEnum.CONFIG_FAIL,
-                "Scp configuration files to host failed, please check the host's network or disk usage.");
+                "scpHostSdkCert Scp configuration files to host failed, please check the host's network or disk usage.");
             return;
         }
 
@@ -649,7 +650,7 @@ public class HostService {
             taskMap.put(tbHost.getId(), task);
         }
         checkHostLatch.await(constant.getExecHostCheckTimeout(), TimeUnit.MILLISECONDS);
-        log.info("Verify check_host time, cancel unfinished tasks.");
+        log.info("Verify check_host time");
         taskMap.forEach((key, value) -> {
             int hostId = key;
             Future<?> task = value;
@@ -739,7 +740,7 @@ public class HostService {
             taskMap.put(taskKey, task);
         }
         checkHostLatch.await(constant.getExecHostCheckPortTimeout(), TimeUnit.MILLISECONDS);
-        log.info("Verify check_port time, cancel unfinished tasks.");
+        log.info("Verify check_port time");
         taskMap.forEach((key, value) -> {
             String frontIpPort = key;
             Future<?> task = value;

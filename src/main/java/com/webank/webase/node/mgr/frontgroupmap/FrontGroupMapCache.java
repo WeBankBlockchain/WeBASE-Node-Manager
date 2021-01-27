@@ -48,6 +48,7 @@ public class FrontGroupMapCache {
 
     /**
      * get map filter by consensus type, sealer first
+     * filter by block height
      * @return
      */
     @Transactional(isolation= Isolation.READ_COMMITTED)

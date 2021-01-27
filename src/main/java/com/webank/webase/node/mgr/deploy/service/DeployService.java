@@ -556,6 +556,8 @@ public class DeployService {
                 } catch (Exception e) {
                     log.error("batchAddNode Exception:[].", e);
                     newFrontIdList.forEach((id -> frontService.updateStatus(id, FrontStatusEnum.ADD_FAILED)));
+                    // update in each config process
+                    //hostService.updateStatus(hostId, HostStatusEnum.CONFIG_FAIL, "batchAddNode failed" + e.getMessage());
                 } finally {
                     configHostLatch.countDown();
                 }
@@ -571,6 +573,7 @@ public class DeployService {
             if (!task.isDone()) {
                 log.error("batchAddNode:[{}] timeout, cancel the task.", hostId);
                 newFrontIdList.forEach((id -> frontService.updateStatus(id, FrontStatusEnum.ADD_FAILED)));
+                hostService.updateStatus(hostId, HostStatusEnum.CONFIG_FAIL, "batchAddNode failed for timeout");
                 task.cancel(false);
             }
         });
