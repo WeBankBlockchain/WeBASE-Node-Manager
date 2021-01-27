@@ -130,7 +130,7 @@ public class DeployService {
         log.info("configChainAndScp start scpConfigHostList chainName:{}, hostIdList:{}", chainName, hostIdList);
         boolean configHostSuccess = hostService.scpConfigHostList(chainName, hostIdList);
         if (!configHostSuccess) {
-            log.error("configChainAndScp config success but image not on remote host, cannot start chain!");
+            log.error("configChainAndScp scpConfigHostList fail, cannot start chain!");
             chainService.updateStatus(chainName, ChainStatusEnum.START_FAIL);
             throw new NodeMgrException(ConstantCode.ANSIBLE_INIT_HOST_CDN_SCP_NOT_ALL_SUCCESS);
         }
