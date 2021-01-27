@@ -350,8 +350,8 @@ public class DeployController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse progress() throws IOException {
         Instant startTime = Instant.now();
-        log.info("Start get progress now:[{}]", startTime);
         int progress = ProgressTools.progress();
+        log.debug("Start get progress status:{}", progress);
         return new BaseResponse(ConstantCode.SUCCESS, progress);
     }
 

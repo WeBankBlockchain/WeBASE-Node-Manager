@@ -191,25 +191,5 @@ public class IpConfigParse {
 
 
 
-//    public String[] hostList2IpConf(List<TbHost> hostList, String agencyName) {
-//        String[] ipConf = new String[hostList.size()];
-//        for (int index = 0; index < hostList.size(); index++) {
-//            TbHost host = hostList.get(index);
-//            StringBuilder ipConfLine = new StringBuilder();
-//            // default one line one node
-//            ipConfLine.append(host.getIp() + ":1");
-//            ipConfLine.append(" ");
-//            ipConfLine.append(agencyName);
-//            ipConfLine.append(" ");
-//            // default group 1
-//            ipConfLine.append("1");
-//            ipConfLine.append("1");
-//
-//            ipConfLine += ;
-//            ipConf
-//        }
-//    }
-    
-
 }
 
