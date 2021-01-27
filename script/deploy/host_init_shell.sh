@@ -2,6 +2,9 @@
 
 ## use sudo to check dependency installed or install it
 
+# tassl depend
+TASSL_CMD="${HOME}"/.fisco/tassl
+
 function install(){
     # 系统命令
     command=$1
@@ -51,5 +54,20 @@ install netstat netstat
 #install nslookup bind-utils
 # todo install dos2unix
 
-
-
+TASSL_CMD="${HOME}"/.fisco/tassl
+check_and_install_tassl(){
+    if [ ! -f "${TASSL_CMD}" ];then
+        echo "Downloading tassl binary ..."
+        if [[ "$(uname)" == "Darwin" ]];then
+            echo "Visual deploy not support Mac!"
+        else
+            # curl -LO https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl.tar.gz
+            curl -LO https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz
+        fi
+        tar zxvf tassl.tar.gz && rm tassl.tar.gz
+        chmod u+x tassl
+        mkdir -p "${HOME}"/.fisco
+        mv tassl "${HOME}"/.fisco/tassl
+    fi
+}
+check_and_install_tassl
