@@ -32,7 +32,6 @@ public class ProgressTools {
     private static int DEPLOY_PROGRESS = 0;
 
     public static int progress() {
-        log.info("Progress check ...");
         return DEPLOY_PROGRESS;
     }
 
