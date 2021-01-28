@@ -100,4 +100,11 @@ public class CnsService {
     public TbCns getTbCns(QueryCnsParam queryCnsParam) {
         return cnsMapper.findOne(queryCnsParam);
     }
+
+    /**
+     * delete by groupId
+     */
+    public void deleteByGroupId(int groupId) {
+        cnsMapper.deleteByGroupId(groupId);
+    }
 }
