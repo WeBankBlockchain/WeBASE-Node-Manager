@@ -50,4 +50,8 @@
       and contract_address = #{contractAddress}
   </select>
 
+  <delete id="deleteByGroupId" parameterType="java.lang.Integer">
+    delete from tb_cns where group_id = #{groupId}
+  </delete>
+
 </mapper>

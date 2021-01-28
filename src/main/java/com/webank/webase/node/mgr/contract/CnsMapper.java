@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.contract;
 import com.webank.webase.node.mgr.contract.entity.QueryCnsParam;
 import com.webank.webase.node.mgr.contract.entity.TbCns;
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -28,4 +29,5 @@ public interface CnsMapper {
 
     List<TbCns> getList(QueryCnsParam param);
 
+    void deleteByGroupId(@Param("groupId") int groupId);
 }
