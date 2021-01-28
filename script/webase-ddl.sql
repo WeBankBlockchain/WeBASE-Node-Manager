@@ -431,12 +431,13 @@ CREATE TABLE IF NOT EXISTS tb_cns (
   contract_path varchar(24) binary NOT NULL COMMENT '合约所在目录',
   contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
   cns_name varchar(120) binary NOT NULL COMMENT 'cns名称',
-  version varchar(120) DEFAULT NULL COMMENT 'cns版本',
-  contract_address varchar(64) DEFAULT NULL COMMENT '合约地址',
+  version varchar(120) NOT NULL COMMENT 'cns版本',
+  contract_address varchar(64) NOT NULL COMMENT '合约地址',
+  contract_abi mediumtext NOT NULL COMMENT '合约abi内容',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (id),
-  UNIQUE KEY uk_path_name (group_id,contract_path,contract_name)
+  UNIQUE KEY uk_version (group_id,cns_name,version)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='cns信息表';
 
 

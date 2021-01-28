@@ -55,8 +55,16 @@ public class CnsService {
         List<AbiDefinition> abiArray =
                 JsonTools.toJavaObjectList(inputParam.getContractAbi(), AbiDefinition.class);
         if (abiArray == null || abiArray.isEmpty()) {
-            log.info("fail registerCns. abi is empty");
+            log.error("fail registerCns. abi is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);
+        }
+        // check version
+        QueryCnsParam queryParam = new QueryCnsParam(inputParam.getGroupId(),
+                inputParam.getCnsName(), inputParam.getVersion());
+        int count = countOfCns(queryParam);
+        if (count > 0) {
+            log.error("fail registerCns. version already exists.");
+            throw new NodeMgrException(ConstantCode.VERSION_ALREADY_EXISTS);
         }
 
         // get signUserId
@@ -80,6 +88,15 @@ public class CnsService {
         cnsMapper.add(tbCns);
     }
 
+    /**
+     * get count.
+     * 
+     * @param queryCnsParam
+     * @return
+     */
+    public int countOfCns(QueryCnsParam queryCnsParam) {
+        return cnsMapper.countOfCns(queryCnsParam);
+    }
 
     /**
      * get List.
@@ -92,13 +109,13 @@ public class CnsService {
     }
 
     /**
-     * getTbCns.
+     * getCnsByAddress.
      * 
      * @param queryCnsParam
      * @return
      */
-    public TbCns getTbCns(QueryCnsParam queryCnsParam) {
-        return cnsMapper.findOne(queryCnsParam);
+    public TbCns getCnsByAddress(QueryCnsParam queryCnsParam) {
+        return cnsMapper.getCnsByAddress(queryCnsParam);
     }
 
     /**

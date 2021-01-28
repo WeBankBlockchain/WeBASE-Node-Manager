@@ -25,7 +25,9 @@ public interface CnsMapper {
     
     Integer add(TbCns TbCns);
 
-    TbCns findOne(QueryCnsParam param);
+    TbCns getCnsByAddress(QueryCnsParam param);
+    
+    int countOfCns(QueryCnsParam param);
 
     List<TbCns> getList(QueryCnsParam param);
 
