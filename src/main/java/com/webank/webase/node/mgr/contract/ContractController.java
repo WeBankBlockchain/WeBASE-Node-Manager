@@ -30,6 +30,7 @@ import com.webank.webase.node.mgr.contract.entity.QueryCnsParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
 import com.webank.webase.node.mgr.contract.entity.ReqListContract;
 import com.webank.webase.node.mgr.contract.entity.ReqQueryCns;
+import com.webank.webase.node.mgr.contract.entity.ReqQueryCnsList;
 import com.webank.webase.node.mgr.contract.entity.ReqRegisterCns;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbCns;
@@ -386,17 +387,50 @@ public class ContractController extends BaseController {
      * query cns info
      */
     @PostMapping(value = "/findCns")
-    public BaseResponse findCns(@RequestBody @Valid ReqQueryCns reqQueryCns, BindingResult result)
+    public BaseResponse findCnsByAddress(@RequestBody @Valid ReqQueryCns reqQueryCns, BindingResult result)
             throws NodeMgrException {
+        checkBindResult(result);
         BaseResponse pagesponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start findCns startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
+        log.info("start findCnsByAddress startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(reqQueryCns));
-        TbCns tbCns = cnsService
-                .getTbCns(new QueryCnsParam(reqQueryCns.getGroupId(), reqQueryCns.getContractPath(),
-                        reqQueryCns.getContractName(), reqQueryCns.getContractAddress()));
+        TbCns tbCns = cnsService.getCnsByAddress(
+                new QueryCnsParam(reqQueryCns.getGroupId(), reqQueryCns.getContractAddress()));
         pagesponse.setData(tbCns);
-        log.info("end findCns. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        log.info("end findCnsByAddress. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return pagesponse;
+    }
+
+    /**
+     * query cns info list
+     */
+    @PostMapping(value = "/findCnsList")
+    public BasePageResponse findCnsList(@RequestBody @Valid ReqQueryCnsList inputParam,
+            BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start findCnsList startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
+                JsonTools.toJSONString(inputParam));
+
+        // param
+        QueryCnsParam queryParam = new QueryCnsParam();
+        BeanUtils.copyProperties(inputParam, queryParam);
+
+        int count = cnsService.countOfCns(queryParam);
+        if (count > 0) {
+            Integer start = Optional.ofNullable(inputParam.getPageNumber())
+                    .map(page -> (page - 1) * inputParam.getPageSize()).orElse(0);
+            queryParam.setStart(start);
+            queryParam.setFlagSortedByTime(SqlSortType.DESC.getValue());
+            // query list
+            List<TbCns> listOfCns = cnsService.getList(queryParam);
+            pagesponse.setData(listOfCns);
+            pagesponse.setTotalCount(count);
+        }
+
+        log.info("end findCnsList. useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
         return pagesponse;
     }
 }
