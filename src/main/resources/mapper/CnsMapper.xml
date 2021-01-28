@@ -82,4 +82,8 @@
     limit 1
   </select>
 
+  <delete id="deleteByGroupId" parameterType="java.lang.Integer">
+    delete from tb_cns where group_id = #{groupId}
+  </delete>
+
 </mapper>
