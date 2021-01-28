@@ -18,6 +18,7 @@ import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERR
 import com.webank.webase.node.mgr.abi.AbiService;
 import com.webank.webase.node.mgr.base.enums.DeployType;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
+import com.webank.webase.node.mgr.contract.CnsService;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.governance.GovernVoteService;
 import java.io.IOException;
@@ -144,6 +145,8 @@ public class GroupService {
     private AbiService abiService;
     @Autowired
     private GovernVoteService governVoteService;
+    @Autowired
+    private CnsService cnsService;
 
     @Autowired private ChainService chainService;
     @Autowired private AnsibleService ansibleService;
@@ -773,6 +776,8 @@ public class GroupService {
         abiService.deleteAbiByGroupId(groupId);
         // delete chain governance vote
         governVoteService.deleteAllByGroupId(groupId);
+        // delete cns record
+        cnsService.deleteByGroupId(groupId);
         // drop table.
         tableService.dropTableByGroupId(groupId);
         log.warn("end removeAllDataByGroupId");
