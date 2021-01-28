@@ -117,4 +117,11 @@ public class CnsService {
     public TbCns getCnsByAddress(QueryCnsParam queryCnsParam) {
         return cnsMapper.getCnsByAddress(queryCnsParam);
     }
+
+    /**
+     * delete by groupId
+     */
+    public void deleteByGroupId(int groupId) {
+        cnsMapper.deleteByGroupId(groupId);
+    }
 }
