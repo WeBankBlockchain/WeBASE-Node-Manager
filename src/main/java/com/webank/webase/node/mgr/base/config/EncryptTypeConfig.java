@@ -31,7 +31,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "sdk")
 public class EncryptTypeConfig {
-    // 0:standard, 1:guomi
+    /**
+     *  0:standard, 1:guomi
+     */
     private int encryptType;
 
     /**

@@ -11,9 +11,8 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- *
+ * check ip and formatter
  */
-
 @Slf4j
 public class IPUtil {
 

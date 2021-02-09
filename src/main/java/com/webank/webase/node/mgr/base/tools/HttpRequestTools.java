@@ -23,6 +23,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 
+/**
+ * request param/body formater
+ */
 public class HttpRequestTools {
 
     /**

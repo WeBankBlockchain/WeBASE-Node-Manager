@@ -19,7 +19,6 @@ import lombok.Data;
 
 /**
  * data unit to handle map2PagedList tool
- * @param <T>
  */
 @Data
 public class MapHandle{

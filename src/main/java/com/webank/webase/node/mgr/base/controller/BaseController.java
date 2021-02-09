@@ -22,6 +22,9 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.ParamException;
 
+/**
+ * base controller with param validation result check
+ */
 public class BaseController {
 
     @Autowired

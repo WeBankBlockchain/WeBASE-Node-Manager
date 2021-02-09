@@ -19,6 +19,9 @@ import com.webank.webase.node.mgr.security.customizeAuth.TokenAuthenticationToke
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 
+/**
+ * filter request with token
+ */
 public class TokenAuthenticationFilter extends AbstractAuthenticationFilter {
     public TokenAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);

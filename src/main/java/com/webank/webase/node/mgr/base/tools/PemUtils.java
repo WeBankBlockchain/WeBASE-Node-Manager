@@ -22,6 +22,9 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * cert tool to wrap content with header and tail of pem cert
+ */
 public class PemUtils {
     public static final String crtContentHeadNoLF = "-----BEGIN PRIVATE KEY-----" ;
     public static final String crtContentHead = "-----BEGIN PRIVATE KEY-----\n" ;

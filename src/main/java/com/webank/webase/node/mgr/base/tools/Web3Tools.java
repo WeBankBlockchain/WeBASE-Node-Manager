@@ -15,8 +15,6 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
-
-
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +32,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * web3sdk common methods of abi/key etc.
+ */
 public class Web3Tools {
 
     static final int PUBLIC_KEY_SIZE = 64;

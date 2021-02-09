@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
  * check port by telnet: if connection reachable, it means port in use
  * fix: use ansible to check: 防火墙将导致联不通，即，无法通过telnet测试是否端口已启用
  */
-
 @Slf4j
 public class NetUtils {
 

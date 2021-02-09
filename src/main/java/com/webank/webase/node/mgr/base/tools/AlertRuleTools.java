@@ -27,6 +27,9 @@ import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * alert rule tool
+ */
 @Log4j2
 public class AlertRuleTools {
 
@@ -42,7 +45,7 @@ public class AlertRuleTools {
     public static final String ALERT_TITLE_AUDIT = "审计异常告警";
     public static final String ALERT_TITLE_CERT = "证书异常告警";
     public static final String ALERT_TITLE_OTHERS = "其他告警";
-    // en
+    // english
     public static final String ALERT_TITLE_NODE_EN = " (Node Exception Alert)";
     public static final String ALERT_TITLE_AUDIT_EN = " (Audit Exception Alert)";
     public static final String ALERT_TITLE_CERT_EN = " (Cert Exception Alert)";

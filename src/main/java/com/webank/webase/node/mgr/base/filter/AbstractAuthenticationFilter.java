@@ -32,6 +32,9 @@ import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 
 import static com.webank.webase.node.mgr.base.tools.NodeMgrTools.TOKEN_HEADER_NAME;
 
+/**
+ * filter request abstract
+ */
 public abstract class AbstractAuthenticationFilter extends OncePerRequestFilter {
     private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
     private AuthenticationManager authenticationManager;

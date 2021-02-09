@@ -33,7 +33,9 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 
 import lombok.extern.slf4j.Slf4j;
 
-
+/**
+ * generate file with template
+ */
 @Slf4j
 public class ThymeleafUtil {
 

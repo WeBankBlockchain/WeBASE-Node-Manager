@@ -35,7 +35,7 @@ import lombok.extern.log4j.Log4j2;
 
 
 /**
- * validate code before login.
+ * verify code before login.
  */
 @Log4j2
 @Component
@@ -74,7 +74,7 @@ public class ValidateCodeFilter implements Filter {
 
 
     /**
-     * validate code.
+     * verify code.
      */
     private void validateCode(HttpServletRequest request) {
         String tokenInHeard = request.getHeader("token");

@@ -19,6 +19,9 @@ import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.precompiled.entity.PrecompiledResult;
 
+/**
+ * check precompiled api return code
+ */
 public class PrecompiledTools {
 
     public static BaseResponse processResponse(String res) {
