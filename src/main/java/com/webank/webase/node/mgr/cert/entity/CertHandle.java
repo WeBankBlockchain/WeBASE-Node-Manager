@@ -19,6 +19,9 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
+/**
+ * param for web request
+ */
 @Data
 public class CertHandle {
     private String content;

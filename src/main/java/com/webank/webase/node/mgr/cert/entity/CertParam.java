@@ -23,6 +23,9 @@ import lombok.ToString;
 
 import java.sql.Date;
 
+/**
+ * db param of cert
+ */
 @Data
 @NoArgsConstructor
 @ToString(callSuper = true)
