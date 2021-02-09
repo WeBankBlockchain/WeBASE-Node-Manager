@@ -20,9 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.extern.log4j.Log4j2;
 
 /**
- *
+ * validate tool
  */
-
 @Log4j2
 public class ValidateUtil {
     public static final String IP_PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";

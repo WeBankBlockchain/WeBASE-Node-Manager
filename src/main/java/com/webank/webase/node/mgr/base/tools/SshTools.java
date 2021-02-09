@@ -34,7 +34,9 @@ import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
 
 import lombok.extern.log4j.Log4j2;
 
-
+/**
+ * used in old deploy for ssh and exec in remote host
+ */
 @Log4j2
 public class SshTools {
 

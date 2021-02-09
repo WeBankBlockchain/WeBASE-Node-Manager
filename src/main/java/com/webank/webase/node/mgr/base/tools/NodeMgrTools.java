@@ -53,7 +53,7 @@ import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * common method.
+ * common method in node manager
  */
 @Log4j2
 public class NodeMgrTools {
@@ -108,8 +108,6 @@ public class NodeMgrTools {
         Instant instant = Instant.ofEpochMilli(inputTimeStamp);
         ZoneId zone = ZoneId.systemDefault();
         return LocalDateTime.ofInstant(instant, zone);
-//        Timestamp time = new Timestamp(inputTimeStamp);
-//        return time.toLocalDateTime();
     }
     /**
      * LocalDateTime to timestamp
@@ -119,8 +117,6 @@ public class NodeMgrTools {
             log.warn("localDateTime2Timestamp fail. inputDateTime is null");
             return null;
         }
-//        Timestamp time = Timestamp.valueOf(inputDateTime);
-//        return time.getTime();
         return inputDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 
@@ -256,7 +252,8 @@ public class NodeMgrTools {
             throw new NullPointerException("values is null");
         }
 
-        values.removeAll(Collections.singleton(null));// remove null
+        // remove null
+        values.removeAll(Collections.singleton(null));
         Collections.sort(values);
 
         StringBuilder sb = new StringBuilder();

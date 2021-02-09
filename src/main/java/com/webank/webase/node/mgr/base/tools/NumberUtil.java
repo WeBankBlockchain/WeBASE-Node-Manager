@@ -13,6 +13,10 @@
  */
  
 package com.webank.webase.node.mgr.base.tools;
+
+/**
+ * get percentage in deploy
+ */
 public class NumberUtil {
 
     public static final int PERCENTAGE_FAILED = -1;

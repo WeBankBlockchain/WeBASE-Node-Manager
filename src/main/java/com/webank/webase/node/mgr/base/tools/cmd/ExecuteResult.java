@@ -21,9 +21,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
- *
+ * result entity of java run command
  */
-
 @Data
 @ToString
 @NoArgsConstructor

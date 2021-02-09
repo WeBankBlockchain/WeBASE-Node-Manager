@@ -33,7 +33,7 @@ import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * constants.
+ * constants in yml and static constants
  */
 @Log4j2
 @Data
@@ -43,9 +43,18 @@ public class ConstantProperties {
 
     // constant
     public static final String CONSTANT_PREFIX = "constant";
-    public static final String COOKIE_JSESSIONID = "JSESSIONID"; // cookie key---session
-    public static final String COOKIE_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_C"; // cookie key---account
-    public static final String SESSION_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_S"; // session key---account
+    /**
+     * cookie key---session
+     */
+    public static final String COOKIE_JSESSIONID = "JSESSIONID";
+    /**
+     * cookie key---account
+     */
+    public static final String COOKIE_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_C";
+    /**
+     * session key---account
+     */
+    public static final String SESSION_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_S";
     public static final String CONTRACT_NAME_ZERO = "0x00000000";
     public static final String ADDRESS_DEPLOY = "0x0000000000000000000000000000000000000000";
     public static final String LOGIN_CHECKCODE_SESSION_KEY = "NODE_MGR_CHECK_CODE_S";
@@ -56,46 +65,69 @@ public class ConstantProperties {
 
     private boolean developerModeEnable = false;
     private BigInteger transRetainMax = new BigInteger("10000");
-    private String groupInvalidGrayscaleValue;  //y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
+    /**
+     * y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
+     */
+    private String groupInvalidGrayscaleValue;
     private String notSupportFrontIp;
 
-    //block into
+    /**
+     * block into
+     */
     private BigInteger blockRetainMax = new BigInteger("10000");
     private BigInteger pullBlockInitCnts = new BigInteger("100");
-    private Long pullBlockSleepTime = 20L; //20 mills
+    /**
+     * 20 mills
+     */
+    private Long pullBlockSleepTime = 20L;
     private Boolean isBlockPullFromZero = false;
 
-    //receive http request
-    private Integer authTokenMaxAge = 900; // seconds
+    /**
+     * receive http request
+     * unit: seconds
+     */
+    private Integer authTokenMaxAge = 900;
     private Boolean isUseSecurity = true;
     private String ignoreCheckFront = null;
-    // verification code settings
-    private Integer verificationCodeMaxAge = 300; // seconds
+    /**
+     * verification code settings
+     * unit: seconds
+     */
+    private Integer verificationCodeMaxAge = 300;
     private Boolean enableVerificationCode = true;
     private String verificationCodeValue = "8888";
 
-    //front http request
+    /**
+     * front http request
+     */
     private String frontUrl;
     private Integer contractDeployTimeOut = 30000;
     private Integer httpTimeOut = 5000;
     private Boolean isPrivateKeyEncrypt = true;
     private Integer maxRequestFail = 3;
-    private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
+    private Long sleepWhenHttpMaxFail = 60000L;
 
-    //transaction monitor
-    private Long transMonitorTaskFixedRate = 60000L; //second
+    /**
+     * transaction monitor
+     * unit: seconds
+     */
+    private Long transMonitorTaskFixedRate = 60000L;
     private Integer monitorInfoRetainMax;
     private Long analysisSleepTime = 200L;
     private Boolean isMonitorIgnoreUser = false;
     private Boolean isMonitorIgnoreContract = false;
     private Integer monitorUnusualMaxCount;
 
-    // alert mail interval
+    /**
+     * alert mail interval
+     */
     private Integer auditMonitorTaskFixedDelay;
     private Integer nodeStatusMonitorTaskFixedDelay;
     private Integer certMonitorTaskFixedDelay;
 
-    // default resetGroupList interval gap, default 15000ms(15s)
+    /**
+     * default resetGroupList interval gap, default 15000ms(15s)
+     */
     private long resetGroupListInterval = 15000;
 
     //******************* Add in v1.4.0 start. *******************
@@ -105,7 +137,9 @@ public class ConstantProperties {
     private int deployType = 0;
     private String webaseSignAddress = "127.0.0.1:5004";
 
-    // shell script
+    /**
+     * shell script
+     */
     private String nodeOperateShell = "./script/deploy/host_operate.sh";
     private String buildChainShell = "./script/deploy/build_chain.sh";
     private String genAgencyShell = "./script/deploy/gen_agency_cert.sh";
@@ -117,7 +151,9 @@ public class ConstantProperties {
     private String hostDockerTcpShell = "./script/deploy/host_docker_tcp.sh";
     private String hostInitShell = "./script/deploy/host_init_shell.sh";
     private String hostCheckPortShell = "./script/deploy/host_check_port.sh";
-    // to support | & > $
+    /**
+     * to support | & > $
+     */
     private String ansibleImageCheckShell = "./script/deploy/check_image_exist.sh";
     private String ansibleContainerCheckShell = "./script/deploy/check_container_exist.sh";
     private String hostCheckIpShell = "./script/deploy/host_check_ifconfig.sh";
@@ -151,7 +187,7 @@ public class ConstantProperties {
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
     private String dockerRepository= "fiscoorg/fisco-webase";
-//    private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
+   // private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
     private String nodesRootTmpDir = "NODES_ROOT_TMP";

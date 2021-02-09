@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
 /**
  * format request uri,support "//".
  */

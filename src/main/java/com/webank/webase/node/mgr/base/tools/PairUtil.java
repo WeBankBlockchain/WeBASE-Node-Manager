@@ -23,6 +23,9 @@ import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+/**
+ * get pair of key value
+ */
 public class PairUtil {
 
     /**

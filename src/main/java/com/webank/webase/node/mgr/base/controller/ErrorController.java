@@ -46,7 +46,7 @@ public class ErrorController extends BasicErrorController {
         if (index > 0) {
             String code = mesage.substring(0, index);
             String msg = mesage.substring(index);
-            throw new NodeMgrException(Integer.valueOf(code), msg);
+            throw new NodeMgrException(Integer.parseInt(code), msg);
         } else {
             throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION.getCode(), mesage);
         }

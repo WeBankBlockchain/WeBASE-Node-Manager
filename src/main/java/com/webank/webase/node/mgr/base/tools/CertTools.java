@@ -29,6 +29,9 @@ import org.fisco.bcos.web3j.utils.Numeric;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 
+/**
+ * load and get cert content
+ */
 public class CertTools {
     public static final String crtContentHead = "-----BEGIN CERTIFICATE-----\n" ;
     public static final String crtContentTail = "-----END CERTIFICATE-----\n" ;

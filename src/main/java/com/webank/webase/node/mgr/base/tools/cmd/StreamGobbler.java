@@ -23,9 +23,8 @@ import java.io.InputStreamReader;
 import lombok.extern.log4j.Log4j2;
 
 /**
- *
+ * Consumes the output from the input stream and displays
  */
-
 @Log4j2
 public class StreamGobbler extends Thread {
     private InputStream inputStream;

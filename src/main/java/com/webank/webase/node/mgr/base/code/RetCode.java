@@ -18,7 +18,8 @@ package com.webank.webase.node.mgr.base.code;
 import lombok.Data;
 
 /**
- * class about exception code and message.
+ * class about exception code and message
+ * @related: ConstantCode
  */
 @Data
 public class RetCode {

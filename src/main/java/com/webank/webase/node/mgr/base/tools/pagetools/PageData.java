@@ -28,7 +28,7 @@ public class PageData<T> {
     private int pageSize;
     //当前页的数量
     private int thisSize;
-    // 总记录数
+    //总记录数
     private int totalSize;
     //总页数
     private int pageNum;
