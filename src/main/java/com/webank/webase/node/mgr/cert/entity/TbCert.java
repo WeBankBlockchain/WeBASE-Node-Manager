@@ -19,6 +19,9 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * entity of cert
+ */
 @Data
 public class TbCert {
     // Primary Key

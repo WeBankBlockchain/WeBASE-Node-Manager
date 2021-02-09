@@ -76,6 +76,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * chain monitor
+ * chain deploy detail
+ */
 @Log4j2
 @Service
 public class ChainService {

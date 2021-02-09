@@ -20,6 +20,10 @@ import lombok.Data;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * block info from chain
+ */
 @Data
 public class BlockInfo {
     private BigInteger number;
