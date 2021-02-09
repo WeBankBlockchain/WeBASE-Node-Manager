@@ -32,17 +32,25 @@ public class ReqAlertRuleParam {
     private String ruleName;
     private Integer enable;
     private Integer alertType;
-    // unit: s
+    /**
+     * unit: s
+     */
     private Long alertIntervalSeconds;
     private Integer alertLevel;
-    // 用html模板组件
+    /**
+     * 用html模板组件
+      */
     private String alertContent;
-    // 序列化
+    /**
+     * 序列化
+     */
     private String contentParamList;
 
     private String description;
     private Integer isAllUser;
-    // 序列化
+    /**
+     * 序列化
+     */
     private String userList;
 
     private String lessThan;

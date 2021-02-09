@@ -19,7 +19,7 @@ import javax.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
- * entity for update password.
+ * entity to update password.
  */
 @Data
 public class PasswordInfo {

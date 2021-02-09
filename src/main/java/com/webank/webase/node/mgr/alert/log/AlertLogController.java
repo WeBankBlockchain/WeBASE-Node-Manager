@@ -105,29 +105,4 @@ public class AlertLogController {
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
-    // Duplicated: only for test
-//    @PostMapping("")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-//    public Object saveAlertLog(@RequestBody ReqLogParam param) {
-//        Instant startTime = Instant.now();
-//        log.info("start saveAlertLog. startTime:{} ReqAlertLogParam:{}",
-//                startTime.toEpochMilli(), JsonTools.toJSONString(param));
-//        if(StringUtils.isEmpty(param.getAlertContent()) ||
-//                StringUtils.isEmpty(param.getAlertLevel()) ||
-//                StringUtils.isEmpty(param.getAlertType())) {
-//            log.debug("saveAlertLog, error:{} ",
-//                    ConstantCode.ALERT_LOG_PARAM_EMPTY);
-//            return new BaseResponse(ConstantCode.ALERT_LOG_PARAM_EMPTY);
-//        }
-//        try{
-//            alertLogService.saveAlertLog(param);
-//        }catch (NodeMgrException e) {
-//            log.debug("saveAlertLog, error, exception:[] ", e);
-//            return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());
-//        }
-//        log.info("end saveAlertLog. useTime:{}",
-//                Duration.between(startTime, Instant.now()).toMillis());
-//        return new BaseResponse(ConstantCode.SUCCESS);
-//    }
-
 }

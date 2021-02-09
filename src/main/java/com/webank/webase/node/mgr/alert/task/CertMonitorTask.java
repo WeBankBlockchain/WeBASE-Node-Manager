@@ -76,8 +76,7 @@ public class CertMonitorTask {
             return;
         }
         List<X509Certificate> certList = certService.loadAllX509Certs();
-        certList.stream()
-            .forEach(cert -> {
+        certList.forEach(cert -> {
                 List<String> alertContentList = new ArrayList<>();
                 Date certNotAfter = cert.getNotAfter();
                 if(checkWithin7days(certNotAfter)){
@@ -107,7 +106,7 @@ public class CertMonitorTask {
         long interval = certNotAfter.getTime() - now;
         log.info("checkWithin7days time distance:{}, sevenDays:{}",
                 interval, sevenDays);
-        if(interval < sevenDays) {
+        if (interval < sevenDays) {
             // within 7days or already not valid (<0)
             return true;
         } else {

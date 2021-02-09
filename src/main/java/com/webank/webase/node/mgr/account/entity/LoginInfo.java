@@ -17,6 +17,9 @@ package com.webank.webase.node.mgr.account.entity;
 
 import lombok.Data;
 
+/**
+ * login param from web request
+ */
 @Data
 public class LoginInfo {
 

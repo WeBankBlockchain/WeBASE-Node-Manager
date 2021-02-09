@@ -34,7 +34,9 @@ public class TbAccountInfo {
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
-    // 邮件告警的邮箱
+    /**
+     * 邮件告警的邮箱
+      */
     private String email;
 
     public TbAccountInfo() {

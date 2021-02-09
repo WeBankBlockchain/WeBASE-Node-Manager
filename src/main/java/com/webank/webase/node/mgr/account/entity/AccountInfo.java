@@ -19,6 +19,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * param to add an Daccount
+ */
 @Data
 public class AccountInfo {
     @NotBlank

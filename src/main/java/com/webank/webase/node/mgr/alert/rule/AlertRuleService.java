@@ -111,6 +111,11 @@ public class AlertRuleService {
         }
     }
 
+    /**
+     * check alert rule's user list whether empty
+     * @param ruleId
+     * @return
+     */
     public boolean checkUserListIsEmptyByRuleId(int ruleId) {
         TbAlertRule tbAlertRule = alertRuleMapper.queryByRuleId(ruleId);
         return StringUtils.isEmpty(tbAlertRule.getUserList());

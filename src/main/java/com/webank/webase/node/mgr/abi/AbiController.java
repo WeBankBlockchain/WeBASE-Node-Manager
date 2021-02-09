@@ -49,6 +49,9 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * abi import controller
+ */
 @Log4j2
 @RestController
 @RequestMapping("abi")
