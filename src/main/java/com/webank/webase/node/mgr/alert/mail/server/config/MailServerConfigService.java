@@ -34,7 +34,6 @@ import java.util.List;
  * Mail Server Configuration for Mail Alert
  * MailService using the latest MailServerConfig as configuration
  */
-
 @Log4j2
 @Service
 public class MailServerConfigService {

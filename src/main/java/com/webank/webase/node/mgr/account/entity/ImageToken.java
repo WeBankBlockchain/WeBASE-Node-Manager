@@ -15,6 +15,9 @@ package com.webank.webase.node.mgr.account.entity;
 
 import lombok.Data;
 
+/**
+ * image token of verify code
+ */
 @Data
 public class ImageToken {
 

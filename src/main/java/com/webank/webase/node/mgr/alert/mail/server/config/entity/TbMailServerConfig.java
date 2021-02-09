@@ -31,19 +31,31 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class TbMailServerConfig {
-    // primary key
+    /**
+     * primary key ID
+     */
     private Integer serverId;
     private String serverName;
-    // 邮箱服务器地址
+    /**
+     * 邮箱服务器地址
+     */
     private String host;
     private Integer port;
-    // 邮箱地址
+    /**
+     * 邮箱服务器地址
+     */
     private String username;
-    // 邮箱授权码
+    /**
+     * 邮箱授权码
+     */
     private String password;
-    // 邮箱协议：smtp, pop3, imap
+    /**
+     * 邮箱协议：smtp, pop3, imap
+     */
     private String protocol;
-    // 默认编码
+    /**
+     * 默认编码
+     */
     private String defaultEncoding;
 
     private LocalDateTime createTime;
@@ -61,7 +73,9 @@ public class TbMailServerConfig {
     private Integer authentication;
     private Integer starttlsEnable;
 
-    // STARTTLS 具体配置
+    /**
+     * STARTTLS 具体配置
+     */
     private Integer starttlsRequired;
     private Integer socketFactoryPort;
     private String socketFactoryClass;

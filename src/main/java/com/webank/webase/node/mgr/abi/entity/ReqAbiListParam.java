@@ -22,6 +22,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * param to get list of abi in db
+ */
 @Data
 @NoArgsConstructor
 @ToString(callSuper = true)

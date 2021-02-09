@@ -65,7 +65,7 @@ public class AccountController extends BaseController {
     private static final int PICTURE_CHECK_CODE_CHAR_NUMBER = 4;
 
     /**
-     * 获取验证码
+     * get verify code when login
      */
     @GetMapping(value = "pictureCheckCode")
     public BaseResponse getPictureCheckCode() throws Exception {

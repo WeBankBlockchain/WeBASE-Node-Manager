@@ -57,6 +57,12 @@ public class AlertLogService {
         }
     }
 
+    /**
+     * save log config by level and alert content
+     * @param alertLevel
+     * @param alertType
+     * @param alertContentInEmail
+     */
     public void saveAlertLogByRuleAndContent(int alertLevel, int alertType, String alertContentInEmail) {
         log.debug("start saveAlertLogByRuleAndContent alertLevel:{},alertType:{} alertContentInEmail:{}",
                 alertLevel, alertType, alertContentInEmail);
@@ -75,6 +81,11 @@ public class AlertLogService {
         }
     }
 
+    /**
+     * get one by id
+     * @param logId
+     * @return AlertLog
+     */
     public AlertLog queryByLogId(int logId) {
         log.debug("start queryByLogId logId:{}", logId);
         AlertLog resAlertLog = alertLogMapper.queryByLogId(logId);
@@ -100,6 +111,10 @@ public class AlertLogService {
         }
     }
 
+    /**
+     * count all log
+     * @return count
+     */
     public int countOfLog() {
         log.debug("start countOfLog ");
         try {
@@ -114,6 +129,10 @@ public class AlertLogService {
     }
 
 
+    /**
+     * update by ReqLogParam
+     * @param inputParam
+     */
     public void updateAlertLog(ReqLogParam inputParam) {
         log.debug("start updateAlertLog ReqAlertLogParam inputParam:{}", inputParam);
         AlertLog alertLog = new AlertLog();
@@ -130,6 +149,10 @@ public class AlertLogService {
         }
     }
 
+    /**
+     * delete by id
+     * @param logId
+     */
     public void deleteByLogId(int logId) {
         log.debug("start deleteByLogId logId:{}", logId);
         alertLogMapper.deleteByLogId(logId);
