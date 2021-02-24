@@ -209,4 +209,11 @@ public class AbiService {
 		log.info("deleteAbiByGroupId groupId:{}", groupId);
 		abiMapper.deleteByGroupId(groupId);
 	}
+
+	public int countOfAbiByGroupId(int groupId) {
+		log.debug("start countOfAbiByGroupId groupId:{}", groupId);
+		ReqAbiListParam param = new ReqAbiListParam();
+		param.setGroupId(groupId);
+		return countOfAbi(param);
+	}
 }

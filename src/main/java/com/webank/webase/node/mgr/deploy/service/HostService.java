@@ -396,7 +396,7 @@ public class HostService {
         // new host, generate sdk dir first
         Path sdkPath = this.pathService.getSdk(chainName, ip);
 
-        if (Files.exists(sdkPath)){
+        if (Files.exists(sdkPath)) {
             log.warn("generateHostSDKCertAndScp Exists sdk dir of host:[{}:{}], delete first.", ip,
                 sdkPath.toAbsolutePath().toAbsolutePath());
             try {
