@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "sdk")
 public class EncryptTypeConfig {
-    // 0:standard, 1:guomi
+    /**
+     *  0:standard, 1:guomi
+     */
     private int encryptType;
 
     /**
