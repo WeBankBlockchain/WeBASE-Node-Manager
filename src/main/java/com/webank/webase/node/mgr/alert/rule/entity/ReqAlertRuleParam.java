@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,17 +32,25 @@ public class ReqAlertRuleParam {
     private String ruleName;
     private Integer enable;
     private Integer alertType;
-    // unit: s
+    /**
+     * unit: s
+     */
     private Long alertIntervalSeconds;
     private Integer alertLevel;
-    // 用html模板组件
+    /**
+     * 用html模板组件
+      */
     private String alertContent;
-    // 序列化
+    /**
+     * 序列化
+     */
     private String contentParamList;
 
     private String description;
     private Integer isAllUser;
-    // 序列化
+    /**
+     * 序列化
+     */
     private String userList;
 
     private String lessThan;

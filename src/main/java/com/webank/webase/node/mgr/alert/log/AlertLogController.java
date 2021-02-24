@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,30 +104,5 @@ public class AlertLogController {
                 Duration.between(startTime, Instant.now()).toMillis(), res);
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
-
-    // Duplicated: only for test
-//    @PostMapping("")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-//    public Object saveAlertLog(@RequestBody ReqLogParam param) {
-//        Instant startTime = Instant.now();
-//        log.info("start saveAlertLog. startTime:{} ReqAlertLogParam:{}",
-//                startTime.toEpochMilli(), JsonTools.toJSONString(param));
-//        if(StringUtils.isEmpty(param.getAlertContent()) ||
-//                StringUtils.isEmpty(param.getAlertLevel()) ||
-//                StringUtils.isEmpty(param.getAlertType())) {
-//            log.debug("saveAlertLog, error:{} ",
-//                    ConstantCode.ALERT_LOG_PARAM_EMPTY);
-//            return new BaseResponse(ConstantCode.ALERT_LOG_PARAM_EMPTY);
-//        }
-//        try{
-//            alertLogService.saveAlertLog(param);
-//        }catch (NodeMgrException e) {
-//            log.debug("saveAlertLog, error, exception:[] ", e);
-//            return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());
-//        }
-//        log.info("end saveAlertLog. useTime:{}",
-//                Duration.between(startTime, Instant.now()).toMillis());
-//        return new BaseResponse(ConstantCode.SUCCESS);
-//    }
 
 }
