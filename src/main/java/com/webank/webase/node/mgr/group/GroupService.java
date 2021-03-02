@@ -16,7 +16,6 @@ package com.webank.webase.node.mgr.group;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
 import com.webank.webase.node.mgr.abi.AbiService;
-import com.webank.webase.node.mgr.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
@@ -32,7 +31,6 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.block.BlockService;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.contract.CnsService;
@@ -88,6 +86,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -566,7 +565,7 @@ public class GroupService {
                 String frontIp = front.getFrontIp();
                 int frontPort = front.getFrontPort();
                 // check genesis block
-                BlockInfo genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
+                BcosBlock.Block genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
                         frontPort, groupId, BigInteger.ZERO);
                 if (genesisBlock == null) {
                     log.debug("checkGroupGenesisSameWithEach getGenesisBlock is null");
@@ -623,7 +622,7 @@ public class GroupService {
 			// case: if group's all front is stopped, front_group_map still normal, would set as CONFLICT for no data from front
 			boolean flagEmptyFront = (allFrontGroupList.size() == 0);
 			for(FrontGroup front: allFrontGroupList) {
-				BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
+				BcosBlock.Block smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
 						front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
 				if (smallestBlockOnChain == null) {
 					continue;

@@ -28,6 +28,8 @@ public class RetCode {
     private String message;
     private String attachment;
 
+    public RetCode() {}
+
     public RetCode(int code, String message) {
         this.code = code;
         this.message = message;

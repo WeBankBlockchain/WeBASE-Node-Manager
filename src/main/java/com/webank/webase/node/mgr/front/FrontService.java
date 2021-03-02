@@ -53,7 +53,6 @@ import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeMapper;
@@ -90,8 +89,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,10 +175,10 @@ public class FrontService {
 				List<String> groupIdList;
 				groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
 				// get syncStatus
-				SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
+				SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
 						frontPort, Integer.valueOf(groupIdList.get(0)));
 				// get version info
-				NodeVersion.Version versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
+                ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
 						frontPort, Integer.valueOf(groupIdList.get(0)));
 				String clientVersion = versionResponse.getVersion();
 				String supportVersion = versionResponse.getSupportedVersion();
@@ -244,7 +244,7 @@ public class FrontService {
             throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
         }
         //check front not exist
-        SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
+        SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
                 frontPort, Integer.valueOf(groupIdList.get(0)));
         FrontParam param = new FrontParam();
         param.setNodeId(syncStatus.getNodeId());
@@ -252,7 +252,7 @@ public class FrontService {
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
         }
-        NodeVersion.Version versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
+        ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
                 frontPort, Integer.valueOf(groupIdList.get(0)));
         String clientVersion = versionResponse.getVersion();
         String supportVersion = versionResponse.getSupportedVersion();
@@ -377,7 +377,7 @@ public class FrontService {
      * if exist:throw exception
      */
     private void checkFrontNotExist(String frontIp, int frontPort) {
-        SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, frontPort, 1);
+        SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, frontPort, 1);
         FrontParam param = new FrontParam();
         param.setNodeId(syncStatus.getNodeId());
         int count = getFrontCount(param);
