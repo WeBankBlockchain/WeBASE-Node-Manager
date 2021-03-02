@@ -14,31 +14,6 @@
 
 package com.webank.webase.node.mgr.frontinterface;
 
-import com.webank.webase.node.mgr.node.NodeService;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
@@ -50,8 +25,34 @@ import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.FrontUrlInfo;
-
+import com.webank.webase.node.mgr.node.NodeService;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.utils.Numeric;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * about http request for WeBASE-Front.
@@ -71,7 +72,7 @@ public class FrontRestTools {
     public static final String URI_GROUP_PLIST = "web3/groupList";
     public static final String URI_PEERS = "web3/peers";
     public static final String URI_CONSENSUS_STATUS = "web3/consensusStatus";
-    public static final String URI_CSYNC_STATUS = "web3/syncStatus";
+    public static final String URI_SYNC_STATUS = "web3/syncStatus";
     public static final String URI_SYSTEMCONFIG_BY_KEY = "web3/systemConfigByKey/%1s";
     public static final String URI_CODE = "web3/code/%1s/%2s";
     public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
@@ -427,5 +428,54 @@ public class FrontRestTools {
             }
         }
         return null;
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param block
+     */
+    public static void processBlockHexNumber(BcosBlock.Block block) {
+        if (block == null) {
+            return;
+        }
+        String gasLimit = block.getGasLimit();
+        String gasUsed = block.getGasUsed();
+        String timestamp = block.getTimestamp();
+        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+        log.info("processBlockHexNumber :{}", block);
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param trans
+     */
+    public static void processTransHexNumber(JsonTransactionResponse trans) {
+        if (trans == null) {
+            return;
+        }
+        String gas = trans.getGas();
+        String gasPrice = trans.getGasPrice();
+        String groupId = trans.getGroupId();
+        trans.setGas(Numeric.toBigInt(gas).toString(10));
+        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
+        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+        log.info("processTransHexNumber :{}", trans);
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param receipt
+     */
+    public static void processReceiptHexNumber(TransactionReceipt receipt) {
+        if (receipt == null) {
+            return;
+        }
+        String gasUsed = receipt.getGasUsed();
+        String blockNumber = receipt.getBlockNumber();
+        receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
+        log.info("processTransHexNumber :{}", receipt);
     }
 }

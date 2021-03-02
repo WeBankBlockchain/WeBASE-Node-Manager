@@ -16,9 +16,16 @@
 package com.webank.webase.node.mgr.frontinterface.entity;
 
 import java.math.BigInteger;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+/**
+ * store ConsensusStatus.ConsensusInfo, convert ViewInfo to BigInteger
+ */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PeerOfConsensusStatus {
     private String nodeId;
     private BigInteger view;

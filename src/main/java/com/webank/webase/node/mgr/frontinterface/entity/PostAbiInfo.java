@@ -19,7 +19,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 
 
 /**
- * abiMeta interface parameter.
+ * abiMeta interface parameter to request front's sendAbi api
  */
 @Data
 public class PostAbiInfo {
