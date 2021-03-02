@@ -18,7 +18,7 @@ package com.webank.webase.node.mgr.base.config;
 
 
 import lombok.Data;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,7 +41,7 @@ public class EncryptTypeConfig {
      * @return
      */
     @Bean(name = "encryptType")
-    public EncryptType EncryptType() {
-        return new EncryptType(encryptType);
+    public CryptoSuite getCryptoSuite() {
+        return new CryptoSuite(encryptType);
     }
 }
