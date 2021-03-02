@@ -24,6 +24,7 @@ import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.properties.VersionProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -152,7 +153,9 @@ public class FrontService {
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
     @Autowired private CryptoSuite cryptoSuite;
-
+    // version to check
+    @Autowired
+    private VersionProperties versionProperties;
 	// interval of check front status
 	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
@@ -261,6 +264,10 @@ public class FrontService {
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
         tbFront.setSupportVersion(supportVersion);
+
+        // 1.5.0 add check client version cannot be lower than v2.4.0
+        this.validateSupportVersion(supportVersion);
+
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
@@ -1241,5 +1248,21 @@ public class FrontService {
             frontList.add(front);
         });
         return frontList;
+    }
+
+    /**
+     * require if webase >= 1.3.1(dynamic group), fisco >= 2.4.1
+     * ignore: require if webase <= 1.3.2, fisco < 2.5.0
+     * @param supportVersion
+     */
+    private void validateSupportVersion(String supportVersion) {
+        int nodeSupportVerInt = NodeMgrTools.getVersionFromStr(supportVersion);
+        String webaseVersion = versionProperties.getVersion();
+        int webaseVerInt = NodeMgrTools.getVersionFromStr(webaseVersion);
+        // webase v1.3.2 above and fisco v2.4.1 below, error for dynamic group manage
+        if ( webaseVerInt >= VersionProperties.WEBASE_LOWEST_VERSION_INT
+            && nodeSupportVerInt < VersionProperties.NODE_LOWEST_SUPPORT_VERSION_INT ) {
+            throw new NodeMgrException(ConstantCode.WEBASE_VERSION_NOT_MATCH_FISCO_SUPPORT_VERSION);
+        }
     }
 }

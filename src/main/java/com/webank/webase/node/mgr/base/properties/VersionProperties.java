@@ -25,6 +25,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class VersionProperties {
 
+    // inclusive (can be equal)
+    public static final Integer WEBASE_LOWEST_VERSION_INT = 132;
+    public static final Integer NODE_LOWEST_SUPPORT_VERSION_INT = 241;
+
     @Value("${version}")
     private String version;
 }
