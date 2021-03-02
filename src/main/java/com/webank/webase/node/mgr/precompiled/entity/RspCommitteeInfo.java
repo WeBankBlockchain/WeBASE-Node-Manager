@@ -19,7 +19,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 
 @Data
 @NoArgsConstructor

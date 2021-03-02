@@ -15,7 +15,7 @@ package com.webank.webase.node.mgr.frontinterface.entity;
 
 import java.util.List;
 import lombok.Data;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 
 
 /**
@@ -27,6 +27,6 @@ public class PostAbiInfo {
     private Integer groupId;
     private String contractName;
     private String address;
-    private List<AbiDefinition> abiInfo;
+    private List<ABIDefinition> abiInfo;
     private String contractBin;
 }
