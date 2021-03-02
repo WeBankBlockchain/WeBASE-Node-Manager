@@ -16,12 +16,10 @@
 
 package node.mgr.test.alert.mail;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 
 public class AlertContentTest {
 

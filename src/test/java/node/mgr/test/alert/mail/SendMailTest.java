@@ -24,6 +24,7 @@ import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
 import com.webank.webase.node.mgr.alert.task.AuditMonitorTask;
 import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
+import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +39,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class SendMailTest {
+public class SendMailTest extends TestBase {
 
     @Autowired
     TemplateEngine templateEngine;

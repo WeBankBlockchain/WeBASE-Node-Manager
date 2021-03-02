@@ -14,22 +14,17 @@
 package node.mgr.test.user;
 
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
-
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import node.mgr.test.base.TestBase;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -38,10 +33,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-@WebAppConfiguration
-public class UserControllerTest {
+public class UserControllerTest extends TestBase {
 
     private MockMvc mockMvc;
 
@@ -49,6 +41,8 @@ public class UserControllerTest {
     private WebApplicationContext webApplicationContext;
     @Autowired
     private FrontGroupMapCache frontGroupMapCache;
+    @Autowired private CryptoSuite cryptoSuite;
+
 
     @Before
     public void setUp() throws Exception {
@@ -136,10 +130,10 @@ public class UserControllerTest {
     @Test
     public void testGenerateKey() throws Exception {
         // guomi use GenCredential
-       Credentials credentials = GenCredential.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+        CryptoKeyPair credentials = cryptoSuite.createKeyPair("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
         System.out.println( credentials.getAddress());
-        System.out.println( credentials.getEcKeyPair().getPrivateKey().toString(16));
-        System.out.println(  credentials.getEcKeyPair().getPublicKey().toString(16));
+        System.out.println( credentials.getHexPrivateKey());
+        System.out.println(  credentials.getHexPublicKey());
     }
 
 }

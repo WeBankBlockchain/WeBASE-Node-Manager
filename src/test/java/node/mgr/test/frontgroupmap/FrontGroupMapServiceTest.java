@@ -14,20 +14,15 @@
 package node.mgr.test.frontgroupmap;
 
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import java.util.List;
+import node.mgr.test.base.TestBase;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class FrontGroupMapServiceTest {
+public class FrontGroupMapServiceTest extends TestBase {
 
     @Autowired
     private FrontGroupMapService frontGroupMapService;

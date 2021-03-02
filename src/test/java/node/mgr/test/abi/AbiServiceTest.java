@@ -23,6 +23,7 @@ import com.webank.webase.node.mgr.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
+import node.mgr.test.base.TestBase;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,9 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class AbiServiceTest {
+public class AbiServiceTest extends TestBase {
 	@Autowired
 	AbiService abiService;
 
