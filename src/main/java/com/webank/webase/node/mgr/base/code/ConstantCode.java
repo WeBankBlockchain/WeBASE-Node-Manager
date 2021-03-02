@@ -245,7 +245,7 @@ public class ConstantCode {
     public static final RetCode TWO_NODES_AT_LEAST = RetCode.mark(202462, "Two nodes at least.");
     public static final RetCode TWO_SEALER_IN_GROUP_AT_LEAST = RetCode.mark(202463, "Group need two sealers at least.");
     public static final RetCode WEBASE_SIGN_CONFIG_ERROR = RetCode.mark(202464, "Please check webaseSignAddress in application.yml file.");
-    public static final RetCode UNKNOWN_DOCKER_IMAGE_TYPE = RetCode.mark(202465, "Docker image type param error.");
+    public static final RetCode WEBASE_SIGN_NOT_LOCALHOST_ERROR = RetCode.mark(202465, "webaseSignAddress cannot be 127.0.0.1 or localhost in application.yml file");
     public static final RetCode IMAGE_NOT_EXISTS_ON_HOST = RetCode.mark(202466, "Image not exists on host.");
     public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(202467, "Max 4 nodes on a same host.");
     public static final RetCode SAME_HOST_ERROR = RetCode.mark(202468, "Host of WeBASE-Node-Manager's ip is already existed.");
