@@ -300,6 +300,7 @@ public class FrontService {
      * @param groupIdList
      * @param tbFront
      */
+    @Transactional
     private void saveGroup(List<String> groupIdList, TbFront tbFront){
 		String frontIp = tbFront.getFrontIp();
 		Integer frontPort = tbFront.getFrontPort();

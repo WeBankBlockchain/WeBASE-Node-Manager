@@ -80,6 +80,7 @@ public class NodeService {
     /**
      * add new node data.
      */
+    @Transactional
     public void addNodeInfo(Integer groupId, PeerInfo peerInfo) throws NodeMgrException {
         String nodeIp = null;
         Integer nodeP2PPort = null;
