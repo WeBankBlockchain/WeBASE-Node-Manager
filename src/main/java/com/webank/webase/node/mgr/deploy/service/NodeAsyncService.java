@@ -141,6 +141,7 @@ public class NodeAsyncService {
 
     /**
      * 扩容节点，并启动
+     * 不会重启所有节点，只启动新节点
      * @param chainId
      * @param optionType
      * @param newFrontIdList
@@ -156,7 +157,7 @@ public class NodeAsyncService {
             // start one front
             ProgressTools.setStarting();
             // update chain to updating
-            this.chainService.updateStatus(chainId, ChainStatusEnum.RESTARTING);
+            this.chainService.updateStatus(chainId, ChainStatusEnum.NODE_ADDING);
 
             // restart front by host
             this.restartFrontByHost(chainId, optionType, hostFrontListMap,
