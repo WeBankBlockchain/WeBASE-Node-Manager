@@ -15,30 +15,24 @@
 package com.webank.webase.node.mgr.deploy.service;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.ConfigTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.deploy.entity.TbConfig;
+import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.webank.webase.node.mgr.base.enums.ConfigTypeEnum;
-import com.webank.webase.node.mgr.deploy.entity.TbConfig;
-import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
-
-import lombok.extern.log4j.Log4j2;
-import org.springframework.util.ObjectUtils;
 
 @Log4j2
 @Component
 public class ConfigService {
 
     @Autowired private TbConfigMapper tbConfigMapper;
-
-    @Autowired private EncryptType encryptType;
 
     /**
      * Select config by type.
@@ -85,10 +79,10 @@ public class ConfigService {
 
     private static List<TbConfig> filterByEncryptType(List<TbConfig> configList, int encryptType) {
         switch (encryptType) {
-            case EncryptType.ECDSA_TYPE:
+            case CryptoType.ECDSA_TYPE:
                 return configList.stream().filter(config -> !StringUtils.endsWith(config.getConfigValue(), "-gm"))
                         .collect(Collectors.toList());
-            case EncryptType.SM2_TYPE:
+            case CryptoType.SM_TYPE:
                 return configList.stream().filter(config -> StringUtils.endsWith(config.getConfigValue(), "-gm"))
                         .collect(Collectors.toList());
             default:

@@ -13,31 +13,6 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
-import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
-import com.webank.webase.node.mgr.monitor.entity.MonitorTrans;
-import com.webank.webase.node.mgr.monitor.entity.PageTransInfo;
-import com.webank.webase.node.mgr.monitor.entity.TbMonitor;
-import com.webank.webase.node.mgr.monitor.entity.UnusualContractInfo;
-import com.webank.webase.node.mgr.monitor.entity.UnusualUserInfo;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.MonitorUserType;
@@ -55,13 +30,36 @@ import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
+import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.monitor.entity.ContractMonitorResult;
+import com.webank.webase.node.mgr.monitor.entity.MonitorTrans;
+import com.webank.webase.node.mgr.monitor.entity.PageTransInfo;
+import com.webank.webase.node.mgr.monitor.entity.TbMonitor;
+import com.webank.webase.node.mgr.monitor.entity.UnusualContractInfo;
+import com.webank.webase.node.mgr.monitor.entity.UnusualUserInfo;
 import com.webank.webase.node.mgr.monitor.entity.UserMonitorResult;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.user.UserService;
-
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 /**
  * MonitorService.
@@ -88,6 +86,7 @@ public class MonitorService {
     private MethodService methodService;
     @Autowired
     private ConstantProperties cProperties;
+    @Autowired private CryptoSuite cryptoSuite;
 
 
     /**
@@ -500,11 +499,11 @@ public class MonitorService {
 
         String interfaceName = null;
         try {
-            List<AbiDefinition> abiList = Web3Tools.loadContractDefinition(contractAbi);
-            for (AbiDefinition abiDefinition : abiList) {
+            List<ABIDefinition> abiList = Web3Tools.loadContractDefinition(contractAbi);
+            for (ABIDefinition abiDefinition : abiList) {
                 if ("function".equals(abiDefinition.getType())) {
                     // support guomi sm3
-                    String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                    String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                     if (methodId.equals(buildMethodId)) {
                         interfaceName = abiDefinition.getName();
                         break;

@@ -19,7 +19,8 @@ package com.webank.webase.node.mgr.gm;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,9 +32,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "encrypt")
 public class EncryptTypeController {
+
+    @Autowired
+    private CryptoSuite cryptoSuite;
+
     @GetMapping("")
     public Object getEncryptType() {
-        int encrypt = EncryptType.encryptType;
+        int encrypt = cryptoSuite.cryptoTypeConfig;
         log.info("getEncryptType:{}", encrypt);
         return new BaseResponse(ConstantCode.SUCCESS, encrypt);
     }

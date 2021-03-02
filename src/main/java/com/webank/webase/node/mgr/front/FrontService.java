@@ -90,8 +90,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
-import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +119,6 @@ public class FrontService {
     private FrontGroupMapMapper frontGroupMapMapper;
     @Autowired
     private TbChainMapper tbChainMapper;
-
     @Autowired
     private NodeService nodeService;
     @Autowired
@@ -149,9 +149,9 @@ public class FrontService {
     private HostService hostService;
     @Autowired
     private ChainService chainService;
-
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    @Autowired private CryptoSuite cryptoSuite;
 
 	// interval of check front status
 	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
@@ -237,10 +237,10 @@ public class FrontService {
         }
         // check front's encrypt type same as nodemgr(guomi or standard)
         int encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort);
-        if (encryptType != EncryptType.encryptType) {
+        if (encryptType != cryptoSuite.cryptoTypeConfig) {
             log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{}," +
                             "local encryptType not match:{}",
-                    frontIp, frontPort, encryptType, EncryptType.encryptType);
+                    frontIp, frontPort, encryptType, cryptoSuite.cryptoTypeConfig);
             throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
         }
         //check front not exist
@@ -698,7 +698,7 @@ public class FrontService {
 
             TbFront tbFront = this.getByNodeId(node.getNodeId());
 
-            boolean guomi = encryptType == EncryptType.SM2_TYPE;
+            boolean guomi = encryptType == CryptoType.SM_TYPE;
             int chainIdInConfigIni = this.constant.getDefaultChainId();
 
             // local node root
@@ -770,7 +770,7 @@ public class FrontService {
                 continue;
             }
 
-            boolean guomi = encryptType == EncryptType.SM2_TYPE;
+            boolean guomi = encryptType == CryptoType.SM_TYPE;
             int chainIdInConfigIni = this.constant.getDefaultChainId();
 
             // local node root

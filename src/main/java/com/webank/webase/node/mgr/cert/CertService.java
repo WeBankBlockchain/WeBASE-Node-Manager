@@ -16,6 +16,16 @@
 
 package com.webank.webase.node.mgr.cert;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.CertTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.cert.entity.CertParam;
+import com.webank.webase.node.mgr.cert.entity.TbCert;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.FrontParam;
+import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,24 +37,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.CertTools;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.cert.entity.CertParam;
-import com.webank.webase.node.mgr.cert.entity.TbCert;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.front.entity.FrontParam;
-import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
@@ -56,6 +53,8 @@ public class CertService {
     private FrontInterfaceService frontInterfaceService;
     @Autowired
     private FrontService frontService;
+    @Autowired
+    private CryptoSuite cryptoSuite;
     /**
      * cert存进数据库中，
      * 证书的格式包含开头---BEGIN---与结尾，包含bare string, 以及tbCert的内容
@@ -95,7 +94,7 @@ public class CertService {
                     ("sdk".equals(certType) && "sdk".equals(certName))) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
-                address = Keys.getAddress(publicKeyString);
+                address = cryptoSuite.getCryptoKeyPair().getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
             }else if(CertTools.TYPE_AGENCY.equals(certType)){
                 fatherCertContent = findFatherCert(certImpl);

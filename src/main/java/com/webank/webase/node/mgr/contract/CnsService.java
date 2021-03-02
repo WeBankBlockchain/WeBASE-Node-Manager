@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,8 +52,8 @@ public class CnsService {
         log.info("start registerCns. inputParam:{}", JsonTools.toJSONString(inputParam));
         int groupId = inputParam.getGroupId();
         String contractName = inputParam.getContractName();
-        List<AbiDefinition> abiArray =
-                JsonTools.toJavaObjectList(inputParam.getContractAbi(), AbiDefinition.class);
+        List<ABIDefinition> abiArray =
+                JsonTools.toJavaObjectList(inputParam.getContractAbi(), ABIDefinition.class);
         if (abiArray == null || abiArray.isEmpty()) {
             log.error("fail registerCns. abi is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);

@@ -23,7 +23,6 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.monitor.MonitorService;
@@ -44,9 +43,11 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.channel.client.P12Manager;
-import org.fisco.bcos.channel.client.PEMManager;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.exceptions.LoadKeyStoreException;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
+import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,7 @@ public class UserService {
     @Lazy
     @Autowired
     private MonitorService monitorService;
+    @Autowired private CryptoSuite cryptoSuite;
 
     /**
      * add new user data.
@@ -182,7 +184,7 @@ public class UserService {
         }
         String address = publicKey;
         if (publicKey.length() == ConstantProperties.PUBLICKEY_LENGTH) {
-            address = Web3Tools.getAddressByPublicKey(publicKey);
+            address = cryptoSuite.createKeyPair().getAddress(publicKey);
         }
 
         // check address
@@ -361,16 +363,8 @@ public class UserService {
      * @return userId
      */
     public Integer importPem(ReqImportPem reqImportPem) {
-        PEMManager pemManager = new PEMManager();
-        String privateKey;
-        try {
-            String pemContent = reqImportPem.getPemContent();
-            pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
-            privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
-        } catch (Exception e) {
-            log.error("importKeyStoreFromPem error:[]", e);
-            throw new NodeMgrException(ConstantCode.PEM_CONTENT_ERROR);
-        }
+        PEMKeyStore pemManager = new PEMKeyStore(new ByteArrayInputStream(reqImportPem.getPemContent().getBytes()));
+        String privateKey = KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate());
         // pem's privateKey encoded here
         String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
 
@@ -399,23 +393,22 @@ public class UserService {
             log.error("decode password error:[]", e);
             throw new NodeMgrException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
         }
-
-        P12Manager p12Manager = new P12Manager();
         String privateKey;
         try {
-            p12Manager.setPassword(p12Password);
-            p12Manager.load(p12File.getInputStream(), p12Password);
-            privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
-        } catch (IOException e) {
+            // manually set password and load
+            P12KeyStore p12Manager = new P12KeyStore(p12File.getInputStream(), p12Password);
+            privateKey = KeyTool.getHexedPrivateKey(p12Manager.getKeyPair().getPrivate());
+        }  catch (IOException e) {
+            log.error("importKeyStoreFromP12 file not found error:[]", e);
+            throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
+        } catch (LoadKeyStoreException e) {
             log.error("importKeyStoreFromP12 error:[]", e);
             if (e.getMessage().contains("password")) {
                 throw new NodeMgrException(ConstantCode.P12_PASSWORD_ERROR);
             }
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
-        } catch (Exception e) {
-            log.error("importKeyStoreFromP12 error:[]", e);
-            throw new NodeMgrException(ConstantCode.P12_FILE_ERROR.getCode(), e.getMessage());
         }
+
         // pem's privateKey encoded here
         String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
 
