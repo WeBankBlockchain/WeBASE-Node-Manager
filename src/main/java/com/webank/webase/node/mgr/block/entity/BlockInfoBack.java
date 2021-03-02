@@ -23,6 +23,7 @@ import lombok.Data;
 
 /**
  * block info from chain
+ * todo switch to sdk's block entity
  */
 @Data
 public class BlockInfo {

@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.monitor;
 
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.enums.TableName;
+import com.webank.webase.node.mgr.monitor.entity.TbMonitor;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.monitor;
+package com.webank.webase.node.mgr.monitor.entity;
 
-import java.math.BigInteger;
-import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ChainTransInfo {
-    private String from;
-    private String to;
-    private String input;
-    private BigInteger blockNumber;
+public class UnusualUserInfo {
+
+    private String userName;
+    private int transCount;
+    private String hashs;
+    private LocalDateTime time;
 }
