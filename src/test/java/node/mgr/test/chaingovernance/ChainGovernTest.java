@@ -18,9 +18,8 @@ import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.precompiled.permission.ChainGovernService;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import node.mgr.test.gm.TestBase;
+import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -20,6 +20,7 @@ package node.mgr.test.abi;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
+import node.mgr.test.base.TestBase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,10 +37,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-@WebAppConfiguration
-public class AbiControllerTest {
+public class AbiControllerTest extends TestBase {
 	private MockMvc mockMvc;
 	private Integer groupId = 1;
 	private Integer pageNumber = 1;

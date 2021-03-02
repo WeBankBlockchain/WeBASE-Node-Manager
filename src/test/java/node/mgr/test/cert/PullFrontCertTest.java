@@ -19,6 +19,7 @@ package node.mgr.test.cert;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
+import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,7 @@ import org.springframework.util.Assert;
 
 import java.util.List;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class PullFrontCertTest {
+public class PullFrontCertTest extends TestBase {
     @Autowired
     CertService certService;
 

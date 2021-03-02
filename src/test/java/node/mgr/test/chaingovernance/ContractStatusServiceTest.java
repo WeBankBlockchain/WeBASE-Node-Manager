@@ -16,7 +16,7 @@ package node.mgr.test.chaingovernance;
 
 import com.webank.webase.node.mgr.governance.GovernVoteService;
 import com.webank.webase.node.mgr.governance.entity.GovernParam;
-import node.mgr.test.gm.TestBase;
+import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
