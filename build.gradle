@@ -46,12 +46,6 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-List web3sdk = [
-    "org.fisco-bcos:web3sdk:2.6.2",
-    'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2-SNAPSHOT'
-
-]
-
 List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
@@ -79,7 +73,8 @@ List log4j = [
 ]
 
 dependencies {
-    compile springboot,spring,jaxb,web3sdk,jackson,log4j
+    compile springboot,spring,jaxb,jackson,log4j
+    compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2-SNAPSHOT"
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile "mysql:mysql-connector-java:8.0.13"
@@ -98,7 +93,7 @@ dependencies {
     }
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
     compile 'ognl:ognl:3.2.14'
-
+    compile 'org.apache.commons:commons-collections4:4.4'
     testCompile test
 
     compileOnly lombok
