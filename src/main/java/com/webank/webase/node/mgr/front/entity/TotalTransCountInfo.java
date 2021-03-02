@@ -21,5 +21,5 @@ import lombok.Data;
 @Data
 public class TotalTransCountInfo {
    private BigInteger txSum;
-   private BigInteger  blockNumber;
+   private BigInteger blockNumber;
 }

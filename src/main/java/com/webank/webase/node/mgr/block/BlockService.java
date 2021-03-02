@@ -13,31 +13,33 @@
  */
 package com.webank.webase.node.mgr.block;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.BlockListParam;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
-import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionObject;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * services for block data.
@@ -100,7 +102,7 @@ public class BlockService {
      */
     private void pullBlockByNumber(int groupId, BigInteger blockNumber) {
         //get block by number
-        BlockInfo blockInfo = frontInterface.getBlockByNumber(groupId, blockNumber);
+        BcosBlock.Block blockInfo = frontInterface.getBlockByNumber(groupId, blockNumber);
         if (blockInfo == null || blockInfo.getNumber() == null) {
             log.info("pullBlockByNumber jump over. not found new block.");
             return;
@@ -137,7 +139,7 @@ public class BlockService {
     /**
      * copy chainBlock properties;
      */
-    public static TbBlock chainBlock2TbBlock(BlockInfo blockInfo) {
+    public static TbBlock chainBlock2TbBlock(BcosBlock.Block blockInfo) {
         if (blockInfo == null) {
             return null;
         }
@@ -146,11 +148,11 @@ public class BlockService {
                 .timestamp2LocalDateTime(Long.valueOf(blockInfo.getTimestamp()));
         int sealerIndex = Integer.parseInt(blockInfo.getSealer().substring(2), 16);
 
-        List<TransactionInfo> transList = blockInfo.getTransactions();
+        int transSize = blockInfo.getTransactions().size();
 
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
-            transList.size(), sealerIndex);
+            transSize, sealerIndex);
         return tbBlock;
     }
 
@@ -158,15 +160,16 @@ public class BlockService {
      * save report block info.
      */
     @Transactional
-    public void saveBLockInfo(BlockInfo blockInfo, Integer groupId) throws NodeMgrException {
-        List<TransactionInfo> transList = blockInfo.getTransactions();
+    public void saveBLockInfo(BcosBlock.Block blockInfo, Integer groupId) throws NodeMgrException {
+        List<TransactionResult> transList = blockInfo.getTransactions();
 
         // save block info
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
         addBlockInfo(tbBlock, groupId);
 
         // save trans hash
-        for (TransactionInfo trans : transList) {
+        for (TransactionResult t : transList) {
+            JsonTransactionResponse trans = (JsonTransactionResponse) t;
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
@@ -298,14 +301,14 @@ public class BlockService {
     /**
      * get block by blockNumber from front server
      */
-    public BlockInfo getBlockFromFrontByNumber(int groupId, BigInteger blockNumber) {
+    public BcosBlock.Block getBlockFromFrontByNumber(int groupId, BigInteger blockNumber) {
         return frontInterface.getBlockByNumber(groupId, blockNumber);
     }
 
     /**
      * get block by hash from front server
      */
-    public BlockInfo getBlockFromFrontByHash(int groupId, String pkHash) {
+    public BcosBlock.Block getBlockFromFrontByHash(int groupId, String pkHash) {
         return frontInterface.getBlockByHash(groupId, pkHash);
     }
 
