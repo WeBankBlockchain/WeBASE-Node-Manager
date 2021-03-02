@@ -16,18 +16,15 @@
 package com.webank.webase.node.mgr.base.tools;
 
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.io.IOException;
 import java.security.Principal;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.utils.Numeric;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import org.fisco.bcos.sdk.utils.Numeric;
 
 /**
  * load and get cert content
@@ -89,11 +86,11 @@ public class CertTools {
         publicKey = publicKey.substring(publicKey.length() - PUBLIC_KEY_IN_HEX_LENGTH); //只取后128位
         return publicKey;
     }
-
-    public static String getAddress(PublicKey key) {
-        String publicKey = getPublicKeyString(key);
-        return Keys.getAddress(publicKey);
-    }
+//
+//    public static String getAddress(PublicKey key) {
+//        String publicKey = getPublicKeyString(key);
+//        return CryptoKeyPair.getAddress(publicKey);
+//    }
 
     // crt文件中默认首个是节点证书 0 isnode ca, 1 is agency ca, 2 is chain
     public static List<String> getCrtContentList(String certContent) {

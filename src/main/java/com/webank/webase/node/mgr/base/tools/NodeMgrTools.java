@@ -40,9 +40,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.crypto.Hash;
-import org.fisco.bcos.web3j.utils.Numeric;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
@@ -51,6 +48,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.utils.Numeric;
 
 /**
  * common method in node manager
@@ -206,24 +204,20 @@ public class NodeMgrTools {
 
     /**
      * get hash value
-     * type: sha256 or sm3
+     * type: sha256
      */
     public static byte[] getHashValue(byte[] byteArray) {
         byte[] hashResult;
-        if(EncryptType.encryptType == 1) {
-           hashResult = Hash.sha3(byteArray);
-           return hashResult;
-        } else {
-            MessageDigest sha = null;
-            try {
-                sha = MessageDigest.getInstance("SHA-256");
-                hashResult = sha.digest(byteArray);
-                return hashResult;
-            } catch (Exception e) {
-                log.error("shaEncode getHashValue fail:", e);
-                return null;
-            }
+        MessageDigest sha = null;
+        try {
+            sha = MessageDigest.getInstance("SHA-256");
+            hashResult = sha.digest(byteArray);
+            return hashResult;
+        } catch (Exception e) {
+            log.error("shaEncode getHashValue fail:", e);
+            return null;
         }
+
     }
 
     /**
