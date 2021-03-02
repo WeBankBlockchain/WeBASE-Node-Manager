@@ -526,4 +526,24 @@ public class NodeMgrTools {
         String regex = "[^\\u4e00-\\u9fa5]+";
         return input.matches(regex);
     }
+
+    /**
+     * get version number without character
+     * @param verStr ex: v2.4.1, ex 1.5.0
+     * @return ex: 241, 150
+     */
+    public static int getVersionFromStr(String verStr) {
+        log.error("getVersionFromStr verStr:{}", verStr);
+        // remove v and split
+        String[] versionArr = verStr.substring(1).split(".");
+        if (versionArr.length < 3) {
+            log.error("getVersionFromStr versionArr:[]", versionArr);
+            throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
+        }
+        // get num
+        int version = Integer.parseInt(versionArr[0]) * 100
+            + Integer.parseInt(versionArr[1]) * 10 + Integer.parseInt(versionArr[2]);
+        log.info("getVersionFromStr version:{}", version);
+        return version;
+    }
 }
