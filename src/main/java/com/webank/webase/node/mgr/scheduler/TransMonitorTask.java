@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
+import com.webank.webase.node.mgr.statistic.StatService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -38,11 +39,17 @@ public class TransMonitorTask {
     private MonitorService monitorService;
     @Autowired
     private GroupService groupService;
-
+    @Autowired
+    private StatService statService;
 
     @Scheduled(fixedRateString = "${constant.transMonitorTaskFixedRate}")
     public void taskStart() {
         monitorStart();
+    }
+
+    @Scheduled(fixedRateString = "${constant.statBlockFixedDelay}")
+    public void statTaskStart() {
+        blockStatStart();
     }
 
     /**
@@ -59,7 +66,7 @@ public class TransMonitorTask {
         }
         // count down group, make sure all group's transMonitor finished
         CountDownLatch latch = new CountDownLatch(groupList.size());
-        groupList.stream()
+        groupList
             .forEach(group -> monitorService.transMonitorByGroupId(latch, group.getGroupId()));
 
         try {
@@ -70,6 +77,34 @@ public class TransMonitorTask {
         }
 
         log.debug("=== end monitor. useTime:{} ",
+            Duration.between(startTime, Instant.now()).toMillis());
+    }
+
+    /**
+     * start monitor.
+     */
+    public synchronized void blockStatStart() {
+        Instant startTime = Instant.now();
+        log.debug("=== start blockStat. startTime:{}", startTime.toEpochMilli());
+        //get group list
+        List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
+        if (groupList == null || groupList.size() == 0) {
+            log.warn("blockStat jump over, not found any group");
+            return;
+        }
+        // count down group, make sure all group's transMonitor finished
+        CountDownLatch latch = new CountDownLatch(groupList.size());
+        groupList
+            .forEach(group -> statService.pullBlockStatistic(latch, group.getGroupId()));
+
+        try {
+             latch.await();
+        } catch (InterruptedException ex) {
+            log.error("InterruptedException", ex);
+            Thread.currentThread().interrupt();
+        }
+
+        log.debug("=== end blockStat. useTime:{} ",
             Duration.between(startTime, Instant.now()).toMillis());
     }
 }

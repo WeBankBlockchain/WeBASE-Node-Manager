@@ -357,4 +357,12 @@ public class BlockService {
     public BcosBlockHeader getBlockHeaderFromFrontByHash(int groupId, String pkHash) {
         return frontInterface.getBlockHeaderByHash(groupId, pkHash);
     }
+
+    /**
+     * get block header by hash from front
+     * @param input block height or tx hash
+     */
+    public Object searchByBlockNumOrTxHash(int groupId, String input) {
+        return frontInterface.searchByBlockNumOrTxHash(groupId, input);
+    }
 }
