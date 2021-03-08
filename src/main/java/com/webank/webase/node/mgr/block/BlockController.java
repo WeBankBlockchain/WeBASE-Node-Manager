@@ -162,4 +162,21 @@ public class BlockController {
         return baseResponse;
     }
 
+    /**
+     * get block or tx
+     */
+    @GetMapping("/search/{groupId}/{input}")
+    public BaseResponse searchByBlockNumOrTxHash(@PathVariable("groupId") Integer groupId,
+        @PathVariable("input") String input)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getBlockHeaderByNumber startTime:{} groupId:{} blockHash:{}",
+            startTime.toEpochMilli(), groupId, input);
+        Object blockOrTx = blockService.searchByBlockNumOrTxHash(groupId, input);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS, blockOrTx);
+        log.info("end getBlockHeaderByNumber useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
 }

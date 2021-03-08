@@ -473,20 +473,6 @@ public class MonitorService {
     }
 
 
-    /**
-     * get systemUser name.
-     */
-//    private String getSystemUserName(String address) {
-//        if (StringUtils.isBlank(address)) {
-//            return null;
-//        }
-//        TbUser user = userService.getSystemUser();
-//        return Optional.ofNullable(user).filter(u -> address.equals(u.getAddress()))
-//            .map(u1 -> u1.getUserName()).orElse(null);
-//    }
-
-
-
 
     /**
      * get interface name.

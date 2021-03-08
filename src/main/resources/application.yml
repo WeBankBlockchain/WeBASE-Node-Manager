@@ -88,6 +88,10 @@ constant:
   permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/encrypt,/version,/front/refresh
   ###interval to async refresh group list locally
   resetGroupListInterval: 15000
+  ###interval block statistic, unit: ms
+  statBlockFixedDelay: 5000
+  statBlockPageSize: 10 # block stat data to pull in one time
+
   #### 1.4.0 visual deploy
   #### deployType 部署方式：
   # 0, 先使用 build_chain.sh 部署链并启用 WeBASE-Front 服务，然后手动添加前置; 

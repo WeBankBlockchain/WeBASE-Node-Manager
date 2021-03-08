@@ -129,6 +129,10 @@ public class ConstantProperties {
      * default resetGroupList interval gap, default 15000ms(15s)
      */
     private long resetGroupListInterval = 15000;
+    // pull block statistic interval: ms
+    private Integer statBlockFixedDelay = 5000;
+    private Integer statBlockPageSize = 10;
+
 
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
