@@ -74,7 +74,7 @@ public class CertService {
         // 记录保存到第几个cert时报错
         int count = 0;
         log.debug("saveCerts start save TbCert in db. cert list size:{}", certs.size());
-        for(int i = 0; i < certs.size(); i++) {
+        for (int i = 0; i < certs.size(); i++) {
             TbCert tbCert = new TbCert();
             X509Certificate certImpl = certs.get(i);
             // 用SHA-1计算得出指纹
@@ -90,16 +90,16 @@ public class CertService {
             String fatherCertContent = "";
             // node cert has PublicKey and Address:
             // standard: type=node;  guomi: type = node || type=encrypt_node || type=sdk&&name=sdk
-            if(CertTools.TYPE_NODE.equals(certType) || CertTools.TYPE_ENCRYPT_NODE.equals(certType) ||
+            if (CertTools.TYPE_NODE.equals(certType) || CertTools.TYPE_ENCRYPT_NODE.equals(certType) ||
                     ("sdk".equals(certType) && "sdk".equals(certName))) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = cryptoSuite.getCryptoKeyPair().getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
-            }else if(CertTools.TYPE_AGENCY.equals(certType)){
+            }else if (CertTools.TYPE_AGENCY.equals(certType)) {
                 fatherCertContent = findFatherCert(certImpl);
                 setSonCert(certImpl);
-            }else if(CertTools.TYPE_CHAIN.equals(certType)){
+            }else if (CertTools.TYPE_CHAIN.equals(certType)) {
                 setSonCert(certImpl);
             }
 
@@ -122,7 +122,7 @@ public class CertService {
             try{
                 saveCert(tbCert);
             }catch (Exception e) {
-                log.error("saveCerts exception:{}", e);
+                log.error("saveCerts exception:[]", e);
                 throw new NodeMgrException(ConstantCode.CERT_FORMAT_ERROR.getCode(),
                         "Fail saving the " + count + " crt, please try again");
             }
@@ -331,12 +331,11 @@ public class CertService {
         log.debug("start pulling Front's Node Certs. ");
         List<TbFront> frontList = frontService.getFrontList(new FrontParam());
         for(TbFront tbFront: frontList) {
-            Map<String, String> certs = new HashMap<>();
             String frontIp = tbFront.getFrontIp();
             Integer frontPort = tbFront.getFrontPort();
             log.debug("start getCertMapFromSpecificFront. frontIp:{} , frontPort: {} ", frontIp, frontPort);
-            certs = frontInterfaceService.getCertMapFromSpecificFront(frontIp, frontPort);
-            log.debug("end getCertMapFromSpecificFront. ");
+            Map<String, String> certs = frontInterfaceService.getCertMapFromSpecificFront(frontIp, frontPort);
+            log.debug("end getCertMapFromSpecificFront certs size:{}", certs.size());
             try{
                 saveFrontCert(certs);
                 count++;
@@ -446,5 +445,13 @@ public class CertService {
     public int deleteAll() {
         log.info("delete all certs");
         return this.certMapper.deleteAll();
+    }
+
+    public Map<String, String> getFrontSdkFiles(int frontId) {
+        TbFront front = frontService.getById(frontId);
+        if (front == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+        }
+        return frontInterfaceService.getSdkFilesFromSpecificFront(front.getFrontIp(), front.getFrontPort());
     }
 }
