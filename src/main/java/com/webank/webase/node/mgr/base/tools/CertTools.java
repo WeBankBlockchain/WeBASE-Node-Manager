@@ -34,6 +34,7 @@ public class CertTools {
     public static final String crtContentTail = "-----END CERTIFICATE-----\n" ;
     public static final String crtTailForConcat = "\n-----END CERTIFICATE-----\n" ;
 
+    // all is sdk cert
     public static final String TYPE_CHAIN = "chain";
     public static final String TYPE_AGENCY = "agency";
     public static final String TYPE_NODE = "node";

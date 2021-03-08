@@ -537,7 +537,7 @@ public class NodeMgrTools {
         // remove v and split
         String[] versionArr = verStr.substring(1).split(".");
         if (versionArr.length < 3) {
-            log.error("getVersionFromStr versionArr:[]", versionArr);
+            log.error("getVersionFromStr versionArr:{}", (Object) versionArr);
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
         // get num
