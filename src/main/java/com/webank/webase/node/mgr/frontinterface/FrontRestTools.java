@@ -64,6 +64,8 @@ public class FrontRestTools {
     //public static final String FRONT_URL = "http://%1s:%2d/WeBASE-Front/%3s";
     public static final String FRONT_TRANS_RECEIPT_BY_HASH_URI = "web3/transactionReceipt/%1s";
     public static final String URI_BLOCK_BY_NUMBER = "web3/blockByNumber/%1d";
+    public static final String URI_BLOCK_TRANS_COUNT_BY_NUMBER = "web3/blockTransCnt/%1d";
+    public static final String URI_BLOCK_STAT_BY_NUMBER = "web3/blockStat/%1d";
     public static final String URI_BLOCK_BY_HASH = "web3/blockByHash/%1s";
     public static final String URI_TRANS_TOTAL = "web3/transaction-total";
     public static final String URI_TRANS_BY_HASH = "web3/transaction/%1s";
@@ -85,6 +87,7 @@ public class FrontRestTools {
     public static final String URI_REFRESH_FRONT = "web3/refresh";
     public static final String URI_BLOCK_HEADER_BY_NUMBER = "web3/blockHeaderByNumber/%1d";
     public static final String URI_BLOCK_HEADER_BY_HASH = "web3/blockHeaderByHash/%1s";
+    public static final String URI_SEARCH_BLOCK_OR_TX = "web3/search";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s";
@@ -119,6 +122,7 @@ public class FrontRestTools {
     public static final String URI_GOVERNANCE_ACCOUNT_UNFREEZE = "governance/account/unfreeze";
 
     public static final String URI_CERT = "cert";
+    public static final String URI_CERT_SDK_FILES = "cert/sdk";
     public static final String URI_ENCRYPT_TYPE = "encrypt";
 
     public static final String URI_CONTRACT_EVENT_INFO_LIST = "event/contractEvent/list";
@@ -135,7 +139,7 @@ public class FrontRestTools {
         .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
                 URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
-                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE,
+                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_CERT_SDK_FILES, URI_ENCRYPT_TYPE,
                 URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
                 URI_FRONT_VERSION, URI_SIGN_VERSION,
                 URI_GOVERNANCE, URI_GOVERNANCE_COMMITTEE, URI_GOVERNANCE_COMMITTEE_LIST,
