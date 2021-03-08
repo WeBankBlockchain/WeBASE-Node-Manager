@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
@@ -29,6 +30,7 @@ import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.GroupHandleResult;
 import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.frontinterface.entity.RspStatBlock;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
@@ -145,6 +147,15 @@ public class FrontInterfaceService {
 
 
     /**
+     * get map's Cert Content from specific front.
+     */
+    public Map<String, String> getSdkFilesFromSpecificFront(String nodeIp, Integer frontPort) {
+        int groupId = 1;
+        return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_CERT_SDK_FILES, Map.class);
+    }
+
+
+    /**
      * get group list from specific front.
      */
     public List<String> getGroupListFromSpecificFront(String nodeIp, Integer frontPort) {
@@ -199,7 +210,6 @@ public class FrontInterfaceService {
         // catch error to avoid task abort
         try {
             block = getFromSpecificFront(groupId, frontIp, frontPort, uri, BcosBlock.Block.class);
-            FrontRestTools.processBlockHexNumber(block);
         } catch (Exception ex) {
             log.error("getBlockByNumberFromSpecificFront:{}", ex.getMessage());
         }
@@ -233,7 +243,6 @@ public class FrontInterfaceService {
         log.debug("start getTransReceipt groupId:{} transaction:{}", groupId, transHash);
         String uri = String.format(FrontRestTools.FRONT_TRANS_RECEIPT_BY_HASH_URI, transHash);
         TransactionReceipt transReceipt = frontRestTools.getForEntity(groupId, uri, TransactionReceipt.class);
-        FrontRestTools.processReceiptHexNumber(transReceipt);
         log.debug("end getTransReceipt");
         return transReceipt;
     }
@@ -250,7 +259,6 @@ public class FrontInterfaceService {
         String uri = String.format(FrontRestTools.URI_TRANS_BY_HASH, transHash);
         JsonTransactionResponse transInfo =
                 frontRestTools.getForEntity(groupId, uri, JsonTransactionResponse.class);
-        FrontRestTools.processTransHexNumber(transInfo);
         log.debug("end getTransaction");
         return transInfo;
     }
@@ -266,7 +274,6 @@ public class FrontInterfaceService {
         // catch error to avoid task abort
         try {
             blockInfo = frontRestTools.getForEntity(groupId, uri,  BcosBlock.Block.class);
-            FrontRestTools.processBlockHexNumber(blockInfo);
         } catch (Exception ex) {
             log.error("fail getBlockByNumber,exception:[]", ex);
         }
@@ -282,7 +289,6 @@ public class FrontInterfaceService {
         log.debug("start getBlockByHash. groupId:{}  blockHash:{}", groupId, blockHash);
         String uri = String.format(FrontRestTools.URI_BLOCK_BY_HASH, blockHash);
         BcosBlock.Block blockInfo = frontRestTools.getForEntity(groupId, uri, BcosBlock.Block.class);
-        FrontRestTools.processBlockHexNumber(blockInfo);
         log.debug("end getBlockByHash. blockInfo:{}", JsonTools.toJSONString(blockInfo));
         return blockInfo;
     }
@@ -354,7 +360,6 @@ public class FrontInterfaceService {
         List<TransactionResult> transInBLock = blockInfo.getTransactions();
         for (TransactionResult t: transInBLock) {
             JsonTransactionResponse tran = (JsonTransactionResponse) t;
-            FrontRestTools.processTransHexNumber(tran);
             transactionResponses.add(tran);
         }
         log.debug("end getTransByBlockNumber. transInBLock:{}", JsonTools.toJSONString(transInBLock));
@@ -637,4 +642,53 @@ public class FrontInterfaceService {
         log.debug("end getEventLogList. resultList:{}", JsonTools.toJSONString(resultList));
         return resultList;
     }
+
+    /**
+     * get block by number.
+     */
+    public Integer getBlockTransCountByNumber(Integer groupId, BigInteger blockNumber)
+        throws NodeMgrException {
+        log.debug("start getBlockTransCountByNumber groupId:{} blockNumber:{}", groupId, blockNumber);
+        String uri = String.format(FrontRestTools.URI_BLOCK_TRANS_COUNT_BY_NUMBER, blockNumber);
+        Integer blockTransCnt = null;
+        // catch error to avoid task abort
+        try {
+            blockTransCnt = frontRestTools.getForEntity(groupId, uri, Integer.class);
+        } catch (Exception ex) {
+            log.error("fail getBlockTransCountByNumber,exception:[]", ex);
+        }
+        log.debug("end getBlockTransCountByNumber, blockTransCnt:{}", blockTransCnt);
+        return blockTransCnt;
+    }
+
+     /**
+     * get block statistic by number.
+     */
+    public RspStatBlock getBlockStatisticByNumber(Integer groupId, BigInteger blockNumber)
+        throws NodeMgrException {
+        log.debug("start getBlockStatisticByNumber groupId:{} blockNumber:{}", groupId, blockNumber);
+        String uri = String.format(FrontRestTools.URI_BLOCK_STAT_BY_NUMBER, blockNumber);
+        RspStatBlock blockStat = null;
+        // catch error to avoid task abort
+        try {
+            blockStat = frontRestTools.getForEntity(groupId, uri, RspStatBlock.class);
+        } catch (Exception ex) {
+            log.error("fail getBlockStatisticByNumber,exception:[]", ex);
+        }
+        log.debug("end getBlockStatisticByNumber, blockStat:{}", blockStat);
+        return blockStat;
+    }
+
+    public Object searchByBlockNumOrTxHash(Integer groupId, String input)
+        throws NodeMgrException {
+        log.debug("start searchByBlockNumOrTxHash groupId:{} input:{}", groupId, input);
+        Map<String, String> map = new HashMap<>();
+        map.put("groupId", String.valueOf(groupId));
+        map.put("pageSize", input);
+        String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_SEARCH_BLOCK_OR_TX, map);
+        Object blockOrTx = frontRestTools.getForEntity(groupId, uri, Object.class);
+        log.debug("end searchByBlockNumOrTxHash, blockOrTx:{}", blockOrTx);
+        return blockOrTx;
+    }
+
 }
