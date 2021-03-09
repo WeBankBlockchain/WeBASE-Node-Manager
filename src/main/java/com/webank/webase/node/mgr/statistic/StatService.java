@@ -244,26 +244,31 @@ public class StatService {
             Long startTime = Long.parseLong(statList.get(i).getStatTimestamp());
             Long endTime = Long.parseLong(statList.get(i + 1).getStatTimestamp());
             if (endTime - startTime > 10000) {
-                log.debug("****startTime:{}", startTime);
-                log.debug("****endTime:{}", endTime);
+                log.debug("====startTime:{}", startTime);
+                log.debug("====endTime:{}", endTime);
                 while (endTime - startTime > 5000) {
                     TbStat emptyMonitor = new TbStat();
                     emptyMonitor.setStatTimestamp(String.valueOf(startTime + 5000));
                     newStatList.add(emptyMonitor);
-                    log.debug("****insert" + startTime);
+                    log.debug("====insert" + startTime);
                     startTime = startTime + 5000;
                 }
-            } else if (endTime - startTime < 5000) {
+            }
+            else if (endTime - startTime < 5000) {
                 // add the data after endTime until gap beyond 5s
-                TbStat targetStat;
+                List<TbStat> stat2Sum = new ArrayList<>();
                 do {
-                    log.debug("**** index:{}", i);
-                    targetStat = sumStatWithin5sec(statList.get(i), statList.get(i + 1));
-                    log.debug("****new endTime:{}", targetStat.getStatTimestamp());
+                    log.debug("==== index:{}", i);
+                    stat2Sum.add(statList.get(i));
+//                    targetStat = sumStatWithin5sec(statList.get(i), statList.get(i + 1));
+//                    log.debug("==== new endTime:{}", targetStat.getStatTimestamp());
                     i++;
-                } while (Long.parseLong(statList.get(i + 1).getStatTimestamp()) - startTime < 5000);
+                } while (i < statList.size() - 2 && Long.parseLong(statList.get(i + 1).getStatTimestamp()) - startTime < 5000);
+                log.debug("==== sumStatWithin5sec:{}", stat2Sum.size());
+                TbStat targetStat = this.sumStatWithin5sec(stat2Sum, endTime);
                 newStatList.add(targetStat);
-            } else {
+            }
+            else {
                 // 5s < gap < 10s
                 newStatList.add(statList.get(i));
             }
@@ -284,6 +289,25 @@ public class StatService {
         statSum.setTps(tps);
         statSum.setBlockSize(blockSize);
         statSum.setBlockCycle(blockCycle);
+        return statSum;
+    }
+
+    private TbStat sumStatWithin5sec(List<TbStat> stat2Sum, Long endTime) {
+        int size = stat2Sum.size();
+        int tpsSum = 0;
+        int blockSizeSum = 0;
+        double blockCycleSum = 0.0;
+        for (TbStat s : stat2Sum) {
+            tpsSum += s.getTps();
+            blockSizeSum += s.getBlockSize();
+            blockCycleSum += s.getBlockCycle();
+        }
+
+        TbStat statSum = new TbStat();
+        statSum.setStatTimestamp(String.valueOf(endTime));
+        statSum.setTps(tpsSum / size);
+        statSum.setBlockSize(blockSizeSum / size);
+        statSum.setBlockCycle(blockCycleSum / size);
         return statSum;
     }
 }
