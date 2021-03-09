@@ -70,7 +70,7 @@ public class CertController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object getSdkCertList(@PathVariable("frontId") Integer frontId) throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start getSdkCertList startTime:{}", startTime.toEpochMilli());
+        log.info("start getSdkCertList startTime:{},frontId:{}", startTime.toEpochMilli(), frontId);
         Map<String, String> list = certService.getFrontSdkFiles(frontId);
         log.info("end getSdkCertList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), list);
