@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -107,6 +108,7 @@ public class NodeMgrTools {
         ZoneId zone = ZoneId.systemDefault();
         return LocalDateTime.ofInstant(instant, zone);
     }
+
     /**
      * LocalDateTime to timestamp
      */
@@ -149,6 +151,22 @@ public class NodeMgrTools {
         DateTimeFormatter df = DateTimeFormatter.ofPattern(format);
         String localTimeStr = df.format(dateTime);
         return localTimeStr;
+    }
+
+
+    /**
+     * timestamp to util.Date
+     * @param inputTimeStamp
+     * @return
+     */
+    public static Date timestamp2Date(Long inputTimeStamp) {
+        if (inputTimeStamp == null) {
+            log.warn("timestamp2Date fail. inputTimeStamp is null");
+            return null;
+        }
+        ZoneId zone = ZoneId.systemDefault();
+        Instant instant = Instant.ofEpochMilli(inputTimeStamp).atZone(zone).toInstant();
+        return Date.from(instant);
     }
 
     /**
