@@ -1,6 +1,7 @@
 package com.webank.webase.node.mgr.statistic.mapper;
 
 import com.webank.webase.node.mgr.statistic.entity.TbStat;
+import java.math.BigInteger;
 import java.util.List;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -15,6 +16,16 @@ import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
 
 public interface TbStatMapper {
+
+    /**
+     * Delete block height.
+     */
+    @Delete({
+        "delete tb from tb_stat as tb,",
+        "(SELECT max(block_number) maxBlock FROM tb_stat where group_id = #{groupId}) AS tmp",
+        "where tb.group_id = #{groupId}",
+        " and tb.block_number <= tmp.maxBlock - ${blockRetainMax}"})
+    Integer remove(@Param("groupId") Integer groupId, @Param("blockRetainMax") BigInteger blockRetainMax);
 
     @Select({"select ", TbStatSqlProvider.ALL_COLUMN_FIELDS,
         " from tb_stat where group_id = #{groupId} ",

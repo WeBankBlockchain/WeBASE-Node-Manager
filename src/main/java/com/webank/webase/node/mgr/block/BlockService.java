@@ -282,7 +282,7 @@ public class BlockService {
 
 
     /**
-     * remove block into.
+     * remove block info.
      */
     public Integer remove(Integer groupId, BigInteger blockRetainMax)
         throws NodeMgrException {
