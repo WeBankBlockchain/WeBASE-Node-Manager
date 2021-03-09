@@ -130,6 +130,7 @@ public class ConstantProperties {
      */
     private long resetGroupListInterval = 15000;
     // pull block statistic interval: ms
+    private BigInteger statBlockRetainMax = new BigInteger("100000");
     private Integer statBlockFixedDelay = 5000;
     private Integer statBlockPageSize = 10;
 

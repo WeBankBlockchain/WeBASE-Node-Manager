@@ -15,6 +15,7 @@
 package com.webank.webase.node.mgr.statistic;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
@@ -309,5 +310,16 @@ public class StatService {
         statSum.setBlockSize(blockSizeSum / size);
         statSum.setBlockCycle(blockCycleSum / size);
         return statSum;
+    }
+
+
+    /**
+     * remove block stat info.
+     */
+    public Integer remove(Integer groupId, BigInteger blockRetainMax) {
+        log.info("remove groupId:{}, blockRetainMax:{}", groupId, blockRetainMax);
+        Integer affectRow = tbStatMapper.remove(groupId, blockRetainMax);
+        log.info("remove affectRow{}", affectRow);
+        return affectRow;
     }
 }

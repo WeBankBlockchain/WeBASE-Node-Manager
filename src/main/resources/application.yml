@@ -89,6 +89,7 @@ constant:
   ###interval to async refresh group list locally
   resetGroupListInterval: 15000
   ###interval block statistic, unit: ms
+  statBlockRetainMax: 100000
   statBlockFixedDelay: 5000
   statBlockPageSize: 10 # block stat data to pull in one time
 
