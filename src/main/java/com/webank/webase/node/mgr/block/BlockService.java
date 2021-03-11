@@ -384,8 +384,8 @@ public class BlockService {
         // try to save external contract
         String toAddress = trans.getTo();
         if (Address.DEFAULT.getValue().equals(toAddress)) {
-            log.debug("save contract from block:{}", toAddress);
-            extContractService.asyncSaveContract(groupId, toAddress, timestamp);
+            log.debug("saveExternalInfo contract from block:{}", trans.getHash());
+            extContractService.asyncSaveContract(groupId, trans.getHash(), timestamp);
         }
     }
 }

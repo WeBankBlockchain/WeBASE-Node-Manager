@@ -15,6 +15,7 @@
 package com.webank.webase.node.mgr.external;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -37,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 @RestController
 @RequestMapping(value = "external")
-public class ExtAccountController {
+public class ExtAccountController extends BaseController {
 
     @Autowired
     private ExtAccountService extAccountService;
@@ -82,7 +83,7 @@ public class ExtAccountController {
     /**
      * qurey contract info list by groupId without abi/bin
      */
-    @GetMapping(value = "/contract/list")
+    @GetMapping(value = "/contract/list/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse extContractList(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize) throws NodeMgrException {

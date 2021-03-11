@@ -28,7 +28,7 @@ public interface TbExternalContractMapper {
     @SelectProvider(type = TbExternalContractSqlProvider.class, method = "count")
     int countExtContract(ContractParam param);
 
-    @Select({ "select count(1)", "from tb_external_contract", "where group_id = #{groupId} and address = #{address}" })
+    @Select({ "select count(1)", "from tb_external_contract", "where group_id = #{groupId} and contract_address = #{address}" })
     int countOfExtContract(@Param("groupId") Integer groupId, @Param("address") String address);
 
     /**

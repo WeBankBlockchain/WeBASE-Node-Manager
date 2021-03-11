@@ -22,8 +22,6 @@ import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.external.mapper.TbExternalContractMapper;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
@@ -39,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExtContractService {
 
     @Autowired
-    private TbExternalContractMapper contractMapper;
+    private TbExternalContractMapper extContractMapper;
     @Autowired
     private ContractService contractService;
     @Autowired
@@ -54,7 +52,7 @@ public class ExtContractService {
     @Async(value = "mgrAsyncExecutor")
     @Transactional
     public void asyncSaveContract(int groupId, String txHash, String timestampStr) {
-        log.debug("start  groupId:{}, txHash:{}, timestampStr:{}",
+        log.debug("start asyncSaveContract groupId:{}, txHash:{}, timestampStr:{}",
             groupId, txHash, timestampStr);
 
         TransactionReceipt txReceipt = frontInterfaceService.getTransReceipt(groupId, txHash);
@@ -85,24 +83,24 @@ public class ExtContractService {
         Date now = new Date();
         tbContract.setCreateTime(now);
         tbContract.setModifyTime(now);
-        int insertRes = contractMapper.insertSelective(tbContract);
+        int insertRes = extContractMapper.insertSelective(tbContract);
         log.info("saveContractOnChain groupId:{} contractAddress:{}, insertRes:{}",
             groupId, contractAddress, insertRes);
         return insertRes;
     }
 
     private boolean checkAddressExist(int groupId, String contractAddress) {
-        // check tb_user's address
-        ContractParam queryParam = new ContractParam();
-        queryParam.setGroupId(groupId);
-        queryParam.setContractAddress(contractAddress);
-        int countOfContract = contractService.countOfContract(queryParam);
-        if (countOfContract > 0) {
-            log.debug("saveContractOnChain exist tb_contract " 
-                + "contractAddress:{} address:{}", groupId, contractAddress);
-            return true;
-        }
-        int count = contractMapper.countOfExtContract(groupId, contractAddress);
+        // check tb_contract's address
+//        ContractParam queryParam = new ContractParam();
+//        queryParam.setGroupId(groupId);
+//        queryParam.setContractAddress(contractAddress);
+//        int countOfContract = contractService.countOfContract(queryParam);
+//        if (countOfContract > 0) {
+//            log.debug("saveContractOnChain exist tb_contract " 
+//                + "contractAddress:{} address:{}", groupId, contractAddress);
+//            return true;
+//        }
+        int count = extContractMapper.countOfExtContract(groupId, contractAddress);
         if (count > 0) {
             log.debug("saveContractOnChain exists tb_external_contract" 
                 + " groupId:{} address:{}", groupId, contractAddress);
@@ -112,15 +110,15 @@ public class ExtContractService {
     }
 
     public List<TbExternalContract> listExtContract(ContractParam param) {
-        return contractMapper.listExtContract(param);
+        return extContractMapper.listExtContract(param);
     }
 
     public int countExtContract(ContractParam param) {
-        return contractMapper.countExtContract(param);
+        return extContractMapper.countExtContract(param);
         
     }
     public int updateContractInfo(int contractId, String contractName, String abi, String description) {
-        TbExternalContract update = contractMapper.selectByPrimaryKey(contractId);
+        TbExternalContract update = extContractMapper.selectByPrimaryKey(contractId);
         if (update == null) {
             log.error("updateContractInfo id not exist!");
             throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
@@ -128,11 +126,11 @@ public class ExtContractService {
         update.setContractName(contractName);
         update.setContractAbi(abi);
         update.setDescription(description);
-        return contractMapper.updateByPrimaryKeySelective(update);
+        return extContractMapper.updateByPrimaryKeySelective(update);
     }
 
     public void deleteByGroupId(int groupId) {
-        int affected = contractMapper.deleteByGroupId(groupId);
+        int affected = extContractMapper.deleteByGroupId(groupId);
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
     }
 }
