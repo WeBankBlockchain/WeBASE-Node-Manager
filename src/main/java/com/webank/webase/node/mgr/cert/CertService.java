@@ -472,8 +472,6 @@ public class CertService {
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
         }
         return frontInterfaceService.getSdkFilesFromSpecificFront(front.getFrontIp(), front.getFrontPort());
-
-
     }
 
     public synchronized FileContentHandle getFrontSdkFiles(int frontId) {
@@ -520,7 +518,7 @@ public class CertService {
             String fileContent = sdkContentMap.get(fileName);
             log.info("writeSdkAsFile sdkPath:{}, content:{}", sdkFilePath, fileContent);
             try (BufferedWriter writer = Files.newBufferedWriter(sdkFilePath, StandardCharsets.UTF_8)) {
-                // write to relative path (todo whether use absolute path)
+                // write to relative path
                 writer.write(fileContent);
             } catch (IOException e) {
                 log.error("writeSdkAsFile fail:[]", e);
@@ -529,7 +527,7 @@ public class CertService {
         }
         // zip the directory of conf(guomi: conf/gm)
         try {
-            generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR);
+            generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR, useGm);
             log.info("sdk zip from :{} to dir: tempZip", sdkDir.getPath());
         } catch (Exception e) {
             log.error("writeSdkAsFile generateZipFile fail:[]", e);
@@ -543,9 +541,10 @@ public class CertService {
 
     /**
      * @param path   要压缩的文件路径
-     * @param outputDir 生成目录，默认为tempZip
+     * @param outputDir zip包的生成目录，默认为tempZip
+     * @param useGm if use gm, there is gm dir in zip
      */
-    public static void generateZipFile(String path, String outputDir) throws Exception {
+    public static void generateZipFile(String path, String outputDir, boolean useGm) throws Exception {
 
         File file2Zip = new File(path);
         // 压缩文件的路径不存在
@@ -572,7 +571,8 @@ public class CertService {
         // 压缩输出流
         ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(outputStream));
         // 传入输出流，传入需要压缩的file路径
-        generateFile(zipOutputStream, file2Zip, TEMP_SDK_DIR);
+        String gmDir = useGm ? "" : "gm";
+        generateFile(zipOutputStream, file2Zip, gmDir);
 
         log.info("file2Zip:{} and outputFile:{}" ,file2Zip.getAbsolutePath(), generateFileName);
         // 关闭 输出流
