@@ -17,6 +17,9 @@ import org.apache.ibatis.type.JdbcType;
 
 public interface TbStatMapper {
 
+    @Delete({ "delete from tb_stat", "where group_id = #{groupId,jdbcType=INTEGER}" })
+    int deleteByGroupId(Integer groupId);
+
     /**
      * Delete block height.
      */

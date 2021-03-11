@@ -18,6 +18,10 @@ import org.apache.ibatis.type.JdbcType;
 
 public interface TbExternalContractMapper {
 
+
+    @Delete({ "delete from tb_external_contract", "where group_id = #{groupId,jdbcType=INTEGER}" })
+    int deleteByGroupId(Integer groupId);
+
     @SelectProvider(type = TbExternalContractSqlProvider.class, method = "getList")
     List<TbExternalContract> listExtContract(ContractParam param);
 

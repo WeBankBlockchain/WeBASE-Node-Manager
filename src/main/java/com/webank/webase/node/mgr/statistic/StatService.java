@@ -322,4 +322,9 @@ public class StatService {
         log.info("remove affectRow{}", affectRow);
         return affectRow;
     }
+
+    public void deleteByGroupId(int groupId) {
+        int affected = tbStatMapper.deleteByGroupId(groupId);
+        log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
+    }
 }

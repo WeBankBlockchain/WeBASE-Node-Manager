@@ -42,6 +42,8 @@ import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
+import com.webank.webase.node.mgr.external.ExtAccountService;
+import com.webank.webase.node.mgr.external.ExtContractService;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -65,6 +67,7 @@ import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
+import com.webank.webase.node.mgr.statistic.StatService;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import java.io.IOException;
@@ -142,6 +145,13 @@ public class GroupService {
     private GovernVoteService governVoteService;
     @Autowired
     private CnsService cnsService;
+    @Autowired
+    private ExtAccountService extAccountService;
+    @Autowired
+    private ExtContractService extContractService;
+    @Autowired
+    private StatService statService;
+
 
     @Autowired private ChainService chainService;
     @Autowired private AnsibleService ansibleService;
@@ -778,6 +788,12 @@ public class GroupService {
         governVoteService.deleteAllByGroupId(groupId);
         // delete cns record
         cnsService.deleteByGroupId(groupId);
+        // delete external user
+        extAccountService.deleteByGroupId(groupId);
+        // delete external contract
+        extContractService.deleteByGroupId(groupId);
+        // delete statistic block data
+        statService.deleteByGroupId(groupId);
         // drop table.
         tableService.dropTableByGroupId(groupId);
         log.warn("end removeAllDataByGroupId");
