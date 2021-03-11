@@ -42,10 +42,11 @@ public class ExtAccountService {
      * save block's
      * @param groupId
      * @param userAddress
+     * todo 考虑用async
      * @return
      */
     public int saveAccountOnChain(int groupId, String userAddress) {
-        log.info("saveAccountOnChain groupId:{} address:{}", groupId, userAddress);
+        // log.info("saveAccountOnChain groupId:{} address:{}", groupId, userAddress);
         if (checkAddressExist(groupId, userAddress)) {
             return 0;
         }
@@ -57,7 +58,8 @@ public class ExtAccountService {
         tbAccount.setCreateTime(now);
         tbAccount.setModifyTime(now);
         int insertRes = accountMapper.insertSelective(tbAccount);
-        log.info("saveAccountOnChain insertRes:{}", insertRes);
+        log.info("saveAccountOnChain groupId:{} address:{}, insertRes:{}",
+            groupId, userAddress, insertRes);
         return insertRes;
     }
 

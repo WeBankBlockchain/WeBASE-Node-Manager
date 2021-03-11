@@ -21,13 +21,18 @@ import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.external.mapper.TbExternalContractMapper;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Service
@@ -37,14 +42,37 @@ public class ExtContractService {
     private TbExternalContractMapper contractMapper;
     @Autowired
     private ContractService contractService;
+    @Autowired
+    private FrontInterfaceService frontInterfaceService;
 
+    /**
+     *
+     * @param groupId
+     * @param txHash
+     * @return
+     */
+    @Async(value = "mgrAsyncExecutor")
+    @Transactional
+    public void asyncSaveContract(int groupId, String txHash, String timestampStr) {
+        log.debug("start  groupId:{}, txHash:{}, timestampStr:{}",
+            groupId, txHash, timestampStr);
+
+        TransactionReceipt txReceipt = frontInterfaceService.getTransReceipt(groupId, txHash);
+        if (!Address.DEFAULT.getValue().equals(txReceipt.getTo())) {
+            return;
+        }
+        // save
+        saveContractOnChain(groupId, txReceipt.getContractAddress(), txHash,
+            txReceipt.getFrom(), timestampStr);
+    }
 
     /**
      * save contract on chain
      */
+    @Transactional
     public int saveContractOnChain(int groupId, String contractAddress, String txHash,
         String deployAddress, String timestamp) {
-        log.info("saveContractOnChain groupId:{} contractAddress:{}", groupId, contractAddress);
+        //log.info("saveContractOnChain groupId:{} contractAddress:{}", groupId, contractAddress);
         if (checkAddressExist(groupId, contractAddress)) {
             return 0;
         }
@@ -58,7 +86,8 @@ public class ExtContractService {
         tbContract.setCreateTime(now);
         tbContract.setModifyTime(now);
         int insertRes = contractMapper.insertSelective(tbContract);
-        log.info("saveContractOnChain insertRes:{}", insertRes);
+        log.info("saveContractOnChain groupId:{} contractAddress:{}, insertRes:{}",
+            groupId, contractAddress, insertRes);
         return insertRes;
     }
 
