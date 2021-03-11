@@ -21,6 +21,8 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.block.entity.BlockListParam;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
+import com.webank.webase.node.mgr.external.ExtAccountService;
+import com.webank.webase.node.mgr.external.ExtContractService;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
@@ -31,6 +33,7 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionObject;
@@ -58,6 +61,10 @@ public class BlockService {
     private TransHashService transHashService;
     @Autowired
     private ConstantProperties cProperties;
+    @Autowired
+    private ExtAccountService extAccountService;
+    @Autowired
+    private ExtContractService extContractService;
     private static final Long SAVE_TRANS_SLEEP_TIME = 5L;
 
 
@@ -157,7 +164,7 @@ public class BlockService {
     }
 
     /**
-     * save report block info.
+     * save report block info and save tx in block
      */
     @Transactional
     public void saveBLockInfo(BcosBlock.Block blockInfo, Integer groupId) throws NodeMgrException {
@@ -173,6 +180,8 @@ public class BlockService {
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
+            // save user or contract from block's transaction
+            this.saveExternalInfo(groupId, trans, blockInfo.getTimestamp());
             try {
                 Thread.sleep(SAVE_TRANS_SLEEP_TIME);
             } catch (InterruptedException ex) {
@@ -364,5 +373,19 @@ public class BlockService {
      */
     public Object searchByBlockNumOrTxHash(int groupId, String input) {
         return frontInterface.searchByBlockNumOrTxHash(groupId, input);
+    }
+
+    private void saveExternalInfo(int groupId, JsonTransactionResponse trans, String timestamp) {
+        if (!cProperties.getEnableExternalFromBlock()) {
+            return;
+        }
+        // try to save external account
+        extAccountService.saveAccountOnChain(groupId, trans.getFrom());
+        // try to save external contract
+        String toAddress = trans.getTo();
+        if (Address.DEFAULT.getValue().equals(toAddress)) {
+            log.debug("save contract from block:{}", toAddress);
+            extContractService.asyncSaveContract(groupId, toAddress, timestamp);
+        }
     }
 }

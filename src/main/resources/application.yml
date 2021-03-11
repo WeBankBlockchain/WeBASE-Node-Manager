@@ -92,6 +92,8 @@ constant:
   statBlockRetainMax: 100000
   statBlockFixedDelay: 5000
   statBlockPageSize: 10 # block stat data to pull in one time
+  ### enable record account and contract from block
+  enableExternalFromBlock: true
 
   #### 1.4.0 visual deploy
   #### deployType 部署方式：
