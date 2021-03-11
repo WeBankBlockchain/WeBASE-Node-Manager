@@ -477,7 +477,7 @@ CREATE TABLE IF NOT EXISTS tb_external_account (
   UNIQUE KEY unique_address (group_id,address),
   KEY index_address (address),
   UNIQUE KEY unique_uuid (sign_user_id)
-) ENGINE=InnoDB AUTO_INCREMENT=700001 DEFAULT CHARSET=utf8 COMMENT='外部账户信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='外部账户信息表';
 
 
 -- ----------------------------
@@ -502,6 +502,6 @@ CREATE TABLE IF NOT EXISTS tb_external_contract (
   description text COMMENT '描述',
   PRIMARY KEY (id),
   UNIQUE KEY uk_group_path_name (group_id,contract_address)
-) ENGINE=InnoDB AUTO_INCREMENT=200001 DEFAULT CHARSET=utf8 COMMENT='合约表';
+) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='合约表';
 
 SET FOREIGN_KEY_CHECKS = 1;
