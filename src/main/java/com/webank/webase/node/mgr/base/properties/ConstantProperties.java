@@ -129,11 +129,16 @@ public class ConstantProperties {
      * default resetGroupList interval gap, default 15000ms(15s)
      */
     private long resetGroupListInterval = 15000;
-    // pull block statistic interval: ms
+    /**
+     * pull block statistic interval: ms
+     */
     private BigInteger statBlockRetainMax = new BigInteger("100000");
     private Integer statBlockFixedDelay = 5000;
     private Integer statBlockPageSize = 10;
-
+    /**
+     * enable pull external account(user address) and contract from block
+     */
+    private Boolean enableExternalFromBlock = true;
 
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;
