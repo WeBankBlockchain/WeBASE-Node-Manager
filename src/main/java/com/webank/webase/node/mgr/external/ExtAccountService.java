@@ -98,4 +98,9 @@ public class ExtAccountService {
         update.setHasPk(HasPk.HAS.getValue());
         return accountMapper.updateByPrimaryKeySelective(update);
     }
+
+    public void deleteByGroupId(int groupId) {
+        int affected = accountMapper.deleteByGroupId(groupId);
+        log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
+    }
 }

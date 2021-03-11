@@ -18,6 +18,9 @@ import org.apache.ibatis.type.JdbcType;
 
 public interface TbExternalAccountMapper {
 
+    @Delete({ "delete from tb_external_account", "where group_id = #{groupId,jdbcType=INTEGER}" })
+    int deleteByGroupId(Integer groupId);
+
     @SelectProvider(type = TbExternalAccountSqlProvider.class, method = "getList")
     List<TbExternalAccount> listExtAccount(UserParam param);
 

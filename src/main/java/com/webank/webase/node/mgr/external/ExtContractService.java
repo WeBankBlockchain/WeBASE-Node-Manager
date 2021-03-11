@@ -130,4 +130,9 @@ public class ExtContractService {
         update.setDescription(description);
         return contractMapper.updateByPrimaryKeySelective(update);
     }
+
+    public void deleteByGroupId(int groupId) {
+        int affected = contractMapper.deleteByGroupId(groupId);
+        log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
+    }
 }
