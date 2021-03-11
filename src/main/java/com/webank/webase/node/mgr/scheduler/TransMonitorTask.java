@@ -54,8 +54,9 @@ public class TransMonitorTask {
 
     /**
      * start monitor.
+     * todo 性能瓶颈一直卡在这里 调用getCode接口
      */
-    public synchronized void monitorStart() {
+    public void monitorStart() {
         Instant startTime = Instant.now();
         log.debug("=== start monitor. startTime:{}", startTime.toEpochMilli());
         //get group list
@@ -83,7 +84,7 @@ public class TransMonitorTask {
     /**
      * start monitor.
      */
-    public synchronized void blockStatStart() {
+    public void blockStatStart() {
         Instant startTime = Instant.now();
         log.debug("=== start blockStat. startTime:{}", startTime.toEpochMilli());
         //get group list
