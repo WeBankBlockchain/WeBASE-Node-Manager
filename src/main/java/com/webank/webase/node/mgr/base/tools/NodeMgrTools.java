@@ -551,7 +551,7 @@ public class NodeMgrTools {
      * @return ex: 241, 150
      */
     public static int getVersionFromStr(String verStr) {
-        log.error("getVersionFromStr verStr:{}", verStr);
+        log.info("getVersionFromStr verStr:{}", verStr);
         // remove v and split
         String[] versionArr = verStr.substring(1).split(".");
         if (versionArr.length < 3) {
