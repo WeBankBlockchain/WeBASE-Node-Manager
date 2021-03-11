@@ -127,14 +127,14 @@ sdk:
 
 # executor config for async pulling data from chain
 executor:
-  corePoolSize: 3
-  maxPoolSize: 10
+  corePoolSize: 10
+  maxPoolSize: 20
   queueSize: 50
   threadNamePrefix: "node-mgr-async-"
 
 # scheduler config for sync scheduled task
 scheduler:
-  poolSize: 50
+  poolSize: 30
   threadNamePrefix: "node-mgr-task-"
   awaitTerminationSeconds: 600
   waitForTasksToCompleteOnShutdown: true
