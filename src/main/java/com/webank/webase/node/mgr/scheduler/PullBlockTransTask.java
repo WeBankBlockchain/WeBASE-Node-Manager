@@ -58,7 +58,7 @@ public class PullBlockTransTask {
         }
         // count down group, make sure all group's pullBlock finished
         CountDownLatch latch = new CountDownLatch(groupList.size());
-        groupList.stream()
+        groupList
                 .forEach(group -> blockService.pullBlockByGroupId(latch, group.getGroupId()));
 
         try {
