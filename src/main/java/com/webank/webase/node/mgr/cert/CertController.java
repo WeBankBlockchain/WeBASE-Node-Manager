@@ -21,9 +21,12 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.cert.entity.CertHandle;
+import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,6 +35,8 @@ import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -71,10 +76,23 @@ public class CertController extends BaseController {
     public Object getSdkCertList(@PathVariable("frontId") Integer frontId) throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start getSdkCertList startTime:{},frontId:{}", startTime.toEpochMilli(), frontId);
-        Map<String, String> list = certService.getFrontSdkFiles(frontId);
+        Map<String, String> list = certService.getFrontSdkContent(frontId);
         log.info("end getSdkCertList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), list);
         return new BasePageResponse(ConstantCode.SUCCESS, list, list.size());
+    }
+
+    @GetMapping("sdk/zip/{frontId}")
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public ResponseEntity<InputStreamResource> getSdkCertZip(@PathVariable("frontId") Integer frontId)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getSdkCertZip startTime:{},frontId:{}", startTime.toEpochMilli(), frontId);
+        // get file
+        FileContentHandle fileContentHandle = certService.getFrontSdkFiles(frontId);
+        log.info("end getSdkCertZip useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return ResponseEntity.ok().headers(HttpRequestTools.headers(fileContentHandle.getFileName()))
+            .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
     @GetMapping("")

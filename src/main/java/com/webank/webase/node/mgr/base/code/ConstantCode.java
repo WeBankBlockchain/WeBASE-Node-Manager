@@ -290,6 +290,10 @@ public class ConstantCode {
     public static final RetCode CNS_NAME_CANNOT_EMPTY = RetCode.mark(202503, "cns name cannot be empty.");
     public static final RetCode VERSION_ALREADY_EXISTS = RetCode.mark(202504,"version already exists");
 
+    // add in v1.5.0
+    public static final RetCode SDK_CRT_KEY_FILE_NOT_FOUND = RetCode.mark(202511,"Front's sdk cert and key not found!");
+    public static final RetCode WRITE_SDK_CRT_KEY_FILE_FAIL = RetCode.mark(202512,"Write front's sdk cert and key fail!");
+
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
     public static final RetCode ACCESS_DENIED = RetCode.mark(302001, "access denied");

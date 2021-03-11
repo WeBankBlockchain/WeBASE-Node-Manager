@@ -13,8 +13,13 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
@@ -55,5 +60,21 @@ public class HttpRequestTools {
                 .queryParams(params).build();
 
         return uriHead + uriComponents.toString();
+    }
+
+    public static HttpHeaders headers(String fileName) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
+            "attachment;filename*=UTF-8''" + encode(fileName));
+        return httpHeaders;
+    }
+
+    public static String encode(String name) {
+        try {
+            return URLEncoder.encode(name, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
