@@ -19,11 +19,13 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.external.mapper.TbExternalContractMapper;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 @Log4j2
 @Service
@@ -75,6 +78,18 @@ public class ExtContractService {
             return 0;
         }
         TbExternalContract tbContract = new TbExternalContract();
+        // check tb_contract's address
+        ContractParam queryParam = new ContractParam();
+        queryParam.setGroupId(groupId);
+        queryParam.setContractAddress(contractAddress);
+        TbContract existedContract = contractService.queryContract(queryParam);
+        if (Objects.nonNull(existedContract)) {
+            log.debug("saveContractOnChain exist tb_contract "
+                + "contractAddress:{} address:{}", groupId, contractAddress);
+            // set related contract name
+            tbContract.setContractName(existedContract.getContractName());
+            tbContract.setContractAbi(existedContract.getContractAbi());
+        }
         tbContract.setGroupId(groupId);
         tbContract.setContractAddress(contractAddress);
         tbContract.setDeployTxHash(txHash);
@@ -90,16 +105,6 @@ public class ExtContractService {
     }
 
     private boolean checkAddressExist(int groupId, String contractAddress) {
-        // check tb_contract's address
-//        ContractParam queryParam = new ContractParam();
-//        queryParam.setGroupId(groupId);
-//        queryParam.setContractAddress(contractAddress);
-//        int countOfContract = contractService.countOfContract(queryParam);
-//        if (countOfContract > 0) {
-//            log.debug("saveContractOnChain exist tb_contract " 
-//                + "contractAddress:{} address:{}", groupId, contractAddress);
-//            return true;
-//        }
         int count = extContractMapper.countOfExtContract(groupId, contractAddress);
         if (count > 0) {
             log.debug("saveContractOnChain exists tb_external_contract" 

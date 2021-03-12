@@ -20,9 +20,11 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.external.entity.TbExternalAccount;
 import com.webank.webase.node.mgr.external.mapper.TbExternalAccountMapper;
 import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,11 +46,18 @@ public class ExtAccountService {
      * @return
      */
     public int saveAccountOnChain(int groupId, String userAddress) {
-        // log.info("saveAccountOnChain groupId:{} address:{}", groupId, userAddress);
         if (checkAddressExist(groupId, userAddress)) {
             return 0;
         }
         TbExternalAccount tbAccount = new TbExternalAccount();
+        // check tb_user's address
+        TbUser addressRow = userService.queryUser(null, groupId, null, userAddress, null);
+        if (Objects.nonNull(addressRow)) {
+            log.debug("saveAccountOnChain exists tb_user groupId:{} address:{}", groupId, userAddress);
+            tbAccount.setUserName(tbAccount.getUserName());
+            tbAccount.setSignUserId(tbAccount.getSignUserId());
+            tbAccount.setHasPk(tbAccount.getHasPk());
+        }
         tbAccount.setGroupId(groupId);
         tbAccount.setAddress(userAddress);
         tbAccount.setHasPk(HasPk.NONE.getValue());
@@ -62,12 +71,6 @@ public class ExtAccountService {
     }
 
     private boolean checkAddressExist(int groupId, String userAddress) {
-        // check tb_user's address
-//        TbUser addressRow = userService.queryUser(null, groupId, null, userAddress, null);
-//        if (Objects.nonNull(addressRow)) {
-//            log.debug("saveAccountOnChain exists tb_user groupId:{} address:{}", groupId, userAddress);
-//            return true;
-//        }
         int count = extAccountMapper.countOfExtAccount(groupId, userAddress);
         if (count > 0) {
             log.debug("saveAccountOnChain exists tb_external_account groupId:{} address:{}", groupId, userAddress);
@@ -77,6 +80,7 @@ public class ExtAccountService {
     }
 
     public List<TbExternalAccount> listExtAccount(UserParam param) {
+        log.debug("start listExtAccount param:{}", param);
         return extAccountMapper.listExtAccount(param);
     }
 
