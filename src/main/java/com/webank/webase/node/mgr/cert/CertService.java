@@ -484,8 +484,8 @@ public class CertService {
         boolean useGm = key.contains("gm");
         // create dir and zip
         writeSdkAsFile(sdkContentMap, useGm);
-        try (FileInputStream is = new FileInputStream(TEMP_ZIP_FILE_PATH)) {
-            return new FileContentHandle(TEMP_ZIP_FILE_NAME, is);
+        try {
+            return new FileContentHandle(TEMP_ZIP_FILE_NAME, new FileInputStream(TEMP_ZIP_FILE_PATH));
         } catch (IOException e) {
             log.error("getFrontSdkFiles fail:[]", e);
             throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
@@ -577,6 +577,7 @@ public class CertService {
         log.info("file2Zip:{} and outputFile:{}" ,file2Zip.getAbsolutePath(), generateFileName);
         // 关闭 输出流
         zipOutputStream.close();
+        outputStream.close();
     }
 
 

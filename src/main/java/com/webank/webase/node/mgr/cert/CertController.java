@@ -83,14 +83,15 @@ public class CertController extends BaseController {
     }
 
     @GetMapping("sdk/zip/{frontId}")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public ResponseEntity<InputStreamResource> getSdkCertZip(@PathVariable("frontId") Integer frontId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start getSdkCertZip startTime:{},frontId:{}", startTime.toEpochMilli(), frontId);
         // get file
         FileContentHandle fileContentHandle = certService.getFrontSdkFiles(frontId);
-        log.info("end getSdkCertZip useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        log.info("end getSdkCertZip fileContentHandle:{}useTime:{}", fileContentHandle,
+            Duration.between(startTime, Instant.now()).toMillis());
         return ResponseEntity.ok().headers(HttpRequestTools.headers(fileContentHandle.getFileName()))
             .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
