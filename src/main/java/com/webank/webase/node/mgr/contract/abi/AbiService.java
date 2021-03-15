@@ -223,12 +223,13 @@ public class AbiService {
 		String account = tbContract.getAccount();
 		String contractAddress = tbContract.getContractAddress();
 		// concat contract name with address
-		String contractName = tbContract.getContractName() + "_" + contractAddress;
+		String contractName = tbContract.getContractName();
+//		String contractName = tbContract.getContractName() + "_" + contractAddress;
 		// check name and address of abi not exist
 		checkAbiExist(groupId, account, contractAddress);
 		String contractBin = tbContract.getContractBin();
 		String contractAbiStr = tbContract.getContractAbi();
-		log.info("saveAbiFromContractId of re-deploying contractId:{}, new abi contractName:{}",
+		log.info("saveAbiFromContractId of re-deploying contractId:{}",
 			contractId, contractName);
 
 		AbiInfo saveAbi = new AbiInfo();
