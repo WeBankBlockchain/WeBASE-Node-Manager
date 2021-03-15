@@ -36,7 +36,13 @@ public class TbContract {
     private Integer contractType;
     private String contractSource;
     private String contractAbi;
+    /**
+     * bin on chain
+     */
     private String contractBin;
+    /**
+     * bin of solc compile
+     */
     private String bytecodeBin;
     private String contractAddress;
     private LocalDateTime deployTime;

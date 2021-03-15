@@ -19,6 +19,7 @@ package com.webank.webase.node.mgr.contract.abi;
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.contract.abi.entity.ReqImportAbi;
+import com.webank.webase.node.mgr.contract.abi.entity.RspAllContract;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -84,6 +85,34 @@ public class AbiController extends BaseController {
 
 		log.info("end listAbi. useTime:{}, resList:{}",
 				Duration.between(startTime, Instant.now()).toMillis(), resList);
+		return new BasePageResponse(ConstantCode.SUCCESS, resList, count);
+	}
+
+	@GetMapping("/list/{groupId}/{pageNumber}/{pageSize}")
+	public Object listAllContractIncludeAbi(
+			@PathVariable("groupId") Integer groupId,
+			@PathVariable("pageNumber") Integer pageNumber,
+			@PathVariable("pageSize") Integer pageSize,
+            @RequestParam(value = "account", required = false) String account) {
+		Instant startTime = Instant.now();
+		if (pageNumber < 1 || pageSize <= 0) {
+			return new BaseResponse(ConstantCode.PARAM_EXCEPTION);
+		}
+		log.info("start listAbi. startTime:{},groupId:{},pageNumber:{},pageSize:{}",
+				startTime.toEpochMilli(), groupId, pageNumber, pageSize);
+
+		Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
+				.orElse(0);
+		ReqAbiListParam param = new ReqAbiListParam(start, pageSize,
+				SqlSortType.DESC.getValue());
+		param.setGroupId(groupId);
+		param.setAccount(account);
+		// total count
+		int count = abiService.countOfAbi(param);
+		List<RspAllContract> resList = abiService.listAllContract(param);
+
+		log.info("end listAbi. useTime:{}, resList size:{}",
+				Duration.between(startTime, Instant.now()).toMillis(), resList.size());
 		return new BasePageResponse(ConstantCode.SUCCESS, resList, count);
 	}
 

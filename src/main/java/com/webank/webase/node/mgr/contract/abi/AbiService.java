@@ -24,6 +24,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.contract.abi.entity.RspAllContract;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
@@ -80,7 +81,7 @@ public class AbiService {
 		// check address
 		String contractBin = getAddressRuntimeBin(groupId, contractAddress);
 		// check name and address of abi not exist
-		checkAbiExist(groupId, account, contractName, contractAddress);
+		checkAbiExist(groupId, account, contractAddress);
 
 		AbiInfo saveAbi = new AbiInfo();
 		BeanUtils.copyProperties(param, saveAbi);
@@ -120,11 +121,7 @@ public class AbiService {
 		abiMapper.deleteByAbiId(id);
 	}
 
-	private void checkAbiExist(int groupId, String account, String contractName, String address) {
-		AbiInfo checkAbiName = abiMapper.queryByGroupIdAndContractName(groupId, account, contractName);
-		if (Objects.nonNull(checkAbiName)) {
-			throw new NodeMgrException(ConstantCode.CONTRACT_NAME_REPEAT);
-		}
+	private void checkAbiExist(int groupId, String account, String address) {
 		AbiInfo checkAbiAddressExist = abiMapper.queryByGroupIdAndAddress(groupId, account, address);
 		if (Objects.nonNull(checkAbiAddressExist)) {
 			throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_ALREADY_EXISTS);
@@ -228,7 +225,7 @@ public class AbiService {
 		// concat contract name with address
 		String contractName = tbContract.getContractName() + "_" + contractAddress;
 		// check name and address of abi not exist
-		checkAbiExist(groupId, account, contractName, contractAddress);
+		checkAbiExist(groupId, account, contractAddress);
 		String contractBin = tbContract.getContractBin();
 		String contractAbiStr = tbContract.getContractAbi();
 		log.info("saveAbiFromContractId of re-deploying contractId:{}, new abi contractName:{}",
@@ -251,8 +248,9 @@ public class AbiService {
 	/**
 	 * select contract from tb_abi(union tb_contract)
 	 */
-	public void listAllContract() {
-
+	public List<RspAllContract> listAllContract(ReqAbiListParam param) {
+		log.debug("listAllContract param:{}", param);
+		return abiMapper.listAllContract(param);
 	}
 
 }
