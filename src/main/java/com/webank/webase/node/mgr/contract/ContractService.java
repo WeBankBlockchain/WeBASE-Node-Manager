@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
@@ -84,6 +85,8 @@ public class  ContractService {
     private PermissionManageService permissionManageService;
     @Autowired
     private ContractPathService contractPathService;
+    @Autowired
+    private ConstantProperties constants;
     /**
      * add new contract data.
      */
@@ -176,8 +179,8 @@ public class  ContractService {
     /**
      * query contract list.
      */
-    public List<RspContractNoAbi> qureyContractListNoAbi(ContractParam param) throws NodeMgrException {
-        log.debug("start qureyContractList ContractListParam:{}", JsonTools.toJSONString(param));
+    public List<RspContractNoAbi> queryContractListNoAbi(ContractParam param) throws NodeMgrException {
+        log.debug("start queryContractListNoAbi ContractListParam:{}", JsonTools.toJSONString(param));
 
         // query contract list
         List<TbContract> listOfContract = contractMapper.listOfContract(param);
@@ -187,7 +190,7 @@ public class  ContractService {
             BeanUtils.copyProperties(c, rsp);
             resultList.add(rsp);
         });
-        log.debug("end qureyContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
+        log.debug("end queryContractListNoAbi listOfContract:{}", JsonTools.toJSONString(listOfContract));
         return resultList;
     }
 
@@ -244,6 +247,7 @@ public class  ContractService {
 
     /**
      * deploy contract.
+     * v1.5.0 import abi when re-deploy same contract
      */
     public TbContract deployContract(DeployInputParam inputParam) throws NodeMgrException {
         log.info("start deployContract. inputParam:{}", JsonTools.toJSONString(inputParam));
@@ -284,6 +288,10 @@ public class  ContractService {
         if (StringUtils.isBlank(contractAddress) || Address.DEFAULT.getValue().equals(contractAddress)) {
             log.error("fail deploy, contractAddress is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
+        }
+        // deploy success, old contract save in tb_abi
+        if (constants.getEnableSaveHistoryContractAbi()) {
+            abiService.saveAbiFromContractId(inputParam.getContractId());
         }
 
         // get deploy user name
@@ -565,8 +573,8 @@ public class  ContractService {
     /**
      * query contract list by multi path
      */
-    public List<TbContract> qureyContractListMultiPath(ReqListContract param) throws NodeMgrException {
-        log.debug("start qureyContractListMultiPath ReqListContract:{}", JsonTools.toJSONString(param));
+    public List<TbContract> queryContractListMultiPath(ReqListContract param) throws NodeMgrException {
+        log.debug("start queryContractListMultiPath ReqListContract:{}", JsonTools.toJSONString(param));
         int groupId = param.getGroupId();
         String account = param.getAccount();
         List<String> pathList = param.getContractPathList();
@@ -579,7 +587,9 @@ public class  ContractService {
             resultList.addAll(listOfContract);
         }
 
-        log.debug("end qureyContractListMultiPath listOfContract size:{}", resultList.size());
+        log.debug("end queryContractListMultiPath listOfContract size:{}", resultList.size());
         return resultList;
     }
+
+    // todo contractService.queryContractByBin(groupId, contractBin); get history contract by bin
 }

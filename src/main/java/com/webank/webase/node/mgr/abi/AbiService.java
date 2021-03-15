@@ -23,6 +23,8 @@ import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.contract.ContractMapper;
+import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
@@ -48,7 +50,8 @@ public class AbiService {
 	AbiMapper abiMapper;
 	@Autowired
 	FrontInterfaceService frontInterfaceService;
-
+	@Autowired
+	ContractService contractService;
 
 	public List<AbiInfo> getListByGroupId(ReqAbiListParam param) {
 		List<AbiInfo> abiList = abiMapper.listOfAbi(param);
@@ -85,8 +88,9 @@ public class AbiService {
 		BeanUtils.copyProperties(param, saveAbi);
 		saveAbi.setContractAbi(contractAbiStr);
 		saveAbi.setContractBin(contractBin);
-		saveAbi.setCreateTime(LocalDateTime.now());
-		saveAbi.setModifyTime(LocalDateTime.now());
+		LocalDateTime now = LocalDateTime.now();
+		saveAbi.setCreateTime(now);
+		saveAbi.setModifyTime(now);
 		abiMapper.add(saveAbi);
 	}
 
@@ -216,4 +220,35 @@ public class AbiService {
 		param.setGroupId(groupId);
 		return countOfAbi(param);
 	}
+
+	public void saveAbiFromContractId(int contractId) {
+		TbContract tbContract = contractService.queryByContractId(contractId);
+
+		int groupId = tbContract.getGroupId();
+		String account = tbContract.getAccount();
+		String contractAddress = tbContract.getContractAddress();
+		// concat contract name with address
+		String contractName = tbContract.getContractName() + "_" + contractAddress;
+		// check name and address of abi not exist
+		checkAbiExist(groupId, account, contractName, contractAddress);
+		String contractBin = tbContract.getContractBin();
+		String contractAbiStr = tbContract.getContractAbi();
+		log.info("saveAbiFromContractId of re-deploying contractId:{}, new abi contractName:{}",
+			contractId, contractName);
+
+		AbiInfo saveAbi = new AbiInfo();
+		saveAbi.setGroupId(groupId);
+		saveAbi.setContractAddress(contractAddress);
+		saveAbi.setContractName(contractName);
+		saveAbi.setContractAbi(contractAbiStr);
+		saveAbi.setContractBin(contractBin);
+		LocalDateTime now = LocalDateTime.now();
+		saveAbi.setCreateTime(now);
+		saveAbi.setModifyTime(now);
+		saveAbi.setAccount(account);
+		abiMapper.add(saveAbi);
+	}
+
+
+
 }
