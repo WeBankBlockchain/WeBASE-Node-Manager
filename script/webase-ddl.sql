@@ -327,8 +327,8 @@ CREATE TABLE IF NOT EXISTS tb_abi (
   create_time datetime DEFAULT NULL COMMENT '合约ABI的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '合约ABI的修改时间',
   PRIMARY KEY (abi_id),
-  UNIQUE KEY unique_address (group_id,account,contract_address),
-  UNIQUE KEY unique_name (group_id,account,contract_name)
+  UNIQUE KEY unique_address (group_id,account,contract_address)
+  -- UNIQUE KEY unique_name (group_id,account,contract_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约ABI表';
 
 

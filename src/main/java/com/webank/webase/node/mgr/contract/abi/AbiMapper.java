@@ -18,6 +18,7 @@ package com.webank.webase.node.mgr.contract.abi;
 
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
+import com.webank.webase.node.mgr.contract.abi.entity.RspAllContract;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -47,4 +48,6 @@ public interface AbiMapper {
 	void deleteByAbiId(@Param("abiId") int abiId);
 
 	void deleteByGroupId(@Param("groupId") int groupId);
+
+	List<RspAllContract> listAllContract(ReqAbiListParam param);
 }
