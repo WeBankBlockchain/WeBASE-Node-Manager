@@ -56,7 +56,7 @@ public interface MonitorMapper {
 
     Integer countOfMonitorTrans(Map<String, Object> queryParam);
 
-    List<PageTransInfo> qureyTransCountList(Map<String, Object> queryParam);
+    List<PageTransInfo> queryTransCountList(Map<String, Object> queryParam);
 
     Integer countOfUnusualUser(@Param("tableName") String tableName,
         @Param("userName") String userName);

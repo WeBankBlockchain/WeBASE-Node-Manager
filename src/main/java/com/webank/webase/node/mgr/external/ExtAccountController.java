@@ -81,7 +81,7 @@ public class ExtAccountController extends BaseController {
     }
 
     /**
-     * qurey contract info list by groupId without abi/bin
+     * query contract info list by groupId without abi/bin
      */
     @GetMapping(value = "/contract/list/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse extContractList(@PathVariable("groupId") Integer groupId,

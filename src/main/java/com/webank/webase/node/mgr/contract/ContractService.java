@@ -166,13 +166,13 @@ public class  ContractService {
     /**
      * query contract list.
      */
-    public List<TbContract> qureyContractList(ContractParam param) throws NodeMgrException {
-        log.debug("start qureyContractList ContractListParam:{}", JsonTools.toJSONString(param));
+    public List<TbContract> queryContractList(ContractParam param) throws NodeMgrException {
+        log.debug("start queryContractList ContractListParam:{}", JsonTools.toJSONString(param));
 
         // query contract list
         List<TbContract> listOfContract = contractMapper.listOfContract(param);
 
-        log.debug("end qureyContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
+        log.debug("end queryContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
         return listOfContract;
     }
 

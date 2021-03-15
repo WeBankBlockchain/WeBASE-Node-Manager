@@ -174,7 +174,7 @@ public class TransHashService {
     /**
      * query un statistics transaction list.
      */
-    public List<TbTransHash> qureyUnStatTransHashList(int groupId) {
+    public List<TbTransHash> queryUnStatTransHashList(int groupId) {
         List<TbTransHash> list = transHashMapper
                 .listOfUnStatTransHash(TableName.TRANS.getTableName(groupId));
         return list;
@@ -183,7 +183,7 @@ public class TransHashService {
     /**
      * query un statistic transaction list by job.
      */
-    public List<TbTransHash> qureyUnStatTransHashListByJob(int groupId, Integer shardingTotalCount,
+    public List<TbTransHash> queryUnStatTransHashListByJob(int groupId, Integer shardingTotalCount,
                                                            Integer shardingItem) {
         String tableName = TableName.TRANS.getTableName(groupId);
         List<TbTransHash> list = transHashMapper

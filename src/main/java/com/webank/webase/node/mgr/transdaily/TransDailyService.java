@@ -45,7 +45,7 @@ public class TransDailyService {
     public List<SeventDaysTrans> listSeventDayOfTrans(Integer groupId) throws NodeMgrException {
         log.debug("start listSeventDayOfTrans groupId:{}", groupId);
         try {
-            // qurey
+            // query
             List<SeventDaysTrans> transList = tbTransDailyMapper
                 .listSeventDayOfTransDaily(groupId);
             log.debug("end listSeventDayOfTrans transList:{}", JsonTools.toJSONString(transList));

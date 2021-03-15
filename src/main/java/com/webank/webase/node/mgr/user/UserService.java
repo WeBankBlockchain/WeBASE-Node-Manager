@@ -233,11 +233,11 @@ public class UserService {
     /**
      * query user list by page.
      */
-    public List<TbUser> qureyUserList(UserParam userParam) throws NodeMgrException {
-        log.debug("start qureyUserList userParam:{}", JsonTools.toJSONString(userParam));
+    public List<TbUser> queryUserList(UserParam userParam) throws NodeMgrException {
+        log.debug("start queryUserList userParam:{}", JsonTools.toJSONString(userParam));
         // query user list
         List<TbUser> listOfUser = userMapper.listOfUser(userParam);
-        log.debug("end qureyUserList listOfUser:{}", JsonTools.toJSONString(listOfUser));
+        log.debug("end queryUserList listOfUser:{}", JsonTools.toJSONString(listOfUser));
         return listOfUser;
     }
 

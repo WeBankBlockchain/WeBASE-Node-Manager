@@ -88,7 +88,7 @@ public class EventService {
 		ContractParam contractParam = new ContractParam();
 		contractParam.setGroupId(groupId);
 		contractParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
-		List<RspContractNoAbi> contractList = contractService.qureyContractListNoAbi(contractParam);
+		List<RspContractNoAbi> contractList = contractService.queryContractListNoAbi(contractParam);
 		// find abi list
 		List<RspContractNoAbi> abiInfoList = abiService.listByGroupIdNoAbi(groupId);
 		// add abi info and contract info in result list
