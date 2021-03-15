@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.webank.webase.node.mgr.abi.AbiMapper">
+<mapper namespace="com.webank.webase.node.mgr.contract.abi.AbiMapper">
     <resultMap id="abiMap"
-               type="com.webank.webase.node.mgr.abi.entity.AbiInfo">
+               type="com.webank.webase.node.mgr.contract.abi.entity.AbiInfo">
         <id column="abi_id" javaType="java.lang.Integer" jdbcType="INTEGER"
             property="abiId" />
         <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -25,7 +25,7 @@
     </resultMap>
 
 
-    <insert id="add" parameterType="com.webank.webase.node.mgr.abi.entity.AbiInfo">
+    <insert id="add" parameterType="com.webank.webase.node.mgr.contract.abi.entity.AbiInfo">
         REPLACE INTO tb_abi(group_id,account,contract_name,contract_address,contract_abi,contract_bin,
         create_time,modify_time)
         VALUES (#{groupId},#{account},#{contractName},#{contractAddress},#{contractAbi},#{contractBin}, now(), now())
@@ -41,7 +41,7 @@
         where group_id = #{groupId}
     </delete>
 
-    <update id="update" parameterType="com.webank.webase.node.mgr.abi.entity.AbiInfo">
+    <update id="update" parameterType="com.webank.webase.node.mgr.contract.abi.entity.AbiInfo">
         update tb_abi set modify_time = now()
         <if test="contractName != null and contractName != ''">
             ,contract_name = #{contractName}
@@ -58,7 +58,7 @@
         where abi_id = #{abiId}
     </update>
 
-    <select id="listOfAbi" parameterType="com.webank.webase.node.mgr.abi.entity.ReqAbiListParam"
+    <select id="listOfAbi" parameterType="com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam"
             resultMap="abiMap">
         select a.* from tb_abi a
         where 1=1 and group_id = #{param.groupId}
@@ -95,6 +95,7 @@
         and contract_address = #{contractAddress}
         limit 1
     </select>
+
     <select id="queryByGroupIdAndContractName" resultMap="abiMap">
         SELECT a.* FROM tb_abi a
         WHERE group_id = #{groupId}
@@ -104,4 +105,5 @@
         and contract_name = #{contractName}
         limit 1
     </select>
+
 </mapper>

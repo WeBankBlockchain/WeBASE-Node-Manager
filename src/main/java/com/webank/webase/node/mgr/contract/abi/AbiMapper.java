@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.abi;
+package com.webank.webase.node.mgr.contract.abi;
 
-import com.webank.webase.node.mgr.abi.entity.AbiInfo;
-import com.webank.webase.node.mgr.abi.entity.ReqAbiListParam;
+import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
+import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 

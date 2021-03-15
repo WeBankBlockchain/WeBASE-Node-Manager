@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.abi.entity;
+package com.webank.webase.node.mgr.contract.abi.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

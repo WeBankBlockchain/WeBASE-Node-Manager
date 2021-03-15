@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package node.mgr.test.abi;
+package node.mgr.test.contract.abi;
 
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.abi.AbiService;
-import com.webank.webase.node.mgr.abi.entity.AbiInfo;
-import com.webank.webase.node.mgr.abi.entity.ReqAbiListParam;
-import com.webank.webase.node.mgr.abi.entity.ReqImportAbi;
+import com.webank.webase.node.mgr.contract.abi.AbiService;
+import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
+import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
+import com.webank.webase.node.mgr.contract.abi.entity.ReqImportAbi;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import node.mgr.test.base.TestBase;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 

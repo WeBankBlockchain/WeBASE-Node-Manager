@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.abi.entity;
+package com.webank.webase.node.mgr.contract.abi.entity;
 
-import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
- * param to get list of abi in db
+ * entity to import/update abi info
  */
 @Data
 @NoArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class ReqAbiListParam extends BaseQueryParam {
-
+public class ReqImportAbi {
+	private Integer abiId;
+	@NotBlank
+    private String account;
+	@NotNull
 	private Integer groupId;
-	private String account;
-	public ReqAbiListParam(Integer start, Integer pageSize,
-						   String flagSortedByTime) {
-		super(start, pageSize, flagSortedByTime);
-	}
+	@NotBlank
+	private String contractName;
+	@NotBlank
+	private String contractAddress;
+	@NotNull
+	private List<Object> contractAbi;
 }

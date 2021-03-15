@@ -13,8 +13,8 @@
  */
 package com.webank.webase.node.mgr.contract;
 
-import com.webank.webase.node.mgr.abi.AbiService;
-import com.webank.webase.node.mgr.abi.entity.AbiInfo;
+import com.webank.webase.node.mgr.contract.abi.AbiService;
+import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
@@ -290,9 +290,7 @@ public class  ContractService {
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
         }
         // deploy success, old contract save in tb_abi
-        if (constants.getEnableSaveHistoryContractAbi()) {
-            abiService.saveAbiFromContractId(inputParam.getContractId());
-        }
+        abiService.saveAbiFromContractId(inputParam.getContractId());
 
         // get deploy user name
         String userName = userService.getUserNameByAddress(groupId, inputParam.getUser());
