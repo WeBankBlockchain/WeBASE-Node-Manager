@@ -46,7 +46,7 @@ public class NodeController {
     @Autowired private NodeService nodeService;
 
     /**
-     * qurey node info list.
+     * query node info list.
      */
     @GetMapping(value = "/nodeList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse queryNodeList(@PathVariable("groupId") Integer groupId,
@@ -79,7 +79,7 @@ public class NodeController {
                 .orElse(null);
             queryParam.setStart(start);
 
-            List<TbNode> listOfnode = nodeService.qureyNodeList(queryParam);
+            List<TbNode> listOfnode = nodeService.queryNodeList(queryParam);
             pagesponse.setData(listOfnode);
             pagesponse.setTotalCount(count);
 

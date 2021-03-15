@@ -61,7 +61,7 @@ public class PermissionManageService {
         // 获取当前group全部user address
         UserParam param = new UserParam();
         param.setGroupId(groupId);
-        List<TbUser> userList = userService.qureyUserList(param);
+        List<TbUser> userList = userService.queryUserList(param);
         log.debug("in listPermissionState. adding all user into resultMap userList:{}", userList);
         // 将未加到Map中的user address加进去
         PermissionState emptyState = getDefaultPermissionState();

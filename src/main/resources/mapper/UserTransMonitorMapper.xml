@@ -116,7 +116,7 @@
     </if>
   </select>
 
-  <select id="qureyTransCountList" parameterType="Map"
+  <select id="queryTransCountList" parameterType="Map"
     resultType="com.webank.webase.node.mgr.monitor.entity.PageTransInfo">
     select
     trans_count as transCount,

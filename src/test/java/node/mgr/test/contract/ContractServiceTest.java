@@ -75,7 +75,7 @@ public class ContractServiceTest extends TestBase {
 
     @Test
     public void testGetContractList() {
-        List<TbContract> resList = contractService.qureyContractList(new ContractParam());
+        List<TbContract> resList = contractService.queryContractList(new ContractParam());
         System.out.println("list:");
         System.out.println(resList);
     }

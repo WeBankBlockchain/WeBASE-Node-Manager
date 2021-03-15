@@ -85,7 +85,7 @@ public class FrontController extends BaseController {
 
 
     /**
-     * qurey front info list.
+     * query front info list.
      */
     @GetMapping(value = "/find")
     public BasePageResponse queryFrontList(
@@ -136,7 +136,7 @@ public class FrontController extends BaseController {
     }
 
     /**
-     * qurey front info list.
+     * query front info list.
      */
     @GetMapping(value = "/refresh/status")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)

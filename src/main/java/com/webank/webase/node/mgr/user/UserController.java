@@ -128,7 +128,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * qurey user info list.
+     * query user info list.
      */
     @GetMapping(value = "/userList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse userList(@PathVariable("groupId") Integer groupId,
@@ -155,7 +155,7 @@ public class UserController extends BaseController {
             param.setStart(start);
             param.setPageSize(pageSize);
 
-            List<TbUser> listOfUser = userService.qureyUserList(param);
+            List<TbUser> listOfUser = userService.queryUserList(param);
             pagesponse.setData(listOfUser);
             pagesponse.setTotalCount(count);
         }

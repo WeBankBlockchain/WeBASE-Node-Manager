@@ -101,7 +101,7 @@ public class MonitorService {
             LocalDateTime createTime = start;
             do {
                 List<TbTransHash> transHashList = transHashService
-                    .qureyUnStatTransHashList(groupId);
+                    .queryUnStatTransHashList(groupId);
                 log.info("=== groupId:{} transHashList:{}", groupId, transHashList.size());
                 if (transHashList.size() == 0) {
                     log.debug("transMonitorByGroupId jump over. transHashList is empty");
@@ -211,12 +211,12 @@ public class MonitorService {
     /**
      * query monitor user list.
      */
-    public List<TbMonitor> qureyMonitorUserList(Integer groupId) throws NodeMgrException {
+    public List<TbMonitor> queryMonitorUserList(Integer groupId) throws NodeMgrException {
 
         List<TbMonitor> monitorUserList = monitorMapper
             .monitorUserList(TableName.MONITOR.getTableName(groupId));
 
-        log.debug("end qureyMonitorUserList monitorUserList:{}",
+        log.debug("end queryMonitorUserList monitorUserList:{}",
             JsonTools.toJSONString(monitorUserList));
         return monitorUserList;
     }
@@ -224,13 +224,13 @@ public class MonitorService {
     /**
      * query monitor interface list.
      */
-    public List<TbMonitor> qureyMonitorInterfaceList(Integer groupId, String userName)
+    public List<TbMonitor> queryMonitorInterfaceList(Integer groupId, String userName)
         throws NodeMgrException {
 
         List<TbMonitor> monitorInterfaceList = monitorMapper
             .monitorInterfaceList(TableName.MONITOR.getTableName(groupId), userName);
 
-        log.debug("end qureyMonitorInterfaceList monitorInterfaceList:{}",
+        log.debug("end queryMonitorInterfaceList monitorInterfaceList:{}",
             JsonTools.toJSONString(monitorInterfaceList));
         return monitorInterfaceList;
     }
@@ -238,7 +238,7 @@ public class MonitorService {
     /**
      * query monitor trans list.
      */
-    public BaseResponse qureyMonitorTransList(Integer groupId, String userName, String startDate,
+    public BaseResponse queryMonitorTransList(Integer groupId, String userName, String startDate,
         String endDate, String interfaceName)
         throws NodeMgrException {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
@@ -252,7 +252,7 @@ public class MonitorService {
         Map<String, Object> param = NodeMgrTools.buidMap(nameList, valueList);
 
         Integer count = monitorMapper.countOfMonitorTrans(param);
-        List<PageTransInfo> transInfoList = monitorMapper.qureyTransCountList(param);
+        List<PageTransInfo> transInfoList = monitorMapper.queryTransCountList(param);
 
         MonitorTrans monitorTrans = new MonitorTrans(groupId, userName, interfaceName, count,
             transInfoList);
@@ -270,10 +270,10 @@ public class MonitorService {
     /**
      * query unusual user list.
      */
-    public List<UnusualUserInfo> qureyUnusualUserList(Integer groupId, String userName,
+    public List<UnusualUserInfo> queryUnusualUserList(Integer groupId, String userName,
         Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
-        log.debug("start qureyUnusualUserList groupId:{} userName:{} pageNumber:{} pageSize:{}",
+        log.debug("start queryUnusualUserList groupId:{} userName:{} pageNumber:{} pageSize:{}",
             groupId, userName, pageNumber,
             pageSize);
 
@@ -287,7 +287,7 @@ public class MonitorService {
 
         List<UnusualUserInfo> listOfUnusualUser = monitorMapper.listOfUnusualUser(param);
 
-        log.debug("end qureyUnusualUserList listOfUnusualUser:{}",
+        log.debug("end queryUnusualUserList listOfUnusualUser:{}",
             JsonTools.toJSONString(listOfUnusualUser));
         return listOfUnusualUser;
     }
@@ -303,11 +303,11 @@ public class MonitorService {
     /**
      * query unusual contract list.
      */
-    public List<UnusualContractInfo> qureyUnusualContractList(Integer groupId,
+    public List<UnusualContractInfo> queryUnusualContractList(Integer groupId,
         String contractAddress, Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
         log.debug(
-            "start qureyUnusualContractList groupId:{} userName:{} pageNumber:{} pageSize:{}",
+            "start queryUnusualContractList groupId:{} userName:{} pageNumber:{} pageSize:{}",
             groupId, contractAddress, pageNumber, pageSize);
 
         String tableName = TableName.MONITOR.getTableName(groupId);
@@ -323,7 +323,7 @@ public class MonitorService {
         List<UnusualContractInfo> listOfUnusualContract = monitorMapper
             .listOfUnusualContract(param);
 
-        log.debug("end qureyUnusualContractList listOfUnusualContract:{}",
+        log.debug("end queryUnusualContractList listOfUnusualContract:{}",
             JsonTools.toJSONString(listOfUnusualContract));
         return listOfUnusualContract;
     }

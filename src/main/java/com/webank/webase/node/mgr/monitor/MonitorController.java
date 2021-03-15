@@ -53,7 +53,7 @@ public class MonitorController {
         log.info("start monitorUserList startTime:{} groupId:{} ", startTime.toEpochMilli(),
             groupId);
 
-        List<TbMonitor> listOfUser = monitorService.qureyMonitorUserList(groupId);
+        List<TbMonitor> listOfUser = monitorService.queryMonitorUserList(groupId);
         response.setData(listOfUser);
 
         log.info("end monitorUserList useTime:{} result:{}",
@@ -73,7 +73,7 @@ public class MonitorController {
             groupId);
 
         List<TbMonitor> listOfInterface = monitorService
-            .qureyMonitorInterfaceList(groupId, userName);
+            .queryMonitorInterfaceList(groupId, userName);
         response.setData(listOfInterface);
 
         log.info("end monitorInterfaceList useTime:{} result:{}",
@@ -99,7 +99,7 @@ public class MonitorController {
             startDate, endDate, interfaceName);
 
         BaseResponse response = monitorService
-            .qureyMonitorTransList(groupId, userName, startDate, endDate, interfaceName);
+            .queryMonitorTransList(groupId, userName, startDate, endDate, interfaceName);
 
         log.info("end monitorTransList useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(response));
@@ -126,7 +126,7 @@ public class MonitorController {
         Integer count = monitorService.countOfUnusualUser(groupId, userName);
         if (count != null && count > 0) {
             List<UnusualUserInfo> listOfUnusualUser = monitorService
-                .qureyUnusualUserList(groupId, userName, pageNumber, pageSize);
+                .queryUnusualUserList(groupId, userName, pageNumber, pageSize);
             pagesponse.setData(listOfUnusualUser);
             pagesponse.setTotalCount(count);
         }
@@ -156,7 +156,7 @@ public class MonitorController {
         Integer count = monitorService.countOfUnusualContract(groupId, contractAddress);
         if (count != null && count > 0) {
             List<UnusualContractInfo> listOfUnusualContract = monitorService
-                .qureyUnusualContractList(groupId, contractAddress, pageNumber, pageSize);
+                .queryUnusualContractList(groupId, contractAddress, pageNumber, pageSize);
             pagesponse.setData(listOfUnusualContract);
             pagesponse.setTotalCount(count);
         }

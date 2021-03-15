@@ -123,13 +123,13 @@ public class NodeService {
     /**
      * query node list by page.
      */
-    public List<TbNode> qureyNodeList(NodeParam queryParam) throws NodeMgrException {
-        log.debug("start qureyNodeList queryParam:{}", JsonTools.toJSONString(queryParam));
+    public List<TbNode> queryNodeList(NodeParam queryParam) throws NodeMgrException {
+        log.debug("start queryNodeList queryParam:{}", JsonTools.toJSONString(queryParam));
 
         // query node list
         List<TbNode> listOfNode = nodeMapper.getList(queryParam);
 
-        log.debug("end qureyNodeList listOfNode:{}", JsonTools.toJSONString(listOfNode));
+        log.debug("end queryNodeList listOfNode:{}", JsonTools.toJSONString(listOfNode));
         return listOfNode;
     }
 
@@ -139,14 +139,14 @@ public class NodeService {
     public List<TbNode> queryByGroupId(int groupId) {
         NodeParam nodeParam = new NodeParam();
         nodeParam.setGroupId(groupId);
-        return qureyNodeList(nodeParam);
+        return queryNodeList(nodeParam);
     }
 
     /**
      * query all node list
      */
     public List<TbNode> getAll() {
-        return qureyNodeList(new NodeParam());
+        return queryNodeList(new NodeParam());
     }
 
     /**

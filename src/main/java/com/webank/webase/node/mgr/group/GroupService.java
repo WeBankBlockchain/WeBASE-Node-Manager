@@ -230,7 +230,7 @@ public class GroupService {
     public List<StatisticalGroupTransInfo> queryLatestStatisticalTrans() throws NodeMgrException {
         log.debug("start queryLatestStatisticalTrans");
         try {
-            // qurey list
+            // query list
             List<StatisticalGroupTransInfo> listStatisticalTrans = groupMapper
                     .queryLatestStatisticalTrans();
             log.debug("end queryLatestStatisticalTrans listStatisticalTrans:{}",
