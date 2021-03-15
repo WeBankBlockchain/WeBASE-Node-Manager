@@ -139,10 +139,6 @@ public class ConstantProperties {
      * enable pull external account(user address) and contract from block
      */
     private Boolean enableExternalFromBlock = true;
-    /**
-     * whether auto save re-deploy contract abi
-     */
-    private Boolean enableSaveHistoryContractAbi = true;
 
     //******************* Add in v1.4.0 start. *******************
     public static final boolean RETURN_EXECUTE_LOG = true;

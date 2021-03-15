@@ -15,7 +15,7 @@ package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
-import com.webank.webase.node.mgr.abi.AbiService;
+import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
