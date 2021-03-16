@@ -124,7 +124,8 @@ public class ExternalController extends BaseController {
     public BasePageResponse listExtUserListJoin(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
-        @RequestParam(value = "account", required = false) String account)
+        @RequestParam(value = "account", required = false) String account,
+        @RequestParam(value = "type", defaultValue = "1") Integer type)
         throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -135,6 +136,8 @@ public class ExternalController extends BaseController {
         param.setGroupId(groupId);
         param.setPageSize(pageSize);
         param.setAccount(account);
+        // type: 1-all, 2-normal, 3-abnormal
+        param.setCommParam(type.toString());
 
         int count = extAccountService.countExtAccount(param);
         if (count > 0) {
@@ -163,6 +166,7 @@ public class ExternalController extends BaseController {
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "account", required = false) String account,
+        @RequestParam(value = "type", defaultValue = "1") Integer type,
         @RequestParam(value = "contractAddress", required = false) String contractAddress,
         @RequestParam(value = "contractName", required = false) String contractName) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
@@ -175,6 +179,8 @@ public class ExternalController extends BaseController {
         param.setAccount(account);
         param.setContractAddress(contractAddress);
         param.setContractName(contractName);
+        // type: 1-all, 2-normal, 3-abnormal
+        param.setContractType(type);
         int count = extContractService.countExtContract(param);
 
         if (count > 0) {
