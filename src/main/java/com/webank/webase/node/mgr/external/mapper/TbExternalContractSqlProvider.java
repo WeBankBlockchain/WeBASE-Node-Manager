@@ -38,9 +38,9 @@ public class TbExternalContractSqlProvider {
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal
         if (param.getContractType() == ExternalInfoType.NORMAL.getValue()) {
-            sql.WHERE("b.abi_id != NULL");
+            sql.WHERE("b.abi_id is not NULL");
         } else if (param.getContractType() == ExternalInfoType.ABNORMAL.getValue()) {
-            sql.WHERE("b.abi_id == NULL");
+            sql.WHERE("b.abi_id is NULL");
         }
         // page
         sql.ORDER_BY("ext.modify_time desc");

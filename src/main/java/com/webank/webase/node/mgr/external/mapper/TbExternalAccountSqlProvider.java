@@ -31,9 +31,9 @@ public class TbExternalAccountSqlProvider {
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal
         if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.NORMAL.getValue()) {
-            sql.WHERE("b.user_id != NULL");
+            sql.WHERE("b.user_id is not NULL");
         } else if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.ABNORMAL.getValue()) {
-            sql.WHERE("b.user_id == NULL");
+            sql.WHERE("b.user_id is NULL");
         }
         // page
         sql.ORDER_BY("ext.modify_time desc");
