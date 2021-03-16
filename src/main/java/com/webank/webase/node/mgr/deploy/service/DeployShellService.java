@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,23 @@
  */
 package com.webank.webase.node.mgr.deploy.service;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ReactiveTypeDescriptor;
 import org.springframework.stereotype.Component;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.IPUtil;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.SshTools;
-import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
-import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Java call shell script and system command.
@@ -95,7 +88,7 @@ public class DeployShellService {
                 // port param
                 //shellPortParam,
                 // guomi or standard
-                encryptType == EncryptType.SM2_TYPE ? "-g " : "",
+                encryptType == CryptoType.SM_TYPE ? "-g " : "",
                 // only linux supports docker model
                 SystemUtils.IS_OS_LINUX ? " -d " : "",
                 // use binary local
@@ -138,7 +131,7 @@ public class DeployShellService {
                 certRoot.toAbsolutePath().toString(),
                 // new agency name
                 newAgencyName,
-                encryptType == EncryptType.SM2_TYPE ?
+                encryptType == CryptoType.SM_TYPE ?
                         String.format(" -g %s", pathService.getGmCertRoot(chainName).toAbsolutePath().toString())
                         : ""
         );
@@ -169,7 +162,7 @@ public class DeployShellService {
                 agencyRoot.toAbsolutePath().toString(),
                 // new node dir
                 newNodeRoot,
-                encryptType == EncryptType.SM2_TYPE ?
+                encryptType == CryptoType.SM_TYPE ?
                         String.format(" -g %s", pathService.getGmAgencyRoot(chainName,agencyName).toAbsolutePath().toString()) : ""
         );
 

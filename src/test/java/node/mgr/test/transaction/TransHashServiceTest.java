@@ -1,25 +1,5 @@
-package node.mgr.test.transaction;
-
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.transaction.TransHashMapper;
-import com.webank.webase.node.mgr.transaction.TransHashService;
-import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
-import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +13,22 @@ import com.webank.webase.node.mgr.transaction.entity.TransListParam;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class TransHashServiceTest {
+package node.mgr.test.transaction;
+
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.transaction.TransHashMapper;
+import com.webank.webase.node.mgr.transaction.TransHashService;
+import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
+import com.webank.webase.node.mgr.transaction.entity.TransListParam;
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import node.mgr.test.base.TestBase;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class TransHashServiceTest extends TestBase {
     @Autowired
     private TransHashService transHashService;
     private Integer groupId = 300001;

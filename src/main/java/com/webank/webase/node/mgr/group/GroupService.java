@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -15,12 +15,61 @@ package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
-import com.webank.webase.node.mgr.abi.AbiService;
+import com.webank.webase.node.mgr.contract.abi.AbiService;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.DeployType;
+import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
+import com.webank.webase.node.mgr.base.enums.GroupType;
+import com.webank.webase.node.mgr.base.enums.OperateStatus;
+import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
+import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
+import com.webank.webase.node.mgr.block.BlockService;
+import com.webank.webase.node.mgr.block.entity.TbBlock;
+import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.contract.CnsService;
+import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
+import com.webank.webase.node.mgr.deploy.entity.TbChain;
+import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
+import com.webank.webase.node.mgr.deploy.service.DeployShellService;
+import com.webank.webase.node.mgr.deploy.service.PathService;
+import com.webank.webase.node.mgr.external.ExtAccountService;
+import com.webank.webase.node.mgr.external.ExtContractService;
+import com.webank.webase.node.mgr.front.FrontMapper;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.FrontParam;
+import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.governance.GovernVoteService;
+import com.webank.webase.node.mgr.group.entity.GroupGeneral;
+import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
+import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
+import com.webank.webase.node.mgr.group.entity.RspGroupStatus;
+import com.webank.webase.node.mgr.group.entity.RspOperateResult;
+import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.method.MethodService;
+import com.webank.webase.node.mgr.node.NodeService;
+import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.node.entity.TbNode;
+import com.webank.webase.node.mgr.statistic.StatService;
+import com.webank.webase.node.mgr.table.TableService;
+import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -36,11 +85,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,57 +98,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.OperateStatus;
-import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
-import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
-import com.webank.webase.node.mgr.block.BlockService;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
-import com.webank.webase.node.mgr.block.entity.TbBlock;
-import com.webank.webase.node.mgr.chain.ChainService;
-import com.webank.webase.node.mgr.contract.ContractService;
-import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
-import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.entity.TbHost;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.deploy.service.DeployShellService;
-import com.webank.webase.node.mgr.deploy.service.PathService;
-import com.webank.webase.node.mgr.front.FrontMapper;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.front.entity.FrontParam;
-import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.group.entity.GroupGeneral;
-import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
-import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
-import com.webank.webase.node.mgr.group.entity.RspGroupStatus;
-import com.webank.webase.node.mgr.group.entity.RspOperateResult;
-import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
-import com.webank.webase.node.mgr.group.entity.TbGroup;
-import com.webank.webase.node.mgr.method.MethodService;
-import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import com.webank.webase.node.mgr.node.entity.TbNode;
-import com.webank.webase.node.mgr.table.TableService;
-import com.webank.webase.node.mgr.transdaily.TransDailyService;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * services for group data.
@@ -147,6 +145,13 @@ public class GroupService {
     private GovernVoteService governVoteService;
     @Autowired
     private CnsService cnsService;
+    @Autowired
+    private ExtAccountService extAccountService;
+    @Autowired
+    private ExtContractService extContractService;
+    @Autowired
+    private StatService statService;
+
 
     @Autowired private ChainService chainService;
     @Autowired private AnsibleService ansibleService;
@@ -225,7 +230,7 @@ public class GroupService {
     public List<StatisticalGroupTransInfo> queryLatestStatisticalTrans() throws NodeMgrException {
         log.debug("start queryLatestStatisticalTrans");
         try {
-            // qurey list
+            // query list
             List<StatisticalGroupTransInfo> listStatisticalTrans = groupMapper
                     .queryLatestStatisticalTrans();
             log.debug("end queryLatestStatisticalTrans listStatisticalTrans:{}",
@@ -262,7 +267,12 @@ public class GroupService {
         List<String> groupPeers = frontInterface.getGroupPeers(groupId);
         groupMapper.updateNodeCount(groupId, groupPeers.size());
         log.debug("getGeneralAndUpdateNodeCount gId:{} count:{}", groupId, groupPeers.size());
-        return groupMapper.getGeneral(groupId);
+        GroupGeneral groupGeneral = groupMapper.getGeneral(groupId);
+        // add imported abi count
+        int abiCount = abiService.countOfAbiByGroupId(groupId);
+        int contractTotalCount = groupGeneral.getContractCount() + abiCount;
+        groupGeneral.setContractCount(contractTotalCount);
+        return groupGeneral;
     }
 
     /**
@@ -565,7 +575,7 @@ public class GroupService {
                 String frontIp = front.getFrontIp();
                 int frontPort = front.getFrontPort();
                 // check genesis block
-                BlockInfo genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
+                BcosBlock.Block genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
                         frontPort, groupId, BigInteger.ZERO);
                 if (genesisBlock == null) {
                     log.debug("checkGroupGenesisSameWithEach getGenesisBlock is null");
@@ -622,7 +632,7 @@ public class GroupService {
 			// case: if group's all front is stopped, front_group_map still normal, would set as CONFLICT for no data from front
 			boolean flagEmptyFront = (allFrontGroupList.size() == 0);
 			for(FrontGroup front: allFrontGroupList) {
-				BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
+				BcosBlock.Block smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
 						front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
 				if (smallestBlockOnChain == null) {
 					continue;
@@ -778,6 +788,12 @@ public class GroupService {
         governVoteService.deleteAllByGroupId(groupId);
         // delete cns record
         cnsService.deleteByGroupId(groupId);
+        // delete external user
+        extAccountService.deleteByGroupId(groupId);
+        // delete external contract
+        extContractService.deleteByGroupId(groupId);
+        // delete statistic block data
+        statService.deleteByGroupId(groupId);
         // drop table.
         tableService.dropTableByGroupId(groupId);
         log.warn("end removeAllDataByGroupId");

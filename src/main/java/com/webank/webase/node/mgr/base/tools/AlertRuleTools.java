@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * alert rule tool
+ */
 @Log4j2
 public class AlertRuleTools {
 
@@ -42,7 +45,7 @@ public class AlertRuleTools {
     public static final String ALERT_TITLE_AUDIT = "审计异常告警";
     public static final String ALERT_TITLE_CERT = "证书异常告警";
     public static final String ALERT_TITLE_OTHERS = "其他告警";
-    // en
+    // english
     public static final String ALERT_TITLE_NODE_EN = " (Node Exception Alert)";
     public static final String ALERT_TITLE_AUDIT_EN = " (Audit Exception Alert)";
     public static final String ALERT_TITLE_CERT_EN = " (Cert Exception Alert)";

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.cert.CertService;
@@ -171,6 +172,10 @@ public class DeployService {
             return true;
         }
 
+        // make sure sign not 127.0.0.1
+        if (IPUtil.isLocal(webaseSignAddr)) {
+            throw new NodeMgrException(ConstantCode.WEBASE_SIGN_NOT_LOCALHOST_ERROR);
+        }
         // check WeBASE Sign accessible
         if (StringUtils.isBlank(webaseSignAddr)
                 || ! NetUtils.checkAddress(webaseSignAddr, 2000) ) {
@@ -229,7 +234,7 @@ public class DeployService {
     }
 
     /**
-     * Add a node. 扩容节点
+     * Add a node. 扩容节点，并重启链的所有节点
      * include: gen config & update other nodes & restart all node
      * after check host and init host(dependency,port,image)
      */

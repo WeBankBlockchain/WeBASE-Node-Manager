@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +28,27 @@ public class ReqMailServerConfigParam {
 
     private Integer serverId;
     private String serverName;
-    // 邮箱服务器地址
+    /**
+     * 邮箱服务器地址
+     */
     private String host;
     private Integer port;
-    // 邮箱地址
+    /**
+     * 邮箱地址
+     */
     private String username;
-    // 邮箱授权码
-    // v1.4.2 base64混淆后传输
+    /**
+     * 邮箱授权码
+     * v1.4.2 base64混淆后传输
+     */
     private String password;
-    // 邮箱协议：smtp, pop3, imap
+    /**
+     * 邮箱协议：smtp, pop3, imap
+     */
     private String protocol;
-    // 默认编码
+    /**
+     * 默认编码
+     */
     private String defaultEncoding;
 
     /**
@@ -49,15 +59,21 @@ public class ReqMailServerConfigParam {
     private Integer authentication;
     private Integer starttlsEnable;
 
-    // STARTTLS 具体配置
+    /**
+     * STARTTLS 具体配置
+     */
     private Integer starttlsRequired;
     private Integer socketFactoryPort;
     private String socketFactoryClass;
     private Integer socketFactoryFallback;
 
-    // 启用、禁用邮箱服务 0-关闭 1-启用
+    /**
+     * 启用、禁用邮箱服务 0-关闭 1-启用
+     */
     private Integer enable;
-    // timeout settings
+    /**
+     * timeout settings
+     */
     private Integer timeout;
     private Integer connectionTimeout;
     private Integer writeTimeout;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,9 +41,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.crypto.Hash;
-import org.fisco.bcos.web3j.utils.Numeric;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
@@ -51,9 +49,10 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.utils.Numeric;
 
 /**
- * common method.
+ * common method in node manager
  */
 @Log4j2
 public class NodeMgrTools {
@@ -108,9 +107,8 @@ public class NodeMgrTools {
         Instant instant = Instant.ofEpochMilli(inputTimeStamp);
         ZoneId zone = ZoneId.systemDefault();
         return LocalDateTime.ofInstant(instant, zone);
-//        Timestamp time = new Timestamp(inputTimeStamp);
-//        return time.toLocalDateTime();
     }
+
     /**
      * LocalDateTime to timestamp
      */
@@ -119,8 +117,6 @@ public class NodeMgrTools {
             log.warn("localDateTime2Timestamp fail. inputDateTime is null");
             return null;
         }
-//        Timestamp time = Timestamp.valueOf(inputDateTime);
-//        return time.getTime();
         return inputDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 
@@ -155,6 +151,22 @@ public class NodeMgrTools {
         DateTimeFormatter df = DateTimeFormatter.ofPattern(format);
         String localTimeStr = df.format(dateTime);
         return localTimeStr;
+    }
+
+
+    /**
+     * timestamp to util.Date
+     * @param inputTimeStamp
+     * @return
+     */
+    public static Date timestamp2Date(Long inputTimeStamp) {
+        if (inputTimeStamp == null) {
+            log.warn("timestamp2Date fail. inputTimeStamp is null");
+            return null;
+        }
+        ZoneId zone = ZoneId.systemDefault();
+        Instant instant = Instant.ofEpochMilli(inputTimeStamp).atZone(zone).toInstant();
+        return Date.from(instant);
     }
 
     /**
@@ -210,24 +222,20 @@ public class NodeMgrTools {
 
     /**
      * get hash value
-     * type: sha256 or sm3
+     * type: sha256
      */
     public static byte[] getHashValue(byte[] byteArray) {
         byte[] hashResult;
-        if(EncryptType.encryptType == 1) {
-           hashResult = Hash.sha3(byteArray);
-           return hashResult;
-        } else {
-            MessageDigest sha = null;
-            try {
-                sha = MessageDigest.getInstance("SHA-256");
-                hashResult = sha.digest(byteArray);
-                return hashResult;
-            } catch (Exception e) {
-                log.error("shaEncode getHashValue fail:", e);
-                return null;
-            }
+        MessageDigest sha = null;
+        try {
+            sha = MessageDigest.getInstance("SHA-256");
+            hashResult = sha.digest(byteArray);
+            return hashResult;
+        } catch (Exception e) {
+            log.error("shaEncode getHashValue fail:", e);
+            return null;
         }
+
     }
 
     /**
@@ -256,7 +264,8 @@ public class NodeMgrTools {
             throw new NullPointerException("values is null");
         }
 
-        values.removeAll(Collections.singleton(null));// remove null
+        // remove null
+        values.removeAll(Collections.singleton(null));
         Collections.sort(values);
 
         StringBuilder sb = new StringBuilder();
@@ -534,5 +543,25 @@ public class NodeMgrTools {
         }
         String regex = "[^\\u4e00-\\u9fa5]+";
         return input.matches(regex);
+    }
+
+    /**
+     * get version number without character
+     * @param verStr ex: v2.4.1, ex 1.5.0
+     * @return ex: 241, 150
+     */
+    public static int getVersionFromStr(String verStr) {
+        log.info("getVersionFromStr verStr:{}", verStr);
+        // remove v and split
+        String[] versionArr = verStr.substring(1).split(".");
+        if (versionArr.length < 3) {
+            log.error("getVersionFromStr versionArr:{}", (Object) versionArr);
+            throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
+        }
+        // get num
+        int version = Integer.parseInt(versionArr[0]) * 100
+            + Integer.parseInt(versionArr[1]) * 10 + Integer.parseInt(versionArr[2]);
+        log.info("getVersionFromStr version:{}", version);
+        return version;
     }
 }

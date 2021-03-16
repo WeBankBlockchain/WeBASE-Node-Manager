@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@
 package node.mgr.test.method;
 
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
-import node.mgr.test.gm.TestBase;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.junit.Test;
-
-
 import java.io.IOException;
 import java.util.List;
+import node.mgr.test.base.TestBase;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 配置sdk的encryptType，配置为国密或标密
  */
 public class MethodIdGmTest extends TestBase {
+    @Autowired private CryptoSuite cryptoSuite;
 
     /**
      * 设置不同的encryptType 1 或者 0， 查看同一个method出来的methodId是否符合
@@ -75,25 +75,25 @@ public class MethodIdGmTest extends TestBase {
     public void testMethodId() throws IOException {
 
         // load abi
-        List<AbiDefinition> abiList = Web3Tools.loadContractDefinition(crud_Abi);
+        List<ABIDefinition> abiList = Web3Tools.loadContractDefinition(crud_Abi);
 
         // 在application.yml中切换sdk-encryptType的值
-        if(EncryptType.encryptType == 1) {
+        if(cryptoSuite.cryptoTypeConfig == 1) {
             // encryptType = 1 guomi:
             System.out.println("guomi");
-            for (AbiDefinition abiDefinition : abiList) {
+            for (ABIDefinition abiDefinition : abiList) {
                 if ("function".equals(abiDefinition.getType())) {
                     // support guomi sm3
-                    String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                    String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                     System.out.println(abiDefinition.getName() + ": " + buildMethodId);
                 }
             }
-        } else if(EncryptType.encryptType == 0) {
+        } else if(cryptoSuite.cryptoTypeConfig == 0) {
             System.out.println("standard");
-            for (AbiDefinition abiDefinition : abiList) {
+            for (ABIDefinition abiDefinition : abiList) {
                 if ("function".equals(abiDefinition.getType())) {
                     // support guomi sm3
-                    String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                    String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                     System.out.println(abiDefinition.getName() + ": " + buildMethodId);
                 }
             }
@@ -103,11 +103,11 @@ public class MethodIdGmTest extends TestBase {
     @Test
     public void testGetAllMethod() throws IOException {
         // 在application.yml中切换sdk-encryptType的值
-        if(EncryptType.encryptType == 1) {
+        if(cryptoSuite.cryptoTypeConfig == 1) {
             // encryptType = 1 guomi:
             System.out.println("guomi");
             System.out.println();
-        } else if(EncryptType.encryptType == 0) {
+        } else if(cryptoSuite.cryptoTypeConfig == 0) {
             System.out.println("standard");
             System.out.println();
         }
@@ -117,76 +117,76 @@ public class MethodIdGmTest extends TestBase {
     String a = "{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"queryManager\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}";
     public void getAllPreMethodId() throws IOException {
         // load abi
-        List<AbiDefinition> sys_config = Web3Tools.loadContractDefinition(sys_config_Abi);
-        List<AbiDefinition> table_factory = Web3Tools.loadContractDefinition(table_factory_Abi);
-        List<AbiDefinition> crud = Web3Tools.loadContractDefinition(crud_Abi);
-        List<AbiDefinition> consensus = Web3Tools.loadContractDefinition(consensus_Abi);
-        List<AbiDefinition> cns = Web3Tools.loadContractDefinition(cns_Abi);
-        List<AbiDefinition> permission = Web3Tools.loadContractDefinition(permission_Abi);
-        List<AbiDefinition> chainGovernance = Web3Tools.loadContractDefinition(chain_governance_Abi);
-        List<AbiDefinition> contractLife = Web3Tools.loadContractDefinition(contract_life_cycle_Abi);
+        List<ABIDefinition> sys_config = Web3Tools.loadContractDefinition(sys_config_Abi);
+        List<ABIDefinition> table_factory = Web3Tools.loadContractDefinition(table_factory_Abi);
+        List<ABIDefinition> crud = Web3Tools.loadContractDefinition(crud_Abi);
+        List<ABIDefinition> consensus = Web3Tools.loadContractDefinition(consensus_Abi);
+        List<ABIDefinition> cns = Web3Tools.loadContractDefinition(cns_Abi);
+        List<ABIDefinition> permission = Web3Tools.loadContractDefinition(permission_Abi);
+        List<ABIDefinition> chainGovernance = Web3Tools.loadContractDefinition(chain_governance_Abi);
+        List<ABIDefinition> contractLife = Web3Tools.loadContractDefinition(contract_life_cycle_Abi);
 
         System.out.println("sys_config");
-        for (AbiDefinition abiDefinition : sys_config) {
+        for (ABIDefinition abiDefinition : sys_config) {
             if ("function".equals(abiDefinition.getType())) {
                 // support guomi sm3
-                String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                 System.out.println(abiDefinition.getName() + ": " + buildMethodId);
             }
         }
         System.out.println("table_factory");
-        for (AbiDefinition abiDefinition : table_factory) {
+        for (ABIDefinition abiDefinition : table_factory) {
             if ("function".equals(abiDefinition.getType())) {
                 // support guomi sm3
-                String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                 System.out.println(abiDefinition.getName() + ": " + buildMethodId);
             }
         }
         System.out.println("crud");
-        for (AbiDefinition abiDefinition : crud) {
+        for (ABIDefinition abiDefinition : crud) {
             if ("function".equals(abiDefinition.getType())) {
                 // support guomi sm3
-                String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                 System.out.println(abiDefinition.getName() + ": " + buildMethodId);
             }
         }
         System.out.println("consensus");
-        for (AbiDefinition abiDefinition : consensus) {
+        for (ABIDefinition abiDefinition : consensus) {
             if ("function".equals(abiDefinition.getType())) {
                 // support guomi sm3
-                String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                 System.out.println(abiDefinition.getName() + ": " + buildMethodId);
             }
         }
         System.out.println("cns");
-        for (AbiDefinition abiDefinition : cns) {
+        for (ABIDefinition abiDefinition : cns) {
             if ("function".equals(abiDefinition.getType())) {
                 // support guomi sm3
-                String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                 System.out.println(abiDefinition.getName() + ": " + buildMethodId);
             }
         }
         System.out.println("permission");
-        for (AbiDefinition abiDefinition : permission) {
+        for (ABIDefinition abiDefinition : permission) {
             if ("function".equals(abiDefinition.getType())) {
                 // support guomi sm3
-                String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                 System.out.println(abiDefinition.getName() + ": " + buildMethodId);
             }
         }
         System.out.println("chainGovernance");
-        for (AbiDefinition abiDefinition : chainGovernance) {
+        for (ABIDefinition abiDefinition : chainGovernance) {
             if ("function".equals(abiDefinition.getType())) {
                 // support guomi sm3
-                String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                 System.out.println(abiDefinition.getName() + ": " + buildMethodId);
             }
         }
         System.out.println("contractLife");
-        for (AbiDefinition abiDefinition : contractLife) {
+        for (ABIDefinition abiDefinition : contractLife) {
             if ("function".equals(abiDefinition.getType())) {
                 // support guomi sm3
-                String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                 System.out.println(abiDefinition.getName() + ": " + buildMethodId);
             }
         }

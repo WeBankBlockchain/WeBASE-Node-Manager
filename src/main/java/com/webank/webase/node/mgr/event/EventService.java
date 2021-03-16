@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.event;
 
-import com.webank.webase.node.mgr.abi.AbiService;
+import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
@@ -32,7 +32,6 @@ import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -88,7 +87,7 @@ public class EventService {
 		ContractParam contractParam = new ContractParam();
 		contractParam.setGroupId(groupId);
 		contractParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
-		List<RspContractNoAbi> contractList = contractService.qureyContractListNoAbi(contractParam);
+		List<RspContractNoAbi> contractList = contractService.queryContractListNoAbi(contractParam);
 		// find abi list
 		List<RspContractNoAbi> abiInfoList = abiService.listByGroupIdNoAbi(groupId);
 		// add abi info and contract info in result list

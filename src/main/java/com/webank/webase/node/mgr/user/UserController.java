@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -128,7 +128,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * qurey user info list.
+     * query user info list.
      */
     @GetMapping(value = "/userList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse userList(@PathVariable("groupId") Integer groupId,
@@ -155,7 +155,7 @@ public class UserController extends BaseController {
             param.setStart(start);
             param.setPageSize(pageSize);
 
-            List<TbUser> listOfUser = userService.qureyUserList(param);
+            List<TbUser> listOfUser = userService.queryUserList(param);
             pagesponse.setData(listOfUser);
             pagesponse.setTotalCount(count);
         }

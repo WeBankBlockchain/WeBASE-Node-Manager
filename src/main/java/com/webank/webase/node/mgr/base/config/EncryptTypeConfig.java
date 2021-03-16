@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.webank.webase.node.mgr.base.config;
 
 
 import lombok.Data;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "sdk")
 public class EncryptTypeConfig {
-    // 0:standard, 1:guomi
+    /**
+     *  0:standard, 1:guomi
+     */
     private int encryptType;
 
     /**
@@ -39,7 +41,7 @@ public class EncryptTypeConfig {
      * @return
      */
     @Bean(name = "encryptType")
-    public EncryptType EncryptType() {
-        return new EncryptType(encryptType);
+    public CryptoSuite getCryptoSuite() {
+        return new CryptoSuite(encryptType);
     }
 }

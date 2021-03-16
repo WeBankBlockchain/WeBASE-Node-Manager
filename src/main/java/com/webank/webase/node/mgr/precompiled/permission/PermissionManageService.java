@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class PermissionManageService {
         // 获取当前group全部user address
         UserParam param = new UserParam();
         param.setGroupId(groupId);
-        List<TbUser> userList = userService.qureyUserList(param);
+        List<TbUser> userList = userService.queryUserList(param);
         log.debug("in listPermissionState. adding all user into resultMap userList:{}", userList);
         // 将未加到Map中的user address加进去
         PermissionState emptyState = getDefaultPermissionState();

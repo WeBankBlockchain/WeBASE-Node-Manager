@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,23 +13,21 @@
  */
 package com.webank.webase.node.mgr.transaction;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
@@ -176,7 +174,7 @@ public class TransHashService {
     /**
      * query un statistics transaction list.
      */
-    public List<TbTransHash> qureyUnStatTransHashList(int groupId) {
+    public List<TbTransHash> queryUnStatTransHashList(int groupId) {
         List<TbTransHash> list = transHashMapper
                 .listOfUnStatTransHash(TableName.TRANS.getTableName(groupId));
         return list;
@@ -185,7 +183,7 @@ public class TransHashService {
     /**
      * query un statistic transaction list by job.
      */
-    public List<TbTransHash> qureyUnStatTransHashListByJob(int groupId, Integer shardingTotalCount,
+    public List<TbTransHash> queryUnStatTransHashListByJob(int groupId, Integer shardingTotalCount,
                                                            Integer shardingItem) {
         String tableName = TableName.TRANS.getTableName(groupId);
         List<TbTransHash> list = transHashMapper
@@ -215,12 +213,12 @@ public class TransHashService {
                 transList.add(tbTransHash);
             }
         }
-        //find trans by block number
+        // find trans by block number
         if (transList.size() == 0 && blockNumber != null) {
-            List<TransactionInfo> transInBlock = frontInterface
-                    .getTransByBlockNumber(groupId, blockNumber);
-            if(transInBlock != null && transInBlock.size() != 0) {
-                transInBlock.stream().forEach(tran -> {
+            List<JsonTransactionResponse> transInBlock = frontInterface
+                .getTransByBlockNumber(groupId, blockNumber);
+            if (transInBlock != null && transInBlock.size() != 0) {
+                transInBlock.forEach(tran -> {
                     TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getFrom(),
                             tran.getTo(), tran.getBlockNumber(),
                             null);
@@ -240,7 +238,7 @@ public class TransHashService {
             throws NodeMgrException {
         log.info("start getTransFromFrontByHash. groupId:{}  transaction:{}", groupId,
                 transHash);
-        TransactionInfo trans = frontInterface.getTransaction(groupId, transHash);
+        JsonTransactionResponse trans = frontInterface.getTransaction(groupId, transHash);
         TbTransHash tbTransHash = null;
         if (trans != null) {
             tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
@@ -261,7 +259,7 @@ public class TransHashService {
     /**
      * get transaction info
      */
-    public TransactionInfo getTransaction(int groupId, String transHash) {
+    public JsonTransactionResponse getTransaction(int groupId, String transHash) {
         return frontInterface.getTransaction(groupId, transHash);
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,8 @@ import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 
 /**
- *
+ * use java process to run command in bash -c
  */
-
 @Log4j2
 @ToString
 public class JavaCommandExecutor {
@@ -44,7 +43,6 @@ public class JavaCommandExecutor {
             log.info("exec command:[{}]", command);
             String[] commandArray = { "/bin/bash", "-c", command };
             process = Runtime.getRuntime().exec(commandArray);
-//            process = Runtime.getRuntime().exec(command);
             final Process p = process;
 
             // close process's output stream.

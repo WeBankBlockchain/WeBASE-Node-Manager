@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,18 @@ package node.mgr.test.cert;
 
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.fisco.bcos.web3j.utils.Numeric;
-import org.junit.Test;
-import org.springframework.util.Assert;
-import sun.security.ec.ECPublicKeyImpl;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-
 import java.util.List;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
+import org.fisco.bcos.sdk.utils.Numeric;
+import org.junit.Test;
+import org.springframework.util.Assert;
+import sun.security.ec.ECPublicKeyImpl;
 
 
 

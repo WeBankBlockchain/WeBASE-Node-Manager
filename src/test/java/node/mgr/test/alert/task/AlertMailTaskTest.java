@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,14 @@
 
 package node.mgr.test.alert.task;
 
-import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.alert.task.AuditMonitorTask;
 import com.webank.webase.node.mgr.alert.task.CertMonitorTask;
 import com.webank.webase.node.mgr.alert.task.NodeStatusMonitorTask;
+import node.mgr.test.base.TestBase;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class AlertMailTaskTest {
+public class AlertMailTaskTest extends TestBase {
 
     @Autowired
     NodeStatusMonitorTask nodeStatusMonitorTask;

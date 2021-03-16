@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,10 @@ public class BeanConfig {
     @Bean(name = "genericRestTemplate")
     public RestTemplate getRestTemplate() {
         SimpleClientHttpRequestFactory factory = getHttpFactoryForDeploy();
-        factory.setReadTimeout(constantProperties.getHttpTimeOut());// ms
-        factory.setConnectTimeout(constantProperties.getHttpTimeOut());// ms
+        // ms
+        factory.setReadTimeout(constantProperties.getHttpTimeOut());
+        // ms
+        factory.setConnectTimeout(constantProperties.getHttpTimeOut());
         return new RestTemplate(factory);
     }
 
@@ -58,8 +60,10 @@ public class BeanConfig {
     @Bean(name = "deployRestTemplate")
     public RestTemplate getDeployRestTemplate() {
         SimpleClientHttpRequestFactory factory = getHttpFactoryForDeploy();
-        factory.setReadTimeout(constantProperties.getContractDeployTimeOut());// ms
-        factory.setConnectTimeout(constantProperties.getContractDeployTimeOut());// ms
+        // ms
+        factory.setReadTimeout(constantProperties.getContractDeployTimeOut());
+        // ms
+        factory.setConnectTimeout(constantProperties.getContractDeployTimeOut());
         return new RestTemplate(factory);
     }
 

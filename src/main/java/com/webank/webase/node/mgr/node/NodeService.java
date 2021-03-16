@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,9 +13,24 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ConsensusType;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.ValidateUtil;
+import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
+import com.webank.webase.node.mgr.deploy.service.PathService;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
+import com.webank.webase.node.mgr.node.entity.NodeParam;
+import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.node.entity.TbNode;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -24,34 +39,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.SshTools;
-import com.webank.webase.node.mgr.base.tools.ValidateUtil;
-import com.webank.webase.node.mgr.chain.ChainService;
-import com.webank.webase.node.mgr.deploy.service.PathService;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
-import com.webank.webase.node.mgr.frontinterface.entity.PeerOfSyncStatus;
-import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
-import com.webank.webase.node.mgr.node.entity.NodeParam;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import com.webank.webase.node.mgr.node.entity.TbNode;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * services for node data.
@@ -82,6 +80,7 @@ public class NodeService {
     /**
      * add new node data.
      */
+    @Transactional
     public void addNodeInfo(Integer groupId, PeerInfo peerInfo) throws NodeMgrException {
         String nodeIp = null;
         Integer nodeP2PPort = null;
@@ -124,13 +123,13 @@ public class NodeService {
     /**
      * query node list by page.
      */
-    public List<TbNode> qureyNodeList(NodeParam queryParam) throws NodeMgrException {
-        log.debug("start qureyNodeList queryParam:{}", JsonTools.toJSONString(queryParam));
+    public List<TbNode> queryNodeList(NodeParam queryParam) throws NodeMgrException {
+        log.debug("start queryNodeList queryParam:{}", JsonTools.toJSONString(queryParam));
 
         // query node list
         List<TbNode> listOfNode = nodeMapper.getList(queryParam);
 
-        log.debug("end qureyNodeList listOfNode:{}", JsonTools.toJSONString(listOfNode));
+        log.debug("end queryNodeList listOfNode:{}", JsonTools.toJSONString(listOfNode));
         return listOfNode;
     }
 
@@ -140,14 +139,14 @@ public class NodeService {
     public List<TbNode> queryByGroupId(int groupId) {
         NodeParam nodeParam = new NodeParam();
         nodeParam.setGroupId(groupId);
-        return qureyNodeList(nodeParam);
+        return queryNodeList(nodeParam);
     }
 
     /**
      * query all node list
      */
     public List<TbNode> getAll() {
-        return qureyNodeList(new NodeParam());
+        return queryNodeList(new NodeParam());
     }
 
     /**
@@ -298,13 +297,14 @@ public class NodeService {
      * get latest number of peer on chain.
      */
     private BigInteger getBlockNumberOfNodeOnChain(int groupId, String nodeId) {
-        SyncStatus syncStatus = frontInterface.getSyncStatus(groupId);
+        SyncStatusInfo syncStatus = frontInterface.getSyncStatus(groupId);
         if (nodeId.equals(syncStatus.getNodeId())) {
-            return syncStatus.getBlockNumber();
+            return new BigInteger(syncStatus.getBlockNumber());
         }
-        List<PeerOfSyncStatus> peerList = syncStatus.getPeers();
+        List<PeersInfo> peerList = syncStatus.getPeers();
+        // blockNumber
         BigInteger latestNumber = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
-            .map(PeerOfSyncStatus::getBlockNumber).findFirst().orElse(BigInteger.ZERO);//blockNumber
+            .map(p -> new BigInteger(p.getBlockNumber())).findFirst().orElse(BigInteger.ZERO);
         return latestNumber;
     }
 
@@ -313,27 +313,16 @@ public class NodeService {
      * get peer of consensusStatus
      */
     private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
-        String consensusStatusJson = frontInterface.getConsensusStatus(groupId);
-        if (StringUtils.isBlank(consensusStatusJson)) {
-            log.debug("getPeerOfConsensusStatus is null: {}", consensusStatusJson);
+        ConsensusInfo consensusInfo = frontInterface.getConsensusStatus(groupId);
+        if (consensusInfo == null) {
+            log.debug("getPeerOfConsensusStatus is null");
             return null;
         }
-        List jsonArr = JsonTools.toJavaObject(consensusStatusJson, List.class);
-        if (jsonArr == null) {
-            log.error("getPeerOfConsensusStatus error");
-            throw new NodeMgrException(ConstantCode.FAIL_PARSE_JSON);
-        }
         List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
-        for (int i = 0; i < jsonArr.size(); i++ ) {
-            if (jsonArr.get(i) instanceof List) {
-                List<PeerOfConsensusStatus> tempList = JsonTools.toJavaObjectList(
-                    JsonTools.toJSONString(jsonArr.get(i)), PeerOfConsensusStatus.class);
-                if (tempList != null) {
-                    dataIsList.addAll(tempList);
-                } else {
-                    throw new NodeMgrException(ConstantCode.FAIL_PARSE_JSON);
-                }
-            }
+        List<ViewInfo> viewInfos = consensusInfo.getViewInfos();
+        for (ViewInfo viewInfo : viewInfos) {
+            dataIsList.add(
+                new PeerOfConsensusStatus(viewInfo.getNodeId(), new BigInteger(viewInfo.getView())));
         }
         return dataIsList;
     }
