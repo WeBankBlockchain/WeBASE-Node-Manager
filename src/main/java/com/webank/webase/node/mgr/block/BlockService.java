@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,31 +13,36 @@
  */
 package com.webank.webase.node.mgr.block;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.TableName;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.block.entity.BlockListParam;
+import com.webank.webase.node.mgr.block.entity.TbBlock;
+import com.webank.webase.node.mgr.external.ExtAccountService;
+import com.webank.webase.node.mgr.external.ExtContractService;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.transaction.TransHashService;
+import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionObject;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.TableName;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
-import com.webank.webase.node.mgr.block.entity.BlockListParam;
-import com.webank.webase.node.mgr.block.entity.TbBlock;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.transaction.TransHashService;
-import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
-import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * services for block data.
@@ -56,6 +61,10 @@ public class BlockService {
     private TransHashService transHashService;
     @Autowired
     private ConstantProperties cProperties;
+    @Autowired
+    private ExtAccountService extAccountService;
+    @Autowired
+    private ExtContractService extContractService;
     private static final Long SAVE_TRANS_SLEEP_TIME = 5L;
 
 
@@ -100,7 +109,7 @@ public class BlockService {
      */
     private void pullBlockByNumber(int groupId, BigInteger blockNumber) {
         //get block by number
-        BlockInfo blockInfo = frontInterface.getBlockByNumber(groupId, blockNumber);
+        BcosBlock.Block blockInfo = frontInterface.getBlockByNumber(groupId, blockNumber);
         if (blockInfo == null || blockInfo.getNumber() == null) {
             log.info("pullBlockByNumber jump over. not found new block.");
             return;
@@ -137,7 +146,7 @@ public class BlockService {
     /**
      * copy chainBlock properties;
      */
-    public static TbBlock chainBlock2TbBlock(BlockInfo blockInfo) {
+    public static TbBlock chainBlock2TbBlock(BcosBlock.Block blockInfo) {
         if (blockInfo == null) {
             return null;
         }
@@ -146,30 +155,33 @@ public class BlockService {
                 .timestamp2LocalDateTime(Long.valueOf(blockInfo.getTimestamp()));
         int sealerIndex = Integer.parseInt(blockInfo.getSealer().substring(2), 16);
 
-        List<TransactionInfo> transList = blockInfo.getTransactions();
+        int transSize = blockInfo.getTransactions().size();
 
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
-            transList.size(), sealerIndex);
+            transSize, sealerIndex);
         return tbBlock;
     }
 
     /**
-     * save report block info.
+     * save report block info and save tx in block
      */
     @Transactional
-    public void saveBLockInfo(BlockInfo blockInfo, Integer groupId) throws NodeMgrException {
-        List<TransactionInfo> transList = blockInfo.getTransactions();
+    public void saveBLockInfo(BcosBlock.Block blockInfo, Integer groupId) throws NodeMgrException {
+        List<TransactionResult> transList = blockInfo.getTransactions();
 
         // save block info
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
         addBlockInfo(tbBlock, groupId);
 
         // save trans hash
-        for (TransactionInfo trans : transList) {
+        for (TransactionResult t : transList) {
+            JsonTransactionResponse trans = (JsonTransactionResponse) t;
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
+            // save user or contract from block's transaction
+            this.saveExternalInfo(groupId, trans, blockInfo.getTimestamp());
             try {
                 Thread.sleep(SAVE_TRANS_SLEEP_TIME);
             } catch (InterruptedException ex) {
@@ -279,7 +291,7 @@ public class BlockService {
 
 
     /**
-     * remove block into.
+     * remove block info.
      */
     public Integer remove(Integer groupId, BigInteger blockRetainMax)
         throws NodeMgrException {
@@ -298,14 +310,14 @@ public class BlockService {
     /**
      * get block by blockNumber from front server
      */
-    public BlockInfo getBlockFromFrontByNumber(int groupId, BigInteger blockNumber) {
+    public BcosBlock.Block getBlockFromFrontByNumber(int groupId, BigInteger blockNumber) {
         return frontInterface.getBlockByNumber(groupId, blockNumber);
     }
 
     /**
      * get block by hash from front server
      */
-    public BlockInfo getBlockFromFrontByHash(int groupId, String pkHash) {
+    public BcosBlock.Block getBlockFromFrontByHash(int groupId, String pkHash) {
         return frontInterface.getBlockByHash(groupId, pkHash);
     }
 
@@ -353,5 +365,27 @@ public class BlockService {
      */
     public BcosBlockHeader getBlockHeaderFromFrontByHash(int groupId, String pkHash) {
         return frontInterface.getBlockHeaderByHash(groupId, pkHash);
+    }
+
+    /**
+     * get block header by hash from front
+     * @param input block height or tx hash
+     */
+    public Object searchByBlockNumOrTxHash(int groupId, String input) {
+        return frontInterface.searchByBlockNumOrTxHash(groupId, input);
+    }
+
+    private void saveExternalInfo(int groupId, JsonTransactionResponse trans, String timestamp) {
+        if (!cProperties.getEnableExternalFromBlock()) {
+            return;
+        }
+        // try to save external account
+        extAccountService.saveAccountOnChain(groupId, trans.getFrom());
+        // try to save external contract
+        String toAddress = trans.getTo();
+        if (Address.DEFAULT.getValue().equals(toAddress)) {
+            log.debug("saveExternalInfo contract from block:{}", trans.getHash());
+            extContractService.asyncSaveContract(groupId, trans.getHash(), timestamp);
+        }
     }
 }

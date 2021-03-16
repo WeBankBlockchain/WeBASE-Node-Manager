@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ import com.webank.webase.node.mgr.security.customizeAuth.TokenAuthenticationToke
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 
+/**
+ * filter request with token
+ */
 public class TokenAuthenticationFilter extends AbstractAuthenticationFilter {
     public TokenAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);

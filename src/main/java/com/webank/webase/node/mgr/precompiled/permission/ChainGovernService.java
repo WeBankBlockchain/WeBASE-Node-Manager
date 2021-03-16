@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -22,8 +22,8 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.PrecompiledTools;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.governance.GovernVoteService;
-import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.precompiled.entity.RspCommitteeInfo;
 import com.webank.webase.node.mgr.user.UserService;
 import java.math.BigDecimal;
@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,7 +70,11 @@ public class ChainGovernService {
         Integer weightSum = 0;
         // get committee info list
         List data = this.listCommittee(groupId);
-        List<PermissionInfo> committeeList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), PermissionInfo.class);
+        List<PermissionInfo> committeeList = new ArrayList<>();
+        List<PermissionInfo> tmpList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), PermissionInfo.class);
+        if (tmpList != null) {
+            committeeList.addAll(tmpList);
+        }
         for (PermissionInfo cOnChain: committeeList) {
             RspCommitteeInfo committeeInfo = new RspCommitteeInfo();
             BeanUtils.copyProperties(cOnChain, committeeInfo);

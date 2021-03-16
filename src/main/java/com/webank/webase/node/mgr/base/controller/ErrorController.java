@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -46,7 +46,7 @@ public class ErrorController extends BasicErrorController {
         if (index > 0) {
             String code = mesage.substring(0, index);
             String msg = mesage.substring(index);
-            throw new NodeMgrException(Integer.valueOf(code), msg);
+            throw new NodeMgrException(Integer.parseInt(code), msg);
         } else {
             throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION.getCode(), mesage);
         }

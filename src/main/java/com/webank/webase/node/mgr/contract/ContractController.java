@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -44,7 +44,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -121,7 +121,7 @@ public class ContractController extends BaseController {
 
 
     /**
-     * qurey contract info list.
+     * query contract info list.
      */
     @PostMapping(value = "/contractList")
     public BasePageResponse queryContractList(@RequestBody QueryContractParam inputParam)
@@ -142,7 +142,7 @@ public class ContractController extends BaseController {
             queryParam.setStart(start);
             queryParam.setFlagSortedByTime(SqlSortType.DESC.getValue());
             // query list
-            List<TbContract> listOfContract = contractService.qureyContractList(queryParam);
+            List<TbContract> listOfContract = contractService.queryContractList(queryParam);
 
             pagesponse.setData(listOfContract);
             pagesponse.setTotalCount(count);
@@ -254,7 +254,7 @@ public class ContractController extends BaseController {
 
 
     /**
-     * qurey contract info list by groupId without abi/bin
+     * query contract info list by groupId without abi/bin
      */
     @GetMapping(value = "/contractList/all/light")
     public BasePageResponse queryContractListNoAbi(@RequestParam Integer groupId,
@@ -273,7 +273,7 @@ public class ContractController extends BaseController {
         if (count > 0) {
             // query list
             List<RspContractNoAbi> listOfContract =
-                    contractService.qureyContractListNoAbi(queryParam);
+                    contractService.queryContractListNoAbi(queryParam);
             pagesponse.setData(listOfContract);
             pagesponse.setTotalCount(count);
         }
@@ -308,7 +308,7 @@ public class ContractController extends BaseController {
 
 
     /**
-     * qurey contract info list.
+     * query contract info list.
      */
     @PostMapping(value = "/contractPath/list/{groupId}")
     public BasePageResponse queryContractPathList(@PathVariable("groupId") Integer groupId) {
@@ -346,7 +346,7 @@ public class ContractController extends BaseController {
     }
 
     /**
-     * qurey contract info list by multi path
+     * query contract info list by multi path
      */
     @PostMapping(value = "/contractList/multiPath")
     public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam)
@@ -355,7 +355,7 @@ public class ContractController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start listContractByMultiPath. startTime:{} inputParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(inputParam));
-        List<TbContract> contractList = contractService.qureyContractListMultiPath(inputParam);
+        List<TbContract> contractList = contractService.queryContractListMultiPath(inputParam);
         pagesponse.setTotalCount(contractList.size());
         pagesponse.setData(contractList);
         log.info("end listContractByMultiPath. useTime:{} result count:{}",

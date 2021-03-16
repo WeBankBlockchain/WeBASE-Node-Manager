@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package com.webank.webase.node.mgr.deploy.service;
 
 import static com.webank.webase.node.mgr.base.tools.DateUtil.YYYYMMDD_HHMMSS;
 
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.DateUtil;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,20 +26,15 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.DateUtil;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  */
@@ -316,7 +313,7 @@ public class PathService {
      * @throws IOException
      */
     public static String getNodeId(Path nodePath, byte encryptType) throws IOException {
-        String nodeIdFile = encryptType == EncryptType.ECDSA_TYPE ? "node.nodeid" : "gmnode.nodeid";
+        String nodeIdFile = encryptType == CryptoType.ECDSA_TYPE ? "node.nodeid" : "gmnode.nodeid";
 
         List<String> lines = Files.readAllLines(nodePath.resolve("conf/").resolve(nodeIdFile));
         if (CollectionUtils.isEmpty(lines)) {

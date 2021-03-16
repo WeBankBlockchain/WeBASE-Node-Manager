@@ -46,10 +46,6 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-List web3sdk = [
-    "org.fisco-bcos:web3sdk:2.6.2"
-]
-
 List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
@@ -76,9 +72,16 @@ List log4j = [
     "org.apache.logging.log4j:log4j-web:$log4j_version"
 ]
 
+List mbg = [
+    'org.mybatis.generator:mybatis-generator-core:1.3.2',
+    'tk.mybatis:mapper:3.3.2',
+    'com.github.yuanmomo:mybatis-generator-plugin:1.0.9'
+]
+
 dependencies {
-    compile springboot,spring,jaxb,web3sdk,jackson,log4j
-    compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.0"
+    compile springboot,spring,jaxb,jackson,log4j
+    compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2-SNAPSHOT"
+    compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile "mysql:mysql-connector-java:8.0.13"
     compile "com.zaxxer:HikariCP:3.2.0"
@@ -96,8 +99,8 @@ dependencies {
     }
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
     compile 'ognl:ognl:3.2.14'
-
-    testCompile test
+    compile 'org.apache.commons:commons-collections4:4.4'
+    testCompile test,mbg
 
     compileOnly lombok
     annotationProcessor lombok

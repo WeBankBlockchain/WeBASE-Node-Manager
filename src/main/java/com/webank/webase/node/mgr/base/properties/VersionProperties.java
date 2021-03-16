@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -24,6 +24,10 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 public class VersionProperties {
+
+    // inclusive (can be equal)
+    public static final Integer WEBASE_LOWEST_VERSION_INT = 132;
+    public static final Integer NODE_LOWEST_SUPPORT_VERSION_INT = 241;
 
     @Value("${version}")
     private String version;

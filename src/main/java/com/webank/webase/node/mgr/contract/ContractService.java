@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,12 +13,13 @@
  */
 package com.webank.webase.node.mgr.contract;
 
-import com.webank.webase.node.mgr.abi.AbiService;
-import com.webank.webase.node.mgr.abi.entity.AbiInfo;
+import com.webank.webase.node.mgr.contract.abi.AbiService;
+import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
@@ -39,24 +40,21 @@ import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService
 import com.webank.webase.node.mgr.user.UserService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * services for contract data.
@@ -87,6 +85,8 @@ public class  ContractService {
     private PermissionManageService permissionManageService;
     @Autowired
     private ContractPathService contractPathService;
+    @Autowired
+    private ConstantProperties constants;
     /**
      * add new contract data.
      */
@@ -166,21 +166,21 @@ public class  ContractService {
     /**
      * query contract list.
      */
-    public List<TbContract> qureyContractList(ContractParam param) throws NodeMgrException {
-        log.debug("start qureyContractList ContractListParam:{}", JsonTools.toJSONString(param));
+    public List<TbContract> queryContractList(ContractParam param) throws NodeMgrException {
+        log.debug("start queryContractList ContractListParam:{}", JsonTools.toJSONString(param));
 
         // query contract list
         List<TbContract> listOfContract = contractMapper.listOfContract(param);
 
-        log.debug("end qureyContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
+        log.debug("end queryContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
         return listOfContract;
     }
 
     /**
      * query contract list.
      */
-    public List<RspContractNoAbi> qureyContractListNoAbi(ContractParam param) throws NodeMgrException {
-        log.debug("start qureyContractList ContractListParam:{}", JsonTools.toJSONString(param));
+    public List<RspContractNoAbi> queryContractListNoAbi(ContractParam param) throws NodeMgrException {
+        log.debug("start queryContractListNoAbi ContractListParam:{}", JsonTools.toJSONString(param));
 
         // query contract list
         List<TbContract> listOfContract = contractMapper.listOfContract(param);
@@ -190,7 +190,7 @@ public class  ContractService {
             BeanUtils.copyProperties(c, rsp);
             resultList.add(rsp);
         });
-        log.debug("end qureyContractList listOfContract:{}", JsonTools.toJSONString(listOfContract));
+        log.debug("end queryContractListNoAbi listOfContract:{}", JsonTools.toJSONString(listOfContract));
         return resultList;
     }
 
@@ -247,6 +247,7 @@ public class  ContractService {
 
     /**
      * deploy contract.
+     * v1.5.0 import abi when re-deploy same contract
      */
     public TbContract deployContract(DeployInputParam inputParam) throws NodeMgrException {
         log.info("start deployContract. inputParam:{}", JsonTools.toJSONString(inputParam));
@@ -262,7 +263,7 @@ public class  ContractService {
         verifyContractNameNotExist(inputParam.getGroupId(), inputParam.getContractPath(),
             inputParam.getContractName(), inputParam.getAccount(), inputParam.getContractId());
 
-        List<AbiDefinition> abiArray = JsonTools.toJavaObjectList(inputParam.getContractAbi(), AbiDefinition.class);
+        List<ABIDefinition> abiArray = JsonTools.toJavaObjectList(inputParam.getContractAbi(), ABIDefinition.class);
         if (abiArray == null || abiArray.isEmpty()) {
             log.info("fail deployContract. abi is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);
@@ -288,6 +289,8 @@ public class  ContractService {
             log.error("fail deploy, contractAddress is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
         }
+        // deploy success, old contract save in tb_abi
+        abiService.saveAbiFromContractId(inputParam.getContractId());
 
         // get deploy user name
         String userName = userService.getUserNameByAddress(groupId, inputParam.getUser());
@@ -348,7 +351,7 @@ public class  ContractService {
         }
 
         // if constant, signUserId is useless
-        AbiDefinition funcAbi = Web3Tools.getAbiDefinition(param.getFuncName(), contractAbiStr);
+        ABIDefinition funcAbi = Web3Tools.getAbiDefinition(param.getFuncName(), contractAbiStr);
         String signUserId = "empty";
         // func is not constant or stateMutability is not equal to 'view' or 'pure'
         // fit in solidity 0.6
@@ -479,7 +482,7 @@ public class  ContractService {
         param.setGroupId(groupId);
         param.setContractName(contract.getContractName());
         param.setAddress(address);
-        param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, AbiDefinition.class));
+        param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
         param.setContractBin(contract.getContractBin());
 
         frontInterface.sendAbi(groupId, param);
@@ -568,8 +571,8 @@ public class  ContractService {
     /**
      * query contract list by multi path
      */
-    public List<TbContract> qureyContractListMultiPath(ReqListContract param) throws NodeMgrException {
-        log.debug("start qureyContractListMultiPath ReqListContract:{}", JsonTools.toJSONString(param));
+    public List<TbContract> queryContractListMultiPath(ReqListContract param) throws NodeMgrException {
+        log.debug("start queryContractListMultiPath ReqListContract:{}", JsonTools.toJSONString(param));
         int groupId = param.getGroupId();
         String account = param.getAccount();
         List<String> pathList = param.getContractPathList();
@@ -582,7 +585,9 @@ public class  ContractService {
             resultList.addAll(listOfContract);
         }
 
-        log.debug("end qureyContractListMultiPath listOfContract size:{}", resultList.size());
+        log.debug("end queryContractListMultiPath listOfContract size:{}", resultList.size());
         return resultList;
     }
+
+    // todo contractService.queryContractByBin(groupId, contractBin); get history contract by bin
 }

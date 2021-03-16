@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package node.mgr.test.cert;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.CertService;
+import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -26,7 +27,7 @@ import org.springframework.util.Assert;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
-public class LoadGmCertTest extends TestBase{
+public class LoadGmCertTest extends TestBase {
     @Autowired
     CertService certService;
 

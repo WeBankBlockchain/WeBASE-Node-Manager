@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,29 +14,24 @@
 package node.mgr.test.frontInterface;
 
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
-import com.webank.webase.node.mgr.monitor.ChainTransInfo;
+import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.util.List;
-
+import node.mgr.test.base.TestBase;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class FrontServiceTest {
+public class FrontServiceTest extends TestBase {
 
     @Autowired
     private FrontInterfaceService frontInterface;
@@ -65,21 +60,21 @@ public class FrontServiceTest {
 
     @Test
     public void getTransactionTest() {
-        TransactionInfo transactionInfo = frontInterface.getTransaction(groupId, transHash);
+        JsonTransactionResponse transactionInfo = frontInterface.getTransaction(groupId, transHash);
         assert (transactionInfo != null);
         System.out.println(JsonTools.toJSONString(transactionInfo));
     }
 
     @Test
     public void getBlockByNumberTest() {
-        BlockInfo blockInfo = frontInterface.getBlockByNumber(groupId, new BigInteger("1000"));
+        BcosBlock.Block blockInfo = frontInterface.getBlockByNumber(groupId, new BigInteger("1000"));
 //        assert (blockInfo != null);
         System.out.println(JsonTools.toJSONString(blockInfo));
     }
 
     @Test
     public void getblockFromFrontByHashTest() {
-        BlockInfo blockInfo = frontInterface.getBlockByHash(groupId, blockHash);
+        BcosBlock.Block blockInfo = frontInterface.getBlockByHash(groupId, blockHash);
         assert (blockInfo != null);
         System.out.println(JsonTools.toJSONString(blockInfo));
     }
@@ -118,7 +113,7 @@ public class FrontServiceTest {
 
     @Test
     public void getTransByBlockNumberTest() {
-        List<TransactionInfo> list = frontInterface.getTransByBlockNumber(groupId, blockNumber);
+        List<JsonTransactionResponse> list = frontInterface.getTransByBlockNumber(groupId, blockNumber);
         assert (list != null && list.size() > 0);
         System.out.println(JsonTools.toJSONString(list));
     }
@@ -147,14 +142,14 @@ public class FrontServiceTest {
 
     @Test
     public void getConsensusStatusTest() {
-        String consensunsStatus = frontInterface.getConsensusStatus(groupId);
+        ConsensusInfo consensunsStatus = frontInterface.getConsensusStatus(groupId);
         assert (consensunsStatus != null);
         System.out.println("=====================consensunsStatus:" + consensunsStatus);
     }
 
     @Test
     public void syncStatusTest() {
-        SyncStatus status = frontInterface.getSyncStatus(groupId);
+        SyncStatusInfo status = frontInterface.getSyncStatus(groupId);
         assert (status != null);
         System.out.println("=====================status:" + JsonTools.toJSONString(status));
     }
@@ -170,7 +165,7 @@ public class FrontServiceTest {
 
     @Test
     public void getClientVersion() {
-        NodeVersion.Version clientVersion = frontInterface.getClientVersionFromSpecificFront(frontIp, frontPort, groupId);
+        ClientVersion clientVersion = frontInterface.getClientVersionFromSpecificFront(frontIp, frontPort, groupId);
         System.out.println(clientVersion);
     }
 

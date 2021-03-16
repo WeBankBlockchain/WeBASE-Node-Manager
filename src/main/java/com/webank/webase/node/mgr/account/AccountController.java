@@ -1,6 +1,6 @@
 
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -65,7 +65,7 @@ public class AccountController extends BaseController {
     private static final int PICTURE_CHECK_CODE_CHAR_NUMBER = 4;
 
     /**
-     * 获取验证码
+     * get verify code when login
      */
     @GetMapping(value = "pictureCheckCode")
     public BaseResponse getPictureCheckCode() throws Exception {

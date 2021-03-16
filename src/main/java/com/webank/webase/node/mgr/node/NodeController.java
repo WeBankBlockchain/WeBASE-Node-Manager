@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -46,7 +46,7 @@ public class NodeController {
     @Autowired private NodeService nodeService;
 
     /**
-     * qurey node info list.
+     * query node info list.
      */
     @GetMapping(value = "/nodeList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse queryNodeList(@PathVariable("groupId") Integer groupId,
@@ -79,7 +79,7 @@ public class NodeController {
                 .orElse(null);
             queryParam.setStart(start);
 
-            List<TbNode> listOfnode = nodeService.qureyNodeList(queryParam);
+            List<TbNode> listOfnode = nodeService.queryNodeList(queryParam);
             pagesponse.setData(listOfnode);
             pagesponse.setTotalCount(count);
 
