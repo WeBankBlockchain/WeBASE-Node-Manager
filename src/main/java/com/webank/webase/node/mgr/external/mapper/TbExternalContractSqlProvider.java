@@ -22,6 +22,12 @@ public class TbExternalContractSqlProvider {
         if (param.getAccount() != null) {
             sql.WHERE("b.account = #{account}");
         }
+        if (param.getContractName() != null) {
+            sql.WHERE("b.contract_name = #{contractName}");
+        }
+        if (param.getContractAddress() != null) {
+            sql.WHERE("ext.contract_address = #{contractAddress}");
+        }
         // page
         sql.ORDER_BY("ext.modify_time desc");
         if (param.getStart() != null && param.getPageSize() != null) {
