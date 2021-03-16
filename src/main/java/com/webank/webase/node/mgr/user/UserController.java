@@ -65,11 +65,8 @@ public class UserController extends BaseController {
         Instant startTime = Instant.now();
 
         // add user row
-        Integer userId = userService.addUserInfo(user.getGroupId(), user.getUserName(),
-                user.getAccount(), user.getDescription(), user.getUserType(), null);
-
-        // query user row
-        TbUser userRow = userService.queryByUserId(userId);
+        TbUser userRow = userService.addUserInfo(user.getGroupId(), user.getUserName(),
+                user.getAccount(), user.getDescription(), user.getUserType(), null, true, true);
         baseResponse.setData(userRow);
 
         log.info("end addUserInfo useTime:{} result:{}",
@@ -89,11 +86,8 @@ public class UserController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
-        // add user row
-        Integer userId = userService.bindUserInfo(user);
-
         // query user row
-        TbUser userRow = userService.queryByUserId(userId);
+        TbUser userRow = userService.bindUserInfo(user, true);
         baseResponse.setData(userRow);
 
         log.info("end bindUserInfo useTime:{} result:{}",
@@ -177,12 +171,9 @@ public class UserController extends BaseController {
         // encoded by web in base64
         String privateKeyEncoded = reqImport.getPrivateKey();
         // add user row
-        Integer userId = userService.addUserInfo(reqImport.getGroupId(), reqImport.getUserName(),
+        TbUser userRow = userService.addUserInfo(reqImport.getGroupId(), reqImport.getUserName(),
                 reqImport.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
-                privateKeyEncoded);
-
-        // query user row
-        TbUser userRow = userService.queryByUserId(userId);
+                privateKeyEncoded, false, true);
         baseResponse.setData(userRow);
 
         log.info("end importPrivateKey useTime:{} result:{}",
@@ -204,9 +195,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
-        Integer userId = userService.importPem(reqImportPem);
-        // query user row
-        TbUser userRow = userService.queryByUserId(userId);
+        TbUser userRow = userService.importPem(reqImportPem, true);
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
@@ -230,10 +219,8 @@ public class UserController extends BaseController {
         if (p12File.getSize() == 0) {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
-        Integer userId = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
-                account, description);
-        // query user row
-        TbUser userRow = userService.queryByUserId(userId);
+        TbUser userRow = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
+                account, description, true);
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",

@@ -1,33 +1,20 @@
-/**
- * Copyright 2014-2021 the original author or authors.
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.webank.webase.node.mgr.base.tools;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-
+import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * check ip and formatter
+ * IPUtil.
  */
+
 @Slf4j
 public class IPUtil {
 
@@ -38,7 +25,6 @@ public class IPUtil {
     static {
         LOCAL_IP_SET.add(LOCAL_IP_127);
         LOCAL_IP_SET.add(LOCAL_IP_host);
-
         LOCAL_IP_SET.addAll(getLocalIPSet());
     }
 
@@ -54,9 +40,8 @@ public class IPUtil {
     }
 
 
-    public static Set<String> getLocalIPSet(){
-        Set<String> result =  new HashSet<>();
-
+    public static Set<String> getLocalIPSet() {
+        Set<String> result = new HashSet<>();
         try {
             Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
             for (NetworkInterface netint : Collections.list(nets)) {
@@ -69,10 +54,98 @@ public class IPUtil {
                 }
             }
         } catch (Exception e) {
-            log.warn("Get ip address from network interface error.",e);
+            log.warn("Get ip address from network interface error.", e);
         }
         return result;
     }
 
+    public static String getLocalIp() {
+        try {
+            if (isWindowsOS()) {
+                return InetAddress.getLocalHost().getHostAddress();
+            } else {
+                return getLinuxLocalIp();
+            }
+        } catch (Exception e) {
+            log.error("getLocalIp error.", e);
+        }
+        return "127.0.0.1";
+    }
 
+    public static boolean isWindowsOS() {
+        boolean isWindowsOS = false;
+        String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().indexOf("windows") > -1) {
+            isWindowsOS = true;
+        }
+        return isWindowsOS;
+    }
+
+    public static String getLinuxLocalIp() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
+                    .hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                String name = intf.getName();
+                if (!name.contains("docker") && !name.contains("lo")) {
+                    for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
+                            .hasMoreElements();) {
+                        InetAddress inetAddress = enumIpAddr.nextElement();
+                        if (!inetAddress.isLoopbackAddress()) {
+                            String ipaddress = inetAddress.getHostAddress().toString();
+                            if (!ipaddress.contains("::") && !ipaddress.contains("0:0:")
+                                    && !ipaddress.contains("fe80")) {
+                                return ipaddress;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            log.error("getLinuxLocalIp error.", e);
+        }
+        return "127.0.0.1";
+    }
+
+    public static String getIpAdrress(HttpServletRequest request) {
+        String ip = null;
+
+        // X-Forwarded-For：Squid 服务代理
+        String ipAddresses = request.getHeader("X-Forwarded-For");
+        String unknown = "unknown";
+        if (ipAddresses == null || ipAddresses.length() == 0
+                || unknown.equalsIgnoreCase(ipAddresses)) {
+            // Proxy-Client-IP：apache 服务代理
+            ipAddresses = request.getHeader("Proxy-Client-IP");
+        }
+
+        if (ipAddresses == null || ipAddresses.length() == 0
+                || unknown.equalsIgnoreCase(ipAddresses)) {
+            // WL-Proxy-Client-IP：weblogic 服务代理
+            ipAddresses = request.getHeader("WL-Proxy-Client-IP");
+        }
+
+        if (ipAddresses == null || ipAddresses.length() == 0
+                || unknown.equalsIgnoreCase(ipAddresses)) {
+            // HTTP_CLIENT_IP：有些代理服务器
+            ipAddresses = request.getHeader("HTTP_CLIENT_IP");
+        }
+
+        if (ipAddresses == null || ipAddresses.length() == 0
+                || unknown.equalsIgnoreCase(ipAddresses)) {
+            // X-Real-IP：nginx服务代理
+            ipAddresses = request.getHeader("X-Real-IP");
+        }
+
+        // 有些网络通过多层代理，那么获取到的ip就会有多个，一般都是通过逗号（,）分割开来，并且第一个ip为客户端的真实IP
+        if (ipAddresses != null && ipAddresses.length() != 0) {
+            ip = ipAddresses.split(",")[0];
+        }
+
+        // 还是不能获取到，最后再通过request.getRemoteAddr();获取
+        if (ip == null || ip.length() == 0 || unknown.equalsIgnoreCase(ipAddresses)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
+    }
 }

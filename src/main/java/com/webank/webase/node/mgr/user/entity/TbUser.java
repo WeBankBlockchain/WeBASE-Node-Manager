@@ -29,6 +29,8 @@ public class TbUser {
     private String account;
     private Integer groupId;
     private String publicKey;
+    // add in 1.5.0
+    private String privateKey;
     private Integer userStatus;
     private Integer chainIndex;
     private Integer userType;
@@ -38,7 +40,6 @@ public class TbUser {
      * temporarily use groupId as appId
      */
     private String appId;
-    @Deprecated
     private Integer hasPk;
     private String description;
     private LocalDateTime createTime;

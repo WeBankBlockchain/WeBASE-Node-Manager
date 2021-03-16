@@ -11,34 +11,35 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.webank.webase.node.mgr.scheduler;
 
-package com.webank.webase.node.mgr.version;
 
-import com.webank.webase.node.mgr.base.properties.VersionProperties;
+import com.webank.webase.node.mgr.appintegration.AppIntegrationService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 /**
- * return version of local server
+ * app status check.
  */
 @Log4j2
-@RestController
-@RequestMapping("version")
-public class VersionController {
+@Component
+public class AppStatusCheckTask {
 
     @Autowired
-    private VersionProperties versionProperties;
+    private AppIntegrationService appIntegrationService;
 
-    /**
-     * webase-web: when add first front, return version and tips
-     * @return
-     */
-    @GetMapping()
-    public String getServerVersion() {
-        return versionProperties.getVersion();
+    @Scheduled(fixedDelayString = "${constant.appStatusCheckCycle}")
+    public void taskStart() {
+        appStatusCheck();
     }
 
+    /**
+     * appStatusCheck.
+     */
+    public void appStatusCheck() {
+        log.info("appStatusCheck start.");
+        appIntegrationService.appStatusCheck();
+    }
 }

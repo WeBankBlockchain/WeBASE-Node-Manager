@@ -16,7 +16,7 @@
 package com.webank.webase.node.mgr.base.enums;
 
 public enum ContractType {
-    GENERALCONTRACT(0), SYSTEMCONTRACT(1);
+    GENERALCONTRACT(0), SYSTEMCONTRACT(1), APPIMPORT(2);
 
     private int value;
 
