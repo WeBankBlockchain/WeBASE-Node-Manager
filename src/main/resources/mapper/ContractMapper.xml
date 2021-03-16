@@ -129,7 +129,7 @@
       and group_id = #{groupId}
     </if>
     <if test="contractName != null and contractName != ''">
-      and contract_name like CONCAT('%',#{contractName},'%')
+      and lower(contract_name) like CONCAT('%',lower(#{contractName}),'%')
     </if>
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address = #{contractAddress}
@@ -171,7 +171,7 @@
       and contract_status = #{contractStatus}
     </if>
     <if test="contractName != null and contractName != ''">
-      and contract_name = #{contractName}
+      and lower(contract_name) like CONCAT('%',lower(#{contractName}),'%')
     </if>
     <if test="account != null and account != ''">
       and account = #{account}
