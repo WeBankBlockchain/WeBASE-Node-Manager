@@ -121,15 +121,15 @@
         from tb_contract
         where contract_type=0 and contract_status=2
         ) b on a.contract_address = b.contract_address and a.group_id = b.group_id
-        where a.group_id = #{param.groupId}
-        <if test="param.account != null and param.account != ''">
-            and a.account = #{param.account}
+        where a.group_id = #{groupId}
+        <if test="account != null and account != ''">
+            and a.account = #{account}
         </if>
-        <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
-            order by a.modify_time ${param.flagSortedByTime}
+        <if test="flagSortedByTime != null and flagSortedByTime != ''">
+            order by a.modify_time ${flagSortedByTime}
         </if>
-        <if test="param.start != null and param.pageSize != null">
-            limit #{param.start},#{param.pageSize}
+        <if test="start != null and pageSize != null">
+            limit #{start},#{pageSize}
         </if>
     </select>
 </mapper>
