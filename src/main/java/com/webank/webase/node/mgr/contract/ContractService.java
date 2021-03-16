@@ -290,7 +290,7 @@ public class  ContractService {
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
         }
         // deploy success, old contract save in tb_abi
-        abiService.saveAbiFromContractId(inputParam.getContractId());
+        abiService.saveAbiFromContractId(inputParam.getContractId(), contractAddress);
 
         // get deploy user name
         String userName = userService.getUserNameByAddress(groupId, inputParam.getUser());
