@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS tb_node (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_contract (
   contract_id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约编号',
-  contract_path varchar(24) binary NOT NULL COMMENT '合约所在目录',
+  contract_path varchar(128) binary NOT NULL COMMENT '合约所在目录',
   contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
   contract_version varchar(120) DEFAULT NULL COMMENT '合约版本',
   account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   contract_address varchar(64) DEFAULT NULL COMMENT '合约地址',
   deploy_time datetime DEFAULT NULL COMMENT '部署时间',
   contract_status int(1) DEFAULT '1' COMMENT '部署状态（1：未部署，2：部署成功，3：部署失败）',
-  contract_type tinyint(4) DEFAULT '0' COMMENT '合约类型(0-普通合约，1-系统合约)',
+  contract_type tinyint(4) DEFAULT '0' COMMENT '合约类型(0-普通合约，1-系统合约，2-应用导入的合约)',
   description text COMMENT '描述',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
@@ -417,7 +417,7 @@ CREATE TABLE IF NOT EXISTS tb_govern_vote (
 
 CREATE TABLE IF NOT EXISTS tb_contract_path (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约路径编号',
-  contract_path varchar(24) binary NOT NULL COMMENT '合约所在目录',
+  contract_path varchar(128) binary NOT NULL COMMENT '合约所在目录',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
@@ -428,7 +428,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_path (
 CREATE TABLE IF NOT EXISTS tb_cns (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
   group_id int(11) NOT NULL COMMENT '群组ID',
-  contract_path varchar(24) binary NOT NULL COMMENT '合约所在目录',
+  contract_path varchar(128) binary NOT NULL COMMENT '合约所在目录',
   contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
   cns_name varchar(120) binary NOT NULL COMMENT 'cns名称',
   version varchar(120) NOT NULL COMMENT 'cns版本',
@@ -503,5 +503,47 @@ CREATE TABLE IF NOT EXISTS tb_external_contract (
   PRIMARY KEY (id),
   UNIQUE KEY uk_group_path_name (group_id,contract_address)
 ) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='外部合约表';
+
+-- ----------------------------
+-- Table structure for tb_app_info
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_app_info (
+  id int(11) NOT NULL AUTO_INCREMENT COMMENT '自增编号',
+  app_name varchar(128) NOT NULL COMMENT '应用名',
+  app_key varchar(16) NOT NULL COMMENT '应用Key',
+  app_secret varchar(32) DEFAULT NULL COMMENT '应用密码',
+  app_type int(1) NOT NULL DEFAULT '2' COMMENT '应用类型(1模板，2新建)',
+  app_status int(1) NOT NULL DEFAULT '2' COMMENT '应用状态(1存活，2不存活)',
+  app_doc_link varchar(256) DEFAULT NULL COMMENT '应用文档链接',
+  app_link varchar(256) DEFAULT NULL COMMENT '应用链接',
+  app_ip varchar(16) DEFAULT NULL COMMENT '应用ip',
+  app_port int(11) DEFAULT NULL COMMENT '应用端口',
+  app_icon mediumtext DEFAULT NULL COMMENT '应用图标',
+  app_desc varchar(1024) DEFAULT NULL COMMENT '应用描述',
+  app_detail text DEFAULT NULL COMMENT '应用详情',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_key (app_key),
+  KEY uk_name (app_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='应用信息表';
+
+-- ----------------------------
+-- Table structure for tb_contract_store
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_contract_store (
+  id int(11) NOT NULL AUTO_INCREMENT COMMENT '自增编号',
+  app_key varchar(16) NOT NULL COMMENT '所属应用Key',
+  contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
+  contract_version varchar(120) NOT NULL COMMENT '合约版本',
+  contract_source mediumtext COMMENT '合约源码',
+  contract_abi mediumtext COMMENT '编译合约生成的abi文件内容',
+  bytecode_bin mediumtext COMMENT '合约bytecodeBin',
+  account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_version (app_key,contract_name,contract_version)
+) ENGINE=InnoDB AUTO_INCREMENT=300001 DEFAULT CHARSET=utf8 COMMENT='应用合约仓库';
 
 SET FOREIGN_KEY_CHECKS = 1;

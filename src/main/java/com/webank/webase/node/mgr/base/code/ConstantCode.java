@@ -75,6 +75,8 @@ public class ConstantCode {
     public static final RetCode INVALID_PARAM_INFO = RetCode.mark(202018, "invalid param info");
 
     public static final RetCode CONTRACT_NAME_REPEAT = RetCode.mark(202019, "contract name cannot be repeated");
+    
+    public static final RetCode DEPLOYED_CANNOT_MODIFIED = RetCode.mark(202020, "deployed contract cannot be modified");
 
     public static final RetCode CONTRACT_NOT_DEPLOY = RetCode.mark(202023, "contract has not deploy");
 
@@ -293,6 +295,18 @@ public class ConstantCode {
     // add in v1.5.0
     public static final RetCode SDK_CRT_KEY_FILE_NOT_FOUND = RetCode.mark(202511,"Front's sdk cert and key not found!");
     public static final RetCode WRITE_SDK_CRT_KEY_FILE_FAIL = RetCode.mark(202512,"Write front's sdk cert and key fail!");
+    // app integration
+    public static final RetCode APPNAME_EXISTS = RetCode.mark(202516, "app name exists");
+    public static final RetCode APPNAME_NOT_EXISTS = RetCode.mark(202517, "app name not exists");
+    public static final RetCode ID_NOT_EXISTS = RetCode.mark(202518, "app id not exists");
+    public static final RetCode LINK_FORMAT_INVALID = RetCode.mark(202519, "link format invalid");
+    public static final RetCode CONTRACT_SOURCE_NOT_EXIST = RetCode.mark(202520, "contract source not exist");
+    public static final RetCode TIMESTAMP_CANNOT_EMPTY = RetCode.mark(202521, "timestamp cannot be empty");
+    public static final RetCode APPKEY_CANNOT_EMPTY = RetCode.mark(202522, "app key cannot be empty");
+    public static final RetCode SIGNATURE_CANNOT_EMPTY = RetCode.mark(202523, "signature cannot be empty");
+    public static final RetCode TIMESTAMP_TIMEOUT = RetCode.mark(202524, "timestamp timeout");
+    public static final RetCode APPKEY_NOT_EXISTS = RetCode.mark(202525, "app key not exists");
+    public static final RetCode SIGNATURE_NOT_MATCH = RetCode.mark(202526, "signature not match");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

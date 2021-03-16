@@ -16,8 +16,6 @@
 package com.webank.webase.node.mgr.contract;
 
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
-import com.webank.webase.node.mgr.contract.entity.RspContractPath;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -30,6 +28,8 @@ import org.springframework.stereotype.Repository;
 public interface ContractMapper {
 
     Integer add(TbContract tbContract);
+    
+    Integer saveAndUpdate(TbContract tbContract);
 
     Integer remove(@Param("contractId") Integer contractId);
 

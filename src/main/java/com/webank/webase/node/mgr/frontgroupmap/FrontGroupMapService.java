@@ -159,6 +159,16 @@ public class FrontGroupMapService {
         //remove by frontId
         frontGroupMapMapper.removeByFrontId(frontId);
     }
+    
+    /**
+     * get group list by frontId
+     */
+    public List<Integer> getGroupIdListByFrontId(int frontId) {
+        if (frontId == 0) {
+            return null;
+        }
+        return frontGroupMapMapper.getGroupIdListByFrontId(frontId);
+    }
 
     /**
      * get map list by groupId

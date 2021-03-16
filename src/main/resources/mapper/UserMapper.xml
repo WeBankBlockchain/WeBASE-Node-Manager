@@ -61,6 +61,9 @@
       and user_name like CONCAT(#{commParam},'%')
       or address like CONCAT(#{commParam},'%')
     </if>
+    <if test="hasPk != null and hasPk != ''">
+      and has_pk = #{hasPk}
+    </if>
   </select>
 
 
@@ -82,6 +85,9 @@
     <if test="commParam != null and commParam != ''">
       and user_name like CONCAT(#{commParam},'%')
       or address like CONCAT(#{commParam},'%')
+    </if>
+    <if test="hasPk != null and hasPk != ''">
+      and has_pk = #{hasPk}
     </if>
     order by user_id desc
     <if test="start != null and pageSize != null">
@@ -119,15 +125,16 @@
 
 
   <select id="queryUserNameByAddress" resultType="java.lang.String">
-		select user_name from tb_user where group_id = #{groupId} and address = #{address} limit 1
-	</select>
+    select user_name from tb_user where group_id = #{groupId} and address = #{address} limit 1
+  </select>
+  
   <select id="querySystemUser" parameterType="java.lang.Integer" resultMap="userMap">
-		select * from tb_user where user_status=1 and user_type = 2 limit 1
-	</select>
+    select * from tb_user where user_status=1 and user_type = 2 limit 1
+  </select>
 
   <delete id="deleteUser" parameterType="java.lang.Integer">
-		delete from tb_user where group_id = #{groupId}
-	</delete>
+    delete from tb_user where group_id = #{groupId}
+  </delete>
 
   <delete id="deleteByAddress" parameterType="java.lang.String">
     delete from tb_user where address = #{address}
