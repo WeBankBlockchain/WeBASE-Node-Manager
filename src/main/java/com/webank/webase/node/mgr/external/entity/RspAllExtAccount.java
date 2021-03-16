@@ -29,4 +29,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class RspAllExtAccount extends TbUser {
     private Integer extAccountId;
+    private String userName;
+    private Integer transCount;
+    private String hashs;
 }

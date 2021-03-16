@@ -9,13 +9,19 @@ public class TbExternalAccountSqlProvider {
     public String listJoin(UserParam param) {
         SQL sql = new SQL();
         String sqlStr = "ext.id extAccountId,ext.group_id groupId,ext.address address,ext.create_time createTime,ext.modify_time modifyTime, " +
-        "b.userId,b.userName,b.account,b.publicKey,b.signUserId,b.userType,b.userStatus,b.appId,b.description,b.hasPk " +
+            "b.userId,b.account,b.publicKey,b.signUserId,b.userType,b.userStatus,b.appId,b.description,b.hasPk, " +
+            "c.transCount,c.hashs,c.user_name " +
             "FROM tb_external_account ext " +
             "LEFT JOIN " +
-            "( SELECT group_id,address,user_id userId,user_name userName,account account,public_key publicKey,sign_user_id signUserId, " +
+            "( SELECT group_id,address,user_id userId,user_name,account account,public_key publicKey,sign_user_id signUserId, " +
             "user_type userType,user_status userStatus,app_id appId,description description,has_pk hasPk " +
             "FROM tb_user " +
-            ") b on ext.address=b.address and ext.group_id=b.group_id ";
+            ") b on ext.address=b.address and ext.group_id=b.group_id " +
+            "LEFT JOIN " +
+            "( SELECT user_name,sum(trans_count) transCount, max(trans_hashs) hashs " +
+            "FROM tb_user_transaction_monitor_${groupId} WHERE user_type=1" +
+            // if external address equal to monitor user's username, it means user not imported
+            ") c on ext.address=c.user_name";
         sql.SELECT(sqlStr);
         sql.WHERE("ext.group_id= #{groupId}");
         if (param.getAccount() != null) {
