@@ -6,6 +6,31 @@ import org.apache.ibatis.jdbc.SQL;
 
 public class TbExternalContractSqlProvider {
 
+    public String listJoin(ContractParam param) {
+        SQL sql = new SQL();
+        String columnsWithJoin = "ext.id extContractId,ext.group_id groupId,ext.contract_address contractAddress," +
+            "ext.deploy_address deployAddress,ext.deploy_tx_hash deployTxHash,ext.deploy_time deployTime," +
+            "b.contractName,b.contractAbi,b.account,b.contractBin,b.abiId,b.createTime,b.modifyTime " +
+            "FROM tb_external_contract ext " +
+            "LEFT JOIN " +
+            "( SELECT group_id,contract_address,abi_id abiId,contract_name contractName,account account," +
+            "contract_abi contractAbi,contract_bin contractBin,create_time createTime,modify_time modifyTime " +
+            "FROM tb_abi " +
+            ") b on ext.contract_address=b.contract_address and ext.group_id=b.group_id ";
+        sql.SELECT(columnsWithJoin);
+        sql.WHERE("ext.group_id= #{groupId}");
+        if (param.getAccount() != null) {
+            sql.WHERE("b.account = #{account}");
+        }
+        // page
+        sql.ORDER_BY("ext.modify_time desc");
+        if (param.getStart() != null && param.getPageSize() != null) {
+            sql.LIMIT(param.getStart());
+            sql.LIMIT(param.getPageSize());
+        }
+        return sql.toString();
+    }
+
     public String count(ContractParam param) {
         SQL sql = new SQL();
         sql.FROM("tb_external_contract");

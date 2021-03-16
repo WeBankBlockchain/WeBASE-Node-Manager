@@ -6,6 +6,30 @@ import org.apache.ibatis.jdbc.SQL;
 
 public class TbExternalAccountSqlProvider {
 
+    public String listJoin(UserParam param) {
+        SQL sql = new SQL();
+        String sqlStr = "ext.id extAccountId,ext.group_id groupId,ext.address address,ext.create_time createTime,ext.modify_time modifyTime, " +
+        "b.userId,b.userName,b.account,b.publicKey,b.signUserId,b.userType,b.userStatus,b.appId,b.description,b.hasPk " +
+            "FROM tb_external_account ext " +
+            "LEFT JOIN " +
+            "( SELECT group_id,address,user_id userId,user_name userName,account account,public_key publicKey,sign_user_id signUserId, " +
+            "user_type userType,user_status userStatus,app_id appId,description description,has_pk hasPk " +
+            "FROM tb_user " +
+            ") b on ext.address=b.address and ext.group_id=b.group_id ";
+        sql.SELECT(sqlStr);
+        sql.WHERE("ext.group_id= #{groupId}");
+        if (param.getAccount() != null) {
+            sql.WHERE("b.account = #{account}");
+        }
+        // page
+        sql.ORDER_BY("ext.modify_time desc");
+        if (param.getStart() != null && param.getPageSize() != null) {
+            sql.LIMIT(param.getStart());
+            sql.LIMIT(param.getPageSize());
+        }
+        return sql.toString();
+    }
+
     public String count(UserParam param) {
         SQL sql = new SQL();
         sql.FROM("tb_external_account");

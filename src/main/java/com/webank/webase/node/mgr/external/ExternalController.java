@@ -21,6 +21,8 @@ import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.external.entity.RspAllExtAccount;
+import com.webank.webase.node.mgr.external.entity.RspAllExtContract;
 import com.webank.webase.node.mgr.external.entity.TbExternalAccount;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.user.entity.UserParam;
@@ -33,12 +35,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Log4j2
 @RestController
 @RequestMapping(value = "external")
-public class ExtAccountController extends BaseController {
+public class ExternalController extends BaseController {
 
     @Autowired
     private ExtAccountService extAccountService;
@@ -113,5 +116,78 @@ public class ExtAccountController extends BaseController {
         return pageResponse;
     }
 
+    /**
+     * query external account info list.
+     * left join tb_user的接口
+     */
+    @GetMapping(value = "account/list/all/{groupId}/{pageNumber}/{pageSize}")
+    public BasePageResponse listExtUserListJoin(@PathVariable("groupId") Integer groupId,
+        @PathVariable("pageNumber") Integer pageNumber,
+        @PathVariable("pageSize") Integer pageSize,
+        @RequestParam(value = "account", required = false) String account)
+        throws NodeMgrException {
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start listExtUserListJoin startTime:{} groupId:{} pageNumber:{} pageSize:{}",
+            startTime.toEpochMilli(), groupId, pageNumber, pageSize);
+
+        UserParam param = new UserParam();
+        param.setGroupId(groupId);
+        param.setPageSize(pageSize);
+        param.setAccount(account);
+
+        int count = extAccountService.countExtAccount(param);
+        if (count > 0) {
+            Integer start =
+                Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize).orElse(null);
+            param.setStart(start);
+            param.setPageSize(pageSize);
+
+            List<RspAllExtAccount> listOfUser = extAccountService.getAllExtAccountLeftJoinUser(param);
+            pageResponse.setData(listOfUser);
+            pageResponse.setTotalCount(count);
+        }
+
+        log.info("end listExtUserListJoin useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(pageResponse));
+        return pageResponse;
+    }
+
+    /**
+     * query contract info list by groupId without abi/bin
+     * left join tb_abi的接口（本地全量）
+     */
+    @GetMapping(value = "/contract/list/all/{groupId}/{pageNumber}/{pageSize}")
+    public BasePageResponse listExtContractListJoin(@PathVariable("groupId") Integer groupId,
+        @PathVariable("pageNumber") Integer pageNumber,
+        @PathVariable("pageSize") Integer pageSize,
+        @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start listExtContractListJoin. startTime:{} groupId:{}", startTime.toEpochMilli(),
+            groupId);
+        ContractParam param = new ContractParam();
+        param.setGroupId(groupId);
+        param.setPageSize(pageSize);
+        param.setAccount(account);
+        int count = extContractService.countExtContract(param);
+
+        if (count > 0) {
+            Integer start =
+                Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize).orElse(null);
+            param.setStart(start);
+            param.setFlagSortedByTime(SqlSortType.DESC.getValue());
+            // query list
+            List<RspAllExtContract> listOfContract = extContractService.getAllExtContractLeftJoinAbi(param);
+
+            pageResponse.setData(listOfContract);
+            pageResponse.setTotalCount(count);
+        }
+
+        log.info("end listExtContractListJoin. useTime:{} result count:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), count);
+        return pageResponse;
+    }
 
 }

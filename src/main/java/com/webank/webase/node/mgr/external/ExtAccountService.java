@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.external;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.external.entity.RspAllExtAccount;
 import com.webank.webase.node.mgr.external.entity.TbExternalAccount;
 import com.webank.webase.node.mgr.external.mapper.TbExternalAccountMapper;
 import com.webank.webase.node.mgr.user.UserService;
@@ -42,7 +43,6 @@ public class ExtAccountService {
      * save block's
      * @param groupId
      * @param userAddress
-     * todo 考虑用async
      * @return
      */
     public int saveAccountOnChain(int groupId, String userAddress) {
@@ -104,5 +104,10 @@ public class ExtAccountService {
     public void deleteByGroupId(int groupId) {
         int affected = extAccountMapper.deleteByGroupId(groupId);
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
+    }
+
+    public List<RspAllExtAccount> getAllExtAccountLeftJoinUser(UserParam param) {
+        log.info("getAllExtAccountLeftJoinUser param:{}", param);
+        return extAccountMapper.listAccountJoinTbUser(param);
     }
 }
