@@ -10,11 +10,11 @@ public class TbExternalAccountSqlProvider {
     public String listJoin(UserParam param) {
         SQL sql = new SQL();
         String sqlStr = "ext.id extAccountId,ext.group_id groupId,ext.address address,ext.create_time createTime,ext.modify_time modifyTime, " +
-            "b.userId,b.account,b.publicKey,b.signUserId,b.userType,b.userStatus,b.appId,b.description,b.hasPk, " +
-            "c.transCount,c.hashs,c.user_name " +
+            "b.userId,b.account,b.publicKey,b.signUserId,b.userType,b.userStatus,b.appId,b.description,b.hasPk,b.userName, " +
+            "c.transCount,c.hashs " +
             "FROM tb_external_account ext " +
             "LEFT JOIN " +
-            "( SELECT group_id,address,user_id userId,user_name,account account,public_key publicKey,sign_user_id signUserId, " +
+            "( SELECT group_id,address,user_id userId,user_name userName,account account,public_key publicKey,sign_user_id signUserId, " +
             "user_type userType,user_status userStatus,app_id appId,description description,has_pk hasPk " +
             "FROM tb_user " +
             ") b on ext.address=b.address and ext.group_id=b.group_id " +
@@ -31,9 +31,9 @@ public class TbExternalAccountSqlProvider {
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal
         if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.NORMAL.getValue()) {
-            sql.WHERE("b.user_id is not NULL");
+            sql.WHERE("b.userId is not NULL");
         } else if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.ABNORMAL.getValue()) {
-            sql.WHERE("b.user_id is NULL");
+            sql.WHERE("b.userId is NULL");
         }
         // page
         sql.ORDER_BY("ext.modify_time desc");
