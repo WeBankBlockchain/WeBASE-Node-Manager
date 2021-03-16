@@ -1,5 +1,6 @@
 package com.webank.webase.node.mgr.external.mapper;
 
+import com.webank.webase.node.mgr.base.enums.ExternalInfoType;
 import com.webank.webase.node.mgr.external.entity.TbExternalAccount;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import org.apache.ibatis.jdbc.SQL;
@@ -26,6 +27,13 @@ public class TbExternalAccountSqlProvider {
         sql.WHERE("ext.group_id= #{groupId}");
         if (param.getAccount() != null) {
             sql.WHERE("b.account = #{account}");
+        }
+        // get all or some
+        // 1-all(default), 2-normal, 3-abnormal
+        if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.NORMAL.getValue()) {
+            sql.WHERE("b.user_id != NULL");
+        } else if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.ABNORMAL.getValue()) {
+            sql.WHERE("b.user_id == NULL");
         }
         // page
         sql.ORDER_BY("ext.modify_time desc");

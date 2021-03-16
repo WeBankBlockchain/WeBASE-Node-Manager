@@ -1,5 +1,6 @@
 package com.webank.webase.node.mgr.external.mapper;
 
+import com.webank.webase.node.mgr.base.enums.ExternalInfoType;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import org.apache.ibatis.jdbc.SQL;
@@ -33,6 +34,13 @@ public class TbExternalContractSqlProvider {
         }
         if (param.getContractAddress() != null) {
             sql.WHERE("ext.contract_address = #{contractAddress}");
+        }
+        // get all or some
+        // 1-all(default), 2-normal, 3-abnormal
+        if (param.getContractType() == ExternalInfoType.NORMAL.getValue()) {
+            sql.WHERE("b.abi_id != NULL");
+        } else if (param.getContractType() == ExternalInfoType.ABNORMAL.getValue()) {
+            sql.WHERE("b.abi_id == NULL");
         }
         // page
         sql.ORDER_BY("ext.modify_time desc");
