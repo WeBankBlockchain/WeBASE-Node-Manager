@@ -19,27 +19,7 @@ import org.apache.ibatis.type.JdbcType;
 
 public interface TbExternalContractMapper {
 
-//    @Select({
-//        "SELECT ext.id extContractId,ext.group_id groupId,ext.contract_address contractAddress,",
-//        "ext.deploy_address deployAddress,ext.deploy_tx_hash deployTxHash,ext.deploy_time deployTime,",
-//        "b.contractName,b.contractAbi,b.account,b.contractBin,b.abiId,b.createTime,b.modifyTime",
-//        "FROM tb_external_account ext",
-//        "LEFT JOIN",
-//        "( SELECT group_id,address,abi_id abiId,contract_name contractName,account account,",
-//        "contract_abi contractAbi,contract_bin contractBin,create_time createTime,modify_time modifyTime",
-//        "FROM tb_abi",
-//        ") b on ext.address=b.address and ext.group_id=b.group_id",
-//        "WHERE ext.group_id=#{groupId}",
-//        "<if test=\"account != null and account != ''\">",
-//        " and ext.account = #{account}",
-//        "</if>",
-//        "<if test=\"flagSortedByTime != null and flagSortedByTime != ''\">",
-//        " order by ext.modify_time ${flagSortedByTime}",
-//        "</if>",
-//        "<if test=\"start != null and pageSize != null\">",
-//        " limit #{start},#{pageSize}",
-//        "</if>"
-//    })
+
     @SelectProvider(value = TbExternalContractSqlProvider.class, method = "listJoin")
     List<RspAllExtContract> listContractJoinTbAbi(ContractParam param);
 
