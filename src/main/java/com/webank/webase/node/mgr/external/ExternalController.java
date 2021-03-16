@@ -162,7 +162,9 @@ public class ExternalController extends BaseController {
     public BasePageResponse listExtContractListJoin(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
-        @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
+        @RequestParam(value = "account", required = false) String account,
+        @RequestParam(value = "contractAddress", required = false) String contractAddress,
+        @RequestParam(value = "contractName", required = false) String contractName) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listExtContractListJoin. startTime:{} groupId:{}", startTime.toEpochMilli(),
@@ -171,6 +173,8 @@ public class ExternalController extends BaseController {
         param.setGroupId(groupId);
         param.setPageSize(pageSize);
         param.setAccount(account);
+        param.setContractAddress(contractAddress);
+        param.setContractName(contractName);
         int count = extContractService.countExtContract(param);
 
         if (count > 0) {

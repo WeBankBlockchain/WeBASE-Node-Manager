@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
- * entity to save tb_abi, tb_contract
+ * entity to save tb_abi left join tb_contract
  */
 @Data
 @NoArgsConstructor
