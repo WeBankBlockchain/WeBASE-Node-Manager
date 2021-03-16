@@ -1,6 +1,8 @@
 package com.webank.webase.node.mgr.external.mapper;
 
+import com.webank.webase.node.mgr.external.entity.RspAllExtAccount;
 import com.webank.webase.node.mgr.external.entity.TbExternalAccount;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.util.List;
 import org.apache.ibatis.annotations.Delete;
@@ -17,6 +19,29 @@ import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
 
 public interface TbExternalAccountMapper {
+
+//    @Select({
+//        "SELECT ext.id extAccountId,ext.group_id groupId,ext.address address,ext.create_time createTime,ext.modify_time modifyTime,",
+//        "b.userId,b.userName,b.account,b.publicKey,b.signUserId,b.userType,b.userStatus,b.appId,b.description,b.hasPk",
+//        "FROM tb_external_account ext",
+//        "LEFT JOIN",
+//        "( SELECT group_id,address,user_id userId,user_name userName,account account,public_key publicKey,sign_user_id signUserId,",
+//        "user_type userType,user_status userStatus,app_id appId,description description,has_pk hasPk",
+//        "FROM tb_user",
+//        ") b on ext.address=b.address and ext.group_id=b.group_id",
+//        "WHERE ext.group_id=#{groupId}"
+////        "<if test=\"account != null and account != ''\">",
+////        " and ext.account = #{account}",
+////        "</if>",
+////        "<if test=\"flagSortedByTime != null and flagSortedByTime != ''\">",
+////        " order by ext.modify_time ${flagSortedByTime}",
+////        "</if>",
+////        "<if test=\"start != null and pageSize != null\">",
+////        " limit #{start},#{pageSize}",
+////        "</if>"
+//    })
+    @SelectProvider(type = TbExternalAccountSqlProvider.class, method = "listJoin")
+    List<RspAllExtAccount> listAccountJoinTbUser(UserParam param);
 
     @Delete({ "delete from tb_external_account", "where group_id = #{groupId,jdbcType=INTEGER}" })
     int deleteByGroupId(Integer groupId);

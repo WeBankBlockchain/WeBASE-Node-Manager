@@ -20,6 +20,7 @@ import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.external.entity.RspAllExtContract;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.external.mapper.TbExternalContractMapper;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
@@ -137,5 +138,10 @@ public class ExtContractService {
     public void deleteByGroupId(int groupId) {
         int affected = extContractMapper.deleteByGroupId(groupId);
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
+    }
+
+    public List<RspAllExtContract> getAllExtContractLeftJoinAbi(ContractParam param) {
+        log.info("getAllExtContractLeftJoinAbi param:{}", param);
+        return extContractMapper.listContractJoinTbAbi(param);
     }
 }
