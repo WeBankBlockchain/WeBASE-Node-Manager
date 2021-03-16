@@ -88,15 +88,15 @@ public class AbiController extends BaseController {
 		return new BasePageResponse(ConstantCode.SUCCESS, resList, count);
 	}
 
-	@GetMapping("/list/{groupId}/{pageNumber}/{pageSize}")
-	public Object listAllContractIncludeAbi(
+	@GetMapping("/list/all/{groupId}/{pageNumber}/{pageSize}")
+	public BasePageResponse listAllContractIncludeAbi(
 			@PathVariable("groupId") Integer groupId,
 			@PathVariable("pageNumber") Integer pageNumber,
 			@PathVariable("pageSize") Integer pageSize,
             @RequestParam(value = "account", required = false) String account) {
 		Instant startTime = Instant.now();
 		if (pageNumber < 1 || pageSize <= 0) {
-			return new BaseResponse(ConstantCode.PARAM_EXCEPTION);
+			return new BasePageResponse(ConstantCode.PARAM_EXCEPTION);
 		}
 		log.info("start listAbi. startTime:{},groupId:{},pageNumber:{},pageSize:{}",
 				startTime.toEpochMilli(), groupId, pageNumber, pageSize);
