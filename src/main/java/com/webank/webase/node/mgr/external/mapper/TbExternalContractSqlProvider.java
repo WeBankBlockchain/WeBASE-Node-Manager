@@ -11,12 +11,18 @@ public class TbExternalContractSqlProvider {
         String columnsWithJoin = "ext.id extContractId,ext.group_id groupId,ext.contract_address contractAddress," +
             "ext.deploy_address deployAddress,ext.deploy_tx_hash deployTxHash,ext.deploy_time deployTime," +
             "b.contractName,b.contractAbi,b.account,b.contractBin,b.abiId,b.createTime,b.modifyTime " +
+            "c.contractName,c.transCount,c.hashs " +
             "FROM tb_external_contract ext " +
             "LEFT JOIN " +
             "( SELECT group_id,contract_address,abi_id abiId,contract_name contractName,account account," +
             "contract_abi contractAbi,contract_bin contractBin,create_time createTime,modify_time modifyTime " +
             "FROM tb_abi " +
-            ") b on ext.contract_address=b.contract_address and ext.group_id=b.group_id ";
+            ") b on ext.contract_address=b.contract_address and ext.group_id=b.group_id " +
+            "LEFT JOIN " +
+            "( SELECT contract_address,max(contract_name) contractName,sum(trans_count) transCount,max(trans_hashs) hashs " +
+            "FROM tb_user_transaction_monitor_${groupId} WHERE trans_unusual_type=1 " +
+            // if external address equal to monitor user's username, it means user not imported
+            ") c on ext.contract_address=c.contract_address";
         sql.SELECT(columnsWithJoin);
         sql.WHERE("ext.group_id= #{groupId}");
         if (param.getAccount() != null) {
