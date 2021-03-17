@@ -33,5 +33,6 @@ public class RspAllExtContract extends AbiInfo {
     private String deployAddress;
     private String deployTxHash;
     private Date deployTime;
-
+    private int transCount;
+    private String hashs;
 }
