@@ -15,15 +15,13 @@
  */
 package com.webank.webase.node.mgr.front.entity;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
-
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 public class TbFront {
@@ -32,6 +30,7 @@ public class TbFront {
     private String frontIp;
     private Integer frontPort;
     private String agency;
+    private List<Integer> groupList;
     /**
      * node version and support version
      */

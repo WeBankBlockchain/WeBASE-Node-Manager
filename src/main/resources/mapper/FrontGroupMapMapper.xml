@@ -137,6 +137,11 @@
             and a.type = #{type}
         </if>
     </select>
+    
+    <select id="getGroupIdListByFrontId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select group_id from tb_front_group_map
+        where front_id = #{frontId}
+    </select>
 
     <delete id="removeByGroupId" parameterType="java.lang.Integer">
         delete from tb_front_group_map where group_id = #{groupId}

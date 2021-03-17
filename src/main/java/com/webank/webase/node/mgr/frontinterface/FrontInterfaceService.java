@@ -14,7 +14,6 @@
 package com.webank.webase.node.mgr.frontinterface;
 
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CONTAIN_GROUP_ID;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -23,9 +22,11 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.cert.entity.SdkCertInfo;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
+import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.GroupHandleResult;
@@ -508,6 +509,16 @@ public class FrontInterfaceService {
         log.debug("end getSignVersionFromSpecificFront. signVersion:{}", signVersion);
         return signVersion;
     }
+    
+    /**
+     * get front node info
+     */
+    public FrontNodeConfig getNodeInfoFromSpecificFront(String frontIp, Integer frontPort) {
+        Integer groupId = Integer.MAX_VALUE;
+        FrontNodeConfig nodeInfo = getFromSpecificFront(groupId, frontIp, frontPort,
+                FrontRestTools.URI_NODEINFO, FrontNodeConfig.class);
+        return nodeInfo;
+    }
 
     /**
      * generate group.
@@ -689,6 +700,20 @@ public class FrontInterfaceService {
         Object blockOrTx = frontRestTools.getForEntity(groupId, uri, Object.class);
         log.debug("end searchByBlockNumOrTxHash, blockOrTx:{}", blockOrTx);
         return blockOrTx;
+    }
+    
+    /**
+     * get sdk's Cert Content from specific front.
+     */
+    public List<SdkCertInfo> getSdkCertInfo() {
+        List<SdkCertInfo> sdkCertList = new ArrayList<>();
+        Map<String, String> certMap =
+                frontRestTools.getForEntity(1, FrontRestTools.URI_CERT_SDK_FILES, Map.class);
+        for (Map.Entry<String, String> entry : certMap.entrySet()) {
+            SdkCertInfo sdkCertInfo = new SdkCertInfo(entry.getKey(), entry.getValue());
+            sdkCertList.add(sdkCertInfo);
+        }
+        return sdkCertList;
     }
 
 }

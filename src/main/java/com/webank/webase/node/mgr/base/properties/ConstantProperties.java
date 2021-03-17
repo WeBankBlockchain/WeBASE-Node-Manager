@@ -64,6 +64,7 @@ public class ConstantProperties {
     public static final String HAS_ROLE_ADMIN_OR_DEVELOPER = "hasRole('admin') or hasRole('developer')";
 
     private boolean developerModeEnable = false;
+    private boolean deployedModifyEnable = true;
     private BigInteger transRetainMax = new BigInteger("10000");
     /**
      * y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
@@ -124,6 +125,11 @@ public class ConstantProperties {
     private Integer auditMonitorTaskFixedDelay;
     private Integer nodeStatusMonitorTaskFixedDelay;
     private Integer certMonitorTaskFixedDelay;
+    
+    /**
+     * application integration
+     */
+    private long appRequestTimeOut = 300000;
 
     /**
      * default resetGroupList interval gap, default 15000ms(15s)
