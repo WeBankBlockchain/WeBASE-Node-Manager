@@ -88,11 +88,13 @@ public class FrontRestTools {
     public static final String URI_BLOCK_HEADER_BY_NUMBER = "web3/blockHeaderByNumber/%1d";
     public static final String URI_BLOCK_HEADER_BY_HASH = "web3/blockHeaderByHash/%1s";
     public static final String URI_SEARCH_BLOCK_OR_TX = "web3/search";
+    public static final String URI_NODEINFO = "web3/nodeInfo";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
-    public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s";
+    public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s&returnPrivateKey=%s";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
     public static final String URI_KEY_PAIR_IMPORT_WITH_SIGN = "privateKey/importWithSign";
+    public static final String URI_KEY_PAIR_USERINFO_WITH_SIGN = "privateKey/getUserInfoWithSign?signUserId=%s&returnPrivateKey=%s";
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_REGISTER_CNS = "contract/registerCns";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
@@ -140,7 +142,7 @@ public class FrontRestTools {
                 URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
                 URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_CERT_SDK_FILES, URI_ENCRYPT_TYPE,
-                URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
+                URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_KEY_PAIR_USERINFO_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
                 URI_FRONT_VERSION, URI_SIGN_VERSION,
                 URI_GOVERNANCE, URI_GOVERNANCE_COMMITTEE, URI_GOVERNANCE_COMMITTEE_LIST,
                 URI_GOVERNANCE_COMMITTEE_WEIGHT, URI_GOVERNANCE_THRESHOLD,

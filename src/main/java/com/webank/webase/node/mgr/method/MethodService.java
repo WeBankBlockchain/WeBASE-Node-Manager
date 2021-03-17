@@ -35,11 +35,11 @@ public class MethodService {
     /**
      * save method info.
      */
-    public void saveMethod(NewMethodInputParam newMethodInputParam) {
+    public void saveMethod(NewMethodInputParam newMethodInputParam, Integer type) {
         List<Method> methodList = newMethodInputParam.getMethodList();
         TbMethod tbMethod = new TbMethod();
         tbMethod.setGroupId(newMethodInputParam.getGroupId());
-        tbMethod.setContractType(ContractType.GENERALCONTRACT.getValue());
+        tbMethod.setContractType(type);
         //save each method
         for (Method method : methodList) {
             BeanUtils.copyProperties(method, tbMethod);

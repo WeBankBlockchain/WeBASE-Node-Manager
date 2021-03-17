@@ -32,6 +32,8 @@ public interface FrontGroupMapMapper {
     int insertSelective(TbFrontGroupMap tbFrontGroupMap);
 
     int update(TbFrontGroupMap tbFrontGroupMap);
+    
+    List<Integer> getGroupIdListByFrontId(@Param("frontId") Integer frontId);
 
     FrontGroup queryFrontGroup(MapListParam mapListParam);
 

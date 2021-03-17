@@ -60,6 +60,13 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
   </insert>
+  
+  <insert id="saveAndUpdate" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
+    insert into
+    tb_contract(group_id,contract_path,contract_version,contract_name,account,contract_source,contract_abi,contract_bin,bytecode_bin,contract_address,contract_status,contract_type,description,create_time,modify_time)
+    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{account},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{contractStatus},#{contractType},#{description},NOW(),NOW())
+    ON DUPLICATE KEY UPDATE contract_version=#{contractVersion},contract_source=#{contractSource},contract_abi=#{contractAbi},contract_bin=#{contractBin},bytecode_bin=#{bytecodeBin},contract_address=#{contractAddress},contract_status=#{contractStatus},modify_time=NOW()
+  </insert>
 
   <delete id="remove" parameterType="java.lang.Integer">
 		delete from tb_contract where contract_id = #{contractId}

@@ -60,6 +60,7 @@ constant:
 
   ###common
   developerModeEnable: false
+  deployedModifyEnable: true
   isDeleteInfo: true
   transRetainMax: 10000
   deleteInfoCron: "0 0/1 * * * ?"
@@ -67,6 +68,11 @@ constant:
   resetGroupListCycle: 600000
   groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
   notSupportFrontIp:
+  
+  ###application integration
+  # app request timestamp timeout (ms)
+  appRequestTimeOut: 300000
+  appStatusCheckCycle: 60000
 
   ###block info (pulling data from chain)
   isBlockPullFromZero: false
@@ -85,7 +91,7 @@ constant:
   auditMonitorTaskFixedDelay: 300000
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
-  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/encrypt,/version,/front/refresh
+  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/encrypt,/version,/front/refresh,/api/*
   ###interval to async refresh group list locally
   resetGroupListInterval: 15000
   ###interval block statistic, unit: ms
