@@ -12,24 +12,29 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.external.entity;
+package com.webank.webase.node.mgr.base.enums;
 
-import com.webank.webase.node.mgr.user.entity.TbUser;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+public enum ExternalInfoType {
+    /**
+     * return all external data
+     */
+    ALL(1),
+    /**
+     * return normal data(user/contract in webase)
+     */
+    NORMAL(2),
+    /**
+     * return data not in webase
+     */
+    ABNORMAL(3);
 
-/**
- * entity to save tb_external_account left join tb_user
- */
-@Data
-@NoArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class RspAllExtAccount extends TbUser {
-    private Integer extAccountId;
-    private String userName;
-    private Integer transCount;
-    private String hashs;
+    private int value;
+
+    ExternalInfoType(Integer value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return this.value;
+    }
 }
