@@ -13,19 +13,19 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
+import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.statistic.StatService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.group.entity.TbGroup;
-import com.webank.webase.node.mgr.monitor.MonitorService;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * using in async monitor
@@ -54,7 +54,6 @@ public class TransMonitorTask {
 
     /**
      * start monitor.
-     * todo 性能瓶颈一直卡在这里 调用getCode接口
      */
     public void monitorStart() {
         Instant startTime = Instant.now();

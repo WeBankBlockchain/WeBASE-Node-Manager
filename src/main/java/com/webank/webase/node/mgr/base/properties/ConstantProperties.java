@@ -68,7 +68,7 @@ public class ConstantProperties {
     /**
      * y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
      */
-    private String groupInvalidGrayscaleValue;
+    private String groupInvalidGrayscaleValue = "1M";
     private String notSupportFrontIp;
 
     /**
@@ -100,7 +100,7 @@ public class ConstantProperties {
     /**
      * front http request
      */
-    private String frontUrl;
+    private String frontUrl = "http://%1s:%2d/WeBASE-Front/%3s";
     private Integer contractDeployTimeOut = 30000;
     private Integer httpTimeOut = 5000;
     private Boolean isPrivateKeyEncrypt = true;
@@ -112,18 +112,18 @@ public class ConstantProperties {
      * unit: seconds
      */
     private Long transMonitorTaskFixedRate = 60000L;
-    private Integer monitorInfoRetainMax;
+    private Integer monitorInfoRetainMax = 10000;
     private Long analysisSleepTime = 200L;
     private Boolean isMonitorIgnoreUser = false;
     private Boolean isMonitorIgnoreContract = false;
-    private Integer monitorUnusualMaxCount;
+    private Integer monitorUnusualMaxCount = 20;
 
     /**
      * alert mail interval
      */
-    private Integer auditMonitorTaskFixedDelay;
-    private Integer nodeStatusMonitorTaskFixedDelay;
-    private Integer certMonitorTaskFixedDelay;
+    private Integer auditMonitorTaskFixedDelay = 300000;
+    private Integer nodeStatusMonitorTaskFixedDelay = 60000;
+    private Integer certMonitorTaskFixedDelay = 300000;
 
     /**
      * default resetGroupList interval gap, default 15000ms(15s)
