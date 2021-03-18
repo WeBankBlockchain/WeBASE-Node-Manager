@@ -72,7 +72,7 @@ constant:
   ###application integration
   # app request timestamp timeout (ms)
   appRequestTimeOut: 300000
-  appStatusCheckCycle: 60000
+  appStatusCheckCycle: 3000
 
   ###block info (pulling data from chain)
   isBlockPullFromZero: false
