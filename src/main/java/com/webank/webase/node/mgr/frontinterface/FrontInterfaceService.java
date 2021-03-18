@@ -513,10 +513,10 @@ public class FrontInterfaceService {
     /**
      * get front node info
      */
-    public FrontNodeConfig getNodeInfoFromSpecificFront(String frontIp, Integer frontPort) {
+    public FrontNodeConfig getNodeConfigFromSpecificFront(String frontIp, Integer frontPort) {
         Integer groupId = Integer.MAX_VALUE;
         FrontNodeConfig nodeInfo = getFromSpecificFront(groupId, frontIp, frontPort,
-                FrontRestTools.URI_NODEINFO, FrontNodeConfig.class);
+                FrontRestTools.URI_NODECONFIG, FrontNodeConfig.class);
         return nodeInfo;
     }
 
@@ -714,6 +714,22 @@ public class FrontInterfaceService {
             sdkCertList.add(sdkCertInfo);
         }
         return sdkCertList;
+    }
+    
+    /**
+     * get front's sslCryptoType
+     */
+    public Integer getSSLCryptoType() {
+        return frontRestTools.getForEntity(1, FrontRestTools.URI_SSL_CRYPTO_TYPE, Integer.class);
+    }
+    
+    /**
+     * getClientVersion
+     */
+    public ClientVersion getClientVersion() {
+        ClientVersion clientVersion = frontRestTools.getForEntity(1, 
+                FrontRestTools.URI_GET_CLIENT_VERSION, ClientVersion.class);
+        return clientVersion;
     }
 
 }

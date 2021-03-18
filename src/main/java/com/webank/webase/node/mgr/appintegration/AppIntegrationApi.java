@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.appintegration.contractstore.ContractStoreServ
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContractAddressSave;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContractSourceSave;
 import com.webank.webase.node.mgr.appintegration.entity.AppRegisterInfo;
+import com.webank.webase.node.mgr.appintegration.entity.BasicInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -29,6 +30,7 @@ import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.properties.VersionProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.PemUtils;
@@ -102,6 +104,8 @@ public class AppIntegrationApi extends BaseController {
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private FrontInterfaceService frontInterfaceService;
+    @Autowired
+    private VersionProperties versionProperties;
 
     /**
      * add new front
@@ -149,6 +153,20 @@ public class AppIntegrationApi extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JsonTools.toJSONString(pagesponse));
         return pagesponse;
+    }
+
+    /**
+     * get base info.
+     */
+    @GetMapping("basicInfo")
+    public BaseResponse getBasicInfo() {
+        BasicInfo basicInfo = new BasicInfo();
+        basicInfo.setEncryptType(cryptoSuite.cryptoTypeConfig);
+        basicInfo.setSslCryptoType(frontInterfaceService.getSSLCryptoType());
+        basicInfo.setFiscoBcosVersion(frontInterfaceService.getClientVersion().getVersion());
+        basicInfo.setWebaseVersion(versionProperties.getVersion());
+        log.info("getBasicInfo:{}", JsonTools.toJSONString(basicInfo));
+        return new BaseResponse(ConstantCode.SUCCESS, basicInfo);
     }
 
     /**
