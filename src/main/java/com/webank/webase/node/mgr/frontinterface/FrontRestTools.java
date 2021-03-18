@@ -88,6 +88,7 @@ public class FrontRestTools {
     public static final String URI_BLOCK_HEADER_BY_NUMBER = "web3/blockHeaderByNumber/%1d";
     public static final String URI_BLOCK_HEADER_BY_HASH = "web3/blockHeaderByHash/%1s";
     public static final String URI_SEARCH_BLOCK_OR_TX = "web3/search";
+    public static final String URI_NODECONFIG = "web3/nodeConfig";
     public static final String URI_NODEINFO = "web3/nodeInfo";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
@@ -126,6 +127,7 @@ public class FrontRestTools {
     public static final String URI_CERT = "cert";
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
     public static final String URI_ENCRYPT_TYPE = "encrypt";
+    public static final String URI_SSL_CRYPTO_TYPE = "sslCryptoType";
 
     public static final String URI_CONTRACT_EVENT_INFO_LIST = "event/contractEvent/list";
     public static final String URI_NEW_BLOCK_EVENT_INFO_LIST = "event/newBlockEvent/list";
@@ -141,7 +143,7 @@ public class FrontRestTools {
         .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
                 URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
-                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_CERT_SDK_FILES, URI_ENCRYPT_TYPE,
+                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_CERT_SDK_FILES, URI_ENCRYPT_TYPE, URI_SSL_CRYPTO_TYPE,
                 URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_KEY_PAIR_USERINFO_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
                 URI_FRONT_VERSION, URI_SIGN_VERSION,
                 URI_GOVERNANCE, URI_GOVERNANCE_COMMITTEE, URI_GOVERNANCE_COMMITTEE_LIST,

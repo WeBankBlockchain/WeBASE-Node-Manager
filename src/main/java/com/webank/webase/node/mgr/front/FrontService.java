@@ -197,7 +197,7 @@ public class FrontService {
 		            log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
 		        }
 		        // get node config(add in 1.5.0)
-                FrontNodeConfig nodeConfig = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
+                FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
                 tbFront.setP2pPort(nodeConfig.getP2pport());
                 tbFront.setJsonrpcPort(nodeConfig.getRpcport());
                 tbFront.setChannelPort(nodeConfig.getChannelPort());
@@ -274,7 +274,7 @@ public class FrontService {
         // 1.5.0 add check client version cannot be lower than v2.4.0
         this.validateSupportVersion(supportVersion);
         // get node config(add in 1.5.0)
-        FrontNodeConfig nodeConfig = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
+        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
         tbFront.setP2pPort(nodeConfig.getP2pport());
         tbFront.setJsonrpcPort(nodeConfig.getRpcport());
         tbFront.setChannelPort(nodeConfig.getChannelPort());

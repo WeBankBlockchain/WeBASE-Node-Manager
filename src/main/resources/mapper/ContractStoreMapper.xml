@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.webase.node.mgr.appintegration.contractstore.ContractStoreMapper">
+  <resultMap id="appMap"
+    type="com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContractStore">
+    <id column="id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="id" />
+    <result column="app_key" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="appKey" />
+    <result column="contract_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractName"/>
+    <result column="contract_version" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractVersion"/>
+    <result column="account" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="account"/>
+    <result column="contract_source" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractSource"/>
+    <result column="contract_abi" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractAbi"/>
+    <result column="bytecode_bin" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="bytecodeBin"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime"/>
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime"/>
+  </resultMap>
+
+  <insert id="saveContractStore" parameterType="com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContractStore">
+    INSERT INTO tb_contract_store(app_key,contract_name,contract_version,account,contract_source,contract_abi,bytecode_bin,create_time,modify_time)
+    VALUES(#{appKey},#{contractName},#{contractVersion},#{account},#{contractSource},#{contractAbi},#{bytecodeBin},NOW(),NOW())
+    ON DUPLICATE KEY UPDATE account=#{account},contract_source=#{contractSource},contract_abi=#{contractAbi},bytecode_bin=#{bytecodeBin},modify_time=NOW()
+  </insert>
+
+  <select id="countOfContractStore" parameterType="com.webank.webase.node.mgr.appintegration.contractstore.entity.ContractStoreParam"
+    resultType="java.lang.Integer">
+    select count(1) from tb_contract_store where 1=1
+    <if test="appKey != null and appKey !=''">
+      and app_key = #{appKey}
+    </if>
+    <if test="contractName != null and contractName !=''">
+      and contract_name = #{contractName}
+    </if>
+    <if test="contractVersion != null and contractVersion !=''">
+      and contract_version = #{contractVersion}
+    </if>
+  </select>
+  
+  <select id="listOfContractStore" parameterType="com.webank.webase.node.mgr.appintegration.contractstore.entity.ContractStoreParam"
+    resultMap="appMap">
+    select * from tb_contract_store where 1=1
+    <if test="appKey != null and appKey !=''">
+      and app_key = #{appKey}
+    </if>
+    <if test="contractName != null and contractName !=''">
+      and contract_name = #{contractName}
+    </if>
+    <if test="contractVersion != null and contractVersion !=''">
+      and contract_version = #{contractVersion}
+    </if>
+    <if test="flagSortedByTime != null and flagSortedByTime != ''">
+      order by modify_time ${flagSortedByTime}
+    </if>
+    <if test="start != null and pageSize != null">
+      limit #{start},#{pageSize}
+    </if>
+  </select>
+
+  <select id="queryContractStore" parameterType="com.webank.webase.node.mgr.appintegration.contractstore.entity.ContractStoreParam"
+    resultMap="appMap">
+    select * from tb_contract_store where 1=1
+    <if test="id != null and id !=''">
+      and id = #{id}
+    </if>
+    <if test="appKey != null and appKey !=''">
+      and app_key = #{appKey}
+    </if>
+    <if test="contractName != null and contractName !=''">
+      and contract_name = #{contractName}
+    </if>
+    <if test="contractVersion != null and contractVersion !=''">
+      and contract_version = #{contractVersion}
+    </if>
+    limit 1
+  </select>
+  
+  <delete id="deleteContractStore" parameterType="java.lang.Integer">
+    delete from tb_contract_store where id = #{id}
+  </delete>
+
+</mapper>
