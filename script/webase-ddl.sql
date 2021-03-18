@@ -328,9 +328,7 @@ CREATE TABLE IF NOT EXISTS tb_abi (
   modify_time datetime DEFAULT NULL COMMENT '合约ABI的修改时间',
   PRIMARY KEY (abi_id),
   UNIQUE KEY unique_address (group_id,account,contract_address)
-  -- UNIQUE KEY unique_name (group_id,account,contract_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约ABI表';
-
 
 
 -- ----------------------------
@@ -379,7 +377,6 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`)
---  UNIQUE KEY `unq_type_value` (`config_type`,`config_value`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统配置信息表';
 
 
@@ -446,7 +443,7 @@ CREATE TABLE IF NOT EXISTS tb_stat (
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   block_cycle double DEFAULT '0' COMMENT '出块周期（秒）',
   tps int(11) DEFAULT '0' COMMENT '每秒交易量',
-  block_number int(11) DEFAULT '0' COMMENT '当前统计到的块高度', -- todo use big int
+  block_number int(11) DEFAULT '0' COMMENT '当前统计到的块高度',
   block_size int(11) DEFAULT '0' COMMENT '块大小(交易数量)',
   stat_timestamp varchar(64) COMMENT '记录时间戳',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
