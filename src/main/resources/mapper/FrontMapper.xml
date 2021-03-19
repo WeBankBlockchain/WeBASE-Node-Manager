@@ -80,9 +80,14 @@
       and group_id = #{groupId}
     </if>
     group by front_id)
-
     <if test="frontId != null and frontId !=''">
       and front_id = #{frontId}
+    </if>
+    <if test="frontIp != null and frontIp !=''">
+      and front_ip = #{frontIp}
+    </if>
+    <if test="frontPort != null and frontPort !=''">
+      and front_port = #{frontPort}
     </if>
     <if test="nodeId != null and nodeId !=''">
       and node_id = #{nodeId}
@@ -100,7 +105,6 @@
       and group_id = #{groupId}
     </if>
     group by front_id)
-
     <if test="frontId != null and frontId !=''">
       and front_id = #{frontId}
     </if>
@@ -109,6 +113,9 @@
     </if>
     <if test="frontPort != null and frontPort !=''">
       and front_port = #{frontPort}
+    </if>
+    <if test="nodeId != null and nodeId !=''">
+      and node_id = #{nodeId}
     </if>
     <if test="frontStatus != null and frontStatus !=''">
       and status = #{frontStatus}

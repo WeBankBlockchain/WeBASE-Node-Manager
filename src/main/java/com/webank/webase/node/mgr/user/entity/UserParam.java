@@ -31,4 +31,5 @@ public class UserParam extends BaseQueryParam {
     private String userName;
     private String account;
     private String commParam;
+    private Integer hasPk;
 }

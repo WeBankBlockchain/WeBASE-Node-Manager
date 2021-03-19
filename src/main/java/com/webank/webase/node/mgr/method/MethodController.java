@@ -13,12 +13,13 @@
  */
 package com.webank.webase.node.mgr.method;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
 import java.time.Duration;
@@ -56,7 +57,7 @@ public class MethodController extends BaseController {
         log.info("start addMethod. startTime:{} newMethodInputParam:{}",
             startTime.toEpochMilli(), JsonTools.toJSONString(newMethodInputParam));
 
-        methodService.saveMethod(newMethodInputParam);
+        methodService.saveMethod(newMethodInputParam, ContractType.GENERALCONTRACT.getValue());
 
         log.info("end addMethod. useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));

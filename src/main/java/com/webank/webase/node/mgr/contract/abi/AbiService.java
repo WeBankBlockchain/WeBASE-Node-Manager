@@ -151,7 +151,7 @@ public class AbiService {
 	 * check address is valid.
 	 * @return address's runtime bin
 	 */
-	private String getAddressRuntimeBin(int groupId, String contractAddress) {
+	public String getAddressRuntimeBin(int groupId, String contractAddress) {
 		if (StringUtils.isBlank(contractAddress)) {
 			log.error("fail getAddressRuntimeBin. contractAddress is empty");
 			throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_NULL);

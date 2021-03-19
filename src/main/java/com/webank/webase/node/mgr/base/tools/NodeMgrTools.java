@@ -13,6 +13,13 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -36,19 +43,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
-
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.utils.Numeric;
 
 /**
@@ -553,7 +551,10 @@ public class NodeMgrTools {
     public static int getVersionFromStr(String verStr) {
         log.info("getVersionFromStr verStr:{}", verStr);
         // remove v and split
-        String[] versionArr = verStr.substring(1).split(".");
+        if (verStr.toLowerCase().startsWith("v")) {
+            verStr = verStr.substring(1);
+        }
+        String[] versionArr = verStr.split("\\.");
         if (versionArr.length < 3) {
             log.error("getVersionFromStr versionArr:{}", (Object) versionArr);
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
@@ -563,5 +564,55 @@ public class NodeMgrTools {
             + Integer.parseInt(versionArr[1]) * 10 + Integer.parseInt(versionArr[2]);
         log.info("getVersionFromStr version:{}", version);
         return version;
+    }
+    
+    /**
+     * md5Encrypt.
+     * 
+     * @param dataStr
+     * @return
+     */
+    public static String md5Encrypt(String dataStr) {
+        try {
+            MessageDigest m = MessageDigest.getInstance("MD5");
+            m.update(dataStr.getBytes("UTF8"));
+            byte s[] = m.digest();
+            String result = "";
+            for (int i = 0; i < s.length; i++) {
+                result += Integer.toHexString((0x000000FF & s[i]) | 0xFFFFFF00).substring(6);
+            }
+            return result.toUpperCase();
+        } catch (Exception e) {
+            log.error("fail md5Encrypt", e);
+        }
+        return "";
+    }
+    
+    /**
+     * writerFile.
+     * 
+     * @param fileName
+     * @param content
+     */
+    public static void writerFile(String fileName, String content) {
+        File file = new File(fileName);
+        FileWriter fileWritter = null;
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            fileWritter = new FileWriter(file.getName(), true);
+            fileWritter.write(content);
+        } catch (Exception e) {
+            log.error("fail writerFile", e);
+        } finally {
+            if (fileWritter != null) {
+                try {
+                    fileWritter.close();
+                } catch (IOException e) {
+                    log.error("fail close fileWritter", e);
+                }
+            }
+        }
     }
 }
