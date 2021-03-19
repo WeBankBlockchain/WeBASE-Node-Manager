@@ -18,7 +18,9 @@ package com.webank.webase.node.mgr.base.tools;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.method.entity.Method;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,6 +71,22 @@ public class Web3Tools {
         return cryptoSuite.getCryptoKeyPair().getAddress(publicKey);
 //        String address = "0x" + Keys.getAddress(publicKey);
     }
+    
+    /**
+     * get method from abi
+     */
+    public static List<Method> getMethodFromAbi(String abi, CryptoSuite cryptoSuite) throws IOException {
+        List<ABIDefinition> abiList = loadContractDefinition(abi);
+        List<Method> methodList = new ArrayList<>();
+        for (ABIDefinition abiDefinition : abiList) {
+            Method method = new Method();
+            method.setMethodType(abiDefinition.getType());
+            method.setAbiInfo(JsonTools.toJSONString(abiDefinition));
+            method.setMethodId(buildMethodId(abiDefinition, cryptoSuite));
+            methodList.add(method);
+        }
+        return methodList;
+    }
 
     /**
      * abi string to ABIDefinition.
@@ -86,7 +104,10 @@ public class Web3Tools {
         byte[] inputs = getMethodIdBytes(abiDefinition);
         // 2019/11/27 support guomi
         byte[] hash = cryptoSuite.hash(inputs);
-        return Numeric.toHexString(hash).substring(0, 10);
+        if ("function".equals(abiDefinition.getType())) {
+            return Numeric.toHexString(hash).substring(0, 10);
+        }
+        return Numeric.toHexString(hash);
     }
 
     /**

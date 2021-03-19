@@ -47,6 +47,7 @@ import com.webank.webase.node.mgr.deploy.service.DockerCommandService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
+import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
@@ -195,6 +196,11 @@ public class FrontService {
 		            // catch old version front and sign that not have '/version' api
 		            log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
 		        }
+		        // get node config(add in 1.5.0)
+                FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+                tbFront.setP2pPort(nodeConfig.getP2pport());
+                tbFront.setJsonrpcPort(nodeConfig.getRpcport());
+                tbFront.setChannelPort(nodeConfig.getChannelPort());
 				//copy attribute
 				tbFront.setNodeId(syncStatus.getNodeId());
 				tbFront.setClientVersion(clientVersion);
@@ -267,6 +273,11 @@ public class FrontService {
 
         // 1.5.0 add check client version cannot be lower than v2.4.0
         this.validateSupportVersion(supportVersion);
+        // get node config(add in 1.5.0)
+        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+        tbFront.setP2pPort(nodeConfig.getP2pport());
+        tbFront.setJsonrpcPort(nodeConfig.getRpcport());
+        tbFront.setChannelPort(nodeConfig.getChannelPort());
 
         // get front server version and sign server version
         try {
