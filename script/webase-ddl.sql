@@ -446,7 +446,7 @@ CREATE TABLE IF NOT EXISTS tb_stat (
   group_id int(11) NOT NULL COMMENT '所属群组编号',
   block_cycle double DEFAULT '0' COMMENT '出块周期（秒）',
   tps int(11) DEFAULT '0' COMMENT '每秒交易量',
-  block_number int(11) DEFAULT '0' COMMENT '当前统计到的块高度', -- todo use big int
+  block_number int(11) DEFAULT '0' COMMENT '当前统计到的块高度',
   block_size int(11) DEFAULT '0' COMMENT '块大小(交易数量)',
   stat_timestamp varchar(64) COMMENT '记录时间戳',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
