@@ -250,8 +250,8 @@ public class UserController extends BaseController {
 //        return baseResponse;
 //    }
 
-    @PostMapping(value = "/export/pem")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PostMapping(value = "/exportPem")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object exportPemUserFromSign(@RequestParam String signUserId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -265,8 +265,8 @@ public class UserController extends BaseController {
         return pemFile;
     }
 
-    @PostMapping(value = "/export/p12")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PostMapping(value = "/exportP12")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object exportP12UserFromSign(@RequestParam String signUserId,
         @RequestParam(required = false, defaultValue = "") String p12Password)
         throws NodeMgrException {

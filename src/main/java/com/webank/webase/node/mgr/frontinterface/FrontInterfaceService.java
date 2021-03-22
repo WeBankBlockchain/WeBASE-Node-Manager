@@ -695,8 +695,7 @@ public class FrontInterfaceService {
         throws NodeMgrException {
         log.debug("start searchByBlockNumOrTxHash groupId:{} input:{}", groupId, input);
         Map<String, String> map = new HashMap<>();
-        map.put("groupId", String.valueOf(groupId));
-        map.put("pageSize", input);
+        map.put("input", input);
         String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_SEARCH_BLOCK_OR_TX, map);
         Object blockOrTx = frontRestTools.getForEntity(groupId, uri, Object.class);
         log.debug("end searchByBlockNumOrTxHash, blockOrTx:{}", blockOrTx);
