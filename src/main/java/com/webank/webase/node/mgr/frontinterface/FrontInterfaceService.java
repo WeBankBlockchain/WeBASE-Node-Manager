@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.cert.entity.SdkCertInfo;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
@@ -694,8 +695,7 @@ public class FrontInterfaceService {
         throws NodeMgrException {
         log.debug("start searchByBlockNumOrTxHash groupId:{} input:{}", groupId, input);
         Map<String, String> map = new HashMap<>();
-        map.put("groupId", String.valueOf(groupId));
-        map.put("pageSize", input);
+        map.put("input", input);
         String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_SEARCH_BLOCK_OR_TX, map);
         Object blockOrTx = frontRestTools.getForEntity(groupId, uri, Object.class);
         log.debug("end searchByBlockNumOrTxHash, blockOrTx:{}", blockOrTx);

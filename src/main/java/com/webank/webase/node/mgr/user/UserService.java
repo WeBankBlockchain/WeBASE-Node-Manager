@@ -21,8 +21,11 @@ import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
+import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.monitor.MonitorService;
@@ -43,6 +46,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.pqc.crypto.newhope.NHOtherInfoGenerator.PartyU;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.exceptions.LoadKeyStoreException;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
@@ -69,6 +73,8 @@ public class UserService {
     private GroupService groupService;
     @Autowired
     private FrontRestTools frontRestTools;
+    @Autowired
+    private FrontInterfaceService frontInterfaceService;
     @Lazy
     @Autowired
     private MonitorService monitorService;
@@ -261,7 +267,7 @@ public class UserService {
     /**
      * query user detail(private key from sign).
      */
-    public TbUser qureyUserDetail(Integer userId) throws NodeMgrException {
+    public TbUser queryUserDetail(Integer userId) throws NodeMgrException {
         // query user info
         TbUser user = queryByUserId(userId);
         if (user == null) {
@@ -450,5 +456,35 @@ public class UserService {
                 UserType.GENERALUSER.getValue(), privateKeyEncoded, false, isCheckExist);
 
         return tbUser;
+    }
+
+    /**
+     * get pem file exported from sign from front api
+     * @return ResponseEntity<InputStreamResource>
+     */
+    public Object exportPemFromSign(String signUserId) {
+        log.debug("start getExportPemFromSign signUserId:{}", signUserId);
+        Map<String, String> map = new HashMap<>();
+        map.put("signUserId", signUserId);
+        String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN, map);
+        Object pemFile = frontRestTools.getForEntity(Integer.MAX_VALUE, uri, Object.class);
+        log.debug("end getExportPemFromSign, pemFile:{}", pemFile);
+        return pemFile;
+    }
+    /**
+     * get p12 file exported from sign from front api
+     * @param p12PasswordEncoded password of p12 key in base64 format
+     * @return ResponseEntity<InputStreamResource>
+     */
+    public Object exportP12FromSign(String signUserId, String p12PasswordEncoded) {
+        log.debug("start getExportP12FromSign signUserId:{}", signUserId);
+        Map<String, String> map = new HashMap<>();
+        map.put("signUserId", signUserId);
+        map.put("p12Password", p12PasswordEncoded);
+        String uri = HttpRequestTools
+            .getQueryUri(FrontRestTools.URI_KEY_PAIR_EXPORT_P12_WITH_SIGN, map);
+        Object pemFile = frontRestTools.getForEntity(Integer.MAX_VALUE, uri, Object.class);
+        log.debug("end getExportP12FromSign, pemFile:{}", pemFile);
+        return pemFile;
     }
 }

@@ -143,7 +143,7 @@
     from ${tableName}
     where user_type=1
     <if test="userName != null and userName != ''">
-      and user_name like CONCAT('%',#{userName},'%')
+      and user_name like CONCAT(CONCAT('%',#{userName}),'%')
     </if>
   </select>
 
@@ -152,7 +152,7 @@
     select user_name as userName,sum(trans_count) as transCount, max(trans_hashs) as hashs, max(modify_time) as time
     from ${tableName} where user_type=1
     <if test="userName != null and userName != ''">
-      and user_name like CONCAT('%',#{userName},'%')
+      and user_name like CONCAT(CONCAT('%',#{userName}),'%')
     </if>
     group by user_name
     <if test="start != null and pageSize != null">
@@ -165,7 +165,7 @@
     from ${tableName}
     where trans_unusual_type=1
     <if test="contractAddress != null and contractAddress != ''">
-      and contract_address like CONCAT('%',#{contractAddress},'%')
+      and contract_address like CONCAT(CONCAT('%',#{contractAddress}),'%')
     </if>
   </select>
 
@@ -175,7 +175,7 @@
     max(trans_hashs) as hashs,max(modify_time) as time
     from ${tableName} where trans_unusual_type=1
     <if test="contractAddress != null and contractAddress != ''">
-      and contract_address like CONCAT('%',#{contractAddress},'%')
+      and contract_address like CONCAT(CONCAT('%',#{contractAddress}),'%')
     </if>
     group by contract_address
     <if test="start != null and pageSize != null">
