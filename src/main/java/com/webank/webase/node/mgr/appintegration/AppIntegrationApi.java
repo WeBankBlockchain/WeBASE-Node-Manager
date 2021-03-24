@@ -411,16 +411,16 @@ public class AppIntegrationApi extends BaseController {
     }
 
     /**
-     * qurey user info.
+     * query user info.
      */
     @GetMapping(value = "/userInfo")
-    public BaseResponse userInfo(@RequestParam(required = true) Integer userId)
+    public BaseResponse userInfo(@RequestParam Integer userId)
             throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start userInfo startTime:{} signUserId:{}", startTime.toEpochMilli(), userId);
 
-        TbUser user = userService.qureyUserDetail(userId);
+        TbUser user = userService.queryUserDetail(userId);
         baseResponse.setData(user);
 
         log.info("end userInfo useTime:{} result:{}",
