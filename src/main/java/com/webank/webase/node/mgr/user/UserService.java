@@ -36,6 +36,7 @@ import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
@@ -78,7 +79,10 @@ public class UserService {
     @Lazy
     @Autowired
     private MonitorService monitorService;
-    @Autowired private CryptoSuite cryptoSuite;
+    @Autowired
+    private CryptoSuite cryptoSuite;
+    private final static String PEM_FILE_FORMAT = ".pem";
+    private final static String P12_FILE_FORMAT = ".p12";
 
     /**
      * add new user data.
@@ -273,11 +277,16 @@ public class UserService {
         if (user == null) {
             throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
         }
-        String keyUri = String.format(FrontRestTools.URI_KEY_PAIR_USERINFO_WITH_SIGN,
-                user.getSignUserId(), true);
-        KeyPair keyPair = frontRestTools.getForEntity(user.getGroupId(), keyUri, KeyPair.class);
+        KeyPair keyPair = this.getUserKeyPairFromSign(user.getGroupId(), user.getSignUserId());
         user.setPrivateKey(keyPair.getPrivateKey());
         return user;
+    }
+
+    private KeyPair getUserKeyPairFromSign(int groupId, String signUserId) {
+        String keyUri = String.format(FrontRestTools.URI_KEY_PAIR_USERINFO_WITH_SIGN,
+            signUserId, true);
+        KeyPair keyPair = frontRestTools.getForEntity(groupId, keyUri, KeyPair.class);
+        return keyPair;
     }
 
     /**
@@ -462,29 +471,48 @@ public class UserService {
      * get pem file exported from sign from front api
      * @return ResponseEntity<InputStreamResource>
      */
-    public Object exportPemFromSign(String signUserId) {
+    public FileContentHandle exportPemFromSign(int groupId, String signUserId) {
         log.debug("start getExportPemFromSign signUserId:{}", signUserId);
-        Map<String, String> map = new HashMap<>();
-        map.put("signUserId", signUserId);
-        String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN, map);
-        Object pemFile = frontRestTools.getForEntity(Integer.MAX_VALUE, uri, Object.class);
-        log.debug("end getExportPemFromSign, pemFile:{}", pemFile);
-        return pemFile;
+        KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
+        String filePath = NodeMgrTools.writePrivateKeyPem(keyPair.getPrivateKey(),
+            keyPair.getAddress(), keyPair.getUserName(), cryptoSuite);
+        try {
+            log.debug("end getExportPemFromSign, filePath:{}", filePath);
+            return new FileContentHandle(keyPair.getAddress() + PEM_FILE_FORMAT,
+                new FileInputStream(filePath));
+        } catch (IOException e) {
+            log.error("exportPrivateKeyPem fail:[]", e);
+            throw new NodeMgrException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
+        }
+
     }
+
     /**
      * get p12 file exported from sign from front api
      * @param p12PasswordEncoded password of p12 key in base64 format
      * @return ResponseEntity<InputStreamResource>
      */
-    public Object exportP12FromSign(String signUserId, String p12PasswordEncoded) {
+    public FileContentHandle exportP12FromSign(int groupId, String signUserId, String p12PasswordEncoded) {
         log.debug("start getExportP12FromSign signUserId:{}", signUserId);
-        Map<String, String> map = new HashMap<>();
-        map.put("signUserId", signUserId);
-        map.put("p12Password", p12PasswordEncoded);
-        String uri = HttpRequestTools
-            .getQueryUri(FrontRestTools.URI_KEY_PAIR_EXPORT_P12_WITH_SIGN, map);
-        Object pemFile = frontRestTools.getForEntity(Integer.MAX_VALUE, uri, Object.class);
-        log.debug("end getExportP12FromSign, pemFile:{}", pemFile);
-        return pemFile;
+        // decode p12 password
+        String p12Password;
+        try {
+            p12Password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
+        } catch (Exception e) {
+            log.error("decode password error:[]", e);
+            throw new NodeMgrException(ConstantCode.P12_PASSWORD_ERROR);
+        }
+
+        KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
+        String filePath = NodeMgrTools.writePrivateKeyP12(p12Password, keyPair.getPrivateKey(),
+            keyPair.getAddress(), keyPair.getUserName(), cryptoSuite);
+        try {
+            log.debug("end getExportP12FromSign, filePath:{}", filePath);
+            return new FileContentHandle(keyPair.getAddress() + P12_FILE_FORMAT,
+                new FileInputStream(filePath));
+        } catch (IOException e) {
+            log.error("exportPrivateKeyPem fail:[]", e);
+            throw new NodeMgrException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
+        }
     }
 }
