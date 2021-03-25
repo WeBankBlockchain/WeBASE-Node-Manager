@@ -27,9 +27,9 @@ import java.util.List;
 @Repository
 public interface AbiMapper {
 
-	List<AbiInfo> listOfAbi(@Param("param") ReqAbiListParam param);
+	List<AbiInfo> listOfAbi(ReqAbiListParam param);
 
-	Integer countOfAbi(@Param("param") ReqAbiListParam param);
+	Integer countOfAbi(ReqAbiListParam param);
 
 	AbiInfo queryByAbiId(@Param("abiId") int abiId);
 

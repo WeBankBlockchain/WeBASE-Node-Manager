@@ -20,7 +20,7 @@ public class TbExternalAccountSqlProvider {
             ") b on ext.address=b.address and ext.group_id=b.group_id " +
             "LEFT JOIN " +
             "( SELECT user_name,sum(trans_count) transCount, max(trans_hashs) hashs " +
-            "FROM tb_user_transaction_monitor_${groupId} WHERE user_type=1" +
+            "FROM tb_user_transaction_monitor_${groupId} WHERE user_type=1 group by user_name" +
             // if external address equal to monitor user's username, it means user not imported
             ") c on ext.address=c.user_name";
         sql.SELECT(sqlStr);
