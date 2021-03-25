@@ -39,7 +39,7 @@ public class AppStatusCheckTask {
      * appStatusCheck.
      */
     public void appStatusCheck() {
-        log.info("appStatusCheck start.");
+        log.debug("appStatusCheck start.");
         appIntegrationService.appStatusCheck();
     }
 }
