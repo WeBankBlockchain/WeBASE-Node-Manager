@@ -20,6 +20,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * bind public user to import
@@ -28,8 +29,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BindUserInputParam {
     @NotBlank
+    @Length(max=64)
     private String userName;
     @NotBlank
+    @Length(max=50)
     private String account;
     @NotBlank
     private String publicKey;

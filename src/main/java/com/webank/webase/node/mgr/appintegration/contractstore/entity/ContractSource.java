@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.appintegration.contractstore.entity;
 
 import javax.validation.constraints.NotBlank;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * param to save contract source
@@ -22,6 +23,7 @@ import lombok.Data;
 @Data
 public class ContractSource {
     @NotBlank
+    @Length(max=120)
     private String contractName;
     @NotBlank
     private String contractSource;

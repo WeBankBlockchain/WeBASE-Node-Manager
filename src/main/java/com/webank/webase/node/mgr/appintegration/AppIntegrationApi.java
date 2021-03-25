@@ -26,10 +26,11 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.CheckUserExist;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
+import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.properties.VersionProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -62,7 +63,6 @@ import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -340,7 +340,8 @@ public class AppIntegrationApi extends BaseController {
 
         // add user row
         TbUser userRow = userService.addUserInfo(user.getGroupId(), user.getUserName(),
-                user.getAccount(), user.getDescription(), user.getUserType(), null, true, false);
+                user.getAccount(), user.getDescription(), user.getUserType(), null, 
+                ReturnPrivateKey.TURE.getValue(), CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end newUser useTime:{} result:{}",
@@ -414,11 +415,11 @@ public class AppIntegrationApi extends BaseController {
      * query user info.
      */
     @GetMapping(value = "/userInfo")
-    public BaseResponse userInfo(@RequestParam Integer userId)
+    public BaseResponse userInfo(@RequestParam(required = true) int userId)
             throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start userInfo startTime:{} signUserId:{}", startTime.toEpochMilli(), userId);
+        log.info("start userInfo startTime:{} userId:{}", startTime.toEpochMilli(), userId);
 
         TbUser user = userService.queryUserDetail(userId);
         baseResponse.setData(user);
@@ -441,7 +442,7 @@ public class AppIntegrationApi extends BaseController {
         // add user row
         TbUser userRow = userService.addUserInfo(reqImport.getGroupId(), reqImport.getUserName(),
                 reqImport.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
-                privateKeyEncoded, false, false);
+                privateKeyEncoded, ReturnPrivateKey.FALSE.getValue(), CheckUserExist.FALSE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPrivateKey useTime:{} result:{}",
@@ -451,7 +452,6 @@ public class AppIntegrationApi extends BaseController {
     }
 
     @PostMapping("/importPem")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem,
             BindingResult result) {
         checkBindResult(result);
@@ -473,7 +473,6 @@ public class AppIntegrationApi extends BaseController {
     }
 
     @PostMapping("/importP12")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
             @RequestParam(required = false, defaultValue = "") String p12Password,
             @RequestParam Integer groupId, @RequestParam String userName,

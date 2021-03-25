@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.appintegration.contractstore.entity;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * param to save contract address
@@ -25,10 +26,13 @@ public class ReqContractAddressSave {
     @NotNull
     private Integer groupId;
     @NotBlank
+    @Length(max=120)
     private String contractName;
     @NotBlank
+    @Length(max=120)
     private String contractPath;
     @NotBlank
+    @Length(max=120)
     private String contractVersion;
     @NotBlank
     private String contractAddress;
