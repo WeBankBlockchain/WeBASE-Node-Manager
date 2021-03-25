@@ -45,25 +45,6 @@ public class ThreadPoolConfig {
         return executor;
     }
 
-
-    /**
-     * thread pool for scheduler parallel task (not async):
-     * pull block, trans monitor, statistic trans, delete info, reset groupList
-     * @return ThreadPoolTaskScheduler
-     */
-    @Bean(destroyMethod = "shutdown")
-    public ThreadPoolTaskScheduler mgrTaskScheduler() {
-        log.info("start mgrTaskScheduler init..");
-        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(schedulerProperties.getPoolSize());
-        scheduler.setThreadNamePrefix(schedulerProperties.getThreadNamePrefix());
-        scheduler.setAwaitTerminationSeconds(schedulerProperties.getAwaitTerminationSeconds());
-        scheduler.setWaitForTasksToCompleteOnShutdown(
-                schedulerProperties.getWaitForTasksToCompleteOnShutdown());
-        return scheduler;
-    }
-
-
     @Bean
     public ThreadPoolTaskScheduler deployAsyncScheduler() {
         log.info("start deployAsyncScheduler init...");
