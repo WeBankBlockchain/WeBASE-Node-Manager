@@ -17,6 +17,7 @@ import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HasPk;
+import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -25,7 +26,6 @@ import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.monitor.MonitorService;
@@ -47,7 +47,6 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.pqc.crypto.newhope.NHOtherInfoGenerator.PartyU;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.exceptions.LoadKeyStoreException;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
@@ -74,8 +73,6 @@ public class UserService {
     private GroupService groupService;
     @Autowired
     private FrontRestTools frontRestTools;
-    @Autowired
-    private FrontInterfaceService frontInterfaceService;
     @Lazy
     @Autowired
     private MonitorService monitorService;
@@ -89,11 +86,14 @@ public class UserService {
      */
     @Transactional
     public TbUser addUserInfo(Integer groupId, String userName, String account, String description,
-            Integer userType, String privateKeyEncoded, boolean returnPrivateKey, boolean isCheckExist) throws NodeMgrException {
+            Integer userType, String privateKeyEncoded, boolean returnPrivateKey, 
+            boolean isCheckExist) throws NodeMgrException {
         log.debug("start addUserInfo groupId:{},userName:{},description:{},userType:{},", groupId,
                 userName, description, userType);
         // check group id
         groupService.checkGroupId(groupId);
+        // check account
+        accountService.accountExist(account);
 
         // check userName
         TbAccountInfo accountRow = accountService.queryByAccount(account);
@@ -130,7 +130,7 @@ public class UserService {
                     FrontRestTools.URI_KEY_PAIR_IMPORT_WITH_SIGN, param, KeyPair.class);
         } else {
             String keyUri =
-                    String.format(FrontRestTools.URI_KEY_PAIR, userName, signUserId, appId, true);
+                    String.format(FrontRestTools.URI_KEY_PAIR, userName, signUserId, appId, returnPrivateKey);
             keyPair = frontRestTools.getForEntity(groupId, keyUri, KeyPair.class);
             privateKeyEncoded = keyPair.getPrivateKey();
         }
@@ -419,7 +419,7 @@ public class UserService {
         // store local and save in sign
         TbUser tbUser = addUserInfo(reqImportPem.getGroupId(), reqImportPem.getUserName(),
                 reqImportPem.getAccount(), reqImportPem.getDescription(),
-                reqImportPem.getUserType(), privateKeyEncoded, false, isCheckExist);
+                reqImportPem.getUserType(), privateKeyEncoded, ReturnPrivateKey.FALSE.getValue(), isCheckExist);
         return tbUser;
     }
 
@@ -462,7 +462,8 @@ public class UserService {
 
         // store local and save in sign
         TbUser tbUser = addUserInfo(groupId, userName, account, description,
-                UserType.GENERALUSER.getValue(), privateKeyEncoded, false, isCheckExist);
+                UserType.GENERALUSER.getValue(), privateKeyEncoded, 
+                ReturnPrivateKey.FALSE.getValue(), isCheckExist);
 
         return tbUser;
     }

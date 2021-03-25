@@ -54,7 +54,7 @@ public class ConfigController {
     /**
      * return encrypt type to web 0 is standard, 1 is guomi.
      */
-    @GetMapping("encrypt")
+    @GetMapping("/encrypt")
     public Object getEncryptType() {
         int encrypt = cryptoSuite.cryptoTypeConfig;
         log.info("getEncryptType:{}", encrypt);
@@ -66,7 +66,7 @@ public class ConfigController {
      * 
      * @return
      */
-    @GetMapping("version")
+    @GetMapping("/version")
     public String getServerVersion() {
         return versionProperties.getVersion();
     }
@@ -74,7 +74,7 @@ public class ConfigController {
     /**
      * return server ipPort.
      */
-    @GetMapping("ipPort")
+    @GetMapping("/ipPort")
     public BaseResponse getIpPort() {
         log.info("getIpPort.");
         String ip = IPUtil.getLocalIp();
@@ -85,7 +85,7 @@ public class ConfigController {
     /**
      * if deployed contract can be modified.
      */
-    @GetMapping("isDeployedModifyEnable")
+    @GetMapping("/isDeployedModifyEnable")
     public BaseResponse isDeployedModifyEnable() {
         boolean isDeployedModifyEnable = constantProperties.isDeployedModifyEnable();
         log.info("isDeployedModifyEnable:{}", isDeployedModifyEnable);
@@ -95,7 +95,7 @@ public class ConfigController {
     /**
      * 获取配置类型（可视化部署）
      */
-    @GetMapping(value = "list")
+    @GetMapping(value = "/list")
     public BaseResponse listDockerTag(
             @RequestParam(value = "type", required = true, defaultValue = "0") int type,
             @RequestParam(value = "update", required = false) boolean update) throws Exception {

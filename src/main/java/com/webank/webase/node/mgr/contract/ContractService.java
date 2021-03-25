@@ -40,6 +40,7 @@ import com.webank.webase.node.mgr.front.entity.TransactionParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
@@ -104,6 +105,8 @@ public class  ContractService {
     private ConstantProperties constantProperties;
     @Autowired
     private CryptoSuite cryptoSuite;
+    @Autowired
+    private GroupService groupService;
     /**
      * add new contract data.
      */
@@ -161,6 +164,8 @@ public class  ContractService {
     public void appContractSave(String appKey, ReqContractAddressSave reqContractAddressSave)
             throws IOException {
         Integer groupId = reqContractAddressSave.getGroupId();
+        // check group id
+        groupService.checkGroupId(groupId);
         // get runtimeBin
         String runtimeBin = abiService.getAddressRuntimeBin(groupId,
                 reqContractAddressSave.getContractAddress());
@@ -182,7 +187,8 @@ public class  ContractService {
             TbContract localContract = queryContract(param);
             // check if deployed contract saved
             if (Objects.nonNull(localContract)
-                    && localContract.getContractStatus() == ContractStatus.DEPLOYED.getValue()) {
+                    && localContract.getContractStatus() == ContractStatus.DEPLOYED.getValue()
+                    && !tbContractStore.getContractName().equals(contractName)) {
                 continue;
             }
             TbContract tbContract = new TbContract();
@@ -195,6 +201,8 @@ public class  ContractService {
                 tbContract.setContractAddress(reqContractAddressSave.getContractAddress());
                 tbContract.setContractBin(runtimeBin);
                 tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+                // save abi
+                abiService.saveAbiFromAppContract(tbContract);
             }
             // save and update contract
             contractMapper.saveAndUpdate(tbContract);
