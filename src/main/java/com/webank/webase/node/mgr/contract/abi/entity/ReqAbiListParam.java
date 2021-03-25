@@ -33,6 +33,8 @@ public class ReqAbiListParam extends BaseQueryParam {
 
 	private Integer groupId;
 	private String account;
+	private String contractName;
+	private String contractAddress;
 	public ReqAbiListParam(Integer start, Integer pageSize,
 						   String flagSortedByTime) {
 		super(start, pageSize, flagSortedByTime);
