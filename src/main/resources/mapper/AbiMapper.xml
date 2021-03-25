@@ -119,7 +119,7 @@
         contract_status contractStatus,contract_abi contractAbi,bytecode_bin bytecodeBin,contract_bin contractBin,
         deploy_address deployAddress,deploy_user_name deployUserName,deploy_time deployTime,contract_type contractType
         from tb_contract
-        where contract_type=0 and contract_status=2
+        where contract_status=2
         ) b on a.contract_address = b.contract_address and a.group_id = b.group_id
         where a.group_id = #{groupId}
         <if test="account != null and account != ''">

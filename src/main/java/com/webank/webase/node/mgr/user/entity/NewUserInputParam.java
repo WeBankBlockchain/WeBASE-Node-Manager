@@ -21,6 +21,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * new user data.
@@ -29,8 +30,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NewUserInputParam {
     @NotBlank
+    @Length(max=64)
     private String userName;
     @NotBlank
+    @Length(max=50)
     private String account;
     @NotNull
     private Integer groupId;

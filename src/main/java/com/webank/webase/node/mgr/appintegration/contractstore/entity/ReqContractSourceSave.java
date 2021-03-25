@@ -17,6 +17,7 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * param to save contract source
@@ -26,7 +27,9 @@ public class ReqContractSourceSave {
     @NotEmpty
     private List<ContractSource> contractList;
     @NotBlank
+    @Length(max=120)
     private String contractVersion;
     @NotBlank
+    @Length(max=50)
     private String account;
 }
