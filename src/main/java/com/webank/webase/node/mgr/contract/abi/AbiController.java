@@ -93,7 +93,9 @@ public class AbiController extends BaseController {
 			@PathVariable("groupId") Integer groupId,
 			@PathVariable("pageNumber") Integer pageNumber,
 			@PathVariable("pageSize") Integer pageSize,
-            @RequestParam(value = "account", required = false) String account) {
+            @RequestParam(value = "account", required = false) String account,
+			@RequestParam(value = "contractName", required = false) String contractName,
+			@RequestParam(value = "contractAddress", required = false) String contractAddress) {
 		Instant startTime = Instant.now();
 		if (pageNumber < 1 || pageSize <= 0) {
 			return new BasePageResponse(ConstantCode.PARAM_EXCEPTION);
@@ -107,6 +109,8 @@ public class AbiController extends BaseController {
 				SqlSortType.DESC.getValue());
 		param.setGroupId(groupId);
 		param.setAccount(account);
+		param.setContractAddress(contractAddress);
+		param.setContractName(contractName);
 		// total count
 		int count = abiService.countOfAbi(param);
 		List<RspAllContract> resList = abiService.listAllContract(param);
