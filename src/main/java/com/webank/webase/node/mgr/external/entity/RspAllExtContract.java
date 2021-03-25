@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.external.entity;
 
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import java.util.Date;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

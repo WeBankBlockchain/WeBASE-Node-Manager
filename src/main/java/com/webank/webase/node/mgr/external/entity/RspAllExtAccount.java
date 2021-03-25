@@ -15,6 +15,7 @@
 package com.webank.webase.node.mgr.external.entity;
 
 import com.webank.webase.node.mgr.user.entity.TbUser;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
