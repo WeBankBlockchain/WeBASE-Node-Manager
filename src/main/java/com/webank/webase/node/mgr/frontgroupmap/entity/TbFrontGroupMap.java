@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.frontgroupmap.entity;
 
 import java.time.LocalDateTime;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,9 +27,32 @@ public class TbFrontGroupMap {
     private Integer groupId;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    /**
+     * front's group status, 1-normal
+     * @related GroupStatus enum
+     */
+    private Integer status;
+    /**
+     * consensus type, 1-sealer, 2-observer
+     */
+    private Integer type;
 
-    public TbFrontGroupMap(Integer frontId,Integer groupId){
+    public TbFrontGroupMap(Integer frontId, Integer groupId, Integer status){
+        this.frontId = frontId;
+        this.groupId = groupId;
+        this.status = status;
+    }
+
+    public TbFrontGroupMap(Integer frontId, Integer groupId) {
         this.frontId = frontId;
         this.groupId = groupId;
     }
+
+    public TbFrontGroupMap(int frontId, int groupId, int status, int type){
+        this.frontId = frontId;
+        this.groupId = groupId;
+        this.status = status;
+        this.type = type;
+    }
+
 }

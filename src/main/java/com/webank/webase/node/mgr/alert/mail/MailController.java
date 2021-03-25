@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import java.util.Base64;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -71,7 +72,14 @@ public class MailController {
         try{
             checkParamEmpty(reqMailServerConfigParam);
         }catch (NodeMgrException e){
-            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
+            return new BaseResponse(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
+        }
+        try {
+            String pwdDecoded = new String(Base64.getDecoder().decode(reqMailServerConfigParam.getPassword()));
+            reqMailServerConfigParam.setPassword(pwdDecoded);
+        } catch (Exception e) {
+            log.error("decode password error:[]", e);
+            return new BaseResponse(ConstantCode.PASSWORD_DECODE_FAIL, e.getMessage());
         }
         // get configuration from web and refresh JavaMailSender
         mailService.refreshJavaMailSenderConfigFromWeb(reqMailServerConfigParam);
@@ -101,13 +109,13 @@ public class MailController {
         reqMailServerConfigParam.getAuthentication() == null ||
                 StringUtils.isEmpty(reqMailServerConfigParam.getHost())) {
             log.error("error checkParamEmpty reqMailServerConfigParam:{}", reqMailServerConfigParam);
-            throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
+            throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
         }
         if(reqMailServerConfigParam.getAuthentication() == EnableStatus.ON.getValue()) {
             if(StringUtils.isEmpty(reqMailServerConfigParam.getUsername()) ||
                     StringUtils.isEmpty(reqMailServerConfigParam.getPassword())) {
                 log.error("error checkParamEmpty in auth reqMailServerConfigParam:{}", reqMailServerConfigParam);
-                throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG__PARAM_EMPTY);
+                throw new NodeMgrException(ConstantCode.MAIL_SERVER_CONFIG_PARAM_EMPTY);
             }
         }
         log.debug("end checkParamEmpty reqMailServerConfigParam:{}", reqMailServerConfigParam);

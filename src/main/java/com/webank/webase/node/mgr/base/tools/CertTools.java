@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 package com.webank.webase.node.mgr.base.tools;
 
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.utils.Numeric;
-import sun.security.ec.ECPublicKeyImpl;
-
 import java.io.IOException;
 import java.security.Principal;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.utils.Numeric;
+
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 
 public class CertTools {
     public static final String crtContentHead = "-----BEGIN CERTIFICATE-----\n" ;

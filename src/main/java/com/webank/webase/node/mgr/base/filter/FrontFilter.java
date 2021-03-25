@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  */
 package com.webank.webase.node.mgr.base.filter;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +54,7 @@ public class FrontFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         ignorePath = getIgnorePath();
-        log.info("ignorePath:{}", JSON.toJSONString(ignorePath));
+        log.info("ignorePath:{}", JsonTools.toJSONString(ignorePath));
     }
 
     @Override

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,17 @@ package com.webank.webase.node.mgr.base.tools;
 
 
 
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.crypto.gm.sm3.SM3Digest;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import org.fisco.bcos.web3j.tx.txdecode.ConstantProperties;
 import org.fisco.bcos.web3j.utils.Numeric;
-import org.fisco.bcos.web3j.utils.Strings;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -106,4 +109,28 @@ public class Web3Tools {
         return inputs;
     }
 
+    /**
+     * get AbiDefinition by Function name
+     * @param funName
+     * @param contractAbi
+     * @return
+     */
+    public static AbiDefinition getAbiDefinition(String funName, String contractAbi) {
+        if (StringUtils.isBlank(contractAbi)) {
+            throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);
+        }
+        List<AbiDefinition> abiList = JsonTools.toJavaObjectList(contractAbi, AbiDefinition.class);
+        if (abiList == null) {
+            throw new NodeMgrException(ConstantCode.FAIL_PARSE_JSON);
+        }
+        AbiDefinition result = null;
+        for (AbiDefinition abiDefinition : abiList) {
+            if (ConstantProperties.TYPE_FUNCTION.equals(abiDefinition.getType())
+                    && funName.equals(abiDefinition.getName())) {
+                result = abiDefinition;
+                break;
+            }
+        }
+        return result;
+    }
 }

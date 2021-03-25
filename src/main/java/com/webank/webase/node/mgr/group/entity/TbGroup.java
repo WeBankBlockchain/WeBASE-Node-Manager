@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@ package com.webank.webase.node.mgr.group.entity;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
+import com.webank.webase.node.mgr.base.enums.GroupType;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -29,16 +33,41 @@ public class TbGroup {
 
     private Integer groupId;
     private String groupName;
+    /**
+     * 1-normal, 2-invalid
+     * @related groupType sync group default 1, manual default 2
+     */
     private Integer groupStatus;
     private Integer nodeCount;
     private BigInteger latestBlock = BigInteger.ZERO;
     private BigInteger transCount = BigInteger.ZERO;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    private String description;
+    private Integer groupType;
+    /**
+     * group.x.genesis timestamp
+     */
+    private String groupTimestamp;
+    /**
+     * group peers nodeId
+     */
+    private String nodeIdList;
 
-    public TbGroup(Integer groupId, String groupName,Integer nodeCount){
+    private Integer chainId;
+    private String chainName;
+
+
+    public TbGroup(Integer groupId, String groupName, Integer nodeCount, String description,
+                   GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName){
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
+        this.description = description;
+        this.groupType = groupType.getValue();
+        this.groupStatus = groupStatus.getValue();
+        this.chainId = chainId;
+        this.chainName = chainName;
     }
+
 }

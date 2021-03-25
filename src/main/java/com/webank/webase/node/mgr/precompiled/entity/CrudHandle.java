@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,6 @@ import lombok.Data;
 public class CrudHandle {
     private int groupId;
     private String fromAddress;
+    private String signUserId;
     private String sql;
-    private Boolean useAes;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,6 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
-import com.webank.webase.node.mgr.alert.mail.MailService;
-import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
-import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
-import com.webank.webase.node.mgr.base.enums.AlertRuleType;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.cert.CertService;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
@@ -37,6 +24,20 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import com.webank.webase.node.mgr.alert.mail.MailService;
+import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
+import com.webank.webase.node.mgr.base.enums.AlertRuleType;
+import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.cert.CertService;
+
+import lombok.extern.log4j.Log4j2;
 
 
 /**
@@ -48,8 +49,6 @@ public class CertMonitorTask {
 
     @Autowired
     private CertService certService;
-    @Autowired
-    private ConstantProperties cProperties;
     @Autowired
     private MailService alertMailService;
     @Autowired
@@ -77,9 +76,9 @@ public class CertMonitorTask {
             return;
         }
         List<X509Certificate> certList = certService.loadAllX509Certs();
-        List<String> alertContentList = new ArrayList<>();
         certList.stream()
             .forEach(cert -> {
+                List<String> alertContentList = new ArrayList<>();
                 Date certNotAfter = cert.getNotAfter();
                 if(checkWithin7days(certNotAfter)){
                     log.warn("cert validity alert. certNotAfter:{}",

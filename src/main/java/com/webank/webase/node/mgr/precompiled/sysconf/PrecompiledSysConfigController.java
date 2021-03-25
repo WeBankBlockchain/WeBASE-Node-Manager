@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,28 @@
  */
 package com.webank.webase.node.mgr.precompiled.sysconf;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.controller.BaseController;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.precompiled.permission.PermissionParam;
-import lombok.extern.log4j.Log4j2;
+import com.webank.webase.node.mgr.precompiled.entity.SysConfigParam;
+import java.time.Duration;
+import java.time.Instant;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.time.Duration;
-import java.time.Instant;
+import com.webank.webase.node.mgr.base.controller.BaseController;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * System config value controller
@@ -57,7 +65,7 @@ public class PrecompiledSysConfigController extends BaseController {
         Object result = precompiledSysConfigService.getSysConfigListService(groupId, pageSize, pageNumber);
 
         log.info("end getSysConfigList useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(result));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
     }
 
@@ -71,12 +79,12 @@ public class PrecompiledSysConfigController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start setSysConfigByKeyService startTime:{} sysConfigParam:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(sysConfigParam));
+                JsonTools.toJSONString(sysConfigParam));
 
         Object res = precompiledSysConfigService.setSysConfigByKeyService(sysConfigParam);
 
         log.info("end setSysConfigByKeyService useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
 
         return res;
     }

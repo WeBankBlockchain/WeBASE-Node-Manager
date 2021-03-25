@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package com.webank.webase.node.mgr.base.tools;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.alert.rule.entity.ReqAlertRuleParam;
-import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class AlertRuleTools {
@@ -79,7 +79,10 @@ public class AlertRuleTools {
         List<String> contentParamList = new ArrayList<>();
         log.debug("processMailContent contentTargetParams:{}", contentTargetParams);
         try{
-            contentParamList = (List<String>) JSON.parse(contentTargetParams);
+            contentParamList = JsonTools.toJavaObjectList(contentTargetParams, String.class);
+            if (contentParamList == null) {
+                log.error("parse json error");
+            }
         } catch (Exception e) {
             log.error("processMailContent parse contentParam to List error contentParams:{}, exception:{}",
                     contentTargetParams, e);
@@ -108,7 +111,10 @@ public class AlertRuleTools {
         List<String> contentParamList = new ArrayList<>();
         log.debug("processMailContent contentTargetParams:{}", contentTargetParams);
         try{
-            contentParamList = (List<String>) JSON.parse(contentTargetParams);
+            contentParamList = JsonTools.toJavaObjectList(contentTargetParams, String.class);
+            if (contentParamList == null) {
+                log.error("parse json error");
+            }
         } catch (Exception e) {
             log.error("processMailContent parse contentParam to List error contentParams:{}, exception:{}",
                     contentTargetParams, e);

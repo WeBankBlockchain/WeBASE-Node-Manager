@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.chain;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -61,7 +61,7 @@ public class ChainController {
 
         response.setData(rspObj);
         log.info("end getChainInfo. endTime:{} response:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(response));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(response));
 
         return response;
     }

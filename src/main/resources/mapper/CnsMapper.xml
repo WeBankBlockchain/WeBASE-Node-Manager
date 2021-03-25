@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.webase.node.mgr.contract.CnsMapper">
+  <resultMap id="cnsMap"
+    type="com.webank.webase.node.mgr.contract.entity.TbCns">
+    <id column="id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="id" />
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId" />
+    <result column="contract_path" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractPath" />
+    <result column="contract_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractName" />
+    <result column="cns_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="cnsName" />
+    <result column="version" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="version" />
+    <result column="contract_address" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractAddress" />
+    <result column="contract_abi" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractAbi" />
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="createTime" />
+    <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+      property="modifyTime" />
+  </resultMap>
+
+  <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbCns">
+    REPLACE INTO tb_cns(group_id,contract_path,contract_name,cns_name,version,contract_address,contract_abi,create_time,modify_time)
+    VALUES (#{groupId},#{contractPath},#{contractName},#{cnsName},#{version},#{contractAddress},#{contractAbi}, now(), now())
+  </insert>
+
+  <select id="countOfCns" parameterType="com.webank.webase.node.mgr.contract.entity.QueryCnsParam"
+    resultType="java.lang.Integer">
+    select count(1) from tb_cns
+    where group_id = #{groupId}
+    <if test="contractPath != null and contractPath !=''">
+      and contract_path = #{contractPath}
+    </if>
+    <if test="contractName != null and contractName !=''">
+      and contract_name = #{contractName}
+    </if>
+    <if test="cnsName != null and cnsName !=''">
+      and cns_name = #{cnsName}
+    </if>
+    <if test="version != null and version !=''">
+      and version = #{version}
+    </if>
+  </select>
+  
+  <select id="getList" parameterType="com.webank.webase.node.mgr.contract.entity.QueryCnsParam"
+    resultMap="cnsMap">
+    select * from tb_cns
+    where group_id = #{groupId}
+    <if test="contractPath != null and contractPath !=''">
+      and contract_path = #{contractPath}
+    </if>
+    <if test="contractName != null and contractName !=''">
+      and contract_name = #{contractName}
+    </if>
+    <if test="cnsName != null and cnsName !=''">
+      and cns_name = #{cnsName}
+    </if>
+    <if test="version != null and version !=''">
+      and version = #{version}
+    </if>
+    <if test="flagSortedByTime != null and flagSortedByTime != ''">
+      order by modify_time ${flagSortedByTime}
+    </if>
+    <if test="start != null and pageSize != null">
+      limit #{start},#{pageSize}
+    </if>
+  </select>
+
+  <select id="getCnsByAddress" parameterType="com.webank.webase.node.mgr.contract.entity.QueryCnsParam"
+    resultMap="cnsMap">
+    select * from tb_cns
+    where group_id = #{groupId}
+      and contract_address = #{contractAddress}
+    order by modify_time desc
+    limit 1
+  </select>
+
+  <delete id="deleteByGroupId" parameterType="java.lang.Integer">
+    delete from tb_cns where group_id = #{groupId}
+  </delete>
+
+</mapper>

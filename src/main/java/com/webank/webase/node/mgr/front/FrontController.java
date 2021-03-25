@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 package com.webank.webase.node.mgr.front;
 
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -53,6 +53,19 @@ public class FrontController extends BaseController {
     private FrontService frontService;
 
     /**
+     * refresh front
+     */
+    @GetMapping("/refresh")
+    public BaseResponse refreshFront() {
+    	Instant startTime = Instant.now();
+    	log.info("start refreshFront startTime:{}", startTime.toEpochMilli());
+    	BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+    	frontService.refreshFront();
+    	log.info("end refreshFront useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+    	return baseResponse;
+    }
+    
+    /**
      * add new front
      */
     @PostMapping("/new")
@@ -61,12 +74,12 @@ public class FrontController extends BaseController {
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start newFront startTime:{} frontInfo:{}",
-            startTime.toEpochMilli(), JSON.toJSONString(frontInfo));
+            startTime.toEpochMilli(), JsonTools.toJSONString(frontInfo));
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         TbFront tbFront = frontService.newFront(frontInfo);
         baseResponse.setData(tbFront);
         log.info("end newFront useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -77,17 +90,19 @@ public class FrontController extends BaseController {
     @GetMapping(value = "/find")
     public BasePageResponse queryFrontList(
         @RequestParam(value = "frontId", required = false) Integer frontId,
-        @RequestParam(value = "groupId", required = false) Integer groupId)
+        @RequestParam(value = "groupId", required = false) Integer groupId,
+        @RequestParam(value = "frontStatus", required = false) Integer frontStatus)
         throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start queryFrontList startTime:{} frontId:{} groupId:{}",
-            startTime.toEpochMilli(), frontId, groupId);
+        log.info("start queryFrontList startTime:{} frontId:{} groupId:{},frontStatus:{}",
+            startTime.toEpochMilli(), frontId, groupId, frontStatus);
 
         //param
         FrontParam param = new FrontParam();
         param.setFrontId(frontId);
         param.setGroupId(groupId);
+        param.setFrontStatus(frontStatus);
 
         //query front info
         int count = frontService.getFrontCount(param);
@@ -98,7 +113,7 @@ public class FrontController extends BaseController {
         }
 
         log.info("end queryFrontList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pagesponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 
@@ -116,7 +131,23 @@ public class FrontController extends BaseController {
         frontService.removeFront(frontId);
 
         log.info("end removeFront useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
+
+    /**
+     * qurey front info list.
+     */
+    @GetMapping(value = "/refresh/status")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse refreshFrontStatus() throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start refreshFrontStatus startTime:{} ", startTime.toEpochMilli());
+
+        frontService.refreshFrontStatus();
+
+        log.info("end queryFrontList useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
 }

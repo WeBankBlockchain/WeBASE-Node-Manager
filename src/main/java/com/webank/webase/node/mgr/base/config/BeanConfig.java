@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package com.webank.webase.node.mgr.base.config;
 
-import java.util.concurrent.ThreadPoolExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +22,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.properties.ExecutorProperties;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -38,8 +35,6 @@ public class BeanConfig {
 
     @Autowired
     private ConstantProperties constantProperties;
-    @Autowired
-    private ExecutorProperties executorProperties;
 
     @Bean
     public RestTemplate restTemplate(ClientHttpRequestFactory factory) {
@@ -78,23 +73,6 @@ public class BeanConfig {
         return factory;
     }
 
-    /**
-     * pull block and trans from chain
-     * @return
-     */
-    @Bean
-    public ThreadPoolTaskExecutor mgrAsyncExecutor() {
-        log.info("start mgrAsyncExecutor init..");
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(executorProperties.getCorePoolSize());
-        executor.setMaxPoolSize(executorProperties.getMaxPoolSize());
-        executor.setQueueCapacity(executorProperties.getQueueSize());
-        executor.setThreadNamePrefix(executorProperties.getThreadNamePrefix());
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        // init executor
-        executor.initialize();
-        return executor;
-    }
 
     /**
      * mail sender for alert mail in node\mgr\alert\mail\MailService.java

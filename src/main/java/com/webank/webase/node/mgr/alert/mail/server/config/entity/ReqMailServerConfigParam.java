@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ public class ReqMailServerConfigParam {
     // 邮箱地址
     private String username;
     // 邮箱授权码
+    // v1.4.2 base64混淆后传输
     private String password;
     // 邮箱协议：smtp, pop3, imap
     private String protocol;

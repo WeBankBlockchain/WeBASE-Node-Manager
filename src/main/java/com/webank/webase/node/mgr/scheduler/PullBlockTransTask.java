@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,9 +13,10 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.block.BlockService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroupMapCache;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * get block info from chain.
+ * get block info and trans info from chain.
  * including tb_block and tb_trans (block contains trans)
  */
 @Log4j2
@@ -37,7 +38,7 @@ public class PullBlockTransTask {
     @Autowired
     private BlockService blockService;
     @Autowired
-    private FrontGroupMapCache frontGroupMapCache;
+    private GroupService groupService;
 
     @Scheduled(fixedDelayString = "${constant.pullBlockTaskFixedDelay}")
     public void taskStart() {
@@ -49,13 +50,13 @@ public class PullBlockTransTask {
      */
     public synchronized void pullBlockStart() {
         Instant startTime = Instant.now();
-        log.info("start pullBLock startTime:{}", startTime.toEpochMilli());
-        List<FrontGroup> groupList = frontGroupMapCache.getAllMap();
+        log.debug("start pullBLock startTime:{}", startTime.toEpochMilli());
+        List<TbGroup> groupList = groupService.getGroupList(GroupStatus.NORMAL.getValue());
         if (groupList == null || groupList.size() == 0) {
             log.warn("pullBlock jump over: not found any group");
             return;
         }
-
+        // count down group, make sure all group's pullBlock finished
         CountDownLatch latch = new CountDownLatch(groupList.size());
         groupList.stream()
                 .forEach(group -> blockService.pullBlockByGroupId(latch, group.getGroupId()));
@@ -67,7 +68,7 @@ public class PullBlockTransTask {
             Thread.currentThread().interrupt();
         }
 
-        log.info("end pullBLock useTime:{} ",
+        log.debug("end pullBLock useTime:{} ",
                 Duration.between(startTime, Instant.now()).toMillis());
     }
 }

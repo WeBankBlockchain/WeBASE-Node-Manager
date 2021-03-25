@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.block;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,7 +88,7 @@ public class BlockController {
                     "did not find block,request from front. pkHash:{} groupId:{}",
                     pkHash, groupId);
                 try {
-                    blockInfo = blockService.getblockFromFrontByHash(groupId, pkHash);
+                    blockInfo = blockService.getBlockFromFrontByHash(groupId, pkHash);
                 }catch (NodeMgrException e) {
                     log.debug("queryBlockList did not find block from front(chain).e:[]", e);
                     pageResponse.setData(null);
@@ -102,7 +103,7 @@ public class BlockController {
         }
 
         log.info("end queryBlockList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(pageResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
         return pageResponse;
     }
 
@@ -121,7 +122,44 @@ public class BlockController {
         Object blockInfo = blockService.getBlockFromFrontByNumber(groupId, blockNumber);
         baseResponse.setData(blockInfo);
         log.info("end getBlockByNumber useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
+
+    /**
+     * get block header by number.
+     */
+    @GetMapping("/blockHeaderByNumber/{groupId}/{blockNumber}")
+    public BaseResponse getBlockHeaderByNumber(@PathVariable("groupId") Integer groupId,
+        @PathVariable("blockNumber") BigInteger blockNumber)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getBlockHeaderByNumber startTime:{} groupId:{} blockNumber:{}",
+            startTime.toEpochMilli(), groupId, blockNumber);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        BcosBlockHeader blockInfo = blockService.getBlockHeaderFromFrontByNumber(groupId, blockNumber);
+        baseResponse.setData(blockInfo);
+        log.info("end getBlockHeaderByNumber useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * get block header by number.
+     */
+    @GetMapping("/blockHeaderByHash/{groupId}/{blockHash}")
+    public BaseResponse getBlockHeaderByNumber(@PathVariable("groupId") Integer groupId,
+        @PathVariable("blockHash") String blockHash)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getBlockHeaderByNumber startTime:{} groupId:{} blockHash:{}",
+            startTime.toEpochMilli(), groupId, blockHash);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        BcosBlockHeader blockInfo = blockService.getBlockHeaderFromFrontByHash(groupId, blockHash);
+        baseResponse.setData(blockInfo);
+        log.info("end getBlockHeaderByNumber useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
 }

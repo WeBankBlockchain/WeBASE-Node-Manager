@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ public class TbContract {
     private String contractPath;
     private String contractVersion;
     private String contractName;
+    private String account;
     private Integer contractStatus;
     private Integer groupId;
     private Integer contractType;
@@ -42,7 +43,8 @@ public class TbContract {
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
-
+    private String deployAddress;
+    private String deployUserName;
     /**
      * init by contractId、contractName、groupId、contractPath.
      */

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,21 @@
  */
 package node.mgr.test.cert;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.io.*;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
 
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import io.jsonwebtoken.lang.Assert;
+import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.Assert;
 import sun.security.ec.ECPublicKeyImpl;
 
 import static com.webank.webase.node.mgr.base.tools.CertTools.byteToHex;
@@ -193,7 +196,7 @@ public class ImportCertTest {
         org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory factory =
                 new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
         List<X509Certificate> certs = (List<X509Certificate>) factory.engineGenerateCertificates(nodes);
-        Assert.notNull(certs);
+        Assert.notNull(certs,"certs null");
         certs.stream().forEach(c -> {
             System.out.println(c.getSubjectDN());
             try {
@@ -202,5 +205,42 @@ public class ImportCertTest {
                 e.printStackTrace();
             }
         });
+    }
+
+    @Test
+    public void testCRLF() {
+        String headLF = "-----BEGIN PRIVATE KEY-----\n";
+        String headCRLF = "-----BEGIN PRIVATE KEY-----\r\n";
+        String hexLF = Numeric.toHexString(headLF.getBytes());
+        String hexCRLF = Numeric.toHexString(headCRLF.getBytes());
+        System.out.println("hexLF " + headLF.length());
+        System.out.println("hexLF " + hexLF);
+        System.out.println("headCRLF " + headCRLF.length());
+        System.out.println("hexCRLF " + hexCRLF);
+
+        String crlfContent = "-----BEGIN PRIVATE KEY-----\r\n"
+            + "MIGHAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBG0wawIBAQQgI2r2hDDWouOOm74a\r\n"
+            + "GZoy4lvKg/J+AQCzewaR2JkBPZShRANCAATgeRpxTyvxl4yRIuK5j9iYEY/iibjF\r\n"
+            + "xWdgl87or6vTcovHI5Wqy2Lye6zO68ZQ7iuIt37GaTxVNQ3fRzBM3sOX\r\n"
+            + "-----END PRIVATE KEY-----";
+        String lfContent = "-----BEGIN PRIVATE KEY-----\n"
+            + "MIGHAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBG0wawIBAQQgI2r2hDDWouOOm74a\n"
+            + "GZoy4lvKg/J+AQCzewaR2JkBPZShRANCAATgeRpxTyvxl4yRIuK5j9iYEY/iibjF\n"
+            + "xWdgl87or6vTcovHI5Wqy2Lye6zO68ZQ7iuIt37GaTxVNQ3fRzBM3sOX\n"
+            + "-----END PRIVATE KEY-----";
+        PEMManager pemManager = new PEMManager();
+        PEMManager pemManager2 = new PEMManager();
+        String crlfAddress;
+        String lfAddress;
+        try {
+            pemManager.load(new ByteArrayInputStream(crlfContent.getBytes()));
+            pemManager2.load(new ByteArrayInputStream(lfContent.getBytes()));
+            crlfAddress = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPublicKey());
+            lfAddress = Numeric.toHexStringNoPrefix(pemManager2.getECKeyPair().getPublicKey());
+        } catch (Exception e) {
+            throw new NodeMgrException(ConstantCode.PEM_CONTENT_ERROR);
+        }
+        System.out.println("crlfAddress " + crlfAddress);
+        System.out.println("lfAddress " + lfAddress);
     }
 }

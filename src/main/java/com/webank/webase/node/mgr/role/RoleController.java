@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
  */
 package com.webank.webase.node.mgr.role;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
@@ -40,6 +42,8 @@ public class RoleController {
 
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private ConstantProperties constantProperties;
 
     /**
      * query role list.
@@ -62,8 +66,11 @@ public class RoleController {
         Integer realPageSize = Optional.ofNullable(pageSize).orElse(5);
         Integer start = Optional.ofNullable(pageNumber)
             .map(page -> (page - 1) * realPageSize).orElse(0);
-
-        RoleListParam param = new RoleListParam(start, realPageSize, roleId, roleName);
+        List<Integer> roleIdListNotIn = new ArrayList<>();
+        if (!constantProperties.isDeveloperModeEnable()) {
+            roleIdListNotIn.add(RoleType.DEVELOPER.getValue());
+        }
+        RoleListParam param = new RoleListParam(start, realPageSize, roleId, roleName, roleIdListNotIn);
 
         // query
         int count = roleService.countOfRole(param);
@@ -75,7 +82,7 @@ public class RoleController {
 
         log.info("end queryRoleList useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
-            JSON.toJSONString(pagesponse));
+            JsonTools.toJSONString(pagesponse));
         return pagesponse;
     }
 }

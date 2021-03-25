@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -23,15 +23,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
+
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import com.alibaba.fastjson.JSON;
+
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.MonitorUserType;
@@ -40,6 +40,7 @@ import com.webank.webase.node.mgr.base.enums.TransType;
 import com.webank.webase.node.mgr.base.enums.TransUnusualType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.ContractService;
@@ -53,7 +54,7 @@ import com.webank.webase.node.mgr.monitor.entity.UserMonitorResult;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.user.UserService;
-import com.webank.webase.node.mgr.user.entity.TbUser;
+
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -97,7 +98,7 @@ public class MonitorService {
                 List<TbTransHash> transHashList = transHashService
                     .qureyUnStatTransHashList(groupId);
                 log.info("=== groupId:{} transHashList:{}", groupId, transHashList.size());
-                if (Objects.isNull(transHashList) || transHashList.size() == 0) {
+                if (transHashList.size() == 0) {
                     log.debug("transMonitorByGroupId jump over. transHashList is empty");
                     return;
                 }
@@ -133,6 +134,7 @@ public class MonitorService {
             log.error("fail transMonitorByGroupId, group:{}", groupId, ex);
         } finally {
             if (Objects.nonNull(latch)) {
+                // finish one group, count down
                 latch.countDown();
             }
         }
@@ -210,7 +212,7 @@ public class MonitorService {
             .monitorUserList(TableName.MONITOR.getTableName(groupId));
 
         log.debug("end qureyMonitorUserList monitorUserList:{}",
-            JSON.toJSONString(monitorUserList));
+            JsonTools.toJSONString(monitorUserList));
         return monitorUserList;
     }
 
@@ -224,7 +226,7 @@ public class MonitorService {
             .monitorInterfaceList(TableName.MONITOR.getTableName(groupId), userName);
 
         log.debug("end qureyMonitorInterfaceList monitorInterfaceList:{}",
-            JSON.toJSONString(monitorInterfaceList));
+            JsonTools.toJSONString(monitorInterfaceList));
         return monitorInterfaceList;
     }
 
@@ -281,7 +283,7 @@ public class MonitorService {
         List<UnusualUserInfo> listOfUnusualUser = monitorMapper.listOfUnusualUser(param);
 
         log.debug("end qureyUnusualUserList listOfUnusualUser:{}",
-            JSON.toJSONString(listOfUnusualUser));
+            JsonTools.toJSONString(listOfUnusualUser));
         return listOfUnusualUser;
     }
 
@@ -317,7 +319,7 @@ public class MonitorService {
             .listOfUnusualContract(param);
 
         log.debug("end qureyUnusualContractList listOfUnusualContract:{}",
-            JSON.toJSONString(listOfUnusualContract));
+            JsonTools.toJSONString(listOfUnusualContract));
         return listOfUnusualContract;
     }
 
@@ -450,10 +452,6 @@ public class MonitorService {
      */
     private UserMonitorResult monitorUser(int groupId, String userAddress) {
         String userName = userService.queryUserNameByAddress(groupId, userAddress);
-
-//        if (StringUtils.isBlank(userName)) {
-//            userName = getSystemUserName(userAddress);
-//        }
 
         int userType = MonitorUserType.NORMAL.getValue();
         if (StringUtils.isBlank(userName)) {

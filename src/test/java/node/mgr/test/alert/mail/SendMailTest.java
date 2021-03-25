@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package node.mgr.test.alert.mail;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.alert.mail.MailService;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
@@ -58,10 +58,11 @@ public class SendMailTest {
     AuditMonitorTask auditMonitorTask;
 
     public static final String testTitle = "WeBase-Node-Manager测试邮件，请勿回复";
-    public static final String fromMailAddress = "15889463195@163.com";
-    public static final String toMailAddress = "15889463195@163.com";
+    public static final String fromMailAddress = "yourmail@163.com"; 
+    public static final String toMailAddress = "yourmail@163.com"; 
     public static final String testContent = "【这是节点管理的测试邮件，请勿回复】";
 
+    
     /**
      * test alert_rule
      * INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval`,`alert_content`,`content_param_list`,`description`,`is_all_user`,`user_list`,`create_time`,`modify_time`,`less_than`,`less_and_equal`,`larger_than`,`larger_and_equal`,`equal`)VALUES ('测试告警', 0, 2, 'low', 3600, '这是测试邮件，来自from', '["from"]', '', 0, '["15889463195@163.com"]', '2019-10-29 20:02:30', '2019-10-29 20:02:30', '','','','','');
@@ -110,7 +111,7 @@ public class SendMailTest {
     public void testFinalEmailContent() {
         TbAlertRule alertRule = alertRuleService.queryByRuleId(1);
         System.out.println("=========alertRule=========");
-        System.out.println(JSON.toJSON(alertRule));
+        System.out.println(JsonTools.toJSONString(alertRule));
 
         String emailTitle = AlertRuleTools.getAlertTypeStrFromEnum(alertRule.getAlertType());
         System.out.println("=========emailTitle=========");
@@ -142,12 +143,12 @@ public class SendMailTest {
         // 假设只有一个参数时
         List<String> testParam = new ArrayList<>();
         testParam.add("nodeId");
-        String afterTestParam = JSON.toJSONString(testParam);
+        String afterTestParam = JsonTools.toJSONString(testParam);
         System.out.println("=======afterTestParam======");
         System.out.println(afterTestParam);
 
         // 转回去，可能出错
-        List<String> finalParamList = (List<String>) JSON.parse(afterTestParam);
+        List<String> finalParamList = JsonTools.toJavaObjectList(afterTestParam, String.class);
 
         // 待处理的string
         String alertContent = "您的节点nodeId状态异常";
@@ -169,7 +170,7 @@ public class SendMailTest {
 //        testList.add("15889463195@163.com");
 //        System.out.println(JSON.toJSON(testList));
         String listStr = "[\"targetmail@163.com\",\"15889463195@163.com\"]";
-        List<String> list = (List<String>) JSON.parse(listStr);
+        List<String> list = JsonTools.toJavaObjectList(listStr, String.class);
         System.out.println(list);
     }
 

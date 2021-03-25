@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package node.mgr.test.cert;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.CertService;
-import io.jsonwebtoken.lang.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -53,7 +53,7 @@ public class LoadGmCertTest extends TestBase{
     public void testLoadCert() throws CertificateEncodingException {
         String crtContent = CertTools.addCertHeadAndTail(gmNodeCrt);
         X509Certificate certificate = certService.loadSingleCertFromCrtContent(crtContent);
-        Assert.notNull(certificate);
+        Assert.notNull(certificate, "certificate null");
         System.out.println(certificate.getSubjectDN());
         System.out.println(NodeMgrTools.getCertFingerPrint(certificate.getEncoded()));
     }

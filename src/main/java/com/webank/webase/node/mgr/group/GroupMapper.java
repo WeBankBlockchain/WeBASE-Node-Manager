@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,12 +13,16 @@
  */
 package com.webank.webase.node.mgr.group;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.springframework.stereotype.Repository;
+
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 /**
  * mapper for table tb_group.
@@ -28,8 +32,14 @@ public interface GroupMapper {
 
     /**
      * add group info
+     * @deprecated
      */
     int save(TbGroup tbGroup);
+
+    /**
+     * insert selective
+     */
+    int insertSelective(TbGroup tbGroup);
 
     /**
      * remove by id.
@@ -40,6 +50,7 @@ public interface GroupMapper {
      * update status.
      */
     int updateStatus(@Param("groupId") Integer groupId, @Param("groupStatus") Integer groupStatus);
+
 
     /**
      * query group count.
@@ -52,6 +63,11 @@ public interface GroupMapper {
     List<TbGroup> getList(@Param("groupStatus") Integer groupStatus);
 
     /**
+     * get group by group id
+     */
+    TbGroup getGroupById(@Param("groupId") Integer groupId);
+
+    /**
      * query the latest statistics trans on all groups.
      */
     List<StatisticalGroupTransInfo> queryLatestStatisticalTrans();
@@ -61,4 +77,23 @@ public interface GroupMapper {
      */
     GroupGeneral getGeneral(@Param("groupId") Integer groupId);
 
+
+    int updateNodeCount(@Param("groupId") int groupId, @Param("nodeCount") int nodeCount);
+
+    int deleteByChainId(@Param("chainId") int chainId);
+
+    @Select({
+        "select * from tb_group where chain_id=#{chainId}"
+    })
+    List<TbGroup> selectGroupList(@Param("chainId") int chainId);
+
+    @Select({
+            "select * from tb_group where chain_id=#{chainId} and group_id=#{groupId}"
+    })
+    TbGroup getGroupByChainIdAndGroupId(@Param("chainId") int chainId, @Param("groupId") int groupId);
+
+    @Update({
+       "update tb_group set group_timestamp=#{timestamp}, node_id_list=#{nodeIdList},modify_time=NOW() where group_id=#{groupId}"
+    })
+    int updateTimestampNodeList(@Param("groupId") int groupId, @Param("timestamp") long timestamp, @Param("nodeIdList") String nodeIdList);
 }

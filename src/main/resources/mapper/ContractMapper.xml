@@ -12,6 +12,8 @@
       property="contractPath"/>
     <result column="contract_version" javaType="java.lang.String" jdbcType="VARCHAR"
       property="contractVersion"/>
+    <result column="account" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="account"/>
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="groupId"/>
     <result column="contract_source" javaType="java.lang.String" jdbcType="VARCHAR"
@@ -24,7 +26,7 @@
       property="contractAbi"/>
     <result column="contract_bin" javaType="java.lang.String" jdbcType="VARCHAR"
       property="contractBin"/>
-    <result column="bytecodeBin" javaType="java.lang.String" jdbcType="VARCHAR"
+    <result column="bytecode_bin" javaType="java.lang.String" jdbcType="VARCHAR"
       property="bytecodeBin"/>
     <result column="contract_address" javaType="java.lang.String" jdbcType="VARCHAR"
       property="contractAddress"/>
@@ -36,13 +38,24 @@
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
+    <result column="deploy_address" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="deployAddress"/>
+    <result column="deploy_user_name" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="deployUserName"/>
+  </resultMap>
+
+  <resultMap id="contractPathMap" type="com.webank.webase.node.mgr.contract.entity.RspContractPath">
+    <id column="contract_path" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="contractPath"/>
+    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+      property="groupId"/>
   </resultMap>
 
 
   <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     insert into
-    tb_contract(group_id,contract_path,contract_version,contract_name,contract_source,contract_abi,contract_bin,bytecodeBin,contract_address,description,deploy_time,create_time,modify_time)
-    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW())
+    tb_contract(group_id,contract_path,contract_version,contract_name,account,contract_source,contract_abi,contract_bin,bytecode_bin,contract_address,description,deploy_time,create_time,modify_time,deploy_address,deploy_user_name)
+    values(#{groupId},#{contractPath},#{contractVersion},#{contractName},#{account},#{contractSource},#{contractAbi},#{contractBin},#{bytecodeBin},#{contractAddress},#{description},#{deployTime},NOW(),NOW(),#{deployAddress},#{deployUserName})
     <selectKey keyProperty="contractId" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -56,7 +69,6 @@
 		delete from tb_contract where group_id = #{groupId}
 	</delete>
 
-
   <update id="update" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
     update tb_contract set modify_time = now()
     <if test="contractSource != null and contractSource != ''">
@@ -69,7 +81,7 @@
       ,contract_bin = #{contractBin}
     </if>
     <if test="bytecodeBin != null and bytecodeBin != ''">
-      ,bytecodeBin = #{bytecodeBin}
+      ,bytecode_bin = #{bytecodeBin}
     </if>
     <if test="contractAddress != null and contractAddress != ''">
       ,contract_address = #{contractAddress}
@@ -88,6 +100,12 @@
     </if>
     <if test="description != null and description != ''">
       ,description = #{description}
+    </if>
+    <if test="deployAddress != null and deployAddress != ''">
+      ,deploy_address = #{deployAddress}
+    </if>
+    <if test="deployUserName != null and deployUserName != ''">
+      ,deploy_user_name = #{deployUserName}
     </if>
     where contract_id = #{contractId}
   </update>
@@ -111,22 +129,28 @@
       and group_id = #{groupId}
     </if>
     <if test="contractName != null and contractName != ''">
-      and contract_name like CONCAT('%',#{contractName},'%')
+      and lower(contract_name) like CONCAT('%',lower(#{contractName}),'%')
     </if>
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address = #{contractAddress}
     </if>
     <if test="contractPath != null and contractPath != ''">
-      and contract_path = #{contractVersion}
+      and contract_path = #{contractPath}
     </if>
     <if test="contractVersion != null and contractVersion != ''">
       and contract_version = #{contractVersion}
+    </if>
+    <if test="account != null and account != ''">
+      and account = #{account}
     </if>
     <if test="contractType != null">
       and contract_type = #{contractType}
     </if>
     <if test="contractStatus != null and contractStatus != ''">
       and contract_status = #{contractStatus}
+    </if>
+    <if test="deployAddress != null and deployAddress != ''">
+      and deploy_address = #{deployAddress}
     </if>
   </select>
 
@@ -147,10 +171,19 @@
       and contract_status = #{contractStatus}
     </if>
     <if test="contractName != null and contractName != ''">
-      and contract_name = #{contractName}
+      and lower(contract_name) like CONCAT('%',lower(#{contractName}),'%')
+    </if>
+    <if test="account != null and account != ''">
+      and account = #{account}
     </if>
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address = #{contractAddress}
+    </if>
+    <if test="deployAddress != null and deployAddress != ''">
+      and deploy_address = #{deployAddress}
+    </if>
+    <if test="contractPath != null and contractPath != ''">
+      and contract_path = #{contractPath}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
       order by modify_time ${flagSortedByTime}
@@ -179,8 +212,14 @@
     <if test="contractName != null and contractName != ''">
       and contract_name = #{contractName}
     </if>
+    <if test="account != null and account != ''">
+      and account = #{account}
+    </if>
     <if test="contractAddress != null and contractAddress != ''">
       and contract_address = #{contractAddress}
+    </if>
+    <if test="deployAddress != null and deployAddress != ''">
+      and deploy_address = #{deployAddress}
     </if>
     <if test="contractStatus != null and contractStatus != ''">
       and contract_status = #{contractStatus}
@@ -192,7 +231,7 @@
       and contract_version = #{contractVersion}
     </if>
     <if test="partOfBytecodeBin != null and partOfBytecodeBin != ''">
-      and locate(bytecodeBin,#{partOfBytecodeBin})
+      and locate(bytecode_bin,#{partOfBytecodeBin})
     </if>
     limit 1
   </select>
@@ -204,5 +243,8 @@
   <select id="querySystemContractBin" resultType="java.lang.String">
 		select contract_bin from tb_contract where group_id = #{groupId} and contract_name = #{contractName}
 	</select>
+
+
+
 
 </mapper>

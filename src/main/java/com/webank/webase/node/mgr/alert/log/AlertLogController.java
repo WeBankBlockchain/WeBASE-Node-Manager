@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.log;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
 import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
 import com.webank.webase.node.mgr.alert.log.entity.ReqLogParam;
@@ -63,7 +63,7 @@ public class AlertLogController {
                     Duration.between(startTime, Instant.now()).toMillis(), resList);
             return new BasePageResponse(ConstantCode.SUCCESS, resList, count);
         }catch (NodeMgrException e) {
-            log.debug("listAlertLog, error, exception:[] ", e);
+            log.error("listAlertLog, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());
         }
     }
@@ -78,16 +78,14 @@ public class AlertLogController {
     public Object updateAlertLog(@RequestBody ReqLogParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertLog. startTime:{} ReqAlertLogParam:{}",
-                startTime.toEpochMilli(), JSON.toJSONString(param));
+                startTime.toEpochMilli(), JsonTools.toJSONString(param));
         if(param.getStatus() == null || param.getLogId() == null) {
-            log.debug("updateAlertLog, error:{} ",
-                    ConstantCode.ALERT_LOG_PARAM_EMPTY);
             return new BaseResponse(ConstantCode.ALERT_LOG_PARAM_EMPTY);
         }
         try{
             alertLogService.updateAlertLog(param);
         }catch (NodeMgrException e) {
-            log.debug("updateAlertLog, error, exception:[] ", e);
+            log.error("updateAlertLog, error, exception:[] ", e);
             return new BaseResponse(ConstantCode.ALERT_LOG_ERROR, e.getMessage());
         }
         AlertLog res = alertLogService.queryByLogId(param.getLogId());
@@ -113,7 +111,7 @@ public class AlertLogController {
 //    public Object saveAlertLog(@RequestBody ReqLogParam param) {
 //        Instant startTime = Instant.now();
 //        log.info("start saveAlertLog. startTime:{} ReqAlertLogParam:{}",
-//                startTime.toEpochMilli(), JSON.toJSONString(param));
+//                startTime.toEpochMilli(), JsonTools.toJSONString(param));
 //        if(StringUtils.isEmpty(param.getAlertContent()) ||
 //                StringUtils.isEmpty(param.getAlertLevel()) ||
 //                StringUtils.isEmpty(param.getAlertType())) {

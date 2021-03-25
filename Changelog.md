@@ -1,3 +1,172 @@
+
+### v1.4.3(2021-01-27)
+
+**Add**
+- 拆分可视化部署步骤为：添加主机、初始化主机、部署节点
+- 可视化部署支持同机部署节点
+- 可视化部署支持自动拉取镜像
+- 可视化部署使用ansible，并完善各个步骤的检测脚本
+- 支持注册CNS合约
+
+**Fix**
+- 修复私钥管理address唯一限制
+- 修复一些已知的bug
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本及以上版本
+- WeBASE-Web v1.4.3+
+- WeBASE-Front v1.4.3+
+- WeBASE-Sign v1.4.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
+### v1.4.2(2020-11-19)
+
+**Add**
+- 新增EventLog查询功能
+
+**Fix**
+- 优化合约IDE合约加载
+- 修复创建群组/加入群组异常
+- 修复节点共识类型问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本及以上版本
+- WeBASE-Web v1.4.0+
+- WeBASE-Front v1.4.2+
+- WeBASE-Sign v1.4.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+### v1.4.1(2020-09-18)
+
+**Add**
+- 新增ChainGovernance接口，包含链委员与运维管理、合约冻结功能
+- 新增getBlockHeader接口
+- 新增开发者模式，区别与普通用户与管理员用户
+
+**Fix**
+- 修复bouncy-castle版本兼容问题，统一为1.60版本
+- 优化调用节点前置策略，不再随机选择前置访问，优先访问最新的可用前置
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本及以上版本
+- WeBASE-Web v1.4.0+
+- WeBASE-Front v1.4.1+
+- WeBASE-Sign v1.4.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+### v1.4.0(2020-08-06)
+
+**Add**
+- 在原有先部署链，后添加前置方式的基础上，新增可视化部署 FISCO-BCOS 底层节点功能；
+- 可视化部署链后，节点的管理操作，包括：新增，启动，停止；
+- 可视化部署链后，重置链后重新部署的功能；
+- `/front/find` 接口增加字段：节点版本号（`clientVersion`）和节点最高支持版本号（`supportVersion`）；
+
+**Fix**
+- 增加返回 FISCO-BCOS 和 WeBASE-Front Version 版本接口
+- 修改`tb_contract`表中合约ABI, BIN字段为`mediumtext`
+- 支持ChainGovernance/ContractLifeCycle预编译合约的交易解析
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本（推荐）
+- 支持FISCO-BCOS v2.5.x 版本
+- WeBASE-Web v1.4.0+
+- WeBASE-Front v1.4.0+
+- WeBASE-Sign v1.4.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
+
+### v1.3.2(2020-06-17)
+
+**Fix**
+- 移除Fastjson，替换为Jackson 2.11.0; web3sdk升级为2.4.1
+- 升级依赖包：spring: 5.1.15; log4j: 2.13.3; slf4j: 1.7.30; netty-all: 4.1.44+; guava: 28.2;
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本
+- WeBASE-Web v1.3.1+
+- WeBASE-Front v1.3.1+
+- WeBASE-Sign v1.3.1+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+### v1.3.1(2020-06-01)
+
+**Add**
+- 新增动态管理群组接口，支持群组脏数据提醒，手动删除群组数据等
+- 新增导入已部署合约的ABI接口，进行合约调用
+- 新增导入.p12/.pem/.txt格式私钥接口，支持导入控制台与前置的私钥
+- 新增节点前置状态，可查看前置运行状态
+
+**Fix**
+- 修复部署合约权限不足导致合约地址为0x0
+- 移除自动删除无效群组数据的逻辑
+- 修复公钥用户签名报空问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本
+- WeBASE-Web v1.3.1+
+- WeBASE-Front v1.3.1+
+- WeBASE-Sign v1.3.1+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
+### v1.3.0(2020-04-29)
+
+**Add**
+- 新增链上事件通知的GET接口
+- 不再保存私钥在数据库中，私钥与交易签名由节点前置通过**WeBASE-Sign**进行私钥创建与交易签名
+- 私钥接口中，不再返回私钥`privateKey`，仅返回`signUserId`、`address`等
+- 预编译合约接口由WeBASE-Sign签名后调用
+- `tb_user`表新增`signUserId`和`appId`字段，移除表`tb_user_key_map`
+- 签名服务的`userId`改为`signUserId`, 接口中的`useAes`默认为true，不再需要传入值
+
+**Fix**
+- 升级依赖包log4j, fastjson, jackson，移除Jwt
+- 统一HTTP请求为UTF-8
+- 优化启动脚本
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 - 2.4.x 版本
+- WeBASE-Web v1.2.2+
+- WeBASE-Front v1.2.2+
+- WeBASE-Sign v1.2.2+
+- WeBASE-Transaction v1.2.2+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+### v1.2.4 (2020-04-14)
+
+**Fix**
+- bugifx: 升级fastjson v1.2.67
+- bugifx: 请求体headers中token字段由“Authorization”改成“AuthorizationToken”
+- bugifx: Precompiled预编译相关接口中的useAes默认为false，改为默认true
+- bugifx: 发交易接口在前后端增加contractAbi字段，修复合约重载函数与CNS获取abi失败的问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 及以上版本
+- WeBASE-Web v1.2.2+
+- WeBASE-Node-Manager v1.2.2+
+- WeBASE-Sign v1.2.2+
+- WeBASE-Transaction v1.2.2+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.2.2 (2020-01-02)
 
 **Add**

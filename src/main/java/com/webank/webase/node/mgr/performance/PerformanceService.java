@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.webank.webase.node.mgr.performance;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_PERFORMANCE_CONFIG;
 import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_PERFORMANCE_RATIO;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -31,6 +31,7 @@ import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 @Log4j2
@@ -74,10 +75,15 @@ public class PerformanceService {
                 FRONT_PERFORMANCE_RATIO);
         url = url + "?" + urlParam;
         log.info("getPerformanceRatio request url:{}", url);
-
-        Object rspObj = genericRestTemplate.getForObject(url, Object.class);
-        log.debug("end getPerformanceRatio. rspObj:{}", JSON.toJSONString(rspObj));
-        return rspObj;
+        // raw request, not use front group map
+        try {
+            Object rspObj = genericRestTemplate.getForObject(url, Object.class);
+            log.debug("end getPerformanceRatio. rspObj:{}", JsonTools.toJSONString(rspObj));
+            return rspObj;
+        } catch (ResourceAccessException e) {
+            log.error("getPerformanceRatio. ResourceAccessException:{}", e);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
 
     }
 
@@ -99,7 +105,7 @@ public class PerformanceService {
         log.info("getPerformanceConfig request url:{}", url);
 
         Object rspObj = genericRestTemplate.getForObject(url, Object.class);
-        log.debug("end getPerformanceConfig. frontRsp:{}", JSON.toJSONString(rspObj));
+        log.debug("end getPerformanceConfig. frontRsp:{}", JsonTools.toJSONString(rspObj));
         return rspObj;
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,19 @@ public class RetCode {
 
     private Integer code;
     private String message;
+    private String attachment;
 
     public RetCode(int code, String message) {
         this.code = code;
         this.message = message;
     }
 
+    public RetCode attach(Object attachment) {
+        if (attachment != null){
+            this.attachment = String.valueOf(attachment);
+        }
+        return this;
+    }
     public static RetCode mark(int code, String message) {
         return new RetCode(code, message);
     }

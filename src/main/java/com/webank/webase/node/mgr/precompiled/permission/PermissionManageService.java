@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,27 @@
  */
 package com.webank.webase.node.mgr.precompiled.permission;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.precompiled.entity.PermissionParam;
+import com.webank.webase.node.mgr.precompiled.entity.PermissionState;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UserParam;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Permission manage service
@@ -40,8 +47,6 @@ public class PermissionManageService {
 
     @Autowired
     private FrontRestTools frontRestTools;
-    @Autowired
-    private FrontInterfaceService frontInterfaceService;
     @Autowired
     private UserService userService;
 
@@ -66,7 +71,7 @@ public class PermissionManageService {
                 resultMap.put(address, emptyState);
             }
         }
-        log.debug("end listPermissionState. frontRsp:{}", JSON.toJSONString(resultMap));
+        log.debug("end listPermissionState. frontRsp:{}", JsonTools.toJSONString(resultMap));
         return resultMap;
     }
 
@@ -89,7 +94,7 @@ public class PermissionManageService {
         map.put("groupId", String.valueOf(groupId));
         uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION_SORTED_FULL_LIST, map);
         Map<String, Object> frontRsp = (Map<String, Object>) frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end listPermissionStateFull. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end listPermissionStateFull. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         Map<String, PermissionState> result = (Map<String, PermissionState>) frontRsp.get("data");
         return result;
     }
@@ -97,8 +102,8 @@ public class PermissionManageService {
     /**
      * get paged permission list
      */
-    public Object listPermission(int groupId, String permissionType, String tableName, int pageSize, int pageNumber) {
-        log.debug("start listPermission. groupId:{}, permissionType:{}" , groupId , permissionType);
+    public Object listPermissionPaged(int groupId, String permissionType, String tableName, int pageSize, int pageNumber) {
+        log.debug("start listPermissionPaged. groupId:{}, permissionType:{}" , groupId , permissionType);
         String uri;
         Map<String, String>  map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
@@ -113,15 +118,15 @@ public class PermissionManageService {
         }
 
         Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end listPermission. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end listPermissionPaged. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
     /**
      * get full permission list
      */
-    public Object getPermissionFullList(int groupId, String permissionType, String tableName) {
-        log.debug("start getPermissionFullList. groupId:{}, permissionType:{}" , groupId , permissionType);
+    public BasePageResponse listPermissionFull(int groupId, String permissionType, String tableName) {
+        log.debug("start listPermissionFull. groupId:{}, permissionType:{}" , groupId , permissionType);
         String uri;
         Map<String, String>  map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
@@ -132,9 +137,8 @@ public class PermissionManageService {
             map.put("tableName", tableName);
             uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_PERMISSION_FULL_LIST, map);
         }
-
-        Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end getPermissionFullList. frontRsp:{}", JSON.toJSONString(frontRsp));
+        BasePageResponse frontRsp = frontRestTools.getForEntity(groupId, uri, BasePageResponse.class);
+        log.debug("end listPermissionFull. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
@@ -142,50 +146,50 @@ public class PermissionManageService {
      * repost permission grant
      */
     public Object updatePermissionState(PermissionParam permissionParam) {
-        log.debug("start updatePermissionState. permissionParam:{}", JSON.toJSONString(permissionParam));
+        log.debug("start updatePermissionState. permissionParam:{}", JsonTools.toJSONString(permissionParam));
         if (Objects.isNull(permissionParam)) {
             log.error("fail updatePermissionState. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        if(Objects.isNull(permissionParam.getUseAes())) {
-            permissionParam.setUseAes(false);
-        }
+        int groupId = permissionParam.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, permissionParam.getFromAddress());
+        permissionParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.postForEntity(
-                permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION_SORTED_LIST,
+                groupId, FrontRestTools.URI_PERMISSION_SORTED_LIST,
                 permissionParam, Object.class);
-        log.debug("end updatePermissionState. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end updatePermissionState. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
     public Object grantPermission(PermissionParam permissionParam) {
-        log.debug("start grantPermission. permissionParam:{}", JSON.toJSONString(permissionParam));
+        log.debug("start grantPermission. permissionParam:{}", JsonTools.toJSONString(permissionParam));
         if (Objects.isNull(permissionParam)) {
             log.error("fail grantPermission. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        if(Objects.isNull(permissionParam.getUseAes())) {
-            permissionParam.setUseAes(false);
-        }
+        int groupId = permissionParam.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, permissionParam.getFromAddress());
+        permissionParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.postForEntity(
-                permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
+                groupId, FrontRestTools.URI_PERMISSION,
                 permissionParam, Object.class);
-        log.debug("end grantPermission. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end grantPermission. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 
     public Object revokePermission(PermissionParam permissionParam) {
-        log.debug("start revokePermission. permissionParam:{}", JSON.toJSONString(permissionParam));
+        log.debug("start revokePermission. permissionParam:{}", JsonTools.toJSONString(permissionParam));
         if (Objects.isNull(permissionParam)) {
             log.error("fail revokePermission. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        if(Objects.isNull(permissionParam.getUseAes())) {
-            permissionParam.setUseAes(false);
-        }
+        int groupId = permissionParam.getGroupId();
+        String signUserId = userService.getSignUserIdByAddress(groupId, permissionParam.getFromAddress());
+        permissionParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.deleteForEntity(
-                permissionParam.getGroupId(), FrontRestTools.URI_PERMISSION,
+                groupId, FrontRestTools.URI_PERMISSION,
                 permissionParam, Object.class);
-        log.debug("end revokePermission. frontRsp:{}", JSON.toJSONString(frontRsp));
+        log.debug("end revokePermission. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
 }

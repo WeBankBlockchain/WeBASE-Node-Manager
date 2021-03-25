@@ -2,9 +2,9 @@
 
 APP_MAIN=com.webank.webase.node.mgr.Application
 CLASSPATH='conf/:apps/*:lib/*'
-CURRENT_DIR=`pwd`
-LOG_DIR=${CURRENT_DIR}/log
-CONF_DIR=${CURRENT_DIR}/conf
+CURRENT_DIR=$(pwd)/
+LOG_DIR=${CURRENT_DIR}log
+CONF_DIR=${CURRENT_DIR}conf
 ARIAL_DIR=${CONF_DIR}/Arial
 
 SERVER_PORT=$(cat $CONF_DIR/application.yml| grep "port" | awk '{print $2}'| sed 's/\r//')
@@ -21,7 +21,7 @@ fi
 copyArial(){
     arialFolder="/usr/share/fonts/arial"
     if [ ! -d "$arialFolder" ]; then
-        sudo mkdir "$arialFolder" && sudo cp $ARIAL_DIR/arial*.ttf $arialFolder/
+        sudo mkdir -p "$arialFolder" && sudo cp $ARIAL_DIR/arial*.ttf $arialFolder/
     fi
 }
 
@@ -31,7 +31,7 @@ startWaitTime=30
 processPid=0
 processStatus=0
 checkProcess(){
-    server_pid=`ps aux | grep java | grep $CURRENT_DIR | grep $APP_MAIN | awk '{print $2}'`
+    server_pid=$(ps aux | grep java | grep $CURRENT_DIR | grep $APP_MAIN | awk '{print $2}')
     if [ -n "$server_pid" ]; then
         processPid=$server_pid
         processStatus=1

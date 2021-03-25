@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -64,7 +64,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         baseResponse.setData(rsp);
 
-        String backStr = JSON.toJSONString(baseResponse);
+        String backStr = JsonTools.toJSONString(baseResponse);
         log.debug("login backInfo:{}", backStr);
 
         response.setContentType("application/json;charset=UTF-8");

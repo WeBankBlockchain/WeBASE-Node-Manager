@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,34 @@
  */
 package com.webank.webase.node.mgr.base.enums;
 
+import lombok.ToString;
+
 /**
  * Enumeration of data status.
  */
+@ToString
 public enum DataStatus {
-    NORMAL(1), INVALID(2);
+    NORMAL(1), INVALID(2),
+    /**
+     * used in visual deploy node status(not front status)
+     */
+    STARTING(3),
+    /**
+     * node is down, but front is normal; used in manually deploy
+     */
+    DOWN(4);
 
     private int value;
 
-    private DataStatus(Integer dataStatus) {
+    DataStatus(Integer dataStatus) {
         this.value = dataStatus;
     }
 
     public int getValue() {
         return this.value;
+    }
+
+    public static boolean starting(int status){
+        return status == STARTING.getValue();
     }
 }

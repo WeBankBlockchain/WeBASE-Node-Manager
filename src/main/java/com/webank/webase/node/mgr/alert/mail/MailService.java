@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package com.webank.webase.node.mgr.alert.mail;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.account.AccountMapper;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.alert.log.AlertLogService;
@@ -180,21 +182,15 @@ public class MailService {
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         // if mail server not turn ON
         if(latestMailServerConfig.getEnable() == EnableStatus.OFF.getValue()) {
-            log.error("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
+            log.warn("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
             return;
         }
         TbAlertRule alertRule = alertRuleMapper.queryByRuleId(ruleId);
         // if alert not activated
         if(alertRule.getEnable() == EnableStatus.OFF.getValue()) {
-            log.debug("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
+            log.warn("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
             return;
         }
-        // last time alert by now, if within interval, not send
-        // 告警间隔时间的刷新放到遍历group异常的for循环外面
-//        if(isWithinAlertIntervalByNow(alertRule)) {
-//            log.debug("end sendMailByRule non-sending mail for beyond alert interval:{}", alertRule);
-//            return;
-//        }
         // if userList is empty or default email
         if(StringUtils.isEmpty(alertRule.getUserList())) {
             log.error("end sendMailByRule for no receive mail address:{}", alertRule);
@@ -246,13 +242,13 @@ public class MailService {
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         // if mail server not turn ON
         if(latestMailServerConfig.getEnable() == EnableStatus.OFF.getValue()) {
-            log.error("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
+            log.warn("end sendMailByRule for server config not enable:{}", latestMailServerConfig);
             return;
         }
         TbAlertRule alertRule = alertRuleMapper.queryByRuleId(ruleId);
         // if alert not activated
         if(alertRule.getEnable() == EnableStatus.OFF.getValue()) {
-            log.debug("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
+            log.warn("end sendMailByRule non-sending mail for alertRule not enabled:{}", alertRule);
             return;
         }
         // last time alert by now, if within interval, not send
@@ -327,9 +323,12 @@ public class MailService {
         }else {
             List<String> userList = new ArrayList<>();
             try {
-                userList = (List<String>) JSON.parse(alertRule.getUserList());
+                userList = JsonTools.toJavaObjectList(alertRule.getUserList(), String.class);
+                if (userList == null) {
+                    log.error("parse json error");
+                }
             }catch (Exception e) {
-                log.error("handleAllUserEmail parse error: e:[], getUserList{}",
+                log.error("handleAllUserEmail parse error: e:{}, getUserList{}",
                         e, alertRule.getUserList());
             }
             for(String userMailAddress: userList) {

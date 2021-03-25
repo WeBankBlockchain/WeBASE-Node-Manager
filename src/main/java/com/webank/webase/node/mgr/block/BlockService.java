@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -19,11 +19,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.TableName;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -87,6 +88,7 @@ public class BlockService {
         } catch (Exception ex) {
             log.error("fail pullBlockByGroupId. groupId:{} ", groupId, ex);
         }finally {
+            // finish one group, count down
             latch.countDown();
         }
         log.debug("end pullBlockByGroupId groupId:{}", groupId);
@@ -182,7 +184,7 @@ public class BlockService {
      */
     @Transactional
     public void addBlockInfo(TbBlock tbBlock, int groupId) throws NodeMgrException {
-        log.debug("start addBlockInfo tbBlock:{}", JSON.toJSONString(tbBlock));
+        log.debug("start addBlockInfo tbBlock:{}", JsonTools.toJSONString(tbBlock));
         String tableName = TableName.BLOCK.getTableName(groupId);
         //check newBLock == dbMaxBLock +1
         BigInteger dbMaxBLock = blockmapper.getLatestBlockNumber(tableName);
@@ -203,7 +205,7 @@ public class BlockService {
     public List<TbBlock> queryBlockList(int groupId, BlockListParam queryParam)
         throws NodeMgrException {
         log.debug("start queryBlockList groupId:{},queryParam:{}", groupId,
-            JSON.toJSONString(queryParam));
+            JsonTools.toJSONString(queryParam));
 
         List<TbBlock> listOfBlock = blockmapper
             .getList(TableName.BLOCK.getTableName(groupId), queryParam);
@@ -294,16 +296,62 @@ public class BlockService {
     }
 
     /**
-     * get block by block from front server
+     * get block by blockNumber from front server
      */
     public BlockInfo getBlockFromFrontByNumber(int groupId, BigInteger blockNumber) {
         return frontInterface.getBlockByNumber(groupId, blockNumber);
     }
 
     /**
-     * get block by block from front server
+     * get block by hash from front server
      */
-    public BlockInfo getblockFromFrontByHash(int groupId, String pkHash) {
-        return frontInterface.getblockByHash(groupId, pkHash);
+    public BlockInfo getBlockFromFrontByHash(int groupId, String pkHash) {
+        return frontInterface.getBlockByHash(groupId, pkHash);
+    }
+
+    /**
+     * get smallest block height in local db
+	 *
+     */
+    public TbBlock getSmallestBlockInfo(int groupId) {
+        BigInteger smallestHeight = getSmallestBlockHeight(groupId);
+        if (smallestHeight == null) {
+        	log.debug("getSmallestBlockInfo groupId:{} has no block local", groupId);
+        	return null;
+		}
+        return getBlockByBlockNumber(groupId, smallestHeight);
+    }
+
+    /**
+     * get block of smallest height in local db
+     * @param groupId
+     */
+    public BigInteger getSmallestBlockHeight(int groupId) {
+        return blockmapper.getSmallestBlockNumber(TableName.BLOCK.getTableName(groupId));
+    }
+
+    /**
+     * get local tbBlock by blockNumber
+     * @param groupId
+     * @param blockNumber
+     * @return TbBlock
+     */
+    public TbBlock getBlockByBlockNumber(int groupId, BigInteger blockNumber) {
+        return blockmapper.getBlockByBlockNumber(TableName.BLOCK.getTableName(groupId),
+                blockNumber);
+    }
+
+    /**
+     * get block by number from front
+     */
+    public BcosBlockHeader getBlockHeaderFromFrontByNumber(int groupId, BigInteger blockNumber) {
+        return frontInterface.getBlockHeaderByNumber(groupId, blockNumber);
+    }
+
+    /**
+     * get block header by hash from front
+     */
+    public BcosBlockHeader getBlockHeaderFromFrontByHash(int groupId, String pkHash) {
+        return frontInterface.getBlockHeaderByHash(groupId, pkHash);
     }
 }

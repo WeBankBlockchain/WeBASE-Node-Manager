@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,12 +13,6 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -29,17 +23,34 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.utils.Numeric;
+
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * common method.
@@ -47,7 +58,7 @@ import org.fisco.bcos.web3j.utils.Numeric;
 @Log4j2
 public class NodeMgrTools {
 
-    private static final String TOKEN_HEADER_NAME = "Authorization";
+    public static final String TOKEN_HEADER_NAME = "AuthorizationToken";
     private static final String TOKEN_START = "Token";
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_TIME_FORMAT_NO_SPACE = "yyyyMMddHHmmss";
@@ -89,14 +100,28 @@ public class NodeMgrTools {
     /**
      * convert timestamp to localDateTime.
      */
-    public static LocalDateTime timestamp2LocalDateTime(Long inputTime) {
-        if (inputTime == null) {
-            log.warn("timestamp2LocalDateTime fail. inputTime is null");
+    public static LocalDateTime timestamp2LocalDateTime(Long inputTimeStamp) {
+        if (inputTimeStamp == null) {
+            log.warn("timestamp2LocalDateTime fail. inputTimeStamp is null");
             return null;
         }
-        Instant instant = Instant.ofEpochMilli(inputTime);
+        Instant instant = Instant.ofEpochMilli(inputTimeStamp);
         ZoneId zone = ZoneId.systemDefault();
         return LocalDateTime.ofInstant(instant, zone);
+//        Timestamp time = new Timestamp(inputTimeStamp);
+//        return time.toLocalDateTime();
+    }
+    /**
+     * LocalDateTime to timestamp
+     */
+    public static Long localDateTime2Timestamp(LocalDateTime inputDateTime) {
+        if (inputDateTime == null) {
+            log.warn("localDateTime2Timestamp fail. inputDateTime is null");
+            return null;
+        }
+//        Timestamp time = Timestamp.valueOf(inputDateTime);
+//        return time.getTime();
+        return inputDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 
     /**
@@ -140,26 +165,17 @@ public class NodeMgrTools {
             log.warn("object2JavaBean. obj or clazz null");
             return null;
         }
-        String jsonStr = JSON.toJSONString(obj);
+        String jsonStr = JsonTools.toJSONString(obj);
 
-        return JSON.parseObject(jsonStr, clazz);
+        return JsonTools.toJavaObject(jsonStr, clazz);
     }
 
-
-    public static JSONObject Object2JSONObject(Object obj) {
-        if (obj == null) {
-            log.warn("obj is null");
-            return null;
-        }
-        String objJson = JSON.toJSONString(obj);
-        return JSONObject.parseObject(objJson);
-    }
 
     /**
      * encode list by sha.
      */
     public static String shaList(List<String> values) {
-        log.info("shaList start. values:{}", JSON.toJSONString(values));
+        log.info("shaList start. values:{}", JsonTools.toJSONString(values));
         // list按字段排序，并转换成字符串
         String list2SortString = list2SortString(values);
         // SHA加密字符串
@@ -349,7 +365,7 @@ public class NodeMgrTools {
 /*        baseResponse.setMessage(ex.getMessage());
         response.setContentType("application/json;charset=UTF-8");*/
         try {
-            response.getWriter().write(JSON.toJSONString(baseResponse));
+            response.getWriter().write(JsonTools.toJSONString(baseResponse));
         } catch (IOException e) {
             log.error("fail responseRetCodeException",e);
         }
@@ -357,58 +373,47 @@ public class NodeMgrTools {
 
 
     /**
-     * check target time is valid.
+     * check target time if within time period
      *
-     * @param dateTime target time.
+     * @param lastTime target time.
      * @param validLength y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid;
-     * example1:1d;example2:n
+     * example1: 1d; example2:n
      */
-    public static boolean isDateTimeInValid(LocalDateTime dateTime, String validLength) {
-        log.debug("start isDateTimeInValid. dateTime:{} validLength:{}", dateTime, validLength);
+    public static boolean isWithinPeriod(LocalDateTime lastTime, String validLength) {
+        log.debug("start isWithinTime. dateTime:{} validLength:{}", lastTime, validLength);
         if ("n".equals(validLength)) {
             return true;
         }
-        if (Objects.isNull(dateTime) || StringUtils.isBlank(validLength)
+        if (Objects.isNull(lastTime) || StringUtils.isBlank(validLength)
             || validLength.length() < 2) {
             return false;
         }
-
+        // example: 2d (2 day)
+        // 2
         String lifeStr = validLength.substring(0, validLength.length() - 1);
         if (!StringUtils.isNumeric(lifeStr)) {
-            log.warn("fail isDateTimeInValid");
-            throw new RuntimeException("fail isDateTimeInValid. validLength is error");
+            log.warn("fail isWithinTime");
+            throw new RuntimeException("fail isWithinTime. validLength is error");
         }
-        int lifeValue = Integer.valueOf(lifeStr);
+        int lifeValue = Integer.parseInt(lifeStr);
+        // d
         String lifeUnit = validLength.substring(validLength.length() - 1);
-
+        // now is day 2, last time is day 1, 2 - 1 = 1 < 2 true
+        // now is day 3, last time is day 1, 3 - 1 = 2 < 2 false, not within
         LocalDateTime now = LocalDateTime.now();
         switch (lifeUnit) {
             case "y":
-                return dateTime.getYear() - now.getYear() < lifeValue;
+                return now.getYear() - lastTime.getYear() < lifeValue;
             case "M":
-                return dateTime.getMonthValue() - now.getMonthValue() < lifeValue;
+                return now.getMonthValue() - lastTime.getMonthValue() < lifeValue;
             case "d":
-                return dateTime.getDayOfMonth() - now.getDayOfMonth() < lifeValue;
+                return  now.getDayOfMonth() - lastTime.getDayOfMonth() < lifeValue;
             case "m":
-                return dateTime.getMinute() - now.getMinute() < lifeValue;
+                return now.getMinute() - lastTime.getMinute() < lifeValue;
             default:
-                log.warn("fail isDateTimeInValid lifeUnit:{}", lifeUnit);
+                log.warn("fail isWithinTime lifeUnit:{}", lifeUnit);
                 return false;
         }
-    }
-
-    /**
-     * is json.
-     */
-    public static boolean isJSON(String str) {
-        boolean result;
-        try {
-            JSON.parse(str);
-            result = true;
-        } catch (Exception e) {
-            result = false;
-        }
-        return result;
     }
 
     /**
@@ -421,12 +426,12 @@ public class NodeMgrTools {
         }
 
         RetCode retCode;
-        if (isJSON(str) && (retCode = JSONObject.parseObject(str, RetCode.class)) != null) {
+        if (JsonTools.isJson(str) && (retCode = JsonTools.toJavaObject(str, RetCode.class)) != null) {
             baseResponse = new BaseResponse(retCode);
         }
 
         try {
-            response.getWriter().write(JSON.toJSONString(baseResponse));
+            response.getWriter().write(JsonTools.toJSONString(baseResponse));
         } catch (IOException e) {
             log.error("fail responseRetCodeException", e);
         }
@@ -484,5 +489,50 @@ public class NodeMgrTools {
             return 0;
         }
         return Integer.parseInt(str.substring(2), 16);
+    }
+
+    /**
+     * remove "0x" and last character.
+     */
+    public static String removeBinFirstAndLast(String contractBin, int removaLastLength) {
+        if (StringUtils.isBlank(contractBin)) {
+            return null;
+        }
+        String contractBinResult = removeFirstStr(contractBin, "0x");
+        if (contractBinResult.length() > removaLastLength) {
+            contractBinResult = contractBinResult.substring(0, contractBinResult.length() - removaLastLength);
+        }
+        return contractBinResult;
+    }
+
+    /**
+     * remove fist string.
+     */
+    public static String removeFirstStr(String input, String target) {
+        if (StringUtils.isBlank(input) || StringUtils.isBlank(target)) {
+            return input;
+        }
+        if (input.startsWith(target)) {
+            input = StringUtils.removeStart(input, target);
+        }
+        return input;
+    }
+
+    public static String encodedBase64Str(String input) {
+        if (input == null) {
+            return null;
+        }
+        return Base64.getEncoder().encodeToString(input.getBytes());
+    }
+
+    /**
+     * 只包含中文
+     */
+    public static boolean notContainsChinese(String input) {
+        if (StringUtils.isBlank(input)) {
+            return true;
+        }
+        String regex = "[^\\u4e00-\\u9fa5]+";
+        return input.matches(regex);
     }
 }

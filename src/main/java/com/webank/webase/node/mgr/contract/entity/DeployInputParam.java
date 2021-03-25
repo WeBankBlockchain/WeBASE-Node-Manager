@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,12 @@ import lombok.Data;
  * receive contract info entity.
  */
 @Data
-public class DeployInputParam{
+public class DeployInputParam {
+    /**
+     * user's address, to identify signUserId
+     */
+    @NotBlank
+    private String account;
     @NotBlank
     private String user;
     @NotNull

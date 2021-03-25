@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.webank.webase.node.mgr.role;
 
 import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -30,14 +31,16 @@ public class RoleListParam extends BaseQueryParam {
     private Integer roleId;
     private String roleName;
     private String roleNameZh;
+    private List<Integer> roleIdListNotIn;
 
     /**
      * init by start、pateSize、roleId、roleName.
      */
-    public RoleListParam(Integer start, Integer pageSize, Integer roleId, String roleName) {
+    public RoleListParam(Integer start, Integer pageSize, Integer roleId, String roleName, List<Integer> roleIdListNotIn) {
         super(start, pageSize,null);
         this.roleId = roleId;
         this.roleName = roleName;
+        this.roleIdListNotIn = roleIdListNotIn;
     }
 
 }

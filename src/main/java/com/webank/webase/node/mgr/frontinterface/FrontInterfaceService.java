@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,25 +13,19 @@
  */
 package com.webank.webase.node.mgr.frontinterface;
 
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CONTAIN_GROUP_ID;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.block.entity.BlockInfo;
+import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
+import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
+import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.GroupHandleResult;
@@ -39,10 +33,28 @@ import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.monitor.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
-import com.webank.webase.node.mgr.transaction.entity.TransReceipt;
 import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
+import com.webank.webase.node.mgr.user.entity.KeyPair;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
-
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestTemplate;
 
 @Log4j2
 @Service
@@ -74,9 +86,23 @@ public class FrontInterfaceService {
             HttpEntity entity = FrontRestTools.buildHttpEntity(param);// build entity
             ResponseEntity<T> response = genericRestTemplate.exchange(url, method, entity, clazz);
             return response.getBody();
-        } catch (HttpStatusCodeException e) {
-            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-            throw new NodeMgrException(error.getInteger("code"), error.getString("errorMessage"));
+        } catch (ResourceAccessException e) {
+            log.error("requestSpecificFront. ResourceAccessException:{}", e);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        } catch (HttpStatusCodeException ex) {
+            JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
+            log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error));
+            if (error == null) {
+                log.error("deserialize http response error");
+                throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
+            }
+            try {
+                int code = error.get("code").intValue();
+                String errorMessage = error.get("errorMessage").asText();
+                throw new NodeMgrException(code, errorMessage);
+            } catch (NullPointerException e) {
+                throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
+            }
         }
     }
 
@@ -98,11 +124,11 @@ public class FrontInterfaceService {
      * send contract abi
      */
     public void sendAbi(int groupId, PostAbiInfo param) {
-        log.debug("start sendAbi groupId:{} param:{}", groupId, JSON.toJSONString(param));
+        log.debug("start sendAbi groupId:{} param:{}", groupId, JsonTools.toJSONString(param));
 
         frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_SENDABI, param,
                 Object.class);
-        log.debug("end sendAbi groupId:{} param:{}", groupId, JSON.toJSONString(param));
+        log.debug("end sendAbi groupId:{} param:{}", groupId, JsonTools.toJSONString(param));
 
     }
 
@@ -121,7 +147,11 @@ public class FrontInterfaceService {
      */
     public List<String> getGroupListFromSpecificFront(String nodeIp, Integer frontPort) {
         Integer groupId = Integer.MAX_VALUE;
-        return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_GROUP_PLIST, List.class);
+        List<String> resList = getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_GROUP_PLIST, List.class);
+        if (resList.isEmpty()) {
+            throw new NodeMgrException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+        }
+        return resList;
     }
 
 
@@ -158,6 +188,20 @@ public class FrontInterfaceService {
                 SyncStatus.class);
     }
 
+    public BlockInfo getBlockByNumberFromSpecificFront(String frontIp, Integer frontPort,
+													   Integer groupId, BigInteger blockNumber) {
+		log.debug("start getBlockByNumberFromSpecificFront frontIp:{},frontPort{}," +
+				" groupId:{} blockNumber:{}", frontIp, frontPort, groupId, blockNumber);
+		String uri = String.format(FrontRestTools.URI_BLOCK_BY_NUMBER, blockNumber);
+		BlockInfo blockInfo = null;
+		try{
+            blockInfo = getFromSpecificFront(groupId, frontIp, frontPort, uri, BlockInfo.class);
+        } catch (Exception ex) {
+		    log.error("getBlockByNumberFromSpecificFront:{}", ex.getMessage());
+        }
+		return blockInfo;
+	}
+
     /**
      * get peers.
      */
@@ -181,10 +225,10 @@ public class FrontInterfaceService {
     /**
      * get transaction receipt.
      */
-    public TransReceipt getTransReceipt(Integer groupId, String transHash) throws NodeMgrException {
+    public TransactionReceipt getTransReceipt(Integer groupId, String transHash) throws NodeMgrException {
         log.debug("start getTransReceipt groupId:{} transaction:{}", groupId, transHash);
         String uri = String.format(FrontRestTools.FRONT_TRANS_RECEIPT_BY_HASH_URI, transHash);
-        TransReceipt transReceipt = frontRestTools.getForEntity(groupId, uri, TransReceipt.class);
+        TransactionReceipt transReceipt = frontRestTools.getForEntity(groupId, uri, TransactionReceipt.class);
         log.debug("end getTransReceipt");
         return transReceipt;
     }
@@ -216,7 +260,7 @@ public class FrontInterfaceService {
         try {
             blockInfo = frontRestTools.getForEntity(groupId, uri, BlockInfo.class);
         } catch (Exception ex) {
-            log.info("fail getBlockByNumber,exception:{}", ex);
+            log.error("fail getBlockByNumber,exception:[]", ex);
         }
         log.debug("end getBlockByNumber");
         return blockInfo;
@@ -226,11 +270,11 @@ public class FrontInterfaceService {
     /**
      * request front for block by hash.
      */
-    public BlockInfo getblockByHash(Integer groupId, String pkHash) throws NodeMgrException {
-        log.debug("start getblockByHash. groupId:{}  pkHash:{}", groupId, pkHash);
-        String uri = String.format(FrontRestTools.URI_BLOCK_BY_HASH, pkHash);
+    public BlockInfo getBlockByHash(Integer groupId, String blockHash) throws NodeMgrException {
+        log.debug("start getBlockByHash. groupId:{}  blockHash:{}", groupId, blockHash);
+        String uri = String.format(FrontRestTools.URI_BLOCK_BY_HASH, blockHash);
         BlockInfo blockInfo = frontRestTools.getForEntity(groupId, uri, BlockInfo.class);
-        log.debug("end getblockByHash. blockInfo:{}", JSON.toJSONString(blockInfo));
+        log.debug("end getBlockByHash. blockInfo:{}", JsonTools.toJSONString(blockInfo));
         return blockInfo;
     }
 
@@ -246,7 +290,7 @@ public class FrontInterfaceService {
         }
         ChainTransInfo chainTransInfo = new ChainTransInfo(trans.getFrom(), trans.getTo(),
                 trans.getInput(), trans.getBlockNumber());
-        log.debug("end getTransInfoByHash:{}", JSON.toJSONString(chainTransInfo));
+        log.debug("end getTransInfoByHash:{}", JsonTools.toJSONString(chainTransInfo));
         return chainTransInfo;
     }
 
@@ -256,7 +300,7 @@ public class FrontInterfaceService {
     public String getAddressByHash(Integer groupId, String transHash) throws NodeMgrException {
         log.debug("start getAddressByHash. groupId:{} transHash:{}", groupId, transHash);
 
-        TransReceipt transReceipt = getTransReceipt(groupId, transHash);
+        TransactionReceipt transReceipt = getTransReceipt(groupId, transHash);
         String contractAddress = transReceipt.getContractAddress();
         log.debug("end getAddressByHash. contractAddress{}", contractAddress);
         return contractAddress;
@@ -298,7 +342,7 @@ public class FrontInterfaceService {
             return null;
         }
         List<TransactionInfo> transInBLock = blockInfo.getTransactions();
-        log.debug("end getTransByBlockNumber. transInBLock:{}", JSON.toJSONString(transInBLock));
+        log.debug("end getTransByBlockNumber. transInBLock:{}", JsonTools.toJSONString(transInBLock));
         return transInBLock;
     }
 
@@ -308,7 +352,7 @@ public class FrontInterfaceService {
     public List<String> getGroupPeers(Integer groupId) {
         log.debug("start getGroupPeers. groupId:{}", groupId);
         List<String> groupPeers = frontRestTools.getForEntity(groupId, FrontRestTools.URI_GROUP_PEERS, List.class);
-        log.debug("end getGroupPeers. groupPeers:{}", JSON.toJSONString(groupPeers));
+        log.debug("end getGroupPeers. groupPeers:{}", JsonTools.toJSONString(groupPeers));
         return groupPeers;
     }
 
@@ -319,7 +363,7 @@ public class FrontInterfaceService {
         log.debug("start getObserverList. groupId:{}", groupId);
         List<String> observers =
                 frontRestTools.getForEntity(groupId, FrontRestTools.URI_GET_OBSERVER_LIST, List.class);
-        log.info("end getObserverList. observers:{}", JSON.toJSONString(observers));
+        log.info("end getObserverList. observers:{}", JsonTools.toJSONString(observers));
         return observers;
     }
 
@@ -350,7 +394,7 @@ public class FrontInterfaceService {
         log.debug("start getSyncStatus. groupId:{}", groupId);
         SyncStatus ststus = frontRestTools.getForEntity(groupId, FrontRestTools.URI_CSYNC_STATUS,
                 SyncStatus.class);
-        log.debug("end getSyncStatus. ststus:{}", JSON.toJSONString(ststus));
+        log.debug("end getSyncStatus. ststus:{}", JsonTools.toJSONString(ststus));
         return ststus;
     }
 
@@ -372,7 +416,7 @@ public class FrontInterfaceService {
         log.debug("start getSealerList. groupId:{}", groupId);
         List getSealerList = frontRestTools.getForEntity(groupId,
                 FrontRestTools.URI_GET_SEALER_LIST, List.class);
-        log.debug("end getSealerList. getSealerList:{}", JSON.toJSONString(getSealerList));
+        log.debug("end getSealerList. getSealerList:{}", JsonTools.toJSONString(getSealerList));
         return getSealerList;
     }
 
@@ -409,12 +453,38 @@ public class FrontInterfaceService {
         return encryptType;
     }
 
-    public String getClientVersion(String frontIp, Integer frontPort,
+    public NodeVersion.Version getClientVersionFromSpecificFront(String frontIp, Integer frontPort,
                                    Integer groupId) {
-        log.debug("start getClientVersion. groupId:{}", groupId);
+        log.debug("start getClientVersionFromSpecificFront. frontIp:{},frontPort:{},groupId:{}",
+            frontIp, frontPort, groupId);
         NodeVersion.Version clientVersion = getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_GET_CLIENT_VERSION, NodeVersion.Version.class);
-        log.debug("end getClientVersion. consensusStatus:{}", clientVersion);
-        return clientVersion.getVersion();
+        log.debug("end getClientVersionFromSpecificFront. consensusStatus:{}", clientVersion);
+        // return clientVersion.getVersion();
+        return clientVersion;
+    }
+
+    /**
+     * get front version
+     */
+    public String getFrontVersionFromSpecificFront(String frontIp, Integer frontPort) {
+        log.debug("start getClientVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp, frontPort);
+        Integer groupId = Integer.MAX_VALUE;
+        String frontVersion = getFromSpecificFront(groupId,
+            frontIp, frontPort, FrontRestTools.URI_FRONT_VERSION, String.class);
+        log.debug("end getFrontVersionFromSpecificFront. frontVersion:{}", frontVersion);
+        return frontVersion;
+    }
+
+    /**
+     * get webase-sign version
+     */
+    public String getSignVersionFromSpecificFront(String frontIp, Integer frontPort) {
+        log.debug("start getSignVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp, frontPort);
+        Integer groupId = Integer.MAX_VALUE;
+        String signVersion = getFromSpecificFront(groupId,
+            frontIp, frontPort, FrontRestTools.URI_SIGN_VERSION, String.class);
+        log.debug("end getSignVersionFromSpecificFront. signVersion:{}", signVersion);
+        return signVersion;
     }
 
     /**
@@ -422,7 +492,7 @@ public class FrontInterfaceService {
      */
     public GroupHandleResult generateGroup(String frontIp, Integer frontPort,
             GenerateGroupInfo param) {
-        log.debug("start generateGroup frontIp:{} frontPort:{} param:{}", JSON.toJSONString(param));
+        log.debug("start generateGroup frontIp:{} frontPort:{} param:{}", frontIp, frontPort, JsonTools.toJSONString(param));
 
         Integer groupId = Integer.MAX_VALUE;
         GroupHandleResult groupHandleResult = requestSpecificFront(groupId, frontIp, frontPort,
@@ -435,25 +505,119 @@ public class FrontInterfaceService {
     /**
      * start group.
      */
-    public GroupHandleResult startGroup(String frontIp, Integer frontPort, Integer startGroupId) {
-        log.debug("start startGroup frontIp:{} frontPort:{} startGroupId:{}", startGroupId);
+    public BaseResponse operateGroup(String frontIp, Integer frontPort, Integer groupId, String type) {
+        log.info("start operateGroup frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
+                groupId);
+        String uri = String.format(FrontRestTools.URI_OPERATE_GROUP, type);
+        BaseResponse response =
+                getFromSpecificFront(groupId, frontIp, frontPort, uri, BaseResponse.class);
+        log.info("end operateGroup");
+        return response;
+    }
 
-        Integer groupId = Integer.MAX_VALUE;
-        String uri = String.format(FrontRestTools.URI_START_GROUP, startGroupId);
-        GroupHandleResult groupHandleResult =
-                getFromSpecificFront(groupId, frontIp, frontPort, uri, GroupHandleResult.class);
-
-        log.debug("end startGroup");
-        return groupHandleResult;
+    /**
+     * query group status list
+     */
+    public Map<String, String> queryGroupStatus(String frontIp, Integer frontPort, String nodeId, List<Integer> groupIdList) {
+        log.debug("start queryGroupStatusList frontIp:{} frontPort:{} nodeId:{} groupIdList:{}",
+                frontIp, frontPort, nodeId, groupIdList);
+        int uselessGroupId = 1;
+        Map<String, Object> param = new HashMap<>(1);
+        param.put("groupIdList", groupIdList);
+        BaseResponse response = requestSpecificFront(uselessGroupId, frontIp, frontPort,
+                        HttpMethod.POST, FrontRestTools.URI_QUERY_GROUP_STATUS, param, BaseResponse.class);
+        log.debug("end queryGroupStatusList");
+        return (Map<String, String>) response.getData();
     }
     
     /**
      * refresh front.
      */
     public void refreshFront(String frontIp, Integer frontPort) {
-        log.debug("start refreshFront groupId:{} frontIp:{} frontPort:{} ", frontIp, frontPort);
+        log.debug("start refreshFront frontIp:{} frontPort:{} ", frontIp, frontPort);
         Integer groupId = Integer.MAX_VALUE;
         getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_REFRESH_FRONT, Object.class);
         log.debug("end refreshFront");
+    }
+
+    /**
+     * get new block info list
+     */
+    public List<NewBlockEventInfo> getNewBlockEventInfo(String frontIp, Integer frontPort, Integer groupId) {
+        log.debug("start getNewBlockEventInfo frontIp:{} frontPort:{} groupId:{}",
+                frontIp, frontPort, groupId);
+        String newBlockInfoURI = FrontRestTools.URI_NEW_BLOCK_EVENT_INFO_LIST + "/" + groupId;
+        URI_CONTAIN_GROUP_ID.add(newBlockInfoURI);
+        BasePageResponse response = getFromSpecificFront(groupId, frontIp, frontPort, newBlockInfoURI,
+                BasePageResponse.class);
+        if (response.getData() == null) {
+            return new ArrayList<>();
+        }
+        List data = (List) response.getData();
+        List<NewBlockEventInfo> resList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), NewBlockEventInfo.class);
+        resList.forEach(info -> info.setFrontInfo(frontIp));
+        return resList;
+    }
+
+	public List<ContractEventInfo> getContractEventInfo(String frontIp, Integer frontPort, Integer groupId) {
+		log.debug("start getContractEventInfo frontIp:{} frontPort:{} groupId:{}",
+				frontIp, frontPort, groupId);
+		String contractEventInfoURI = FrontRestTools.URI_CONTRACT_EVENT_INFO_LIST + "/" + groupId;
+		URI_CONTAIN_GROUP_ID.add(contractEventInfoURI);
+		BasePageResponse response = getFromSpecificFront(groupId, frontIp, frontPort, contractEventInfoURI,
+				BasePageResponse.class);
+		if (response.getData() == null) {
+			return new ArrayList<>();
+		}
+		List data = (List) response.getData();
+		List<ContractEventInfo> resList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), ContractEventInfo.class);
+		resList.forEach(info -> info.setFrontInfo(frontIp));
+		return resList;
+	}
+
+	public List<KeyPair> getKeyStoreList(Integer groupId, String frontIp, Integer frontPort) {
+        List data = getFromSpecificFront(groupId, frontIp, frontPort,
+                FrontRestTools.URI_KEY_PAIR_LOCAL_KEYSTORE, List.class);
+        List<KeyPair> resList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), KeyPair.class);
+        return resList;
+    }
+
+    public List<String> getNodeIdList(int groupId) {
+        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_NODEID_LIST, List.class);
+    }
+
+    /**
+     * get block by number.
+     */
+    public BcosBlockHeader getBlockHeaderByNumber(Integer groupId, BigInteger blockNumber)
+        throws NodeMgrException {
+        log.debug("start getBlockHeaderByNumber groupId:{} blockNumber:{}", groupId, blockNumber);
+        String uri = String.format(FrontRestTools.URI_BLOCK_HEADER_BY_NUMBER, blockNumber);
+        BcosBlockHeader blockInfo = frontRestTools.getForEntity(groupId, uri, BcosBlockHeader.class);
+        log.debug("end getBlockHeaderByNumber");
+        return blockInfo;
+    }
+
+
+    /**
+     * request front for block by hash.
+     */
+    public BcosBlockHeader getBlockHeaderByHash(Integer groupId, String blockHash) throws NodeMgrException {
+        log.debug("start getBlockHeaderByHash. groupId:{}  blockHash:{}", groupId, blockHash);
+        String uri = String.format(FrontRestTools.URI_BLOCK_HEADER_BY_HASH, blockHash);
+        BcosBlockHeader blockInfo = frontRestTools.getForEntity(groupId, uri, BcosBlockHeader.class);
+        log.debug("end getBlockHeaderByHash. blockInfo:{}", JsonTools.toJSONString(blockInfo));
+        return blockInfo;
+    }
+
+    /**
+     * get event log list from front
+     */
+    public BasePageResponse getEventLogList(ReqEventLogList param) {
+        log.debug("start getEventLogList. param:{}", param);
+        BasePageResponse resultList = frontRestTools.postForEntity(param.getGroupId(),
+            FrontRestTools.URI_EVENT_LOG_LIST, param, BasePageResponse.class);
+        log.debug("end getEventLogList. resultList:{}", JsonTools.toJSONString(resultList));
+        return resultList;
     }
 }

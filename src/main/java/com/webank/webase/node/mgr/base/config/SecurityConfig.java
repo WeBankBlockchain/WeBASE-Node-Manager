@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,8 +13,6 @@
  */
 package com.webank.webase.node.mgr.base.config;
 
-import com.webank.webase.node.mgr.base.tools.SM3PasswordEncoder;
-import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +30,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
 import com.webank.webase.node.mgr.base.filter.TokenAuthenticationFilter;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.security.AccountDetailsService;
@@ -75,8 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .successHandler(loginSuccessHandler) // if login success
             .failureHandler(loginfailHandler) // if login fail
             .and().authorizeRequests()
-            .antMatchers("/account/login", "/account/pictureCheckCode",
-                    "/login","/user/privateKey/**", "/encrypt")
+            .antMatchers(constants.getPermitUrlArray())
             .permitAll()
             .anyRequest().authenticated().and().csrf()
             .disable() // close csrf
@@ -86,6 +84,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .logoutSuccessHandler(jsonLogoutSuccessHandler)
             .permitAll();
     }
+
 
     @Override
     public void configure(WebSecurity web) throws Exception {
