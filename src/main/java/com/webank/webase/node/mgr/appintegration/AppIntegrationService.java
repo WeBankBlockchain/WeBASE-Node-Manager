@@ -151,7 +151,7 @@ public class AppIntegrationService {
             try {
                 NodeMgrTools.checkServerConnect(tbAppInfo.getAppIp(), tbAppInfo.getAppPort());
             } catch (Exception e) {
-                log.info("appKey:{} status is invalid", tbAppInfo.getAppKey());
+                log.debug("appKey:{} status is invalid", tbAppInfo.getAppKey());
                 appStatus = DataStatus.INVALID.getValue();
             }
             updateAppInfo(new TbAppInfo(tbAppInfo.getId(), appStatus));
