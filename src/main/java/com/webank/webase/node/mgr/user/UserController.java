@@ -13,17 +13,24 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.CheckUserExist;
+import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.PemUtils;
-import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
-import com.webank.webase.node.mgr.user.entity.*;
+import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
+import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
+import com.webank.webase.node.mgr.user.entity.ReqImportPem;
+import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
+import com.webank.webase.node.mgr.user.entity.TbUser;
+import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
+import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -67,7 +74,8 @@ public class UserController extends BaseController {
 
         // add user row
         TbUser userRow = userService.addUserInfo(user.getGroupId(), user.getUserName(),
-                user.getAccount(), user.getDescription(), user.getUserType(), null, true, true);
+                user.getAccount(), user.getDescription(), user.getUserType(), null, 
+                ReturnPrivateKey.FALSE.getValue(), CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end addUserInfo useTime:{} result:{}",
@@ -174,7 +182,7 @@ public class UserController extends BaseController {
         // add user row
         TbUser userRow = userService.addUserInfo(reqImport.getGroupId(), reqImport.getUserName(),
                 reqImport.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
-                privateKeyEncoded, false, true);
+                privateKeyEncoded, ReturnPrivateKey.FALSE.getValue(), CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPrivateKey useTime:{} result:{}",
@@ -196,7 +204,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
-        TbUser userRow = userService.importPem(reqImportPem, true);
+        TbUser userRow = userService.importPem(reqImportPem, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
@@ -221,7 +229,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
         TbUser userRow = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
-                account, description, true);
+                account, description, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
@@ -232,52 +240,54 @@ public class UserController extends BaseController {
 
     /**
      * query user info.
+     * 
      * @related: export .txt privateKey file
      */
-//    @GetMapping(value = "/userInfo")
-//    public BaseResponse userInfo(@RequestParam Integer userId)
-//        throws NodeMgrException {
-//        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-//        Instant startTime = Instant.now();
-//        log.info("start userInfo startTime:{} signUserId:{}", startTime.toEpochMilli(), userId);
-//
-//        TbUser user = userService.queryUserDetail(userId);
-//        baseResponse.setData(user);
-//
-//        log.info("end userInfo useTime:{} result:{}",
-//            Duration.between(startTime, Instant.now()).toMillis(),
-//            JsonTools.toJSONString(baseResponse));
-//        return baseResponse;
-//    }
+    // @GetMapping(value = "/userInfo")
+    // public BaseResponse userInfo(@RequestParam Integer userId)
+    // throws NodeMgrException {
+    // BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+    // Instant startTime = Instant.now();
+    // log.info("start userInfo startTime:{} signUserId:{}", startTime.toEpochMilli(), userId);
+    //
+    // TbUser user = userService.queryUserDetail(userId);
+    // baseResponse.setData(user);
+    //
+    // log.info("end userInfo useTime:{} result:{}",
+    // Duration.between(startTime, Instant.now()).toMillis(),
+    // JsonTools.toJSONString(baseResponse));
+    // return baseResponse;
+    // }
 
     @PostMapping(value = "/exportPem")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object exportPemUserFromSign(@RequestParam String signUserId)
-        throws NodeMgrException {
+    public Object exportPemUserFromSign(@RequestParam String signUserId) throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start exportPemUserFromSign startTime:{} signUserId:{}", startTime.toEpochMilli(), signUserId);
+        log.info("start exportPemUserFromSign startTime:{} signUserId:{}", startTime.toEpochMilli(),
+                signUserId);
 
         Object pemFile = userService.exportPemFromSign(signUserId);
 
         log.info("end exportPemUserFromSign useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(),
-            JsonTools.toJSONString(pemFile));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(pemFile));
         return pemFile;
     }
 
     @PostMapping(value = "/exportP12")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object exportP12UserFromSign(@RequestParam String signUserId,
-        @RequestParam(required = false, defaultValue = "") String p12Password)
-        throws NodeMgrException {
+            @RequestParam(required = false, defaultValue = "") String p12Password)
+            throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start exportP12UserFromSign startTime:{} signUserId:{}", startTime.toEpochMilli(), signUserId);
+        log.info("start exportP12UserFromSign startTime:{} signUserId:{}", startTime.toEpochMilli(),
+                signUserId);
 
         Object pemFile = userService.exportP12FromSign(signUserId, p12Password);
 
         log.info("end exportP12UserFromSign useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(),
-            JsonTools.toJSONString(pemFile));
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(pemFile));
         return pemFile;
     }
 

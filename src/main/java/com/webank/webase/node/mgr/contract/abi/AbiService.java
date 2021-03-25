@@ -16,30 +16,29 @@
 
 package com.webank.webase.node.mgr.contract.abi;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.contract.abi.entity.ReqImportAbi;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.contract.abi.entity.RspAllContract;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
 
 @Log4j2
 @Service
@@ -69,7 +68,6 @@ public class AbiService {
 	public void insertAbiInfo(ReqImportAbi param) {
 		int groupId = param.getGroupId();
 		String account = param.getAccount();
-		String contractName = param.getContractName();
 		String contractAddress = param.getContractAddress();
 		String contractAbiStr;
 		try {
@@ -122,10 +120,17 @@ public class AbiService {
 	}
 
 	private void checkAbiExist(int groupId, String account, String address) {
-		AbiInfo checkAbiAddressExist = abiMapper.queryByGroupIdAndAddress(groupId, account, address);
-		if (Objects.nonNull(checkAbiAddressExist)) {
+		if (ifAbiExist(groupId, account, address)) {
 			throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_ALREADY_EXISTS);
 		}
+	}
+	
+	private boolean ifAbiExist(int groupId, String account, String address) {
+	    AbiInfo checkAbiAddressExist = abiMapper.queryByGroupIdAndAddress(groupId, account, address);
+	    if (Objects.nonNull(checkAbiAddressExist)) {
+	        return true;
+	    }
+	    return false;
 	}
 
 	public AbiInfo getAbiById(Integer abiId) {
@@ -242,8 +247,7 @@ public class AbiService {
 		saveAbi.setAccount(account);
 		abiMapper.add(saveAbi);
 	}
-
-
+	
 	/**
 	 * select contract from tb_abi(union tb_contract)
 	 */
@@ -251,5 +255,32 @@ public class AbiService {
 		log.debug("listAllContract param:{}", param);
 		return abiMapper.listAllContract(param);
 	}
+	
+	public void saveAbiFromAppContract(TbContract tbContract) {
+        int groupId = tbContract.getGroupId();
+        String account = tbContract.getAccount();
+        String contractAddress = tbContract.getContractAddress();
+        String contractName = tbContract.getContractName();
+        // check name and address of abi not exist
+        if (ifAbiExist(groupId, account, contractAddress)) {
+            return;
+        }
+        String contractBin = tbContract.getContractBin();
+        String contractAbiStr = tbContract.getContractAbi();
+        log.info("saveAbiFromAppContract of contractName:{} contractAddress:{}", 
+                contractName, contractAddress);
+        
+        AbiInfo saveAbi = new AbiInfo();
+        saveAbi.setGroupId(groupId);
+        saveAbi.setContractAddress(contractAddress);
+        saveAbi.setContractName(contractName);
+        saveAbi.setContractAbi(contractAbiStr);
+        saveAbi.setContractBin(contractBin);
+        LocalDateTime now = LocalDateTime.now();
+        saveAbi.setCreateTime(now);
+        saveAbi.setModifyTime(now);
+        saveAbi.setAccount(account);
+        abiMapper.add(saveAbi);
+    }
 
 }
