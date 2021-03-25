@@ -112,9 +112,9 @@ public class StatService {
             }
 
             for (int height = localBlockNum + 1; height <= blockNumOnChain; height++) {
-                if (height >= blockNumOnChain) {
-                    return;
-                }
+//                if (height >= blockNumOnChain) {
+//                    return;
+//                }
                 log.debug("pullBlockStatistic height:{}", height);
                 RspStatBlock chainBlockStat = frontInterfaceService.getBlockStatisticByNumber(groupId,
                         new BigInteger(String.valueOf(height)));
