@@ -283,9 +283,12 @@ public class UserService {
     }
 
     private KeyPair getUserKeyPairFromSign(int groupId, String signUserId) {
+        boolean returnPrivateKeyFromSign = true;
         String keyUri = String.format(FrontRestTools.URI_KEY_PAIR_USERINFO_WITH_SIGN,
-            signUserId, true);
+            signUserId, returnPrivateKeyFromSign);
         KeyPair keyPair = frontRestTools.getForEntity(groupId, keyUri, KeyPair.class);
+        String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
+        keyPair.setPrivateKey(decodedPrivateKey);
         return keyPair;
     }
 
