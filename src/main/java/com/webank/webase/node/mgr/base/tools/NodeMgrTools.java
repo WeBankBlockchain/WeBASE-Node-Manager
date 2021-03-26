@@ -47,6 +47,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.utils.Numeric;
 
 /**
@@ -536,7 +538,7 @@ public class NodeMgrTools {
      * 只包含中文
      */
     public static boolean notContainsChinese(String input) {
-        if (StringUtils.isBlank(input)) {
+        if (input == null) {
             return true;
         }
         String regex = "[^\\u4e00-\\u9fa5]+";
@@ -615,4 +617,60 @@ public class NodeMgrTools {
             }
         }
     }
+
+    private final static String TEMP_EXPORT_KEYSTORE_PATH = "exportedKey";
+    private final static String PEM_FILE_FORMAT = ".pem";
+    private final static String P12_FILE_FORMAT = ".p12";
+    /**
+     * write pem in ./tempKey
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @param cryptoSuite
+     * @return
+     */
+    public static String writePrivateKeyPem(String rawPrivateKey, String address, String userName,
+        CryptoSuite cryptoSuite) {
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            keystorePath.delete();
+        }
+        keystorePath.mkdir();
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + PEM_FILE_FORMAT;
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        cryptoKeyPair.storeKeyPairWithPem(exportedKeyPath);
+        return exportedKeyPath;
+    }
+
+    /**
+     * write p12 in ./tempKey
+     * @param p12Password
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @param cryptoSuite
+     * @return
+     */
+    public static String writePrivateKeyP12(String p12Password, String rawPrivateKey,
+        String address, String userName, CryptoSuite cryptoSuite) {
+
+
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            keystorePath.delete();
+        }
+        keystorePath.mkdir();
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + P12_FILE_FORMAT;
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        cryptoKeyPair.storeKeyPairWithP12(exportedKeyPath, p12Password);
+
+        return exportedKeyPath;
+    }
+
 }
