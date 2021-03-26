@@ -49,12 +49,10 @@ import com.webank.webase.node.mgr.user.UserService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
@@ -243,8 +241,8 @@ public class  ContractService {
      */
     public void deleteContract(Integer contractId, int groupId) throws NodeMgrException {
         log.debug("start deleteContract contractId:{} groupId:{}", contractId, groupId);
-        // check if contract deployed
-        verifyContractNotDeploy(contractId, groupId);
+        // check if contract deployed (not check from v1.5.0)
+        // verifyContractNotDeploy(contractId, groupId);
         //remove
         contractMapper.remove(contractId);
         log.debug("end deleteContract");
@@ -643,18 +641,8 @@ public class  ContractService {
             contractPathService.removeByPathName(param);
             return;
         }
-        // batch delete contract by path that not deployed
-        Collection<TbContract> unDeployedList = contractList.stream()
-            .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
-            .collect(Collectors.toList());
-        // unDeployed's size == list's size, list is all unDeployed
-        if (unDeployedList.size() == contractList.size()) {
-            log.debug("deleteByContractPath delete contract in path");
-            unDeployedList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
-        } else {
-            log.error("end deleteByContractPath for contain deployed contract");
-            throw new NodeMgrException(ConstantCode.CONTRACT_PATH_CONTAIN_DEPLOYED);
-        }
+        // batch delete contract (not check if deployed from v1.5.0)
+        contractList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
         log.debug("deleteByContractPath delete path");
         contractPathService.removeByPathName(param);
         log.debug("end deleteByContractPath. ");
