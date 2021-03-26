@@ -14,14 +14,20 @@
 
 package com.webank.webase.node.mgr.user.entity;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 public class ReqExport {
-    private String userAddress;
+    @NotBlank
     private String signUserId;
+    /**
+     * password encoded in base64
+     */
     private String p12Password;
+    @NotNull
     private Integer groupId;
 }
