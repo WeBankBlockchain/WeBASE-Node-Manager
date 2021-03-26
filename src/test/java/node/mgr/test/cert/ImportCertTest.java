@@ -35,6 +35,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -254,5 +255,14 @@ public class ImportCertTest {
         }
         System.out.println("crlfAddress " + crlfAddress);
         System.out.println("lfAddress " + lfAddress);
+    }
+
+    @Test
+    public void testEmptyPwdP12() {
+        String emptyPwd = "";
+        String afterBase64 = Base64.getEncoder().encodeToString(emptyPwd.getBytes());
+        System.out.println("afterBase64: " + afterBase64);
+        String afterDecode = new String(Base64.getDecoder().decode(afterBase64.getBytes()));
+        System.out.println("afterDecode: " + afterDecode);
     }
 }
