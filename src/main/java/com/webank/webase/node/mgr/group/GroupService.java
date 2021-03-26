@@ -268,11 +268,7 @@ public class GroupService {
         groupMapper.updateNodeCount(groupId, groupPeers.size());
         log.debug("getGeneralAndUpdateNodeCount gId:{} count:{}", groupId, groupPeers.size());
         GroupGeneral groupGeneral = groupMapper.getGeneral(groupId);
-        // v1.5.0 add abi when save tb_contract, so just count tb_abi count
-        // add imported abi count
-//        int abiCount = abiService.countOfAbiByGroupId(groupId);
-//        int contractTotalCount = groupGeneral.getContractCount() + abiCount;
-//        groupGeneral.setContractCount(contractTotalCount);
+        // v1.5.0 count all contract on chain
         return groupGeneral;
     }
 

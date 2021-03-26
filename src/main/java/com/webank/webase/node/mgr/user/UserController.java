@@ -21,11 +21,14 @@ import com.webank.webase.node.mgr.base.enums.CheckUserExist;
 import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.PemUtils;
+import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
+import com.webank.webase.node.mgr.user.entity.ReqExport;
 import com.webank.webase.node.mgr.user.entity.ReqImportPem;
 import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
 import com.webank.webase.node.mgr.user.entity.TbUser;
@@ -38,6 +41,8 @@ import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -238,57 +243,42 @@ public class UserController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
-    /**
-     * query user info.
-     * 
-     * @related: export .txt privateKey file
-     */
-    // @GetMapping(value = "/userInfo")
-    // public BaseResponse userInfo(@RequestParam Integer userId)
-    // throws NodeMgrException {
-    // BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-    // Instant startTime = Instant.now();
-    // log.info("start userInfo startTime:{} signUserId:{}", startTime.toEpochMilli(), userId);
-    //
-    // TbUser user = userService.queryUserDetail(userId);
-    // baseResponse.setData(user);
-    //
-    // log.info("end userInfo useTime:{} result:{}",
-    // Duration.between(startTime, Instant.now()).toMillis(),
-    // JsonTools.toJSONString(baseResponse));
-    // return baseResponse;
-    // }
-
     @PostMapping(value = "/exportPem")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object exportPemUserFromSign(@RequestParam String signUserId) throws NodeMgrException {
+    public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param)
+        throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start exportPemUserFromSign startTime:{} signUserId:{}", startTime.toEpochMilli(),
-                signUserId);
+        log.info("start exportPemUserFromSign startTime:{} param:{}", startTime.toEpochMilli(), param);
+        Integer groupId = param.getGroupId();
+        String signUserId = param.getSignUserId();
+        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId);
 
-        Object pemFile = userService.exportPemFromSign(signUserId);
-
-        log.info("end exportPemUserFromSign useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pemFile));
-        return pemFile;
+        log.info("end exportPemUserFromSign useTime:{} fileContentHandle:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(fileContentHandle));
+        return ResponseEntity.ok().headers(HttpRequestTools.headers(fileContentHandle.getFileName()))
+            .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
     @PostMapping(value = "/exportP12")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object exportP12UserFromSign(@RequestParam String signUserId,
-            @RequestParam(required = false, defaultValue = "") String p12Password)
-            throws NodeMgrException {
+    public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param)
+        throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start exportP12UserFromSign startTime:{} signUserId:{}", startTime.toEpochMilli(),
-                signUserId);
-
-        Object pemFile = userService.exportP12FromSign(signUserId, p12Password);
+        log.info("start exportP12UserFromSign startTime:{} param:{}", startTime.toEpochMilli(), param);
+        Integer groupId = param.getGroupId();
+        String signUserId = param.getSignUserId();
+        String p12PasswordEncoded = param.getP12Password();
+        if (!NodeMgrTools.notContainsChinese(p12PasswordEncoded)) {
+            throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
+        }
+        FileContentHandle fileContentHandle = userService.exportP12FromSign(groupId, signUserId, p12PasswordEncoded);
 
         log.info("end exportP12UserFromSign useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pemFile));
-        return pemFile;
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(fileContentHandle));
+        return ResponseEntity.ok().headers(HttpRequestTools.headers(fileContentHandle.getFileName()))
+            .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
 }
