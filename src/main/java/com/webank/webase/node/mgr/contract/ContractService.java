@@ -156,19 +156,19 @@ public class  ContractService {
 
     /**
      * save application's contract.
-     * 
+     *
      * @param appKey
      * @param reqContractSourceSave
      */
     @Transactional
     public void appContractSave(String appKey, ReqContractAddressSave reqContractAddressSave)
-            throws IOException {
+        throws IOException {
         Integer groupId = reqContractAddressSave.getGroupId();
         // check group id
         groupService.checkGroupId(groupId);
         // get runtimeBin
         String runtimeBin = abiService.getAddressRuntimeBin(groupId,
-                reqContractAddressSave.getContractAddress());
+            reqContractAddressSave.getContractAddress());
         String contractName = reqContractAddressSave.getContractName();
         String contractVersion = reqContractAddressSave.getContractVersion();
         // get contract store
@@ -176,19 +176,19 @@ public class  ContractService {
         contractStoreParam.setAppKey(appKey);
         contractStoreParam.setContractVersion(contractVersion);
         List<TbContractStore> listOfContractStore =
-                contractStoreService.listOfContractStore(contractStoreParam);
+            contractStoreService.listOfContractStore(contractStoreParam);
         if (CollectionUtils.isEmpty(listOfContractStore)) {
             throw new NodeMgrException(ConstantCode.CONTRACT_SOURCE_NOT_EXIST);
         }
         for (TbContractStore tbContractStore : listOfContractStore) {
             ContractParam param =
-                    new ContractParam(groupId, reqContractAddressSave.getContractPath(),
-                            tbContractStore.getContractName(), tbContractStore.getAccount());
+                new ContractParam(groupId, reqContractAddressSave.getContractPath(),
+                    tbContractStore.getContractName(), tbContractStore.getAccount());
             TbContract localContract = queryContract(param);
             // check if deployed contract saved
             if (Objects.nonNull(localContract)
-                    && localContract.getContractStatus() == ContractStatus.DEPLOYED.getValue()
-                    && !tbContractStore.getContractName().equals(contractName)) {
+                && localContract.getContractStatus() == ContractStatus.DEPLOYED.getValue()
+                && !tbContractStore.getContractName().equals(contractName)) {
                 continue;
             }
             TbContract tbContract = new TbContract();
@@ -210,7 +210,7 @@ public class  ContractService {
             NewMethodInputParam newMethodInputParam = new NewMethodInputParam();
             newMethodInputParam.setGroupId(groupId);
             newMethodInputParam
-                    .setMethodList(Web3Tools.getMethodFromAbi(tbContractStore.getContractAbi(), cryptoSuite));
+                .setMethodList(Web3Tools.getMethodFromAbi(tbContractStore.getContractAbi(), cryptoSuite));
             methodService.saveMethod(newMethodInputParam, ContractType.APPIMPORT.getValue());
         }
         // if exist, auto not save (ignore)
@@ -221,11 +221,11 @@ public class  ContractService {
      * update contract.
      */
     private TbContract updateContract(Contract contract) {
-     // check contract id
+        // check contract id
         TbContract tbContract =
-                verifyContractIdExist(contract.getContractId(), contract.getGroupId());
+            verifyContractIdExist(contract.getContractId(), contract.getGroupId());
         if (tbContract.getContractType() == ContractStatus.DEPLOYED.getValue()
-                && !constantProperties.isDeployedModifyEnable()) {
+            && !constantProperties.isDeployedModifyEnable()) {
             log.info("fail updateContract. deployed contract cannot be modified");
             throw new NodeMgrException(ConstantCode.DEPLOYED_CANNOT_MODIFIED);
         }
@@ -346,9 +346,9 @@ public class  ContractService {
         String contractName = inputParam.getContractName();
         // check contract
         TbContract contractRecord =
-                verifyContractIdExist(inputParam.getContractId(), inputParam.getGroupId());
+            verifyContractIdExist(inputParam.getContractId(), inputParam.getGroupId());
         if (contractRecord.getContractType() == ContractStatus.DEPLOYED.getValue()
-                && !constantProperties.isDeployedModifyEnable()) {
+            && !constantProperties.isDeployedModifyEnable()) {
             log.info("fail deployContract. deployed contract cannot be modified");
             throw new NodeMgrException(ConstantCode.DEPLOYED_CANNOT_MODIFIED);
         }
@@ -682,5 +682,4 @@ public class  ContractService {
         return resultList;
     }
 
-    // todo contractService.queryContractByBin(groupId, contractBin); get history contract by bin
 }

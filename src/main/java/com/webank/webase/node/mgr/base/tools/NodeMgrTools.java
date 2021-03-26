@@ -538,7 +538,7 @@ public class NodeMgrTools {
      * 只包含中文
      */
     public static boolean notContainsChinese(String input) {
-        if (StringUtils.isBlank(input)) {
+        if (input == null) {
             return true;
         }
         String regex = "[^\\u4e00-\\u9fa5]+";

@@ -268,8 +268,11 @@ public class UserController extends BaseController {
         log.info("start exportP12UserFromSign startTime:{} param:{}", startTime.toEpochMilli(), param);
         Integer groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
-        String p12Password = param.getP12Password();
-        FileContentHandle fileContentHandle = userService.exportP12FromSign(groupId, signUserId, p12Password);
+        String p12PasswordEncoded = param.getP12Password();
+        if (!NodeMgrTools.notContainsChinese(p12PasswordEncoded)) {
+            throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
+        }
+        FileContentHandle fileContentHandle = userService.exportP12FromSign(groupId, signUserId, p12PasswordEncoded);
 
         log.info("end exportP12UserFromSign useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
