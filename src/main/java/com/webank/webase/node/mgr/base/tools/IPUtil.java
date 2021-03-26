@@ -69,7 +69,7 @@ public class IPUtil {
         } catch (Exception e) {
             log.error("getLocalIp error.", e);
         }
-        return "127.0.0.1";
+        return LOCAL_IP_127;
     }
 
     public static boolean isWindowsOS() {
@@ -91,12 +91,10 @@ public class IPUtil {
                     for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
                             .hasMoreElements();) {
                         InetAddress inetAddress = enumIpAddr.nextElement();
-                        if (!inetAddress.isLoopbackAddress()) {
-                            String ipaddress = inetAddress.getHostAddress().toString();
-                            if (!ipaddress.contains("::") && !ipaddress.contains("0:0:")
-                                    && !ipaddress.contains("fe80")) {
-                                return ipaddress;
-                            }
+                        if (!inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()
+                                && !inetAddress.isSiteLocalAddress()
+                                && inetAddress instanceof Inet4Address) {
+                            return inetAddress.getHostAddress();
                         }
                     }
                 }
@@ -104,7 +102,7 @@ public class IPUtil {
         } catch (SocketException e) {
             log.error("getLinuxLocalIp error.", e);
         }
-        return "127.0.0.1";
+        return LOCAL_IP_127;
     }
 
     public static String getIpAdrress(HttpServletRequest request) {
