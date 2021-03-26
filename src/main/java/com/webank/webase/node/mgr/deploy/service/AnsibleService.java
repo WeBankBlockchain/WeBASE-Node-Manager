@@ -73,7 +73,7 @@ public class AnsibleService {
 
     /**
      * check ansible ping, code is always 0(success)
-     * @case1: ip configured in ansible, output not empty. ex: 10.107.118.18 | SUCCESS => xxxxx
+     * @case1: ip configured in ansible, output not empty. ex: 127.0.0.1 | SUCCESS => xxxxx
      * @case2: if ip not in ansible's host, output is empty. ex: Exec command success: code:[0], OUTPUT:[]
      */
     public void execPing(String ip) {
