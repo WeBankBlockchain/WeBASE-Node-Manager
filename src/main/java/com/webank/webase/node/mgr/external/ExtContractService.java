@@ -141,8 +141,14 @@ public class ExtContractService {
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
     }
 
-    public List<RspAllExtContract> getAllExtContractLeftJoinAbi(ContractParam param) {
+    public List<RspAllExtContract> getAllExtContractLeftJoinAbi(ContractParam param, boolean requiredBin) {
         log.info("getAllExtContractLeftJoinAbi param:{}", param);
-        return extContractMapper.listContractJoinTbAbi(param);
+        List<RspAllExtContract> contractList = extContractMapper.listContractJoinTbAbi(param);
+
+        if (requiredBin) {
+            contractList.forEach(c -> c.setContractBin(""));
+        }
+        return contractList;
     }
+
 }
