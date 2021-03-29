@@ -38,8 +38,7 @@ public class TbExternalAccountSqlProvider {
         // page
         sql.ORDER_BY("ext.modify_time desc");
         if (param.getStart() != null && param.getPageSize() != null) {
-            sql.LIMIT(param.getStart());
-            sql.LIMIT(param.getPageSize());
+            sql.LIMIT(param.getStart() + "," +param.getPageSize());
         }
         return sql.toString();
     }
@@ -76,8 +75,9 @@ public class TbExternalAccountSqlProvider {
         // page
         sql.ORDER_BY("create_time ");
         if (param.getStart() != null && param.getPageSize() != null) {
-            sql.LIMIT(param.getStart());
-            sql.LIMIT(param.getPageSize());
+            sql.LIMIT(param.getStart() + "," +param.getPageSize());
+//            sql.LIMIT(param.getStart());
+//            sql.LIMIT(param.getPageSize());
         }
         return sql.toString();
     }

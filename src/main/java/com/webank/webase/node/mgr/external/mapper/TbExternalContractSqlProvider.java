@@ -45,8 +45,7 @@ public class TbExternalContractSqlProvider {
         // page
         sql.ORDER_BY("b.modifyTime desc");
         if (param.getStart() != null && param.getPageSize() != null) {
-            sql.LIMIT(param.getStart());
-            sql.LIMIT(param.getPageSize());
+            sql.LIMIT(param.getStart() + "," +param.getPageSize());
         }
         return sql.toString();
     }
@@ -89,8 +88,7 @@ public class TbExternalContractSqlProvider {
         // page
         sql.ORDER_BY("create_time ");
         if (param.getStart() != null && param.getPageSize() != null) {
-            sql.LIMIT(param.getStart());
-            sql.LIMIT(param.getPageSize());
+            sql.LIMIT(param.getStart() + "," +param.getPageSize());
         }
         return sql.toString();
     }
