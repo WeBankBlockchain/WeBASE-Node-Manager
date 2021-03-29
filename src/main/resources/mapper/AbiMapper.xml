@@ -76,10 +76,10 @@
     <select id="countOfAbi" resultType="java.lang.Integer">
         select count(1) from tb_abi where 1=1 and group_id = #{groupId}
         <if test="contractName != null and contractName != ''">
-            and a.contract_name = #{contractName}
+            and contract_name = #{contractName}
         </if>
         <if test="contractAddress != null and contractAddress != ''">
-            and a.contract_address = #{contractAddress}
+            and contract_address = #{contractAddress}
         </if>
         <if test="account != null and account != ''">
             and account = #{account}
@@ -127,18 +127,18 @@
         from tb_contract
         where contract_status=2
         ) b on a.contract_address = b.contract_address and a.group_id = b.group_id
-        where a.group_id = #{groupId}
+        where a.groupId = #{groupId}
         <if test="account != null and account != ''">
             and a.account = #{account}
         </if>
         <if test="contractName != null and contractName != ''">
-            and a.contract_name = #{contractName}
+            and a.contractName = #{contractName}
         </if>
         <if test="contractAddress != null and contractAddress != ''">
-            and a.contract_address = #{contractAddress}
+            and a.contractAddress = #{contractAddress}
         </if>
         <if test="flagSortedByTime != null and flagSortedByTime != ''">
-            order by a.modify_time ${flagSortedByTime}
+            order by a.modifyTime ${flagSortedByTime}
         </if>
         <if test="start != null and pageSize != null">
             limit #{start},#{pageSize}
