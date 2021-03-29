@@ -168,7 +168,8 @@ public class ExternalController extends BaseController {
         @RequestParam(value = "account", required = false) String account,
         @RequestParam(value = "type", defaultValue = "1") Integer type,
         @RequestParam(value = "contractAddress", required = false) String contractAddress,
-        @RequestParam(value = "contractName", required = false) String contractName) throws NodeMgrException {
+        @RequestParam(value = "contractName", required = false) String contractName,
+        @RequestParam(value = "requiredBin", defaultValue = "true", required = false) Boolean requiredBin) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listExtContractListJoin. startTime:{} groupId:{}", startTime.toEpochMilli(),
@@ -189,7 +190,7 @@ public class ExternalController extends BaseController {
             param.setStart(start);
             param.setFlagSortedByTime(SqlSortType.DESC.getValue());
             // query list
-            List<RspAllExtContract> listOfContract = extContractService.getAllExtContractLeftJoinAbi(param);
+            List<RspAllExtContract> listOfContract = extContractService.getAllExtContractLeftJoinAbi(param, requiredBin);
 
             pageResponse.setData(listOfContract);
             pageResponse.setTotalCount(count);
