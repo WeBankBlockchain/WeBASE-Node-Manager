@@ -43,7 +43,7 @@ public class TbExternalContractSqlProvider {
             sql.WHERE("b.abiId is NULL");
         }
         // page
-        sql.ORDER_BY("b.modify_time desc");
+        sql.ORDER_BY("b.modifyTime desc");
         if (param.getStart() != null && param.getPageSize() != null) {
             sql.LIMIT(param.getStart() + "," +param.getPageSize());
         }
