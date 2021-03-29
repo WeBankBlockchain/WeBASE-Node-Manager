@@ -257,7 +257,7 @@ public class FrontRestTools {
      * delete key of map.
      */
     private static void deleteKeyOfMap(Map<String, FailInfo> map, String rkey) {
-        log.info("start deleteKeyOfMap. rkey:{} map:{}", rkey, JsonTools.toJSONString(map));
+        log.info("start deleteKeyOfMap. rkey:{} map:{}", rkey, map);
         Iterator<String> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             String key = iter.next();
@@ -266,7 +266,7 @@ public class FrontRestTools {
                 iter.remove();
             }
         }
-        log.info("end deleteKeyOfMap. rkey:{} map:{}", rkey, JsonTools.toJSONString(map));
+        log.info("end deleteKeyOfMap. rkey:{} map:{}", rkey, map);
     }
 
 
