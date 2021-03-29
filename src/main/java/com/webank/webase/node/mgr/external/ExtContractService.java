@@ -116,12 +116,13 @@ public class ExtContractService {
     }
 
     public List<TbExternalContract> listExtContract(ContractParam param) {
+        log.debug("listExtContract param:{}", param);
         return extContractMapper.listExtContract(param);
     }
 
     public int countExtContract(ContractParam param) {
+        log.debug("countExtContract param:{}", param);
         return extContractMapper.countExtContract(param);
-        
     }
     public int updateContractInfo(int contractId, String contractName, String abi, String description) {
         TbExternalContract update = extContractMapper.selectByPrimaryKey(contractId);
@@ -140,8 +141,14 @@ public class ExtContractService {
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
     }
 
-    public List<RspAllExtContract> getAllExtContractLeftJoinAbi(ContractParam param) {
+    public List<RspAllExtContract> getAllExtContractLeftJoinAbi(ContractParam param, boolean requiredBin) {
         log.info("getAllExtContractLeftJoinAbi param:{}", param);
-        return extContractMapper.listContractJoinTbAbi(param);
+        List<RspAllExtContract> contractList = extContractMapper.listContractJoinTbAbi(param);
+
+        if (requiredBin) {
+            contractList.forEach(c -> c.setContractBin(""));
+        }
+        return contractList;
     }
+
 }

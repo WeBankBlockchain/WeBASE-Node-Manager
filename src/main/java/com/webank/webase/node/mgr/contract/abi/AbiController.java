@@ -100,7 +100,7 @@ public class AbiController extends BaseController {
 		if (pageNumber < 1 || pageSize <= 0) {
 			return new BasePageResponse(ConstantCode.PARAM_EXCEPTION);
 		}
-		log.info("start listAbi. startTime:{},groupId:{},pageNumber:{},pageSize:{}",
+		log.info("start listAllContractIncludeAbi. startTime:{},groupId:{},pageNumber:{},pageSize:{}",
 				startTime.toEpochMilli(), groupId, pageNumber, pageSize);
 
 		Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
@@ -115,7 +115,7 @@ public class AbiController extends BaseController {
 		int count = abiService.countOfAbi(param);
 		List<RspAllContract> resList = abiService.listAllContract(param);
 
-		log.info("end listAbi. useTime:{}, resList size:{}",
+		log.info("end listAllContractIncludeAbi. useTime:{}, resList size:{}",
 				Duration.between(startTime, Instant.now()).toMillis(), resList.size());
 		return new BasePageResponse(ConstantCode.SUCCESS, resList, count);
 	}

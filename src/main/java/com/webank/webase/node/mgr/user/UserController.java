@@ -281,4 +281,19 @@ public class UserController extends BaseController {
             .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
+
+    @PostMapping(value = "/export/{userId}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse exportRawUserFromSign(@PathVariable("userId") Integer userId)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start exportRawUserFromSign startTime:{} userId:{}", startTime.toEpochMilli(), userId);
+
+        TbUser tbUser = userService.queryUserDetail(userId);
+
+        log.info("end exportRawUserFromSign useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            tbUser);
+        return new BaseResponse(ConstantCode.SUCCESS, tbUser);
+    }
 }
