@@ -64,7 +64,6 @@ public class NodeController {
         // param
         NodeParam queryParam = new NodeParam();
         queryParam.setGroupId(groupId);
-        queryParam.setPageSize(pageSize);
         queryParam.setNodeName(nodeName);
 
         //check node status before query
@@ -77,6 +76,7 @@ public class NodeController {
         if (count != null && count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);
+            queryParam.setPageSize(pageSize);
             queryParam.setStart(start);
 
             List<TbNode> listOfnode = nodeService.queryNodeList(queryParam);
