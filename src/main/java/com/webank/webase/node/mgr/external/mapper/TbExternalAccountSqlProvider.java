@@ -36,7 +36,7 @@ public class TbExternalAccountSqlProvider {
             sql.WHERE("b.userId is NULL");
         }
         // page
-        sql.ORDER_BY("ext.modifyTime desc");
+        sql.ORDER_BY("ext.modify_time desc");
         if (param.getStart() != null && param.getPageSize() != null) {
             sql.LIMIT(param.getStart() + "," +param.getPageSize());
         }

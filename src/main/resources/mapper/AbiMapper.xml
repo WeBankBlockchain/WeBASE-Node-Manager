@@ -127,18 +127,18 @@
         from tb_contract
         where contract_status=2
         ) b on a.contract_address = b.contract_address and a.group_id = b.group_id
-        where a.groupId = #{groupId}
+        where a.group_id = #{groupId}
         <if test="account != null and account != ''">
             and a.account = #{account}
         </if>
         <if test="contractName != null and contractName != ''">
-            and a.contractName = #{contractName}
+            and a.contract_name = #{contractName}
         </if>
         <if test="contractAddress != null and contractAddress != ''">
-            and a.contractAddress = #{contractAddress}
+            and a.contract_address = #{contractAddress}
         </if>
         <if test="flagSortedByTime != null and flagSortedByTime != ''">
-            order by a.modifyTime ${flagSortedByTime}
+            order by a.modify_time ${flagSortedByTime}
         </if>
         <if test="start != null and pageSize != null">
             limit #{start},#{pageSize}
