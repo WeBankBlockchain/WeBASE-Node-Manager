@@ -116,12 +116,13 @@ public class ExtContractService {
     }
 
     public List<TbExternalContract> listExtContract(ContractParam param) {
+        log.debug("listExtContract param:{}", param);
         return extContractMapper.listExtContract(param);
     }
 
     public int countExtContract(ContractParam param) {
+        log.debug("countExtContract param:{}", param);
         return extContractMapper.countExtContract(param);
-        
     }
     public int updateContractInfo(int contractId, String contractName, String abi, String description) {
         TbExternalContract update = extContractMapper.selectByPrimaryKey(contractId);
