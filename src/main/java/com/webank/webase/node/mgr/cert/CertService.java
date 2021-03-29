@@ -571,7 +571,7 @@ public class CertService {
         // 压缩输出流
         ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(outputStream));
         // 传入输出流，传入需要压缩的file路径
-        String gmDir = useGm ? "" : "gm";
+        String gmDir = useGm ? "gm" : "";
         generateFile(zipOutputStream, file2Zip, gmDir);
 
         log.info("file2Zip:{} and outputFile:{}" ,file2Zip.getAbsolutePath(), generateFileName);
