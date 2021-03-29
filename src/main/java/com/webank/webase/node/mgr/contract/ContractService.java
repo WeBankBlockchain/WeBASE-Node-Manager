@@ -244,7 +244,9 @@ public class  ContractService {
     public void deleteContract(Integer contractId, int groupId) throws NodeMgrException {
         log.debug("start deleteContract contractId:{} groupId:{}", contractId, groupId);
         // check if contract deployed
-        verifyContractNotDeploy(contractId, groupId);
+        if (!constantProperties.isDeployedModifyEnable()) {
+             verifyContractNotDeploy(contractId, groupId);
+        }
         //remove
         contractMapper.remove(contractId);
         log.debug("end deleteContract");
@@ -643,17 +645,21 @@ public class  ContractService {
             contractPathService.removeByPathName(param);
             return;
         }
-        // batch delete contract by path that not deployed
-        Collection<TbContract> unDeployedList = contractList.stream()
-            .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
-            .collect(Collectors.toList());
-        // unDeployed's size == list's size, list is all unDeployed
-        if (unDeployedList.size() == contractList.size()) {
-            log.debug("deleteByContractPath delete contract in path");
-            unDeployedList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
+        // batch delete contract by path
+        if (constantProperties.isDeployedModifyEnable()) {
+            contractList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
         } else {
-            log.error("end deleteByContractPath for contain deployed contract");
-            throw new NodeMgrException(ConstantCode.CONTRACT_PATH_CONTAIN_DEPLOYED);
+            Collection<TbContract> unDeployedList = contractList.stream()
+                    .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
+                    .collect(Collectors.toList());
+            // unDeployed's size == list's size, list is all unDeployed
+            if (unDeployedList.size() == contractList.size()) {
+                log.debug("deleteByContractPath delete contract in path");
+                unDeployedList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
+            } else {
+                log.error("end deleteByContractPath for contain deployed contract");
+                throw new NodeMgrException(ConstantCode.CONTRACT_PATH_CONTAIN_DEPLOYED);
+            }
         }
         log.debug("deleteByContractPath delete path");
         contractPathService.removeByPathName(param);
