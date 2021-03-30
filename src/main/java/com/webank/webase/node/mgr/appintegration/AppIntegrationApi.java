@@ -463,7 +463,7 @@ public class AppIntegrationApi extends BaseController {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
-        TbUser userRow = userService.importPem(reqImportPem, false);
+        TbUser userRow = userService.importPem(reqImportPem, CheckUserExist.FALSE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
@@ -487,7 +487,7 @@ public class AppIntegrationApi extends BaseController {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
         TbUser userRow = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
-                account, description, false);
+                account, description, CheckUserExist.FALSE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
