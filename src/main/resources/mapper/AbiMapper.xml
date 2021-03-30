@@ -76,10 +76,10 @@
     <select id="countOfAbi" resultType="java.lang.Integer">
         select count(1) from tb_abi where 1=1 and group_id = #{groupId}
         <if test="contractName != null and contractName != ''">
-            and a.contract_name = #{contractName}
+            and contract_name = #{contractName}
         </if>
         <if test="contractAddress != null and contractAddress != ''">
-            and a.contract_address = #{contractAddress}
+            and contract_address = #{contractAddress}
         </if>
         <if test="account != null and account != ''">
             and account = #{account}
