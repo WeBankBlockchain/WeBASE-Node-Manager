@@ -248,4 +248,16 @@ public class FrontGroupMapService {
         }
         return type;
     }
+
+    public FrontGroup getOneNormalMap(Integer frontId, Integer groupId) {
+        MapListParam param = new MapListParam(frontId, groupId);
+        param.setStatus(GroupStatus.NORMAL.getValue());
+        log.info("getOneNormalMap param:{}", param);
+        List<FrontGroup> list = this.getList(param);
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+        log.info("getOneNormalMap list:{}", list);
+        return list.get(0);
+    }
 }

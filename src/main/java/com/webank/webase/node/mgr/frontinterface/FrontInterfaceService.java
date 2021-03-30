@@ -35,6 +35,7 @@ import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.frontinterface.entity.RspStatBlock;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -546,6 +547,19 @@ public class FrontInterfaceService {
         BaseResponse response =
                 getFromSpecificFront(groupId, frontIp, frontPort, uri, BaseResponse.class);
         log.info("end operateGroup");
+        return response;
+    }
+
+    /**
+     * node consensus type manage
+     */
+    public Object nodeManageFromSpecificFront(String frontIp, Integer frontPort, ConsensusHandle consensusHandle) {
+        log.info("start nodeManageFromSpecificFront frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
+            consensusHandle);
+        int groupId = consensusHandle.getGroupId();
+        Object response = requestSpecificFront(groupId, frontIp, frontPort,
+                HttpMethod.POST, FrontRestTools.URI_CONSENSUS, consensusHandle, Object.class);
+        log.info("end nodeManageFromSpecificFront");
         return response;
     }
 
