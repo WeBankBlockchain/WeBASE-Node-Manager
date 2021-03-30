@@ -215,6 +215,9 @@ public class UserService {
         // check address
         TbUser addressRow = queryUser(null, user.getGroupId(), null, address, user.getAccount());
         if (Objects.nonNull(addressRow)) {
+            if (!isCheckExist) {
+                return addressRow;
+            }
             log.warn("fail bindUserInfo. address is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
@@ -225,9 +228,6 @@ public class UserService {
                 user.getDescription());
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {
-            if (!isCheckExist) {
-                return addressRow;
-            }
             log.warn("bindUserInfo affect 0 rows of tb_user");
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
