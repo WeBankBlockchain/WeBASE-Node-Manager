@@ -26,6 +26,7 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
@@ -113,7 +114,6 @@ public class PrecompiledService {
     /**
      * post node manage consensus status
      */
-
     public Object nodeManageService(ConsensusHandle consensusHandle) {
         log.debug("start nodeManageService. consensusHandle:{}", JsonTools.toJSONString(consensusHandle));
 
@@ -122,10 +122,11 @@ public class PrecompiledService {
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
         int groupId = consensusHandle.getGroupId();
+        String nodeId = consensusHandle.getNodeId();
 
         // check sealer num in group
         List<String> sealerList = this.frontInterfaceService.getSealerList(groupId);
-        sealerList.remove(consensusHandle.getNodeId());
+        sealerList.remove(nodeId);
         // @visual-deploy: at least 2 sealers in group after remove
         if (constants.getDeployType() == DeployType.VISUAL_DEPLOY.getValue()
             && CollectionUtils.size(sealerList) < ConstantProperties.LEAST_SEALER_TWO) {
@@ -135,12 +136,31 @@ public class PrecompiledService {
 
         String signUserId = userService.getSignUserIdByAddress(groupId, consensusHandle.getFromAddress());
         consensusHandle.setSignUserId(signUserId);
-        Object frontRsp = frontRestTools.postForEntity(
-                groupId, FrontRestTools.URI_CONSENSUS,
+        TbFront front = this.frontMapper.getByNodeId(nodeId);
+        Object frontRsp;
+        // if contain node's front,
+        if (front != null) {
+            FrontGroup checkFrontGroup = frontGroupMapService.getOneNormalMap(front.getFrontId(), groupId);
+            // if front is not removed
+            if ( checkFrontGroup != null &&
+                (StringUtils.equalsIgnoreCase("sealer", consensusHandle.getNodeType())
+                || StringUtils.equalsIgnoreCase("observer", consensusHandle.getNodeType())) ) {
+                log.info("nodeManageService now request specific front:{}", front.getFrontIp());
+                frontRsp = frontInterfaceService.nodeManageFromSpecificFront(front.getFrontIp(),
+                    front.getFrontPort(), consensusHandle);
+            } else {
+                // avoid request removed node, or just remove node no need specific front
+                log.info("nodeManageService now request random available front");
+                frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONSENSUS,
+                    consensusHandle, Object.class);
+            }
+        } else {
+            // random front
+            log.info("nodeManageService now request random available front");
+            frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONSENSUS,
                 consensusHandle, Object.class);
-
+        }
         // update front group map if remove node from sealer/observer
-        TbFront front = this.frontMapper.getByNodeId(consensusHandle.getNodeId());
         if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null){
             log.info("remove node/front:[{}] from group:[{}], change front group map status to [{}]",
                     front.getFrontId(), groupId, GroupStatus.MAINTAINING);
@@ -150,7 +170,7 @@ public class PrecompiledService {
             groupService.resetGroupList();
         }
 
-        log.debug("end nodeManageService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
+        log.debug("end nodeManageService. frontRsp:{}", frontRsp);
         return frontRsp;
     }
 
