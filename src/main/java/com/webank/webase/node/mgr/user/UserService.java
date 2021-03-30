@@ -129,9 +129,15 @@ public class UserService {
             keyPair = frontRestTools.postForEntity(groupId,
                     FrontRestTools.URI_KEY_PAIR_IMPORT_WITH_SIGN, param, KeyPair.class);
         } else {
-            String keyUri =
-                    String.format(FrontRestTools.URI_KEY_PAIR, userName, signUserId, appId, returnPrivateKey);
-            keyPair = frontRestTools.getForEntity(groupId, keyUri, KeyPair.class);
+            Map<String, String> param = new HashMap<>();
+            // for front, its type is 2-external account
+            param.put("type", "2");
+            param.put("userName", userName);
+            param.put("signUserId", signUserId);
+            param.put("appId", appId);
+            param.put("returnPrivateKey", String.valueOf(returnPrivateKey));
+            String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_KEY_PAIR, param);
+            keyPair = frontRestTools.getForEntity(groupId, uri, KeyPair.class);
             privateKeyEncoded = keyPair.getPrivateKey();
         }
 
@@ -283,10 +289,11 @@ public class UserService {
     }
 
     private KeyPair getUserKeyPairFromSign(int groupId, String signUserId) {
-        boolean returnPrivateKeyFromSign = true;
-        String keyUri = String.format(FrontRestTools.URI_KEY_PAIR_USERINFO_WITH_SIGN,
-            signUserId, returnPrivateKeyFromSign);
-        KeyPair keyPair = frontRestTools.getForEntity(groupId, keyUri, KeyPair.class);
+        Map<String, String> param = new HashMap<>();
+        param.put("signUserId", signUserId);
+        param.put("returnPrivateKey", "true");
+        String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_KEY_PAIR_USERINFO_WITH_SIGN, param);
+        KeyPair keyPair = frontRestTools.getForEntity(groupId, uri, KeyPair.class);
         String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
         keyPair.setPrivateKey(decodedPrivateKey);
         return keyPair;
