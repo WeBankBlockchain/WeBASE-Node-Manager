@@ -105,7 +105,7 @@ public class AppIntegrationService {
         }
         // check name
         TbAppInfo tbRecord = queryAppInfoByAppName(appAddInfo.getAppName());
-        if (tbRecord != null && tbRecord.getId() != appAddInfo.getId()) {
+        if (tbRecord != null && tbRecord.getId().intValue() != appAddInfo.getId().intValue()) {
             throw new NodeMgrException(ConstantCode.APPNAME_EXISTS);
         }
         // copy app info

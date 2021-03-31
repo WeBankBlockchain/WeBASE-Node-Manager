@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
@@ -422,6 +423,7 @@ public class UserService {
      * @param reqImportPem
      * @return userId
      */
+    @Transactional
     public TbUser importPem(ReqImportPem reqImportPem, boolean isCheckExist) {
         PEMKeyStore pemManager = new PEMKeyStore(new ByteArrayInputStream(reqImportPem.getPemContent().getBytes()));
         String privateKey = KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate());
@@ -443,6 +445,7 @@ public class UserService {
      * @param userName
      * @return KeyStoreInfo
      */
+    @Transactional
     public TbUser importKeyStoreFromP12(MultipartFile p12File, String p12PasswordEncoded, Integer groupId,
             String userName, String account, String description, boolean isCheckExist) {
         // decode p12 password

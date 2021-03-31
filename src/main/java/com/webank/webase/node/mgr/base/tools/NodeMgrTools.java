@@ -65,6 +65,7 @@ public class NodeMgrTools {
         'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's',
         't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J',
         'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+    private static Random random = new Random();
 
 
     /**
@@ -77,7 +78,6 @@ public class NodeMgrTools {
             return null;
         }
         StringBuffer sb = new StringBuffer();
-        Random random = new Random();
         for (int i = 0; i < length; i++) {
             sb.append(CHARS[random.nextInt(CHARS.length)]);
         }
@@ -209,6 +209,9 @@ public class NodeMgrTools {
             return null;
         }
         byte[] hashValue = getHashValue(byteArray);
+        if (hashValue == null) {
+            return null;
+        }
         StringBuffer hexValue = new StringBuffer();
         for (int i = 0; i < hashValue.length; i++) {
             int val = ((int) hashValue[i]) & 0xff;

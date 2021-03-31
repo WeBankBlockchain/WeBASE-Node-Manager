@@ -117,10 +117,12 @@ public class AlertRuleTools {
             contentParamList = JsonTools.toJavaObjectList(contentTargetParams, String.class);
             if (contentParamList == null) {
                 log.error("parse json error");
+                return alertContent;
             }
         } catch (Exception e) {
             log.error("processMailContent parse contentParam to List error contentParams:{}, exception:{}",
                     contentTargetParams, e);
+            return alertContent;
         }
         // 替换content中的需要被替代的paramItem， 用replacementText替代
         // 如 您的节点nodeId状态异常，将nodeId替换为具体的0xda3213..的节点id

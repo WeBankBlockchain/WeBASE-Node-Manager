@@ -32,7 +32,6 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,19 +39,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -408,7 +404,7 @@ public class CertService {
      */
     public boolean certFingerPrintExists(String fingerPrint) throws NodeMgrException {
         log.debug("start check certFingerPrintExists. fingerPrint:{} ", fingerPrint);
-        if (fingerPrint == "") {
+        if(StringUtils.isBlank(fingerPrint)) {
             log.debug("fail certAddressExists. fingerPrint is empty ");
             throw new NodeMgrException(ConstantCode.ROLE_ID_EMPTY);
         }
@@ -605,19 +601,24 @@ public class CertService {
             }
 
         } else { // 当前是文件
-
-            // 输入流
-            FileInputStream inputStream = new FileInputStream(file);
-            // 标记要打包的条目
-            out.putNextEntry(new ZipEntry(dir));
-            // 进行写操作
-            int len = 0;
-            byte[] bytes = new byte[1024];
-            while ((len = inputStream.read(bytes)) > 0) {
-                out.write(bytes, 0, len);
+            FileInputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(file);
+                // 标记要打包的条目
+                out.putNextEntry(new ZipEntry(dir));
+                // 进行写操作
+                int len = 0;
+                byte[] bytes = new byte[1024];
+                while ((len = inputStream.read(bytes)) > 0) {
+                    out.write(bytes, 0, len);
+                }
+            } catch (IOException e) {
+                log.error("base64ToFile IOException:[{}]", e.toString());
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
             }
-            // 关闭输入流
-            inputStream.close();
         }
 
     }

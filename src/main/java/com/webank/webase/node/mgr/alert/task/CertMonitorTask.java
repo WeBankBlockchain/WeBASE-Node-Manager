@@ -101,7 +101,7 @@ public class CertMonitorTask {
 
     private boolean checkWithin7days(Date certNotAfter) {
         // unit: ms
-        long sevenDays = 1000 * 60 * 60 * 24 * 7;
+        long sevenDays = 1000L * 60 * 60 * 24 * 7;
         long now = Instant.now().toEpochMilli();
         long interval = certNotAfter.getTime() - now;
         log.info("checkWithin7days time distance:{}, sevenDays:{}",
