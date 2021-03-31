@@ -23,7 +23,6 @@ import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
@@ -220,6 +219,8 @@ public class UserService {
 
         // check group id
         groupService.checkGroupId(user.getGroupId());
+        // check account
+        accountService.accountExist(user.getAccount());
 
         // check userName
         TbUser userRow = queryByName(user.getGroupId(), user.getUserName(), user.getAccount());
@@ -302,7 +303,8 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
         }
         KeyPair keyPair = this.getUserKeyPairFromSign(user.getGroupId(), user.getSignUserId());
-        user.setPrivateKey(keyPair.getPrivateKey());
+        // encode privateKey
+        user.setPrivateKey(NodeMgrTools.encodedBase64Str(keyPair.getPrivateKey()));
         return user;
     }
 

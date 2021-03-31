@@ -37,10 +37,10 @@ public class BaseController {
         if (result.hasErrors()) {
             String errFieldStr = result.getAllErrors().stream()
                 .map(obj -> JsonTools.stringToJsonNode(JsonTools.toJSONString(obj)))
-                .map(err -> err.get("field").asText())
+                .map(err -> err.get("field").asText() + "(" + err.get("defaultMessage").asText() + ")")
                 .collect(Collectors.joining(","));
             StringUtils.removeEnd(errFieldStr, ",");
-            String message = "these fields can not be empty:" + errFieldStr;
+            String message = "these fields error:" + errFieldStr;
             throw new ParamException(ConstantCode.PARAM_EXCEPTION.getCode(), message);
         }
     }
