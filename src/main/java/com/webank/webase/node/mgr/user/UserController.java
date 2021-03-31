@@ -36,6 +36,7 @@ import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
@@ -78,9 +79,8 @@ public class UserController extends BaseController {
         Instant startTime = Instant.now();
 
         // add user row
-        TbUser userRow = userService.addUserInfo(user.getGroupId(), user.getUserName(),
-                user.getAccount(), user.getDescription(), user.getUserType(), null, 
-                ReturnPrivateKey.FALSE.getValue(), CheckUserExist.TURE.getValue());
+        TbUser userRow = userService.addUserInfoLocal(user.getGroupId(), user.getUserName(),
+                user.getAccount(), user.getDescription(), user.getUserType(), null);
         baseResponse.setData(userRow);
 
         log.info("end addUserInfo useTime:{} result:{}",
@@ -185,9 +185,9 @@ public class UserController extends BaseController {
         // encoded by web in base64
         String privateKeyEncoded = reqImport.getPrivateKey();
         // add user row
-        TbUser userRow = userService.addUserInfo(reqImport.getGroupId(), reqImport.getUserName(),
+        TbUser userRow = userService.addUserInfoLocal(reqImport.getGroupId(), reqImport.getUserName(),
                 reqImport.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
-                privateKeyEncoded, ReturnPrivateKey.FALSE.getValue(), CheckUserExist.TURE.getValue());
+                privateKeyEncoded);
         baseResponse.setData(userRow);
 
         log.info("end importPrivateKey useTime:{} result:{}",
@@ -290,7 +290,6 @@ public class UserController extends BaseController {
         log.info("start exportRawUserFromSign startTime:{} userId:{}", startTime.toEpochMilli(), userId);
 
         TbUser tbUser = userService.queryUserDetail(userId);
-
         log.info("end exportRawUserFromSign useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
             tbUser);
