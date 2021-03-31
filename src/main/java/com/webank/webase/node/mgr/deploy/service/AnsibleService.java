@@ -18,6 +18,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
@@ -98,15 +99,15 @@ public class AnsibleService {
         log.info("scp typeEnum:{},ip:{},src:{},dst:{}", typeEnum, ip, src, dst);
         Instant startTime = Instant.now();
         log.info("scp startTime:{}", startTime.toEpochMilli());
-        boolean isSrcDirectory = Files.isDirectory(Paths.get(src));
-        boolean isSrcFile = Files.isRegularFile(Paths.get(src));
+        boolean isSrcDirectory = Files.isDirectory(Paths.get(CleanPathUtil.cleanString(src)));
+        boolean isSrcFile = Files.isRegularFile(Paths.get(CleanPathUtil.cleanString(src)));
         // exec ansible copy or fetch
         String command;
         if (typeEnum == ScpTypeEnum.UP) {
             // handle file's dir local or remote
             if (isSrcFile) {
                 // if src is file, create parent directory of dst on remote
-                String parentOnRemote = Paths.get(dst).getParent().toAbsolutePath().toString();
+                String parentOnRemote = Paths.get(CleanPathUtil.cleanString(dst)).getParent().toAbsolutePath().toString();
                 this.execCreateDir(ip, parentOnRemote);
             }
             if (isSrcDirectory) {

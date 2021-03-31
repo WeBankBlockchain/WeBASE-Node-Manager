@@ -28,6 +28,7 @@ import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.block.BlockService;
@@ -75,6 +76,7 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -579,7 +581,7 @@ public class GroupService {
                     log.debug("checkGroupGenesisSameWithEach getGenesisBlock is null");
                     continue;
                 }
-                if (!"".equals(lastBlockHash) && !lastBlockHash.equals(genesisBlock.getHash())) {
+                if (!"".equals(lastBlockHash) && !MessageDigest.isEqual(lastBlockHash.getBytes(), genesisBlock.getHash().getBytes())) {
                     log.warn("checkGroupGenesisSameWithEach genesis block hash conflicts with other group," +
                             " groupId:{}, frontId:{}", groupId, front.getFrontId());
                     updateGroupStatus(groupId, GroupStatus.CONFLICT_GROUP_GENESIS.getValue());
@@ -652,7 +654,7 @@ public class GroupService {
             log.debug("checkSameChainData groupId:{},blockHeight:{},localHash:{},chainHash:{} ",
                     groupId, blockHeightLocal, blockHashLocal, blockHashOnChain);
             // check same block hash, the same chain
-            if (!blockHashOnChain.isEmpty() && !blockHashLocal.equals(blockHashOnChain)) {
+            if (!blockHashOnChain.isEmpty() && !MessageDigest.isEqual(blockHashLocal.getBytes(), blockHashOnChain.getBytes())) {
                 log.warn("checkSameChainDataWithLocal blockHashOnChain conflicts with local block data " +
                                 "groupId: {} height:{} on chain ", groupId, blockHeightLocal);
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
@@ -1209,7 +1211,7 @@ public class GroupService {
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
         String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/data/group[groupId]/group.1001.*
-        Path localDst = Paths.get(String.format("%s/data/group%s/.group_status", localNodePath,generateGroupId));
+        Path localDst = Paths.get(CleanPathUtil.cleanString(String.format("%s/data/group%s/.group_status", localNodePath,generateGroupId)));
         // create data parent directory
         if (Files.notExists(localDst.getParent())){
             try {

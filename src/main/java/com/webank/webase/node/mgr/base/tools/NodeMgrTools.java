@@ -46,6 +46,7 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -377,7 +378,7 @@ public class NodeMgrTools {
 /*        baseResponse.setMessage(ex.getMessage());
         response.setContentType("application/json;charset=UTF-8");*/
         try {
-            response.getWriter().write(JsonTools.toJSONString(baseResponse));
+            response.getWriter().write(StringEscapeUtils.escapeHtml(JsonTools.toJSONString(baseResponse)));
         } catch (IOException e) {
             log.error("fail responseRetCodeException",e);
         }
@@ -443,7 +444,8 @@ public class NodeMgrTools {
         }
 
         try {
-            response.getWriter().write(JsonTools.toJSONString(baseResponse));
+            String encodeText = StringEscapeUtils.escapeHtml(JsonTools.toJSONString(baseResponse));
+            response.getWriter().write(encodeText);
         } catch (IOException e) {
             log.error("fail responseRetCodeException", e);
         }
@@ -600,13 +602,13 @@ public class NodeMgrTools {
      * @param content
      */
     public static void writerFile(String fileName, String content) {
-        File file = new File(fileName);
+        File file = new File(CleanPathUtil.cleanString(fileName));
         FileWriter fileWritter = null;
         try {
             if (!file.exists()) {
                 file.createNewFile();
             }
-            fileWritter = new FileWriter(file.getName(), true);
+            fileWritter = new FileWriter(CleanPathUtil.cleanString(file.getName()), true);
             fileWritter.write(content);
         } catch (Exception e) {
             log.error("fail writerFile", e);

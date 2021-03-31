@@ -134,8 +134,8 @@ public class AppIntegrationApi extends BaseController {
             @RequestParam(required = false) String account) throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{} account:{} ",
-                startTime.toEpochMilli(), pageNumber, pageSize, account);
+        log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{}",
+                startTime.toEpochMilli(), pageNumber, pageSize);
 
         int count = accountService.countOfAccount(account);
         if (count > 0) {

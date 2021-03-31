@@ -19,6 +19,7 @@ package com.webank.webase.node.mgr.cert;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.CertTools;
+import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
@@ -510,7 +511,7 @@ public class CertService {
         // gm: gmca.crt, gmsdk.crt, gmsdk.key
         // else: ca.crt, sdk.crt, sdk.key
         for (String fileName : sdkContentMap.keySet()) {
-            Path sdkFilePath = Paths.get(sdkDir.getPath() + File.separator + fileName);
+            Path sdkFilePath = Paths.get(sdkDir.getPath() + File.separator + CleanPathUtil.cleanString(fileName));
             String fileContent = sdkContentMap.get(fileName);
             log.info("writeSdkAsFile sdkPath:{}, content:{}", sdkFilePath, fileContent);
             try (BufferedWriter writer = Files.newBufferedWriter(sdkFilePath, StandardCharsets.UTF_8)) {
@@ -524,7 +525,6 @@ public class CertService {
         // zip the directory of conf(guomi: conf/gm)
         try {
             generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR, useGm);
-            log.info("sdk zip from :{} to dir: tempZip", sdkDir.getPath());
         } catch (Exception e) {
             log.error("writeSdkAsFile generateZipFile fail:[]", e);
             throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
@@ -542,7 +542,7 @@ public class CertService {
      */
     public static void generateZipFile(String path, String outputDir, boolean useGm) throws Exception {
 
-        File file2Zip = new File(path);
+        File file2Zip = new File(CleanPathUtil.cleanString(path));
         // 压缩文件的路径不存在
         if (!file2Zip.exists()) {
             log.error("file not exist:{}", path);
@@ -556,14 +556,14 @@ public class CertService {
         }
         // 目的压缩文件，已存在则先删除
         // tempZip/conf.zip
-        String generateFileName = compress.getAbsolutePath() + File.separator + TEMP_ZIP_FILE_NAME;
+        String generateFileName = compress.getAbsolutePath() + File.separator + CleanPathUtil.cleanString(TEMP_ZIP_FILE_NAME);
         File confZip = new File(generateFileName);
         if (confZip.exists() ) {
             log.info("confZip exist, now delete:{}", confZip);
             confZip.delete();
         }
         // 输出流
-        FileOutputStream outputStream = new FileOutputStream(generateFileName);
+        FileOutputStream outputStream = new FileOutputStream(CleanPathUtil.cleanString(generateFileName));
         // 压缩输出流
         ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(outputStream));
         // 传入输出流，传入需要压缩的file路径

@@ -73,7 +73,7 @@ public class ExtAccountService {
     private boolean checkAddressExist(int groupId, String userAddress) {
         int count = extAccountMapper.countOfExtAccount(groupId, userAddress);
         if (count > 0) {
-            log.debug("saveAccountOnChain exists tb_external_account groupId:{} address:{}", groupId, userAddress);
+            log.debug("checkAddressExist is true groupId:{} address:{}", groupId, userAddress);
             return true;
         }
         return false;
