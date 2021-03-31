@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.user;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.CheckUserExist;
 import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.base.enums.RoleType;
@@ -49,6 +50,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.exceptions.LoadKeyStoreException;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
@@ -82,6 +84,19 @@ public class UserService {
     private final static String P12_FILE_FORMAT = ".p12";
 
     /**
+     * save key pair locally and not in integrated app
+     * @param privateKeyEncoded in base64
+     * @return
+     * @throws NodeMgrException
+     */
+    @Transactional
+    public TbUser addUserInfoLocal(Integer groupId, String userName, String account, String description,
+        Integer userType, String privateKeyEncoded) throws NodeMgrException {
+        return addUserInfo(groupId, userName, account, description, userType,
+            privateKeyEncoded, ReturnPrivateKey.FALSE.getValue(), CheckUserExist.TURE.getValue());
+    }
+
+    /**
      * add new user data.
      */
     @Transactional
@@ -95,21 +110,31 @@ public class UserService {
         // check account
         accountService.accountExist(account);
 
-        // check userName
+        // check userName and account
+        TbUser checkUserNameRow;
         TbAccountInfo accountRow = accountService.queryByAccount(account);
-        TbUser userRow = new TbUser();
         if (RoleType.ADMIN.getValue().equals(accountRow.getRoleId())) {
-            userRow = queryByName(groupId, userName, null);
+            checkUserNameRow = queryByName(groupId, userName, null);
         } else {
             userName = account + "_" + userName;
-            userRow = queryByName(groupId, userName, account);
+            checkUserNameRow = queryByName(groupId, userName, account);
         }
-        // check username
-        if (userRow != null) {
+        if (checkUserNameRow != null) {
             if (!isCheckExist) {
-                return userRow;
+                return checkUserNameRow;
             }
             log.warn("fail addUserInfo. user info already exists");
+            throw new NodeMgrException(ConstantCode.USER_EXISTS);
+        }
+
+        // check user address
+        TbUser checkAddressRow = queryUser(null, groupId, null,
+            getAddressFromPrivateKeyEncoded(privateKeyEncoded), null);
+        if (Objects.nonNull(checkAddressRow)) {
+            if (!isCheckExist) {
+                return checkAddressRow;
+            }
+            log.warn("fail addUserInfo. address is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
 
@@ -120,7 +145,9 @@ public class UserService {
 
         // request sign or not
         KeyPair keyPair;
+        // import key
         if (StringUtils.isNotBlank(privateKeyEncoded)) {
+            // import key pair
             Map<String, Object> param = new HashMap<>();
             param.put("signUserId", signUserId);
             param.put("appId", appId);
@@ -129,6 +156,7 @@ public class UserService {
             keyPair = frontRestTools.postForEntity(groupId,
                     FrontRestTools.URI_KEY_PAIR_IMPORT_WITH_SIGN, param, KeyPair.class);
         } else {
+            // not import, but new key pair
             Map<String, String> param = new HashMap<>();
             // for front, its type is 2-external account
             param.put("type", "2");
@@ -149,16 +177,6 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL);
         }
 
-        // check address
-        TbUser addressRow = queryUser(null, groupId, null, address, account);
-        if (Objects.nonNull(addressRow)) {
-            if (!isCheckExist) {
-                return addressRow;
-            }
-            log.warn("fail bindUserInfo. address is already exists");
-            throw new NodeMgrException(ConstantCode.USER_EXISTS);
-        }
-
         // add row
         TbUser newUserRow = new TbUser(HasPk.HAS.getValue(), userType, userName, account, groupId,
                 address, publicKey, description);
@@ -173,12 +191,12 @@ public class UserService {
         // update monitor unusual user's info
         monitorService.updateUnusualUser(groupId, userName, address);
 
-        userRow = queryByUserId(newUserRow.getUserId());
+        checkUserNameRow = queryByUserId(newUserRow.getUserId());
         // if return privateKey
         if (returnPrivateKey) {
-            userRow.setPrivateKey(privateKeyEncoded);
+            checkUserNameRow.setPrivateKey(privateKeyEncoded);
         }
-        return userRow;
+        return checkUserNameRow;
     }
 
     /**
@@ -294,8 +312,6 @@ public class UserService {
         param.put("returnPrivateKey", "true");
         String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_KEY_PAIR_USERINFO_WITH_SIGN, param);
         KeyPair keyPair = frontRestTools.getForEntity(groupId, uri, KeyPair.class);
-        String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
-        keyPair.setPrivateKey(decodedPrivateKey);
         return keyPair;
     }
 
@@ -485,6 +501,8 @@ public class UserService {
     public FileContentHandle exportPemFromSign(int groupId, String signUserId) {
         log.debug("start getExportPemFromSign signUserId:{}", signUserId);
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
+        String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
+        keyPair.setPrivateKey(decodedPrivateKey);
         String filePath = NodeMgrTools.writePrivateKeyPem(keyPair.getPrivateKey(),
             keyPair.getAddress(), keyPair.getUserName(), cryptoSuite);
         try {
@@ -515,6 +533,8 @@ public class UserService {
         }
 
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
+        String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
+        keyPair.setPrivateKey(decodedPrivateKey);
         String filePath = NodeMgrTools.writePrivateKeyP12(p12Password, keyPair.getPrivateKey(),
             keyPair.getAddress(), keyPair.getUserName(), cryptoSuite);
         try {
@@ -525,5 +545,11 @@ public class UserService {
             log.error("exportPrivateKeyPem fail:[]", e);
             throw new NodeMgrException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
         }
+    }
+
+    private String getAddressFromPrivateKeyEncoded(String privateKeyEncoded) {
+        String hexPrivateKey = new String(Base64.getDecoder().decode(privateKeyEncoded.getBytes()));
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(hexPrivateKey);
+        return cryptoKeyPair.getAddress();
     }
 }
