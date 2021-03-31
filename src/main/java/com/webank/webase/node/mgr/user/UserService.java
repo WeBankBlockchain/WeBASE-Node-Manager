@@ -453,7 +453,7 @@ public class UserService {
         try{
             p12Password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
         } catch (Exception e) {
-            log.error("decode password error:[]", e);
+            log.error("decode pwd error:[]", e);
             throw new NodeMgrException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
         }
         String privateKey;

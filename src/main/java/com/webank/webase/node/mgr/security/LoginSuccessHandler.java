@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -68,7 +69,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         log.debug("login backInfo:{}", backStr);
 
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(backStr);
+        response.getWriter().write(StringEscapeUtils.escapeHtml(backStr));
     }
 
 }

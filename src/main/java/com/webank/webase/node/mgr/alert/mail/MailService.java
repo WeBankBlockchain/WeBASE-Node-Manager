@@ -301,8 +301,6 @@ public class MailService {
          * @param emailFinalContent
          */
     public void handleAllUserEmail(TbAlertRule alertRule, String emailTitle, String emailFinalContent) {
-        log.debug("start handleAllUserEmail alertRule:{},emailTitle:{},emailFinalContent:{}",
-                emailTitle, emailTitle, emailFinalContent);
         // get from address
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         String fromMailAddress = latestMailServerConfig.getUsername();
@@ -331,13 +329,10 @@ public class MailService {
             }
             for(String userMailAddress: userList) {
                 try {
-                    log.debug("handleAllUserEmail sending email fromMailAddress:{},fromMailAddress:{}," +
-                                    "emailTitle:{},emailFinalContent:{}",
-                            fromMailAddress, userMailAddress, emailTitle, emailFinalContent);
                     sendMailBare(fromMailAddress,
                             userMailAddress, emailTitle, emailFinalContent);
                 }catch (Exception e) {
-                    log.error("handleAllUserEmail send email error:[]", e);
+                    log.error("handleAllUserEmail send error:[]", e);
                 }
             }
             log.debug("end handleAllUserEmail. ");
@@ -351,8 +346,6 @@ public class MailService {
      * @param emailFinalContent
      */
     public void sendMailBare(String from, String to, String emailTitle, String emailFinalContent) {
-        log.debug("start sendMailBare from:{},to:{},emailTitle:{},emailFinalContent:{}",
-                from, to, emailTitle, emailFinalContent);
         // refresh java mail sender config from db, cover yml's config
 //        refreshJavaMailSenderConfigFromDB();
         MimeMessage message = mailSender.createMimeMessage();
