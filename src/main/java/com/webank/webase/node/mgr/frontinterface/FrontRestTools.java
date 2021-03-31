@@ -92,12 +92,12 @@ public class FrontRestTools {
     public static final String URI_NODEINFO = "web3/nodeInfo";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
-    public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s&returnPrivateKey=%s";
+    public static final String URI_KEY_PAIR = "privateKey";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
     public static final String URI_KEY_PAIR_IMPORT_WITH_SIGN = "privateKey/importWithSign";
     public static final String URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN = "privateKey/exportPem";
     public static final String URI_KEY_PAIR_EXPORT_P12_WITH_SIGN = "privateKey/exportP12";
-    public static final String URI_KEY_PAIR_USERINFO_WITH_SIGN = "privateKey/userInfoWithSign?signUserId=%s&returnPrivateKey=%s";
+    public static final String URI_KEY_PAIR_USERINFO_WITH_SIGN = "privateKey/userInfoWithSign";
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_REGISTER_CNS = "contract/registerCns";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";

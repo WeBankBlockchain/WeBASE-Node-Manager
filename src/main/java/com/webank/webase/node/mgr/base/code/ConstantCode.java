@@ -296,6 +296,7 @@ public class ConstantCode {
     public static final RetCode SDK_CRT_KEY_FILE_NOT_FOUND = RetCode.mark(202511,"Front's sdk cert and key not found!");
     public static final RetCode WRITE_SDK_CRT_KEY_FILE_FAIL = RetCode.mark(202512,"Write front's sdk cert and key fail!");
     public static final RetCode WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL = RetCode.mark(202513,"Write private key file fail!");
+    public static final RetCode GENESIS_CONF_NOT_FOUND = RetCode.mark(202514, "group genesis conf not found");
 
     // app integration
     public static final RetCode APPNAME_EXISTS = RetCode.mark(202516, "app name exists");
