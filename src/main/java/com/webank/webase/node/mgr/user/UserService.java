@@ -303,8 +303,6 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
         }
         KeyPair keyPair = this.getUserKeyPairFromSign(user.getGroupId(), user.getSignUserId());
-        // encode privateKey
-        user.setPrivateKey(NodeMgrTools.encodedBase64Str(keyPair.getPrivateKey()));
         return user;
     }
 
