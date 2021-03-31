@@ -73,6 +73,8 @@ public class PrecompiledService {
     private static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
     private static final String CONTRACT_MANAGE_FREEZE = "freeze";
     private static final String CONTRACT_MANAGE_UNFREEZE = "unfreeze";
+    private static final String GROUP_OPERATE_GET_STATUS = "getStatus";
+    public static final String GROUP_FILE_NOT_EXIST = "INEXISTENT";
 
     /**
      * get cns list /{groupId}/{pathValue} /a?groupId=xx
@@ -138,28 +140,26 @@ public class PrecompiledService {
         consensusHandle.setSignUserId(signUserId);
         TbFront front = this.frontMapper.getByNodeId(nodeId);
         Object frontRsp;
-        // if contain node's front,
+        // if contain node's front
         if (front != null) {
-            FrontGroup checkFrontGroup = frontGroupMapService.getOneNormalMap(front.getFrontId(), groupId);
-            // if front is not removed
-            if ( checkFrontGroup != null &&
-                (StringUtils.equalsIgnoreCase("sealer", consensusHandle.getNodeType())
-                || StringUtils.equalsIgnoreCase("observer", consensusHandle.getNodeType())) ) {
-                log.info("nodeManageService now request specific front:{}", front.getFrontIp());
-                frontRsp = frontInterfaceService.nodeManageFromSpecificFront(front.getFrontIp(),
-                    front.getFrontPort(), consensusHandle);
-            } else {
-                // avoid request removed node, or just remove node no need specific front
-                log.info("nodeManageService now request random available front");
-                frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONSENSUS,
-                    consensusHandle, Object.class);
+            if (StringUtils.equalsIgnoreCase("sealer", consensusHandle.getNodeType())) {
+                log.info("nodeManageService request specific front [{}] for getStatus of group:{}",
+                    front.getFrontIp(), groupId);
+                BaseResponse response = frontInterfaceService.operateGroup(front.getFrontIp(),
+                    front.getFrontPort(), groupId, GROUP_OPERATE_GET_STATUS);
+                log.info("nodeManageService check group genesis file response:{}", response);
+                if (response != null && response.getCode() == 0) {
+                    if (GROUP_FILE_NOT_EXIST.equalsIgnoreCase((String) response.getData())) {
+                        log.error("nodeManageService not support add node as sealer "
+                            + "without group config files response:{}", response);
+                        throw new NodeMgrException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+                    }
+                }
             }
-        } else {
-            // random front
-            log.info("nodeManageService now request random available front");
-            frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONSENSUS,
-                consensusHandle, Object.class);
         }
+        log.info("nodeManageService now request random available front");
+        frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONSENSUS,
+            consensusHandle, Object.class);
         // update front group map if remove node from sealer/observer
         if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null){
             log.info("remove node/front:[{}] from group:[{}], change front group map status to [{}]",
