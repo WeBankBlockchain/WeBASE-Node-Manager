@@ -31,10 +31,8 @@ import com.webank.webase.node.mgr.deploy.entity.ReqUpgrade;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.DeployService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
-import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -62,11 +60,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class DeployController extends BaseController {
 
     @Autowired private TbChainMapper tbChainMapper;
-    @Autowired private TbHostMapper tbHostMapper;
 
     @Autowired private DeployService deployService;
     @Autowired private HostService hostService;
-    @Autowired private ResetGroupListTask resetGroupListTask;
     @Autowired private ConstantProperties constantProperties;
 
     /**
@@ -149,6 +145,7 @@ public class DeployController extends BaseController {
         } catch (NodeMgrException e) {
             return new BaseResponse(e.getRetCode());
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
 
@@ -204,6 +201,7 @@ public class DeployController extends BaseController {
             addResult = this.deployService.batchAddNode(addNode);
         } catch (InterruptedException e) {
             log.error("Error addNodes interrupted ex:", e);
+            Thread.currentThread().interrupt();
             throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
         log.info("End addNodes addResult:[{}], usedTime:[{}]", JsonTools.toJSONString(addResult), Duration
@@ -349,7 +347,6 @@ public class DeployController extends BaseController {
     @GetMapping(value = "progress")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse progress() throws IOException {
-        Instant startTime = Instant.now();
         int progress = ProgressTools.progress();
         log.debug("Start get progress status:{}", progress);
         return new BaseResponse(ConstantCode.SUCCESS, progress);

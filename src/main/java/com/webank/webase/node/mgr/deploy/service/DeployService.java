@@ -24,7 +24,6 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
-import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
@@ -34,7 +33,6 @@ import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
-import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
@@ -48,7 +46,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +62,6 @@ import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -80,7 +76,6 @@ public class DeployService {
     @Autowired private TbConfigMapper tbConfigMapper;
     @Autowired private TbChainMapper tbChainMapper;
     @Autowired private FrontMapper frontMapper;
-    @Autowired private TbAgencyMapper tbAgencyMapper;
     @Autowired private TbHostMapper tbHostMapper;
 
     @Autowired private AgencyService agencyService;
@@ -100,6 +95,7 @@ public class DeployService {
     /**
      * generate chain config and front config in db, scp to remote and async start
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void configChainAndScp(String chainName, List<DeployNodeInfo> deployNodeInfoList, String[] ipConf,
         String imageTag, int encrtypType, String webaseSignAddr, String agencyName)
         throws InterruptedException {

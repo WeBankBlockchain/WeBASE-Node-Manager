@@ -83,10 +83,10 @@ dependencies {
     compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2-SNAPSHOT"
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
-    compile "mysql:mysql-connector-java:8.0.13"
+    compile "mysql:mysql-connector-java:8.0.22"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
-    compile 'org.bouncycastle:bcprov-jdk15on:1.60'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.67'
     // cover old version
     compile 'com.google.guava:guava:28.2-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'

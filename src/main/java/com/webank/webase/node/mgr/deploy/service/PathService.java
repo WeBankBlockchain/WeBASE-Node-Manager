@@ -16,16 +16,17 @@
 package com.webank.webase.node.mgr.deploy.service;
 
 import static com.webank.webase.node.mgr.base.tools.DateUtil.YYYYMMDD_HHMMSS;
-
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.DateUtil;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -127,7 +128,7 @@ public class PathService {
      * @return
      */
     public Path getAgencyDeleteRoot( String chainName, String agencyName) throws IOException {
-        return Paths.get(String.format("%s/%s/%s ", this.getChainDeletedRoot(chainName), agencyName));
+        return Paths.get(String.format("%s/%s ", this.getChainDeletedRoot(chainName), agencyName));
     }
 
 
@@ -209,9 +210,14 @@ public class PathService {
      */
     public List<Path> listHostNodesPath(String chainName, String ip) throws IOException {
         Path hostNodes = this.getHost(chainName, ip);
-        return Files.walk(hostNodes, 1)
-                .filter(path -> path.getFileName().toString().startsWith("node"))
-                .collect(Collectors.toList());
+        List<Path> result = new ArrayList<>();
+        try (Stream<Path> walk = Files.walk(hostNodes, 1)) {
+            result = walk.filter(path -> path.getFileName().toString().startsWith("node"))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("listHostNodesPath error:{}", e);
+        }
+        return result;
     }
 
     /**
@@ -334,15 +340,16 @@ public class PathService {
      * @throws IOException
      */
     public static Set<Integer> getNodeGroupIdSet(Path nodePath) {
-        try {
-            return Files.walk(nodePath.resolve("conf"), 1)
-                    .filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
+        Set<Integer> result = null;
+        try (Stream<Path> walk = Files.walk(nodePath.resolve("conf"), 1)) {
+            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
                     .map((path) -> Integer.parseInt(path.getFileName().toString()
                             .replaceAll("group\\.", "").replaceAll("\\.genesis", "")))
                     .collect(Collectors.toSet());
         } catch (IOException e) {
-            return null;
+            log.error("getNodeGroupIdSet error:{}", e);
         }
+        return result;
     }
 
     /**

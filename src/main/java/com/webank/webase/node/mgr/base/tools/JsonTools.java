@@ -260,4 +260,8 @@ public class JsonTools {
             return null;
         }
     }
+    
+    public void unload() {
+        OBJECT_MAPPER.remove();
+    }
 }
