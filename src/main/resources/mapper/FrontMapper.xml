@@ -65,6 +65,9 @@
         support_version = #{supportVersion},
         front_version = #{frontVersion},
         sign_version = #{signVersion},
+        p2p_port = #{p2pPort},
+        jsonrpc_port = #{jsonrpcPort},
+        channel_port = #{channelPort},
         modify_time = now()
     where front_id = #{frontId}
   </update>

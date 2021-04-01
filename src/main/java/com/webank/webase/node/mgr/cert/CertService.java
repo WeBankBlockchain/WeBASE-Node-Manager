@@ -19,6 +19,7 @@ package com.webank.webase.node.mgr.cert;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.CertTools;
+import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
@@ -32,7 +33,6 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,19 +40,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -408,7 +405,7 @@ public class CertService {
      */
     public boolean certFingerPrintExists(String fingerPrint) throws NodeMgrException {
         log.debug("start check certFingerPrintExists. fingerPrint:{} ", fingerPrint);
-        if (fingerPrint == "") {
+        if(StringUtils.isBlank(fingerPrint)) {
             log.debug("fail certAddressExists. fingerPrint is empty ");
             throw new NodeMgrException(ConstantCode.ROLE_ID_EMPTY);
         }
@@ -514,7 +511,7 @@ public class CertService {
         // gm: gmca.crt, gmsdk.crt, gmsdk.key
         // else: ca.crt, sdk.crt, sdk.key
         for (String fileName : sdkContentMap.keySet()) {
-            Path sdkFilePath = Paths.get(sdkDir.getPath() + File.separator + fileName);
+            Path sdkFilePath = Paths.get(sdkDir.getPath() + File.separator + CleanPathUtil.cleanString(fileName));
             String fileContent = sdkContentMap.get(fileName);
             log.info("writeSdkAsFile sdkPath:{}, content:{}", sdkFilePath, fileContent);
             try (BufferedWriter writer = Files.newBufferedWriter(sdkFilePath, StandardCharsets.UTF_8)) {
@@ -528,7 +525,6 @@ public class CertService {
         // zip the directory of conf(guomi: conf/gm)
         try {
             generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR, useGm);
-            log.info("sdk zip from :{} to dir: tempZip", sdkDir.getPath());
         } catch (Exception e) {
             log.error("writeSdkAsFile generateZipFile fail:[]", e);
             throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
@@ -546,7 +542,7 @@ public class CertService {
      */
     public static void generateZipFile(String path, String outputDir, boolean useGm) throws Exception {
 
-        File file2Zip = new File(path);
+        File file2Zip = new File(CleanPathUtil.cleanString(path));
         // 压缩文件的路径不存在
         if (!file2Zip.exists()) {
             log.error("file not exist:{}", path);
@@ -560,14 +556,14 @@ public class CertService {
         }
         // 目的压缩文件，已存在则先删除
         // tempZip/conf.zip
-        String generateFileName = compress.getAbsolutePath() + File.separator + TEMP_ZIP_FILE_NAME;
+        String generateFileName = compress.getAbsolutePath() + File.separator + CleanPathUtil.cleanString(TEMP_ZIP_FILE_NAME);
         File confZip = new File(generateFileName);
         if (confZip.exists() ) {
             log.info("confZip exist, now delete:{}", confZip);
             confZip.delete();
         }
         // 输出流
-        FileOutputStream outputStream = new FileOutputStream(generateFileName);
+        FileOutputStream outputStream = new FileOutputStream(CleanPathUtil.cleanString(generateFileName));
         // 压缩输出流
         ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(outputStream));
         // 传入输出流，传入需要压缩的file路径
@@ -605,19 +601,24 @@ public class CertService {
             }
 
         } else { // 当前是文件
-
-            // 输入流
-            FileInputStream inputStream = new FileInputStream(file);
-            // 标记要打包的条目
-            out.putNextEntry(new ZipEntry(dir));
-            // 进行写操作
-            int len = 0;
-            byte[] bytes = new byte[1024];
-            while ((len = inputStream.read(bytes)) > 0) {
-                out.write(bytes, 0, len);
+            FileInputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(file);
+                // 标记要打包的条目
+                out.putNextEntry(new ZipEntry(dir));
+                // 进行写操作
+                int len = 0;
+                byte[] bytes = new byte[1024];
+                while ((len = inputStream.read(bytes)) > 0) {
+                    out.write(bytes, 0, len);
+                }
+            } catch (IOException e) {
+                log.error("base64ToFile IOException:[{}]", e.toString());
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
             }
-            // 关闭输入流
-            inputStream.close();
         }
 
     }

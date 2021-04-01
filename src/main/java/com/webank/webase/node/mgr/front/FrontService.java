@@ -157,67 +157,67 @@ public class FrontService {
     // version to check
     @Autowired
     private VersionProperties versionProperties;
-	// interval of check front status
-	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
+    // interval of check front status
+    private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
-	/**
-	 * refresh front, group, frontGroupMap, nodeList
-	 */
-	@Transactional
-	public void refreshFront() {
-		//get all front
+    /**
+     * refresh front, group, frontGroupMap, nodeList
+     */
+    @Transactional
+    public void refreshFront() {
+        //get all front
         List<TbFront> frontList = frontMapper.getAllList();
         if (frontList == null || frontList.size() == 0) {
-        	log.info("refreshFront. not find any front.");
+            log.info("refreshFront. not find any front.");
             return;
         }
         for (TbFront tbFront : frontList) {
-        	try {
-	            String frontIp = tbFront.getFrontIp();
-	            Integer frontPort = tbFront.getFrontPort();
-				// query group list from chain
-				List<String> groupIdList;
-				groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
-				// get syncStatus
-				SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
-						frontPort, Integer.valueOf(groupIdList.get(0)));
-				// get version info
+            try {
+                String frontIp = tbFront.getFrontIp();
+                Integer frontPort = tbFront.getFrontPort();
+                // query group list from chain
+                List<String> groupIdList;
+                groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+                // get syncStatus
+                SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
+                        frontPort, Integer.valueOf(groupIdList.get(0)));
+                // get version info
                 ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
-						frontPort, Integer.valueOf(groupIdList.get(0)));
-				String clientVersion = versionResponse.getVersion();
-				String supportVersion = versionResponse.getSupportedVersion();
-				// get front server version and sign server version
-		        try {
-		            String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
-		            String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
-		            tbFront.setFrontVersion(frontVersion);
-		            tbFront.setSignVersion(signVersion);
-		        } catch (Exception e) {
-		            // catch old version front and sign that not have '/version' api
-		            log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
-		        }
-		        // get node config(add in 1.5.0)
+                        frontPort, Integer.valueOf(groupIdList.get(0)));
+                String clientVersion = versionResponse.getVersion();
+                String supportVersion = versionResponse.getSupportedVersion();
+                // get front server version and sign server version
+                try {
+                    String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
+                    String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
+                    tbFront.setFrontVersion(frontVersion);
+                    tbFront.setSignVersion(signVersion);
+                } catch (Exception e) {
+                    // catch old version front and sign that not have '/version' api
+                    log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
+                }
+                // get node config(add in 1.5.0)
                 FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
                 tbFront.setP2pPort(nodeConfig.getP2pport());
                 tbFront.setJsonrpcPort(nodeConfig.getRpcport());
                 tbFront.setChannelPort(nodeConfig.getChannelPort());
-				//copy attribute
-				tbFront.setNodeId(syncStatus.getNodeId());
-				tbFront.setClientVersion(clientVersion);
-				tbFront.setSupportVersion(supportVersion);
-				//update front info
-				frontMapper.updateBasicInfo(tbFront);
-				// save group info
-				saveGroup(groupIdList, tbFront);
-        	} catch (Exception ex) {
-				log.error("refreshFront fail. frontId:{}", tbFront.getFrontId(), ex);
-				continue;
-			}
-		}
-		// clear cache
-		frontGroupMapCache.clearMapList();
-	}
-	
+                //copy attribute
+                tbFront.setNodeId(syncStatus.getNodeId());
+                tbFront.setClientVersion(clientVersion);
+                tbFront.setSupportVersion(supportVersion);
+                //update front info
+                frontMapper.updateBasicInfo(tbFront);
+                // save group info
+                saveGroup(groupIdList, tbFront);
+            } catch (Exception ex) {
+                log.error("refreshFront fail. frontId:{}", tbFront.getFrontId(), ex);
+                continue;
+            }
+        }
+        // clear cache
+        frontGroupMapCache.clearMapList();
+    }
+    
     /**
      * add new front, save front, frontGroupMap, check front's groupStatus, refresh nodeList
      */
@@ -312,40 +312,40 @@ public class FrontService {
      * @param tbFront
      */
     @Transactional
-    private void saveGroup(List<String> groupIdList, TbFront tbFront){
-		String frontIp = tbFront.getFrontIp();
-		Integer frontPort = tbFront.getFrontPort();
-		for (String groupId : groupIdList) {
-			Integer group = Integer.valueOf(groupId);
-			//peer in group
-			List<String> groupPeerList = frontInterface
-					.getGroupPeersFromSpecificFront(frontIp, frontPort, group);
-			//get peers on chain
-			PeerInfo[] peerArr = frontInterface
-					.getPeersFromSpecificFront(frontIp, frontPort, group);
-			List<PeerInfo> peerList = Arrays.asList(peerArr);
-			//add group
-			// check group not existed or node count differs
-			TbGroup checkGroup = groupService.getGroupById(group);
-			if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
-				groupService.saveGroup(group, groupPeerList.size(), "synchronous",
-						GroupType.SYNC, GroupStatus.NORMAL,0,"");
-			}
-			//save front group map
-			frontGroupMapService.newFrontGroup(tbFront, group);
-			//save nodes
-			for (String nodeId : groupPeerList) {
-				PeerInfo newPeer = peerList.stream()
+    public void saveGroup(List<String> groupIdList, TbFront tbFront){
+        String frontIp = tbFront.getFrontIp();
+        Integer frontPort = tbFront.getFrontPort();
+        for (String groupId : groupIdList) {
+            Integer group = Integer.valueOf(groupId);
+            //peer in group
+            List<String> groupPeerList = frontInterface
+                    .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
+            //get peers on chain
+            PeerInfo[] peerArr = frontInterface
+                    .getPeersFromSpecificFront(frontIp, frontPort, group);
+            List<PeerInfo> peerList = Arrays.asList(peerArr);
+            //add group
+            // check group not existed or node count differs
+            TbGroup checkGroup = groupService.getGroupById(group);
+            if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
+                groupService.saveGroup(group, groupPeerList.size(), "synchronous",
+                        GroupType.SYNC, GroupStatus.NORMAL,0,"");
+            }
+            //save front group map
+            frontGroupMapService.newFrontGroup(tbFront, group);
+            //save nodes
+            for (String nodeId : groupPeerList) {
+                PeerInfo newPeer = peerList.stream()
                     .map(p -> NodeMgrTools.object2JavaBean(p, PeerInfo.class))
                     .filter(Objects::nonNull)
                     .filter(peer -> nodeId.equals(peer.getNodeId()))
                     .findFirst().orElseGet(() -> new PeerInfo(nodeId));
-				nodeService.addNodeInfo(group, newPeer);
-			}
-			// add sealer(consensus node) and observer in nodeList
-			refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
-		}
-	}
+                nodeService.addNodeInfo(group, newPeer);
+            }
+            // add sealer(consensus node) and observer in nodeList
+            refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
+        }
+    }
 
     /**
      * add sealer(consensus node) and observer in nodeList
@@ -485,13 +485,13 @@ public class FrontService {
         }
         LocalDateTime modifyTime = updateFront.getModifyTime();
         LocalDateTime createTime = updateFront.getCreateTime();
-		Duration duration = Duration.between(modifyTime, LocalDateTime.now());
-		Long subTime = duration.toMillis();
-		if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
-			log.debug("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
-					subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
-			return;
-		}
+        Duration duration = Duration.between(modifyTime, LocalDateTime.now());
+        Long subTime = duration.toMillis();
+        if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
+            log.debug("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
+                    subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
+            return;
+        }
         updateFront.setStatus(status);
         frontMapper.update(updateFront);
     }
@@ -808,6 +808,7 @@ public class FrontService {
             this.batchScpNodeConfigIni(chain, groupId, nodeIdRelatedFrontMap);
         } catch (InterruptedException e) {
             log.error("batchScpNodeConfigIni interrupted:[]", e);
+            Thread.currentThread().interrupt();
         }
     }
     /**
@@ -859,6 +860,7 @@ public class FrontService {
      * @param groupId
      * @param newNodeRelatedFrontMap nodeId include new Front new node
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void batchScpNodeConfigIni(TbChain chain, int groupId, Map<String, List<TbFront>> newNodeRelatedFrontMap) throws InterruptedException {
        // List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chain.getId(), groupId);
         log.info("start batchScpNodeConfigIni chainId:{},groupId:{},newNodeRelatedFrontMap:{}",
@@ -1090,6 +1092,7 @@ public class FrontService {
             Thread.sleep(constant.getDockerRestartPeriodTime());
         } catch (InterruptedException e) {
             log.warn("Docker stop and remove container sleep Interrupted");
+            Thread.currentThread().interrupt();
         }
 
         // update map
@@ -1131,6 +1134,7 @@ public class FrontService {
             Thread.sleep(constant.getDockerRestartPeriodTime());
         } catch (InterruptedException e) {
             log.warn("Docker stop and remove container sleep Interrupted");
+            Thread.currentThread().interrupt();
         }
 
         // update map

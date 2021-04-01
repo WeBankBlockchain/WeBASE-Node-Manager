@@ -14,7 +14,7 @@
 package com.webank.webase.node.mgr.base.properties;
 
 import static java.io.File.separator;
-
+import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
 import java.io.File;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -41,21 +41,8 @@ public class ConstantProperties {
 
     // constant
     public static final String CONSTANT_PREFIX = "constant";
-    /**
-     * cookie key---session
-     */
-    public static final String COOKIE_JSESSIONID = "JSESSIONID";
-    /**
-     * cookie key---account
-     */
-    public static final String COOKIE_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_C";
-    /**
-     * session key---account
-     */
-    public static final String SESSION_MGR_ACCOUNT = "NODE_MGR_ACCOUNT_S";
     public static final String CONTRACT_NAME_ZERO = "0x00000000";
     public static final String ADDRESS_DEPLOY = "0x0000000000000000000000000000000000000000";
-    public static final String LOGIN_CHECKCODE_SESSION_KEY = "NODE_MGR_CHECK_CODE_S";
     public static final int PUBLICKEY_LENGTH = 130;
     public static final int ADDRESS_LENGTH = 42;
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
@@ -226,7 +213,7 @@ public class ConstantProperties {
         log.info("Init constant properties, dockerProxyMap: [{}]", dockerProxyMap);
 
         log.info("Init constant properties, check FISCO-BCOS binary path: [{}]", fiscoBcosBinary);
-        if (!Files.exists(Paths.get(fiscoBcosBinary))) {
+        if (!Files.exists(Paths.get(CleanPathUtil.cleanString(fiscoBcosBinary)))) {
             log.warn("FISCO-BCOS binary path: [{}] not exists.", fiscoBcosBinary);
             fiscoBcosBinary = "";
         }

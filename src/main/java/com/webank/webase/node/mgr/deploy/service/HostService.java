@@ -21,7 +21,6 @@ import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.IPUtil;
-import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
 import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
@@ -31,8 +30,6 @@ import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
-import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
@@ -41,7 +38,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -57,7 +53,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,17 +75,13 @@ public class HostService {
 
     @Autowired private TbHostMapper tbHostMapper;
     @Autowired private FrontMapper frontMapper;
-    @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private ConstantProperties constant;
     @Autowired private DockerCommandService dockerOptions;
-    @Autowired private AgencyService agencyService;
     @Autowired private PathService pathService;
     @Autowired private DeployShellService deployShellService;
-    @Autowired private DeployService deployService;
     @Autowired private AnsibleService ansibleService;
     @Autowired private FrontService frontService;
-    @Autowired private TbConfigMapper tbConfigMapper;
     @Autowired private ChainService chainService;
     @Autowired
     private ConfigService configService;
@@ -156,6 +147,7 @@ public class HostService {
      * @param imagePullType default 2-pull from cdn
      * @return
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public boolean  initHostAndDocker(String chainName, String imageTag, List<Integer> hostIdList, int imagePullType) {
         List<TbHost> tbHostList = this.selectDistinctHostListById(hostIdList);
 
@@ -255,6 +247,7 @@ public class HostService {
      * @param hostIdList
      * @return
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public List<TbHost> checkInitAndListHost(List<Integer> hostIdList) {
         log.info("start checkInitAndListHost hostIdList:{}", hostIdList);
         List<TbHost> hostList = this.selectDistinctHostListById(hostIdList);
@@ -281,6 +274,7 @@ public class HostService {
      * @param chainName
      * @param hostIdList
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public boolean scpConfigHostList(String chainName, List<Integer> hostIdList) throws InterruptedException {
 
         List<TbHost> tbHostList = this.selectDistinctHostListById(hostIdList);
@@ -428,6 +422,7 @@ public class HostService {
      * @param chainName
      * @param host
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     private void scpHostSdkCert(String chainName, TbHost host) {
         log.info("start scpHostSdkCert chainName:{},host:{}", chainName, host);
         String ip = host.getIp();
@@ -486,6 +481,7 @@ public class HostService {
     /**
      * deleteHostChainDir b chain id
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteHostChainDir(TbChain chain) {
         log.info("start deleteHostChainDir chain:{}", chain);
         List<TbFront> frontList = frontService.selectFrontListByChainId(chain.getId());
@@ -571,6 +567,7 @@ public class HostService {
     /**
      * check host memory/cpu/dependencies(docker, docker hello-world)
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public boolean batchCheckHostList(List<Integer> hostIdList) throws InterruptedException {
         log.info("batchCheckHostList hostIdList:{}", hostIdList);
         // save repeat time in "remark"
@@ -703,6 +700,7 @@ public class HostService {
      * check host chain's port before init host, after check host mem/cpu
      * @related: syncCheckPortHostList， 一个host多个端口时，端口占用的异常会被覆盖，因此采用同步非异步方式检测
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public boolean checkPortHostList(List<DeployNodeInfo> deployNodeInfoList) throws InterruptedException {
         log.info("batchCheckHostList deployNodeInfoList:{}", deployNodeInfoList);
 
@@ -805,6 +803,7 @@ public class HostService {
      * check synchronized
      * check host chain's port before init host, after check host mem/cpu
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public boolean syncCheckPortHostList(List<DeployNodeInfo> deployNodeInfoList) {
         log.info("syncCheckPortHostList deployNodeInfoList:{}", deployNodeInfoList);
         ProgressTools.setPortCheck();

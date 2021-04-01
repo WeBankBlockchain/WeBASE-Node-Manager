@@ -273,6 +273,7 @@ public class NodeAsyncService {
             startSuccess = startSuccessCount.get() == totalFrontCount.get();
         } catch (InterruptedException e) {
             log.error("Start front of chain:[{}] error", chainId, e);
+            Thread.currentThread().interrupt();
         }
 
         // check if all host init success

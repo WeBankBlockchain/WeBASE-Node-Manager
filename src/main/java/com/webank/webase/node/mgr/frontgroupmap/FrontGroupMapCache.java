@@ -52,7 +52,7 @@ public class FrontGroupMapCache {
      * @return
      */
     @Transactional(isolation= Isolation.READ_COMMITTED)
-    private List<FrontGroup> getSealerOrObserverMap() {
+    public List<FrontGroup> getSealerOrObserverMap() {
         MapListParam param = new MapListParam();
         param.setType(ConsensusType.SEALER.getValue());
         List<FrontGroup> targetMap = null;
@@ -71,6 +71,7 @@ public class FrontGroupMapCache {
      * reset mapList.
      * 优先选择共识节点
      */
+    @Transactional
     public List<FrontGroup> resetMapList() {
         mapList = this.getSealerOrObserverMap();
         return mapList;
@@ -79,6 +80,7 @@ public class FrontGroupMapCache {
     /**
      * get all mapList.
      */
+    @Transactional
     public List<FrontGroup> getAllMap() {
         if (mapList == null || mapList.size() == 0) {
             mapList = resetMapList();
@@ -89,6 +91,7 @@ public class FrontGroupMapCache {
      * get mapList.
      * filter by group status
      */
+    @Transactional
     public List<FrontGroup> getMapListByGroupId(int groupId) {
         List<FrontGroup> list = getAllMap();
         if (list == null) {

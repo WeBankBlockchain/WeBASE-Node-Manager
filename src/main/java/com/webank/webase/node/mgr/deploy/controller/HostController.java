@@ -56,7 +56,7 @@ public class HostController extends BaseController {
     private HostService hostService;
     @Autowired
     private AnsibleService ansibleService;
-    @Autowired private ConstantProperties constantProperties;
+    
     /**
      * list added host
      * @return
@@ -146,6 +146,7 @@ public class HostController extends BaseController {
             return new BaseResponse(e.getRetCode());
         } catch (InterruptedException e) {
             log.error("Error check ex:", e);
+            Thread.currentThread().interrupt();
             throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
     }
