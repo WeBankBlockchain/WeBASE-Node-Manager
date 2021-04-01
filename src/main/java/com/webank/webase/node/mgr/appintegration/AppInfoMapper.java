@@ -43,7 +43,7 @@ public interface AppInfoMapper {
     /**
      * Query application info according to some conditions.
      */
-    TbAppInfo queryAppInfo(AppInfoParam appInfoParam);
+    TbAppInfo queryAppInfoAdded(AppInfoParam appInfoParam);
 
     /**
      * update application row.
