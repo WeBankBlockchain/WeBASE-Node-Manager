@@ -51,11 +51,11 @@ public class DeployShellService {
      * build_chain.sh
      * @param encryptType
      * @param ipLines
+     * @param chainName
+     * @param chainVersion ex: 2.7.2 without v
      * @return
      */
-    public void execBuildChain(int encryptType,
-                                        String[] ipLines,
-                                        String chainName) {
+    public void execBuildChain(int encryptType, String[] ipLines, String chainName, String chainVersion) {
         Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
                 JsonTools.toJSONString(ipLines), chainName, ipConf.toString());
@@ -77,8 +77,8 @@ public class DeployShellService {
         }
 
         // build_chain.sh only support docker on linux
-        // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ]
-        String command = String.format("bash -e %s -S -f %s -o %s %s %s %s",
+        // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ] [ -v support_version ]
+        String command = String.format("bash %s -S -f %s -o %s %s %s %s %s",
                 // build_chain.sh shell script
                 constant.getBuildChainShell(),
                 // ipconf file path
@@ -93,7 +93,8 @@ public class DeployShellService {
                 SystemUtils.IS_OS_LINUX ? " -d " : "",
                 // use binary local
                 StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
-                        String.format(" -e %s ", constant.getFiscoBcosBinary())
+                        String.format(" -e %s ", constant.getFiscoBcosBinary()),
+                String.format(" -v %s ", chainVersion)
         );
 
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());

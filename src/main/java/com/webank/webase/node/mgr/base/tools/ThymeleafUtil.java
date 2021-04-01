@@ -108,16 +108,21 @@ public class ThymeleafUtil {
      * @param peerList
      * @param guomi
      * @param chainIdInConfigIni
+     * @param chainVersion ex: 2.7.2 without v
      * @throws IOException
      */
     public static void newNodeConfigIni(Path nodeRoot, int channelPort, int p2pPort,
                                         int jsonrpcPort, List<TbFront> peerList, boolean guomi,
-                                        int chainIdInConfigIni) throws IOException {
-        log.info("newNodeConfigIni nodeRoot:{},channelPort:{}peerList:{}", nodeRoot, channelPort, peerList);
+                                        int chainIdInConfigIni, String chainVersion) throws IOException {
+        log.info("newNodeConfigIni nodeRoot:{},channelPort:{}peerList:{},chainVersion:{}", nodeRoot, channelPort, peerList, chainVersion);
+        if (chainVersion.startsWith("v")) {
+            chainVersion = chainVersion.substring(1);
+            log.info("chainVersion for supportVersion:{}", chainVersion);
+        }
         String nodeConfigIni = ThymeleafUtil.generate(ThymeleafUtil.NODE_CONFIG_INI,
                 Pair.of("channelPort", channelPort), Pair.of("p2pPort", p2pPort),
                 Pair.of("jsonrpcPort", jsonrpcPort), Pair.of("nodeList", peerList),
-                Pair.of("guomi", guomi), Pair.of("chainId", chainIdInConfigIni));
+                Pair.of("guomi", guomi), Pair.of("chainId", chainIdInConfigIni),Pair.of("supportVersion", chainVersion));
 
         if (Files.notExists(nodeRoot)){
             Files.createDirectories(nodeRoot);

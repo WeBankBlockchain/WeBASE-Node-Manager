@@ -724,8 +724,10 @@ public class FrontService {
             Path nodeRoot = this.pathService.getNodeRoot(chainName, tbFront.getFrontIp(), tbFront.getHostIndex());
 
             // generate config.ini
+            // 1.5.0 add chain version from v2.7.2 => 2.7.2
             ThymeleafUtil.newNodeConfigIni(nodeRoot, tbFront.getChannelPort(),
-                    tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedFront, guomi, chainIdInConfigIni);
+                    tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedFront, guomi, chainIdInConfigIni,
+                chain.getVersion());
 
         }
         log.info("end updateNodeConfigIniByGroupId start batchScpNodeConfigIni");
@@ -797,7 +799,7 @@ public class FrontService {
 
             // generate config.ini
             ThymeleafUtil.newNodeConfigIni(nodeRoot, tbFront.getChannelPort(),
-                tbFront.getP2pPort(), tbFront.getJsonrpcPort(), dbRelatedFrontList, guomi, chainIdInConfigIni);
+                tbFront.getP2pPort(), tbFront.getJsonrpcPort(), dbRelatedFrontList, guomi, chainIdInConfigIni, chain.getVersion());
 
         }
         log.info("end updateNodeConfigIniByGroupId start batchScpNodeConfigIni");
