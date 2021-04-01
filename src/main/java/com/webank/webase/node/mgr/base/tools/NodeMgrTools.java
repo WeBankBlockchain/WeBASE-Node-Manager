@@ -46,7 +46,6 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -378,7 +377,7 @@ public class NodeMgrTools {
 /*        baseResponse.setMessage(ex.getMessage());
         response.setContentType("application/json;charset=UTF-8");*/
         try {
-            response.getWriter().write(StringEscapeUtils.escapeHtml(JsonTools.toJSONString(baseResponse)));
+            response.getWriter().write(JsonTools.toJSONString(baseResponse));
         } catch (IOException e) {
             log.error("fail responseRetCodeException",e);
         }
@@ -444,8 +443,7 @@ public class NodeMgrTools {
         }
 
         try {
-            String encodeText = StringEscapeUtils.escapeHtml(JsonTools.toJSONString(baseResponse));
-            response.getWriter().write(encodeText);
+            response.getWriter().write(JsonTools.toJSONString(baseResponse));
         } catch (IOException e) {
             log.error("fail responseRetCodeException", e);
         }

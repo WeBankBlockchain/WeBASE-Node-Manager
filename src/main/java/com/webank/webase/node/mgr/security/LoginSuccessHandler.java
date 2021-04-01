@@ -15,24 +15,23 @@
  */
 package com.webank.webase.node.mgr.security;
 
+import com.webank.webase.node.mgr.account.AccountService;
+import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.token.TokenService;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang.StringEscapeUtils;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.account.AccountService;
-import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.token.TokenService;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component("loginSuccessHandler")
@@ -69,7 +68,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         log.debug("login backInfo:{}", backStr);
 
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(StringEscapeUtils.escapeHtml(backStr));
+        response.getWriter().write(backStr);
     }
 
 }

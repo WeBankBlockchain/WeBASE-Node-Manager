@@ -72,7 +72,8 @@ public class AppIntegrationService {
      */
     public TbAppInfo newApp(AppAddInfo appAddInfo) {
         // check name
-        if (checkExistByAppName(appAddInfo.getAppName())) {
+        TbAppInfo tbRecord = queryAppInfoByAppName(appAddInfo.getAppName());
+        if (tbRecord != null && tbRecord.getAppType().intValue() == AppType.NEW.getValue()) {
             throw new NodeMgrException(ConstantCode.APPNAME_EXISTS);
         }
         // get app key and secret
@@ -105,7 +106,8 @@ public class AppIntegrationService {
         }
         // check name
         TbAppInfo tbRecord = queryAppInfoByAppName(appAddInfo.getAppName());
-        if (tbRecord != null && tbRecord.getId().intValue() != appAddInfo.getId().intValue()) {
+        if (tbRecord != null && tbRecord.getId().intValue() != appAddInfo.getId().intValue()
+                && tbRecord.getAppType().intValue() == AppType.NEW.getValue()) {
             throw new NodeMgrException(ConstantCode.APPNAME_EXISTS);
         }
         // copy app info
@@ -187,7 +189,7 @@ public class AppIntegrationService {
     public int updateAppInfo(TbAppInfo tbAppInfo) {
         return appInfoMapper.updateAppInfo(tbAppInfo);
     }
-    
+
     /**
      * deleteAppInfo.
      * 
