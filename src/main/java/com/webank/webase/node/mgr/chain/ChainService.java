@@ -321,7 +321,12 @@ public class ChainService {
         // 1.4.3 use bash to generate not ansible
         log.info("Locally exec build_chain....");
         ProgressTools.setGenConfig();
-        deployShellService.execBuildChain(encryptType, ipConf, chainName);
+        String chainVersion = imageTag;
+        if (chainVersion.startsWith("v")) {
+            chainVersion = chainVersion.substring(1);
+            log.info("execBuildChain chainVersion:{}", chainVersion);
+        }
+        deployShellService.execBuildChain(encryptType, ipConf, chainName, chainVersion);
 
         try {
             log.info("Init chain front node db data....");
