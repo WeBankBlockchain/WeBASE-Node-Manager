@@ -15,15 +15,14 @@
  */
 package com.webank.webase.node.mgr.security;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -40,7 +39,7 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.ACCESS_DENIED);
 
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(StringEscapeUtils.escapeHtml(JsonTools.toJSONString(baseResponse)));
+        response.getWriter().write(JsonTools.toJSONString(baseResponse));
     }
 
 }
