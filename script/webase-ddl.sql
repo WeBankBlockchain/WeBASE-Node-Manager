@@ -425,7 +425,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_path (
 CREATE TABLE IF NOT EXISTS tb_cns (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
   group_id int(11) NOT NULL COMMENT '群组ID',
-  contract_path varchar(128) binary NOT NULL COMMENT '合约所在目录',
+  contract_path varchar(128) binary DEFAULT NULL COMMENT '合约所在目录',
   contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
   cns_name varchar(120) binary NOT NULL COMMENT 'cns名称',
   version varchar(120) NOT NULL COMMENT 'cns版本',
