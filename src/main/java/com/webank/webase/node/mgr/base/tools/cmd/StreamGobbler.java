@@ -62,7 +62,7 @@ public class StreamGobbler extends Thread {
         } finally {
             this.isStopped = true;
             synchronized (this) {
-                notify();
+                notifyAll();
             }
         }
     }
@@ -74,6 +74,7 @@ public class StreamGobbler extends Thread {
                     wait();
                 } catch (InterruptedException ignore) {
                     ignore.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
             }
         }

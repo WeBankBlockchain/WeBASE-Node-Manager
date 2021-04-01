@@ -16,16 +16,18 @@
 package com.webank.webase.node.mgr.deploy.service;
 
 import static com.webank.webase.node.mgr.base.tools.DateUtil.YYYYMMDD_HHMMSS;
-
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.base.tools.DateUtil;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -52,7 +54,7 @@ public class PathService {
      * @return              NODES_ROOT/[chainName]_ipconf, a file, not a directory.
      */
     public Path getIpConfig(String chainName) {
-        return Paths.get(constant.getNodesRootDir(), String.format("%s_ipconf", chainName));
+        return Paths.get(constant.getNodesRootDir(), CleanPathUtil.cleanString(String.format("%s_ipconf", chainName)));
     }
 
     /**
@@ -72,7 +74,7 @@ public class PathService {
      * @return              NODES_ROOT/[chainName]/ as a {@link Path}, a directory.
      */
     public Path getChainRoot(String chainName) {
-        return Paths.get(constant.getNodesRootDir(), String.format("%s_nodes", chainName));
+        return Paths.get(constant.getNodesRootDir(), CleanPathUtil.cleanString(String.format("%s_nodes", chainName)));
     }
 
 
@@ -83,7 +85,7 @@ public class PathService {
      * @return              NODES_ROOT_TMP/, a directory.
      */
     public Path getLocalDeleteRoot() throws IOException {
-        Path path = Paths.get(String.format("%s/", constant.getNodesRootTmpDir()));
+        Path path = Paths.get(CleanPathUtil.cleanString(String.format("%s/", constant.getNodesRootTmpDir())));
         if (! Files.exists(path)){
             Files.createDirectories(path);
         }
@@ -96,8 +98,8 @@ public class PathService {
      * @return              NODES_ROOT_TMP/[chainName]-yyyyMMdd_HHmmss, a directory.
      */
     public Path getChainDeletedRoot(String chainName) throws IOException {
-        return Paths.get(String.format("%s/%s-%s",
-                this.getLocalDeleteRoot(), chainName, DateUtil.formatNow(YYYYMMDD_HHMMSS)));
+        return Paths.get(CleanPathUtil.cleanString(String.format("%s/%s-%s",
+                this.getLocalDeleteRoot(), chainName, DateUtil.formatNow(YYYYMMDD_HHMMSS))));
     }
 
     /**
@@ -115,7 +117,7 @@ public class PathService {
      * @return              NODES_ROOT_TMP/[chainName]-yyyyMMdd_HHmmss/[ip]/[nodeid], a directory.
      */
     public Path getNodeDeletedRoot( String chainName, String ip, String nodeId) throws IOException {
-        return Paths.get(String.format("%s/%s/%s ", this.getChainDeletedRoot(chainName), ip, nodeId));
+        return Paths.get(CleanPathUtil.cleanString(String.format("%s/%s/%s ", this.getChainDeletedRoot(chainName), ip, nodeId)));
     }
 
     /**
@@ -127,7 +129,7 @@ public class PathService {
      * @return
      */
     public Path getAgencyDeleteRoot( String chainName, String agencyName) throws IOException {
-        return Paths.get(String.format("%s/%s/%s ", this.getChainDeletedRoot(chainName), agencyName));
+        return Paths.get(CleanPathUtil.cleanString(String.format("%s/%s ", this.getChainDeletedRoot(chainName), agencyName)));
     }
 
 
@@ -139,7 +141,7 @@ public class PathService {
      * @return              NODES_ROOT/[chainName]/[ip] as a {@link Path}, a directory.
      */
     public Path getHost(String chainName, String ip) {
-        return Paths.get(this.getChainRootString(chainName), ip);
+        return Paths.get(CleanPathUtil.cleanString(this.getChainRootString(chainName)), ip);
     }
 
     /**
@@ -209,9 +211,14 @@ public class PathService {
      */
     public List<Path> listHostNodesPath(String chainName, String ip) throws IOException {
         Path hostNodes = this.getHost(chainName, ip);
-        return Files.walk(hostNodes, 1)
-                .filter(path -> path.getFileName().toString().startsWith("node"))
-                .collect(Collectors.toList());
+        List<Path> result = new ArrayList<>();
+        try (Stream<Path> walk = Files.walk(hostNodes, 1)) {
+            result = walk.filter(path -> path.getFileName().toString().startsWith("node"))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("listHostNodesPath error:{}", e);
+        }
+        return result;
     }
 
     /**
@@ -334,15 +341,16 @@ public class PathService {
      * @throws IOException
      */
     public static Set<Integer> getNodeGroupIdSet(Path nodePath) {
-        try {
-            return Files.walk(nodePath.resolve("conf"), 1)
-                    .filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
+        Set<Integer> result = null;
+        try (Stream<Path> walk = Files.walk(nodePath.resolve("conf"), 1)) {
+            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
                     .map((path) -> Integer.parseInt(path.getFileName().toString()
                             .replaceAll("group\\.", "").replaceAll("\\.genesis", "")))
                     .collect(Collectors.toSet());
         } catch (IOException e) {
-            return null;
+            log.error("getNodeGroupIdSet error:{}", e);
         }
+        return result;
     }
 
     /**

@@ -56,6 +56,7 @@ public class AbiService {
         return abiList;
     }
 
+    @Transactional
     public void saveAbi(ReqImportAbi param) {
         if (Objects.isNull(param.getAbiId())) {
             insertAbiInfo(param);

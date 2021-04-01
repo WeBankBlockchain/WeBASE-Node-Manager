@@ -101,7 +101,7 @@ public class UserController extends BaseController {
         Instant startTime = Instant.now();
 
         // query user row
-        TbUser userRow = userService.bindUserInfo(user, true);
+        TbUser userRow = userService.bindUserInfo(user, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end bindUserInfo useTime:{} result:{}",

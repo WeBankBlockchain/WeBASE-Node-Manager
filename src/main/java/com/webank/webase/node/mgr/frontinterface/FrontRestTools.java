@@ -75,7 +75,7 @@ public class FrontRestTools {
     public static final String URI_PEERS = "web3/peers";
     public static final String URI_CONSENSUS_STATUS = "web3/consensusStatus";
     public static final String URI_SYNC_STATUS = "web3/syncStatus";
-    public static final String URI_SYSTEMCONFIG_BY_KEY = "web3/systemConfigByKey/%1s";
+    public static final String URI_SYSTEM_CONFIG = "web3/systemConfigByKey/%1s";
     public static final String URI_CODE = "web3/code/%1s/%2s";
     public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
     public static final String URI_GET_SEALER_LIST = "web3/sealerList";

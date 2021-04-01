@@ -105,7 +105,7 @@ public class AppIntegrationService {
         }
         // check name
         TbAppInfo tbRecord = queryAppInfoByAppName(appAddInfo.getAppName());
-        if (tbRecord != null && tbRecord.getId() != appAddInfo.getId()) {
+        if (tbRecord != null && tbRecord.getId().intValue() != appAddInfo.getId().intValue()) {
             throw new NodeMgrException(ConstantCode.APPNAME_EXISTS);
         }
         // copy app info
@@ -187,7 +187,7 @@ public class AppIntegrationService {
     public int updateAppInfo(TbAppInfo tbAppInfo) {
         return appInfoMapper.updateAppInfo(tbAppInfo);
     }
-    
+
     /**
      * deleteAppInfo.
      * 
@@ -239,7 +239,7 @@ public class AppIntegrationService {
     public TbAppInfo queryAppInfoById(Integer id) {
         AppInfoParam appInfoParam = new AppInfoParam();
         appInfoParam.setId(id);
-        return queryAppInfo(appInfoParam);
+        return queryAppInfoAdded(appInfoParam);
     }
 
     /**
@@ -251,7 +251,7 @@ public class AppIntegrationService {
     public TbAppInfo queryAppInfoByAppName(String appName) {
         AppInfoParam appInfoParam = new AppInfoParam();
         appInfoParam.setAppName(appName);
-        return queryAppInfo(appInfoParam);
+        return queryAppInfoAdded(appInfoParam);
     }
 
     /**
@@ -263,7 +263,7 @@ public class AppIntegrationService {
     public TbAppInfo queryAppInfoByAppKey(String appKey) {
         AppInfoParam appInfoParam = new AppInfoParam();
         appInfoParam.setAppKey(appKey);
-        return queryAppInfo(appInfoParam);
+        return queryAppInfoAdded(appInfoParam);
     }
 
     /**
@@ -272,8 +272,8 @@ public class AppIntegrationService {
      * @param appInfoParam
      * @return
      */
-    private TbAppInfo queryAppInfo(AppInfoParam appInfoParam) {
-        return appInfoMapper.queryAppInfo(appInfoParam);
+    private TbAppInfo queryAppInfoAdded(AppInfoParam appInfoParam) {
+        return appInfoMapper.queryAppInfoAdded(appInfoParam);
     }
 
     /**

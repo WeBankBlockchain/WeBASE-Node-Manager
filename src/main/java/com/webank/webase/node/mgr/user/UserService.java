@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
@@ -221,6 +222,9 @@ public class UserService {
         // check address
         TbUser addressRow = queryUser(null, user.getGroupId(), null, address, user.getAccount());
         if (Objects.nonNull(addressRow)) {
+            if (!isCheckExist) {
+                return addressRow;
+            }
             log.warn("fail bindUserInfo. address is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
@@ -231,9 +235,6 @@ public class UserService {
                 user.getDescription());
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {
-            if (!isCheckExist) {
-                return addressRow;
-            }
             log.warn("bindUserInfo affect 0 rows of tb_user");
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
@@ -422,6 +423,7 @@ public class UserService {
      * @param reqImportPem
      * @return userId
      */
+    @Transactional
     public TbUser importPem(ReqImportPem reqImportPem, boolean isCheckExist) {
         PEMKeyStore pemManager = new PEMKeyStore(new ByteArrayInputStream(reqImportPem.getPemContent().getBytes()));
         String privateKey = KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate());
@@ -443,6 +445,7 @@ public class UserService {
      * @param userName
      * @return KeyStoreInfo
      */
+    @Transactional
     public TbUser importKeyStoreFromP12(MultipartFile p12File, String p12PasswordEncoded, Integer groupId,
             String userName, String account, String description, boolean isCheckExist) {
         // decode p12 password
@@ -450,7 +453,7 @@ public class UserService {
         try{
             p12Password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
         } catch (Exception e) {
-            log.error("decode password error:[]", e);
+            log.error("decode pwd error:[]", e);
             throw new NodeMgrException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
         }
         String privateKey;

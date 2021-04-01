@@ -26,7 +26,6 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.cert.entity.CertHandle;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
@@ -129,7 +129,7 @@ public class CertController extends BaseController {
         checkBindResult(result);
         int count = 0;
         String content = certHandle.getContent();
-        if(content == null | content == "") {
+        if(StringUtils.isBlank(content)) {
             return new BaseResponse(ConstantCode.CERT_ERROR, "content cannot be empty");
         }
         try {
@@ -154,7 +154,7 @@ public class CertController extends BaseController {
         checkBindResult(result);
         int count = 0;
         String fingerPrint = certHandle.getFingerPrint();
-        if(fingerPrint == null || fingerPrint == ""){
+        if(StringUtils.isBlank(fingerPrint)) {
             return new BaseResponse(ConstantCode.CERT_ERROR, "fingerPrint cannot be null");
         }
         try {

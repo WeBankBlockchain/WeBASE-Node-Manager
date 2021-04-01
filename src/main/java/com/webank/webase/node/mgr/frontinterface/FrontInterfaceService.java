@@ -22,7 +22,6 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.cert.entity.SdkCertInfo;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
@@ -458,7 +457,7 @@ public class FrontInterfaceService {
      */
     public String getSystemConfigByKey(Integer groupId, String key) {
         log.debug("start getSystemConfigByKey. groupId:{}", groupId);
-        String uri = String.format(FrontRestTools.URI_SYSTEMCONFIG_BY_KEY, key);
+        String uri = String.format(FrontRestTools.URI_SYSTEM_CONFIG, key);
         String config = frontRestTools.getForEntity(groupId, uri, String.class);
         log.debug("end getSystemConfigByKey. config:{}", config);
         return config;

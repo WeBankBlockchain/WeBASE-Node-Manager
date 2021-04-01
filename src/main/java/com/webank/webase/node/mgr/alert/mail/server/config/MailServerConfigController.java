@@ -101,7 +101,7 @@ public class MailServerConfigController {
                 String pwdDecoded = new String(Base64.getDecoder().decode(param.getPassword()));
                 param.setPassword(pwdDecoded);
             } catch (Exception e) {
-                log.error("decode password error:[]", e);
+                log.error("decode pwd error:[]", e);
                 return new BaseResponse(ConstantCode.PASSWORD_DECODE_FAIL, e.getMessage());
             }
         }

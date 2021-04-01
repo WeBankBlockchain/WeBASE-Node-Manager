@@ -23,7 +23,6 @@ import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorContro
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -34,7 +33,6 @@ public class ErrorController extends BasicErrorController {
     }
 
     @Override
-    @RequestMapping
     public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
         Map<String, Object> body = getErrorAttributes(request,
             isIncludeStackTrace(request, MediaType.ALL));
