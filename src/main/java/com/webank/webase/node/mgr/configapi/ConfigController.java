@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.config;
+package com.webank.webase.node.mgr.configapi;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.config.WebMvcConfig;
@@ -22,7 +22,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.properties.VersionProperties;
 import com.webank.webase.node.mgr.base.tools.IPUtil;
-import com.webank.webase.node.mgr.config.entity.ServerInfo;
+import com.webank.webase.node.mgr.configapi.entity.ServerInfo;
 import com.webank.webase.node.mgr.deploy.service.ConfigService;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;

@@ -127,16 +127,6 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
         }
 
-        // check user address
-        TbUser checkAddressRow = queryUser(null, groupId, null,
-            getAddressFromPrivateKeyEncoded(privateKeyEncoded), null);
-        if (Objects.nonNull(checkAddressRow)) {
-            if (!isCheckExist) {
-                return checkAddressRow;
-            }
-            log.warn("fail addUserInfo. address is already exists");
-            throw new NodeMgrException(ConstantCode.USER_EXISTS);
-        }
 
         // add user by webase-front->webase-sign
         String signUserId = UUID.randomUUID().toString().replaceAll("-", "");
@@ -147,6 +137,16 @@ public class UserService {
         KeyPair keyPair;
         // import key
         if (StringUtils.isNotBlank(privateKeyEncoded)) {
+            // check user address if import private key
+            TbUser checkAddressRow = queryUser(null, groupId, null,
+                getAddressFromPrivateKeyEncoded(privateKeyEncoded), null);
+            if (Objects.nonNull(checkAddressRow)) {
+                if (!isCheckExist) {
+                    return checkAddressRow;
+                }
+                log.warn("fail addUserInfo. address is already exists");
+                throw new NodeMgrException(ConstantCode.USER_EXISTS);
+            }
             // import key pair
             Map<String, Object> param = new HashMap<>();
             param.put("signUserId", signUserId);
@@ -177,6 +177,15 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL);
         }
 
+        // check address after sign return
+        TbUser checkAddressRow = queryUser(null, groupId, null, address, null);
+        if (Objects.nonNull(checkAddressRow)) {
+            if (!isCheckExist) {
+                return checkAddressRow;
+            }
+            log.warn("fail addUserInfo. address is already exists");
+            throw new NodeMgrException(ConstantCode.USER_EXISTS);
+        }
         // add row
         TbUser newUserRow = new TbUser(HasPk.HAS.getValue(), userType, userName, account, groupId,
                 address, publicKey, description);
