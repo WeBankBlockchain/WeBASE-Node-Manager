@@ -1,4 +1,4 @@
-package com.webank.webase.node.mgr.config.entity;
+package com.webank.webase.node.mgr.configapi.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
