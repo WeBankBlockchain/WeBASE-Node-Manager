@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,6 @@
  */
 package com.webank.webase.node.mgr.transaction;
 
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -39,9 +23,22 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
-import com.webank.webase.node.mgr.transaction.entity.TransactionInfo;
-
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Log4j2
 @RestController
@@ -130,7 +127,7 @@ public class TransHashController {
         log.info("start getTransaction startTime:{} groupId:{} transaction:{}",
             startTime.toEpochMilli(), groupId, transHash);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        TransactionInfo transInfo = transHashService.getTransaction(groupId, transHash);
+        JsonTransactionResponse transInfo = transHashService.getTransaction(groupId, transHash);
         baseResponse.setData(transInfo);
         log.info("end getTransaction useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));

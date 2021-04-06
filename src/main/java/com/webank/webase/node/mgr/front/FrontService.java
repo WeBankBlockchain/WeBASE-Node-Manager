@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -24,6 +24,7 @@ import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.properties.VersionProperties;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -46,6 +47,7 @@ import com.webank.webase.node.mgr.deploy.service.DockerCommandService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
+import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
@@ -53,7 +55,6 @@ import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.entity.SyncStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeMapper;
@@ -90,8 +91,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +121,6 @@ public class FrontService {
     private FrontGroupMapMapper frontGroupMapMapper;
     @Autowired
     private TbChainMapper tbChainMapper;
-
     @Autowired
     private NodeService nodeService;
     @Autowired
@@ -149,66 +151,73 @@ public class FrontService {
     private HostService hostService;
     @Autowired
     private ChainService chainService;
-
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    @Autowired private CryptoSuite cryptoSuite;
+    // version to check
+    @Autowired
+    private VersionProperties versionProperties;
+    // interval of check front status
+    private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
-	// interval of check front status
-	private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
-
-	/**
-	 * refresh front, group, frontGroupMap, nodeList
-	 */
-	@Transactional
-	public void refreshFront() {
-		//get all front
+    /**
+     * refresh front, group, frontGroupMap, nodeList
+     */
+    @Transactional
+    public void refreshFront() {
+        //get all front
         List<TbFront> frontList = frontMapper.getAllList();
         if (frontList == null || frontList.size() == 0) {
-        	log.info("refreshFront. not find any front.");
+            log.info("refreshFront. not find any front.");
             return;
         }
         for (TbFront tbFront : frontList) {
-        	try {
-	            String frontIp = tbFront.getFrontIp();
-	            Integer frontPort = tbFront.getFrontPort();
-				// query group list from chain
-				List<String> groupIdList;
-				groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
-				// get syncStatus
-				SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
-						frontPort, Integer.valueOf(groupIdList.get(0)));
-				// get version info
-				NodeVersion.Version versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
-						frontPort, Integer.valueOf(groupIdList.get(0)));
-				String clientVersion = versionResponse.getVersion();
-				String supportVersion = versionResponse.getSupportedVersion();
-				// get front server version and sign server version
-		        try {
-		            String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
-		            String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
-		            tbFront.setFrontVersion(frontVersion);
-		            tbFront.setSignVersion(signVersion);
-		        } catch (Exception e) {
-		            // catch old version front and sign that not have '/version' api
-		            log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
-		        }
-				//copy attribute
-				tbFront.setNodeId(syncStatus.getNodeId());
-				tbFront.setClientVersion(clientVersion);
-				tbFront.setSupportVersion(supportVersion);
-				//update front info
-				frontMapper.updateBasicInfo(tbFront);
-				// save group info
-				saveGroup(groupIdList, tbFront);
-        	} catch (Exception ex) {
-				log.error("refreshFront fail. frontId:{}", tbFront.getFrontId(), ex);
-				continue;
-			}
-		}
-		// clear cache
-		frontGroupMapCache.clearMapList();
-	}
-	
+            try {
+                String frontIp = tbFront.getFrontIp();
+                Integer frontPort = tbFront.getFrontPort();
+                // query group list from chain
+                List<String> groupIdList;
+                groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+                // get syncStatus
+                SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
+                        frontPort, Integer.valueOf(groupIdList.get(0)));
+                // get version info
+                ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
+                        frontPort, Integer.valueOf(groupIdList.get(0)));
+                String clientVersion = versionResponse.getVersion();
+                String supportVersion = versionResponse.getSupportedVersion();
+                // get front server version and sign server version
+                try {
+                    String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
+                    String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
+                    tbFront.setFrontVersion(frontVersion);
+                    tbFront.setSignVersion(signVersion);
+                } catch (Exception e) {
+                    // catch old version front and sign that not have '/version' api
+                    log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
+                }
+                // get node config(add in 1.5.0)
+                FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+                tbFront.setP2pPort(nodeConfig.getP2pport());
+                tbFront.setJsonrpcPort(nodeConfig.getRpcport());
+                tbFront.setChannelPort(nodeConfig.getChannelPort());
+                //copy attribute
+                tbFront.setNodeId(syncStatus.getNodeId());
+                tbFront.setClientVersion(clientVersion);
+                tbFront.setSupportVersion(supportVersion);
+                //update front info
+                frontMapper.updateBasicInfo(tbFront);
+                // save group info
+                saveGroup(groupIdList, tbFront);
+            } catch (Exception ex) {
+                log.error("refreshFront fail. frontId:{}", tbFront.getFrontId(), ex);
+                continue;
+            }
+        }
+        // clear cache
+        frontGroupMapCache.clearMapList();
+    }
+    
     /**
      * add new front, save front, frontGroupMap, check front's groupStatus, refresh nodeList
      */
@@ -237,14 +246,14 @@ public class FrontService {
         }
         // check front's encrypt type same as nodemgr(guomi or standard)
         int encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort);
-        if (encryptType != EncryptType.encryptType) {
+        if (encryptType != cryptoSuite.cryptoTypeConfig) {
             log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{}," +
                             "local encryptType not match:{}",
-                    frontIp, frontPort, encryptType, EncryptType.encryptType);
+                    frontIp, frontPort, encryptType, cryptoSuite.cryptoTypeConfig);
             throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
         }
         //check front not exist
-        SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, 
+        SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
                 frontPort, Integer.valueOf(groupIdList.get(0)));
         FrontParam param = new FrontParam();
         param.setNodeId(syncStatus.getNodeId());
@@ -252,7 +261,7 @@ public class FrontService {
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
         }
-        NodeVersion.Version versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
+        ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
                 frontPort, Integer.valueOf(groupIdList.get(0)));
         String clientVersion = versionResponse.getVersion();
         String supportVersion = versionResponse.getSupportedVersion();
@@ -261,6 +270,15 @@ public class FrontService {
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
         tbFront.setSupportVersion(supportVersion);
+
+        // 1.5.0 add check client version cannot be lower than v2.4.0
+        this.validateSupportVersion(supportVersion);
+        // get node config(add in 1.5.0)
+        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+        tbFront.setP2pPort(nodeConfig.getP2pport());
+        tbFront.setJsonrpcPort(nodeConfig.getRpcport());
+        tbFront.setChannelPort(nodeConfig.getChannelPort());
+
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
@@ -293,40 +311,41 @@ public class FrontService {
      * @param groupIdList
      * @param tbFront
      */
-    private void saveGroup(List<String> groupIdList, TbFront tbFront){
-		String frontIp = tbFront.getFrontIp();
-		Integer frontPort = tbFront.getFrontPort();
-		for (String groupId : groupIdList) {
-			Integer group = Integer.valueOf(groupId);
-			//peer in group
-			List<String> groupPeerList = frontInterface
-					.getGroupPeersFromSpecificFront(frontIp, frontPort, group);
-			//get peers on chain
-			PeerInfo[] peerArr = frontInterface
-					.getPeersFromSpecificFront(frontIp, frontPort, group);
-			List<PeerInfo> peerList = Arrays.asList(peerArr);
-			//add group
-			// check group not existed or node count differs
-			TbGroup checkGroup = groupService.getGroupById(group);
-			if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
-				groupService.saveGroup(group, groupPeerList.size(), "synchronous",
-						GroupType.SYNC, GroupStatus.NORMAL,0,"");
-			}
-			//save front group map
-			frontGroupMapService.newFrontGroup(tbFront, group);
-			//save nodes
-			for (String nodeId : groupPeerList) {
-				PeerInfo newPeer = peerList.stream()
+    @Transactional
+    public void saveGroup(List<String> groupIdList, TbFront tbFront){
+        String frontIp = tbFront.getFrontIp();
+        Integer frontPort = tbFront.getFrontPort();
+        for (String groupId : groupIdList) {
+            Integer group = Integer.valueOf(groupId);
+            //peer in group
+            List<String> groupPeerList = frontInterface
+                    .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
+            //get peers on chain
+            PeerInfo[] peerArr = frontInterface
+                    .getPeersFromSpecificFront(frontIp, frontPort, group);
+            List<PeerInfo> peerList = Arrays.asList(peerArr);
+            //add group
+            // check group not existed or node count differs
+            TbGroup checkGroup = groupService.getGroupById(group);
+            if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
+                groupService.saveGroup(group, groupPeerList.size(), "synchronous",
+                        GroupType.SYNC, GroupStatus.NORMAL,0,"");
+            }
+            //save front group map
+            frontGroupMapService.newFrontGroup(tbFront, group);
+            //save nodes
+            for (String nodeId : groupPeerList) {
+                PeerInfo newPeer = peerList.stream()
                     .map(p -> NodeMgrTools.object2JavaBean(p, PeerInfo.class))
                     .filter(Objects::nonNull)
                     .filter(peer -> nodeId.equals(peer.getNodeId()))
                     .findFirst().orElseGet(() -> new PeerInfo(nodeId));
-				nodeService.addNodeInfo(group, newPeer);
-			}
-			// add sealer(consensus node) and observer in nodeList
-			refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
-		}
-	}
+                nodeService.addNodeInfo(group, newPeer);
+            }
+            // add sealer(consensus node) and observer in nodeList
+            refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
+        }
+    }
 
     /**
      * add sealer(consensus node) and observer in nodeList
@@ -377,7 +396,7 @@ public class FrontService {
      * if exist:throw exception
      */
     private void checkFrontNotExist(String frontIp, int frontPort) {
-        SyncStatus syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, frontPort, 1);
+        SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, frontPort, 1);
         FrontParam param = new FrontParam();
         param.setNodeId(syncStatus.getNodeId());
         int count = getFrontCount(param);
@@ -455,7 +474,7 @@ public class FrontService {
     }
 
     public void updateFrontWithInternal(Integer frontId, Integer status) {
-        log.info("updateFrontStatus frontId:{}, status:{}", frontId, status);
+        log.debug("updateFrontStatus frontId:{}, status:{}", frontId, status);
         TbFront updateFront = getById(frontId);
         if (updateFront == null) {
             log.error("updateFrontStatus updateFront is null");
@@ -466,13 +485,13 @@ public class FrontService {
         }
         LocalDateTime modifyTime = updateFront.getModifyTime();
         LocalDateTime createTime = updateFront.getCreateTime();
-		Duration duration = Duration.between(modifyTime, LocalDateTime.now());
-		Long subTime = duration.toMillis();
-		if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
-			log.debug("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
-					subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
-			return;
-		}
+        Duration duration = Duration.between(modifyTime, LocalDateTime.now());
+        Long subTime = duration.toMillis();
+        if (subTime < CHECK_FRONT_STATUS_WAIT_MIN_MILLIS && createTime.isBefore(modifyTime)) {
+            log.debug("updateFrontWithInternal jump. subTime:{}, minInternal:{}",
+                    subTime, CHECK_FRONT_STATUS_WAIT_MIN_MILLIS);
+            return;
+        }
         updateFront.setStatus(status);
         frontMapper.update(updateFront);
     }
@@ -698,15 +717,17 @@ public class FrontService {
 
             TbFront tbFront = this.getByNodeId(node.getNodeId());
 
-            boolean guomi = encryptType == EncryptType.SM2_TYPE;
+            boolean guomi = encryptType == CryptoType.SM_TYPE;
             int chainIdInConfigIni = this.constant.getDefaultChainId();
 
             // local node root
             Path nodeRoot = this.pathService.getNodeRoot(chainName, tbFront.getFrontIp(), tbFront.getHostIndex());
 
             // generate config.ini
+            // 1.5.0 add chain version from v2.7.2 => 2.7.2
             ThymeleafUtil.newNodeConfigIni(nodeRoot, tbFront.getChannelPort(),
-                    tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedFront, guomi, chainIdInConfigIni);
+                    tbFront.getP2pPort(), tbFront.getJsonrpcPort(), nodeRelatedFront, guomi, chainIdInConfigIni,
+                chain.getVersion());
 
         }
         log.info("end updateNodeConfigIniByGroupId start batchScpNodeConfigIni");
@@ -770,7 +791,7 @@ public class FrontService {
                 continue;
             }
 
-            boolean guomi = encryptType == EncryptType.SM2_TYPE;
+            boolean guomi = encryptType == CryptoType.SM_TYPE;
             int chainIdInConfigIni = this.constant.getDefaultChainId();
 
             // local node root
@@ -778,7 +799,7 @@ public class FrontService {
 
             // generate config.ini
             ThymeleafUtil.newNodeConfigIni(nodeRoot, tbFront.getChannelPort(),
-                tbFront.getP2pPort(), tbFront.getJsonrpcPort(), dbRelatedFrontList, guomi, chainIdInConfigIni);
+                tbFront.getP2pPort(), tbFront.getJsonrpcPort(), dbRelatedFrontList, guomi, chainIdInConfigIni, chain.getVersion());
 
         }
         log.info("end updateNodeConfigIniByGroupId start batchScpNodeConfigIni");
@@ -789,6 +810,7 @@ public class FrontService {
             this.batchScpNodeConfigIni(chain, groupId, nodeIdRelatedFrontMap);
         } catch (InterruptedException e) {
             log.error("batchScpNodeConfigIni interrupted:[]", e);
+            Thread.currentThread().interrupt();
         }
     }
     /**
@@ -840,6 +862,7 @@ public class FrontService {
      * @param groupId
      * @param newNodeRelatedFrontMap nodeId include new Front new node
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void batchScpNodeConfigIni(TbChain chain, int groupId, Map<String, List<TbFront>> newNodeRelatedFrontMap) throws InterruptedException {
        // List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chain.getId(), groupId);
         log.info("start batchScpNodeConfigIni chainId:{},groupId:{},newNodeRelatedFrontMap:{}",
@@ -1071,6 +1094,7 @@ public class FrontService {
             Thread.sleep(constant.getDockerRestartPeriodTime());
         } catch (InterruptedException e) {
             log.warn("Docker stop and remove container sleep Interrupted");
+            Thread.currentThread().interrupt();
         }
 
         // update map
@@ -1112,6 +1136,7 @@ public class FrontService {
             Thread.sleep(constant.getDockerRestartPeriodTime());
         } catch (InterruptedException e) {
             log.warn("Docker stop and remove container sleep Interrupted");
+            Thread.currentThread().interrupt();
         }
 
         // update map
@@ -1241,5 +1266,21 @@ public class FrontService {
             frontList.add(front);
         });
         return frontList;
+    }
+
+    /**
+     * require if webase >= 1.3.1(dynamic group), fisco >= 2.4.1
+     * ignore: require if webase <= 1.3.2, fisco < 2.5.0
+     * @param supportVersion
+     */
+    private void validateSupportVersion(String supportVersion) {
+        int nodeSupportVerInt = NodeMgrTools.getVersionFromStr(supportVersion);
+        String webaseVersion = versionProperties.getVersion();
+        int webaseVerInt = NodeMgrTools.getVersionFromStr(webaseVersion);
+        // webase v1.3.2 above and fisco v2.4.1 below, error for dynamic group manage
+        if ( webaseVerInt >= VersionProperties.WEBASE_LOWEST_VERSION_INT
+            && nodeSupportVerInt < VersionProperties.NODE_LOWEST_SUPPORT_VERSION_INT ) {
+            throw new NodeMgrException(ConstantCode.WEBASE_VERSION_NOT_MATCH_FISCO_SUPPORT_VERSION);
+        }
     }
 }

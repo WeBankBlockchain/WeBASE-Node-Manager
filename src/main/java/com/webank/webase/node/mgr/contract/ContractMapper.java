@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 package com.webank.webase.node.mgr.contract;
 
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
-import com.webank.webase.node.mgr.contract.entity.RspContractPath;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -30,6 +28,8 @@ import org.springframework.stereotype.Repository;
 public interface ContractMapper {
 
     Integer add(TbContract tbContract);
+    
+    Integer saveAndUpdate(TbContract tbContract);
 
     Integer remove(@Param("contractId") Integer contractId);
 

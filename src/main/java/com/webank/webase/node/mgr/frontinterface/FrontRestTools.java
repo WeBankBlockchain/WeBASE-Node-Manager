@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,6 +14,17 @@
 
 package com.webank.webase.node.mgr.frontinterface;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
+import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
+import com.webank.webase.node.mgr.frontinterface.entity.FrontUrlInfo;
 import com.webank.webase.node.mgr.node.NodeService;
 import java.time.Duration;
 import java.time.Instant;
@@ -25,8 +36,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -39,20 +54,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.front.FrontService;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontinterface.entity.FailInfo;
-import com.webank.webase.node.mgr.frontinterface.entity.FrontUrlInfo;
-
-import lombok.extern.log4j.Log4j2;
-
 /**
  * about http request for WeBASE-Front.
  */
@@ -63,6 +64,8 @@ public class FrontRestTools {
     //public static final String FRONT_URL = "http://%1s:%2d/WeBASE-Front/%3s";
     public static final String FRONT_TRANS_RECEIPT_BY_HASH_URI = "web3/transactionReceipt/%1s";
     public static final String URI_BLOCK_BY_NUMBER = "web3/blockByNumber/%1d";
+    public static final String URI_BLOCK_TRANS_COUNT_BY_NUMBER = "web3/blockTransCnt/%1d";
+    public static final String URI_BLOCK_STAT_BY_NUMBER = "web3/blockStat/%1d";
     public static final String URI_BLOCK_BY_HASH = "web3/blockByHash/%1s";
     public static final String URI_TRANS_TOTAL = "web3/transaction-total";
     public static final String URI_TRANS_BY_HASH = "web3/transaction/%1s";
@@ -71,8 +74,8 @@ public class FrontRestTools {
     public static final String URI_GROUP_PLIST = "web3/groupList";
     public static final String URI_PEERS = "web3/peers";
     public static final String URI_CONSENSUS_STATUS = "web3/consensusStatus";
-    public static final String URI_CSYNC_STATUS = "web3/syncStatus";
-    public static final String URI_SYSTEMCONFIG_BY_KEY = "web3/systemConfigByKey/%1s";
+    public static final String URI_SYNC_STATUS = "web3/syncStatus";
+    public static final String URI_SYSTEM_CONFIG = "web3/systemConfigByKey/%1s";
     public static final String URI_CODE = "web3/code/%1s/%2s";
     public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
     public static final String URI_GET_SEALER_LIST = "web3/sealerList";
@@ -84,11 +87,17 @@ public class FrontRestTools {
     public static final String URI_REFRESH_FRONT = "web3/refresh";
     public static final String URI_BLOCK_HEADER_BY_NUMBER = "web3/blockHeaderByNumber/%1d";
     public static final String URI_BLOCK_HEADER_BY_HASH = "web3/blockHeaderByHash/%1s";
+    public static final String URI_SEARCH_BLOCK_OR_TX = "web3/search";
+    public static final String URI_NODECONFIG = "web3/nodeConfig";
+    public static final String URI_NODEINFO = "web3/nodeInfo";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
-    public static final String URI_KEY_PAIR = "privateKey?type=2&userName=%s&signUserId=%s&appId=%s";
+    public static final String URI_KEY_PAIR = "privateKey";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
     public static final String URI_KEY_PAIR_IMPORT_WITH_SIGN = "privateKey/importWithSign";
+    public static final String URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN = "privateKey/exportPem";
+    public static final String URI_KEY_PAIR_EXPORT_P12_WITH_SIGN = "privateKey/exportP12";
+    public static final String URI_KEY_PAIR_USERINFO_WITH_SIGN = "privateKey/userInfoWithSign";
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_REGISTER_CNS = "contract/registerCns";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
@@ -118,7 +127,9 @@ public class FrontRestTools {
     public static final String URI_GOVERNANCE_ACCOUNT_UNFREEZE = "governance/account/unfreeze";
 
     public static final String URI_CERT = "cert";
+    public static final String URI_CERT_SDK_FILES = "cert/sdk";
     public static final String URI_ENCRYPT_TYPE = "encrypt";
+    public static final String URI_SSL_CRYPTO_TYPE = "sslCryptoType";
 
     public static final String URI_CONTRACT_EVENT_INFO_LIST = "event/contractEvent/list";
     public static final String URI_NEW_BLOCK_EVENT_INFO_LIST = "event/newBlockEvent/list";
@@ -134,9 +145,9 @@ public class FrontRestTools {
         .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
                 URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
                 URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
-                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_ENCRYPT_TYPE,
-                URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
-                URI_FRONT_VERSION, URI_SIGN_VERSION,
+                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_CERT_SDK_FILES, URI_ENCRYPT_TYPE, URI_SSL_CRYPTO_TYPE,
+                URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_KEY_PAIR_USERINFO_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
+                URI_FRONT_VERSION, URI_SIGN_VERSION, URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN, URI_KEY_PAIR_EXPORT_P12_WITH_SIGN,
                 URI_GOVERNANCE, URI_GOVERNANCE_COMMITTEE, URI_GOVERNANCE_COMMITTEE_LIST,
                 URI_GOVERNANCE_COMMITTEE_WEIGHT, URI_GOVERNANCE_THRESHOLD,
                 URI_GOVERNANCE_OPERATOR, URI_GOVERNANCE_OPERATOR_LIST,
@@ -246,7 +257,7 @@ public class FrontRestTools {
      * delete key of map.
      */
     private static void deleteKeyOfMap(Map<String, FailInfo> map, String rkey) {
-        log.info("start deleteKeyOfMap. rkey:{} map:{}", rkey, JsonTools.toJSONString(map));
+        log.info("start deleteKeyOfMap. rkey:{} map:{}", rkey, map);
         Iterator<String> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             String key = iter.next();
@@ -255,7 +266,7 @@ public class FrontRestTools {
                 iter.remove();
             }
         }
-        log.info("end deleteKeyOfMap. rkey:{} map:{}", rkey, JsonTools.toJSONString(map));
+        log.info("end deleteKeyOfMap. rkey:{} map:{}", rkey, map);
     }
 
 
@@ -427,5 +438,54 @@ public class FrontRestTools {
             }
         }
         return null;
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param block
+     */
+    public static void processBlockHexNumber(BcosBlock.Block block) {
+        if (block == null) {
+            return;
+        }
+        String gasLimit = block.getGasLimit();
+        String gasUsed = block.getGasUsed();
+        String timestamp = block.getTimestamp();
+        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+        log.info("processBlockHexNumber :{}", block);
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param trans
+     */
+    public static void processTransHexNumber(JsonTransactionResponse trans) {
+        if (trans == null) {
+            return;
+        }
+        String gas = trans.getGas();
+        String gasPrice = trans.getGasPrice();
+        String groupId = trans.getGroupId();
+        trans.setGas(Numeric.toBigInt(gas).toString(10));
+        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
+        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+        log.info("processTransHexNumber :{}", trans);
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param receipt
+     */
+    public static void processReceiptHexNumber(TransactionReceipt receipt) {
+        if (receipt == null) {
+            return;
+        }
+        String gasUsed = receipt.getGasUsed();
+        String blockNumber = receipt.getBlockNumber();
+        receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
+        log.info("processTransHexNumber :{}", receipt);
     }
 }

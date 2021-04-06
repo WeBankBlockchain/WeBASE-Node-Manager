@@ -1,5 +1,5 @@
 # server version
-version: v1.4.3
+version: v1.5.0
 
 #server config
 server:
@@ -60,6 +60,7 @@ constant:
 
   ###common
   developerModeEnable: false
+  deployedModifyEnable: true
   isDeleteInfo: true
   transRetainMax: 10000
   deleteInfoCron: "0 0/1 * * * ?"
@@ -67,6 +68,11 @@ constant:
   resetGroupListCycle: 600000
   groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
   notSupportFrontIp:
+  
+  ###application integration
+  # app request timestamp timeout (ms)
+  appRequestTimeOut: 300000
+  appStatusCheckCycle: 3000
 
   ###block info (pulling data from chain)
   isBlockPullFromZero: false
@@ -85,9 +91,15 @@ constant:
   auditMonitorTaskFixedDelay: 300000
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
-  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/encrypt,/version,/front/refresh
+  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/config/encrypt,/config/version,/front/refresh,/api/*
   ###interval to async refresh group list locally
   resetGroupListInterval: 15000
+  ###interval block statistic, unit: ms
+  statBlockRetainMax: 100000
+  statBlockFixedDelay: 5000
+  statBlockPageSize: 10 # block stat data to pull in one time
+  enableExternalFromBlock: true # enable record account and contract from block
+
   #### 1.4.0 visual deploy
   #### deployType 部署方式：
   # 0, 先使用 build_chain.sh 部署链并启用 WeBASE-Front 服务，然后手动添加前置; 
@@ -120,14 +132,14 @@ sdk:
 
 # executor config for async pulling data from chain
 executor:
-  corePoolSize: 3
-  maxPoolSize: 10
+  corePoolSize: 10
+  maxPoolSize: 20
   queueSize: 50
   threadNamePrefix: "node-mgr-async-"
 
 # scheduler config for sync scheduled task
 scheduler:
-  poolSize: 50
+  poolSize: 30
   threadNamePrefix: "node-mgr-task-"
   awaitTerminationSeconds: 600
   waitForTasksToCompleteOnShutdown: true

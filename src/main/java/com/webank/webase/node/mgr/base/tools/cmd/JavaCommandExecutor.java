@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,13 @@ package com.webank.webase.node.mgr.base.tools.cmd;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 
 /**
- *
+ * use java process to run command in bash -c
  */
-
 @Log4j2
 @ToString
 public class JavaCommandExecutor {
@@ -39,12 +36,10 @@ public class JavaCommandExecutor {
         InputStream pErr = null;
         StreamGobbler outputGobbler = null;
         StreamGobbler errorGobbler = null;
-        Future<Integer> executeFuture = null;
         try {
             log.info("exec command:[{}]", command);
             String[] commandArray = { "/bin/bash", "-c", command };
             process = Runtime.getRuntime().exec(commandArray);
-//            process = Runtime.getRuntime().exec(command);
             final Process p = process;
 
             // close process's output stream.
@@ -80,13 +75,6 @@ public class JavaCommandExecutor {
             log.error(errorMessage, ex);
             return new ExecuteResult(-1, errorMessage);
         } finally {
-            if (executeFuture != null) {
-                try {
-                    executeFuture.cancel(true);
-                } catch (Exception ignore) {
-                    ignore.printStackTrace();
-                }
-            }
             if (pIn != null) {
                 closeQuietly(pIn);
                 if (outputGobbler != null && !outputGobbler.isInterrupted()) {

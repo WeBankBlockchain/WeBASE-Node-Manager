@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,6 +14,9 @@
 
 package com.webank.webase.node.mgr.deploy.entity;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.deploy.service.PathService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,22 +25,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.ini4j.Ini;
 import org.ini4j.Profile;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.deploy.service.PathService;
-
-import lombok.Data;
-import lombok.extern.log4j.Log4j2;
 
 @Data
 @Log4j2
@@ -104,7 +101,7 @@ public class NodeConfig {
     public static void initSdkDir(byte encryptType, Path sdk) {
         if (Files.exists(sdk)) {
             Path sdkConfig = sdk.resolve("conf");
-            if (encryptType == EncryptType.SM2_TYPE) {
+            if (encryptType == CryptoType.SM_TYPE) {
                 sdkConfig = sdkConfig.resolve("origin_cert");
             }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.mail;
 
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.account.AccountMapper;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.alert.log.AlertLogService;
@@ -27,9 +24,10 @@ import com.webank.webase.node.mgr.alert.mail.server.config.MailServerConfigServi
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
-import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.EnableStatus;
+import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +38,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -303,8 +301,6 @@ public class MailService {
          * @param emailFinalContent
          */
     public void handleAllUserEmail(TbAlertRule alertRule, String emailTitle, String emailFinalContent) {
-        log.debug("start handleAllUserEmail alertRule:{},emailTitle:{},emailFinalContent:{}",
-                emailTitle, emailTitle, emailFinalContent);
         // get from address
         TbMailServerConfig latestMailServerConfig = mailServerConfigService.getLatestMailServerConfig();
         String fromMailAddress = latestMailServerConfig.getUsername();
@@ -333,13 +329,10 @@ public class MailService {
             }
             for(String userMailAddress: userList) {
                 try {
-                    log.debug("handleAllUserEmail sending email fromMailAddress:{},fromMailAddress:{}," +
-                                    "emailTitle:{},emailFinalContent:{}",
-                            fromMailAddress, userMailAddress, emailTitle, emailFinalContent);
                     sendMailBare(fromMailAddress,
                             userMailAddress, emailTitle, emailFinalContent);
                 }catch (Exception e) {
-                    log.error("handleAllUserEmail send email error:[]", e);
+                    log.error("handleAllUserEmail send error:[]", e);
                 }
             }
             log.debug("end handleAllUserEmail. ");
@@ -353,8 +346,6 @@ public class MailService {
      * @param emailFinalContent
      */
     public void sendMailBare(String from, String to, String emailTitle, String emailFinalContent) {
-        log.debug("start sendMailBare from:{},to:{},emailTitle:{},emailFinalContent:{}",
-                from, to, emailTitle, emailFinalContent);
         // refresh java mail sender config from db, cover yml's config
 //        refreshJavaMailSenderConfigFromDB();
         MimeMessage message = mailSender.createMimeMessage();

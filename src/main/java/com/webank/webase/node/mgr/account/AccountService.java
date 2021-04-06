@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class AccountService {
 
         // check pwd
         if (StringUtils.isBlank(passwordStr)) {
-            log.info("fail login. password is null");
+            log.info("fail login. passwordStr is null");
             throw new NodeMgrException(ConstantCode.PASSWORD_ERROR);
         }
         // encode by bCryptPasswordEncoder
@@ -68,7 +68,7 @@ public class AccountService {
         if (!passwordEncoder.matches(passwordStr, accountRow.getAccountPwd())) {
             // reset login fail time
             int loginFailTime = accountRow.getLoginFailTime() + 1;
-            log.info("fail login. password error,loginFailTime:{}", loginFailTime);
+            log.info("fail login. pwd error,loginFailTime:{}", loginFailTime);
             accountRow.setLoginFailTime(loginFailTime);
             accountMapper.updateAccountRow(accountRow);
             throw new NodeMgrException(ConstantCode.PASSWORD_ERROR);
@@ -81,8 +81,6 @@ public class AccountService {
      * add account row.
      */
     public void addAccountRow(AccountInfo accountInfo) throws NodeMgrException {
-        log.debug("start addAccountRow.  AccountInfo:{} ", JsonTools.toJSONString(accountInfo));
-
         String accountStr = accountInfo.getAccount();
         Integer roleId = accountInfo.getRoleId();
         String email = accountInfo.getEmail();
@@ -107,9 +105,6 @@ public class AccountService {
      */
     public void updateAccountRow(String currentAccount, AccountInfo accountInfo)
         throws NodeMgrException {
-        log.debug("start updateAccountRow.  currentAccount:{} AccountInfo:{} ", currentAccount,
-            JsonTools.toJSONString(accountInfo));
-
         String accountStr = accountInfo.getAccount();
         // check account
         accountExist(accountStr);
@@ -150,13 +145,13 @@ public class AccountService {
         // query target account info
         TbAccountInfo targetRow = accountMapper.queryByAccount(targetAccount);
         if (targetRow == null) {
-            log.warn("fail updatePassword. not found target account row. targetAccount:{}",
+            log.warn("fail updatePassword. not found target row. targetAccount:{}",
                 targetAccount);
             throw new NodeMgrException(ConstantCode.ACCOUNT_NOT_EXISTS);
         }
 
         if (StringUtils.equals(oldAccountPwd, newAccountPwd)) {
-            log.warn("fail updatePassword. the new password cannot be same as old ");
+            log.warn("fail updatePassword. the new pwd cannot be same as old ");
             throw new NodeMgrException(ConstantCode.NOW_PWD_EQUALS_OLD);
         }
 
@@ -191,10 +186,8 @@ public class AccountService {
      * query count of account.
      */
     public int countOfAccount(String account) {
-        log.debug("start countOfAccount. account:{} ", account);
         Integer accountCount = accountMapper.countOfAccount(account);
         int count = accountCount == null ? 0 : accountCount.intValue();
-        log.debug("end countOfAccount. count:{} ", count);
         return count;
     }
 
@@ -212,8 +205,6 @@ public class AccountService {
      * delete account info.
      */
     public void deleteAccountRow(String account) throws NodeMgrException {
-        log.debug("start deleteAccountRow. account:{} ", account);
-
         // check account
         accountExist(account);
 
@@ -233,7 +224,6 @@ public class AccountService {
      */
     public void accountExist(String account) throws NodeMgrException {
         if (StringUtils.isBlank(account)) {
-            log.warn("fail isAccountExit. account:{}", account);
             throw new NodeMgrException(ConstantCode.ACCOUNT_NAME_EMPTY);
         }
         int count = countOfAccount(account);
@@ -247,7 +237,6 @@ public class AccountService {
      */
     public void accountNotExist(String account) throws NodeMgrException {
         if (StringUtils.isBlank(account)) {
-            log.warn("fail isAccountExit. account:{}", account);
             throw new NodeMgrException(ConstantCode.ACCOUNT_NAME_EMPTY);
         }
         int count = countOfAccount(account);
@@ -261,7 +250,6 @@ public class AccountService {
      */
     private void checkDbAffectRow(Integer affectRow) throws NodeMgrException {
         if (affectRow == 0) {
-            log.warn("affect 0 rows of tb_account");
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,8 +76,7 @@ public class CertMonitorTask {
             return;
         }
         List<X509Certificate> certList = certService.loadAllX509Certs();
-        certList.stream()
-            .forEach(cert -> {
+        certList.forEach(cert -> {
                 List<String> alertContentList = new ArrayList<>();
                 Date certNotAfter = cert.getNotAfter();
                 if(checkWithin7days(certNotAfter)){
@@ -102,12 +101,12 @@ public class CertMonitorTask {
 
     private boolean checkWithin7days(Date certNotAfter) {
         // unit: ms
-        long sevenDays = 1000 * 60 * 60 * 24 * 7;
+        long sevenDays = 1000L * 60 * 60 * 24 * 7;
         long now = Instant.now().toEpochMilli();
         long interval = certNotAfter.getTime() - now;
         log.info("checkWithin7days time distance:{}, sevenDays:{}",
                 interval, sevenDays);
-        if(interval < sevenDays) {
+        if (interval < sevenDays) {
             // within 7days or already not valid (<0)
             return true;
         } else {

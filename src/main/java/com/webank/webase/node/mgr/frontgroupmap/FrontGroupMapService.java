@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -159,6 +159,16 @@ public class FrontGroupMapService {
         //remove by frontId
         frontGroupMapMapper.removeByFrontId(frontId);
     }
+    
+    /**
+     * get group list by frontId
+     */
+    public List<Integer> getGroupIdListByFrontId(int frontId) {
+        if (frontId == 0) {
+            return null;
+        }
+        return frontGroupMapMapper.getGroupIdListByFrontId(frontId);
+    }
 
     /**
      * get map list by groupId
@@ -237,5 +247,17 @@ public class FrontGroupMapService {
             log.error("node block height larger than local! check later! nodeId:{},consensus type:{}", front.getNodeId(), type);
         }
         return type;
+    }
+
+    public FrontGroup getOneNormalMap(Integer frontId, Integer groupId) {
+        MapListParam param = new MapListParam(frontId, groupId);
+        param.setStatus(GroupStatus.NORMAL.getValue());
+        log.info("getOneNormalMap param:{}", param);
+        List<FrontGroup> list = this.getList(param);
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+        log.info("getOneNormalMap list:{}", list);
+        return list.get(0);
     }
 }

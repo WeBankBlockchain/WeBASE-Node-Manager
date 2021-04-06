@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,6 +13,13 @@
  */
 package com.webank.webase.node.mgr.base.tools;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.code.RetCode;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -29,31 +36,23 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.crypto.Hash;
-import org.fisco.bcos.web3j.utils.Numeric;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
-
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.utils.Numeric;
 
 /**
- * common method.
+ * common method in node manager
  */
 @Log4j2
 public class NodeMgrTools {
@@ -66,6 +65,7 @@ public class NodeMgrTools {
         'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's',
         't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J',
         'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+    private static Random random = new Random();
 
 
     /**
@@ -78,7 +78,6 @@ public class NodeMgrTools {
             return null;
         }
         StringBuffer sb = new StringBuffer();
-        Random random = new Random();
         for (int i = 0; i < length; i++) {
             sb.append(CHARS[random.nextInt(CHARS.length)]);
         }
@@ -108,9 +107,8 @@ public class NodeMgrTools {
         Instant instant = Instant.ofEpochMilli(inputTimeStamp);
         ZoneId zone = ZoneId.systemDefault();
         return LocalDateTime.ofInstant(instant, zone);
-//        Timestamp time = new Timestamp(inputTimeStamp);
-//        return time.toLocalDateTime();
     }
+
     /**
      * LocalDateTime to timestamp
      */
@@ -119,8 +117,6 @@ public class NodeMgrTools {
             log.warn("localDateTime2Timestamp fail. inputDateTime is null");
             return null;
         }
-//        Timestamp time = Timestamp.valueOf(inputDateTime);
-//        return time.getTime();
         return inputDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 
@@ -155,6 +151,22 @@ public class NodeMgrTools {
         DateTimeFormatter df = DateTimeFormatter.ofPattern(format);
         String localTimeStr = df.format(dateTime);
         return localTimeStr;
+    }
+
+
+    /**
+     * timestamp to util.Date
+     * @param inputTimeStamp
+     * @return
+     */
+    public static Date timestamp2Date(Long inputTimeStamp) {
+        if (inputTimeStamp == null) {
+            log.warn("timestamp2Date fail. inputTimeStamp is null");
+            return null;
+        }
+        ZoneId zone = ZoneId.systemDefault();
+        Instant instant = Instant.ofEpochMilli(inputTimeStamp).atZone(zone).toInstant();
+        return Date.from(instant);
     }
 
     /**
@@ -197,6 +209,9 @@ public class NodeMgrTools {
             return null;
         }
         byte[] hashValue = getHashValue(byteArray);
+        if (hashValue == null) {
+            return null;
+        }
         StringBuffer hexValue = new StringBuffer();
         for (int i = 0; i < hashValue.length; i++) {
             int val = ((int) hashValue[i]) & 0xff;
@@ -210,24 +225,20 @@ public class NodeMgrTools {
 
     /**
      * get hash value
-     * type: sha256 or sm3
+     * type: sha256
      */
     public static byte[] getHashValue(byte[] byteArray) {
         byte[] hashResult;
-        if(EncryptType.encryptType == 1) {
-           hashResult = Hash.sha3(byteArray);
-           return hashResult;
-        } else {
-            MessageDigest sha = null;
-            try {
-                sha = MessageDigest.getInstance("SHA-256");
-                hashResult = sha.digest(byteArray);
-                return hashResult;
-            } catch (Exception e) {
-                log.error("shaEncode getHashValue fail:", e);
-                return null;
-            }
+        MessageDigest sha = null;
+        try {
+            sha = MessageDigest.getInstance("SHA-256");
+            hashResult = sha.digest(byteArray);
+            return hashResult;
+        } catch (Exception e) {
+            log.error("shaEncode getHashValue fail:", e);
+            return null;
         }
+
     }
 
     /**
@@ -256,7 +267,8 @@ public class NodeMgrTools {
             throw new NullPointerException("values is null");
         }
 
-        values.removeAll(Collections.singleton(null));// remove null
+        // remove null
+        values.removeAll(Collections.singleton(null));
         Collections.sort(values);
 
         StringBuilder sb = new StringBuilder();
@@ -343,7 +355,7 @@ public class NodeMgrTools {
             SocketAddress address = new InetSocketAddress(serverHost, serverPort);
             socket.connect(address, 1000);
         } catch (Exception ex) {
-            log.error("fail checkServerConnect", ex);
+            log.warn("fail checkServerConnect");
             throw new NodeMgrException(ConstantCode.SERVER_CONNECT_FAIL);
         }finally {
             if(Objects.nonNull(socket)){
@@ -535,4 +547,133 @@ public class NodeMgrTools {
         String regex = "[^\\u4e00-\\u9fa5]+";
         return input.matches(regex);
     }
+
+    /**
+     * get version number without character
+     * @param verStr ex: v2.4.1, ex 1.5.0
+     * @return ex: 241, 150
+     */
+    public static int getVersionFromStr(String verStr) {
+        log.info("getVersionFromStr verStr:{}", verStr);
+        // remove v and split
+        if (verStr.toLowerCase().startsWith("v")) {
+            verStr = verStr.substring(1);
+        }
+        String[] versionArr = verStr.split("\\.");
+        if (versionArr.length < 3) {
+            log.error("getVersionFromStr versionArr:{}", (Object) versionArr);
+            throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
+        }
+        // get num
+        int version = Integer.parseInt(versionArr[0]) * 100
+            + Integer.parseInt(versionArr[1]) * 10 + Integer.parseInt(versionArr[2]);
+        log.info("getVersionFromStr version:{}", version);
+        return version;
+    }
+    
+    /**
+     * md5Encrypt.
+     * 
+     * @param dataStr
+     * @return
+     */
+    public static String md5Encrypt(String dataStr) {
+        try {
+            MessageDigest m = MessageDigest.getInstance("MD5");
+            m.update(dataStr.getBytes("UTF8"));
+            byte s[] = m.digest();
+            String result = "";
+            for (int i = 0; i < s.length; i++) {
+                result += Integer.toHexString((0x000000FF & s[i]) | 0xFFFFFF00).substring(6);
+            }
+            return result.toUpperCase();
+        } catch (Exception e) {
+            log.error("fail md5Encrypt", e);
+        }
+        return "";
+    }
+    
+    /**
+     * writerFile.
+     * 
+     * @param fileName
+     * @param content
+     */
+    public static void writerFile(String fileName, String content) {
+        File file = new File(CleanPathUtil.cleanString(fileName));
+        FileWriter fileWritter = null;
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            fileWritter = new FileWriter(CleanPathUtil.cleanString(file.getName()), true);
+            fileWritter.write(content);
+        } catch (Exception e) {
+            log.error("fail writerFile", e);
+        } finally {
+            if (fileWritter != null) {
+                try {
+                    fileWritter.close();
+                } catch (IOException e) {
+                    log.error("fail close fileWritter", e);
+                }
+            }
+        }
+    }
+
+    private final static String TEMP_EXPORT_KEYSTORE_PATH = "exportedKey";
+    private final static String PEM_FILE_FORMAT = ".pem";
+    private final static String P12_FILE_FORMAT = ".p12";
+    /**
+     * write pem in ./tempKey
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @param cryptoSuite
+     * @return
+     */
+    public static String writePrivateKeyPem(String rawPrivateKey, String address, String userName,
+        CryptoSuite cryptoSuite) {
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            keystorePath.delete();
+        }
+        keystorePath.mkdir();
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + PEM_FILE_FORMAT;
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        cryptoKeyPair.storeKeyPairWithPem(exportedKeyPath);
+        return exportedKeyPath;
+    }
+
+    /**
+     * write p12 in ./tempKey
+     * @param p12Password
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @param cryptoSuite
+     * @return
+     */
+    public static String writePrivateKeyP12(String p12Password, String rawPrivateKey,
+        String address, String userName, CryptoSuite cryptoSuite) {
+
+
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            keystorePath.delete();
+        }
+        keystorePath.mkdir();
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + P12_FILE_FORMAT;
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        cryptoKeyPair.storeKeyPairWithP12(exportedKeyPath, p12Password);
+
+        return exportedKeyPath;
+    }
+
 }

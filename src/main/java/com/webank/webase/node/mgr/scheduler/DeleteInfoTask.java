@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.scheduler;
 
 
+import com.webank.webase.node.mgr.statistic.StatService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -52,6 +53,8 @@ public class DeleteInfoTask {
     private ConstantProperties cProperties;
     @Autowired
     private MonitorService monitorService;
+    @Autowired
+    private StatService statService;
 
 
     @Scheduled(cron = "${constant.deleteInfoCron}")
@@ -72,7 +75,7 @@ public class DeleteInfoTask {
             return;
         }
 
-        groupList.stream().forEach(g -> deleteByGroupId(g.getGroupId()));
+        groupList.forEach(g -> deleteByGroupId(g.getGroupId()));
 
         log.debug("end deleteInfoStart useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
@@ -88,6 +91,8 @@ public class DeleteInfoTask {
         deleteTransHash(groupId);
         //delete transaction monitor info
         deleteTransMonitor(groupId);
+        // delete block stat data
+        deleteBlockStat(groupId);
     }
 
 
@@ -138,4 +143,19 @@ public class DeleteInfoTask {
             log.error("fail deleteTransMonitor. groupId:{}", groupId, ex);
         }
     }
+
+    /**
+     * remove stat block data
+     * @param groupId
+     */
+    private void deleteBlockStat(int groupId) {
+        log.debug("start deleteBlockStat. groupId:{}", groupId);
+        try {
+            Integer removeCount = statService.remove(groupId, cProperties.getStatBlockRetainMax());
+            log.debug("end deleteBlockStat. groupId:{} removeCount:{}", groupId, removeCount);
+        } catch (Exception ex) {
+            log.error("fail deleteBlockStat. groupId:{}", groupId, ex);
+        }
+    }
+
 }

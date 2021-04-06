@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -56,7 +56,7 @@ public class HostController extends BaseController {
     private HostService hostService;
     @Autowired
     private AnsibleService ansibleService;
-    @Autowired private ConstantProperties constantProperties;
+    
     /**
      * list added host
      * @return
@@ -146,6 +146,7 @@ public class HostController extends BaseController {
             return new BaseResponse(e.getRetCode());
         } catch (InterruptedException e) {
             log.error("Error check ex:", e);
+            Thread.currentThread().interrupt();
             throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
     }

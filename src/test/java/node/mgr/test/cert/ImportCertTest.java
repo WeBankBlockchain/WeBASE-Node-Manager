@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,37 @@
  */
 package node.mgr.test.cert;
 
+import static com.webank.webase.node.mgr.base.tools.CertTools.byteToHex;
+
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import java.io.*;
-import java.security.*;
-import java.security.cert.*;
-import java.util.*;
-
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import org.fisco.bcos.channel.client.PEMManager;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.utils.Numeric;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.Assert;
 import sun.security.ec.ECPublicKeyImpl;
-
-import static com.webank.webase.node.mgr.base.tools.CertTools.byteToHex;
 
 /**
  * test load non-guomi cert and guomi cert
@@ -61,8 +74,9 @@ public class ImportCertTest {
         ECPublicKeyImpl pub = (ECPublicKeyImpl) nodeCert.getPublicKey();
         byte[] pubBytes = pub.getEncodedPublicValue();
         String publicKey = Numeric.toHexStringNoPrefix(pubBytes);
-        String address = Keys.getAddress(publicKey);
-        byte[] addByteArray = Keys.getAddress(pubBytes);
+        CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
+        String address = cryptoSuite.createKeyPair().getAddress(publicKey);
+        byte[] addByteArray = cryptoSuite.createKeyPair().getAddress(pubBytes);
         System.out.println("byte[] : pub ");
         System.out.println(pubBytes);
         System.out.println("====================================");
@@ -79,21 +93,22 @@ public class ImportCertTest {
      */
     @Test
     public void testAddress() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
-        ECKeyPair key = Keys.createEcKeyPair();
+        CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
+
+        CryptoKeyPair key = cryptoSuite.createKeyPair();
         // 用byte[]穿进去获取公钥，就会可能多出一位0
-        byte[] pubBytes = key.getPublicKey().toByteArray();
         System.out.println("=============原生的==============");
-        System.out.println(key.getPublicKey()); //64bytes BigInteger
-        System.out.println(Keys.getAddress(key.getPublicKey()));
+        System.out.println(key.getHexPublicKey()); //64bytes BigInteger
+        System.out.println(key.getAddress());
 
-        System.out.println("===========通过转成hex后获取地址============");
-        System.out.println(Numeric.toHexStringNoPrefix(key.getPublicKey())); //Hex后显示
-        System.out.println(Keys.getAddress(Numeric.toHexStringNoPrefix(key.getPublicKey())));
-
-        System.out.println("===========通过byte[]============");
-        System.out.println(Numeric.toHexStringNoPrefix(pubBytes)); // BigInteget=> byte[] => hex 多一位
-        System.out.println(Keys.getAddress(Numeric.toHexStringNoPrefix(pubBytes)));
-        System.out.println("===============");
+//        System.out.println("===========通过转成hex后获取地址============");
+//        System.out.println(Numeric.toHexStringNoPrefix(key.getPublicKey())); //Hex后显示
+//        System.out.println(Keys.getAddress(Numeric.toHexStringNoPrefix(key.getPublicKey())));
+//
+//        System.out.println("===========通过byte[]============");
+//        System.out.println(Numeric.toHexStringNoPrefix(pubBytes)); // BigInteget=> byte[] => hex 多一位
+//        System.out.println(Keys.getAddress(Numeric.toHexStringNoPrefix(pubBytes)));
+//        System.out.println("===============");
 //        System.out.println(Keys.getAddress(pubBytes));
     }
 
@@ -228,19 +243,26 @@ public class ImportCertTest {
             + "GZoy4lvKg/J+AQCzewaR2JkBPZShRANCAATgeRpxTyvxl4yRIuK5j9iYEY/iibjF\n"
             + "xWdgl87or6vTcovHI5Wqy2Lye6zO68ZQ7iuIt37GaTxVNQ3fRzBM3sOX\n"
             + "-----END PRIVATE KEY-----";
-        PEMManager pemManager = new PEMManager();
-        PEMManager pemManager2 = new PEMManager();
         String crlfAddress;
         String lfAddress;
         try {
-            pemManager.load(new ByteArrayInputStream(crlfContent.getBytes()));
-            pemManager2.load(new ByteArrayInputStream(lfContent.getBytes()));
-            crlfAddress = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPublicKey());
-            lfAddress = Numeric.toHexStringNoPrefix(pemManager2.getECKeyPair().getPublicKey());
+            PEMKeyStore pemKeyStore = new PEMKeyStore(new ByteArrayInputStream(crlfContent.getBytes()));
+            PEMKeyStore pemKeyStore2 = new PEMKeyStore(new ByteArrayInputStream(lfContent.getBytes()));
+            crlfAddress = Numeric.toHexStringNoPrefix(pemKeyStore.getKeyPair().getPublic().getEncoded());
+            lfAddress = Numeric.toHexStringNoPrefix(pemKeyStore2.getKeyPair().getPublic().getEncoded());
         } catch (Exception e) {
             throw new NodeMgrException(ConstantCode.PEM_CONTENT_ERROR);
         }
         System.out.println("crlfAddress " + crlfAddress);
         System.out.println("lfAddress " + lfAddress);
+    }
+
+    @Test
+    public void testEmptyPwdP12() {
+        String emptyPwd = "";
+        String afterBase64 = Base64.getEncoder().encodeToString(emptyPwd.getBytes());
+        System.out.println("afterBase64: " + afterBase64);
+        String afterDecode = new String(Base64.getDecoder().decode(afterBase64.getBytes()));
+        System.out.println("afterDecode: " + afterDecode);
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -12,25 +12,6 @@
  * the License.
  */
 package com.webank.webase.node.mgr.monitor;
-
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -49,13 +30,36 @@ import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
+import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.monitor.entity.ContractMonitorResult;
+import com.webank.webase.node.mgr.monitor.entity.MonitorTrans;
+import com.webank.webase.node.mgr.monitor.entity.PageTransInfo;
+import com.webank.webase.node.mgr.monitor.entity.TbMonitor;
+import com.webank.webase.node.mgr.monitor.entity.UnusualContractInfo;
+import com.webank.webase.node.mgr.monitor.entity.UnusualUserInfo;
 import com.webank.webase.node.mgr.monitor.entity.UserMonitorResult;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.user.UserService;
-
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 /**
  * MonitorService.
@@ -82,6 +86,7 @@ public class MonitorService {
     private MethodService methodService;
     @Autowired
     private ConstantProperties cProperties;
+    @Autowired private CryptoSuite cryptoSuite;
 
 
     /**
@@ -96,7 +101,7 @@ public class MonitorService {
             LocalDateTime createTime = start;
             do {
                 List<TbTransHash> transHashList = transHashService
-                    .qureyUnStatTransHashList(groupId);
+                    .queryUnStatTransHashList(groupId);
                 log.info("=== groupId:{} transHashList:{}", groupId, transHashList.size());
                 if (transHashList.size() == 0) {
                     log.debug("transMonitorByGroupId jump over. transHashList is empty");
@@ -206,12 +211,12 @@ public class MonitorService {
     /**
      * query monitor user list.
      */
-    public List<TbMonitor> qureyMonitorUserList(Integer groupId) throws NodeMgrException {
+    public List<TbMonitor> queryMonitorUserList(Integer groupId) throws NodeMgrException {
 
         List<TbMonitor> monitorUserList = monitorMapper
             .monitorUserList(TableName.MONITOR.getTableName(groupId));
 
-        log.debug("end qureyMonitorUserList monitorUserList:{}",
+        log.debug("end queryMonitorUserList monitorUserList:{}",
             JsonTools.toJSONString(monitorUserList));
         return monitorUserList;
     }
@@ -219,13 +224,13 @@ public class MonitorService {
     /**
      * query monitor interface list.
      */
-    public List<TbMonitor> qureyMonitorInterfaceList(Integer groupId, String userName)
+    public List<TbMonitor> queryMonitorInterfaceList(Integer groupId, String userName)
         throws NodeMgrException {
 
         List<TbMonitor> monitorInterfaceList = monitorMapper
             .monitorInterfaceList(TableName.MONITOR.getTableName(groupId), userName);
 
-        log.debug("end qureyMonitorInterfaceList monitorInterfaceList:{}",
+        log.debug("end queryMonitorInterfaceList monitorInterfaceList:{}",
             JsonTools.toJSONString(monitorInterfaceList));
         return monitorInterfaceList;
     }
@@ -233,7 +238,7 @@ public class MonitorService {
     /**
      * query monitor trans list.
      */
-    public BaseResponse qureyMonitorTransList(Integer groupId, String userName, String startDate,
+    public BaseResponse queryMonitorTransList(Integer groupId, String userName, String startDate,
         String endDate, String interfaceName)
         throws NodeMgrException {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
@@ -247,7 +252,7 @@ public class MonitorService {
         Map<String, Object> param = NodeMgrTools.buidMap(nameList, valueList);
 
         Integer count = monitorMapper.countOfMonitorTrans(param);
-        List<PageTransInfo> transInfoList = monitorMapper.qureyTransCountList(param);
+        List<PageTransInfo> transInfoList = monitorMapper.queryTransCountList(param);
 
         MonitorTrans monitorTrans = new MonitorTrans(groupId, userName, interfaceName, count,
             transInfoList);
@@ -265,10 +270,10 @@ public class MonitorService {
     /**
      * query unusual user list.
      */
-    public List<UnusualUserInfo> qureyUnusualUserList(Integer groupId, String userName,
+    public List<UnusualUserInfo> queryUnusualUserList(Integer groupId, String userName,
         Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
-        log.debug("start qureyUnusualUserList groupId:{} userName:{} pageNumber:{} pageSize:{}",
+        log.debug("start queryUnusualUserList groupId:{} userName:{} pageNumber:{} pageSize:{}",
             groupId, userName, pageNumber,
             pageSize);
 
@@ -282,7 +287,7 @@ public class MonitorService {
 
         List<UnusualUserInfo> listOfUnusualUser = monitorMapper.listOfUnusualUser(param);
 
-        log.debug("end qureyUnusualUserList listOfUnusualUser:{}",
+        log.debug("end queryUnusualUserList listOfUnusualUser:{}",
             JsonTools.toJSONString(listOfUnusualUser));
         return listOfUnusualUser;
     }
@@ -298,11 +303,11 @@ public class MonitorService {
     /**
      * query unusual contract list.
      */
-    public List<UnusualContractInfo> qureyUnusualContractList(Integer groupId,
+    public List<UnusualContractInfo> queryUnusualContractList(Integer groupId,
         String contractAddress, Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
         log.debug(
-            "start qureyUnusualContractList groupId:{} userName:{} pageNumber:{} pageSize:{}",
+            "start queryUnusualContractList groupId:{} userName:{} pageNumber:{} pageSize:{}",
             groupId, contractAddress, pageNumber, pageSize);
 
         String tableName = TableName.MONITOR.getTableName(groupId);
@@ -318,7 +323,7 @@ public class MonitorService {
         List<UnusualContractInfo> listOfUnusualContract = monitorMapper
             .listOfUnusualContract(param);
 
-        log.debug("end qureyUnusualContractList listOfUnusualContract:{}",
+        log.debug("end queryUnusualContractList listOfUnusualContract:{}",
             JsonTools.toJSONString(listOfUnusualContract));
         return listOfUnusualContract;
     }
@@ -468,20 +473,6 @@ public class MonitorService {
     }
 
 
-    /**
-     * get systemUser name.
-     */
-//    private String getSystemUserName(String address) {
-//        if (StringUtils.isBlank(address)) {
-//            return null;
-//        }
-//        TbUser user = userService.getSystemUser();
-//        return Optional.ofNullable(user).filter(u -> address.equals(u.getAddress()))
-//            .map(u1 -> u1.getUserName()).orElse(null);
-//    }
-
-
-
 
     /**
      * get interface name.
@@ -494,11 +485,11 @@ public class MonitorService {
 
         String interfaceName = null;
         try {
-            List<AbiDefinition> abiList = Web3Tools.loadContractDefinition(contractAbi);
-            for (AbiDefinition abiDefinition : abiList) {
+            List<ABIDefinition> abiList = Web3Tools.loadContractDefinition(contractAbi);
+            for (ABIDefinition abiDefinition : abiList) {
                 if ("function".equals(abiDefinition.getType())) {
                     // support guomi sm3
-                    String buildMethodId = Web3Tools.buildMethodId(abiDefinition);
+                    String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
                     if (methodId.equals(buildMethodId)) {
                         interfaceName = abiDefinition.getName();
                         break;

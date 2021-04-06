@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,8 +52,8 @@ public class CnsService {
         log.info("start registerCns. inputParam:{}", JsonTools.toJSONString(inputParam));
         int groupId = inputParam.getGroupId();
         String contractName = inputParam.getContractName();
-        List<AbiDefinition> abiArray =
-                JsonTools.toJavaObjectList(inputParam.getContractAbi(), AbiDefinition.class);
+        List<ABIDefinition> abiArray =
+                JsonTools.toJavaObjectList(inputParam.getContractAbi(), ABIDefinition.class);
         if (abiArray == null || abiArray.isEmpty()) {
             log.error("fail registerCns. abi is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);

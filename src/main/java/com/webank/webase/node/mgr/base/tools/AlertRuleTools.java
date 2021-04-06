@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * alert rule tool
+ */
 @Log4j2
 public class AlertRuleTools {
 
@@ -42,7 +45,7 @@ public class AlertRuleTools {
     public static final String ALERT_TITLE_AUDIT = "审计异常告警";
     public static final String ALERT_TITLE_CERT = "证书异常告警";
     public static final String ALERT_TITLE_OTHERS = "其他告警";
-    // en
+    // english
     public static final String ALERT_TITLE_NODE_EN = " (Node Exception Alert)";
     public static final String ALERT_TITLE_AUDIT_EN = " (Audit Exception Alert)";
     public static final String ALERT_TITLE_CERT_EN = " (Cert Exception Alert)";
@@ -114,10 +117,12 @@ public class AlertRuleTools {
             contentParamList = JsonTools.toJavaObjectList(contentTargetParams, String.class);
             if (contentParamList == null) {
                 log.error("parse json error");
+                return alertContent;
             }
         } catch (Exception e) {
             log.error("processMailContent parse contentParam to List error contentParams:{}, exception:{}",
                     contentTargetParams, e);
+            return alertContent;
         }
         // 替换content中的需要被替代的paramItem， 用replacementText替代
         // 如 您的节点nodeId状态异常，将nodeId替换为具体的0xda3213..的节点id

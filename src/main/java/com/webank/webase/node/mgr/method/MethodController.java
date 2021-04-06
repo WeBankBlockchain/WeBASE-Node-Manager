@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,12 +13,13 @@
  */
 package com.webank.webase.node.mgr.method;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
 import java.time.Duration;
@@ -56,7 +57,7 @@ public class MethodController extends BaseController {
         log.info("start addMethod. startTime:{} newMethodInputParam:{}",
             startTime.toEpochMilli(), JsonTools.toJSONString(newMethodInputParam));
 
-        methodService.saveMethod(newMethodInputParam);
+        methodService.saveMethod(newMethodInputParam, ContractType.GENERALCONTRACT.getValue());
 
         log.info("end addMethod. useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));

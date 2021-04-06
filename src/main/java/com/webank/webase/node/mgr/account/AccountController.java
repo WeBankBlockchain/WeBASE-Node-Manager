@@ -1,6 +1,6 @@
 
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -65,7 +65,7 @@ public class AccountController extends BaseController {
     private static final int PICTURE_CHECK_CODE_CHAR_NUMBER = 4;
 
     /**
-     * 获取验证码
+     * get verify code when login
      */
     @GetMapping(value = "pictureCheckCode")
     public BaseResponse getPictureCheckCode() throws Exception {
@@ -110,8 +110,7 @@ public class AccountController extends BaseController {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start addAccountInfo. startTime:{} accountInfo:{}", startTime.toEpochMilli(),
-            JsonTools.toJSONString(info));
+        log.info("start addAccountInfo. startTime:{}", startTime.toEpochMilli());
 
         // add account row
         accountService.addAccountRow(info);
@@ -136,8 +135,7 @@ public class AccountController extends BaseController {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start updateAccountInfo startTime:{} accountInfo:{}", startTime.toEpochMilli(),
-            JsonTools.toJSONString(info));
+        log.info("start updateAccountInfo startTime:{}", startTime.toEpochMilli());
 
         // current
         String currentAccount = getCurrentAccount(request);
@@ -166,8 +164,8 @@ public class AccountController extends BaseController {
         @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
         BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{} account:{} ",
-            startTime.toEpochMilli(), pageNumber, pageSize, account);
+        log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{}",
+            startTime.toEpochMilli(), pageNumber, pageSize);
 
         int count = accountService.countOfAccount(account);
         if (count > 0) {
@@ -195,7 +193,6 @@ public class AccountController extends BaseController {
         throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start deleteAccount. startTime:{} account:{}", startTime.toEpochMilli(), account);
 
         accountService.deleteAccountRow(account);
 
@@ -213,8 +210,6 @@ public class AccountController extends BaseController {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start updatePassword startTime:{} passwordInfo:{}", startTime.toEpochMilli(),
-            JsonTools.toJSONString(info));
 
         String targetAccount = getCurrentAccount(request);
 

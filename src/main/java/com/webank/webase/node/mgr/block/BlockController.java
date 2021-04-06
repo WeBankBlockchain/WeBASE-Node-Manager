@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,13 +13,12 @@
  */
 package com.webank.webase.node.mgr.block;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.block.entity.BlockListParam;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
 import java.math.BigInteger;
@@ -29,7 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -78,7 +78,7 @@ public class BlockController {
             pageResponse.setData(blockList);
             pageResponse.setTotalCount(count);
         } else {
-            BlockInfo blockInfo = null;
+            BcosBlock.Block blockInfo = null;
             if (blockNumber != null) {
                 log.debug("did not find block, request from front. blockNumber:{} groupId:{}",
                     blockNumber, groupId);
@@ -157,6 +157,23 @@ public class BlockController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         BcosBlockHeader blockInfo = blockService.getBlockHeaderFromFrontByHash(groupId, blockHash);
         baseResponse.setData(blockInfo);
+        log.info("end getBlockHeaderByNumber useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * get block or tx
+     */
+    @GetMapping("/search/{groupId}/{input}")
+    public BaseResponse searchByBlockNumOrTxHash(@PathVariable("groupId") Integer groupId,
+        @PathVariable("input") String input)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start getBlockHeaderByNumber startTime:{} groupId:{} blockHash:{}",
+            startTime.toEpochMilli(), groupId, input);
+        Object blockOrTx = blockService.searchByBlockNumOrTxHash(groupId, input);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS, blockOrTx);
         log.info("end getBlockHeaderByNumber useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;

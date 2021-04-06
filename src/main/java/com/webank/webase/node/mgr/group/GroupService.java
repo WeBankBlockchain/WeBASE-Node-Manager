@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -15,44 +15,11 @@ package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
-import com.webank.webase.node.mgr.abi.AbiService;
-import com.webank.webase.node.mgr.base.enums.DeployType;
-import com.webank.webase.node.mgr.base.tools.ProgressTools;
-import com.webank.webase.node.mgr.contract.CnsService;
-import com.webank.webase.node.mgr.deploy.service.AnsibleService;
-import com.webank.webase.node.mgr.governance.GovernVoteService;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.aop.framework.AopContext;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.ResourceAccessException;
-
+import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
+import com.webank.webase.node.mgr.base.enums.DeployType;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
@@ -61,19 +28,23 @@ import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.ThymeleafUtil;
+import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.block.BlockService;
-import com.webank.webase.node.mgr.block.entity.BlockInfo;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.chain.ChainService;
+import com.webank.webase.node.mgr.contract.CnsService;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
+import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
+import com.webank.webase.node.mgr.external.ExtAccountService;
+import com.webank.webase.node.mgr.external.ExtContractService;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
@@ -85,6 +56,7 @@ import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
+import com.webank.webase.node.mgr.governance.GovernVoteService;
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
 import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
@@ -96,10 +68,38 @@ import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
+import com.webank.webase.node.mgr.statistic.StatService;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
-
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
 
 /**
  * services for group data.
@@ -147,6 +147,13 @@ public class GroupService {
     private GovernVoteService governVoteService;
     @Autowired
     private CnsService cnsService;
+    @Autowired
+    private ExtAccountService extAccountService;
+    @Autowired
+    private ExtContractService extContractService;
+    @Autowired
+    private StatService statService;
+
 
     @Autowired private ChainService chainService;
     @Autowired private AnsibleService ansibleService;
@@ -225,7 +232,7 @@ public class GroupService {
     public List<StatisticalGroupTransInfo> queryLatestStatisticalTrans() throws NodeMgrException {
         log.debug("start queryLatestStatisticalTrans");
         try {
-            // qurey list
+            // query list
             List<StatisticalGroupTransInfo> listStatisticalTrans = groupMapper
                     .queryLatestStatisticalTrans();
             log.debug("end queryLatestStatisticalTrans listStatisticalTrans:{}",
@@ -262,7 +269,9 @@ public class GroupService {
         List<String> groupPeers = frontInterface.getGroupPeers(groupId);
         groupMapper.updateNodeCount(groupId, groupPeers.size());
         log.debug("getGeneralAndUpdateNodeCount gId:{} count:{}", groupId, groupPeers.size());
-        return groupMapper.getGeneral(groupId);
+        GroupGeneral groupGeneral = groupMapper.getGeneral(groupId);
+        // v1.5.0 count all contract on chain
+        return groupGeneral;
     }
 
     /**
@@ -293,95 +302,96 @@ public class GroupService {
         frontGroupMapCache.clearMapList();
 
         // save group and nodes(peers, sealer, observer) and front_group_map from chain
-		// update front_group_map by group list on chain
-		saveDataOfGroup(frontList, allGroupSet);
+        // update front_group_map by group list on chain
+        saveDataOfGroup(frontList, allGroupSet);
 
         //remove invalid peers
         removeInvalidPeer(frontList);
 
         // check group status(normal or maintaining), update by local group list
-		// if groupid not in allGroupSet, remove it
+        // if groupid not in allGroupSet, remove it
         checkAndUpdateGroupStatus(allGroupSet);
 
 
-		// check group local whether has dirty data by contrast of local blockHash with chain blockHash
-		// if not same, update group as DIRTY
-		checkSameChainDataWithLocal();
-		// check group's genesis block same with each other front,
-		// if not, update group as CONFLICT
-		checkGroupGenesisSameWithEach();
-		// remove front_group_map that not in tb_front or tb_group by local data
+        // check group local whether has dirty data by contrast of local blockHash with chain blockHash
+        // if not same, update group as DIRTY
+        checkSameChainDataWithLocal();
+        // check group's genesis block same with each other front,
+        // if not, update group as CONFLICT
+        checkGroupGenesisSameWithEach();
+        // remove front_group_map that not in tb_front or tb_group by local data
         // v1.4.3 remove
-		frontGroupMapService.removeInvalidFrontGroupMap();
-		// update front_group_map status of local group
-		checkGroupMapByLocalGroupList(frontList);
+        frontGroupMapService.removeInvalidFrontGroupMap();
+        // update front_group_map status of local group
+        checkGroupMapByLocalGroupList(frontList);
         log.info("end resetGroupList. useTime:{} ",
                 Duration.between(startTime, Instant.now()).toMillis());
     }
 
-	/**
-	 * check group status(normal or maintaining), update by local group list
-	 * if groupid not in allGroupSet, remove it
-	 * @param frontList all front
-	 * @param allGroupSet to record all group from each front
-	 */
-	private void saveDataOfGroup(List<TbFront> frontList, Set<Integer> allGroupSet) {
-	    log.info("saveDataOfGroup frontList:{}", frontList);
-		for (TbFront front : frontList) {
+    /**
+     * check group status(normal or maintaining), update by local group list
+     * if groupid not in allGroupSet, remove it
+     * @param frontList all front
+     * @param allGroupSet to record all group from each front
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    private void saveDataOfGroup(List<TbFront> frontList, Set<Integer> allGroupSet) {
+        log.info("saveDataOfGroup frontList:{}", frontList);
+        for (TbFront front : frontList) {
             String frontIp = front.getFrontIp();
-			int frontPort = front.getFrontPort();
-			// query group list from chain
-			List<String> groupIdList;
-			try {
-			    // if observer to removed, this observer would still return groupId
-				groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
-			} catch (Exception ex) {
-				log.error("saveDataOfGroup fail getGroupListFromSpecificFront.", ex);
-				continue;
-			}
-			// update by group list on chain
+            int frontPort = front.getFrontPort();
+            // query group list from chain
+            List<String> groupIdList;
+            try {
+                // if observer to removed, this observer would still return groupId
+                groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+            } catch (Exception ex) {
+                log.error("saveDataOfGroup fail getGroupListFromSpecificFront.", ex);
+                continue;
+            }
+            // update by group list on chain
             log.info("saveDataOfGroup groupIdList:{}", groupIdList);
             for (String groupId : groupIdList) {
-				Integer gId = Integer.valueOf(groupId);
+                Integer gId = Integer.valueOf(groupId);
 
-				allGroupSet.add(gId);
-				// peer in group
-				List<String> groupPeerList;
-				try {
-				    // if observer set removed, it still return itself as observer
-					groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
-				} catch (Exception e) {
-					// case: if front1 group1 stopped, getGroupPeers error, update front1_group1_map invalid fail
-					log.warn("saveDataOfGroup getGroupPeersFromSpecificFront fail, frontId:{}, groupId:{}",
-							front.getFrontId(), groupId);
-					continue;
-				}
-				// check group not existed or node count differs
-				// save group entity
-				TbGroup checkGroupExist = getGroupById(gId);
-				if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
-					saveGroup(gId, groupPeerList.size(), "synchronous",
-							GroupType.SYNC, GroupStatus.NORMAL, front.getChainId(), front.getChainName());
-				}
-				// refresh front group map by group list on chain
-				// different from checkGroupMapByLocalGroupList which update by local groupList
+                allGroupSet.add(gId);
+                // peer in group
+                List<String> groupPeerList;
+                try {
+                    // if observer set removed, it still return itself as observer
+                    groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+                } catch (Exception e) {
+                    // case: if front1 group1 stopped, getGroupPeers error, update front1_group1_map invalid fail
+                    log.warn("saveDataOfGroup getGroupPeersFromSpecificFront fail, frontId:{}, groupId:{}",
+                            front.getFrontId(), groupId);
+                    continue;
+                }
+                // check group not existed or node count differs
+                // save group entity
+                TbGroup checkGroupExist = getGroupById(gId);
+                if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
+                    saveGroup(gId, groupPeerList.size(), "synchronous",
+                            GroupType.SYNC, GroupStatus.NORMAL, front.getChainId(), front.getChainName());
+                }
+                // refresh front group map by group list on chain
+                // different from checkGroupMapByLocalGroupList which update by local groupList
                 // 1.4.3 add consensus type of front group map
-				frontGroupMapService.newFrontGroup(front, gId);
+                frontGroupMapService.newFrontGroup(front, gId);
 
-				//save new peers(tb_node)
-				savePeerList(frontIp, frontPort, gId, groupPeerList);
+                //save new peers(tb_node)
+                savePeerList(frontIp, frontPort, gId, groupPeerList);
 
-				//refresh: add sealer and observer no matter validity
-				frontService.refreshSealerAndObserverInNodeList(frontIp, frontPort, gId);
-			}
-		}
-	}
+                //refresh: add sealer and observer no matter validity
+                frontService.refreshSealerAndObserverInNodeList(frontIp, frontPort, gId);
+            }
+        }
+    }
 
     /**
      * separated from saveDataOfGroup, separated save and delete, delete first
      * @param frontList
      */
-	private void removeInvalidPeer(List<TbFront> frontList) {
+    private void removeInvalidPeer(List<TbFront> frontList) {
         log.info("removeInvalidPeer frontList:{}", frontList);
         for (TbFront front : frontList) {
             String frontIp = front.getFrontIp();
@@ -416,29 +426,29 @@ public class GroupService {
         }
     }
 
-	/**
-	 * remove invalid peer.
-	 */
-	private void removeInvalidPeer(int groupId, List<String> groupPeerList) {
-		if (groupId == 0) {
-			return;
-		}
-		//get local peers
-		List<TbNode> localNodes = nodeService.queryByGroupId(groupId);
-		if (CollectionUtils.isEmpty(localNodes)) {
-			return;
-		}
-		//remove node that's not in groupPeerList and not in sealer/observer list
+    /**
+     * remove invalid peer.
+     */
+    private void removeInvalidPeer(int groupId, List<String> groupPeerList) {
+        if (groupId == 0) {
+            return;
+        }
+        //get local peers
+        List<TbNode> localNodes = nodeService.queryByGroupId(groupId);
+        if (CollectionUtils.isEmpty(localNodes)) {
+            return;
+        }
+        //remove node that's not in groupPeerList and not in sealer/observer list
         // 1.4.3 if observer is removed, observer's nodeId still in groupPeerList
-		localNodes.stream()
+        localNodes.stream()
                 .filter(n -> ! DataStatus.starting(n.getNodeActive()))
-				.forEach(node -> {
-				    boolean isRemoved = !checkSealerAndObserverListContains(groupId, node.getNodeId());
+                .forEach(node -> {
+                    boolean isRemoved = !checkSealerAndObserverListContains(groupId, node.getNodeId());
                     if(isRemoved || !groupPeerList.contains(node.getNodeId()) ) {
                         nodeService.deleteByNodeAndGroupId(node.getNodeId(), groupId);
                     }
-				});
-	}
+                });
+    }
 
     /**
      * simular as frontInterface's getGroupPeers
@@ -447,22 +457,22 @@ public class GroupService {
      * @param nodeId
      * @return
      */
-	private boolean checkSealerAndObserverListContains(int groupId, String nodeId) {
-		//get sealer and observer on chain
-		List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(groupId);
-		for (PeerInfo peerInfo : sealerAndObserverList) {
-			if (nodeId.equals(peerInfo.getNodeId())) {
+    private boolean checkSealerAndObserverListContains(int groupId, String nodeId) {
+        //get sealer and observer on chain
+        List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(groupId);
+        for (PeerInfo peerInfo : sealerAndObserverList) {
+            if (nodeId.equals(peerInfo.getNodeId())) {
                 log.debug("checkSealerAndObserverListNotContains true nodeId:{},groupId:{}",
                     nodeId, groupId);
                 return true;
-			}
-		}
+            }
+        }
         log.debug("checkSealerAndObserverListNotContains false nodeId:{},groupId:{} ",
             nodeId, groupId);
-		return false;
-	}
+        return false;
+    }
 
-	/**
+    /**
      * save new peers that not in group peers
      */
     private void savePeerList(String frontIp, Integer frontPort, int groupId, List<String> groupPeerList) {
@@ -523,8 +533,8 @@ public class GroupService {
                 // if not found in groupOnChain and local status is normal, set as invalid
                 if (count == 0 && GroupStatus.NORMAL.getValue() == localGroup.getGroupStatus()) {
                     // update invalid
-					log.warn("group is invalid, localGroupId:{}", localGroupId);
-					updateGroupStatus(localGroupId, GroupStatus.MAINTAINING.getValue());
+                    log.warn("group is invalid, localGroupId:{}", localGroupId);
+                    updateGroupStatus(localGroupId, GroupStatus.MAINTAINING.getValue());
                     continue;
                 }
 
@@ -536,23 +546,23 @@ public class GroupService {
         }
     }
 
-	/**
-	 * check group's genesis block the same with each other on chain
-	 * @case: each front has different genesis conf, but add in same nodemgr
-	 */
-	private void checkGroupGenesisSameWithEach() {
-	    log.info("start checkGroupGenesisSameWithEach.");
-		// get all front
-		List<TbFront> frontList = frontService.getFrontList(new FrontParam());
-		if (frontList == null || frontList.size() == 0) {
+    /**
+     * check group's genesis block the same with each other on chain
+     * @case: each front has different genesis conf, but add in same nodemgr
+     */
+    private void checkGroupGenesisSameWithEach() {
+        log.info("start checkGroupGenesisSameWithEach.");
+        // get all front
+        List<TbFront> frontList = frontService.getFrontList(new FrontParam());
+        if (frontList == null || frontList.size() == 0) {
             log.warn("checkGroupGenesisSameWithEach not found any front.");
             return;
-		}
-		List<TbGroup> allGroupList = getGroupList(null);
-		if (allGroupList.isEmpty()) {
+        }
+        List<TbGroup> allGroupList = getGroupList(null);
+        if (allGroupList.isEmpty()) {
             log.warn("checkGroupGenesisSameWithEach not found any group of front.");
             return;
-		}
+        }
 
         for (TbGroup tbGroup : allGroupList) {
             int groupId = tbGroup.getGroupId();
@@ -565,13 +575,13 @@ public class GroupService {
                 String frontIp = front.getFrontIp();
                 int frontPort = front.getFrontPort();
                 // check genesis block
-                BlockInfo genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
+                BcosBlock.Block genesisBlock = frontInterface.getBlockByNumberFromSpecificFront(frontIp,
                         frontPort, groupId, BigInteger.ZERO);
                 if (genesisBlock == null) {
                     log.debug("checkGroupGenesisSameWithEach getGenesisBlock is null");
                     continue;
                 }
-                if (!"".equals(lastBlockHash) && !lastBlockHash.equals(genesisBlock.getHash())) {
+                if (!"".equals(lastBlockHash) && !MessageDigest.isEqual(lastBlockHash.getBytes(), genesisBlock.getHash().getBytes())) {
                     log.warn("checkGroupGenesisSameWithEach genesis block hash conflicts with other group," +
                             " groupId:{}, frontId:{}", groupId, front.getFrontId());
                     updateGroupStatus(groupId, GroupStatus.CONFLICT_GROUP_GENESIS.getValue());
@@ -579,9 +589,9 @@ public class GroupService {
                 lastBlockHash = genesisBlock.getHash();
                 log.debug("checkGroupGenesisSameWithEach, groupId:{}, frontId:{}, genesis blockHash:{}",
                         groupId, front.getFrontId(), lastBlockHash);
-			}
-		}
-	}
+            }
+        }
+    }
 
     /**
      * check local block's hash same with blockHash on chain
@@ -609,42 +619,42 @@ public class GroupService {
                 continue;
             }
             BigInteger blockHeightLocal = smallestBlockLocal.getBlockNumber();
-			String blockHashLocal = smallestBlockLocal.getPkHash();
+            String blockHashLocal = smallestBlockLocal.getPkHash();
 
             // get same height block from chain(if null, get from another front), contrast block hash
-			String blockHashOnChain = "";
-			// get all frontGroupMap list by group id
-			List<FrontGroup> allFrontGroupList = frontGroupMapCache.getMapListByGroupId(groupId);
-			if (allFrontGroupList == null) {
-				continue;
-			}
-			log.debug("checkSameChainDataWithLocal allFrontGroupList:{}", allFrontGroupList);
-			// case: if group's all front is stopped, front_group_map still normal, would set as CONFLICT for no data from front
-			boolean flagEmptyFront = (allFrontGroupList.size() == 0);
-			for(FrontGroup front: allFrontGroupList) {
-				BlockInfo smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
-						front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
-				if (smallestBlockOnChain == null) {
-					continue;
-				} else {
-					blockHashOnChain = smallestBlockOnChain.getHash();
-					break;
-				}
-			}
-			// if no block in each node, not same chain, else contrast with local hash
-			// if all front group map invalid, ignore
-			if (blockHashOnChain.isEmpty() && !flagEmptyFront) {
-				log.warn("smallestBlockOnChain groupId: {} height: {} return null block, " +
-						"please check group's node", groupId, blockHeightLocal);
-				// null block not means conflict
-			 	updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
-				continue;
-			}
+            String blockHashOnChain = "";
+            // get all frontGroupMap list by group id
+            List<FrontGroup> allFrontGroupList = frontGroupMapCache.getMapListByGroupId(groupId);
+            if (allFrontGroupList == null) {
+                continue;
+            }
+            log.debug("checkSameChainDataWithLocal allFrontGroupList:{}", allFrontGroupList);
+            // case: if group's all front is stopped, front_group_map still normal, would set as CONFLICT for no data from front
+            boolean flagEmptyFront = (allFrontGroupList.size() == 0);
+            for(FrontGroup front: allFrontGroupList) {
+                BcosBlock.Block smallestBlockOnChain = frontInterface.getBlockByNumberFromSpecificFront(
+                        front.getFrontIp(), front.getFrontPort(), groupId, blockHeightLocal);
+                if (smallestBlockOnChain == null) {
+                    continue;
+                } else {
+                    blockHashOnChain = smallestBlockOnChain.getHash();
+                    break;
+                }
+            }
+            // if no block in each node, not same chain, else contrast with local hash
+            // if all front group map invalid, ignore
+            if (blockHashOnChain.isEmpty() && !flagEmptyFront) {
+                log.warn("smallestBlockOnChain groupId: {} height: {} return null block, " +
+                        "please check group's node", groupId, blockHeightLocal);
+                // null block not means conflict
+                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
+                continue;
+            }
 
             log.debug("checkSameChainData groupId:{},blockHeight:{},localHash:{},chainHash:{} ",
                     groupId, blockHeightLocal, blockHashLocal, blockHashOnChain);
             // check same block hash, the same chain
-            if (!blockHashOnChain.isEmpty() && !blockHashLocal.equals(blockHashOnChain)) {
+            if (!blockHashOnChain.isEmpty() && !MessageDigest.isEqual(blockHashLocal.getBytes(), blockHashOnChain.getBytes())) {
                 log.warn("checkSameChainDataWithLocal blockHashOnChain conflicts with local block data " +
                                 "groupId: {} height:{} on chain ", groupId, blockHeightLocal);
                 updateGroupStatus(groupId, GroupStatus.CONFLICT_LOCAL_DATA.getValue());
@@ -697,57 +707,57 @@ public class GroupService {
         }
     }
 
-	/**
-	 * check all group and remove those without normal front group
-	 * @related removeGroupAccording2MapStatus
-	 */
-	private void removeInvalidGroupByMap() {
-		List<TbGroup> groupList = getGroupList(null);
-		// if all front of group invalid, remove group and front_group_map
-		groupList.forEach(tbGroup ->
-				removeGroupBy2MapStatus(tbGroup.getGroupId()));
-	}
+    /**
+     * check all group and remove those without normal front group
+     * @related removeGroupAccording2MapStatus
+     */
+    private void removeInvalidGroupByMap() {
+        List<TbGroup> groupList = getGroupList(null);
+        // if all front of group invalid, remove group and front_group_map
+        groupList.forEach(tbGroup ->
+                removeGroupBy2MapStatus(tbGroup.getGroupId()));
+    }
 
-	/**
-	 * remove group whose front(front_group_map) all invalid
-	 * case1: remove front, call this
-	 * case2: stop all front of one group, call this
-	 * @param groupId
-	 */
-	private void removeGroupBy2MapStatus(Integer groupId) {
-		log.debug("removeGroupByMapStatus groupId:{}", groupId);
-		// get list of this group
-		MapListParam param = new MapListParam();
-		param.setGroupId(groupId);
-		// count of group belonging to this front
-		List<FrontGroup> frontListByGroup = frontGroupMapService.getList(param);
+    /**
+     * remove group whose front(front_group_map) all invalid
+     * case1: remove front, call this
+     * case2: stop all front of one group, call this
+     * @param groupId
+     */
+    private void removeGroupBy2MapStatus(Integer groupId) {
+        log.debug("removeGroupByMapStatus groupId:{}", groupId);
+        // get list of this group
+        MapListParam param = new MapListParam();
+        param.setGroupId(groupId);
+        // count of group belonging to this front
+        List<FrontGroup> frontListByGroup = frontGroupMapService.getList(param);
 
-		// count of front's groupStatus normal
-		long count = frontListByGroup.stream()
-				.filter( f -> f.getStatus() == GroupStatus.NORMAL.getValue())
-				.count();
-		long countInvalid = frontListByGroup.size() - count;
-		// front belong to this group all invalid
-		if (countInvalid == frontListByGroup.size()) {
-			log.warn("removeGroupByMapStatus all map is valid, remove group: countInvalid:{}", countInvalid);
-			removeAllDataByGroupId(groupId);
-		}
-	}
+        // count of front's groupStatus normal
+        long count = frontListByGroup.stream()
+                .filter( f -> f.getStatus() == GroupStatus.NORMAL.getValue())
+                .count();
+        long countInvalid = frontListByGroup.size() - count;
+        // front belong to this group all invalid
+        if (countInvalid == frontListByGroup.size()) {
+            log.warn("removeGroupByMapStatus all map is valid, remove group: countInvalid:{}", countInvalid);
+            removeAllDataByGroupId(groupId);
+        }
+    }
 
 
-	/**
-	 * remove all group.
-	 */
-	private void removeAllGroup() {
-		List<TbGroup> allGroup = getGroupList(null);
-		if (CollectionUtils.isEmpty(allGroup)) {
-			log.info("removeAllGroup jump over. not fount any group");
-			return;
-		}
+    /**
+     * remove all group.
+     */
+    private void removeAllGroup() {
+        List<TbGroup> allGroup = getGroupList(null);
+        if (CollectionUtils.isEmpty(allGroup)) {
+            log.info("removeAllGroup jump over. not fount any group");
+            return;
+        }
 
-		//remove each group
-		allGroup.stream().forEach(group -> removeAllDataByGroupId(group.getGroupId()));
-	}
+        //remove each group
+        allGroup.stream().forEach(group -> removeAllDataByGroupId(group.getGroupId()));
+    }
 
     /**
      * remove all data by groupId.
@@ -778,6 +788,12 @@ public class GroupService {
         governVoteService.deleteAllByGroupId(groupId);
         // delete cns record
         cnsService.deleteByGroupId(groupId);
+        // delete external user
+        extAccountService.deleteByGroupId(groupId);
+        // delete external contract
+        extContractService.deleteByGroupId(groupId);
+        // delete statistic block data
+        statService.deleteByGroupId(groupId);
         // drop table.
         tableService.dropTableByGroupId(groupId);
         log.warn("end removeAllDataByGroupId");
@@ -791,6 +807,7 @@ public class GroupService {
      * @param req info
      * @return
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public TbGroup generateToSingleNode(String nodeId, ReqGenerateGroup req) {
         Integer generateGroupId = req.getGenerateGroupId();
 
@@ -821,6 +838,7 @@ public class GroupService {
      * @param req info
      * @return
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public List<RspOperateResult> generateGroup(ReqGenerateGroup req) {
         Integer generateGroupId = req.getGenerateGroupId();
         if (checkGroupIdExisted(generateGroupId)) {
@@ -844,9 +862,9 @@ public class GroupService {
                 log.error("fail generateGroup node front not exists.");
                 throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
             }
-			// record generate result
-			RspOperateResult operateResult = new RspOperateResult(tbFront.getFrontId(),
-					OperateStatus.SUCCESS.getValue());
+            // record generate result
+            RspOperateResult operateResult = new RspOperateResult(tbFront.getFrontId(),
+                    OperateStatus.SUCCESS.getValue());
             // request front to generate
             GenerateGroupInfo generateGroupInfo = new GenerateGroupInfo();
             BeanUtils.copyProperties(req, generateGroupInfo);
@@ -891,6 +909,7 @@ public class GroupService {
      * @param type
      * @return
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public Object operateGroup(String nodeId, Integer groupId, String type) {
         // get front
         TbFront tbFront = frontService.getByNodeId(nodeId);
@@ -923,22 +942,22 @@ public class GroupService {
      */
     public List<RspGroupStatus> listGroupStatus(List<String> nodeIdList, List<Integer> groupIdList) {
         List<RspGroupStatus> resList = new ArrayList<>(nodeIdList.size());
-		for (String nodeId : nodeIdList) {
-			// get front
-			TbFront tbFront = frontService.getByNodeId(nodeId);
-			if (tbFront == null) {
-				log.error("fail getGroupStatus node front not exists.");
-				throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
-			}
+        for (String nodeId : nodeIdList) {
+            // get front
+            TbFront tbFront = frontService.getByNodeId(nodeId);
+            if (tbFront == null) {
+                log.error("fail getGroupStatus node front not exists.");
+                throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
+            }
             Map<String, String> statusMap = new HashMap<>();
             try{
-            	statusMap = getGroupStatus(tbFront, groupIdList);
-			} catch (NodeMgrException | ResourceAccessException e) {
-				log.error("fail getGroupStatus in frontId:{}, exception:{}",
-						tbFront.getFrontId(), e.getMessage());
-				// request front fail
-				statusMap.put(nodeId, "FAIL");
-			}
+                statusMap = getGroupStatus(tbFront, groupIdList);
+            } catch (NodeMgrException | ResourceAccessException e) {
+                log.error("fail getGroupStatus in frontId:{}, exception:{}",
+                        tbFront.getFrontId(), e.getMessage());
+                // request front fail
+                statusMap.put(nodeId, "FAIL");
+            }
             RspGroupStatus rspGroupStatus = new RspGroupStatus(nodeId, statusMap);
             resList.add(rspGroupStatus);
         }
@@ -964,33 +983,34 @@ public class GroupService {
      *
      * @param req
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public List<RspOperateResult> batchStartGroup(ReqBatchStartGroup req) {
         log.info("start batchStartGroup:{}", req);
         Integer groupId = req.getGenerateGroupId();
         // check id
         checkGroupId(groupId);
         List<String> nodeIdList = req.getNodeList();
-		List<RspOperateResult> resOperateList = new ArrayList<>(nodeIdList.size());
-		for (String nodeId : nodeIdList) {
+        List<RspOperateResult> resOperateList = new ArrayList<>(nodeIdList.size());
+        for (String nodeId : nodeIdList) {
             // get front
             TbFront tbFront = frontService.getByNodeId(nodeId);
             if (tbFront == null) {
                 log.error("fail batchStartGroup node not exists.");
                 throw new NodeMgrException(ConstantCode.NODE_NOT_EXISTS);
             }
-			// record generate result
-			RspOperateResult operateResult = new RspOperateResult(tbFront.getFrontId(),
-					OperateStatus.SUCCESS.getValue());
+            // record generate result
+            RspOperateResult operateResult = new RspOperateResult(tbFront.getFrontId(),
+                    OperateStatus.SUCCESS.getValue());
             // request front to start
             try {
                 this.operateGroup(nodeId, groupId, OPERATE_START_GROUP);
-				resOperateList.add(operateResult);
-			} catch (NodeMgrException | ResourceAccessException e) {
-				log.error("fail startGroup in frontId:{}, exception:{}",
-						tbFront.getFrontId(), e.getMessage());
-				operateResult.setCode(OperateStatus.FAIL.getValue());
-				resOperateList.add(operateResult);
-			}
+                resOperateList.add(operateResult);
+            } catch (NodeMgrException | ResourceAccessException e) {
+                log.error("fail startGroup in frontId:{}, exception:{}",
+                        tbFront.getFrontId(), e.getMessage());
+                operateResult.setCode(OperateStatus.FAIL.getValue());
+                resOperateList.add(operateResult);
+            }
         }
         // refresh group status
         resetGroupList();
@@ -1114,6 +1134,7 @@ public class GroupService {
      * @param chainName
      * @return return true if insert.
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(int groupId, int num, Integer chainId, String chainName) {
         TbGroup group = this.getGroupById(groupId);
         if (group == null) {
@@ -1190,7 +1211,7 @@ public class GroupService {
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
         String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/data/group[groupId]/group.1001.*
-        Path localDst = Paths.get(String.format("%s/data/group%s/.group_status", localNodePath,generateGroupId));
+        Path localDst = Paths.get(CleanPathUtil.cleanString(String.format("%s/data/group%s/.group_status", localNodePath,generateGroupId)));
         // create data parent directory
         if (Files.notExists(localDst.getParent())){
             try {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * bind public user to import
@@ -28,8 +29,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BindUserInputParam {
     @NotBlank
+    @Length(max=64)
     private String userName;
     @NotBlank
+    @Length(max=50)
     private String account;
     @NotBlank
     private String publicKey;

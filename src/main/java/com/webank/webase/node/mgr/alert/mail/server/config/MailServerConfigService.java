@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import java.util.List;
  * Mail Server Configuration for Mail Alert
  * MailService using the latest MailServerConfig as configuration
  */
-
 @Log4j2
 @Service
 public class MailServerConfigService {

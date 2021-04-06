@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -22,8 +22,8 @@ import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.NetUtils;
-import com.webank.webase.node.mgr.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
@@ -33,7 +33,6 @@ import com.webank.webase.node.mgr.deploy.entity.TbAgency;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
-import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
@@ -47,7 +46,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +62,6 @@ import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -79,7 +76,6 @@ public class DeployService {
     @Autowired private TbConfigMapper tbConfigMapper;
     @Autowired private TbChainMapper tbChainMapper;
     @Autowired private FrontMapper frontMapper;
-    @Autowired private TbAgencyMapper tbAgencyMapper;
     @Autowired private TbHostMapper tbHostMapper;
 
     @Autowired private AgencyService agencyService;
@@ -99,6 +95,7 @@ public class DeployService {
     /**
      * generate chain config and front config in db, scp to remote and async start
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void configChainAndScp(String chainName, List<DeployNodeInfo> deployNodeInfoList, String[] ipConf,
         String imageTag, int encrtypType, String webaseSignAddr, String agencyName)
         throws InterruptedException {
@@ -171,6 +168,10 @@ public class DeployService {
             return true;
         }
 
+        // make sure sign not 127.0.0.1
+        if (IPUtil.isLocal(webaseSignAddr)) {
+            throw new NodeMgrException(ConstantCode.WEBASE_SIGN_NOT_LOCALHOST_ERROR);
+        }
         // check WeBASE Sign accessible
         if (StringUtils.isBlank(webaseSignAddr)
                 || ! NetUtils.checkAddress(webaseSignAddr, 2000) ) {
@@ -229,7 +230,7 @@ public class DeployService {
     }
 
     /**
-     * Add a node. 扩容节点
+     * Add a node. 扩容节点，并重启链的所有节点
      * include: gen config & update other nodes & restart all node
      * after check host and init host(dependency,port,image)
      */

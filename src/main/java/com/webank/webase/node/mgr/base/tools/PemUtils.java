@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * cert tool to wrap content with header and tail of pem cert
+ */
 public class PemUtils {
     public static final String crtContentHeadNoLF = "-----BEGIN PRIVATE KEY-----" ;
     public static final String crtContentHead = "-----BEGIN PRIVATE KEY-----\n" ;

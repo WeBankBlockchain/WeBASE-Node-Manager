@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,6 +13,10 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
+import com.webank.webase.node.mgr.monitor.entity.PageTransInfo;
+import com.webank.webase.node.mgr.monitor.entity.TbMonitor;
+import com.webank.webase.node.mgr.monitor.entity.UnusualContractInfo;
+import com.webank.webase.node.mgr.monitor.entity.UnusualUserInfo;
 import java.util.List;
 import java.util.Map;
 import org.apache.ibatis.annotations.Param;
@@ -52,7 +56,7 @@ public interface MonitorMapper {
 
     Integer countOfMonitorTrans(Map<String, Object> queryParam);
 
-    List<PageTransInfo> qureyTransCountList(Map<String, Object> queryParam);
+    List<PageTransInfo> queryTransCountList(Map<String, Object> queryParam);
 
     Integer countOfUnusualUser(@Param("tableName") String tableName,
         @Param("userName") String userName);

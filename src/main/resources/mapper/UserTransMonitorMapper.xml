@@ -4,7 +4,7 @@
 
 <!--对应mapper接口 -->
 <mapper namespace="com.webank.webase.node.mgr.monitor.MonitorMapper">
-  <resultMap id="monitorMap" type="com.webank.webase.node.mgr.monitor.TbMonitor">
+  <resultMap id="monitorMap" type="com.webank.webase.node.mgr.monitor.entity.TbMonitor">
     <result column="user_name" javaType="java.lang.String" jdbcType="VARCHAR" property="userName"/>
     <result column="user_type" javaType="java.lang.Integer" jdbcType="INTEGER" property="userType"/>
     <result column="contract_name" javaType="java.lang.String" jdbcType="VARCHAR"
@@ -74,7 +74,7 @@
           and (trans_unusual_type = 1 or trans_unusual_type = 2)
     </update>
 
-  <select id="queryTbMonitor" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
+  <select id="queryTbMonitor" resultType="com.webank.webase.node.mgr.monitor.entity.TbMonitor">
 		select trans_count as transCount,trans_hashs as transHashs
 		from ${tableName}
 		where user_name = #{monitor.userName}
@@ -88,11 +88,11 @@
 		limit 1
 	</select>
 
-  <select id="monitorUserList" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
+  <select id="monitorUserList" resultType="com.webank.webase.node.mgr.monitor.entity.TbMonitor">
     select distinct user_name as userName from ${tableName}
   </select>
 
-  <select id="monitorInterfaceList" resultType="com.webank.webase.node.mgr.monitor.TbMonitor">
+  <select id="monitorInterfaceList" resultType="com.webank.webase.node.mgr.monitor.entity.TbMonitor">
     select distinct interface_name as interfaceName from ${tableName}
     where 1=1
     <if test="userName != null and userName != ''">
@@ -116,8 +116,8 @@
     </if>
   </select>
 
-  <select id="qureyTransCountList" parameterType="Map"
-    resultType="com.webank.webase.node.mgr.monitor.PageTransInfo">
+  <select id="queryTransCountList" parameterType="Map"
+    resultType="com.webank.webase.node.mgr.monitor.entity.PageTransInfo">
     select
     trans_count as transCount,
     modify_time as time
@@ -143,16 +143,16 @@
     from ${tableName}
     where user_type=1
     <if test="userName != null and userName != ''">
-      and user_name like CONCAT('%',#{userName},'%')
+      and user_name like CONCAT(CONCAT('%',#{userName}),'%')
     </if>
   </select>
 
   <select id="listOfUnusualUser" parameterType="Map"
-    resultType="com.webank.webase.node.mgr.monitor.UnusualUserInfo">
+    resultType="com.webank.webase.node.mgr.monitor.entity.UnusualUserInfo">
     select user_name as userName,sum(trans_count) as transCount, max(trans_hashs) as hashs, max(modify_time) as time
     from ${tableName} where user_type=1
     <if test="userName != null and userName != ''">
-      and user_name like CONCAT('%',#{userName},'%')
+      and user_name like CONCAT(CONCAT('%',#{userName}),'%')
     </if>
     group by user_name
     <if test="start != null and pageSize != null">
@@ -165,17 +165,17 @@
     from ${tableName}
     where trans_unusual_type=1
     <if test="contractAddress != null and contractAddress != ''">
-      and contract_address like CONCAT('%',#{contractAddress},'%')
+      and contract_address like CONCAT(CONCAT('%',#{contractAddress}),'%')
     </if>
   </select>
 
   <select id="listOfUnusualContract" parameterType="Map"
-    resultType="com.webank.webase.node.mgr.monitor.UnusualContractInfo">
+    resultType="com.webank.webase.node.mgr.monitor.entity.UnusualContractInfo">
     select contract_address as contractAddress,max(contract_name) as contractName,sum(trans_count) as transCount,
     max(trans_hashs) as hashs,max(modify_time) as time
     from ${tableName} where trans_unusual_type=1
     <if test="contractAddress != null and contractAddress != ''">
-      and contract_address like CONCAT('%',#{contractAddress},'%')
+      and contract_address like CONCAT(CONCAT('%',#{contractAddress}),'%')
     </if>
     group by contract_address
     <if test="start != null and pageSize != null">

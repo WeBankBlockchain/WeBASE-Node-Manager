@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -29,6 +29,8 @@ public class TbUser {
     private String account;
     private Integer groupId;
     private String publicKey;
+    // add in 1.5.0
+    private String privateKey;
     private Integer userStatus;
     private Integer chainIndex;
     private Integer userType;
@@ -38,7 +40,6 @@ public class TbUser {
      * temporarily use groupId as appId
      */
     private String appId;
-    @Deprecated
     private Integer hasPk;
     private String description;
     private LocalDateTime createTime;

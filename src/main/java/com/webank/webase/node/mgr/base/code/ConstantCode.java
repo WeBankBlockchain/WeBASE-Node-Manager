@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ public class ConstantCode {
     public static final RetCode SYSTEM_EXCEPTION = RetCode.mark(102000, "system exception");
     public static final RetCode SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL = RetCode.mark(102001, "system exception: please check front");
     public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(102002, "No group belongs to this groupId(node not belongs to this group)");
+    public static final RetCode WEBASE_VERSION_NOT_MATCH_FISCO_SUPPORT_VERSION = RetCode.mark(102003, "When webase is v1.3.2 above(inclusive), fisco-bcos node must be v2.4.1 above(inclusive)!");
 
     /**
      * Business exception.
@@ -74,6 +75,8 @@ public class ConstantCode {
     public static final RetCode INVALID_PARAM_INFO = RetCode.mark(202018, "invalid param info");
 
     public static final RetCode CONTRACT_NAME_REPEAT = RetCode.mark(202019, "contract name cannot be repeated");
+    
+    public static final RetCode DEPLOYED_CANNOT_MODIFIED = RetCode.mark(202020, "deployed contract cannot be modified");
 
     public static final RetCode CONTRACT_NOT_DEPLOY = RetCode.mark(202023, "contract has not deploy");
 
@@ -245,7 +248,7 @@ public class ConstantCode {
     public static final RetCode TWO_NODES_AT_LEAST = RetCode.mark(202462, "Two nodes at least.");
     public static final RetCode TWO_SEALER_IN_GROUP_AT_LEAST = RetCode.mark(202463, "Group need two sealers at least.");
     public static final RetCode WEBASE_SIGN_CONFIG_ERROR = RetCode.mark(202464, "Please check webaseSignAddress in application.yml file.");
-    public static final RetCode UNKNOWN_DOCKER_IMAGE_TYPE = RetCode.mark(202465, "Docker image type param error.");
+    public static final RetCode WEBASE_SIGN_NOT_LOCALHOST_ERROR = RetCode.mark(202465, "webaseSignAddress cannot be 127.0.0.1 or localhost in application.yml file");
     public static final RetCode IMAGE_NOT_EXISTS_ON_HOST = RetCode.mark(202466, "Image not exists on host.");
     public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(202467, "Max 4 nodes on a same host.");
     public static final RetCode SAME_HOST_ERROR = RetCode.mark(202468, "Host of WeBASE-Node-Manager's ip is already existed.");
@@ -288,6 +291,25 @@ public class ConstantCode {
     public static final RetCode VERSION_CANNOT_EMPTY = RetCode.mark(202502, "version cannot be empty.");
     public static final RetCode CNS_NAME_CANNOT_EMPTY = RetCode.mark(202503, "cns name cannot be empty.");
     public static final RetCode VERSION_ALREADY_EXISTS = RetCode.mark(202504,"version already exists");
+
+    // add in v1.5.0
+    public static final RetCode SDK_CRT_KEY_FILE_NOT_FOUND = RetCode.mark(202511,"Front's sdk cert and key not found!");
+    public static final RetCode WRITE_SDK_CRT_KEY_FILE_FAIL = RetCode.mark(202512,"Write front's sdk cert and key fail!");
+    public static final RetCode WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL = RetCode.mark(202513,"Write private key file fail!");
+    public static final RetCode GENESIS_CONF_NOT_FOUND = RetCode.mark(202514, "group genesis conf not found");
+
+    // app integration
+    public static final RetCode APPNAME_EXISTS = RetCode.mark(202516, "app name exists");
+    public static final RetCode APPNAME_NOT_EXISTS = RetCode.mark(202517, "app name not exists");
+    public static final RetCode ID_NOT_EXISTS = RetCode.mark(202518, "app id not exists");
+    public static final RetCode LINK_FORMAT_INVALID = RetCode.mark(202519, "link format invalid");
+    public static final RetCode CONTRACT_SOURCE_NOT_EXIST = RetCode.mark(202520, "contract source not exist");
+    public static final RetCode TIMESTAMP_CANNOT_EMPTY = RetCode.mark(202521, "timestamp cannot be empty");
+    public static final RetCode APPKEY_CANNOT_EMPTY = RetCode.mark(202522, "app key cannot be empty");
+    public static final RetCode SIGNATURE_CANNOT_EMPTY = RetCode.mark(202523, "signature cannot be empty");
+    public static final RetCode TIMESTAMP_TIMEOUT = RetCode.mark(202524, "timestamp timeout");
+    public static final RetCode APPKEY_NOT_EXISTS = RetCode.mark(202525, "app key not exists");
+    public static final RetCode SIGNATURE_NOT_MATCH = RetCode.mark(202526, "signature not match");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

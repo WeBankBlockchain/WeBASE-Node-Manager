@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,15 +17,14 @@ import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 /**
  * get block info and trans info from chain.
@@ -58,7 +57,7 @@ public class PullBlockTransTask {
         }
         // count down group, make sure all group's pullBlock finished
         CountDownLatch latch = new CountDownLatch(groupList.size());
-        groupList.stream()
+        groupList
                 .forEach(group -> blockService.pullBlockByGroupId(latch, group.getGroupId()));
 
         try {

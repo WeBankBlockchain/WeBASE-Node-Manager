@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020  the original author or authors.
+ * Copyright 2014-2021  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -67,8 +67,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler); // 无权访问 JSON 格式的数据
-        http.formLogin().loginPage("/login") // login page
+        // 无权访问 JSON 格式的数据
+        http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler);
+
+        // login page
+        http.formLogin().loginPage("/login")
             .loginProcessingUrl("/account/login") // login request uri
             .usernameParameter("account").passwordParameter("accountPwd").permitAll()
             .successHandler(loginSuccessHandler) // if login success

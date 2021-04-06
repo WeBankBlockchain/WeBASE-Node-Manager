@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,23 +13,37 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.CheckUserExist;
+import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.PemUtils;
-import com.webank.webase.node.mgr.user.entity.*;
+import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
+import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
+import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
+import com.webank.webase.node.mgr.user.entity.ReqExport;
+import com.webank.webase.node.mgr.user.entity.ReqImportPem;
+import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
+import com.webank.webase.node.mgr.user.entity.TbUser;
+import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
+import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,11 +79,8 @@ public class UserController extends BaseController {
         Instant startTime = Instant.now();
 
         // add user row
-        Integer userId = userService.addUserInfo(user.getGroupId(), user.getUserName(),
+        TbUser userRow = userService.addUserInfoLocal(user.getGroupId(), user.getUserName(),
                 user.getAccount(), user.getDescription(), user.getUserType(), null);
-
-        // query user row
-        TbUser userRow = userService.queryByUserId(userId);
         baseResponse.setData(userRow);
 
         log.info("end addUserInfo useTime:{} result:{}",
@@ -89,11 +100,8 @@ public class UserController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
-        // add user row
-        Integer userId = userService.bindUserInfo(user);
-
         // query user row
-        TbUser userRow = userService.queryByUserId(userId);
+        TbUser userRow = userService.bindUserInfo(user, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end bindUserInfo useTime:{} result:{}",
@@ -128,7 +136,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * qurey user info list.
+     * query user info list.
      */
     @GetMapping(value = "/userList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse userList(@PathVariable("groupId") Integer groupId,
@@ -155,7 +163,7 @@ public class UserController extends BaseController {
             param.setStart(start);
             param.setPageSize(pageSize);
 
-            List<TbUser> listOfUser = userService.qureyUserList(param);
+            List<TbUser> listOfUser = userService.queryUserList(param);
             pagesponse.setData(listOfUser);
             pagesponse.setTotalCount(count);
         }
@@ -177,12 +185,9 @@ public class UserController extends BaseController {
         // encoded by web in base64
         String privateKeyEncoded = reqImport.getPrivateKey();
         // add user row
-        Integer userId = userService.addUserInfo(reqImport.getGroupId(), reqImport.getUserName(),
+        TbUser userRow = userService.addUserInfoLocal(reqImport.getGroupId(), reqImport.getUserName(),
                 reqImport.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
                 privateKeyEncoded);
-
-        // query user row
-        TbUser userRow = userService.queryByUserId(userId);
         baseResponse.setData(userRow);
 
         log.info("end importPrivateKey useTime:{} result:{}",
@@ -204,9 +209,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
-        Integer userId = userService.importPem(reqImportPem);
-        // query user row
-        TbUser userRow = userService.queryByUserId(userId);
+        TbUser userRow = userService.importPem(reqImportPem, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
@@ -230,10 +233,8 @@ public class UserController extends BaseController {
         if (p12File.getSize() == 0) {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
-        Integer userId = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
-                account, description);
-        // query user row
-        TbUser userRow = userService.queryByUserId(userId);
+        TbUser userRow = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
+                account, description, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
@@ -242,4 +243,56 @@ public class UserController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
+    @PostMapping(value = "/exportPem")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start exportPemUserFromSign startTime:{} param:{}", startTime.toEpochMilli(), param);
+        Integer groupId = param.getGroupId();
+        String signUserId = param.getSignUserId();
+        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId);
+
+        log.info("end exportPemUserFromSign useTime:{} fileContentHandle:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(fileContentHandle));
+        return ResponseEntity.ok().headers(HttpRequestTools.headers(fileContentHandle.getFileName()))
+            .body(new InputStreamResource(fileContentHandle.getInputStream()));
+    }
+
+    @PostMapping(value = "/exportP12")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start exportP12UserFromSign startTime:{} param:{}", startTime.toEpochMilli(), param);
+        Integer groupId = param.getGroupId();
+        String signUserId = param.getSignUserId();
+        String p12PasswordEncoded = param.getP12Password();
+        if (!NodeMgrTools.notContainsChinese(p12PasswordEncoded)) {
+            throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
+        }
+        FileContentHandle fileContentHandle = userService.exportP12FromSign(groupId, signUserId, p12PasswordEncoded);
+
+        log.info("end exportP12UserFromSign useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(fileContentHandle));
+        return ResponseEntity.ok().headers(HttpRequestTools.headers(fileContentHandle.getFileName()))
+            .body(new InputStreamResource(fileContentHandle.getInputStream()));
+    }
+
+
+    @PostMapping(value = "/export/{userId}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse exportRawUserFromSign(@PathVariable("userId") Integer userId)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start exportRawUserFromSign startTime:{} userId:{}", startTime.toEpochMilli(), userId);
+
+        TbUser tbUser = userService.queryUserDetail(userId);
+        log.info("end exportRawUserFromSign useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            tbUser);
+        return new BaseResponse(ConstantCode.SUCCESS, tbUser);
+    }
 }
