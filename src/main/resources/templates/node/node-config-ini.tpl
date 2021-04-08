@@ -47,7 +47,7 @@
 
 [compatibility]
     ; supported_version should nerver be changed
-    supported_version=${supportVersion}
+    supported_version=[(${supportVersion})]
 
 [log]
     enable=true
