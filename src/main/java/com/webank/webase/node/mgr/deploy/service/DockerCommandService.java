@@ -49,7 +49,7 @@ public class DockerCommandService {
      */
     public static String getContainerName(String rootDirOnHost, String chainName, int hostIndex) {
         return String.format("%s%snode%s",
-            rootDirOnHost.replaceAll("\\", "").replaceAll("/", "").replaceAll(" ", ""), chainName, hostIndex);
+            rootDirOnHost.replaceAll(File.separator, "").replaceAll(" ", ""), chainName, hostIndex);
     }
 
 
