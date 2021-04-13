@@ -80,7 +80,7 @@ List mbg = [
 
 dependencies {
     compile springboot,spring,jaxb,jackson,log4j
-    compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2-SNAPSHOT"
+    compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2"
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile "mysql:mysql-connector-java:8.0.22"
