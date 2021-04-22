@@ -52,10 +52,6 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-<<<<<<<HEAD
-=======
-    >>>>>>>upstream/dev
-
 @Log4j2
 @Service
 public class CertService {
