@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.CertTools;
 import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.ZipUtils;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
@@ -471,7 +472,13 @@ public class CertService {
         return frontInterfaceService.getSdkFilesFromSpecificFront(front.getFrontIp(), front.getFrontPort());
     }
 
-    public synchronized FileContentHandle getFrontSdkFiles(int frontId) {
+
+    /**
+     * get sdk cert key files' zip
+     * @return
+     */
+    public synchronized FileContentHandle getFrontSdkZipFile(int frontId) {
+        // get sdk cert content
         Map<String, String> sdkContentMap = this.getFrontSdkContent(frontId);
         if (sdkContentMap.isEmpty()) {
             throw new NodeMgrException(ConstantCode.SDK_CRT_KEY_FILE_NOT_FOUND);
@@ -479,17 +486,7 @@ public class CertService {
         // get if guomi sdk
         String key = sdkContentMap.keySet().iterator().next();
         boolean useGm = key.contains("gm");
-        // create dir and zip
-        writeSdkAsFile(sdkContentMap, useGm);
-        try {
-            return new FileContentHandle(TEMP_ZIP_FILE_NAME, new FileInputStream(TEMP_ZIP_FILE_PATH));
-        } catch (IOException e) {
-            log.error("getFrontSdkFiles fail:[]", e);
-            throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
-        }
-    }
 
-    private void writeSdkAsFile(Map<String, String> sdkContentMap, boolean useGm) {
         // if guomi, create conf/gm, else create conf/
         File sdkDir;
         if (useGm) {
@@ -498,6 +495,40 @@ public class CertService {
             sdkDir = new File(TEMP_SDK_DIR);
         }
         log.info("writeSdkAsFile sdkDir:{}", sdkDir);
+        // create dir and zip
+        writeSdkFilesAndZip(sdkContentMap, sdkDir, useGm);
+        try {
+            // FileInputStream would be closed by web
+            return new FileContentHandle(TEMP_ZIP_FILE_NAME, new FileInputStream(TEMP_ZIP_FILE_PATH));
+        } catch (IOException e) {
+            log.error("getFrontSdkFiles fail:[]", e);
+            throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
+        }
+    }
+
+    private void writeSdkFilesAndZip(Map<String, String> sdkContentMap, File sdkDir, boolean useGm) {
+        this.writeSdkAsFile(sdkContentMap, sdkDir);
+        // zip the directory of conf(guomi: conf/gm)
+        String gmDirInZip = useGm ? "gm" : "";
+        try {
+            ZipUtils.generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR, gmDirInZip, TEMP_ZIP_FILE_NAME);
+        } catch (Exception e) {
+            log.error("writeSdkAsFile generateZipFile fail:[]", e);
+            throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
+        }
+
+        // rm conf dir
+        boolean resultDel = sdkDir.delete();
+        log.info("delete for temp sdk file, result:{}", resultDel);
+    }
+
+    /**
+     * write sdk file of ca.crt, sdk.crt, sdk.key
+     * @param sdkContentMap
+     * @param sdkDir sdk file output directory
+     * @return
+     */
+    public void writeSdkAsFile(Map<String, String> sdkContentMap, File sdkDir) {
 
         // create sdk dir
         if (sdkDir.exists()) {
@@ -511,10 +542,12 @@ public class CertService {
         // gm: gmca.crt, gmsdk.crt, gmsdk.key
         // else: ca.crt, sdk.crt, sdk.key
         for (String fileName : sdkContentMap.keySet()) {
-            Path sdkFilePath = Paths.get(sdkDir.getPath() + File.separator + CleanPathUtil.cleanString(fileName));
+            Path sdkFilePath = Paths
+                .get(CleanPathUtil.cleanString(sdkDir.getPath() + File.separator + fileName));
             String fileContent = sdkContentMap.get(fileName);
             log.info("writeSdkAsFile sdkPath:{}, content:{}", sdkFilePath, fileContent);
-            try (BufferedWriter writer = Files.newBufferedWriter(sdkFilePath, StandardCharsets.UTF_8)) {
+            try (BufferedWriter writer = Files
+                .newBufferedWriter(sdkFilePath, StandardCharsets.UTF_8)) {
                 // write to relative path
                 writer.write(fileContent);
             } catch (IOException e) {
@@ -522,105 +555,159 @@ public class CertService {
                 throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
             }
         }
-        // zip the directory of conf(guomi: conf/gm)
-        try {
-            generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR, useGm);
-        } catch (Exception e) {
-            log.error("writeSdkAsFile generateZipFile fail:[]", e);
-            throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
-        }
-
-        // rm conf dir
-        boolean resultDel = sdkDir.delete();
-        log.info("delete for temp sdk file, result:{}", resultDel);
     }
 
-    /**
-     * @param path   要压缩的文件路径
-     * @param outputDir zip包的生成目录，默认为tempZip
-     * @param useGm if use gm, there is gm dir in zip
-     */
-    public static void generateZipFile(String path, String outputDir, boolean useGm) throws Exception {
-
-        File file2Zip = new File(CleanPathUtil.cleanString(path));
-        // 压缩文件的路径不存在
-        if (!file2Zip.exists()) {
-            log.error("file not exist:{}", path);
-            throw new Exception("file not exist: " + path);
-        }
-        // 用于存放压缩文件的文件夹
-        File compress = new File(outputDir);
-        // 如果文件夹不存在，进行创建
-        if (!compress.exists() ){
-            compress.mkdirs();
-        }
-        // 目的压缩文件，已存在则先删除
-        // tempZip/conf.zip
-        String generateFileName = compress.getAbsolutePath() + File.separator + CleanPathUtil.cleanString(TEMP_ZIP_FILE_NAME);
-        File confZip = new File(generateFileName);
-        if (confZip.exists() ) {
-            log.info("confZip exist, now delete:{}", confZip);
-            confZip.delete();
-        }
-        // 输出流
-        FileOutputStream outputStream = new FileOutputStream(CleanPathUtil.cleanString(generateFileName));
-        // 压缩输出流
-        ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(outputStream));
-        // 传入输出流，传入需要压缩的file路径
-        String gmDir = useGm ? "gm" : "";
-        generateFile(zipOutputStream, file2Zip, gmDir);
-
-        log.info("file2Zip:{} and outputFile:{}" ,file2Zip.getAbsolutePath(), generateFileName);
-        // 关闭 输出流
-        zipOutputStream.close();
-        outputStream.close();
-    }
-
-
-    /**
-     * @param out  输出流
-     * @param file 目标文件
-     * @param dir  在压缩包中的文件夹
-     * @throws Exception
-     */
-    private static void generateFile(ZipOutputStream out, File file, String dir) throws Exception {
-
-        // 当前的是文件夹，则进行一步处理
-        if (file.isDirectory()) {
-            //得到文件列表信息
-            File[] files = file.listFiles();
-
-            //将文件夹添加到下一级打包目录
-            out.putNextEntry(new ZipEntry(dir + "/"));
-
-            dir = dir.length() == 0 ? "" : dir + "/";
-
-            //循环将文件夹中的文件打包
-            for (int i = 0; i < files.length; i++) {
-                generateFile(out, files[i], dir + files[i].getName());
-            }
-
-        } else { // 当前是文件
-            FileInputStream inputStream = null;
-            try {
-                inputStream = new FileInputStream(file);
-                // 标记要打包的条目
-                out.putNextEntry(new ZipEntry(dir));
-                // 进行写操作
-                int len = 0;
-                byte[] bytes = new byte[1024];
-                while ((len = inputStream.read(bytes)) > 0) {
-                    out.write(bytes, 0, len);
-                }
-            } catch (IOException e) {
-                log.error("base64ToFile IOException:[{}]", e.toString());
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            }
-        }
-
-    }
+//
+//    public synchronized FileContentHandle getFrontSdkFiles(int frontId) {
+//        Map<String, String> sdkContentMap = this.getFrontSdkContent(frontId);
+//        if (sdkContentMap.isEmpty()) {
+//            throw new NodeMgrException(ConstantCode.SDK_CRT_KEY_FILE_NOT_FOUND);
+//        }
+//        // get if guomi sdk
+//        String key = sdkContentMap.keySet().iterator().next();
+//        boolean useGm = key.contains("gm");
+//        // create dir and zip
+//        writeSdkAsFile(sdkContentMap, useGm);
+//        try {
+//            return new FileContentHandle(TEMP_ZIP_FILE_NAME, new FileInputStream(TEMP_ZIP_FILE_PATH));
+//        } catch (IOException e) {
+//            log.error("getFrontSdkFiles fail:[]", e);
+//            throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
+//        }
+//    }
+//
+//    private void writeSdkAsFile(Map<String, String> sdkContentMap, boolean useGm) {
+//        // if guomi, create conf/gm, else create conf/
+//        File sdkDir;
+//        if (useGm) {
+//            sdkDir = new File(TEMP_SDK_DIR + File.separator + "gm");
+//        } else {
+//            sdkDir = new File(TEMP_SDK_DIR);
+//        }
+//        log.info("writeSdkAsFile sdkDir:{}", sdkDir);
+//
+//        // create sdk dir
+//        if (sdkDir.exists()) {
+//            boolean result = sdkDir.delete();
+//            log.info("delete existed gm dir, result:{}", result);
+//        }
+//        boolean result = sdkDir.mkdirs();
+//        log.info("mkdir for temp sdk file, result:{}", result);
+//
+//        // write each content to each file in conf/ or conf/gm/
+//        // gm: gmca.crt, gmsdk.crt, gmsdk.key
+//        // else: ca.crt, sdk.crt, sdk.key
+//        for (String fileName : sdkContentMap.keySet()) {
+//            Path sdkFilePath = Paths.get(sdkDir.getPath() + File.separator + CleanPathUtil.cleanString(fileName));
+//            String fileContent = sdkContentMap.get(fileName);
+//            log.info("writeSdkAsFile sdkPath:{}, content:{}", sdkFilePath, fileContent);
+//            try (BufferedWriter writer = Files.newBufferedWriter(sdkFilePath, StandardCharsets.UTF_8)) {
+//                // write to relative path
+//                writer.write(fileContent);
+//            } catch (IOException e) {
+//                log.error("writeSdkAsFile fail:[]", e);
+//                throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
+//            }
+//        }
+//        // zip the directory of conf(guomi: conf/gm)
+//        try {
+//            generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR, useGm);
+//        } catch (Exception e) {
+//            log.error("writeSdkAsFile generateZipFile fail:[]", e);
+//            throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
+//        }
+//
+//        // rm conf dir
+//        boolean resultDel = sdkDir.delete();
+//        log.info("delete for temp sdk file, result:{}", resultDel);
+//    }
+//
+//    /**
+//     * @param path   要压缩的文件路径
+//     * @param outputDir zip包的生成目录，默认为tempZip
+//     * @param useGm if use gm, there is gm dir in zip
+//     */
+//    public static void generateZipFile(String path, String outputDir, boolean useGm) throws Exception {
+//
+//        File file2Zip = new File(CleanPathUtil.cleanString(path));
+//        // 压缩文件的路径不存在
+//        if (!file2Zip.exists()) {
+//            log.error("file not exist:{}", path);
+//            throw new Exception("file not exist: " + path);
+//        }
+//        // 用于存放压缩文件的文件夹
+//        File compress = new File(outputDir);
+//        // 如果文件夹不存在，进行创建
+//        if (!compress.exists() ){
+//            compress.mkdirs();
+//        }
+//        // 目的压缩文件，已存在则先删除
+//        // tempZip/conf.zip
+//        String generateFileName = compress.getAbsolutePath() + File.separator + CleanPathUtil.cleanString(TEMP_ZIP_FILE_NAME);
+//        File confZip = new File(generateFileName);
+//        if (confZip.exists() ) {
+//            log.info("confZip exist, now delete:{}", confZip);
+//            confZip.delete();
+//        }
+//        // 输出流
+//        FileOutputStream outputStream = new FileOutputStream(CleanPathUtil.cleanString(generateFileName));
+//        // 压缩输出流
+//        ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(outputStream));
+//        // 传入输出流，传入需要压缩的file路径
+//        String gmDir = useGm ? "gm" : "";
+//        generateFile(zipOutputStream, file2Zip, gmDir);
+//
+//        log.info("file2Zip:{} and outputFile:{}" ,file2Zip.getAbsolutePath(), generateFileName);
+//        // 关闭 输出流
+//        zipOutputStream.close();
+//        outputStream.close();
+//    }
+//
+//
+//    /**
+//     * @param out  输出流
+//     * @param file 目标文件
+//     * @param dir  在压缩包中的文件夹
+//     * @throws Exception
+//     */
+//    private static void generateFile(ZipOutputStream out, File file, String dir) throws Exception {
+//
+//        // 当前的是文件夹，则进行一步处理
+//        if (file.isDirectory()) {
+//            //得到文件列表信息
+//            File[] files = file.listFiles();
+//
+//            //将文件夹添加到下一级打包目录
+//            out.putNextEntry(new ZipEntry(dir + "/"));
+//
+//            dir = dir.length() == 0 ? "" : dir + "/";
+//
+//            //循环将文件夹中的文件打包
+//            for (int i = 0; i < files.length; i++) {
+//                generateFile(out, files[i], dir + files[i].getName());
+//            }
+//
+//        } else { // 当前是文件
+//            FileInputStream inputStream = null;
+//            try {
+//                inputStream = new FileInputStream(file);
+//                // 标记要打包的条目
+//                out.putNextEntry(new ZipEntry(dir));
+//                // 进行写操作
+//                int len = 0;
+//                byte[] bytes = new byte[1024];
+//                while ((len = inputStream.read(bytes)) > 0) {
+//                    out.write(bytes, 0, len);
+//                }
+//            } catch (IOException e) {
+//                log.error("base64ToFile IOException:[{}]", e.toString());
+//            } finally {
+//                if (inputStream != null) {
+//                    inputStream.close();
+//                }
+//            }
+//        }
+//
+//    }
 
 }

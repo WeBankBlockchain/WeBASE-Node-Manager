@@ -89,7 +89,7 @@ public class CertController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start getSdkCertZip startTime:{},frontId:{}", startTime.toEpochMilli(), frontId);
         // get file
-        FileContentHandle fileContentHandle = certService.getFrontSdkFiles(frontId);
+        FileContentHandle fileContentHandle = certService.getFrontSdkZipFile(frontId);
         log.info("end getSdkCertZip fileContentHandle:{}useTime:{}", fileContentHandle,
             Duration.between(startTime, Instant.now()).toMillis());
         return ResponseEntity.ok().headers(HttpRequestTools.headers(fileContentHandle.getFileName()))
