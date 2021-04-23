@@ -465,7 +465,12 @@ public class CertService {
         if (front == null) {
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
         }
-        return frontInterfaceService.getSdkFilesFromSpecificFront(front.getFrontIp(), front.getFrontPort());
+        Map<String, String> sdkMap = frontInterfaceService.getSdkFilesFromSpecificFront(front.getFrontIp(), front.getFrontPort());
+        if (sdkMap == null || sdkMap.isEmpty()) {
+            log.error("getFrontSdkContent failed frontId:{}", frontId);
+            throw new NodeMgrException(ConstantCode.GET_FRONT_SDK_MAP_FAIL);
+        }
+        return sdkMap;
     }
 
 

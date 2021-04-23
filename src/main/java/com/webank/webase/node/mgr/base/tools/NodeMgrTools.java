@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -676,4 +677,35 @@ public class NodeMgrTools {
         return exportedKeyPath;
     }
 
+    /**
+     * 文件转Base64
+     *
+     * @param filePath 文件路径
+     * @return
+     */
+    public static String fileToBase64(String filePath) {
+        if (filePath == null) {
+            return null;
+        }
+        FileInputStream inputFile = null;
+        try {
+            File file = new File(CleanPathUtil.cleanString(filePath));
+            inputFile = new FileInputStream(file);
+            byte[] buffer = new byte[(int) file.length()];
+            int size = inputFile.read(buffer);
+            log.debug("fileToBase64 inputFile size:{}", size);
+            return Base64.getEncoder().encodeToString(buffer);
+        } catch (IOException e) {
+            log.error("base64ToFile IOException:[{}]", e.toString());
+        } finally {
+            if (inputFile != null) {
+                try {
+                    inputFile.close();
+                } catch (IOException e) {
+                    log.error("closeable IOException:[{}]", e.toString());
+                }
+            }
+        }
+        return null;
+    }
 }

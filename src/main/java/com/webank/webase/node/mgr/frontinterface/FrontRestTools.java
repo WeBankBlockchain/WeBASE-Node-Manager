@@ -88,8 +88,8 @@ public class FrontRestTools {
     public static final String URI_BLOCK_HEADER_BY_NUMBER = "web3/blockHeaderByNumber/%1d";
     public static final String URI_BLOCK_HEADER_BY_HASH = "web3/blockHeaderByHash/%1s";
     public static final String URI_SEARCH_BLOCK_OR_TX = "web3/search";
-    public static final String URI_NODECONFIG = "web3/nodeConfig";
-    public static final String URI_NODEINFO = "web3/nodeInfo";
+    public static final String URI_NODE_CONFIG = "web3/nodeConfig";
+    public static final String URI_NODE_INFO = "web3/nodeInfo";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey";
