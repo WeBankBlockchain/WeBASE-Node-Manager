@@ -30,3 +30,4 @@
 *.srl
 gmcert.cnf
 gmsm2.param
+/output/
