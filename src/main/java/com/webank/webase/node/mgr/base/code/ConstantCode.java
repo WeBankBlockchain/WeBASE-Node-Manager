@@ -314,6 +314,7 @@ public class ConstantCode {
     // add in v1.5.1
     public static final RetCode PROJECT_NAME_ALREADY_EXIST = RetCode.mark(202531, "directory of project's artifact name already exist");
     public static final RetCode GET_FRONT_SDK_MAP_FAIL = RetCode.mark(202532, "get sdk cert/key content map failed");
+    public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(202533, "generate project of contract failed");
 
 
     /* auth */

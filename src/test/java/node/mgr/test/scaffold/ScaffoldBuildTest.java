@@ -93,7 +93,7 @@ public class ScaffoldBuildTest {
      * 根据入参生成项目
      */
     @Test
-    public void testBuildByParam() throws JsonProcessingException {
+    public void testBuildByParam() throws Exception {
         String solSourceCode = new String(Base64.getDecoder().decode(helloWorldSolBase64Str));
 
         ContractInfo contractInfo = new ContractInfo();
@@ -111,8 +111,9 @@ public class ScaffoldBuildTest {
         System.out.println(sdkMap);
 
         ProjectFactory projectFactory = new ProjectFactory();
-        ProjectArtifact result = projectFactory.buildProjectDir(Collections.singletonList(contractInfo),
-            group, artifactName, outputDir,
+        ProjectArtifact result = projectFactory.buildProjectDir(
+            Collections.singletonList(contractInfo),
+            group, artifactName, outputDir, "gradle",
             //null, null, null, null);
             "127.0.0.1:25200", 2, "0x123", sdkMap);
     }
@@ -121,7 +122,7 @@ public class ScaffoldBuildTest {
      * build with multi sol contract
      */
     @Test
-    public void testBuildMultiSol() throws JsonProcessingException {
+    public void testBuildMultiSol() throws Exception {
         String solSourceCode = new String(Base64.getDecoder().decode(helloWorldSolBase64Str));
 
         ContractInfo contractInfo = new ContractInfo();
@@ -145,7 +146,7 @@ public class ScaffoldBuildTest {
         ProjectFactory projectFactory = new ProjectFactory();
         // ProjectArtifact result = projectFactory.buildProjectDir(Collections.singletonList(contractInfo),
         ProjectArtifact result = projectFactory.buildProjectDir(Arrays.asList(contractInfo, creditContract),
-            group, artifactName, outputDir,
+            group, artifactName, outputDir, "gradle",
             //null, null, null, null);
             "127.0.0.1:25200", 2, "0x123", sdkMap);
         System.out.println("result: ");

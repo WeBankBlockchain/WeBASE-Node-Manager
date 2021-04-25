@@ -14,7 +14,6 @@
 
 package com.webank.webase.node.mgr.scaffold;
 
-import com.webank.scaffold.artifact.ProjectArtifact;
 import com.webank.scaffold.artifact.webase.NewMainResourceDir.ContractInfo;
 import com.webank.scaffold.factory.ProjectFactory;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -32,9 +31,6 @@ import com.webank.webase.node.mgr.scaffold.entity.ReqProject;
 import com.webank.webase.node.mgr.scaffold.entity.RspFile;
 import com.webank.webase.node.mgr.user.UserService;
 import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -66,6 +62,9 @@ public class ScaffoldService {
     private UserService userService;
     @Autowired
     private FrontInterfaceService frontInterfaceService;
+
+    // gradle not in package, skip
+    private static final String GRADLE_WRAPPER_DIR = "";
 
     private static final String OUTPUT_DIR = "output";
     private static final String ZIP_SUFFIX = ".zip";
@@ -151,15 +150,21 @@ public class ScaffoldService {
         ProjectFactory projectFactory = new ProjectFactory();
         log.info("generateProject projectGroup:{},artifactName:{},OUTPUT_DIR:{},frontChannelIpPort:{},groupId:{}",
             projectGroup, artifactName, OUTPUT_DIR, frontChannelIpPort, groupId);
-        ProjectArtifact result = projectFactory.buildProjectDir(contractInfoList,
-            projectGroup, artifactName, OUTPUT_DIR,
-            frontChannelIpPort, groupId, hexPrivateKey, sdkMap);
+        try {
+            projectFactory.buildProjectDir(contractInfoList,
+                projectGroup, artifactName, OUTPUT_DIR, GRADLE_WRAPPER_DIR,
+                frontChannelIpPort, groupId, hexPrivateKey, sdkMap);
+        } catch (Exception e) {
+            log.error("generateProject error:[]", e);
+            throw new NodeMgrException(ConstantCode.GENERATE_CONTRACT_PROJECT_FAIL.attach(e.getMessage()));
+        }
         String projectDir = OUTPUT_DIR + File.separator + artifactName;
         log.info("generateProject result:{}", projectDir);
         return projectDir;
     }
 
     private List<ContractInfo> handleContractList(List<TbContract> contractList) {
+        log.info("handleContractList contractList:{}", contractList);
         List<ContractInfo> contractInfoList = new ArrayList<>();
         log.info("handleContractList param contractList size:{}", contractList.size());
         for (TbContract contract : contractList) {
@@ -183,6 +188,7 @@ public class ScaffoldService {
             contractInfoList.add(contractInfo);
         }
         log.info("handleContractList result contractInfoList size:{}", contractInfoList.size());
+        log.info("handleContractList contractList:{}", contractInfoList);
         return contractInfoList;
     }
 }
