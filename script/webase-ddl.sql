@@ -553,7 +553,7 @@ CREATE TABLE IF NOT EXISTS tb_ware_house (
   id int(11) NOT NULL COMMENT '自增编号',
   ware_house_name varchar(255) binary NOT NULL COMMENT '合约仓库名',
   ware_house_name_en varchar(255) binary NOT NULL COMMENT '仓库名（英文）',
-  type  int(11) binary NOT NULL COMMENT '仓库类型',
+  type  int(11) NOT NULL COMMENT '仓库类型',
   ware_house_icon     mediumtext COMMENT '仓库图标（Base64）',
   description     mediumtext COMMENT '仓库描述(Base64)',
   description_en  mediumtext COMMENT '仓库描述（英文）(Base64)',
