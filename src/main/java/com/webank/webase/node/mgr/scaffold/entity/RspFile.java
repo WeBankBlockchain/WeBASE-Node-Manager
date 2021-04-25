@@ -14,9 +14,6 @@
 
 package com.webank.webase.node.mgr.scaffold.entity;
 
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import java.io.InputStream;
-import java.util.Base64;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
