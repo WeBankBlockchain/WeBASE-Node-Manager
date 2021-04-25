@@ -31,3 +31,6 @@
 gmcert.cnf
 gmsm2.param
 /output/
+generatorConfig.xml
+mbg.properties
+GenerateToolTest.java
