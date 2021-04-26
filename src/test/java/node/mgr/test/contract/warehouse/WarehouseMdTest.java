@@ -17,7 +17,7 @@ package node.mgr.test.contract.warehouse;
 import java.util.Base64;
 import org.junit.Test;
 
-public class WareHouseMdTest {
+public class WarehouseMdTest {
     public static final String ADDRESS_MD = "# Address\n" +
         "\n" +
         "Address library\n" +

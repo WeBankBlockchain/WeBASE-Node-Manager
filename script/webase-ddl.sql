@@ -544,8 +544,6 @@ CREATE TABLE IF NOT EXISTS tb_contract_store (
   UNIQUE KEY uk_version (app_key,contract_name,contract_version)
 ) ENGINE=InnoDB AUTO_INCREMENT=300001 DEFAULT CHARSET=utf8 COMMENT='应用合约信息';
 
-SET FOREIGN_KEY_CHECKS = 1;
-
 -- ----------------------------
 -- Table structure for tb_contract_store
 -- ----------------------------
@@ -592,3 +590,6 @@ CREATE TABLE IF NOT EXISTS tb_contract_item (
   PRIMARY KEY (id),
   UNIQUE KEY uk_name(warehouse_id,contract_folder_id,contract_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库合约信息';
+
+
+SET FOREIGN_KEY_CHECKS = 1;
