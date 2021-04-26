@@ -549,20 +549,20 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ----------------------------
 -- Table structure for tb_contract_store
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_ware_house (
+CREATE TABLE IF NOT EXISTS tb_warehouse (
   id int(11) NOT NULL COMMENT '自增编号',
-  ware_house_name varchar(255) binary NOT NULL COMMENT '合约仓库名',
-  ware_house_name_en varchar(255) binary NOT NULL COMMENT '仓库名（英文）',
+  warehouse_name varchar(255) binary NOT NULL COMMENT '合约仓库名',
+  warehouse_name_en varchar(255) binary NOT NULL COMMENT '仓库名（英文）',
   type  int(11) NOT NULL COMMENT '仓库类型',
-  ware_house_icon     mediumtext COMMENT '仓库图标（Base64）',
+  warehouse_icon     mediumtext COMMENT '仓库图标（Base64）',
   description     mediumtext COMMENT '仓库描述(Base64)',
   description_en  mediumtext COMMENT '仓库描述（英文）(Base64)',
-  ware_house_detail   mediumtext COMMENT '仓库详情',
-  ware_house_detail_en   mediumtext COMMENT '仓库详情（英文）',
+  warehouse_detail   mediumtext COMMENT '仓库详情',
+  warehouse_detail_en   mediumtext COMMENT '仓库详情（英文）',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (id),
-  UNIQUE KEY uk_name(ware_house_name)
+  UNIQUE KEY uk_name(warehouse_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库';
 
 CREATE TABLE IF NOT EXISTS tb_contract_folder (
@@ -574,9 +574,9 @@ CREATE TABLE IF NOT EXISTS tb_contract_folder (
   folder_detail_en   mediumtext COMMENT '目录详情（英文）',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  ware_house_id  int(11) NOT NULL COMMENT '合约仓库编号',
+  warehouse_id  int(11) NOT NULL COMMENT '合约仓库编号',
   PRIMARY KEY (id),
-  UNIQUE KEY uk_name(ware_house_id,folder_name)
+  UNIQUE KEY uk_name(warehouse_id,folder_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库目录';
 
 CREATE TABLE IF NOT EXISTS tb_contract_item (
@@ -587,8 +587,8 @@ CREATE TABLE IF NOT EXISTS tb_contract_item (
   description_en  mediumtext COMMENT '合约描述（英文）(Base64)',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',  
-  ware_house_id  int(11) NOT NULL COMMENT '合约仓库编号',
+  warehouse_id  int(11) NOT NULL COMMENT '合约仓库编号',
   contract_folder_id  int(11) NOT NULL COMMENT '合约目录编号',
   PRIMARY KEY (id),
-  UNIQUE KEY uk_name(ware_house_id,contract_folder_id,contract_name)
+  UNIQUE KEY uk_name(warehouse_id,contract_folder_id,contract_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库合约信息';
