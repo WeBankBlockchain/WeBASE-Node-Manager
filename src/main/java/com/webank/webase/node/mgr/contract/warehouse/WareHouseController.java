@@ -18,7 +18,7 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractFolder;
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractItem;
-import com.webank.webase.node.mgr.contract.warehouse.entity.TbWareHouse;
+import com.webank.webase.node.mgr.contract.warehouse.entity.TbWarehouse;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * ContractStoreController.
+ * @author marsli
  */
 @Slf4j
 @RestController
-@RequestMapping(value = "/contractStore")
+@RequestMapping(value = "/warehouse")
 public class WareHouseController extends BaseController {
 
     @Autowired
@@ -42,10 +43,10 @@ public class WareHouseController extends BaseController {
     /**
      * query the list of contract store item
      */
-    @GetMapping(value = "/getContractStoreList")
+    @GetMapping(value = "/list")
     public BaseResponse getContractStoreList() {
 
-        List<TbWareHouse>  storeItemList = wareHouseService.getStoreList();
+        List<TbWarehouse>  storeItemList = wareHouseService.getStoreList();
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(storeItemList);
         return response;
@@ -54,10 +55,10 @@ public class WareHouseController extends BaseController {
     /**
      * query a contract store item
      */
-    @GetMapping(value = "/getContractStoreById/{storeId}")
+    @GetMapping(value = "/{storeId}")
     public BaseResponse getContractStoreById(@PathVariable("storeId") Integer storeId) {
         log.info("getContractStoreById start. storeId:{}", storeId);
-        TbWareHouse storeItem = wareHouseService.getStoreItemById(storeId);
+        TbWarehouse storeItem = wareHouseService.getStoreItemById(storeId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(storeItem);
         return response;
@@ -66,7 +67,7 @@ public class WareHouseController extends BaseController {
     /**
      * query a contract folder item
      */
-    @GetMapping(value = "/getContractFolderById/{contractFolderId}")
+    @GetMapping(value = "/folder/{contractFolderId}")
     public BaseResponse getContractFolderById(@PathVariable("contractFolderId") Integer contractFolderId) {
         log.info("getContractStoreById start. contractFolderId:{}", contractFolderId);
         TbContractFolder contractFolderItem = wareHouseService.getContractFolderById(contractFolderId);
@@ -78,7 +79,7 @@ public class WareHouseController extends BaseController {
     /**
      * query a contract item
      */
-    @GetMapping(value = "/getContractItemById/{contractId}")
+    @GetMapping(value = "/item/{contractId}")
     public BaseResponse getContractItemById(@PathVariable("contractId") Integer contractId) {
         log.info("getContractStoreById start. contractId:{}", contractId);
         TbContractItem contractItem = wareHouseService.getContractItemById(contractId);
@@ -90,7 +91,7 @@ public class WareHouseController extends BaseController {
     /**
      * get folderItemList by storeId
      */
-    @GetMapping(value = "/getFolderItemListByStoreId/{storeId}")
+    @GetMapping(value = "/folder/list/{storeId}")
     public BaseResponse getFolderItemListByStoreId(@PathVariable("storeId") Integer storeId) {
         log.info("getFolderItemListByStoreId start. storeId:{}", storeId);
         List<TbContractFolder> contractFolderItemList = wareHouseService.getFolderItemListByStoreId(storeId);
@@ -102,7 +103,7 @@ public class WareHouseController extends BaseController {
     /**
      * get contractItemList by folderId
      */
-    @GetMapping(value = "/getContractItemByFolderId/{folderId}")
+    @GetMapping(value = "/item/list/{folderId}")
     public BaseResponse getContractItemByFolderId(@PathVariable("folderId") Integer folderId) {
         log.info("getContractItemByFolderId start. storeId:{}", folderId);
         List<TbContractItem> contractItemList = wareHouseService.getContractItemByFolderId(folderId);

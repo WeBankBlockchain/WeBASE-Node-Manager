@@ -15,17 +15,18 @@ package com.webank.webase.node.mgr.contract.warehouse;
 
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractFolder;
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractItem;
-import com.webank.webase.node.mgr.contract.warehouse.entity.TbWareHouse;
+import com.webank.webase.node.mgr.contract.warehouse.entity.TbWarehouse;
 import com.webank.webase.node.mgr.contract.warehouse.mapper.TbContractFolderMapper;
 import com.webank.webase.node.mgr.contract.warehouse.mapper.TbContractItemMapper;
-import com.webank.webase.node.mgr.contract.warehouse.mapper.TbWareHouseMapper;
+import com.webank.webase.node.mgr.contract.warehouse.mapper.TbWarehouseMapper;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *
+ * contract warehouse service
+ * include warehouse, contract folder of warehouse, contract item of contract folder
  * @author marsli
  */
 @Slf4j
@@ -36,21 +37,21 @@ public class WareHouseService {
     @Autowired
     private TbContractFolderMapper contractFolderMapper;
     @Autowired
-    private TbWareHouseMapper wareHouseMapper;
+    private TbWarehouseMapper wareHouseMapper;
 
     /**
      *
      */
-    public List<TbWareHouse> getStoreList() {
-        List<TbWareHouse> storeItemList = wareHouseMapper.findAll();
+    public List<TbWarehouse> getStoreList() {
+        List<TbWarehouse> storeItemList = wareHouseMapper.findAll();
         return storeItemList;
     }
 
     /**
      *
      */
-    public TbWareHouse getStoreItemById(Integer wareHouseId) {
-        TbWareHouse storeItem = wareHouseMapper.selectByPrimaryKey(wareHouseId);
+    public TbWarehouse getStoreItemById(Integer wareHouseId) {
+        TbWarehouse storeItem = wareHouseMapper.selectByPrimaryKey(wareHouseId);
         return storeItem;
     }
 

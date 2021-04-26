@@ -20,8 +20,7 @@ import org.apache.ibatis.type.JdbcType;
  */
 public interface TbContractFolderMapper {
 
-    @Select({"select", TbWareHouseSqlProvider.ALL_COLUMN_FIELDS, "from tb_contract_folder",
-    "where ware_house_id = #{wareHouseId}"})
+    @Select({ "select", TbWarehouseSqlProvider.ALL_COLUMN_FIELDS, "from tb_contract_folder", "where ware_house_id = #{wareHouseId}" })
     List<TbContractFolder> findByWareHouseId(@Param("wareHouseId") Integer wareHouseId);
 
     /**
@@ -30,10 +29,7 @@ public interface TbContractFolderMapper {
      *
      * @mbg.generated
      */
-    @Delete({
-        "delete from tb_contract_folder",
-        "where id = #{id,jdbcType=INTEGER}"
-    })
+    @Delete({ "delete from tb_contract_folder", "where id = #{id,jdbcType=INTEGER}" })
     int deleteByPrimaryKey(Integer id);
 
     /**
@@ -42,8 +38,8 @@ public interface TbContractFolderMapper {
      *
      * @mbg.generated
      */
-    @InsertProvider(type=TbContractFolderSqlProvider.class, method="insertSelective")
-    @SelectKey(statement="SELECT LAST_INSERT_ID()", keyProperty="id", before=false, resultType=Integer.class)
+    @InsertProvider(type = TbContractFolderSqlProvider.class, method = "insertSelective")
+    @SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = Integer.class)
     int insertSelective(TbContractFolder record);
 
     /**
@@ -52,24 +48,8 @@ public interface TbContractFolderMapper {
      *
      * @mbg.generated
      */
-    @Select({
-        "select",
-        "id, folder_name, create_time, modify_time, ware_house_id, description, description_en, ",
-        "folder_detail, folder_detail_en",
-        "from tb_contract_folder",
-        "where id = #{id,jdbcType=INTEGER}"
-    })
-    @Results({
-        @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
-        @Result(column="folder_name", property="folderName", jdbcType=JdbcType.VARCHAR),
-        @Result(column="create_time", property="createTime", jdbcType=JdbcType.TIMESTAMP),
-        @Result(column="modify_time", property="modifyTime", jdbcType=JdbcType.TIMESTAMP),
-        @Result(column="ware_house_id", property="wareHouseId", jdbcType=JdbcType.INTEGER),
-        @Result(column="description", property="description", jdbcType=JdbcType.LONGVARCHAR),
-        @Result(column="description_en", property="descriptionEn", jdbcType=JdbcType.LONGVARCHAR),
-        @Result(column="folder_detail", property="folderDetail", jdbcType=JdbcType.LONGVARCHAR),
-        @Result(column="folder_detail_en", property="folderDetailEn", jdbcType=JdbcType.LONGVARCHAR)
-    })
+    @Select({ "select", "id, folder_name, create_time, modify_time, warehouse_id, description, description_en, ", "folder_detail, folder_detail_en", "from tb_contract_folder", "where id = #{id,jdbcType=INTEGER}" })
+    @Results({ @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true), @Result(column = "folder_name", property = "folderName", jdbcType = JdbcType.VARCHAR), @Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP), @Result(column = "modify_time", property = "modifyTime", jdbcType = JdbcType.TIMESTAMP), @Result(column = "warehouse_id", property = "warehouseId", jdbcType = JdbcType.INTEGER), @Result(column = "description", property = "description", jdbcType = JdbcType.LONGVARCHAR), @Result(column = "description_en", property = "descriptionEn", jdbcType = JdbcType.LONGVARCHAR), @Result(column = "folder_detail", property = "folderDetail", jdbcType = JdbcType.LONGVARCHAR), @Result(column = "folder_detail_en", property = "folderDetailEn", jdbcType = JdbcType.LONGVARCHAR) })
     TbContractFolder selectByPrimaryKey(Integer id);
 
     /**
@@ -78,7 +58,7 @@ public interface TbContractFolderMapper {
      *
      * @mbg.generated
      */
-    @UpdateProvider(type=TbContractFolderSqlProvider.class, method="updateByPrimaryKeySelective")
+    @UpdateProvider(type = TbContractFolderSqlProvider.class, method = "updateByPrimaryKeySelective")
     int updateByPrimaryKeySelective(TbContractFolder record);
 
     /**
@@ -87,19 +67,7 @@ public interface TbContractFolderMapper {
      *
      * @mbg.generated
      */
-    @Options(useGeneratedKeys = true,keyProperty="id",keyColumn = "id")
-    @Insert({
-    "<script>",
-        "insert into tb_contract_folder (folder_name, ",
-        "create_time, modify_time, ",
-        "ware_house_id, description, ",
-        "description_en, folder_detail, ",
-        "folder_detail_en)",
-        "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.folderName,jdbcType=VARCHAR}, ",
-        "#{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP}, ",
-        "#{detail.wareHouseId,jdbcType=INTEGER}, #{detail.description,jdbcType=LONGVARCHAR}, ",
-        "#{detail.descriptionEn,jdbcType=LONGVARCHAR}, #{detail.folderDetail,jdbcType=LONGVARCHAR}, ",
-        "#{detail.folderDetailEn,jdbcType=LONGVARCHAR})</foreach></script>",
-    })
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    @Insert({ "<script>", "insert into tb_contract_folder (folder_name, ", "create_time, modify_time, ", "warehouse_id, description, ", "description_en, folder_detail, ", "folder_detail_en)", "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.folderName,jdbcType=VARCHAR}, ", "#{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP}, ", "#{detail.warehouseId,jdbcType=INTEGER}, #{detail.description,jdbcType=LONGVARCHAR}, ", "#{detail.descriptionEn,jdbcType=LONGVARCHAR}, #{detail.folderDetail,jdbcType=LONGVARCHAR}, ", "#{detail.folderDetailEn,jdbcType=LONGVARCHAR})</foreach></script>" })
     int batchInsert(java.util.List<TbContractFolder> list);
 }
