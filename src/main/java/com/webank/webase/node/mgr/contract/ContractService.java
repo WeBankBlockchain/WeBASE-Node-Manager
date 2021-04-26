@@ -697,17 +697,15 @@ public class  ContractService {
     public void copyContracts(ReqCopyContracts reqCopyContracts) {
         log.debug("start saveContractBatch ReqContractList:{}",
             JsonTools.toJSONString(reqCopyContracts));
+        if ("".equals(reqCopyContracts.getContractPath())) {
+            reqCopyContracts.setContractPath("/");
+        }
         reqCopyContracts.getContractItems().forEach(c -> {
-                Contract reqContractSave = new Contract();
-                reqContractSave.setContractName(c.getContractName());
-                reqContractSave.setContractSource(c.getContractSource());
-                // default path "/"
-                reqContractSave.setContractPath(reqCopyContracts.getContractPath());
-                if ("".equals(reqCopyContracts.getContractPath())) {
-                    reqContractSave.setContractPath("/");
-                }
-                reqContractSave.setGroupId(reqCopyContracts.getGroupId());
-                this.newContract(reqContractSave);
+            Contract reqContractSave = new Contract(reqCopyContracts.getGroupId(), "",
+                reqCopyContracts.getContractPath(), reqCopyContracts.getAccount());
+            reqContractSave.setContractName(c.getContractName());
+            reqContractSave.setContractSource(c.getContractSource());
+            this.newContract(reqContractSave);
         });
     }
 
