@@ -31,6 +31,7 @@ import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
+import com.webank.webase.node.mgr.contract.entity.ReqCopyContracts;
 import com.webank.webase.node.mgr.contract.entity.ReqListContract;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
@@ -107,6 +108,7 @@ public class  ContractService {
     private CryptoSuite cryptoSuite;
     @Autowired
     private GroupService groupService;
+
     /**
      * add new contract data.
      */
@@ -158,7 +160,7 @@ public class  ContractService {
      * save application's contract.
      *
      * @param appKey
-     * @param reqContractSourceSave
+     * @param reqContractAddressSave
      */
     @Transactional
     public void appContractSave(String appKey, ReqContractAddressSave reqContractAddressSave)
@@ -686,6 +688,27 @@ public class  ContractService {
 
         log.debug("end queryContractListMultiPath listOfContract size:{}", resultList.size());
         return resultList;
+    }
+
+    /**
+     * copy contracts source from contract warehouse
+     * @param reqCopyContracts
+     */
+    public void copyContracts(ReqCopyContracts reqCopyContracts) {
+        log.debug("start saveContractBatch ReqContractList:{}",
+            JsonTools.toJSONString(reqCopyContracts));
+        reqCopyContracts.getContractItems().forEach(c -> {
+                Contract reqContractSave = new Contract();
+                reqContractSave.setContractName(c.getContractName());
+                reqContractSave.setContractSource(c.getContractSource());
+                // default path "/"
+                reqContractSave.setContractPath(reqCopyContracts.getContractPath());
+                if ("".equals(reqCopyContracts.getContractPath())) {
+                    reqContractSave.setContractPath("/");
+                }
+                reqContractSave.setGroupId(reqCopyContracts.getGroupId());
+                this.newContract(reqContractSave);
+        });
     }
 
 }

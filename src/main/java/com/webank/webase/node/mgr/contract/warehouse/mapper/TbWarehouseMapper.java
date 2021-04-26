@@ -17,7 +17,7 @@ import org.apache.ibatis.type.JdbcType;
  */
 public interface TbWarehouseMapper {
 
-    @Select({ "select", TbWarehouseSqlProvider.ALL_COLUMN_FIELDS, "from tb_ware_house" })
+    @Select({ "select", TbWarehouseSqlProvider.ALL_COLUMN_FIELDS, "from tb_warehouse" })
     List<TbWarehouse> findAll();
 
     /**

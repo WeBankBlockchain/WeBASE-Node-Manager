@@ -35,10 +35,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping(value = "/warehouse")
-public class WareHouseController extends BaseController {
+public class WarehouseController extends BaseController {
 
     @Autowired
-    WareHouseService wareHouseService;
+    WarehouseService warehouseService;
 
     /**
      * query the list of contract store item
@@ -46,7 +46,7 @@ public class WareHouseController extends BaseController {
     @GetMapping(value = "/list")
     public BaseResponse getContractStoreList() {
 
-        List<TbWarehouse>  storeItemList = wareHouseService.getStoreList();
+        List<TbWarehouse>  storeItemList = warehouseService.getStoreList();
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(storeItemList);
         return response;
@@ -55,10 +55,10 @@ public class WareHouseController extends BaseController {
     /**
      * query a contract store item
      */
-    @GetMapping(value = "/{storeId}")
-    public BaseResponse getContractStoreById(@PathVariable("storeId") Integer storeId) {
-        log.info("getContractStoreById start. storeId:{}", storeId);
-        TbWarehouse storeItem = wareHouseService.getStoreItemById(storeId);
+    @GetMapping(value = "/{warehouseId}")
+    public BaseResponse getContractStoreById(@PathVariable("warehouseId") Integer warehouseId) {
+        log.info("getContractStoreById start. warehouseId:{}", warehouseId);
+        TbWarehouse storeItem = warehouseService.getStoreItemById(warehouseId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(storeItem);
         return response;
@@ -70,7 +70,7 @@ public class WareHouseController extends BaseController {
     @GetMapping(value = "/folder/{contractFolderId}")
     public BaseResponse getContractFolderById(@PathVariable("contractFolderId") Integer contractFolderId) {
         log.info("getContractStoreById start. contractFolderId:{}", contractFolderId);
-        TbContractFolder contractFolderItem = wareHouseService.getContractFolderById(contractFolderId);
+        TbContractFolder contractFolderItem = warehouseService.getContractFolderById(contractFolderId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(contractFolderItem);
         return response;
@@ -82,19 +82,19 @@ public class WareHouseController extends BaseController {
     @GetMapping(value = "/item/{contractId}")
     public BaseResponse getContractItemById(@PathVariable("contractId") Integer contractId) {
         log.info("getContractStoreById start. contractId:{}", contractId);
-        TbContractItem contractItem = wareHouseService.getContractItemById(contractId);
+        TbContractItem contractItem = warehouseService.getContractItemById(contractId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(contractItem);
         return response;
     }
 
     /**
-     * get folderItemList by storeId
+     * get folderItemList by warehouseId
      */
-    @GetMapping(value = "/folder/list/{storeId}")
-    public BaseResponse getFolderItemListByStoreId(@PathVariable("storeId") Integer storeId) {
-        log.info("getFolderItemListByStoreId start. storeId:{}", storeId);
-        List<TbContractFolder> contractFolderItemList = wareHouseService.getFolderItemListByStoreId(storeId);
+    @GetMapping(value = "/folder/list/{warehouseId}")
+    public BaseResponse getFolderItemListByStoreId(@PathVariable("warehouseId") Integer warehouseId) {
+        log.info("getFolderItemListByStoreId start. warehouseId:{}", warehouseId);
+        List<TbContractFolder> contractFolderItemList = warehouseService.getFolderItemListByStoreId(warehouseId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(contractFolderItemList);
         return response;
@@ -105,8 +105,8 @@ public class WareHouseController extends BaseController {
      */
     @GetMapping(value = "/item/list/{folderId}")
     public BaseResponse getContractItemByFolderId(@PathVariable("folderId") Integer folderId) {
-        log.info("getContractItemByFolderId start. storeId:{}", folderId);
-        List<TbContractItem> contractItemList = wareHouseService.getContractItemByFolderId(folderId);
+        log.info("getContractItemByFolderId start. warehouseId:{}", folderId);
+        List<TbContractItem> contractItemList = warehouseService.getContractItemByFolderId(folderId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(contractItemList);
         return response;

@@ -31,27 +31,27 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class WareHouseService {
+public class WarehouseService {
     @Autowired
     private TbContractItemMapper contractItemMapper;
     @Autowired
     private TbContractFolderMapper contractFolderMapper;
     @Autowired
-    private TbWarehouseMapper wareHouseMapper;
+    private TbWarehouseMapper warehouseMapper;
 
     /**
      *
      */
     public List<TbWarehouse> getStoreList() {
-        List<TbWarehouse> storeItemList = wareHouseMapper.findAll();
+        List<TbWarehouse> storeItemList = warehouseMapper.findAll();
         return storeItemList;
     }
 
     /**
      *
      */
-    public TbWarehouse getStoreItemById(Integer wareHouseId) {
-        TbWarehouse storeItem = wareHouseMapper.selectByPrimaryKey(wareHouseId);
+    public TbWarehouse getStoreItemById(Integer warehouseId) {
+        TbWarehouse storeItem = warehouseMapper.selectByPrimaryKey(warehouseId);
         return storeItem;
     }
 
@@ -82,8 +82,8 @@ public class WareHouseService {
     /**
      *
      */
-    public List<TbContractFolder> getFolderItemListByStoreId(Integer wareHouseId) {
-        List<TbContractFolder> contractFolderItemList = contractFolderMapper.findByWareHouseId(wareHouseId);
+    public List<TbContractFolder> getFolderItemListByStoreId(Integer warehouseId) {
+        List<TbContractFolder> contractFolderItemList = contractFolderMapper.findByWarehouseId(warehouseId);
         return contractFolderItemList;
     }
 
