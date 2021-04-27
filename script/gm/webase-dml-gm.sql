@@ -1,6 +1,6 @@
 
 -- ----------------------------
--- 1、init tb_account_info data   admin/Abcd1234 // 国密版 sm3.hash(Abcd123)
+-- 1、init tb_account_info data   admin/password4 // 国密版 sm3.hash(password)
 -- ----------------------------
 INSERT INTO tb_account_info (account,account_pwd,role_id,create_time,modify_time)values('admin', '$2a$10$F/aEB1iEx/FvVh0fMn6L/uyy.PkpTy8Kd9EdbqLGo7Bw7eCivpq.m',100000,now(),now());
 
