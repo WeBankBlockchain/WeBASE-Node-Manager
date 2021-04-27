@@ -23,7 +23,9 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.properties.VersionProperties;
 import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.configapi.entity.ServerInfo;
+import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.service.ConfigService;
+import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,17 +99,12 @@ public class ConfigController {
      */
     @GetMapping(value = "/list")
     public BaseResponse listDockerTag(
-            @RequestParam(value = "type", required = true, defaultValue = "0") int type,
-            @RequestParam(value = "update", required = false) boolean update) throws Exception {
+            @RequestParam(value = "type", defaultValue = "0") int type,
+            @RequestParam(value = "update", required = false) boolean update) {
         log.info("list config, type: [{}], update: [{}]", type, update);
 
-        ConfigTypeEnum configTypeEnum = ConfigTypeEnum.getById(type);
-        if (configTypeEnum == null) {
-            throw new NodeMgrException(ConstantCode.UNKNOWN_CONFIG_TYPE_ERROR);
-        }
-
-        return new BaseResponse(ConstantCode.SUCCESS,
-                configService.selectConfigList(update, configTypeEnum));
+        List<TbConfig> configList = configService.selectConfigList(update, type);
+        return new BaseResponse(ConstantCode.SUCCESS, configList);
     }
 
 }
