@@ -36,5 +36,13 @@ public class ReqProject {
     private Integer frontId;
     @NotNull
     private Integer groupId;
-    private String userAddress;
+    /**
+     * channel ip for exported project to connect node
+     */
+    private String channelIp;
+    /**
+     * select multi user to export in project by p12 format
+     */
+    @NotNull
+    private List<String> userAddressList;
 }

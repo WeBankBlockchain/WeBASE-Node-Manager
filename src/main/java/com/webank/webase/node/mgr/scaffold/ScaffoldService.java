@@ -63,8 +63,7 @@ public class ScaffoldService {
     @Autowired
     private FrontInterfaceService frontInterfaceService;
 
-    // gradle not in package, skip
-    private static final String GRADLE_WRAPPER_DIR = "";
+    private static final String GRADLE_WRAPPER_DIR = "gradle";
 
     private static final String OUTPUT_DIR = "output";
     private static final String ZIP_SUFFIX = ".zip";
@@ -78,8 +77,8 @@ public class ScaffoldService {
         // check dir exist
         File checkProjectDir = new File(OUTPUT_DIR + File.separator + artifactName);
         if (checkProjectDir.exists()) {
-            log.error("exportProject dir exist: {}", artifactName);
-            throw new NodeMgrException(ConstantCode.PROJECT_NAME_ALREADY_EXIST);
+            boolean result = checkProjectDir.delete();
+            log.warn("exportProject dir exist: {}, now delete it result:{}", artifactName, result);
         }
         // get contract info list
         List<Integer> contractIdList = reqProject.getContractIdList();
@@ -101,19 +100,21 @@ public class ScaffoldService {
         // get front's p2p ip and channel port
         FrontNodeConfig frontNodeConfig = frontInterfaceService
             .getNodeConfigFromSpecificFront(front.getFrontIp(), front.getFrontPort());
+        frontNodeConfig.setP2pip(reqProject.getChannelIp());
         log.info("exportProject get frontNodeConfig:{}", frontNodeConfig);
         // get front's sdk key cert
         Map<String, String> sdkMap = certService.getFrontSdkContent(front.getFrontId());
         log.info("exportProject get sdkMap size:{}", sdkMap.size());
         // get user private key if set
-        String hexPrivateKey = "";
-        if (StringUtils.isNotBlank(reqProject.getUserAddress())) {
-            hexPrivateKey = userService.queryUserDetail(reqProject.getGroupId(), reqProject.getUserAddress());
+        List<String> userAddressList = reqProject.getUserAddressList();
+        String hexPrivateKeyListStr = "";
+        if (userAddressList != null && !userAddressList.isEmpty()) {
+            // hexPrivateKeyListStr = this.handleUserList(reqProject.getGroupId(), userAddressList);
+            hexPrivateKeyListStr = userService.queryUserDetail(reqProject.getGroupId(), userAddressList.get(0));
         }
-        log.info("exportProject get hexPrivateKey length:{}", hexPrivateKey.length());
         // generate
         String projectPath = this.generateProject(frontNodeConfig, reqProject.getGroup(), reqProject.getArtifactName(),
-            tbContractList, reqProject.getGroupId(), hexPrivateKey, sdkMap);
+            tbContractList, reqProject.getGroupId(), hexPrivateKeyListStr, sdkMap);
         String zipFileName = artifactName + ZIP_SUFFIX;
         try {
             ZipUtils.generateZipFile(projectPath, OUTPUT_ZIP_DIR, "", zipFileName);
@@ -138,12 +139,12 @@ public class ScaffoldService {
      * @param artifactName
      * @param tbContractList
      * @param groupId
-     * @param hexPrivateKey
+     * @param hexPrivateKeyListStr
      * @param sdkMap
      * @return path string of project
      */
     public String generateProject(FrontNodeConfig nodeConfig, String projectGroup, String artifactName,
-        List<TbContract> tbContractList, int groupId, String hexPrivateKey, Map<String, String> sdkMap) {
+        List<TbContract> tbContractList, int groupId, String hexPrivateKeyListStr, Map<String, String> sdkMap) {
         log.info("generateProject sdkMap size:{}", sdkMap.size());
         List<ContractInfo> contractInfoList = this.handleContractList(tbContractList);
         String frontChannelIpPort = nodeConfig.getP2pip() + ":" + nodeConfig.getChannelPort();
@@ -153,7 +154,7 @@ public class ScaffoldService {
         try {
             projectFactory.buildProjectDir(contractInfoList,
                 projectGroup, artifactName, OUTPUT_DIR, GRADLE_WRAPPER_DIR,
-                frontChannelIpPort, groupId, hexPrivateKey, sdkMap);
+                frontChannelIpPort, groupId, hexPrivateKeyListStr, sdkMap);
         } catch (Exception e) {
             log.error("generateProject error:[]", e);
             throw new NodeMgrException(ConstantCode.GENERATE_CONTRACT_PROJECT_FAIL.attach(e.getMessage()));
@@ -190,5 +191,22 @@ public class ScaffoldService {
         log.info("handleContractList result contractInfoList size:{}", contractInfoList.size());
         log.info("handleContractList contractList:{}", contractInfoList);
         return contractInfoList;
+    }
+
+    /**
+     * userP12PathList
+     * @return: String of list, e.g. 123,123,123
+     */
+    private String handleUserList(int groupId, List<String> userAddressList) {
+        List<String> keyList = new ArrayList<>();
+        for (String address : userAddressList) {
+            String hexPrivateKey = "";
+            if (StringUtils.isNotBlank(address)) {
+                hexPrivateKey = userService.queryUserDetail(groupId, address);
+            }
+            log.info("exportProject get hexPrivateKey length:{}", hexPrivateKey.length());
+            keyList.add(hexPrivateKey);
+        }
+        return StringUtils.join(keyList, ",");
     }
 }

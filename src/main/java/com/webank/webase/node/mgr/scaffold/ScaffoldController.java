@@ -18,6 +18,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.scaffold.entity.ReqProject;
 import com.webank.webase.node.mgr.scaffold.entity.RspFile;
@@ -25,6 +26,7 @@ import java.time.Duration;
 import java.time.Instant;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +50,9 @@ public class ScaffoldController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start exportProjectApi param:{} groupId:{}", startTime.toEpochMilli(),
             param);
+        if (StringUtils.isBlank(param.getChannelIp())) {
+            param.setChannelIp(IPUtil.LOCAL_IP_127);
+        }
         RspFile rspFile = scaffoldService.exportProject(param);
         log.info("end exportProjectApi useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), rspFile);
