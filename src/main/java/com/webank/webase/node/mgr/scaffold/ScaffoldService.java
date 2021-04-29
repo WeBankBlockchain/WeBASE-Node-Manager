@@ -77,7 +77,7 @@ public class ScaffoldService {
         // check dir exist
         File checkProjectDir = new File(OUTPUT_DIR + File.separator + artifactName);
         if (checkProjectDir.exists()) {
-            boolean result = checkProjectDir.delete();
+            boolean result = NodeMgrTools.deleteDir(checkProjectDir);
             log.warn("exportProject dir exist: {}, now delete it result:{}", artifactName, result);
         }
         // get contract info list

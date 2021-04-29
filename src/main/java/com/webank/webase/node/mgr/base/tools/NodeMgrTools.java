@@ -638,7 +638,7 @@ public class NodeMgrTools {
         File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
         // delete old private key
         if (keystorePath.exists()) {
-            keystorePath.delete();
+            deleteDir(keystorePath);
         }
         keystorePath.mkdir();
         // get private key
@@ -665,7 +665,7 @@ public class NodeMgrTools {
         File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
         // delete old private key
         if (keystorePath.exists()) {
-            keystorePath.delete();
+            deleteDir(keystorePath);
         }
         keystorePath.mkdir();
         // get private key
@@ -707,5 +707,25 @@ public class NodeMgrTools {
             }
         }
         return null;
+    }
+
+    /**
+     * delete dir or file whatever
+     * @param dir
+     * @return
+     */
+    public static boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            // recursive delete until dir is emtpy to delete
+            for (int i=0; i<children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        // delete empty dir
+        return dir.delete();
     }
 }
