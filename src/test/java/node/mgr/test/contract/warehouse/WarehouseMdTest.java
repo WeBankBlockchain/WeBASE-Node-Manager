@@ -52,10 +52,13 @@ public class WarehouseMdTest {
         System.out.println("SAFE_MATH_MD:\n" + Base64.getEncoder().encodeToString(SAFE_MATH_MD.getBytes()));
         System.out.println("TABLE_MD:\n" + Base64.getEncoder().encodeToString(TABLE_MD.getBytes()));
         System.out.println("ROLES_MD:\n" + Base64.getEncoder().encodeToString(ROLES_MD.getBytes()));
-
-        System.out.println("EVIDENCE_MD:\n" + Base64.getEncoder().encodeToString(EVIDENCE_MD.getBytes()));
-        System.out.println("BAC001_MD:\n" + Base64.getEncoder().encodeToString(BAC001_MD.getBytes()));
     }
+
+    @Test
+    public void testEvidenceMdToBase64() {
+        System.out.println("EVIDENCE_MD:\n" + Base64.getEncoder().encodeToString(EVIDENCE_MD.getBytes()));
+    }
+
 
     public static final String EVIDENCE_MD = "# Evidence 合约\n" +
         "\n" +
@@ -63,6 +66,15 @@ public class WarehouseMdTest {
         "Evidence 示例合约，使用分层的智能合约结构： \n" +
         "1）工厂合约（EvidenceSignersData.sol），由存证各方事前约定，存储存证生效条件，并管理存证的生成。  \n" +
         "2）存证合约（Evidence.sol），由工厂合约生成，存储存证id，hash和各方签名（每张存证一个合约）。  ";
+
+    @Test
+    public void testBACMdToBase64() {
+        System.out.println("ADDRESS_MD:\n" + Base64.getEncoder().encodeToString(ADDRESS_MD.getBytes()));
+        System.out.println("SAFE_MATH_MD:\n" + Base64.getEncoder().encodeToString(SAFE_MATH_MD.getBytes()));
+        System.out.println("ROLES_MD:\n" + Base64.getEncoder().encodeToString(ROLES_MD.getBytes()));
+        System.out.println("BAC001_MD:\n" + Base64.getEncoder().encodeToString(BAC001_MD.getBytes()));
+    }
+
     public static final String BAC001_MD = "# 积分合约\n" +
         "\n" +
         "## 简介\n" +
