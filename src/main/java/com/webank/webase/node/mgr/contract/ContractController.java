@@ -438,9 +438,13 @@ public class ContractController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req,
         BindingResult result) {
-        log.info("copyContracts start. req:{}", JsonTools.toJSONString(req));
+        Instant startTime = Instant.now();
+        log.info("copyContracts start. startTime:{}  req:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(req));
         checkBindResult(result);
         contractService.copyContracts(req);
+        log.info("end copyContracts. useTime:{}",
+            Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS, req.getContractItems().size());
     }
 }
