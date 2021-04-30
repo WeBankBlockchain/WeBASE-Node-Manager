@@ -182,9 +182,11 @@ public class ScaffoldService {
             contractInfo.setContractAddress(contractAddress);
             contractInfo.setAbiStr(contractAbi);
             if (cryptoSuite.getCryptoTypeConfig() == CryptoType.SM_TYPE) {
+                contractInfo.setBinStr("");
                 contractInfo.setSmBinStr(bytecodeBin);
             } else {
                 contractInfo.setBinStr(bytecodeBin);
+                contractInfo.setSmBinStr("");
             }
             contractInfoList.add(contractInfo);
         }
