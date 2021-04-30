@@ -160,7 +160,7 @@ INSERT INTO `tb_warehouse` (`id`, `warehouse_name`, `warehouse_name_en`, `type`,
 INSERT INTO `tb_warehouse` (`id`, `warehouse_name`, `warehouse_name_en`, `type`, `warehouse_icon`, `description`, `description_en`, `warehouse_detail`, `warehouse_detail_en`, `create_time`, `modify_time`) VALUES
 (3, '积分应用', 'Points', 3, 'pointsId', '一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能', 'Points Contract suite', '一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能', 'Points Contract suite', now(), now());
 INSERT INTO `tb_warehouse` (`id`, `warehouse_name`, `warehouse_name_en`, `type`, `warehouse_icon`, `description`, `description_en`, `warehouse_detail`, `warehouse_detail_en`, `create_time`, `modify_time`) VALUES
-(4, 'SmartDev应用', 'Smart_Dev Template', 4, 'smartDevId', 'Smart-Dev-Contracts仓库中的应用模板', 'Smart-Dev-Contract\'s Contract suite of business_template', 'Smart-Dev-Contracts仓库中的应用模板', 'Smart-Dev-Contract\'s Contract suite of business_template', now(), now());
+(4, 'SmartDev存证应用', 'Smart_Dev_Evidence', 4, 'evidenceId', 'Smart-Dev-Contracts仓库中的存证应用模板', 'Smart-Dev-Contract\'s Evidence Contract suite of business_template', 'Smart-Dev-Contracts仓库中的存证应用模板', 'Smart-Dev-Contract\'s Evidence Contract suite of business_template', now(), now());
 -- folder
 INSERT INTO `tb_contract_folder` (`id`, `warehouse_id`, `folder_name`, `description`, `description_en`, `folder_detail`, `folder_detail_en`, `create_time`, `modify_time`) VALUES
 (1, 1, 'Tools', '工具箱中有常用的工具合约', 'Toolbox Contract suite', '工具箱中有常用的工具合约', 'Toolbox Contract suite', now(), now());
