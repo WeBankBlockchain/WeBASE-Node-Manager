@@ -443,8 +443,7 @@ public class ContractController extends BaseController {
             JsonTools.toJSONString(req));
         checkBindResult(result);
         contractService.copyContracts(req);
-        log.info("end copyContracts. useTime:{}",
-            Duration.between(startTime, Instant.now()).toMillis());
+        log.info("end copyContracts. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS, req.getContractItems().size());
     }
 }

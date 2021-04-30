@@ -16,9 +16,12 @@ package com.webank.webase.node.mgr.contract.warehouse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractFolder;
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractItem;
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbWarehouse;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,11 +48,13 @@ public class WarehouseController extends BaseController {
      * query the list of contract store item
      */
     @GetMapping(value = "/list")
-    public BaseResponse getContractStoreList() {
-
+    public BaseResponse listContractStore() {
+        Instant startTime = Instant.now();
+        log.info("listContractStore start. startTime:{}", startTime.toEpochMilli());
         List<TbWarehouse>  storeItemList = warehouseService.getStoreList();
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(storeItemList);
+        log.info("end listContractStore. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return response;
     }
 
@@ -58,10 +63,13 @@ public class WarehouseController extends BaseController {
      */
     @GetMapping(value = "")
     public BaseResponse getContractStoreById(@RequestParam("warehouseId") Integer warehouseId) {
-        log.info("getContractStoreById start. warehouseId:{}", warehouseId);
+        Instant startTime = Instant.now();
+        log.info("getContractStoreById start. startTime:{}  warehouseId:{}", startTime.toEpochMilli(),
+            warehouseId);
         TbWarehouse storeItem = warehouseService.getStoreItemById(warehouseId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(storeItem);
+        log.info("end getContractStoreById. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return response;
     }
 
@@ -70,10 +78,13 @@ public class WarehouseController extends BaseController {
      */
     @GetMapping(value = "/folder")
     public BaseResponse getContractFolderById(@RequestParam("folderId") Integer folderId) {
-        log.info("getContractStoreById start. folderId:{}", folderId);
+        Instant startTime = Instant.now();
+        log.info("getContractFolderById start. startTime:{}  folderId:{}", startTime.toEpochMilli(),
+            folderId);
         TbContractFolder contractFolderItem = warehouseService.getContractFolderById(folderId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(contractFolderItem);
+        log.info("end getContractFolderById. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return response;
     }
 
@@ -82,10 +93,13 @@ public class WarehouseController extends BaseController {
      */
     @GetMapping(value = "/item")
     public BaseResponse getContractItemById(@RequestParam("contractId") Integer contractId) {
-        log.info("getContractStoreById start. contractId:{}", contractId);
+        Instant startTime = Instant.now();
+        log.info("getContractItemById start. startTime:{}  contractId:{}", startTime.toEpochMilli(),
+            contractId);
         TbContractItem contractItem = warehouseService.getContractItemById(contractId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(contractItem);
+        log.info("end getContractItemById. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return response;
     }
 
@@ -93,11 +107,14 @@ public class WarehouseController extends BaseController {
      * get folderItemList by warehouseId
      */
     @GetMapping(value = "/folder/list")
-    public BaseResponse getFolderItemListByStoreId(@RequestParam("warehouseId") Integer warehouseId) {
-        log.info("getFolderItemListByStoreId start. warehouseId:{}", warehouseId);
+    public BaseResponse listFolderItemByStoreId(@RequestParam("warehouseId") Integer warehouseId) {
+        Instant startTime = Instant.now();
+        log.info("listFolderItemByStoreId start. startTime:{}  warehouseId:{}", startTime.toEpochMilli(),
+            warehouseId);
         List<TbContractFolder> contractFolderItemList = warehouseService.getFolderItemListByStoreId(warehouseId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(contractFolderItemList);
+        log.info("end listFolderItemByStoreId. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return response;
     }
 
@@ -105,11 +122,14 @@ public class WarehouseController extends BaseController {
      * get contractItemList by folderId
      */
     @GetMapping(value = "/item/list")
-    public BaseResponse getContractItemByFolderId(@RequestParam("folderId") Integer folderId) {
-        log.info("getContractItemByFolderId start. warehouseId:{}", folderId);
+    public BaseResponse listContractItemByFolderId(@RequestParam("folderId") Integer folderId) {
+        Instant startTime = Instant.now();
+        log.info("listContractItemByFolderId start. startTime:{}  folderId:{}", startTime.toEpochMilli(),
+            folderId);
         List<TbContractItem> contractItemList = warehouseService.getContractItemByFolderId(folderId);
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         response.setData(contractItemList);
+        log.info("end listContractItemByFolderId. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return response;
     }
 }
