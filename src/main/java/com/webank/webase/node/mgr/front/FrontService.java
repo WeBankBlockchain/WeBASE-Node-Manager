@@ -91,6 +91,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
@@ -197,14 +198,19 @@ public class FrontService {
                     log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
                 }
                 // get node config(add in 1.5.0)
+                // p2p/rpc/channel port etc.
                 FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+                // get agency of node
+                NodeInfo nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
                 tbFront.setP2pPort(nodeConfig.getP2pport());
                 tbFront.setJsonrpcPort(nodeConfig.getRpcport());
                 tbFront.setChannelPort(nodeConfig.getChannelPort());
-                //copy attribute
+                // copy attribute
                 tbFront.setNodeId(syncStatus.getNodeId());
                 tbFront.setClientVersion(clientVersion);
                 tbFront.setSupportVersion(supportVersion);
+                // set agency from chain
+                tbFront.setAgency(nodeInfo.getNodeInfo().getAgency());
                 //update front info
                 frontMapper.updateBasicInfo(tbFront);
                 // save group info
