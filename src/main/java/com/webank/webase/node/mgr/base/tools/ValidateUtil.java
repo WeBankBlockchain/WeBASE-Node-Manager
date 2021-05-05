@@ -25,6 +25,8 @@ public class ValidateUtil {
     public static final String IP_PATTERN =
             "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
 
+    public static final String DOMAIN_PATTERN = "^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$";
+
     public static final String AGENCY_NAME_PATTERN = "^[0-9a-zA-Z_]+$";
 
     /**
