@@ -130,7 +130,6 @@ public class DeployController extends BaseController {
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        deploy.setWebaseSignAddr(constantProperties.getWebaseSignAddress());
         log.info("Start configChainAndHost:[{}], start:[{}]", JsonTools.toJSONString(deploy), startTime);
 
         try {
