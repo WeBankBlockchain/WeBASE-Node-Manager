@@ -17,7 +17,7 @@ import org.apache.ibatis.type.JdbcType;
 public interface TbContractItemMapper {
 
     @Select({ "select", TbContractItemSqlProvider.ALL_COLUMN_FIELDS, "from tb_contract_item",
-        "where contract_folder_id = #{contractFolderId}" })
+        "where contract_folder_id = #{contractFolderId}  order by id asc" })
     List<TbContractItem> listByFolderId(@Param("contractFolderId") Integer contractFolderId);
 
     /**

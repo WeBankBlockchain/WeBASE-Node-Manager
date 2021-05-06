@@ -20,7 +20,7 @@ import org.apache.ibatis.type.JdbcType;
 public interface TbContractFolderMapper {
 
     @Select({ "select", TbContractFolderSqlProvider.ALL_COLUMN_FIELDS, "from tb_contract_folder",
-        "where warehouse_id = #{warehouseId}" })
+        "where warehouse_id = #{warehouseId} order by id asc" })
     List<TbContractFolder> findByWarehouseId(@Param("warehouseId") Integer warehouseId);
 
     /**
