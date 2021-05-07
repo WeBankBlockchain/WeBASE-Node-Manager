@@ -318,6 +318,22 @@ public class UserService {
         return user;
     }
 
+    public String queryUserDetail(int groupId, String userAddress) throws NodeMgrException {
+        // query sign user id
+        String signUserId = getSignUserIdByAddress(groupId, userAddress);
+        // get key from sign
+        KeyPair keyPair = this.getUserKeyPairFromSign(groupId, signUserId);
+        // decode key
+        String privateKeyRaw = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
+        return privateKeyRaw;
+    }
+
+    /**
+     * return key pair with private key encoded in base64
+     * @param groupId
+     * @param signUserId
+     * @return the private key of KeyPair is encoded in base64
+     */
     private KeyPair getUserKeyPairFromSign(int groupId, String signUserId) {
         Map<String, String> param = new HashMap<>();
         param.put("signUserId", signUserId);

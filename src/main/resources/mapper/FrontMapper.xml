@@ -68,6 +68,7 @@
         p2p_port = #{p2pPort},
         jsonrpc_port = #{jsonrpcPort},
         channel_port = #{channelPort},
+        agency = #{agency},
         modify_time = now()
     where front_id = #{frontId}
   </update>

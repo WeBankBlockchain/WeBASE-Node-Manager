@@ -108,7 +108,7 @@ public class HostService {
         log.info("check host ip accessible:{}", ip);
         ansibleService.execPing(ip);
         // check 127.0.0.1
-        this.validateHostLocalIp(ip);
+        this.validateAllLocalhostOrNot(ip);
 
         log.info("check host root dir accessible:{}", rootDir);
         ExecuteResult execResult = ansibleService.execCreateDir(ip, rootDir);
@@ -843,6 +843,7 @@ public class HostService {
      * if 127.0.0.1 was added first, then check
      * @param ip
      */
+    @Deprecated
     private void validateHostLocalIp(String ip) {
         if (IPUtil.isLocal(ip)) {
             // if ip is 127.0.0.1, check all other host ip
@@ -874,4 +875,36 @@ public class HostService {
         }
     }
 
+    /**
+     * @case: if 127.0.0.1 added, cannot add other ip, only 127.0.0.1 support
+     * @case: if other ip added, cannot add 127.0.0.1
+     */
+    private void validateAllLocalhostOrNot(String ip) {
+        log.info("check validateAllLocalhostOrNot ip:{}",ip);
+        if (IPUtil.isLocal(ip)) {
+            // if ip is 127.0.0.1, check all other host ip
+            List<TbHost> hostList = tbHostMapper.selectAll();
+            // 127.0.0.1 is the first host, pass
+            if (hostList == null || hostList.isEmpty()) {
+                log.info("host list empty, skip check local");
+                return;
+            } else {
+                // if already exist others ip, not pass
+                log.error("validateAllLocalhostOrNot already exist common ip, cannot add 127.0.0.1");
+                throw new NodeMgrException(ConstantCode.HOST_ONLY_ALL_LOCALHOST_OR_NOT_LOCALHOST);
+            }
+        } else {
+            // check whether 127.0.0.1 in tb_host
+            TbHost hostOfLocalIp = tbHostMapper.getByIp(IPUtil.LOCAL_IP_127);
+            if (hostOfLocalIp == null) {
+                log.info("host of 127.0.0.1 not in tb_host, skip check local");
+                return;
+            } else {
+                // if already exist local ip, not pass
+                log.error("validateAllLocalhostOrNot already exist localhost ip, cannot add common ip");
+                throw new NodeMgrException(ConstantCode.HOST_ONLY_ALL_LOCALHOST_OR_NOT_LOCALHOST);
+            }
+
+        }
+    }
 }

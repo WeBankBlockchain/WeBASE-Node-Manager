@@ -28,6 +28,7 @@ import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
 import com.webank.webase.node.mgr.contract.entity.QueryCnsParam;
 import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
+import com.webank.webase.node.mgr.contract.entity.ReqCopyContracts;
 import com.webank.webase.node.mgr.contract.entity.ReqListContract;
 import com.webank.webase.node.mgr.contract.entity.ReqQueryCns;
 import com.webank.webase.node.mgr.contract.entity.ReqQueryCnsList;
@@ -82,8 +83,7 @@ public class ContractController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start saveContract startTime:{} contract:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(contract));
-
-        // default path /
+        // default path "/"
         if ("".equals(contract.getContractPath())) {
             contract.setContractPath("/");
         }
@@ -432,5 +432,18 @@ public class ContractController extends BaseController {
         log.info("end findCnsList. useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return pagesponse;
+    }
+
+    @PostMapping(value = "/copy")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req,
+        BindingResult result) {
+        Instant startTime = Instant.now();
+        log.info("copyContracts start. startTime:{}  req:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(req));
+        checkBindResult(result);
+        contractService.copyContracts(req);
+        log.info("end copyContracts. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return new BaseResponse(ConstantCode.SUCCESS, req.getContractItems().size());
     }
 }

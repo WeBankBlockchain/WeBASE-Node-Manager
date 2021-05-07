@@ -1,20 +1,23 @@
 /**
- * Copyright 2014-2021  the original author or authors.
- *
+ * Copyright 2014-2020 the original author or authors.
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package node.mgr.test.front;
+
+package node.mgr.test.scaffold;
 
 import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.front.entity.FrontInfo;
+import com.webank.webase.node.mgr.node.NodeService;
+import com.webank.webase.node.mgr.scaffold.entity.ReqProject;
+import java.util.Collections;
 import node.mgr.test.base.TestBase;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,10 +31,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-/**
- * test front controller
- */
-public class FrontControllerTest extends TestBase {
+public class ScaffoldControllerTest extends TestBase {
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -43,40 +44,21 @@ public class FrontControllerTest extends TestBase {
     }
 
     @Test
-    public void testNewFront() throws Exception {
-        FrontInfo param = new FrontInfo();
-        param.setFrontIp("localhost");
-        param.setFrontPort(8081);
-        param.setAgency("1fe");
-
+    public void testExportProject() throws Exception {
+        ReqProject param = new ReqProject();
+        param.setArtifactName("demo");
+        param.setGroup("org.webank");
+        param.setContractIdList(Collections.singletonList(1));
+        param.setFrontId(1);
+        param.setGroupId(1);
         ResultActions resultActions = mockMvc.perform(
-            MockMvcRequestBuilders.post( "/front/new").
-            content(JsonTools.toJSONString(param)).
-            contentType(MediaType.APPLICATION_JSON_UTF8)
+            MockMvcRequestBuilders.post( "/scaffold/export").
+                content(JsonTools.toJSONString(param)).
+                contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
-            andExpect(MockMvcResultMatchers.status().isOk()).
+//            andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
         System.out.println("response:"+resultActions.andReturn().getResponse().getContentAsString());
     }
-
-    @Test
-    public void testQueryFrontList() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/front/find?frontId="));
-        resultActions.
-            andExpect(MockMvcResultMatchers.status().isOk()).
-            andDo(MockMvcResultHandlers.print());
-        System.out.println("response:"+resultActions.andReturn().getResponse().getContentAsString());
-    }
-
-    @Test
-    public void testRemoveFront() throws Exception {
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete("/front/500025"));
-        resultActions.
-            andExpect(MockMvcResultMatchers.status().isOk()).
-            andDo(MockMvcResultHandlers.print());
-        System.out.println("response:"+resultActions.andReturn().getResponse().getContentAsString());
-    }
-
-
 }

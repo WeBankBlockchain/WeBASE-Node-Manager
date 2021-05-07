@@ -252,6 +252,7 @@ public class ConstantCode {
     public static final RetCode IMAGE_NOT_EXISTS_ON_HOST = RetCode.mark(202466, "Image not exists on host.");
     public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(202467, "Max 4 nodes on a same host.");
     public static final RetCode SAME_HOST_ERROR = RetCode.mark(202468, "Host of WeBASE-Node-Manager's ip is already existed.");
+    public static final RetCode HOST_ONLY_ALL_LOCALHOST_OR_NOT_LOCALHOST = RetCode.mark(202469, "Host must be all localhost(127.0.0.1) or all non-localhost");
     // add in 1.4.3
     public static final RetCode EXEC_DOCKER_CHECK_SCRIPT_ERROR = RetCode.mark(202469, "Check docker installed and running of host");
     public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM = RetCode.mark(202470, "Check host memory not enough for nodes(s)");
@@ -310,6 +311,11 @@ public class ConstantCode {
     public static final RetCode TIMESTAMP_TIMEOUT = RetCode.mark(202524, "timestamp timeout");
     public static final RetCode APPKEY_NOT_EXISTS = RetCode.mark(202525, "app key not exists");
     public static final RetCode SIGNATURE_NOT_MATCH = RetCode.mark(202526, "signature not match");
+
+    // add in v1.5.1
+    public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(202531, "generate project failed in scaffold");
+    public static final RetCode GET_FRONT_SDK_MAP_FAIL = RetCode.mark(202532, "get sdk cert/key content map failed");
+
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
