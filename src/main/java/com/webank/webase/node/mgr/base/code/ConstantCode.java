@@ -252,6 +252,7 @@ public class ConstantCode {
     public static final RetCode IMAGE_NOT_EXISTS_ON_HOST = RetCode.mark(202466, "Image not exists on host.");
     public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(202467, "Max 4 nodes on a same host.");
     public static final RetCode SAME_HOST_ERROR = RetCode.mark(202468, "Host of WeBASE-Node-Manager's ip is already existed.");
+    public static final RetCode HOST_ONLY_ALL_LOCALHOST_OR_NOT_LOCALHOST = RetCode.mark(202469, "Host must be all localhost(127.0.0.1) or all non-localhost");
     // add in 1.4.3
     public static final RetCode EXEC_DOCKER_CHECK_SCRIPT_ERROR = RetCode.mark(202469, "Check docker installed and running of host");
     public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM = RetCode.mark(202470, "Check host memory not enough for nodes(s)");
