@@ -44,7 +44,7 @@ import lombok.extern.log4j.Log4j2;
 public class ValidateCodeFilter implements Filter {
     @Autowired
     private TokenService tokenService;
-    @Autowired
+    
     private static final String LOGIN_URI = "/account/login";
     private static final String LOGIN_METHOD = "post";
 

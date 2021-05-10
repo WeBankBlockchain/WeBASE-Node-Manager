@@ -15,17 +15,12 @@
  */
 package com.webank.webase.node.mgr.role;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,8 +37,6 @@ public class RoleController {
 
     @Autowired
     private RoleService roleService;
-    @Autowired
-    private ConstantProperties constantProperties;
 
     /**
      * query role list.
@@ -55,30 +48,14 @@ public class RoleController {
         @RequestParam(value = "roleId", required = false) Integer roleId,
         @RequestParam(value = "roleName", required = false) String roleName)
         throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info(
             "start queryRoleList.  startTime:{} pageNumber:{} pageSize:{} roleId:{} roleName:{}",
             startTime.toEpochMilli(),
             pageNumber, pageSize, roleId, roleName);
 
-        // param
-        Integer realPageSize = Optional.ofNullable(pageSize).orElse(5);
-        Integer start = Optional.ofNullable(pageNumber)
-            .map(page -> (page - 1) * realPageSize).orElse(0);
-        List<Integer> roleIdListNotIn = new ArrayList<>();
-        if (!constantProperties.isDeveloperModeEnable()) {
-            roleIdListNotIn.add(RoleType.DEVELOPER.getValue());
-        }
-        RoleListParam param = new RoleListParam(start, realPageSize, roleId, roleName, roleIdListNotIn);
-
         // query
-        int count = roleService.countOfRole(param);
-        if (count > 0) {
-            List<TbRole> listOfRole = roleService.listOfRole(param);
-            pagesponse.setData(listOfRole);
-            pagesponse.setTotalCount(count);
-        }
+        BasePageResponse pagesponse = roleService.queryRoleList(pageNumber, pageSize, roleId, roleName);
 
         log.info("end queryRoleList useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),

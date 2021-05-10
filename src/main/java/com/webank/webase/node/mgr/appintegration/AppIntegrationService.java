@@ -19,8 +19,8 @@ import com.webank.webase.node.mgr.appintegration.entity.AppInfoParam;
 import com.webank.webase.node.mgr.appintegration.entity.AppRegisterInfo;
 import com.webank.webase.node.mgr.appintegration.entity.TbAppInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.AppStatus;
 import com.webank.webase.node.mgr.base.enums.AppType;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.ValidateUtil;
@@ -84,6 +84,7 @@ public class AppIntegrationService {
         BeanUtils.copyProperties(appAddInfo, tbAppInfo);
         tbAppInfo.setAppKey(appKey);
         tbAppInfo.setAppSecret(appSecret);
+        tbAppInfo.setAppStatus(AppStatus.UNREGISTER.getValue());
         Integer affectRow = appInfoMapper.addAppInfo(tbAppInfo);
         if (affectRow == 0) {
             log.warn("affect 0 rows of tb_app_info");
@@ -133,7 +134,7 @@ public class AppIntegrationService {
         }
         // update
         TbAppInfo tbAppInfo = queryAppInfoByAppKey(appKey);
-        tbAppInfo.setAppStatus(DataStatus.NORMAL.getValue());
+        tbAppInfo.setAppStatus(AppStatus.NORMAL.getValue());
         BeanUtils.copyProperties(appRegisterInfo, tbAppInfo);
         updateAppInfo(tbAppInfo);
     }
@@ -147,12 +148,15 @@ public class AppIntegrationService {
         param.setAppType(AppType.NEW.getValue());
         List<TbAppInfo> listOfAppInfo = listOfAppInfo(param);
         for (TbAppInfo tbAppInfo : listOfAppInfo) {
-            Integer appStatus = DataStatus.NORMAL.getValue();
+            if (tbAppInfo.getAppStatus().intValue() == AppStatus.UNREGISTER.getValue()) {
+                continue;
+            }
+            Integer appStatus = AppStatus.NORMAL.getValue();
             try {
                 NodeMgrTools.checkServerConnect(tbAppInfo.getAppIp(), tbAppInfo.getAppPort());
             } catch (Exception e) {
                 log.debug("appKey:{} status is invalid", tbAppInfo.getAppKey());
-                appStatus = DataStatus.INVALID.getValue();
+                appStatus = AppStatus.INVALID.getValue();
             }
             updateAppInfo(new TbAppInfo(tbAppInfo.getId(), appStatus));
         }

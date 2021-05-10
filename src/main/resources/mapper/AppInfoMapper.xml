@@ -37,8 +37,8 @@
   </resultMap>
 
   <insert id="addAppInfo" parameterType="com.webank.webase.node.mgr.appintegration.entity.TbAppInfo">
-    INSERT INTO tb_app_info(app_name,app_key,app_secret,app_doc_link,app_icon,app_desc,app_detail,create_time,modify_time)
-    VALUES (#{appName},#{appKey},#{appSecret},#{appDocLink},#{appIcon},#{appDesc},#{appDetail},now(),now())
+    INSERT INTO tb_app_info(app_name,app_key,app_secret,app_doc_link,app_icon,app_desc,app_status,app_detail,create_time,modify_time)
+    VALUES (#{appName},#{appKey},#{appSecret},#{appDocLink},#{appIcon},#{appDesc},#{appStatus},#{appDetail},now(),now())
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
