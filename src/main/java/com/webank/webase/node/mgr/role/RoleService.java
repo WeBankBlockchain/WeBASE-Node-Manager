@@ -42,7 +42,7 @@ public class RoleService {
     
     public BasePageResponse queryRoleList(Integer pageNumber, Integer pageSize, Integer roleId,
             String roleName) throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
 
         // param
         Integer realPageSize = Optional.ofNullable(pageSize).orElse(10);
@@ -59,11 +59,11 @@ public class RoleService {
         int count = countOfRole(param);
         if (count > 0) {
             List<TbRole> listOfRole = listOfRole(param);
-            pagesponse.setData(listOfRole);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfRole);
+            pageResponse.setTotalCount(count);
         }
 
-        return pagesponse;
+        return pageResponse;
     }
 
     /**

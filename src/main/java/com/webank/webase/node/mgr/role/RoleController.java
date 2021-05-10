@@ -55,11 +55,11 @@ public class RoleController {
             pageNumber, pageSize, roleId, roleName);
 
         // query
-        BasePageResponse pagesponse = roleService.queryRoleList(pageNumber, pageSize, roleId, roleName);
+        BasePageResponse pageResponse = roleService.queryRoleList(pageNumber, pageSize, roleId, roleName);
 
         log.info("end queryRoleList useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
-            JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+            JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 }

@@ -162,7 +162,7 @@ public class AccountController extends BaseController {
     public BasePageResponse queryAccountList(@PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{}",
             startTime.toEpochMilli(), pageNumber, pageSize);
@@ -175,13 +175,13 @@ public class AccountController extends BaseController {
                 SqlSortType.DESC.getValue());
             List<TbAccountInfo> listOfAccount = accountService.listOfAccount(param);
             listOfAccount.stream().forEach(accountData -> accountData.setAccountPwd(null));
-            pagesponse.setData(listOfAccount);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfAccount);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end queryAccountList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
