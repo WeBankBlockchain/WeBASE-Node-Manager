@@ -284,7 +284,10 @@ public class FrontService {
         tbFront.setP2pPort(nodeConfig.getP2pport());
         tbFront.setJsonrpcPort(nodeConfig.getRpcport());
         tbFront.setChannelPort(nodeConfig.getChannelPort());
-
+        // get agency of node
+        NodeInfo nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
+        log.info("front's agency is :{}", nodeInfo.getNodeInfo());
+        tbFront.setAgency(nodeInfo.getNodeInfo().getAgency());
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
