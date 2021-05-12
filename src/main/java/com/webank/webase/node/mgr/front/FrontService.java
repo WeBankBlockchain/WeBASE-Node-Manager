@@ -235,6 +235,8 @@ public class FrontService {
         // set default chainId
         tbFront.setChainId(0);
         tbFront.setChainName("default");
+        // default normal front
+        tbFront.setStatus(DataStatus.NORMAL.getValue());
 
         String frontIp = frontInfo.getFrontIp();
         Integer frontPort = frontInfo.getFrontPort();
