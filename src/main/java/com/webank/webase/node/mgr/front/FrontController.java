@@ -93,7 +93,7 @@ public class FrontController extends BaseController {
         @RequestParam(value = "groupId", required = false) Integer groupId,
         @RequestParam(value = "frontStatus", required = false) Integer frontStatus)
         throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryFrontList startTime:{} frontId:{} groupId:{},frontStatus:{}",
             startTime.toEpochMilli(), frontId, groupId, frontStatus);
@@ -106,15 +106,15 @@ public class FrontController extends BaseController {
 
         //query front info
         int count = frontService.getFrontCount(param);
-        pagesponse.setTotalCount(count);
+        pageResponse.setTotalCount(count);
         if (count > 0) {
             List<TbFront> list = frontService.getFrontList(param);
-            pagesponse.setData(list);
+            pageResponse.setData(list);
         }
 
         log.info("end queryFrontList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**

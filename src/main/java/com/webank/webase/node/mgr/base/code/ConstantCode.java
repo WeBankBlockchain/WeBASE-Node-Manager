@@ -311,6 +311,9 @@ public class ConstantCode {
     public static final RetCode TIMESTAMP_TIMEOUT = RetCode.mark(202524, "timestamp timeout");
     public static final RetCode APPKEY_NOT_EXISTS = RetCode.mark(202525, "app key not exists");
     public static final RetCode SIGNATURE_NOT_MATCH = RetCode.mark(202526, "signature not match");
+    public static final RetCode REQUEST_ENCRYPT_FAIL = RetCode.mark(202527, "request encrypt fail");
+    public static final RetCode REQUEST_DECRYPT_FAIL = RetCode.mark(202528, "request decrypt fail");
+    public static final RetCode ENCRYPT_NOT_MATCH = RetCode.mark(202529, "isTransferEncrypt config not match");
 
     // add in v1.5.1
     public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(202531, "generate project failed in scaffold");

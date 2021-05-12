@@ -111,7 +111,7 @@ public class GroupController extends BaseController {
      */
     @GetMapping("/all")
     public BasePageResponse getAllGroup() throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start getAllGroup startTime:{}", startTime.toEpochMilli());
 
@@ -119,8 +119,8 @@ public class GroupController extends BaseController {
         int count = groupService.countOfGroup(null, GroupStatus.NORMAL.getValue());
         if (count > 0) {
             List<TbGroup> groupList = groupService.getGroupList(GroupStatus.NORMAL.getValue());
-            pagesponse.setTotalCount(count);
-            pagesponse.setData(groupList);
+            pageResponse.setTotalCount(count);
+            pageResponse.setData(groupList);
         }
 
         // reset group
@@ -128,8 +128,8 @@ public class GroupController extends BaseController {
 
         log.info("end getAllGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
@@ -143,7 +143,7 @@ public class GroupController extends BaseController {
             "/all/invalidIncluded"})
     public BasePageResponse getAllGroupIncludeInvalidGroup(@PathVariable(value = "pageNumber",required = false) Integer pageNumber,
                                                            @PathVariable(value = "pageSize", required = false) Integer pageSize) throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start getAllGroupIncludeInvalidGroup startTime:{}", startTime.toEpochMilli());
 
@@ -152,12 +152,12 @@ public class GroupController extends BaseController {
         if (count > 0) {
             List<TbGroup> groupList = groupService.getGroupList(null);
             if (pageNumber == null && pageSize == null) {
-                pagesponse.setData(groupList);
-                pagesponse.setTotalCount(count);
+                pageResponse.setData(groupList);
+                pageResponse.setTotalCount(count);
             } else {
                 List2Page list2Page = new List2Page(groupList, pageSize, pageNumber);
-                pagesponse.setData(list2Page.getPagedList());
-                pagesponse.setTotalCount(count);
+                pageResponse.setData(list2Page.getPagedList());
+                pageResponse.setTotalCount(count);
             }
         }
         // reset group
@@ -165,8 +165,8 @@ public class GroupController extends BaseController {
 
         log.info("end getAllGroupIncludeInvalidGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     @GetMapping("/all/{groupStatus}")
@@ -200,18 +200,18 @@ public class GroupController extends BaseController {
      */
     @GetMapping("/transDaily/{groupId}")
     public BaseResponse getTransDaily(@PathVariable("groupId") Integer groupId) throws Exception {
-        BaseResponse pagesponse = new BaseResponse(ConstantCode.SUCCESS);
+        BaseResponse pageResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start getTransDaily startTime:{} groupId:{}", startTime.toEpochMilli(), groupId);
 
         // query trans daily
         List<SeventDaysTrans> listTrans = transDailyService.listSeventDayOfTrans(groupId);
-        pagesponse.setData(listTrans);
+        pageResponse.setData(listTrans);
 
         log.info("end getAllGroup useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**

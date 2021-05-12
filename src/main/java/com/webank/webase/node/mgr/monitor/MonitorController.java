@@ -115,7 +115,7 @@ public class MonitorController {
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "userName", required = false) String userName)
         throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info(
             "start unusualUserList startTime:{} groupId:{} pageNumber:{} pageSize:{}"
@@ -127,13 +127,13 @@ public class MonitorController {
         if (count != null && count > 0) {
             List<UnusualUserInfo> listOfUnusualUser = monitorService
                 .queryUnusualUserList(groupId, userName, pageNumber, pageSize);
-            pagesponse.setData(listOfUnusualUser);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfUnusualUser);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end unusualUserList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
@@ -145,7 +145,7 @@ public class MonitorController {
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "contractAddress", required = false) String contractAddress)
         throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info(
             "start unusualContractList startTime:{} groupId:{} pageNumber:{}"
@@ -157,12 +157,12 @@ public class MonitorController {
         if (count != null && count > 0) {
             List<UnusualContractInfo> listOfUnusualContract = monitorService
                 .queryUnusualContractList(groupId, contractAddress, pageNumber, pageSize);
-            pagesponse.setData(listOfUnusualContract);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfUnusualContract);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end unusualContractList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 }
