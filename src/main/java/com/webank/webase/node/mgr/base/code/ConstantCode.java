@@ -244,7 +244,7 @@ public class ConstantCode {
     public static final RetCode GENERATE_FRONT_YML_ERROR = RetCode.mark(202458, "Generate front application.yml file failed.");
     public static final RetCode EXEC_HOST_INIT_SCRIPT_ERROR = RetCode.mark(202459, "Exec host init script failed.");
     public static final RetCode TRANSFER_FILES_ERROR = RetCode.mark(202460, "Transfer files error.");
-    public static final RetCode DOCKER_OPERATION_ERROR = RetCode.mark(202461, "Docker option error.");
+    public static final RetCode HOST_ONLY_ALL_LOCALHOST_OR_NOT_LOCALHOST = RetCode.mark(202461, "Host must be all localhost(127.0.0.1) or all non-localhost");
     public static final RetCode TWO_NODES_AT_LEAST = RetCode.mark(202462, "Two nodes at least.");
     public static final RetCode TWO_SEALER_IN_GROUP_AT_LEAST = RetCode.mark(202463, "Group need two sealers at least.");
     public static final RetCode WEBASE_SIGN_CONFIG_ERROR = RetCode.mark(202464, "Please check webaseSignAddress in application.yml file.");
@@ -252,7 +252,6 @@ public class ConstantCode {
     public static final RetCode IMAGE_NOT_EXISTS_ON_HOST = RetCode.mark(202466, "Image not exists on host.");
     public static final RetCode NODES_NUM_EXCEED_MAX_ERROR = RetCode.mark(202467, "Max 4 nodes on a same host.");
     public static final RetCode SAME_HOST_ERROR = RetCode.mark(202468, "Host of WeBASE-Node-Manager's ip is already existed.");
-    public static final RetCode HOST_ONLY_ALL_LOCALHOST_OR_NOT_LOCALHOST = RetCode.mark(202469, "Host must be all localhost(127.0.0.1) or all non-localhost");
     // add in 1.4.3
     public static final RetCode EXEC_DOCKER_CHECK_SCRIPT_ERROR = RetCode.mark(202469, "Check docker installed and running of host");
     public static final RetCode EXEC_HOST_CHECK_SCRIPT_ERROR_FOR_MEM = RetCode.mark(202470, "Check host memory not enough for nodes(s)");
