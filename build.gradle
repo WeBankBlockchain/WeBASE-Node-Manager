@@ -100,6 +100,10 @@ dependencies {
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
     compile 'ognl:ognl:3.2.14'
     compile 'org.apache.commons:commons-collections4:4.4'
+    // scaffold
+    compile ('com.webank.webase:solscaffold:1.0.0-SNAPSHOT')
+    compile ('com.webank:solc-gradle-plugin:1.0.0-SNAPSHOT')
+
     testCompile test,mbg
 
     compileOnly lombok
@@ -148,6 +152,10 @@ jar {
         copy {
             from file('src/main/resources/')
             into 'dist/conf_template'
+        }
+        copy {
+            from file('gradle')
+            into 'dist/gradle'
         }
         copy {
             from file('script/')

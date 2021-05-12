@@ -339,7 +339,7 @@ public class FrontRestTools {
         T response = restTemplateExchange(groupId, uri, HttpMethod.GET, null, clazz);
         if (response == null) {
             log.error("getForEntity response is null!");
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.attach("getForEntity response is null"));
         }
         return response;
     }
@@ -351,7 +351,7 @@ public class FrontRestTools {
         T response = restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
         if (response == null) {
             log.error("postForEntity response is null!");
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.attach("postForEntity response is null"));
         }
         return response;
     }
@@ -363,7 +363,7 @@ public class FrontRestTools {
         T response = restTemplateExchange(groupId, uri, HttpMethod.DELETE, params, clazz);
         if (response == null) {
             log.error("deleteForEntity response is null!");
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.attach("deleteForEntity response is null"));
         }
         return response;
     }

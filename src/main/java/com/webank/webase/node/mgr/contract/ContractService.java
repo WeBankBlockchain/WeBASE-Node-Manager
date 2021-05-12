@@ -231,7 +231,7 @@ public class  ContractService {
         // check contract id
         TbContract tbContract =
             verifyContractIdExist(contract.getContractId(), contract.getGroupId());
-        if (tbContract.getContractType() == ContractStatus.DEPLOYED.getValue()
+        if (tbContract.getContractStatus() == ContractStatus.DEPLOYED.getValue()
             && !constantProperties.isDeployedModifyEnable()) {
             log.info("fail updateContract. deployed contract cannot be modified");
             throw new NodeMgrException(ConstantCode.DEPLOYED_CANNOT_MODIFIED);
@@ -356,7 +356,7 @@ public class  ContractService {
         // check contract
         TbContract contractRecord =
             verifyContractIdExist(inputParam.getContractId(), inputParam.getGroupId());
-        if (contractRecord.getContractType() == ContractStatus.DEPLOYED.getValue()
+        if (contractRecord.getContractStatus() == ContractStatus.DEPLOYED.getValue()
             && !constantProperties.isDeployedModifyEnable()) {
             log.info("fail deployContract. deployed contract cannot be modified");
             throw new NodeMgrException(ConstantCode.DEPLOYED_CANNOT_MODIFIED);

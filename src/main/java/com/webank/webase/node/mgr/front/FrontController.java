@@ -53,7 +53,7 @@ public class FrontController extends BaseController {
     private FrontService frontService;
 
     /**
-     * refresh front
+     * refresh frontn
      */
     @GetMapping("/refresh")
     public BaseResponse refreshFront() {
