@@ -403,8 +403,8 @@ public class FrontRestTools {
                 HttpEntity entity = buildHttpEntity(param);// build entity
                 if (null == restTemplate) {
                     log.error("fail restTemplateExchange, rest is null. groupId:{} uri:{}",
-                            groupId,uri);
-                    throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
+                        groupId,uri);
+                    throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION.attach("restTemplate is null"));
                 }
                 ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
                 frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.NORMAL.getValue());
@@ -417,7 +417,7 @@ public class FrontRestTools {
                     frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
                     throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
                 }
-                log.info("continue next front", ex);
+                log.info("continue next front");
                 continue;
             } catch (HttpStatusCodeException ex) {
                 // case2: request front success but return fail
