@@ -14,8 +14,8 @@
 
 package com.webank.webase.node.mgr.scaffold;
 
-import com.webank.scaffold.artifact.webase.NewMainResourceDir.ContractInfo;
-import com.webank.scaffold.factory.ProjectFactory;
+import com.webank.scaffold.artifact.NewMainResourceDir.ContractInfo;
+import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -153,7 +153,7 @@ public class ScaffoldService {
         log.info("generateProject sdkMap size:{}", sdkMap.size());
         List<ContractInfo> contractInfoList = this.handleContractList(tbContractList);
         String frontChannelIpPort = nodeConfig.getP2pip() + ":" + nodeConfig.getChannelPort();
-        ProjectFactory projectFactory = new ProjectFactory();
+        WebaseProjectFactory projectFactory = new WebaseProjectFactory();
         log.info("generateProject projectGroup:{},artifactName:{},OUTPUT_DIR:{},frontChannelIpPort:{},groupId:{}",
             projectGroup, artifactName, OUTPUT_DIR, frontChannelIpPort, groupId);
         try {
