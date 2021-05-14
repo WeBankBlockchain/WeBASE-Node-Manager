@@ -145,7 +145,7 @@ public class UserController extends BaseController {
             @RequestParam(value = "account", required = false) String account,
             @RequestParam(value = "userParam", required = false) String commParam)
             throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start userList startTime:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
                 startTime.toEpochMilli(), groupId, pageNumber, pageSize, commParam);
@@ -164,14 +164,14 @@ public class UserController extends BaseController {
             param.setPageSize(pageSize);
 
             List<TbUser> listOfUser = userService.queryUserList(param);
-            pagesponse.setData(listOfUser);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfUser);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end userList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     @PostMapping("/import")

@@ -54,7 +54,7 @@ public class NodeController {
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "nodeName", required = false) String nodeName)
         throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info(
             "start queryNodeList startTime:{} groupId:{}  pageNumber:{} pageSize:{} nodeName:{}",
@@ -80,14 +80,14 @@ public class NodeController {
             queryParam.setStart(start);
 
             List<TbNode> listOfnode = nodeService.queryNodeList(queryParam);
-            pagesponse.setData(listOfnode);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfnode);
+            pageResponse.setTotalCount(count);
 
         }
 
         log.info("end queryNodeList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**

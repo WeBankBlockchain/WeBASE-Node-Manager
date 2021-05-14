@@ -15,10 +15,15 @@
  */
 package com.webank.webase.node.mgr.role;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +37,34 @@ public class RoleService {
 
     @Autowired
     private RoleMapper roleMapper;
+    @Autowired
+    private ConstantProperties constantProperties;
+    
+    public BasePageResponse queryRoleList(Integer pageNumber, Integer pageSize, Integer roleId,
+            String roleName) throws NodeMgrException {
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
+
+        // param
+        Integer realPageSize = Optional.ofNullable(pageSize).orElse(10);
+        Integer start =
+                Optional.ofNullable(pageNumber).map(page -> (page - 1) * realPageSize).orElse(0);
+        List<Integer> roleIdListNotIn = new ArrayList<>();
+        if (!constantProperties.isDeveloperModeEnable()) {
+            roleIdListNotIn.add(RoleType.DEVELOPER.getValue());
+        }
+        RoleListParam param =
+                new RoleListParam(start, realPageSize, roleId, roleName, roleIdListNotIn);
+
+        // query
+        int count = countOfRole(param);
+        if (count > 0) {
+            List<TbRole> listOfRole = listOfRole(param);
+            pageResponse.setData(listOfRole);
+            pageResponse.setTotalCount(count);
+        }
+
+        return pageResponse;
+    }
 
     /**
      * query role count.

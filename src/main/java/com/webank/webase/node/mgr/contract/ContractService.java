@@ -173,6 +173,7 @@ public class  ContractService {
             reqContractAddressSave.getContractAddress());
         String contractName = reqContractAddressSave.getContractName();
         String contractVersion = reqContractAddressSave.getContractVersion();
+        String contractPath = reqContractAddressSave.getContractPath();
         // get contract store
         ContractStoreParam contractStoreParam = new ContractStoreParam();
         contractStoreParam.setAppKey(appKey);
@@ -182,10 +183,14 @@ public class  ContractService {
         if (CollectionUtils.isEmpty(listOfContractStore)) {
             throw new NodeMgrException(ConstantCode.CONTRACT_SOURCE_NOT_EXIST);
         }
+        boolean pathExist = contractPathService.checkPathExist(groupId, contractPath);
         for (TbContractStore tbContractStore : listOfContractStore) {
-            ContractParam param =
-                new ContractParam(groupId, reqContractAddressSave.getContractPath(),
-                    tbContractStore.getContractName(), tbContractStore.getAccount());
+            // check if tbContractStore has been saved
+            if (pathExist && !tbContractStore.getContractName().equals(contractName)) {
+                continue;
+            }
+            ContractParam param = new ContractParam(groupId, contractPath,
+                tbContractStore.getContractName(), tbContractStore.getAccount());
             TbContract localContract = queryContract(param);
             // check if deployed contract saved
             if (Objects.nonNull(localContract)
@@ -197,7 +202,7 @@ public class  ContractService {
             BeanUtils.copyProperties(tbContractStore, tbContract);
             tbContract.setGroupId(groupId);
             tbContract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
-            tbContract.setContractPath(reqContractAddressSave.getContractPath());
+            tbContract.setContractPath(contractPath);
             tbContract.setContractType(ContractType.APPIMPORT.getValue());
             if (tbContractStore.getContractName().equals(contractName)) {
                 tbContract.setContractAddress(reqContractAddressSave.getContractAddress());
@@ -211,12 +216,12 @@ public class  ContractService {
             // save and update method
             NewMethodInputParam newMethodInputParam = new NewMethodInputParam();
             newMethodInputParam.setGroupId(groupId);
-            newMethodInputParam
-                .setMethodList(Web3Tools.getMethodFromAbi(tbContractStore.getContractAbi(), cryptoSuite));
+            newMethodInputParam.setMethodList(
+                Web3Tools.getMethodFromAbi(tbContractStore.getContractAbi(), cryptoSuite));
             methodService.saveMethod(newMethodInputParam, ContractType.APPIMPORT.getValue());
         }
         // if exist, auto not save (ignore)
-        contractPathService.save(groupId, reqContractAddressSave.getContractPath(), true);
+        contractPathService.save(groupId, contractPath, true);
     }
 
     /**

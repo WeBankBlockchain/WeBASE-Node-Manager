@@ -47,6 +47,13 @@ public class ConstantProperties {
     public static final int ADDRESS_LENGTH = 42;
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
     public static final String HAS_ROLE_ADMIN_OR_DEVELOPER = "hasRole('admin') or hasRole('developer')";
+    
+    public static final String PARAM_APP_KEY = "appKey";
+    public static final String PARAM_APP_SECRET = "appSecret";
+    public static final String PARAM_TIMESTAMP = "timestamp";
+    public static final String PARAM_SIGNATURE = "signature";
+    public static final String PARAM_IS_TRANSFER_ENCRYPT = "isTransferEncrypt";
+    public static final String ENCRYPT_FALSE = "false";
 
     private boolean developerModeEnable = false;
     private boolean deployedModifyEnable = true;
@@ -114,6 +121,7 @@ public class ConstantProperties {
      * application integration
      */
     private long appRequestTimeOut = 300000;
+    private boolean isTransferEncrypt = true;
 
     /**
      * default resetGroupList interval gap, default 15000ms(15s)

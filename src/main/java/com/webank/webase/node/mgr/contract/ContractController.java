@@ -126,7 +126,7 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/contractList")
     public BasePageResponse queryContractList(@RequestBody QueryContractParam inputParam)
             throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start contractList. startTime:{} inputParam:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(inputParam));
@@ -144,13 +144,13 @@ public class ContractController extends BaseController {
             // query list
             List<TbContract> listOfContract = contractService.queryContractList(queryParam);
 
-            pagesponse.setData(listOfContract);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfContract);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end contractList. useTime:{} result count:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), count);
-        return pagesponse;
+        return pageResponse;
     }
 
     /**
@@ -259,7 +259,7 @@ public class ContractController extends BaseController {
     @GetMapping(value = "/contractList/all/light")
     public BasePageResponse queryContractListNoAbi(@RequestParam Integer groupId,
             @RequestParam Integer contractStatus) throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryContractListNoAbi. startTime:{} groupId:{}", startTime.toEpochMilli(),
                 groupId);
@@ -274,13 +274,13 @@ public class ContractController extends BaseController {
             // query list
             List<RspContractNoAbi> listOfContract =
                     contractService.queryContractListNoAbi(queryParam);
-            pagesponse.setData(listOfContract);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfContract);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end queryContractListNoAbi. useTime:{} result count:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), count);
-        return pagesponse;
+        return pageResponse;
     }
 
 
@@ -312,19 +312,19 @@ public class ContractController extends BaseController {
      */
     @PostMapping(value = "/contractPath/list/{groupId}")
     public BasePageResponse queryContractPathList(@PathVariable("groupId") Integer groupId) {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryContractPathList. startTime:{} groupId:{}", startTime.toEpochMilli(),
                 groupId);
 
         List<TbContractPath> result = contractService.queryContractPathList(groupId);
-        pagesponse.setData(result);
-        pagesponse.setTotalCount(result.size());
+        pageResponse.setData(result);
+        pageResponse.setTotalCount(result.size());
 
         log.info("end queryContractPathList. useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
@@ -351,16 +351,16 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/contractList/multiPath")
     public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam)
             throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listContractByMultiPath. startTime:{} inputParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(inputParam));
         List<TbContract> contractList = contractService.queryContractListMultiPath(inputParam);
-        pagesponse.setTotalCount(contractList.size());
-        pagesponse.setData(contractList);
+        pageResponse.setTotalCount(contractList.size());
+        pageResponse.setData(contractList);
         log.info("end listContractByMultiPath. useTime:{} result count:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), contractList.size());
-        return pagesponse;
+        return pageResponse;
     }
 
     /**
@@ -390,15 +390,15 @@ public class ContractController extends BaseController {
     public BaseResponse findCnsByAddress(@RequestBody @Valid ReqQueryCns reqQueryCns, BindingResult result)
             throws NodeMgrException {
         checkBindResult(result);
-        BaseResponse pagesponse = new BaseResponse(ConstantCode.SUCCESS);
+        BaseResponse pageResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start findCnsByAddress startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(reqQueryCns));
         TbCns tbCns = cnsService.getCnsByAddress(
                 new QueryCnsParam(reqQueryCns.getGroupId(), reqQueryCns.getContractAddress()));
-        pagesponse.setData(tbCns);
+        pageResponse.setData(tbCns);
         log.info("end findCnsByAddress. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
-        return pagesponse;
+        return pageResponse;
     }
 
     /**
@@ -408,7 +408,7 @@ public class ContractController extends BaseController {
     public BasePageResponse findCnsList(@RequestBody @Valid ReqQueryCnsList inputParam,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start findCnsList startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(inputParam));
@@ -425,13 +425,13 @@ public class ContractController extends BaseController {
             queryParam.setFlagSortedByTime(SqlSortType.DESC.getValue());
             // query list
             List<TbCns> listOfCns = cnsService.getList(queryParam);
-            pagesponse.setData(listOfCns);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfCns);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end findCnsList. useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
-        return pagesponse;
+        return pageResponse;
     }
 
     @PostMapping(value = "/copy")

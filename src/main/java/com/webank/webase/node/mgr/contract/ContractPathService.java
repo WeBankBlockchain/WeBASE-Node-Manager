@@ -80,4 +80,13 @@ public class ContractPathService {
     public void removeByGroupId(Integer groupId) {
         contractPathMapper.removeByGroupId(groupId);
     }
+    
+    public boolean checkPathExist(Integer groupId, String pathName) {
+        TbContractPath contractPath = contractPathMapper.findOne(new ContractPathParam(groupId, pathName));
+        if (contractPath != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
