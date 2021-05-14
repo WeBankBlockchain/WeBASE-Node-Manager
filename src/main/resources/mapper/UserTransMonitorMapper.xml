@@ -171,7 +171,7 @@
 
   <select id="listOfUnusualContract" parameterType="Map"
     resultType="com.webank.webase.node.mgr.monitor.entity.UnusualContractInfo">
-    select contract_address as contractAddress,max(contract_name) as contractName,sum(trans_count) as transCount,
+    select distinct(contract_address) as contractAddress,max(contract_name) as contractName,sum(trans_count) as transCount,
     max(trans_hashs) as hashs,max(modify_time) as time
     from ${tableName} where trans_unusual_type=1
     <if test="contractAddress != null and contractAddress != ''">
