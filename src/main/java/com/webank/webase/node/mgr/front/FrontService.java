@@ -1294,4 +1294,16 @@ public class FrontService {
             throw new NodeMgrException(ConstantCode.WEBASE_VERSION_NOT_MATCH_FISCO_SUPPORT_VERSION);
         }
     }
+
+    public FrontNodeConfig getFrontNodeConfig(int frontId) {
+        TbFront front = this.getById(frontId);
+        if (front == null) {
+            log.error("");
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+        }
+        String frontIp = front.getFrontIp();
+        int frontPort = front.getFrontPort();
+        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+        return nodeConfig;
+    }
 }

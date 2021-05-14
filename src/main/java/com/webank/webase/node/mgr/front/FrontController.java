@@ -14,14 +14,15 @@
 package com.webank.webase.node.mgr.front;
 
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
+import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.time.Duration;
@@ -148,6 +149,20 @@ public class FrontController extends BaseController {
 
         log.info("end queryFrontList useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     * get front's node config
+     */
+    @GetMapping(value = "/nodeConfig")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse getFrontNodeConfig(@RequestParam("frontId") int frontId) {
+        Instant startTime = Instant.now();
+        log.info("start getFrontNodeConfig startTime:{} ", startTime.toEpochMilli());
+        FrontNodeConfig nodeConfig = frontService.getFrontNodeConfig(frontId);
+
+        log.info("end getFrontNodeConfig useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return new BaseResponse(ConstantCode.SUCCESS, nodeConfig);
     }
 
 }
