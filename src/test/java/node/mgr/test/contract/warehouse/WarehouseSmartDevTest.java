@@ -14,6 +14,7 @@
 
 package node.mgr.test.contract.warehouse;
 
+import com.webank.scaffold.util.FileUtils;
 import com.webank.scaffold.util.IOUtil;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import java.io.File;
@@ -47,7 +48,7 @@ public class WarehouseSmartDevTest {
 //                System.out.println(solFile.getName() + " content: " + content);
                 System.out.println(subFile.getName() + " content base64: " + NodeMgrTools
                     .encodedBase64Str(content));
-                IOUtil.writeStringToFile(NodeMgrTools.encodedBase64Str(content),
+                FileUtils.writeStringToFile(NodeMgrTools.encodedBase64Str(content),
                     new File(readDir + "/base64"),
                     subFile.getName() + ".txt");
             }

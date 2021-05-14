@@ -235,6 +235,8 @@ public class FrontService {
         // set default chainId
         tbFront.setChainId(0);
         tbFront.setChainName("default");
+        // default normal front
+        tbFront.setStatus(DataStatus.NORMAL.getValue());
 
         String frontIp = frontInfo.getFrontIp();
         Integer frontPort = frontInfo.getFrontPort();
@@ -1291,5 +1293,17 @@ public class FrontService {
             && nodeSupportVerInt < VersionProperties.NODE_LOWEST_SUPPORT_VERSION_INT ) {
             throw new NodeMgrException(ConstantCode.WEBASE_VERSION_NOT_MATCH_FISCO_SUPPORT_VERSION);
         }
+    }
+
+    public FrontNodeConfig getFrontNodeConfig(int frontId) {
+        TbFront front = this.getById(frontId);
+        if (front == null) {
+            log.error("");
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+        }
+        String frontIp = front.getFrontIp();
+        int frontPort = front.getFrontPort();
+        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+        return nodeConfig;
     }
 }

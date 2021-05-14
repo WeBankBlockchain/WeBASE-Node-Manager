@@ -83,7 +83,7 @@ public class StatService {
                 localBlockNum = latestStat.getBlockNumber();
                 lastBlockTimestamp = Long.parseLong(latestStat.getStatTimestamp());
             } else {
-                log.info("local block is null, start pull from zero groupId:{}", groupId);
+                log.info("groupId:{} local block is null, start pull from zero", groupId);
                 // if no stat data local, pull from zero
                 localBlockNum = 0;
                 RspStatBlock zeroBlock = frontInterfaceService.getBlockStatisticByNumber(groupId, BigInteger.ZERO);

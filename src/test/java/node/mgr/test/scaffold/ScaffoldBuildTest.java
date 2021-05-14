@@ -14,11 +14,11 @@
 
 package node.mgr.test.scaffold;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.scaffold.artifact.NewMainResourceDir.ContractInfo;
 import com.webank.scaffold.artifact.ProjectArtifact;
-import com.webank.scaffold.artifact.webase.NewMainResourceDir.ContractInfo;
 import com.webank.scaffold.factory.ProjectFactory;
+import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.scaffold.util.IOUtil;
 import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
 import java.io.BufferedWriter;
@@ -110,7 +110,7 @@ public class ScaffoldBuildTest {
         System.out.println("sdkMap: ");
         System.out.println(sdkMap);
 
-        ProjectFactory projectFactory = new ProjectFactory();
+        WebaseProjectFactory projectFactory = new WebaseProjectFactory();
         ProjectArtifact result = projectFactory.buildProjectDir(
             Collections.singletonList(contractInfo),
             group, artifactName, outputDir, "gradle",
@@ -143,7 +143,7 @@ public class ScaffoldBuildTest {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, String> sdkMap = mapper.readValue(sdkMapStr, Map.class);
 
-        ProjectFactory projectFactory = new ProjectFactory();
+        WebaseProjectFactory projectFactory = new WebaseProjectFactory();
         // ProjectArtifact result = projectFactory.buildProjectDir(Collections.singletonList(contractInfo),
         ProjectArtifact result = projectFactory.buildProjectDir(Arrays.asList(contractInfo, creditContract),
             group, artifactName, outputDir, "gradle",
