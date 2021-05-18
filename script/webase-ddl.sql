@@ -416,6 +416,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_path (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约路径编号',
   contract_path varchar(128) binary NOT NULL COMMENT '合约所在目录',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
+  account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (id),

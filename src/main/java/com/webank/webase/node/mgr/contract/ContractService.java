@@ -152,7 +152,7 @@ public class  ContractService {
         // save contract path
         log.debug("newContract save contract path");
         // if exist, auto not save (ignore)
-        contractPathService.save(contract.getGroupId(), contract.getContractPath(), true);
+        contractPathService.save(contract.getGroupId(), contract.getContractPath(), contract.getAccount(), true);
         return tbContract;
     }
 
@@ -221,7 +221,7 @@ public class  ContractService {
             methodService.saveMethod(newMethodInputParam, ContractType.APPIMPORT.getValue());
         }
         // if exist, auto not save (ignore)
-        contractPathService.save(groupId, contractPath, true);
+        contractPathService.save(groupId, contractPath, listOfContractStore.get(0).getAccount(), true);
     }
 
     /**
@@ -632,8 +632,8 @@ public class  ContractService {
     /**
      * get contract path list
      */
-    public List<TbContractPath> queryContractPathList(Integer groupId) {
-        List<TbContractPath> pathList = contractPathService.listContractPath(groupId);
+    public List<TbContractPath> queryContractPathList(Integer groupId, String account) {
+        List<TbContractPath> pathList = contractPathService.listContractPath(groupId, account);
         // not return null, but return empty list
         List<TbContractPath> resultList = new ArrayList<>();
         if (pathList != null) {

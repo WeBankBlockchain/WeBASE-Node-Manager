@@ -138,7 +138,7 @@ public class AccountController extends BaseController {
         log.info("start updateAccountInfo startTime:{}", startTime.toEpochMilli());
 
         // current
-        String currentAccount = getCurrentAccount(request);
+        String currentAccount = accountService.getCurrentAccount(request);
 
         // update account row
         accountService.updateAccountRow(currentAccount, info);
@@ -211,7 +211,7 @@ public class AccountController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
-        String targetAccount = getCurrentAccount(request);
+        String targetAccount = accountService.getCurrentAccount(request);
 
         // update account row
         accountService
@@ -222,11 +222,4 @@ public class AccountController extends BaseController {
         return baseResponse;
     }
     
-    /**
-     * get current account.
-     */
-    private String getCurrentAccount(HttpServletRequest request) {
-        String token = NodeMgrTools.getToken(request);
-        return tokenService.getValueFromToken(token);
-    }
 }
