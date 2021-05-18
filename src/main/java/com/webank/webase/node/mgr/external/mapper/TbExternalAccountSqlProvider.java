@@ -45,16 +45,22 @@ public class TbExternalAccountSqlProvider {
 
     public String count(UserParam param) {
         SQL sql = new SQL();
-        sql.FROM("tb_external_account");
-        sql.SELECT("count(1)");
+        sql.SELECT("count(1),b.userId from tb_external_account ext "
+            + "left join "
+            + "(select user_id userId,group_id,address from tb_user) b "
+            + "on ext.address=b.address and ext.group_id=b.group_id ");
         if (param.getGroupId() != null) {
             sql.WHERE("group_id = #{groupId}");
         }
         if (param.getUserName() != null) {
             sql.WHERE("user_name = #{userName}");
         }
-        if (param.getUserId() != null) {
-            sql.WHERE("id = #{userId}");
+        // get all or some
+        // 1-all(default), 2-normal, 3-abnormal
+        if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.NORMAL.getValue()) {
+            sql.WHERE("b.userId is not NULL");
+        } else if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.ABNORMAL.getValue()) {
+            sql.WHERE("b.userId is NULL");
         }
         return sql.toString();
     }

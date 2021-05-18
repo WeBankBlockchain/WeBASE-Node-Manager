@@ -52,8 +52,10 @@ public class TbExternalContractSqlProvider {
 
     public String count(ContractParam param) {
         SQL sql = new SQL();
-        sql.FROM("tb_external_contract");
-        sql.SELECT("count(1)");
+        sql.SELECT("count(1),b.abiId from tb_external_contract ext "
+            + "left join "
+            + "(select abi_id abiId,contract_address,group_id from tb_abi) b "
+            + "on ext.contract_address=b.contract_address and ext.group_id=b.group_id ");
         if (param.getGroupId() != null) {
             sql.WHERE("group_id = #{groupId}");
         }
@@ -63,8 +65,12 @@ public class TbExternalContractSqlProvider {
         if (param.getDeployAddress() != null) {
             sql.WHERE("deploy_address = #{deployAddress}");
         }
-        if (param.getContractId() != null) {
-            sql.WHERE("id = #{contractId}");
+        // get all or some
+        // 1-all(default), 2-normal, 3-abnormal
+        if (param.getContractType() == ExternalInfoType.NORMAL.getValue()) {
+            sql.WHERE("b.abiId is not NULL");
+        } else if (param.getContractType() == ExternalInfoType.ABNORMAL.getValue()) {
+            sql.WHERE("b.abiId is NULL");
         }
         return sql.toString();
     }

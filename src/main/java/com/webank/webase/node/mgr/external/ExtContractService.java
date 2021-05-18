@@ -102,7 +102,7 @@ public class ExtContractService {
             tbContract.setContractAbi(existedContract.getContractAbi());
         }
         // check tb_abi's address
-        AbiInfo existedTbAbi = abiService.getAbiByGroupIdAndAddress(groupId, contractAddress);
+        AbiInfo existedTbAbi = abiService.getAbi(groupId, contractAddress);
         if (Objects.nonNull(existedTbAbi)) {
             log.debug("saveContractOnChain exist tb_contract "
                 + "contractAddress:{} address:{}", groupId, contractAddress);
