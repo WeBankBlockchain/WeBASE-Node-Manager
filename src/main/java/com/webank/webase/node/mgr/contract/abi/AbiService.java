@@ -158,11 +158,15 @@ public class AbiService {
     }
 
     public AbiInfo getAbiByGroupIdAndAddress(Integer groupId, String contractAddress) {
-        AbiInfo abiInfo = abiMapper.queryByGroupIdAndAddress(groupId, null, contractAddress);
+        AbiInfo abiInfo = this.getAbi(groupId, contractAddress);
         if (Objects.isNull(abiInfo)) {
             throw new NodeMgrException(ConstantCode.ABI_INFO_NOT_EXISTS);
         }
         return abiInfo;
+    }
+
+    public AbiInfo getAbi(Integer groupId, String contractAddress) {
+        return abiMapper.queryByGroupIdAndAddress(groupId, null, contractAddress);
     }
 
     /**
