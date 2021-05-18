@@ -25,7 +25,9 @@ public class TbExternalContractSqlProvider {
             // if external address equal to monitor user's username, it means user not imported
             ") c on ext.contract_address=c.contract_address";
         sql.SELECT(columnsWithJoin);
-        sql.WHERE("ext.group_id= #{groupId}");
+        if (param.getGroupId() != null) {
+            sql.WHERE("ext.group_id = #{groupId}");
+        }
         if (param.getAccount() != null) {
             sql.WHERE("b.account = #{account}");
         }
@@ -52,18 +54,22 @@ public class TbExternalContractSqlProvider {
 
     public String count(ContractParam param) {
         SQL sql = new SQL();
-        sql.SELECT("count(1),b.abiId from tb_external_contract ext "
+        sql.SELECT("count(1),ext.group_id,ext.contract_address,b.abiId,b.account,b.contract_name"
+            + " from tb_external_contract ext "
             + "left join "
-            + "(select abi_id abiId,contract_address,group_id from tb_abi) b "
+            + "(select abi_id abiId,contract_address,group_id,account,contract_name from tb_abi) b "
             + "on ext.contract_address=b.contract_address and ext.group_id=b.group_id ");
         if (param.getGroupId() != null) {
-            sql.WHERE("group_id = #{groupId}");
+            sql.WHERE("ext.group_id = #{groupId}");
         }
         if (param.getContractAddress() != null) {
-            sql.WHERE("contract_address = #{contractAddress}");
+            sql.WHERE("ext.contract_address = #{contractAddress}");
         }
-        if (param.getDeployAddress() != null) {
-            sql.WHERE("deploy_address = #{deployAddress}");
+        if (param.getAccount() != null) {
+            sql.WHERE("b.account = #{account}");
+        }
+        if (param.getContractName() != null) {
+            sql.WHERE("b.contract_name = #{contractName}");
         }
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal

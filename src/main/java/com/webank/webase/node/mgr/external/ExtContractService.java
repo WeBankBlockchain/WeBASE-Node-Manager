@@ -69,6 +69,9 @@ public class ExtContractService {
         // if send transaction to call contract, receipt's contract address is all zero,
         // receipt's to is contract address
         String contractAddress = txReceipt.getTo();
+        if (contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED)) {
+            return;
+        }
         // if receipt's to is all zero, deploy transaction
         if (ConstantProperties.ADDRESS_DEPLOY.equals(txReceipt.getTo())) {
             contractAddress = txReceipt.getContractAddress();
