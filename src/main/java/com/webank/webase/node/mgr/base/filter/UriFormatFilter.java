@@ -42,7 +42,7 @@ public class UriFormatFilter implements Filter {
         throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
-        String requestUri = httpRequest.getRequestURI().toString();
+        String requestUri = httpRequest.getRequestURI();
         log.debug("request url:{}", requestUri);
 
         request = new HttpServletRequestWrapper(httpRequest) {

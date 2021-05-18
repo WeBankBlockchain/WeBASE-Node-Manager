@@ -84,7 +84,7 @@ public class FrontFilter implements Filter {
      * check path is ignore.
      */
     private boolean isIgnore(String uri) {
-        long count = ignorePath.stream().filter(path -> uri.startsWith(path)).count();
+        long count = ignorePath.stream().filter(uri::startsWith).count();
         return count > 0;
     }
 
