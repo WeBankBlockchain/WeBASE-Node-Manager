@@ -30,6 +30,7 @@ import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.method.MethodService;
+import com.webank.webase.node.mgr.monitor.MonitorService;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ public class AbiService {
     ContractService contractService;
     @Autowired
     MethodService methodService;
+    @Autowired
+    MonitorService monitorService;
 
     public List<AbiInfo> getListByGroupId(ReqAbiListParam param) {
         List<AbiInfo> abiList = abiMapper.listOfAbi(param);
@@ -89,6 +92,10 @@ public class AbiService {
         addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, contractBin);
         // save and update method
         methodService.saveMethod(groupId, contractAbiStr, ContractType.GENERALCONTRACT.getValue());
+        if (StringUtils.isNotBlank(contractBin)) {
+            // update monitor unusual deployInputParam's info
+            monitorService.updateUnusualContract(groupId, param.getContractName(), contractBin);
+        }
     }
 
     @Transactional
@@ -114,7 +121,10 @@ public class AbiService {
         abiMapper.update(updateAbi);
         // update method
         methodService.saveMethod(param.getGroupId(), contractAbiStr, ContractType.GENERALCONTRACT.getValue());
-
+        if (StringUtils.isNotBlank(contractBin)) {
+            // update monitor unusual deployInputParam's info
+            monitorService.updateUnusualContract(param.getGroupId(), param.getContractName(), contractBin);
+        }
     }
 
     public void delete(Integer id) {
@@ -291,4 +301,11 @@ public class AbiService {
         abiMapper.add(saveAbi);
     }
 
+    public AbiInfo getAbiInfoByBin(ReqAbiListParam param) {
+        log.debug("start getAbiInfoByBin. queryParam:{}", JsonTools.toJSONString(param));
+        AbiInfo abiInfo = abiMapper.getAbiByBin(param);
+        log.debug("end getAbiInfoByBin. queryParam:{} tbContract:{}", JsonTools.toJSONString(param),
+            JsonTools.toJSONString(abiInfo));
+        return abiInfo;
+    }
 }

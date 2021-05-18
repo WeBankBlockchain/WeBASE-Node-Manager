@@ -44,7 +44,7 @@ public class ContractParam extends BaseQueryParam {
     /**
      * init by contractId.
      */
-    public ContractParam(int contractId,int groupId) {
+    public ContractParam(int contractId, int groupId) {
         super();
         this.contractId = contractId;
         this.groupId = groupId;

@@ -25,6 +25,9 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.contract.abi.AbiService;
+import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
+import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
@@ -86,7 +89,10 @@ public class MonitorService {
     private MethodService methodService;
     @Autowired
     private ConstantProperties cProperties;
-    @Autowired private CryptoSuite cryptoSuite;
+    @Autowired
+    private CryptoSuite cryptoSuite;
+    @Autowired
+    private AbiService abiService;
 
 
     /**
@@ -380,7 +386,7 @@ public class MonitorService {
         String contractAddress, contractName, interfaceName = "", contractBin;
         int transType = TransType.DEPLOY.getValue();
         int transUnusualType = TransUnusualType.NORMAL.getValue();
-
+        // deploy contract tx
         if (isDeploy(transTo)) {
             contractAddress = frontInterfacee.getAddressByHash(groupId, transHash);
             if (ConstantProperties.ADDRESS_DEPLOY.equals(contractAddress)) {
@@ -390,9 +396,15 @@ public class MonitorService {
                 param.setGroupId(groupId);
                 param.setPartOfBytecodeBin(contractBin);
                 TbContract tbContract = contractService.queryContract(param);
-                
+                // add abi query
+                ReqAbiListParam paramTbAbi = new ReqAbiListParam();
+                paramTbAbi.setGroupId(groupId);
+                paramTbAbi.setPartOfContractBin(contractBin);
+                AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
                 if (Objects.nonNull(tbContract)) {
                     contractName = tbContract.getContractName();
+                } else if (Objects.nonNull(abiInfo)) {
+                    contractName = abiInfo.getContractName();
                 } else {
                     contractName = getNameFromContractBin(groupId, contractBin);
                     transUnusualType = TransUnusualType.CONTRACT.getValue();
@@ -400,10 +412,17 @@ public class MonitorService {
             } else {
                 contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
                 contractBin = removeBinFirstAndLast(contractBin);
-                
+
                 List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
+                // add abi query
+                ReqAbiListParam paramTbAbi = new ReqAbiListParam();
+                paramTbAbi.setGroupId(groupId);
+                paramTbAbi.setPartOfContractBin(contractBin);
+                AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
                 if (contractRow != null && contractRow.size() > 0) {
                     contractName = contractRow.get(0).getContractName();
+                } else if (Objects.nonNull(abiInfo)) {
+                    contractName = abiInfo.getContractName();
                 } else {
                     contractName = getNameFromContractBin(groupId, contractBin);
                     transUnusualType = TransUnusualType.CONTRACT.getValue();
@@ -426,12 +445,14 @@ public class MonitorService {
                     transUnusualType = TransUnusualType.FUNCTION.getValue();
                 }
             } else {
+                // no contract name, use bin as contract name
                 contractName = getNameFromContractBin(groupId, contractBin);
                 TbMethod tbMethod = methodService.getByMethodId(methodId, groupId);
                 if (Objects.nonNull(tbMethod)) {
                     interfaceName = getInterfaceName(methodId, "[" + tbMethod.getAbiInfo() + "]");
                     log.info("monitor methodId:{} interfaceName:{}", methodId, interfaceName);
                 }
+                // no method id, deploy tx
                 if (StringUtils.isBlank(interfaceName)) {
                     interfaceName = transInput.substring(0, 10);
                     transUnusualType = TransUnusualType.CONTRACT.getValue();
