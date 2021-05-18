@@ -17,6 +17,7 @@
 package com.webank.webase.node.mgr.contract.abi;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -28,6 +29,7 @@ import com.webank.webase.node.mgr.contract.abi.entity.RspAllContract;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.method.MethodService;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,6 +52,8 @@ public class AbiService {
     FrontInterfaceService frontInterfaceService;
     @Autowired
     ContractService contractService;
+    @Autowired
+    MethodService methodService;
 
     public List<AbiInfo> getListByGroupId(ReqAbiListParam param) {
         List<AbiInfo> abiList = abiMapper.listOfAbi(param);
@@ -83,6 +87,8 @@ public class AbiService {
         checkAbiExist(groupId, account, contractAddress);
         // add
         addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, contractBin);
+        // save and update method
+        methodService.saveMethod(groupId, contractAbiStr, ContractType.GENERALCONTRACT.getValue());
     }
 
     @Transactional
@@ -106,6 +112,9 @@ public class AbiService {
         updateAbi.setContractBin(contractBin);
         updateAbi.setModifyTime(LocalDateTime.now());
         abiMapper.update(updateAbi);
+        // update method
+        methodService.saveMethod(param.getGroupId(), contractAbiStr, ContractType.GENERALCONTRACT.getValue());
+
     }
 
     public void delete(Integer id) {
