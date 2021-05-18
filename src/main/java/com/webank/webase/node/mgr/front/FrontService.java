@@ -211,7 +211,7 @@ public class FrontService {
                 tbFront.setClientVersion(clientVersion);
                 tbFront.setSupportVersion(supportVersion);
                 // set agency from chain
-                tbFront.setAgency(nodeInfo.getAgency());
+                tbFront.setAgency(nodeInfo.getAgency() == null ? "fisco" : nodeInfo.getAgency());
                 //update front info
                 frontMapper.updateBasicInfo(tbFront);
                 // save group info
