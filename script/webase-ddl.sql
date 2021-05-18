@@ -489,7 +489,7 @@ CREATE TABLE IF NOT EXISTS tb_external_contract (
   deploy_time datetime NOT NULL COMMENT '部署时间',
   contract_bin mediumtext DEFAULT NULL COMMENT '合约链上binary',
   contract_status int(1) DEFAULT '1' COMMENT '部署状态（1：未部署，2：部署成功，3：部署失败）',
-  contract_type tinyint(4) DEFAULT '0' COMMENT '合约类型(0-普通合约，1-系统合约)',
+  contract_type tinyint(4) DEFAULT '0' COMMENT '合约类型(0-普通合约，1-系统合约，2-APP合约)',
   contract_name varchar(120) binary DEFAULT NULL COMMENT '合约名称',
   contract_version varchar(120) DEFAULT NULL COMMENT '合约版本',
   contract_abi mediumtext COMMENT '编译合约生成的abi文件内容',
