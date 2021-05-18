@@ -731,4 +731,31 @@ public class NodeMgrTools {
         // delete empty dir
         return dir.delete();
     }
+
+    /**
+     * 支持数字，字母与下划线"_"
+     *
+     * @param input
+     * @return
+     */
+    public static boolean isLetterDigit(String input) {
+        String regex = "^[a-z0-9A-Z_]+$";
+        return input.matches(regex);
+    }
+
+    /**
+     * 字母开头
+     * @param input
+     * @return
+     */
+    public static boolean startWithLetter(String input) {
+        if (StringUtils.isBlank(input)) {
+            return false;
+        }
+        if (!isLetterDigit(input)) {
+            return false;
+        }
+        String regex = "^[a-zA-Z]+$";
+        return (input.charAt(0)+"").matches(regex);
+    }
 }
