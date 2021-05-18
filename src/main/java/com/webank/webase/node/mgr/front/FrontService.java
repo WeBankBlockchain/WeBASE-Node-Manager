@@ -92,6 +92,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
@@ -201,7 +202,7 @@ public class FrontService {
                 // p2p/rpc/channel port etc.
                 FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
                 // get agency of node
-                NodeInfo nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
+                NodeInformation nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
                 tbFront.setP2pPort(nodeConfig.getP2pport());
                 tbFront.setJsonrpcPort(nodeConfig.getRpcport());
                 tbFront.setChannelPort(nodeConfig.getChannelPort());
@@ -210,7 +211,7 @@ public class FrontService {
                 tbFront.setClientVersion(clientVersion);
                 tbFront.setSupportVersion(supportVersion);
                 // set agency from chain
-                tbFront.setAgency(nodeInfo.getNodeInfo().getAgency());
+                tbFront.setAgency(nodeInfo.getAgency());
                 //update front info
                 frontMapper.updateBasicInfo(tbFront);
                 // save group info
@@ -287,9 +288,9 @@ public class FrontService {
         tbFront.setJsonrpcPort(nodeConfig.getRpcport());
         tbFront.setChannelPort(nodeConfig.getChannelPort());
         // get agency of node
-        NodeInfo nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
-        log.info("front's agency is :{}", nodeInfo.getNodeInfo());
-        tbFront.setAgency(nodeInfo.getNodeInfo().getAgency());
+        NodeInformation nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
+        log.info("front's agency is :{}", nodeInfo);
+        tbFront.setAgency(nodeInfo.getAgency());
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
