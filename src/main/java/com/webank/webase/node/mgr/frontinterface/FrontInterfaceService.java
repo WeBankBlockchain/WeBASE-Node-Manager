@@ -387,7 +387,7 @@ public class FrontInterfaceService {
         log.debug("start getObserverList. groupId:{}", groupId);
         List<String> observers =
                 frontRestTools.getForEntity(groupId, FrontRestTools.URI_GET_OBSERVER_LIST, List.class);
-        log.info("end getObserverList. observers:{}", JsonTools.toJSONString(observers));
+        log.debug("end getObserverList. observers:{}", JsonTools.toJSONString(observers));
         return observers;
     }
 
