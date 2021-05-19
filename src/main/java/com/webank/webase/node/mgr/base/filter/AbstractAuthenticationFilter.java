@@ -45,7 +45,8 @@ public abstract class AbstractAuthenticationFilter extends OncePerRequestFilter 
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+        throws ServletException, IOException {
         final String header = request.getHeader(TOKEN_HEADER_NAME);
 
         if (header == null || !header.startsWith(getHeaderPrefix())) {

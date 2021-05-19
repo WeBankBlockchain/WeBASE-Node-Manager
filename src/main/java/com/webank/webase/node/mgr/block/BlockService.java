@@ -376,16 +376,15 @@ public class BlockService {
     }
 
     private void saveExternalInfo(int groupId, JsonTransactionResponse trans, String timestamp) {
+        log.info("saveExternalInfo trans block number:{}", trans.getBlockNumber());
         if (!cProperties.getEnableExternalFromBlock()) {
             return;
         }
         // try to save external account
         extAccountService.saveAccountOnChain(groupId, trans.getFrom());
         // try to save external contract
-        String toAddress = trans.getTo();
-        if (Address.DEFAULT.getValue().equals(toAddress)) {
-            log.debug("saveExternalInfo contract from block:{}", trans.getHash());
-            extContractService.asyncSaveContract(groupId, trans.getHash(), timestamp);
-        }
+        log.debug("saveExternalInfo contract from block:{}", trans.getHash());
+        extContractService.asyncSaveContract(groupId, trans.getHash(), timestamp);
+
     }
 }

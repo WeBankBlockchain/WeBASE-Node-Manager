@@ -16,8 +16,12 @@ package com.webank.webase.node.mgr.external;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.contract.abi.AbiService;
+import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
+import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.external.entity.RspAllExtContract;
@@ -45,6 +49,8 @@ public class ExtContractService {
     @Autowired
     private ContractService contractService;
     @Autowired
+    private AbiService abiService;
+    @Autowired
     private FrontInterfaceService frontInterfaceService;
 
     /**
@@ -60,11 +66,19 @@ public class ExtContractService {
             groupId, txHash, timestampStr);
 
         TransactionReceipt txReceipt = frontInterfaceService.getTransReceipt(groupId, txHash);
-        if (!Address.DEFAULT.getValue().equals(txReceipt.getTo())) {
+        // if send transaction to call contract, receipt's contract address is all zero,
+        // receipt's to is contract address
+        String contractAddress = txReceipt.getTo();
+        // ignore precompiled contract address
+        if (contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED)) {
             return;
         }
-        // save
-        saveContractOnChain(groupId, txReceipt.getContractAddress(), txHash,
+        // if receipt's to is all zero, deploy transaction
+        if (ConstantProperties.ADDRESS_DEPLOY.equals(txReceipt.getTo())) {
+            contractAddress = txReceipt.getContractAddress();
+        }
+        // save ext contract
+        saveContractOnChain(groupId, contractAddress, txHash,
             txReceipt.getFrom(), timestampStr);
     }
 
@@ -90,6 +104,15 @@ public class ExtContractService {
             // set related contract name
             tbContract.setContractName(existedContract.getContractName());
             tbContract.setContractAbi(existedContract.getContractAbi());
+        }
+        // check tb_abi's address
+        AbiInfo existedTbAbi = abiService.getAbi(groupId, contractAddress);
+        if (Objects.nonNull(existedTbAbi)) {
+            log.debug("saveContractOnChain exist tb_contract "
+                + "contractAddress:{} address:{}", groupId, contractAddress);
+            // set related contract name
+            tbContract.setContractName(existedTbAbi.getContractName());
+            tbContract.setContractAbi(existedTbAbi.getContractAbi());
         }
         tbContract.setGroupId(groupId);
         tbContract.setContractAddress(contractAddress);

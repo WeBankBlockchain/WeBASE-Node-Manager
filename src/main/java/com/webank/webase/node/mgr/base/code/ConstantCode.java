@@ -317,6 +317,7 @@ public class ConstantCode {
     // add in v1.5.1
     public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(202531, "generate project failed in scaffold");
     public static final RetCode GET_FRONT_SDK_MAP_FAIL = RetCode.mark(202532, "get sdk cert/key content map failed");
+    public static final RetCode PARAM_INVALID_LETTER_DIGIT = RetCode.mark(202533, "Only support letter and digit, please check your params");
 
 
     /* auth */

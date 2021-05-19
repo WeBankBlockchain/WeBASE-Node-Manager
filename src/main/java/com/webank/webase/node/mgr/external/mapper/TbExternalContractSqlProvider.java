@@ -20,12 +20,14 @@ public class TbExternalContractSqlProvider {
             "FROM tb_abi " +
             ") b on ext.contract_address=b.contract_address and ext.group_id=b.group_id " +
             "LEFT JOIN " +
-            "( SELECT contract_address,sum(trans_count) transCount,max(trans_hashs) hashs " +
+            "( SELECT distinct(contract_address),sum(trans_count) transCount,max(trans_hashs) hashs " +
             "FROM tb_user_transaction_monitor_${groupId} WHERE trans_unusual_type=1 group by contract_address" +
             // if external address equal to monitor user's username, it means user not imported
             ") c on ext.contract_address=c.contract_address";
         sql.SELECT(columnsWithJoin);
-        sql.WHERE("ext.group_id= #{groupId}");
+        if (param.getGroupId() != null) {
+            sql.WHERE("ext.group_id = #{groupId}");
+        }
         if (param.getAccount() != null) {
             sql.WHERE("b.account = #{account}");
         }
@@ -52,19 +54,29 @@ public class TbExternalContractSqlProvider {
 
     public String count(ContractParam param) {
         SQL sql = new SQL();
-        sql.FROM("tb_external_contract");
-        sql.SELECT("count(1)");
+        sql.SELECT("count(1),ext.group_id,ext.contract_address,b.abiId,b.account,b.contract_name"
+            + " from tb_external_contract ext "
+            + "left join "
+            + "(select abi_id abiId,contract_address,group_id,account,contract_name from tb_abi) b "
+            + "on ext.contract_address=b.contract_address and ext.group_id=b.group_id ");
         if (param.getGroupId() != null) {
-            sql.WHERE("group_id = #{groupId}");
+            sql.WHERE("ext.group_id = #{groupId}");
         }
         if (param.getContractAddress() != null) {
-            sql.WHERE("contract_address = #{contractAddress}");
+            sql.WHERE("ext.contract_address = #{contractAddress}");
         }
-        if (param.getDeployAddress() != null) {
-            sql.WHERE("deploy_address = #{deployAddress}");
+        if (param.getAccount() != null) {
+            sql.WHERE("b.account = #{account}");
         }
-        if (param.getContractId() != null) {
-            sql.WHERE("id = #{contractId}");
+        if (param.getContractName() != null) {
+            sql.WHERE("b.contract_name = #{contractName}");
+        }
+        // get all or some
+        // 1-all(default), 2-normal, 3-abnormal
+        if (param.getContractType() == ExternalInfoType.NORMAL.getValue()) {
+            sql.WHERE("b.abiId is not NULL");
+        } else if (param.getContractType() == ExternalInfoType.ABNORMAL.getValue()) {
+            sql.WHERE("b.abiId is NULL");
         }
         return sql.toString();
     }

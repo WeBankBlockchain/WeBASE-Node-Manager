@@ -50,4 +50,12 @@ public interface AbiMapper {
 	void deleteByGroupId(@Param("groupId") int groupId);
 
 	List<RspAllContract> listAllContract(ReqAbiListParam param);
+
+	/**
+	 * support query by bin
+	 * @param param
+	 * @return
+	 */
+	AbiInfo getAbiByBin(ReqAbiListParam param);
+
 }
