@@ -31,8 +31,6 @@ public class BindUserInputParam {
     @NotBlank
     @Length(max=64)
     private String userName;
-    @NotBlank
-    @Length(max=50)
     private String account;
     @NotBlank
     private String publicKey;

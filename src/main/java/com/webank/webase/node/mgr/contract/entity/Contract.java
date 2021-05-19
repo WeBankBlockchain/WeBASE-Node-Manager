@@ -24,7 +24,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class Contract {
-    @NotBlank
     private String account;
     @NotNull
     private Integer groupId;

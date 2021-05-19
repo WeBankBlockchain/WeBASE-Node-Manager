@@ -16,6 +16,7 @@
 package com.webank.webase.node.mgr.account;
 
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.LoginInfo;
@@ -24,7 +25,9 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.AccountStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.role.RoleService;
+import com.webank.webase.node.mgr.token.TokenService;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,8 @@ public class AccountService {
     @Qualifier(value = "bCryptPasswordEncoder")
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private TokenService tokenService;
 
     /**
      * login.
@@ -252,6 +257,14 @@ public class AccountService {
         if (affectRow == 0) {
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
+    }
+    
+    /**
+     * get current account.
+     */
+    public String getCurrentAccount(HttpServletRequest request) {
+        String token = NodeMgrTools.getToken(request);
+        return tokenService.getValueFromToken(token);
     }
 
 }
