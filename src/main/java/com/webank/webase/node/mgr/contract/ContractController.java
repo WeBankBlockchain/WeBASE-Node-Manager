@@ -13,10 +13,13 @@
  */
 package com.webank.webase.node.mgr.contract;
 
+import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
+import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
@@ -76,8 +79,8 @@ public class ContractController extends BaseController {
      */
     @PostMapping(value = "/save")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse saveContract(@RequestBody @Valid Contract contract, BindingResult result)
-            throws NodeMgrException {
+    public BaseResponse saveContract(@RequestBody @Valid Contract contract,
+            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -88,6 +91,7 @@ public class ContractController extends BaseController {
             contract.setContractPath("/");
         }
         // add contract row
+        contract.setAccount(currentAccountInfo.getAccount());
         TbContract tbContract = contractService.saveContract(contract);
 
         baseResponse.setData(tbContract);
@@ -124,8 +128,8 @@ public class ContractController extends BaseController {
      * query contract info list.
      */
     @PostMapping(value = "/contractList")
-    public BasePageResponse queryContractList(@RequestBody QueryContractParam inputParam)
-            throws NodeMgrException {
+    public BasePageResponse queryContractList(@RequestBody QueryContractParam inputParam, 
+            @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start contractList. startTime:{} inputParam:{}", startTime.toEpochMilli(),
@@ -134,6 +138,9 @@ public class ContractController extends BaseController {
         // param
         ContractParam queryParam = new ContractParam();
         BeanUtils.copyProperties(inputParam, queryParam);
+        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
+                ? currentAccountInfo.getAccount() : null;
+        queryParam.setAccount(account);
 
         int count = contractService.countOfContract(queryParam);
         if (count > 0) {
@@ -289,7 +296,8 @@ public class ContractController extends BaseController {
      */
     @PostMapping(value = "/contractPath")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse addContractPath(@Valid @RequestBody ContractPathParam param) {
+    public BaseResponse addContractPath(@Valid @RequestBody ContractPathParam param,
+            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addContractPath. startTime:{} param:{}", startTime.toEpochMilli(), param);
@@ -298,7 +306,7 @@ public class ContractController extends BaseController {
         if ("".equals(contractPath)) {
             contractPath = "/";
         }
-        int result = contractPathService.save(param.getGroupId(), contractPath, false);
+        int result = contractPathService.save(param.getGroupId(), contractPath, currentAccountInfo.getAccount(), false);
         response.setData(result);
 
         log.info("end addContractPath. useTime:{} add result:{}",
@@ -311,13 +319,15 @@ public class ContractController extends BaseController {
      * query contract info list.
      */
     @PostMapping(value = "/contractPath/list/{groupId}")
-    public BasePageResponse queryContractPathList(@PathVariable("groupId") Integer groupId) {
+    public BasePageResponse queryContractPathList(@PathVariable("groupId") Integer groupId,
+            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryContractPathList. startTime:{} groupId:{}", startTime.toEpochMilli(),
                 groupId);
-
-        List<TbContractPath> result = contractService.queryContractPathList(groupId);
+        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
+                ? currentAccountInfo.getAccount() : null;
+        List<TbContractPath> result = contractService.queryContractPathList(groupId, account);
         pageResponse.setData(result);
         pageResponse.setTotalCount(result.size());
 
@@ -349,12 +359,16 @@ public class ContractController extends BaseController {
      * query contract info list by multi path
      */
     @PostMapping(value = "/contractList/multiPath")
-    public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam)
-            throws NodeMgrException {
+    public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam,
+            @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listContractByMultiPath. startTime:{} inputParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(inputParam));
+        
+        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
+                ? currentAccountInfo.getAccount() : null;
+        inputParam.setAccount(account);
         List<TbContract> contractList = contractService.queryContractListMultiPath(inputParam);
         pageResponse.setTotalCount(contractList.size());
         pageResponse.setData(contractList);

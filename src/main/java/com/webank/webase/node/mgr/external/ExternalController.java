@@ -14,9 +14,12 @@
 
 package com.webank.webase.node.mgr.external;
 
+import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
+import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
@@ -124,14 +127,15 @@ public class ExternalController extends BaseController {
     public BasePageResponse listExtUserListJoin(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
-        @RequestParam(value = "account", required = false) String account,
-        @RequestParam(value = "type", defaultValue = "1") Integer type)
-        throws NodeMgrException {
+        @RequestParam(value = "type", defaultValue = "1") Integer type,
+        @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listExtUserListJoin startTime:{} groupId:{} pageNumber:{} pageSize:{}",
             startTime.toEpochMilli(), groupId, pageNumber, pageSize);
 
+        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
+                ? currentAccountInfo.getAccount() : null;
         UserParam param = new UserParam();
         param.setGroupId(groupId);
         param.setPageSize(pageSize);
@@ -165,15 +169,18 @@ public class ExternalController extends BaseController {
     public BasePageResponse listExtContractListJoin(@PathVariable("groupId") Integer groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
-        @RequestParam(value = "account", required = false) String account,
         @RequestParam(value = "type", defaultValue = "1") Integer type,
         @RequestParam(value = "contractAddress", required = false) String contractAddress,
         @RequestParam(value = "contractName", required = false) String contractName,
-        @RequestParam(value = "requiredBin", defaultValue = "true", required = false) Boolean requiredBin) throws NodeMgrException {
+        @RequestParam(value = "requiredBin", defaultValue = "true", required = false) Boolean requiredBin,
+        @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listExtContractListJoin. startTime:{} groupId:{}", startTime.toEpochMilli(),
             groupId);
+        
+        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
+                ? currentAccountInfo.getAccount() : null;
         ContractParam param = new ContractParam();
         param.setGroupId(groupId);
         param.setPageSize(pageSize);

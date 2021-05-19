@@ -10,6 +10,8 @@
       property="groupId" />
     <result column="contract_path" javaType="java.lang.String" jdbcType="VARCHAR"
       property="contractPath" />
+    <result column="account" javaType="java.lang.String" jdbcType="VARCHAR"
+      property="account" />
     <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="createTime" />
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
@@ -18,8 +20,8 @@
 
 
   <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContractPath">
-    REPLACE INTO tb_contract_path(group_id,contract_path,create_time,modify_time)
-    VALUES (#{groupId},#{contractPath}, now(), now())
+    REPLACE INTO tb_contract_path(group_id,contract_path,account,create_time,modify_time)
+    VALUES (#{groupId},#{contractPath},#{account}, now(), now())
   </insert>
 
   <delete id="remove" parameterType="java.lang.Integer">
@@ -49,6 +51,9 @@
     resultMap="pathMap">
     select * from tb_contract_path
     where group_id = #{groupId}
+    <if test="account != null and account != ''">
+      and account = #{account}
+    </if>
     order by modify_time desc
   </select>
 

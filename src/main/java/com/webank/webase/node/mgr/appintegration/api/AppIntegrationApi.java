@@ -430,7 +430,7 @@ public class AppIntegrationApi extends BaseController {
         Instant startTime = Instant.now();
 
         // query user row
-        TbUser userRow = userService.bindUserInfo(user, CheckUserExist.FALSE.getValue());
+        TbUser userRow = userService.bindUserInfo(user, user.getAccount(), CheckUserExist.FALSE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPublicKey useTime:{} result:{}",

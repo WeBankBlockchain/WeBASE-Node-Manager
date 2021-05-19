@@ -13,12 +13,14 @@
  */
 package com.webank.webase.node.mgr.user;
 
+import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
+import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.CheckUserExist;
-import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
@@ -36,7 +38,6 @@ import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
@@ -72,15 +73,15 @@ public class UserController extends BaseController {
      */
     @PostMapping(value = "/userInfo")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse addUserInfo(@RequestBody @Valid NewUserInputParam user,
-            BindingResult result) throws NodeMgrException {
+    public BaseResponse addUserInfo(@RequestBody @Valid NewUserInputParam user, 
+            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
         // add user row
         TbUser userRow = userService.addUserInfoLocal(user.getGroupId(), user.getUserName(),
-                user.getAccount(), user.getDescription(), user.getUserType(), null);
+                currentAccountInfo.getAccount(), user.getDescription(), user.getUserType(), null);
         baseResponse.setData(userRow);
 
         log.info("end addUserInfo useTime:{} result:{}",
@@ -95,13 +96,13 @@ public class UserController extends BaseController {
     @PostMapping(value = "/bind")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse bindUserInfo(@RequestBody @Valid BindUserInputParam user,
-            BindingResult result) throws NodeMgrException {
+            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
         // query user row
-        TbUser userRow = userService.bindUserInfo(user, CheckUserExist.TURE.getValue());
+        TbUser userRow = userService.bindUserInfo(user, currentAccountInfo.getAccount(), CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end bindUserInfo useTime:{} result:{}",
@@ -142,14 +143,16 @@ public class UserController extends BaseController {
     public BasePageResponse userList(@PathVariable("groupId") Integer groupId,
             @PathVariable("pageNumber") Integer pageNumber,
             @PathVariable("pageSize") Integer pageSize,
-            @RequestParam(value = "account", required = false) String account,
-            @RequestParam(value = "userParam", required = false) String commParam)
+            @RequestParam(value = "userParam", required = false) String commParam,
+            @CurrentAccount CurrentAccountInfo currentAccountInfo)
             throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start userList startTime:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
                 startTime.toEpochMilli(), groupId, pageNumber, pageSize, commParam);
 
+        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
+                ? currentAccountInfo.getAccount() : null;
         UserParam param = new UserParam();
         param.setGroupId(groupId);
         param.setAccount(account);
@@ -177,7 +180,7 @@ public class UserController extends BaseController {
     @PostMapping("/import")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport,
-            BindingResult result) {
+            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -186,7 +189,7 @@ public class UserController extends BaseController {
         String privateKeyEncoded = reqImport.getPrivateKey();
         // add user row
         TbUser userRow = userService.addUserInfoLocal(reqImport.getGroupId(), reqImport.getUserName(),
-                reqImport.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
+                currentAccountInfo.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
                 privateKeyEncoded);
         baseResponse.setData(userRow);
 
@@ -199,7 +202,7 @@ public class UserController extends BaseController {
     @PostMapping("/importPem")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem,
-            BindingResult result) {
+            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -209,6 +212,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
+        reqImportPem.setAccount(currentAccountInfo.getAccount());
         TbUser userRow = userService.importPem(reqImportPem, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
@@ -223,7 +227,8 @@ public class UserController extends BaseController {
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
             @RequestParam(required = false, defaultValue = "") String p12Password,
             @RequestParam Integer groupId, @RequestParam String userName,
-            @RequestParam String account, @RequestParam(required = false) String description) {
+            @RequestParam(required = false) String description,
+            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
@@ -234,7 +239,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
         TbUser userRow = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
-                account, description, CheckUserExist.TURE.getValue());
+                currentAccountInfo.getAccount(), description, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
