@@ -144,4 +144,26 @@
             limit #{start},#{pageSize}
         </if>
     </select>
+
+    <select id="getAbiByBin" parameterType="com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam"
+      resultMap="abiMap">
+        SELECT a.* FROM tb_abi a
+        WHERE 1=1
+        <if test="groupId != null and groupId != ''">
+            and group_id = #{groupId}
+        </if>
+        <if test="contractName != null and contractName != ''">
+            and contract_name = #{contractName}
+        </if>
+        <if test="contractAddress != null and contractAddress != ''">
+            and contract_address = #{contractAddress}
+        </if>
+        <if test="account != null and account != ''">
+            and account = #{account}
+        </if>
+        <if test="partOfContractBin != null and partOfContractBin != ''">
+            and locate(contract_bin,#{partOfContractBin})
+        </if>
+        limit 1
+    </select>
 </mapper>

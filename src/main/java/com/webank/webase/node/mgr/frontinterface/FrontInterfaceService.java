@@ -50,6 +50,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
@@ -522,10 +523,10 @@ public class FrontInterfaceService {
         return nodeConfig;
     }
 
-    public NodeInfo getNodeInfoFromSpecificFront(String frontIp, Integer frontPort) {
+    public NodeInformation getNodeInfoFromSpecificFront(String frontIp, Integer frontPort) {
         Integer groupId = Integer.MAX_VALUE;
-        NodeInfo nodeInfo = getFromSpecificFront(groupId, frontIp, frontPort,
-            FrontRestTools.URI_NODE_INFO, NodeInfo.class);
+        NodeInformation nodeInfo = getFromSpecificFront(groupId, frontIp, frontPort,
+            FrontRestTools.URI_NODE_INFO, NodeInformation.class);
         return nodeInfo;
     }
 

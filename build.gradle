@@ -1,5 +1,5 @@
 group = 'com.webank.webase.node.mgr'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0-SNAPSHOT'
 
 apply plugin: 'maven'
 apply plugin: 'java'
@@ -124,6 +124,7 @@ configurations {
     all*.exclude group: 'jline', module: 'jline'
     all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
     all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
+    all*.exclude group: 'com.webank', module: 'key-mini-toolkit'
 }
 
 sourceSets {

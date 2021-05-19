@@ -17,9 +17,11 @@ package com.webank.webase.node.mgr.scaffold;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.scaffold.entity.ReqProject;
 import com.webank.webase.node.mgr.scaffold.entity.RspFile;
 import java.time.Duration;
@@ -52,6 +54,33 @@ public class ScaffoldController extends BaseController {
             param);
         if (StringUtils.isBlank(param.getChannelIp())) {
             param.setChannelIp(IPUtil.LOCAL_IP_127);
+        }
+        // check artifact name and group name
+        if (!NodeMgrTools.startWithLetter(param.getArtifactName())) {
+            log.error("must start with letter");
+            throw new NodeMgrException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
+        }
+        // validate group name, ex: org.example
+        if (!param.getGroup().contains("\\.")) {
+            // only org
+            if (!NodeMgrTools.startWithLetter(param.getGroup())) {
+                log.error("must start with letter");
+                throw new NodeMgrException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
+            }
+        } else {
+            // include org.xxx
+            String[] groupNameArray = param.getGroup().split("\\.");
+            for (String group: groupNameArray) {
+                // not start or end with dot "."
+                if (StringUtils.isBlank(group)) {
+                    log.error("group cannot start or end with dot");
+                    throw new NodeMgrException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
+                }
+                if (!NodeMgrTools.startWithLetter(group)) {
+                    log.error("package name must start with letter");
+                    throw new NodeMgrException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
+                }
+            }
         }
         RspFile rspFile = scaffoldService.exportProject(param);
         log.info("end exportProjectApi useTime:{} result:{}",

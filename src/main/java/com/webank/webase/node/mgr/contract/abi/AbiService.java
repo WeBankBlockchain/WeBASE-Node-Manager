@@ -17,6 +17,7 @@
 package com.webank.webase.node.mgr.contract.abi;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
@@ -28,6 +29,8 @@ import com.webank.webase.node.mgr.contract.abi.entity.RspAllContract;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.method.MethodService;
+import com.webank.webase.node.mgr.monitor.MonitorService;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,6 +53,10 @@ public class AbiService {
     FrontInterfaceService frontInterfaceService;
     @Autowired
     ContractService contractService;
+    @Autowired
+    MethodService methodService;
+    @Autowired
+    MonitorService monitorService;
 
     public List<AbiInfo> getListByGroupId(ReqAbiListParam param) {
         List<AbiInfo> abiList = abiMapper.listOfAbi(param);
@@ -83,6 +90,12 @@ public class AbiService {
         checkAbiExist(groupId, account, contractAddress);
         // add
         addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, contractBin);
+        // save and update method
+        methodService.saveMethod(groupId, contractAbiStr, ContractType.GENERALCONTRACT.getValue());
+        if (StringUtils.isNotBlank(contractBin)) {
+            // update monitor unusual deployInputParam's info
+            monitorService.updateUnusualContract(groupId, param.getContractName(), contractBin);
+        }
     }
 
     @Transactional
@@ -106,6 +119,12 @@ public class AbiService {
         updateAbi.setContractBin(contractBin);
         updateAbi.setModifyTime(LocalDateTime.now());
         abiMapper.update(updateAbi);
+        // update method
+        methodService.saveMethod(param.getGroupId(), contractAbiStr, ContractType.GENERALCONTRACT.getValue());
+        if (StringUtils.isNotBlank(contractBin)) {
+            // update monitor unusual deployInputParam's info
+            monitorService.updateUnusualContract(param.getGroupId(), param.getContractName(), contractBin);
+        }
     }
 
     public void delete(Integer id) {
@@ -139,11 +158,15 @@ public class AbiService {
     }
 
     public AbiInfo getAbiByGroupIdAndAddress(Integer groupId, String contractAddress) {
-        AbiInfo abiInfo = abiMapper.queryByGroupIdAndAddress(groupId, null, contractAddress);
+        AbiInfo abiInfo = this.getAbi(groupId, contractAddress);
         if (Objects.isNull(abiInfo)) {
             throw new NodeMgrException(ConstantCode.ABI_INFO_NOT_EXISTS);
         }
         return abiInfo;
+    }
+
+    public AbiInfo getAbi(Integer groupId, String contractAddress) {
+        return abiMapper.queryByGroupIdAndAddress(groupId, null, contractAddress);
     }
 
     /**
@@ -282,4 +305,11 @@ public class AbiService {
         abiMapper.add(saveAbi);
     }
 
+    public AbiInfo getAbiInfoByBin(ReqAbiListParam param) {
+        log.debug("start getAbiInfoByBin. queryParam:{}", JsonTools.toJSONString(param));
+        AbiInfo abiInfo = abiMapper.getAbiByBin(param);
+        log.debug("end getAbiInfoByBin. queryParam:{} tbContract:{}", JsonTools.toJSONString(param),
+            JsonTools.toJSONString(abiInfo));
+        return abiInfo;
+    }
 }

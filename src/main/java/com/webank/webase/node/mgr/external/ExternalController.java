@@ -140,7 +140,7 @@ public class ExternalController extends BaseController {
         param.setGroupId(groupId);
         param.setPageSize(pageSize);
         param.setAccount(account);
-        // type: 1-all, 2-normal, 3-abnormal
+        // type: 1-all, 2-normal
         param.setCommParam(type.toString());
 
         int count = extAccountService.countExtAccount(param);
@@ -187,10 +187,9 @@ public class ExternalController extends BaseController {
         param.setAccount(account);
         param.setContractAddress(contractAddress);
         param.setContractName(contractName);
-        // type: 1-all, 2-normal, 3-abnormal
+        // type: 1-all, 2-normal
         param.setContractType(type);
         int count = extContractService.countExtContract(param);
-
         if (count > 0) {
             Integer start =
                 Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize).orElse(null);
