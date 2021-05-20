@@ -82,7 +82,7 @@ public class MonitorService {
     @Autowired
     private TransHashService transHashService;
     @Autowired
-    private FrontInterfaceService frontInterfacee;
+    private FrontInterfaceService frontInterface;
     @Autowired
     private MonitorTransactionService monitorTransactionService;
     @Autowired
@@ -198,7 +198,7 @@ public class MonitorService {
             if (StringUtils.isBlank(txHash)) {
                 return;
             }
-            ChainTransInfo trans = frontInterfacee.getTransInfoByHash(groupId, txHash);
+            ChainTransInfo trans = frontInterface.getTransInfoByHash(groupId, txHash);
             if (trans == null) {
                 return;
             }
@@ -340,7 +340,7 @@ public class MonitorService {
     public void monitorTransHash(int groupId, TbTransHash trans, LocalDateTime createTime) {
 
         try {
-            ChainTransInfo chanTrans = frontInterfacee
+            ChainTransInfo chanTrans = frontInterface
                 .getTransInfoByHash(groupId, trans.getTransHash());
             if (Objects.isNull(chanTrans)) {
                 log.error("monitor jump over,invalid hash. groupId:{} hash:{}", groupId,
@@ -388,7 +388,7 @@ public class MonitorService {
         int transUnusualType = TransUnusualType.NORMAL.getValue();
         // deploy contract tx
         if (isDeploy(transTo)) {
-            contractAddress = frontInterfacee.getAddressByHash(groupId, transHash);
+            contractAddress = frontInterface.getAddressByHash(groupId, transHash);
             if (ConstantProperties.ADDRESS_DEPLOY.equals(contractAddress)) {
                 contractBin = StringUtils.removeStart(transInput, "0x");
                 
@@ -410,7 +410,7 @@ public class MonitorService {
                     transUnusualType = TransUnusualType.CONTRACT.getValue();
                 }
             } else {
-                contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
+                contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
                 contractBin = removeBinFirstAndLast(contractBin);
 
                 List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
@@ -433,7 +433,7 @@ public class MonitorService {
             transType = TransType.CALL.getValue();
             String methodId = transInput.substring(0, 10);
             contractAddress = transTo;
-            contractBin = frontInterfacee.getCodeFromFront(groupId, contractAddress, blockNumber);
+            contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
             contractBin = removeBinFirstAndLast(contractBin);
 
             List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);

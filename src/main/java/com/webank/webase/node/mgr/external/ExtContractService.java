@@ -72,11 +72,12 @@ public class ExtContractService {
 
         // if receipt's to is all zero, deploy transaction
         if (ConstantProperties.ADDRESS_DEPLOY.equalsIgnoreCase(txReceipt.getTo())) {
-            log.info("deploy contract tx :{}", txReceipt.getContractAddress());
+            log.debug("deploy contract tx :{}", txReceipt.getContractAddress());
             contractAddress = txReceipt.getContractAddress();
         }
         // ignore precompiled contract address
-        if (txReceipt.getTo().startsWith(ConstantProperties.ADDRESS_PRECOMPILED)) {
+        if (contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED)) {
+            log.debug("ignore precompiled contract:{}", contractAddress);
             return;
         }
         // save ext contract
@@ -90,8 +91,9 @@ public class ExtContractService {
     @Transactional
     public int saveContractOnChain(int groupId, String contractAddress, String txHash,
         String deployAddress, String timestamp) {
-        log.info("saveContractOnChain groupId:{} contractAddress:{}", groupId, contractAddress);
+        log.debug("saveContractOnChain groupId:{} contractAddress:{}", groupId, contractAddress);
         if (checkAddressExist(groupId, contractAddress)) {
+            log.info("checkAddressExist groupId:{} contractAddress:{}", groupId, contractAddress);
             return 0;
         }
         TbExternalContract tbContract = new TbExternalContract();
