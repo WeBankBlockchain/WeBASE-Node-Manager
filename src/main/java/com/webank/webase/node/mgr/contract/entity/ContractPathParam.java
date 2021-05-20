@@ -24,4 +24,5 @@ import lombok.NoArgsConstructor;
 public class ContractPathParam {
     private Integer groupId;
     private String contractPath;
+    private String account;
 }

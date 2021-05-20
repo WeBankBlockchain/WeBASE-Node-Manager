@@ -341,14 +341,15 @@ public class ContractController extends BaseController {
      * delete contract by id. only admin batch delete contract
      */
     @DeleteMapping(value = "/batch/path")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param) {
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param,
+            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start deleteContractByPath startTime:{} ContractPathParam:{}",
                 startTime.toEpochMilli(), param);
-
-        contractService.deleteByContractPath(param);
+        
+        contractService.deleteByContractPath(param, currentAccountInfo);
 
         log.info("end deleteContractByPath useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
@@ -365,9 +366,9 @@ public class ContractController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start listContractByMultiPath. startTime:{} inputParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(inputParam));
-        
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
-                ? currentAccountInfo.getAccount() : null;
+
+        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId()
+                .intValue() ? currentAccountInfo.getAccount() : null;
         inputParam.setAccount(account);
         List<TbContract> contractList = contractService.queryContractListMultiPath(inputParam);
         pageResponse.setTotalCount(contractList.size());
@@ -401,8 +402,8 @@ public class ContractController extends BaseController {
      * query cns info
      */
     @PostMapping(value = "/findCns")
-    public BaseResponse findCnsByAddress(@RequestBody @Valid ReqQueryCns reqQueryCns, BindingResult result)
-            throws NodeMgrException {
+    public BaseResponse findCnsByAddress(@RequestBody @Valid ReqQueryCns reqQueryCns,
+            BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse pageResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -411,7 +412,8 @@ public class ContractController extends BaseController {
         TbCns tbCns = cnsService.getCnsByAddress(
                 new QueryCnsParam(reqQueryCns.getGroupId(), reqQueryCns.getContractAddress()));
         pageResponse.setData(tbCns);
-        log.info("end findCnsByAddress. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        log.info("end findCnsByAddress. useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
         return pageResponse;
     }
 
@@ -451,13 +453,14 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/copy")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req,
-        BindingResult result) {
+            BindingResult result) {
         Instant startTime = Instant.now();
         log.info("copyContracts start. startTime:{}  req:{}", startTime.toEpochMilli(),
-            JsonTools.toJSONString(req));
+                JsonTools.toJSONString(req));
         checkBindResult(result);
         contractService.copyContracts(req);
-        log.info("end copyContracts. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        log.info("end copyContracts. useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS, req.getContractItems().size());
     }
 }

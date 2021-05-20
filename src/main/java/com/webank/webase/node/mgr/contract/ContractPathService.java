@@ -38,12 +38,14 @@ public class ContractPathService {
 
     /**
      * save not exist path
+     * 
      * @param groupId
      * @param pathName
      * @return
      */
     public int save(Integer groupId, String pathName, String account, boolean ignoreRepeat) {
-        TbContractPath check = contractPathMapper.findOne(new ContractPathParam(groupId, pathName));
+        TbContractPath check =
+                contractPathMapper.findOne(new ContractPathParam(groupId, pathName, null));
         if (check != null) {
             if (ignoreRepeat) {
                 return 0;
@@ -81,9 +83,10 @@ public class ContractPathService {
     public void removeByGroupId(Integer groupId) {
         contractPathMapper.removeByGroupId(groupId);
     }
-    
-    public boolean checkPathExist(Integer groupId, String pathName) {
-        TbContractPath contractPath = contractPathMapper.findOne(new ContractPathParam(groupId, pathName));
+
+    public boolean checkPathExist(Integer groupId, String pathName, String account) {
+        TbContractPath contractPath =
+                contractPathMapper.findOne(new ContractPathParam(groupId, pathName, account));
         if (contractPath != null) {
             return true;
         } else {
