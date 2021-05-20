@@ -30,6 +30,12 @@ public class TbExternalAccountSqlProvider {
         if (param.getAccount() != null) {
             sql.WHERE("b.account = #{account}");
         }
+        if (param.getUserName() != null) {
+            sql.WHERE("b.userName = #{userName}");
+        }
+        if (param.getAddress() != null) {
+            sql.WHERE("ext.address = #{address}");
+        }
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal
         if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.NORMAL.getValue()) {
@@ -47,15 +53,21 @@ public class TbExternalAccountSqlProvider {
 
     public String count(UserParam param) {
         SQL sql = new SQL();
-        sql.SELECT("count(1),ext.group_id,ext.address,b.userId,b.account from tb_external_account ext "
+        sql.SELECT("count(1),ext.group_id,ext.address,b.userId,b.account,b.userName from tb_external_account ext "
             + "left join "
-            + "(select user_id userId,group_id,address,account from tb_user) b "
+            + "(select user_id userId,group_id,address,account,user_name userName from tb_user) b "
             + "on ext.address=b.address and ext.group_id=b.group_id ");
         if (param.getGroupId() != null) {
             sql.WHERE("ext.group_id = #{groupId}");
         }
         if (param.getAccount() != null) {
             sql.WHERE("b.account = #{account}");
+        }
+        if (param.getUserName() != null) {
+            sql.WHERE("b.userName = #{userName}");
+        }
+        if (param.getAddress() != null) {
+            sql.WHERE("ext.address = #{address}");
         }
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal
