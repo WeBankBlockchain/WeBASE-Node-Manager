@@ -61,10 +61,10 @@ public class ScaffoldController extends BaseController {
             throw new NodeMgrException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
         }
         // validate group name, ex: org.example
-        if (!param.getGroup().contains("\\.")) {
+        if (!param.getGroup().contains(".")) {
             // only org
             if (!NodeMgrTools.startWithLetter(param.getGroup())) {
-                log.error("must start with letter");
+                log.error("group must start with letter");
                 throw new NodeMgrException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
             }
         } else {
@@ -73,11 +73,11 @@ public class ScaffoldController extends BaseController {
             for (String group: groupNameArray) {
                 // not start or end with dot "."
                 if (StringUtils.isBlank(group)) {
-                    log.error("group cannot start or end with dot");
+                    log.error("group must start with letter, and not end with dot");
                     throw new NodeMgrException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
                 }
                 if (!NodeMgrTools.startWithLetter(group)) {
-                    log.error("package name must start with letter");
+                    log.error("group name must start with letter");
                     throw new NodeMgrException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
                 }
             }

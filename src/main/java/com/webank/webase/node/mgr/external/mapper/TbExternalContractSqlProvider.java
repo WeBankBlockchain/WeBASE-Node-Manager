@@ -22,7 +22,6 @@ public class TbExternalContractSqlProvider {
             "LEFT JOIN " +
             "( SELECT distinct(contract_address),sum(trans_count) transCount,max(trans_hashs) hashs " +
             "FROM tb_user_transaction_monitor_${groupId} WHERE trans_unusual_type=1 group by contract_address" +
-            // if external address equal to monitor user's username, it means user not imported
             ") c on ext.contract_address=c.contract_address";
         sql.SELECT(columnsWithJoin);
         if (param.getGroupId() != null) {
@@ -35,7 +34,7 @@ public class TbExternalContractSqlProvider {
             sql.WHERE("b.contractName = #{contractName}");
         }
         if (param.getContractAddress() != null) {
-            sql.WHERE("ext.contractAddress = #{contractAddress}");
+            sql.WHERE("ext.contract_address = #{contractAddress}");
         }
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal

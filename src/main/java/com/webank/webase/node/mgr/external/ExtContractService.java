@@ -69,13 +69,16 @@ public class ExtContractService {
         // if send transaction to call contract, receipt's contract address is all zero,
         // receipt's to is contract address
         String contractAddress = txReceipt.getTo();
+
+        // if receipt's to is all zero, deploy transaction
+        if (ConstantProperties.ADDRESS_DEPLOY.equalsIgnoreCase(txReceipt.getTo())) {
+            log.debug("deploy contract tx :{}", txReceipt.getContractAddress());
+            contractAddress = txReceipt.getContractAddress();
+        }
         // ignore precompiled contract address
         if (contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED)) {
+            log.debug("ignore precompiled contract:{}", contractAddress);
             return;
-        }
-        // if receipt's to is all zero, deploy transaction
-        if (ConstantProperties.ADDRESS_DEPLOY.equals(txReceipt.getTo())) {
-            contractAddress = txReceipt.getContractAddress();
         }
         // save ext contract
         saveContractOnChain(groupId, contractAddress, txHash,
@@ -88,8 +91,9 @@ public class ExtContractService {
     @Transactional
     public int saveContractOnChain(int groupId, String contractAddress, String txHash,
         String deployAddress, String timestamp) {
-        //log.info("saveContractOnChain groupId:{} contractAddress:{}", groupId, contractAddress);
+        log.debug("saveContractOnChain groupId:{} contractAddress:{}", groupId, contractAddress);
         if (checkAddressExist(groupId, contractAddress)) {
+            log.info("checkAddressExist groupId:{} contractAddress:{}", groupId, contractAddress);
             return 0;
         }
         TbExternalContract tbContract = new TbExternalContract();
@@ -131,7 +135,7 @@ public class ExtContractService {
     private boolean checkAddressExist(int groupId, String contractAddress) {
         int count = extContractMapper.countOfExtContract(groupId, contractAddress);
         if (count > 0) {
-            log.debug("saveContractOnChain exists tb_external_contract" 
+            log.info("saveContractOnChain exists tb_external_contract"
                 + " groupId:{} address:{}", groupId, contractAddress);
             return true;
         }

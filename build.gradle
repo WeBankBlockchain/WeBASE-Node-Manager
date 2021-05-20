@@ -81,7 +81,7 @@ List mbg = [
 List scaffold = [
     'com.webank.webase:solscaffold:1.0.0-SNAPSHOT',
     'com.webank:SmartDev-Scaffold:1.0.0-SNAPSHOT',
-    'com.webank:solc-gradle-plugin:1.0.0-SNAPSHOT'
+    'com.webank:solc-gradle-plugin:1.0.1-SNAPSHOT'
 ]
 
 dependencies {
@@ -124,7 +124,6 @@ configurations {
     all*.exclude group: 'jline', module: 'jline'
     all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
     all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
-    all*.exclude group: 'com.webank', module: 'key-mini-toolkit'
 }
 
 sourceSets {

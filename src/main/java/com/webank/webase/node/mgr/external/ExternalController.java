@@ -128,6 +128,8 @@ public class ExternalController extends BaseController {
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "type", defaultValue = "1") Integer type,
+        @RequestParam(value = "userName", required = false) String userName,
+        @RequestParam(value = "address", required = false) String address,
         @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -140,6 +142,8 @@ public class ExternalController extends BaseController {
         param.setGroupId(groupId);
         param.setPageSize(pageSize);
         param.setAccount(account);
+        param.setUserName(userName);
+        param.setAddress(address);
         // type: 1-all, 2-normal
         param.setCommParam(type.toString());
 
