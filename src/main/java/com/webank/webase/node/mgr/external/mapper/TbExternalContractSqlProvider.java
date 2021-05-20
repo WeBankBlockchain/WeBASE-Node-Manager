@@ -35,7 +35,7 @@ public class TbExternalContractSqlProvider {
             sql.WHERE("b.contractName = #{contractName}");
         }
         if (param.getContractAddress() != null) {
-            sql.WHERE("ext.contractAddress = #{contractAddress}");
+            sql.WHERE("ext.contract_address = #{contractAddress}");
         }
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal
