@@ -17,10 +17,12 @@ import com.webank.webase.node.mgr.appintegration.contractstore.ContractStoreServ
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ContractStoreParam;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContractAddressSave;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContractStore;
+import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.enums.ContractType;
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
@@ -183,7 +185,8 @@ public class  ContractService {
         if (CollectionUtils.isEmpty(listOfContractStore)) {
             throw new NodeMgrException(ConstantCode.CONTRACT_SOURCE_NOT_EXIST);
         }
-        boolean pathExist = contractPathService.checkPathExist(groupId, contractPath);
+        boolean pathExist = contractPathService.checkPathExist(groupId, contractPath,
+                listOfContractStore.get(0).getAccount());
         for (TbContractStore tbContractStore : listOfContractStore) {
             // check if tbContractStore has been saved
             if (pathExist && !tbContractStore.getContractName().equals(contractName)) {
@@ -642,8 +645,16 @@ public class  ContractService {
         return resultList;
     }
 
-    public void deleteByContractPath(ContractPathParam param) {
+    public void deleteByContractPath(ContractPathParam param, CurrentAccountInfo currentAccountInfo) {
         log.debug("start deleteByContractPath ContractPathParam:{}", JsonTools.toJSONString(param));
+        // check developer
+        if (RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
+                && !contractPathService.checkPathExist(param.getGroupId(), param.getContractPath(),
+                        currentAccountInfo.getAccount())) {
+            log.error("end deleteByContractPath. contract path not exists.");
+            throw new NodeMgrException(ConstantCode.CONTRACT_PATH_NOT_EXISTS);
+        }
+        
         ContractParam listParam = new ContractParam();
         BeanUtils.copyProperties(param, listParam);
         List<TbContract> contractList = contractMapper.listOfContract(listParam);

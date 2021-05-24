@@ -318,7 +318,7 @@ public class ConstantCode {
     public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(202531, "generate project failed in scaffold");
     public static final RetCode GET_FRONT_SDK_MAP_FAIL = RetCode.mark(202532, "get sdk cert/key content map failed");
     public static final RetCode PARAM_INVALID_LETTER_DIGIT = RetCode.mark(202533, "Only support letter and digit, please check your params");
-
+    public static final RetCode CONTRACT_PATH_NOT_EXISTS = RetCode.mark(202534, "contract path not exists.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

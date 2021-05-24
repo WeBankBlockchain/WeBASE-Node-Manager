@@ -62,6 +62,9 @@
     select * from tb_contract_path
     where group_id = #{groupId}
     and contract_path = #{contractPath}
+    <if test="account != null and account != ''">
+      and account = #{account}
+    </if>
   </select>
 
 </mapper>
