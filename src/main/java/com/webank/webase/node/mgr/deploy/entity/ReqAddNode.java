@@ -44,6 +44,7 @@ public class ReqAddNode {
     /**
      * 0, 1
      */
+    @Deprecated
     private int encryptType;
 
 }

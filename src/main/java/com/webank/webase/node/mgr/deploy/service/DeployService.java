@@ -503,8 +503,6 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.CHAIN_NAME_NOT_EXISTS_ERROR);
         }
 
-
-
         log.info("batchAddNode chainName:{},deployNodeInfoList:{},tagId:{},encrtypType:{},"
                 + "webaseSignAddr:{},agencyName:{}", chainName, deployNodeInfoList,
             chain.getVersion(), chain.getEncryptType(), chain.getWebaseSignAddr(), agencyName);

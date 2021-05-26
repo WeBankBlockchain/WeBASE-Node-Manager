@@ -331,7 +331,8 @@ public class ChainService {
         try {
             log.info("Init chain front node db data....");
             // save chain data in db, generate front's yml
-            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName, deployNodeInfoList, ipConfigParseList, webaseSignAddr, imageTag, (byte)encryptType, agencyName);
+            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName, deployNodeInfoList,
+                ipConfigParseList, webaseSignAddr, imageTag, (byte)encryptType, agencyName);
         } catch (Exception e) {
             log.error("Init chain:[{}] data error. remove generated files:[{}]",
                     chainName, this.pathService.getChainRoot(chainName), e);
@@ -430,7 +431,7 @@ public class ChainService {
                     // insert front group mapping
                     this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
 
-                    // update node count of goup
+                    // update node count of group
                     TbGroup group = this.groupService.getGroupById(groupId);
                     this.groupService.updateGroupNodeCount(groupId, group.getNodeCount() + 1 );
 
