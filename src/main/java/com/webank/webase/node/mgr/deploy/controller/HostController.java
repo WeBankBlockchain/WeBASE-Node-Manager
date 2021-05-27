@@ -19,8 +19,10 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.exception.ParamException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.deploy.entity.ReqAddHost;
 import com.webank.webase.node.mgr.deploy.entity.ReqCheckHost;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
@@ -77,6 +79,12 @@ public class HostController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse addHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+
+        if(!ValidateUtil.ipv4Valid(reqAddHost.getSshIp())) {
+            log.error("not valid ip!:{}", reqAddHost.getSshIp());
+            throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
+        }
+
         Instant startTime = Instant.now();
         log.info("Start addHost:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
@@ -112,6 +120,11 @@ public class HostController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse pingHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+
+        if(!ValidateUtil.ipv4Valid(reqAddHost.getSshIp())) {
+            log.error("not valid ip!:{}", reqAddHost.getSshIp());
+            throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
+        }
         Instant startTime = Instant.now();
         log.info("Start ping:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
