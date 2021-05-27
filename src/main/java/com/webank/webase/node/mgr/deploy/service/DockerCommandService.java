@@ -100,7 +100,6 @@ public class DockerCommandService {
             log.info("pullImage from docker hub");
             String dockerPullCommand = String.format("docker pull %s", imageFullName);
             // kill exists docker pull process
-//            SshTools.killCommand(ip, dockerPullCommand, sshUser, sshPort, constant.getPrivateKey());
             ExecuteResult result = ansibleService.execDocker(ip, dockerPullCommand);
             if (result.failed()) {
                 throw new NodeMgrException(ConstantCode.ANSIBLE_PULL_DOCKER_HUB_ERROR.attach(result.getExecuteOut()));

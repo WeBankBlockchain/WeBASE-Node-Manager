@@ -95,7 +95,7 @@ public class AgencyService {
             return agency;
         }
 
-        if(! ValidateUtil.validateAgencyName(agencyName)){
+        if(!ValidateUtil.validateAgencyName(agencyName)){
             throw new NodeMgrException(AGENCY_NAME_CONFIG_ERROR);
         }
 
