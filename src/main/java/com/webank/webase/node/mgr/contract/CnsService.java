@@ -58,7 +58,7 @@ public class CnsService {
             log.error("fail registerCns. abi is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY);
         }
-        // check version
+        // check version locally
         QueryCnsParam queryParam = new QueryCnsParam(inputParam.getGroupId(),
                 inputParam.getCnsName(), inputParam.getVersion());
         int count = countOfCns(queryParam);
@@ -74,7 +74,8 @@ public class CnsService {
         params.put("groupId", groupId);
         params.put("signUserId", signUserId);
         params.put("contractName", contractName);
-        params.put("cnsName", contractName);
+        // depend on cnsName
+        params.put("cnsName", inputParam.getCnsName());
         params.put("version", inputParam.getVersion());
         params.put("contractAddress", inputParam.getContractAddress());
         params.put("abiInfo", abiArray);
