@@ -80,7 +80,7 @@ public class HostController extends BaseController {
     public BaseResponse addHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
 
-        if(!ValidateUtil.ipv4Valid(reqAddHost.getSshIp()) && !ValidateUtil.domainValid(reqAddHost.getSshIp())){
+        if(!ValidateUtil.ipv4Valid(reqAddHost.getSshIp())) {
             throw new ParamException(
                     ConstantCode.IP_FORMAT_ERROR.getCode(), ConstantCode.IP_FORMAT_ERROR.getMessage()
             );
