@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.exception.ParamException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.NumberUtil;
@@ -109,7 +110,6 @@ public class HostService {
         ansibleService.execPing(ip);
         // check 127.0.0.1
         this.validateAllLocalhostOrNot(ip);
-
         log.info("check host root dir accessible:{}", rootDir);
         ExecuteResult execResult = ansibleService.execCreateDir(ip, rootDir);
         if (execResult.failed()) {

@@ -81,9 +81,8 @@ public class HostController extends BaseController {
         checkBindResult(result);
 
         if(!ValidateUtil.ipv4Valid(reqAddHost.getSshIp())) {
-            throw new ParamException(
-                    ConstantCode.IP_FORMAT_ERROR.getCode(), ConstantCode.IP_FORMAT_ERROR.getMessage()
-            );
+            log.error("not valid ip!:{}", reqAddHost.getSshIp());
+            throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
         Instant startTime = Instant.now();
@@ -121,6 +120,11 @@ public class HostController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse pingHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+
+        if(!ValidateUtil.ipv4Valid(reqAddHost.getSshIp())) {
+            log.error("not valid ip!:{}", reqAddHost.getSshIp());
+            throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
+        }
         Instant startTime = Instant.now();
         log.info("Start ping:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
