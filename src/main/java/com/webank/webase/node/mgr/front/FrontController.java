@@ -14,14 +14,15 @@
 package com.webank.webase.node.mgr.front;
 
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
+import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
+import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.time.Duration;
@@ -53,7 +54,7 @@ public class FrontController extends BaseController {
     private FrontService frontService;
 
     /**
-     * refresh front
+     * refresh frontn
      */
     @GetMapping("/refresh")
     public BaseResponse refreshFront() {
@@ -93,7 +94,7 @@ public class FrontController extends BaseController {
         @RequestParam(value = "groupId", required = false) Integer groupId,
         @RequestParam(value = "frontStatus", required = false) Integer frontStatus)
         throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryFrontList startTime:{} frontId:{} groupId:{},frontStatus:{}",
             startTime.toEpochMilli(), frontId, groupId, frontStatus);
@@ -106,15 +107,15 @@ public class FrontController extends BaseController {
 
         //query front info
         int count = frontService.getFrontCount(param);
-        pagesponse.setTotalCount(count);
+        pageResponse.setTotalCount(count);
         if (count > 0) {
             List<TbFront> list = frontService.getFrontList(param);
-            pagesponse.setData(list);
+            pageResponse.setData(list);
         }
 
         log.info("end queryFrontList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
@@ -148,6 +149,20 @@ public class FrontController extends BaseController {
 
         log.info("end queryFrontList useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     * get front's node config
+     */
+    @GetMapping(value = "/nodeConfig")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse getFrontNodeConfig(@RequestParam("frontId") int frontId) {
+        Instant startTime = Instant.now();
+        log.info("start getFrontNodeConfig startTime:{} ", startTime.toEpochMilli());
+        FrontNodeConfig nodeConfig = frontService.getFrontNodeConfig(frontId);
+
+        log.info("end getFrontNodeConfig useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return new BaseResponse(ConstantCode.SUCCESS, nodeConfig);
     }
 
 }

@@ -1,5 +1,5 @@
 group = 'com.webank.webase.node.mgr'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0-SNAPSHOT'
 
 apply plugin: 'maven'
 apply plugin: 'java'
@@ -15,12 +15,10 @@ targetCompatibility = 1.8
 // In this section you declare where to find the dependencies of your project
 repositories {
     maven {url "http://maven.aliyun.com/nexus/content/groups/public/"}
-    
-    maven { url 'https://dl.bintray.com/ethereum/maven/' }
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-
-    mavenLocal()
     mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url 'https://dl.bintray.com/ethereum/maven/' }
+    mavenLocal()
 }
 
 def springboot_version="2.1.15.RELEASE"
@@ -78,8 +76,14 @@ List mbg = [
     'com.github.yuanmomo:mybatis-generator-plugin:1.0.9'
 ]
 
+List scaffold = [
+    'com.webank.webase:solscaffold:1.0.0',
+    'com.webank:SmartDev-Scaffold:1.0.0-SNAPSHOT',
+    'com.webank:solc-gradle-plugin:1.0.1-SNAPSHOT'
+]
+
 dependencies {
-    compile springboot,spring,jaxb,jackson,log4j
+    compile springboot,spring,jaxb,jackson,log4j,scaffold
     compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2"
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
@@ -100,6 +104,7 @@ dependencies {
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
     compile 'ognl:ognl:3.2.14'
     compile 'org.apache.commons:commons-collections4:4.4'
+
     testCompile test,mbg
 
     compileOnly lombok
@@ -148,6 +153,10 @@ jar {
         copy {
             from file('src/main/resources/')
             into 'dist/conf_template'
+        }
+        copy {
+            from file('gradle')
+            into 'dist/gradle'
         }
         copy {
             from file('script/')

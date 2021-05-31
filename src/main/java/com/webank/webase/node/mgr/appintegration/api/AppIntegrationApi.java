@@ -12,16 +12,19 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.appintegration;
+package com.webank.webase.node.mgr.appintegration.api;
 
 import com.webank.webase.node.mgr.account.AccountService;
+import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
+import com.webank.webase.node.mgr.appintegration.AppIntegrationService;
 import com.webank.webase.node.mgr.appintegration.contractstore.ContractStoreService;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContractAddressSave;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContractSourceSave;
 import com.webank.webase.node.mgr.appintegration.entity.AppRegisterInfo;
 import com.webank.webase.node.mgr.appintegration.entity.BasicInfo;
+import com.webank.webase.node.mgr.appintegration.entity.UpdatePasswordInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -46,6 +49,7 @@ import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.TbNode;
+import com.webank.webase.node.mgr.role.RoleService;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
@@ -87,6 +91,8 @@ public class AppIntegrationApi extends BaseController {
     @Autowired
     private AccountService accountService;
     @Autowired
+    private RoleService roleService;
+    @Autowired
     private GroupService groupService;
     @Autowired
     private NodeService nodeService;
@@ -108,7 +114,7 @@ public class AppIntegrationApi extends BaseController {
     private VersionProperties versionProperties;
 
     /**
-     * add new front
+     * app register.
      */
     @PostMapping("/appRegister")
     public BaseResponse appRegister(@RequestParam(required = true) String appKey,
@@ -132,7 +138,7 @@ public class AppIntegrationApi extends BaseController {
     public BasePageResponse queryAccountList(@RequestParam(required = true) Integer pageNumber,
             @RequestParam(required = true) Integer pageSize,
             @RequestParam(required = false) String account) throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{}",
                 startTime.toEpochMilli(), pageNumber, pageSize);
@@ -145,14 +151,76 @@ public class AppIntegrationApi extends BaseController {
                     new AccountListParam(start, pageSize, account, SqlSortType.DESC.getValue());
             List<TbAccountInfo> listOfAccount = accountService.listOfAccount(param);
             listOfAccount.stream().forEach(accountData -> accountData.setAccountPwd(null));
-            pagesponse.setData(listOfAccount);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfAccount);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end queryAccountList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
+    }
+
+    /**
+     * query role list.
+     */
+    @GetMapping(value = "/roleList")
+    public BasePageResponse queryRoleList() throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start queryRoleList.", startTime.toEpochMilli());
+
+        // query
+        BasePageResponse pageResponse = roleService.queryRoleList(null, null, null, null);
+
+        log.info("end queryRoleList useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
+    }
+
+    /**
+     * add account info.
+     */
+    @PostMapping(value = "/accountAdd")
+    public BaseResponse addAccountInfo(@RequestBody @Valid AccountInfo info, BindingResult result)
+            throws NodeMgrException {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start addAccountInfo. startTime:{}", startTime.toEpochMilli());
+
+        // add account row
+        accountService.addAccountRow(info);
+
+        // query row
+        TbAccountInfo tbAccount = accountService.queryByAccount(info.getAccount());
+        tbAccount.setAccountPwd(null);
+        baseResponse.setData(tbAccount);
+
+        log.info("end addAccountInfo useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * update password.
+     */
+    @PostMapping(value = "/passwordUpdate")
+    public BaseResponse updatePassword(@RequestBody @Valid UpdatePasswordInfo info,
+            BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+
+        // update account row
+        accountService.updatePassword(info.getAccount(), info.getOldAccountPwd(),
+                info.getNewAccountPwd());
+
+        log.info("end updatePassword useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
+        return baseResponse;
     }
 
     /**
@@ -172,6 +240,7 @@ public class AppIntegrationApi extends BaseController {
     /**
      * get encrypt type.
      */
+    @Deprecated
     @GetMapping("encrypt")
     public BaseResponse getEncryptType() {
         int encrypt = cryptoSuite.cryptoTypeConfig;
@@ -186,7 +255,7 @@ public class AppIntegrationApi extends BaseController {
     public BasePageResponse getGroupList(
             @RequestParam(required = false, defaultValue = "1") Integer groupStatus)
             throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start getGroupList startTime:{}", startTime.toEpochMilli());
 
@@ -199,14 +268,14 @@ public class AppIntegrationApi extends BaseController {
         int count = groupService.countOfGroup(null, groupStatus);
         if (count > 0) {
             List<TbGroup> groupList = groupService.getGroupList(groupStatus);
-            pagesponse.setTotalCount(count);
-            pagesponse.setData(groupList);
+            pageResponse.setTotalCount(count);
+            pageResponse.setData(groupList);
         }
 
         log.info("end getGroupList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
@@ -217,7 +286,7 @@ public class AppIntegrationApi extends BaseController {
             @RequestParam(required = true) Integer pageSize,
             @RequestParam(required = false, defaultValue = "") Integer groupId,
             @RequestParam(required = false) String nodeId) throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryNodeList startTime:{}", startTime.toEpochMilli());
 
@@ -240,15 +309,15 @@ public class AppIntegrationApi extends BaseController {
             queryParam.setStart(start);
 
             List<TbNode> listOfnode = nodeService.queryNodeList(queryParam);
-            pagesponse.setData(listOfnode);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfnode);
+            pageResponse.setTotalCount(count);
 
         }
 
         log.info("end queryNodeList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
@@ -284,7 +353,7 @@ public class AppIntegrationApi extends BaseController {
     @GetMapping(value = "/frontNodeList")
     public BasePageResponse queryFrontList(@RequestParam(required = false) Integer groupId,
             @RequestParam(required = false) String nodeId) throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryFrontList startTime:{} groupId:{},nodeId:{}", startTime.toEpochMilli(),
                 groupId, nodeId);
@@ -296,18 +365,18 @@ public class AppIntegrationApi extends BaseController {
 
         // query front info
         int count = frontService.getFrontCount(param);
-        pagesponse.setTotalCount(count);
+        pageResponse.setTotalCount(count);
         if (count > 0) {
             List<TbFront> list = frontService.getFrontList(param);
             list.forEach(front -> front.setGroupList(
                     frontGroupMapService.getGroupIdListByFrontId(front.getFrontId())));
-            pagesponse.setData(list);
+            pageResponse.setData(list);
         }
 
         log.info("end queryFrontList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
@@ -340,7 +409,7 @@ public class AppIntegrationApi extends BaseController {
 
         // add user row
         TbUser userRow = userService.addUserInfo(user.getGroupId(), user.getUserName(),
-                user.getAccount(), user.getDescription(), user.getUserType(), null, 
+                user.getAccount(), user.getDescription(), user.getUserType(), null,
                 ReturnPrivateKey.TURE.getValue(), CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
@@ -361,7 +430,7 @@ public class AppIntegrationApi extends BaseController {
         Instant startTime = Instant.now();
 
         // query user row
-        TbUser userRow = userService.bindUserInfo(user, CheckUserExist.FALSE.getValue());
+        TbUser userRow = userService.bindUserInfo(user, user.getAccount(), CheckUserExist.FALSE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPublicKey useTime:{} result:{}",
@@ -378,18 +447,18 @@ public class AppIntegrationApi extends BaseController {
             @RequestParam(required = true) Integer pageNumber,
             @RequestParam(required = true) Integer pageSize,
             @RequestParam(required = false) String account,
-            @RequestParam(required = false) String commParam,
+            @RequestParam(required = false) String userParam,
             @RequestParam(required = false, defaultValue = "") Integer hasPrivateKey)
             throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start userList startTime:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
-                startTime.toEpochMilli(), groupId, pageNumber, pageSize, commParam);
+        log.info("start userList startTime:{} groupId:{} pageNumber:{} pageSize:{} userParam:{}",
+                startTime.toEpochMilli(), groupId, pageNumber, pageSize, userParam);
 
         UserParam param = new UserParam();
         param.setGroupId(groupId);
         param.setAccount(account);
-        param.setCommParam(commParam);
+        param.setCommParam(userParam);
         param.setPageSize(pageSize);
         param.setHasPk(hasPrivateKey);
 
@@ -401,14 +470,14 @@ public class AppIntegrationApi extends BaseController {
             param.setPageSize(pageSize);
 
             List<TbUser> listOfUser = userService.queryUserList(param);
-            pagesponse.setData(listOfUser);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfUser);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end userList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+                JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
@@ -442,7 +511,8 @@ public class AppIntegrationApi extends BaseController {
         // add user row
         TbUser userRow = userService.addUserInfo(reqImport.getGroupId(), reqImport.getUserName(),
                 reqImport.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
-                privateKeyEncoded, ReturnPrivateKey.FALSE.getValue(), CheckUserExist.FALSE.getValue());
+                privateKeyEncoded, ReturnPrivateKey.FALSE.getValue(),
+                CheckUserExist.FALSE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPrivateKey useTime:{} result:{}",
@@ -493,7 +563,7 @@ public class AppIntegrationApi extends BaseController {
         log.info("end importPemPrivateKey useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JsonTools.toJSONString(baseResponse));
-        return new BaseResponse(ConstantCode.SUCCESS);
+        return baseResponse;
     }
 
     /**
@@ -545,7 +615,7 @@ public class AppIntegrationApi extends BaseController {
      */
     @GetMapping("dbInfo")
     public BaseResponse getDbInfo() {
-        log.info("getDbInfo:{}");
+        log.info("getDbInfo.");
         return new BaseResponse(ConstantCode.SUCCESS, tableService.getDbInfo());
     }
 }

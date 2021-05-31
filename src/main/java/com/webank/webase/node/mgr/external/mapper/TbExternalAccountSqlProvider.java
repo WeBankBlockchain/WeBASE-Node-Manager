@@ -19,14 +19,22 @@ public class TbExternalAccountSqlProvider {
             "FROM tb_user " +
             ") b on ext.address=b.address and ext.group_id=b.group_id " +
             "LEFT JOIN " +
-            "( SELECT user_name,sum(trans_count) transCount, max(trans_hashs) hashs " +
+            "( SELECT distinct(user_name),sum(trans_count) transCount, max(trans_hashs) hashs " +
             "FROM tb_user_transaction_monitor_${groupId} WHERE user_type=1 group by user_name" +
             // if external address equal to monitor user's username, it means user not imported
             ") c on ext.address=c.user_name";
         sql.SELECT(sqlStr);
-        sql.WHERE("ext.group_id= #{groupId}");
+        if (param.getGroupId() != null) {
+            sql.WHERE("ext.group_id = #{groupId}");
+        }
         if (param.getAccount() != null) {
             sql.WHERE("b.account = #{account}");
+        }
+        if (param.getUserName() != null) {
+            sql.WHERE("b.userName = #{userName}");
+        }
+        if (param.getAddress() != null) {
+            sql.WHERE("ext.address = #{address}");
         }
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal
@@ -45,16 +53,28 @@ public class TbExternalAccountSqlProvider {
 
     public String count(UserParam param) {
         SQL sql = new SQL();
-        sql.FROM("tb_external_account");
-        sql.SELECT("count(1)");
+        sql.SELECT("count(1),ext.group_id,ext.address,b.userId,b.account,b.userName from tb_external_account ext "
+            + "left join "
+            + "(select user_id userId,group_id,address,account,user_name userName from tb_user) b "
+            + "on ext.address=b.address and ext.group_id=b.group_id ");
         if (param.getGroupId() != null) {
-            sql.WHERE("group_id = #{groupId}");
+            sql.WHERE("ext.group_id = #{groupId}");
+        }
+        if (param.getAccount() != null) {
+            sql.WHERE("b.account = #{account}");
         }
         if (param.getUserName() != null) {
-            sql.WHERE("user_name = #{userName}");
+            sql.WHERE("b.userName = #{userName}");
         }
-        if (param.getUserId() != null) {
-            sql.WHERE("id = #{userId}");
+        if (param.getAddress() != null) {
+            sql.WHERE("ext.address = #{address}");
+        }
+        // get all or some
+        // 1-all(default), 2-normal, 3-abnormal
+        if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.NORMAL.getValue()) {
+            sql.WHERE("b.userId is not NULL");
+        } else if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.ABNORMAL.getValue()) {
+            sql.WHERE("b.userId is NULL");
         }
         return sql.toString();
     }
@@ -76,8 +96,6 @@ public class TbExternalAccountSqlProvider {
         sql.ORDER_BY("create_time ");
         if (param.getStart() != null && param.getPageSize() != null) {
             sql.LIMIT(param.getStart() + "," +param.getPageSize());
-//            sql.LIMIT(param.getStart());
-//            sql.LIMIT(param.getPageSize());
         }
         return sql.toString();
     }

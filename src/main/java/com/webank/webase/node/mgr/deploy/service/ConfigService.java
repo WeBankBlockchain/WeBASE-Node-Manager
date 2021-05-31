@@ -15,11 +15,9 @@
 package com.webank.webase.node.mgr.deploy.service;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.ConfigTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
@@ -41,39 +39,9 @@ public class ConfigService {
      * @param type
      * @return
      */
-    public List<TbConfig> selectConfigList(boolean update, ConfigTypeEnum type) {
-        if (type == null) {
-            return Collections.emptyList();
-        }
-
-        switch (type) {
-            case DOCKER_IMAGE_TYPE:
-                // update tags from docker hub registry
-//                    if (StringUtils.isBlank(constants.getImageTagUpdateUrl())) {
-//                        throw new NodeMgrException(ConstantCode.NO_DOCKER_TAG_UPDATE_URL_ERROR);
-//                    }
-//
-//                    log.info("Fetch tag from: [{}]", constants.getImageTagUpdateUrl());
-//                    ResponseEntity<ImageTag[]> responseEntity =
-//                            this.genericRestTemplate.getForEntity(constants.getImageTagUpdateUrl(), ImageTag[].class);
-//                    if (responseEntity == null
-//                            || ArrayUtils.isEmpty(responseEntity.getBody())) {
-//                        // docker hub api return empty
-//                        throw new NodeMgrException(ConstantCode.UPDATE_DOCKER_TAG_ERROR);
-//                    }
-
-//
-//                    log.info("Docker image tag update success, new tag count is: [{}].",
-//                            CollectionUtils.size(configList));
-
-                List<TbConfig> configList = tbConfigMapper.selectByType(type.getId());
-                // return filterByEncryptType(configList, encryptType.getEncryptType());
-                return configList;
-            default:
-                break;
-        }
-
-        return Collections.emptyList();
+    public List<TbConfig> selectConfigList(boolean update, int type) {
+        List<TbConfig> configList = tbConfigMapper.selectByType(type);
+        return configList;
 
     }
 

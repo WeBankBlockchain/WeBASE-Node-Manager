@@ -23,6 +23,8 @@ public class FrontInfo {
     private String frontIp;
     @NotNull
     private Integer frontPort;
-    @NotBlank
+    /**
+     * deprecated in v1.5.1
+     */
     private String agency;
 }

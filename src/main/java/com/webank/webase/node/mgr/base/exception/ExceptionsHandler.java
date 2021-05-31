@@ -41,7 +41,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(value = NodeMgrException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public BaseResponse myExceptionHandler(NodeMgrException nodeMgrException) {
-        log.warn("catch business exception", nodeMgrException);
+        log.error("catch business exception:[]", nodeMgrException);
         RetCode retCode = Optional.ofNullable(nodeMgrException).map(NodeMgrException::getRetCode)
             .orElse(ConstantCode.SYSTEM_EXCEPTION);
 
@@ -57,7 +57,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(value = ParamException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public BaseResponse paramExceptionHandler(ParamException paramException) {
-        log.warn("catch param exception", paramException);
+        log.error("catch param exception:[]", paramException);
         RetCode retCode = Optional.ofNullable(paramException).map(ParamException::getRetCode)
             .orElse(ConstantCode.SYSTEM_EXCEPTION);
 
@@ -73,7 +73,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(value = TypeMismatchException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public BaseResponse typeMismatchExceptionHandler(TypeMismatchException ex) {
-        log.warn("catch typeMismatchException", ex);
+        log.error("catch typeMismatchException:[]", ex);
 
         RetCode retCode = new RetCode(ConstantCode.PARAM_EXCEPTION.getCode(), ex.getMessage());
         BaseResponse bre = new BaseResponse(retCode);
@@ -90,7 +90,7 @@ public class ExceptionsHandler {
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     public BaseResponse accessDeniedExceptionHandler(AccessDeniedException exception)
         throws Exception {
-        log.warn("catch accessDenied exception", exception);
+        log.error("catch accessDenied exception:[]", exception);
         BaseResponse bre = new BaseResponse(ConstantCode.ACCESS_DENIED);
         log.warn("accessDenied exception return:{}", JsonTools.toJSONString(bre));
         return bre;
@@ -103,7 +103,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(value = RuntimeException.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public BaseResponse exceptionHandler(RuntimeException exc) {
-        log.warn("catch RuntimeException", exc);
+        log.error("catch RuntimeException:[]", exc);
         // 默认系统异常
         RetCode retCode = ConstantCode.SYSTEM_EXCEPTION;
         // v1.3.1 增加异常细节

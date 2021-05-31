@@ -49,6 +49,8 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
@@ -385,7 +387,7 @@ public class FrontInterfaceService {
         log.debug("start getObserverList. groupId:{}", groupId);
         List<String> observers =
                 frontRestTools.getForEntity(groupId, FrontRestTools.URI_GET_OBSERVER_LIST, List.class);
-        log.info("end getObserverList. observers:{}", JsonTools.toJSONString(observers));
+        log.debug("end getObserverList. observers:{}", JsonTools.toJSONString(observers));
         return observers;
     }
 
@@ -516,8 +518,15 @@ public class FrontInterfaceService {
      */
     public FrontNodeConfig getNodeConfigFromSpecificFront(String frontIp, Integer frontPort) {
         Integer groupId = Integer.MAX_VALUE;
-        FrontNodeConfig nodeInfo = getFromSpecificFront(groupId, frontIp, frontPort,
-                FrontRestTools.URI_NODECONFIG, FrontNodeConfig.class);
+        FrontNodeConfig nodeConfig = getFromSpecificFront(groupId, frontIp, frontPort,
+            FrontRestTools.URI_NODE_CONFIG, FrontNodeConfig.class);
+        return nodeConfig;
+    }
+
+    public NodeInformation getNodeInfoFromSpecificFront(String frontIp, Integer frontPort) {
+        Integer groupId = Integer.MAX_VALUE;
+        NodeInformation nodeInfo = getFromSpecificFront(groupId, frontIp, frontPort,
+            FrontRestTools.URI_NODE_INFO, NodeInformation.class);
         return nodeInfo;
     }
 

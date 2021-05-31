@@ -32,8 +32,6 @@ public class ReqConfigChain {
     @NotNull
     private String[] ipconf;
 
-//    @Positive
-//    private int tagId;
     /**
      * ex: v2.7.0, v2.7.1 etc.
      */

@@ -76,7 +76,7 @@ public class AppIntegrationController extends BaseController {
     public BasePageResponse queryAppList(@RequestParam(required = false) Integer appType,
             @RequestParam(required = false) String appName,
             @RequestParam(required = false) String appKey) throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryAppList startTime:{} appName:{},appKey:{}", startTime.toEpochMilli(),
                 appName, appKey);
@@ -92,15 +92,15 @@ public class AppIntegrationController extends BaseController {
         }
         // query app info
         int count = appIntegrationService.countOfAppInfo(param);
-        pagesponse.setTotalCount(count);
+        pageResponse.setTotalCount(count);
         if (count > 0) {
             List<TbAppInfo> list = appIntegrationService.listOfAppInfo(param);
-            pagesponse.setData(list);
+            pageResponse.setData(list);
         }
 
         log.info("end queryAppList useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
-        return pagesponse;
+        return pageResponse;
     }
     
     /**

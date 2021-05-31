@@ -56,9 +56,9 @@ public class AppIntegrationFilter implements HandlerInterceptor {
      * validate app request.
      */
     private void validateAppRequest(HttpServletRequest request) {
-        String timestamp = request.getParameter("timestamp");
-        String appKey = request.getParameter("appKey");
-        String signature = request.getParameter("signature");
+        String timestamp = request.getParameter(ConstantProperties.PARAM_TIMESTAMP);
+        String appKey = request.getParameter(ConstantProperties.PARAM_APP_KEY);
+        String signature = request.getParameter(ConstantProperties.PARAM_SIGNATURE);
         log.debug("validateAppRequest. timestamp:{} appKey:{} signature:{}", timestamp, appKey,
                 signature);
         // check param

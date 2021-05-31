@@ -1,5 +1,5 @@
 # server version
-version: v1.5.0
+version: v1.5.1
 
 #server config
 server:
@@ -96,8 +96,8 @@ constant:
   resetGroupListInterval: 15000
   ###interval block statistic, unit: ms
   statBlockRetainMax: 100000
-  statBlockFixedDelay: 5000
-  statBlockPageSize: 10 # block stat data to pull in one time
+  statBlockFixedDelay: 10000
+  statBlockPageSize: 20 # block stat data to pull in one time
   enableExternalFromBlock: true # enable record account and contract from block
 
   #### 1.4.0 visual deploy

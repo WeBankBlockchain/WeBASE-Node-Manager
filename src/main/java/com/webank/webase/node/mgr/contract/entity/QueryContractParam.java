@@ -20,6 +20,7 @@ public class QueryContractParam {
 
     private Integer groupId;
     private String contractName;
+    @Deprecated
     private String account;
     private String contractAddress;
     private Integer contractStatus;

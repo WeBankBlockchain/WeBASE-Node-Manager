@@ -91,6 +91,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
@@ -197,14 +199,19 @@ public class FrontService {
                     log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
                 }
                 // get node config(add in 1.5.0)
+                // p2p/rpc/channel port etc.
                 FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+                // get agency of node
+                NodeInformation nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
                 tbFront.setP2pPort(nodeConfig.getP2pport());
                 tbFront.setJsonrpcPort(nodeConfig.getRpcport());
                 tbFront.setChannelPort(nodeConfig.getChannelPort());
-                //copy attribute
+                // copy attribute
                 tbFront.setNodeId(syncStatus.getNodeId());
                 tbFront.setClientVersion(clientVersion);
                 tbFront.setSupportVersion(supportVersion);
+                // set agency from chain
+                tbFront.setAgency(nodeInfo.getAgency() == null ? "fisco" : nodeInfo.getAgency());
                 //update front info
                 frontMapper.updateBasicInfo(tbFront);
                 // save group info
@@ -229,6 +236,8 @@ public class FrontService {
         // set default chainId
         tbFront.setChainId(0);
         tbFront.setChainName("default");
+        // default normal front
+        tbFront.setStatus(DataStatus.NORMAL.getValue());
 
         String frontIp = frontInfo.getFrontIp();
         Integer frontPort = frontInfo.getFrontPort();
@@ -278,7 +287,10 @@ public class FrontService {
         tbFront.setP2pPort(nodeConfig.getP2pport());
         tbFront.setJsonrpcPort(nodeConfig.getRpcport());
         tbFront.setChannelPort(nodeConfig.getChannelPort());
-
+        // get agency of node
+        NodeInformation nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
+        log.info("front's agency is :{}", nodeInfo);
+        tbFront.setAgency(nodeInfo.getAgency());
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
@@ -1282,5 +1294,17 @@ public class FrontService {
             && nodeSupportVerInt < VersionProperties.NODE_LOWEST_SUPPORT_VERSION_INT ) {
             throw new NodeMgrException(ConstantCode.WEBASE_VERSION_NOT_MATCH_FISCO_SUPPORT_VERSION);
         }
+    }
+
+    public FrontNodeConfig getFrontNodeConfig(int frontId) {
+        TbFront front = this.getById(frontId);
+        if (front == null) {
+            log.error("");
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+        }
+        String frontIp = front.getFrontIp();
+        int frontPort = front.getFrontPort();
+        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+        return nodeConfig;
     }
 }

@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.pagetools.entity.MapHandle;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -637,7 +638,7 @@ public class NodeMgrTools {
         File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
         // delete old private key
         if (keystorePath.exists()) {
-            keystorePath.delete();
+            deleteDir(keystorePath);
         }
         keystorePath.mkdir();
         // get private key
@@ -664,7 +665,7 @@ public class NodeMgrTools {
         File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
         // delete old private key
         if (keystorePath.exists()) {
-            keystorePath.delete();
+            deleteDir(keystorePath);
         }
         keystorePath.mkdir();
         // get private key
@@ -676,4 +677,85 @@ public class NodeMgrTools {
         return exportedKeyPath;
     }
 
+    /**
+     * 文件转Base64
+     *
+     * @param filePath 文件路径
+     * @return
+     */
+    public static String fileToBase64(String filePath) {
+        if (filePath == null) {
+            return null;
+        }
+        FileInputStream inputFile = null;
+        try {
+            File file = new File(CleanPathUtil.cleanString(filePath));
+            inputFile = new FileInputStream(file);
+            byte[] buffer = new byte[(int) file.length()];
+            int size = inputFile.read(buffer);
+            log.debug("fileToBase64 inputFile size:{}", size);
+            return Base64.getEncoder().encodeToString(buffer);
+        } catch (IOException e) {
+            log.error("base64ToFile IOException:[{}]", e.toString());
+        } finally {
+            if (inputFile != null) {
+                try {
+                    inputFile.close();
+                } catch (IOException e) {
+                    log.error("closeable IOException:[{}]", e.toString());
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * delete dir or file whatever
+     * @param dir
+     * @return
+     */
+    public static boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            if (children == null) {
+                return dir.delete();
+            }
+            // recursive delete until dir is emtpy to delete
+            for (int i=0; i<children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        // delete empty dir
+        return dir.delete();
+    }
+
+    /**
+     * 支持数字，字母与下划线"_"
+     *
+     * @param input
+     * @return
+     */
+    public static boolean isLetterDigit(String input) {
+        String regex = "^[a-z0-9A-Z_]+$";
+        return input.matches(regex);
+    }
+
+    /**
+     * 字母开头
+     * @param input
+     * @return
+     */
+    public static boolean startWithLetter(String input) {
+        if (StringUtils.isBlank(input)) {
+            return false;
+        }
+        if (!isLetterDigit(input)) {
+            return false;
+        }
+        String regex = "^[a-zA-Z]+$";
+        return (input.charAt(0)+"").matches(regex);
+    }
 }

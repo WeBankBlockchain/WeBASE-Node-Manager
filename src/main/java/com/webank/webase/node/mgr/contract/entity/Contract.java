@@ -16,13 +16,14 @@ package com.webank.webase.node.mgr.contract.entity;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * param to save contract
  */
 @Data
+@NoArgsConstructor
 public class Contract {
-    @NotBlank
     private String account;
     @NotNull
     private Integer groupId;
@@ -35,4 +36,12 @@ public class Contract {
     private String contractAbi;
     private String contractBin;
     private String bytecodeBin;
+
+    public Contract(Integer groupId, String contractName, String contractPath,
+        String account) {
+        this.groupId = groupId;
+        this.contractName = contractName;
+        this.contractPath = contractPath;
+        this.account = account;
+    }
 }

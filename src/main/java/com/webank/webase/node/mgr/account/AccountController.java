@@ -138,7 +138,7 @@ public class AccountController extends BaseController {
         log.info("start updateAccountInfo startTime:{}", startTime.toEpochMilli());
 
         // current
-        String currentAccount = getCurrentAccount(request);
+        String currentAccount = accountService.getCurrentAccount(request);
 
         // update account row
         accountService.updateAccountRow(currentAccount, info);
@@ -162,7 +162,7 @@ public class AccountController extends BaseController {
     public BasePageResponse queryAccountList(@PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
-        BasePageResponse pagesponse = new BasePageResponse(ConstantCode.SUCCESS);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{}",
             startTime.toEpochMilli(), pageNumber, pageSize);
@@ -175,13 +175,13 @@ public class AccountController extends BaseController {
                 SqlSortType.DESC.getValue());
             List<TbAccountInfo> listOfAccount = accountService.listOfAccount(param);
             listOfAccount.stream().forEach(accountData -> accountData.setAccountPwd(null));
-            pagesponse.setData(listOfAccount);
-            pagesponse.setTotalCount(count);
+            pageResponse.setData(listOfAccount);
+            pageResponse.setTotalCount(count);
         }
 
         log.info("end queryAccountList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pagesponse));
-        return pagesponse;
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
+        return pageResponse;
     }
 
     /**
@@ -211,7 +211,7 @@ public class AccountController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
-        String targetAccount = getCurrentAccount(request);
+        String targetAccount = accountService.getCurrentAccount(request);
 
         // update account row
         accountService
@@ -222,11 +222,4 @@ public class AccountController extends BaseController {
         return baseResponse;
     }
     
-    /**
-     * get current account.
-     */
-    private String getCurrentAccount(HttpServletRequest request) {
-        String token = NodeMgrTools.getToken(request);
-        return tokenService.getValueFromToken(token);
-    }
 }

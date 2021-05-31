@@ -88,8 +88,8 @@ public class FrontRestTools {
     public static final String URI_BLOCK_HEADER_BY_NUMBER = "web3/blockHeaderByNumber/%1d";
     public static final String URI_BLOCK_HEADER_BY_HASH = "web3/blockHeaderByHash/%1s";
     public static final String URI_SEARCH_BLOCK_OR_TX = "web3/search";
-    public static final String URI_NODECONFIG = "web3/nodeConfig";
-    public static final String URI_NODEINFO = "web3/nodeInfo";
+    public static final String URI_NODE_CONFIG = "web3/nodeConfig";
+    public static final String URI_NODE_INFO = "web3/nodeInfo";
     public static final String FRONT_PERFORMANCE_RATIO = "performance";
     public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey";
@@ -339,7 +339,7 @@ public class FrontRestTools {
         T response = restTemplateExchange(groupId, uri, HttpMethod.GET, null, clazz);
         if (response == null) {
             log.error("getForEntity response is null!");
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.attach("getForEntity response is null"));
         }
         return response;
     }
@@ -351,7 +351,7 @@ public class FrontRestTools {
         T response = restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
         if (response == null) {
             log.error("postForEntity response is null!");
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.attach("postForEntity response is null"));
         }
         return response;
     }
@@ -363,7 +363,7 @@ public class FrontRestTools {
         T response = restTemplateExchange(groupId, uri, HttpMethod.DELETE, params, clazz);
         if (response == null) {
             log.error("deleteForEntity response is null!");
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.attach("deleteForEntity response is null"));
         }
         return response;
     }
@@ -403,8 +403,8 @@ public class FrontRestTools {
                 HttpEntity entity = buildHttpEntity(param);// build entity
                 if (null == restTemplate) {
                     log.error("fail restTemplateExchange, rest is null. groupId:{} uri:{}",
-                            groupId,uri);
-                    throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
+                        groupId,uri);
+                    throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION.attach("restTemplate is null"));
                 }
                 ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
                 frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.NORMAL.getValue());
@@ -417,7 +417,7 @@ public class FrontRestTools {
                     frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
                     throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
                 }
-                log.info("continue next front", ex);
+                log.info("continue next front");
                 continue;
             } catch (HttpStatusCodeException ex) {
                 // case2: request front success but return fail

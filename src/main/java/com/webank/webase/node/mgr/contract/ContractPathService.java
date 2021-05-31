@@ -32,18 +32,20 @@ public class ContractPathService {
     @Autowired
     private ContractPathMapper contractPathMapper;
 
-    public List<TbContractPath> listContractPath(Integer groupId) {
-        return contractPathMapper.listOfContractPath(groupId);
+    public List<TbContractPath> listContractPath(Integer groupId, String account) {
+        return contractPathMapper.listOfContractPath(groupId, account);
     }
 
     /**
      * save not exist path
+     * 
      * @param groupId
      * @param pathName
      * @return
      */
-    public int save(Integer groupId, String pathName, boolean ignoreRepeat) {
-        TbContractPath check = contractPathMapper.findOne(new ContractPathParam(groupId, pathName));
+    public int save(Integer groupId, String pathName, String account, boolean ignoreRepeat) {
+        TbContractPath check =
+                contractPathMapper.findOne(new ContractPathParam(groupId, pathName, null));
         if (check != null) {
             if (ignoreRepeat) {
                 return 0;
@@ -55,6 +57,7 @@ public class ContractPathService {
         TbContractPath contractPath = new TbContractPath();
         contractPath.setContractPath(pathName);
         contractPath.setGroupId(groupId);
+        contractPath.setAccount(account);
         return contractPathMapper.add(contractPath);
     }
 
@@ -79,5 +82,15 @@ public class ContractPathService {
 
     public void removeByGroupId(Integer groupId) {
         contractPathMapper.removeByGroupId(groupId);
+    }
+
+    public boolean checkPathExist(Integer groupId, String pathName, String account) {
+        TbContractPath contractPath =
+                contractPathMapper.findOne(new ContractPathParam(groupId, pathName, account));
+        if (contractPath != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

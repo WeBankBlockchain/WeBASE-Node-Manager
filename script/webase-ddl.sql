@@ -416,6 +416,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_path (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约路径编号',
   contract_path varchar(128) binary NOT NULL COMMENT '合约所在目录',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
+  account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (id),
@@ -489,7 +490,7 @@ CREATE TABLE IF NOT EXISTS tb_external_contract (
   deploy_time datetime NOT NULL COMMENT '部署时间',
   contract_bin mediumtext DEFAULT NULL COMMENT '合约链上binary',
   contract_status int(1) DEFAULT '1' COMMENT '部署状态（1：未部署，2：部署成功，3：部署失败）',
-  contract_type tinyint(4) DEFAULT '0' COMMENT '合约类型(0-普通合约，1-系统合约)',
+  contract_type tinyint(4) DEFAULT '0' COMMENT '合约类型(0-普通合约，1-系统合约，2-APP合约)',
   contract_name varchar(120) binary DEFAULT NULL COMMENT '合约名称',
   contract_version varchar(120) DEFAULT NULL COMMENT '合约版本',
   contract_abi mediumtext COMMENT '编译合约生成的abi文件内容',
@@ -527,6 +528,7 @@ CREATE TABLE IF NOT EXISTS tb_app_info (
 
 -- ----------------------------
 -- Table structure for tb_contract_store
+-- contract from application manage
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_contract_store (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '自增编号',
@@ -541,6 +543,54 @@ CREATE TABLE IF NOT EXISTS tb_contract_store (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (id),
   UNIQUE KEY uk_version (app_key,contract_name,contract_version)
-) ENGINE=InnoDB AUTO_INCREMENT=300001 DEFAULT CHARSET=utf8 COMMENT='应用合约仓库';
+) ENGINE=InnoDB AUTO_INCREMENT=300001 DEFAULT CHARSET=utf8 COMMENT='应用合约信息';
+
+-- ----------------------------
+-- Table structure for tb_contract_store
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tb_warehouse (
+  id int(11) NOT NULL COMMENT '自增编号',
+  warehouse_name varchar(255) binary NOT NULL COMMENT '合约仓库名',
+  warehouse_name_en varchar(255) binary NOT NULL COMMENT '仓库名（英文）',
+  type  int(11) NOT NULL COMMENT '仓库类型',
+  warehouse_icon     mediumtext COMMENT '仓库图标（Base64）',
+  description     mediumtext COMMENT '仓库描述(Base64)',
+  description_en  mediumtext COMMENT '仓库描述（英文）(Base64)',
+  warehouse_detail   mediumtext COMMENT '仓库详情',
+  warehouse_detail_en   mediumtext COMMENT '仓库详情（英文）',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_name(warehouse_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库';
+
+CREATE TABLE IF NOT EXISTS tb_contract_folder (
+  id int(11) NOT NULL COMMENT '自增编号',
+  folder_name      varchar(255) binary NOT NULL COMMENT '合约目录名',
+  description     mediumtext COMMENT '目录描述(Base64)',
+  description_en  mediumtext COMMENT '目录描述（英文）(Base64)',
+  folder_detail   mediumtext COMMENT '目录详情',
+  folder_detail_en   mediumtext COMMENT '目录详情（英文）',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',
+  warehouse_id  int(11) NOT NULL COMMENT '合约仓库编号',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_name(warehouse_id,folder_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库目录';
+
+CREATE TABLE IF NOT EXISTS tb_contract_item (
+  id int(11) NOT NULL COMMENT '自增编号',
+  contract_name varchar(255) binary NOT NULL COMMENT '合约名称',
+  contract_source mediumtext COMMENT '合约源码(Base64)',
+  description     mediumtext COMMENT '合约描述(Base64)',
+  description_en  mediumtext COMMENT '合约描述（英文）(Base64)',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  modify_time datetime DEFAULT NULL COMMENT '修改时间',  
+  warehouse_id  int(11) NOT NULL COMMENT '合约仓库编号',
+  contract_folder_id  int(11) NOT NULL COMMENT '合约目录编号',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_name(warehouse_id,contract_folder_id,contract_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库合约信息';
+
 
 SET FOREIGN_KEY_CHECKS = 1;

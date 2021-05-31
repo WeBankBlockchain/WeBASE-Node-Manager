@@ -212,7 +212,7 @@ public class UserService {
      * bind user info.
      */
     @Transactional
-    public TbUser bindUserInfo(BindUserInputParam user, boolean isCheckExist) throws NodeMgrException {
+    public TbUser bindUserInfo(BindUserInputParam user, String account, boolean isCheckExist) throws NodeMgrException {
         log.debug("start bindUserInfo User:{}", JsonTools.toJSONString(user));
 
         String publicKey = user.getPublicKey();
@@ -230,10 +230,10 @@ public class UserService {
         // check group id
         groupService.checkGroupId(user.getGroupId());
         // check account
-        accountService.accountExist(user.getAccount());
+        accountService.accountExist(account);
 
         // check userName
-        TbUser userRow = queryByName(user.getGroupId(), user.getUserName(), user.getAccount());
+        TbUser userRow = queryByName(user.getGroupId(), user.getUserName(), account);
         if (Objects.nonNull(userRow)) {
             if (!isCheckExist) {
                 return userRow;
@@ -247,7 +247,7 @@ public class UserService {
         }
 
         // check address
-        TbUser addressRow = queryUser(null, user.getGroupId(), null, address, user.getAccount());
+        TbUser addressRow = queryUser(null, user.getGroupId(), null, address, account);
         if (Objects.nonNull(addressRow)) {
             if (!isCheckExist) {
                 return addressRow;
@@ -258,7 +258,7 @@ public class UserService {
 
         // add row
         TbUser newUserRow = new TbUser(HasPk.NONE.getValue(), user.getUserType(),
-                user.getUserName(), user.getAccount(), user.getGroupId(), address, publicKey,
+                user.getUserName(), account, user.getGroupId(), address, publicKey,
                 user.getDescription());
         Integer affectRow = userMapper.addUserRow(newUserRow);
         if (affectRow == 0) {
@@ -318,6 +318,22 @@ public class UserService {
         return user;
     }
 
+    public String queryUserDetail(int groupId, String userAddress) throws NodeMgrException {
+        // query sign user id
+        String signUserId = getSignUserIdByAddress(groupId, userAddress);
+        // get key from sign
+        KeyPair keyPair = this.getUserKeyPairFromSign(groupId, signUserId);
+        // decode key
+        String privateKeyRaw = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
+        return privateKeyRaw;
+    }
+
+    /**
+     * return key pair with private key encoded in base64
+     * @param groupId
+     * @param signUserId
+     * @return the private key of KeyPair is encoded in base64
+     */
     private KeyPair getUserKeyPairFromSign(int groupId, String signUserId) {
         Map<String, String> param = new HashMap<>();
         param.put("signUserId", signUserId);

@@ -43,7 +43,7 @@ public class ChainController {
     @Autowired
     private ChainService chainService;
 
-    @GetMapping(value = "/mointorInfo/{frontId}")
+    @GetMapping(value = "/monitorInfo/{frontId}")
     public BaseResponse getChainMoinntorInfo(@PathVariable("frontId") Integer frontId,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime beginDate,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime endDate,

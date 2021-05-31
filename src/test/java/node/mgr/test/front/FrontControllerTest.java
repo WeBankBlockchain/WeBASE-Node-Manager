@@ -49,7 +49,8 @@ public class FrontControllerTest extends TestBase {
         param.setFrontPort(8081);
         param.setAgency("1fe");
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post( "/front/new").
+        ResultActions resultActions = mockMvc.perform(
+            MockMvcRequestBuilders.post( "/front/new").
             content(JsonTools.toJSONString(param)).
             contentType(MediaType.APPLICATION_JSON_UTF8)
         );

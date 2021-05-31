@@ -244,7 +244,7 @@ public class ConstantCode {
     public static final RetCode GENERATE_FRONT_YML_ERROR = RetCode.mark(202458, "Generate front application.yml file failed.");
     public static final RetCode EXEC_HOST_INIT_SCRIPT_ERROR = RetCode.mark(202459, "Exec host init script failed.");
     public static final RetCode TRANSFER_FILES_ERROR = RetCode.mark(202460, "Transfer files error.");
-    public static final RetCode DOCKER_OPERATION_ERROR = RetCode.mark(202461, "Docker option error.");
+    public static final RetCode HOST_ONLY_ALL_LOCALHOST_OR_NOT_LOCALHOST = RetCode.mark(202461, "Host must be all localhost(127.0.0.1) or all non-localhost");
     public static final RetCode TWO_NODES_AT_LEAST = RetCode.mark(202462, "Two nodes at least.");
     public static final RetCode TWO_SEALER_IN_GROUP_AT_LEAST = RetCode.mark(202463, "Group need two sealers at least.");
     public static final RetCode WEBASE_SIGN_CONFIG_ERROR = RetCode.mark(202464, "Please check webaseSignAddress in application.yml file.");
@@ -310,6 +310,15 @@ public class ConstantCode {
     public static final RetCode TIMESTAMP_TIMEOUT = RetCode.mark(202524, "timestamp timeout");
     public static final RetCode APPKEY_NOT_EXISTS = RetCode.mark(202525, "app key not exists");
     public static final RetCode SIGNATURE_NOT_MATCH = RetCode.mark(202526, "signature not match");
+    public static final RetCode REQUEST_ENCRYPT_FAIL = RetCode.mark(202527, "request encrypt fail");
+    public static final RetCode REQUEST_DECRYPT_FAIL = RetCode.mark(202528, "request decrypt fail");
+    public static final RetCode ENCRYPT_NOT_MATCH = RetCode.mark(202529, "isTransferEncrypt config not match");
+
+    // add in v1.5.1
+    public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(202531, "generate project failed in scaffold");
+    public static final RetCode GET_FRONT_SDK_MAP_FAIL = RetCode.mark(202532, "get sdk cert/key content map failed");
+    public static final RetCode PARAM_INVALID_LETTER_DIGIT = RetCode.mark(202533, "Only support letter and digit, please check your params");
+    public static final RetCode CONTRACT_PATH_NOT_EXISTS = RetCode.mark(202534, "contract path not exists.");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
