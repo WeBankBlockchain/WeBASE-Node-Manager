@@ -88,7 +88,7 @@ public interface NodeMapper {
     @Select({
             "select * from tb_node where node_id= #{nodeId,jdbcType=VARCHAR} and group_id=#{groupId,jdbcType=INTEGER}"
     })
-    TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId,@Param("groupId") int groupId);
+    TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId, @Param("groupId") int groupId);
 
     @Select({
             " SELECT " +
