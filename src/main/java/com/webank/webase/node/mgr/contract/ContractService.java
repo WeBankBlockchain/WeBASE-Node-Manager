@@ -29,16 +29,7 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
-import com.webank.webase.node.mgr.contract.entity.Contract;
-import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.ReqCopyContracts;
-import com.webank.webase.node.mgr.contract.entity.ReqListContract;
-import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.contract.entity.TbContractPath;
-import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.contract.entity.*;
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
@@ -49,15 +40,6 @@ import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
 import com.webank.webase.node.mgr.user.UserService;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
@@ -70,6 +52,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * services for contract data.
@@ -180,6 +167,7 @@ public class  ContractService {
         ContractStoreParam contractStoreParam = new ContractStoreParam();
         contractStoreParam.setAppKey(appKey);
         contractStoreParam.setContractVersion(contractVersion);
+        contractStoreParam.setContractName(contractName);
         List<TbContractStore> listOfContractStore =
             contractStoreService.listOfContractStore(contractStoreParam);
         if (CollectionUtils.isEmpty(listOfContractStore)) {
