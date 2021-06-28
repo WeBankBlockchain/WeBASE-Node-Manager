@@ -492,7 +492,7 @@ public class FrontService {
             log.error("updateFrontStatus updateFront is null");
             return;
         }
-        if (updateFront.getStatus() != null &&  updateFront.getStatus().equals(status)) {
+        if (updateFront.getStatus().equals(status)) {
             return;
         }
         LocalDateTime modifyTime = updateFront.getModifyTime();
