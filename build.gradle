@@ -21,7 +21,7 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.1.15.RELEASE"
+def springboot_version="2.1.18.RELEASE"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
@@ -31,11 +31,19 @@ List springboot = [
 ]
 
 // cover old version
-def spring_version="5.1.15.RELEASE"
-List spring =[
+def spring_version="5.1.20.RELEASE"
+List spring = [
     "org.springframework:spring-jdbc:$spring_version",
     "org.springframework:spring-tx:$spring_version"
 ]
+// cover old version
+def spring_security_version="5.4.4"
+List spring_security = [
+    "org.springframework.security:spring-security-core:$spring_security_version",
+    "org.springframework.security:spring-security-web:$spring_security_version",
+    "org.springframework.security:spring-security-config:$spring_security_version",
+]
+
 
 List jaxb = [
      "javax.xml.bind:jaxb-api:2.3.0",
@@ -83,7 +91,7 @@ List scaffold = [
 ]
 
 dependencies {
-    compile springboot,spring,jaxb,jackson,log4j,scaffold
+    compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold
     compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2"
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
