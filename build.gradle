@@ -31,10 +31,18 @@ List springboot = [
 ]
 
 // cover old version
-def spring_version="5.1.20.RELEASE"
+def spring_version="5.2.15.RELEASE"
 List spring = [
+    "org.springframework:spring-core:$spring_version",
+    "org.springframework:spring-aop:$spring_version",
+    "org.springframework:spring-beans:$spring_version",
+    "org.springframework:spring-context:$spring_version",
+    "org.springframework:spring-expression:$spring_version",
+    "org.springframework:spring-jcl:$spring_version",
     "org.springframework:spring-jdbc:$spring_version",
-    "org.springframework:spring-tx:$spring_version"
+    "org.springframework:spring-tx:$spring_version",
+    "org.springframework:spring-test:$spring_version",
+    "org.springframework:spring-web:$spring_version"
 ]
 // cover old version
 def spring_security_version="5.4.4"
