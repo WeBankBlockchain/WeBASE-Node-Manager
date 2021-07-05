@@ -15,9 +15,9 @@
  */
 package node.mgr.test.method;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.method.entity.Method;
-import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.transaction.method.entity.Method;
+import com.webank.webase.node.mgr.lite.transaction.method.entity.NewMethodInputParam;
 import java.util.Arrays;
 import node.mgr.test.base.TestBase;
 import org.junit.Before;

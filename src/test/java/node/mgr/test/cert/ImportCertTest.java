@@ -15,11 +15,11 @@
  */
 package node.mgr.test.cert;
 
-import static com.webank.webase.node.mgr.base.tools.CertTools.byteToHex;
+import static com.webank.webase.node.mgr.lite.base.tools.CertTools.byteToHex;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
+import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.lite.base.tools.NodeMgrTools;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

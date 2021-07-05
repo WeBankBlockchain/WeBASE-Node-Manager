@@ -16,14 +16,12 @@ package node.mgr.test.scaffold;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
-import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.scaffold.ScaffoldService;
+import com.webank.webase.node.mgr.lite.contract.entity.TbContract;
+import com.webank.webase.node.mgr.lite.front.entity.FrontNodeConfig;
+import com.webank.webase.node.mgr.lite.contract.scaffold.ScaffoldService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javafx.animation.ScaleTransition;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

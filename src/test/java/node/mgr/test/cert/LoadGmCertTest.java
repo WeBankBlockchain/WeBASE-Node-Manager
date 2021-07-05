@@ -16,9 +16,9 @@
 
 package node.mgr.test.cert;
 
-import com.webank.webase.node.mgr.base.tools.CertTools;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.cert.CertService;
+import com.webank.webase.node.mgr.lite.base.tools.CertTools;
+import com.webank.webase.node.mgr.lite.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.pro.cert.CertService;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

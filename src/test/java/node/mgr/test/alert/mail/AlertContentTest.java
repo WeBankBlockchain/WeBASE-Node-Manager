@@ -16,7 +16,7 @@
 
 package node.mgr.test.alert.mail;
 
-import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
+import com.webank.webase.node.mgr.lite.base.tools.AlertRuleTools;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;

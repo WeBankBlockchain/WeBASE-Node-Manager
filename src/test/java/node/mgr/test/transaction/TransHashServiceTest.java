@@ -15,11 +15,11 @@
  */
 package node.mgr.test.transaction;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.transaction.TransHashMapper;
-import com.webank.webase.node.mgr.transaction.TransHashService;
-import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
-import com.webank.webase.node.mgr.transaction.entity.TransListParam;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.transaction.TransHashMapper;
+import com.webank.webase.node.mgr.lite.transaction.TransHashService;
+import com.webank.webase.node.mgr.lite.transaction.entity.TbTransHash;
+import com.webank.webase.node.mgr.lite.transaction.entity.TransListParam;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;

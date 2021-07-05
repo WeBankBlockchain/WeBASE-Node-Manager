@@ -17,8 +17,8 @@
 package node.mgr.test.contract.abi;
 
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.contract.abi.entity.ReqImportAbi;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.contract.abi.entity.ReqImportAbi;
 import node.mgr.test.base.TestBase;
 import org.junit.Before;
 import org.junit.Test;

@@ -16,8 +16,8 @@
 
 package node.mgr.test.cert;
 
-import com.webank.webase.node.mgr.cert.CertService;
-import com.webank.webase.node.mgr.cert.entity.TbCert;
+import com.webank.webase.node.mgr.pro.cert.CertService;
+import com.webank.webase.node.mgr.pro.cert.entity.TbCert;
 import java.util.List;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;

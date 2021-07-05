@@ -1,6 +1,6 @@
 package node.mgr.test.token;
 
-import com.webank.webase.node.mgr.token.TokenService;
+import com.webank.webase.node.mgr.lite.account.token.TokenService;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

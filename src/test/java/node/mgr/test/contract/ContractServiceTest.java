@@ -16,12 +16,12 @@
 package node.mgr.test.contract;
 
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.contract.ContractService;
-import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.contract.ContractService;
+import com.webank.webase.node.mgr.lite.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.lite.contract.entity.DeployInputParam;
+import com.webank.webase.node.mgr.lite.contract.entity.TbContract;
+import com.webank.webase.node.mgr.lite.contract.entity.TransactionInputParam;
 import java.util.Arrays;
 import java.util.List;
 import node.mgr.test.base.TestBase;

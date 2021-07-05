@@ -20,7 +20,7 @@ import com.webank.scaffold.artifact.ProjectArtifact;
 import com.webank.scaffold.factory.ProjectFactory;
 import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.scaffold.util.IOUtil;
-import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
+import com.webank.webase.node.mgr.lite.base.tools.CleanPathUtil;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;

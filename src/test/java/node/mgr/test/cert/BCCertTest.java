@@ -16,8 +16,8 @@
 
 package node.mgr.test.cert;
 
-import com.webank.webase.node.mgr.base.tools.CertTools;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.lite.base.tools.CertTools;
+import com.webank.webase.node.mgr.lite.base.tools.NodeMgrTools;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.PublicKey;

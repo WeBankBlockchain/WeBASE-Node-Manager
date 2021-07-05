@@ -16,7 +16,7 @@
 
 package node.mgr.test.alert.task;
 
-import com.webank.webase.node.mgr.precompiled.PrecompiledService;
+import com.webank.webase.node.mgr.pro.precompiled.PrecompiledService;
 import java.util.LinkedHashMap;
 import java.util.List;
 import node.mgr.test.base.TestBase;

@@ -16,20 +16,16 @@
 
 package node.mgr.test.alert.mail;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.Application;
-import com.webank.webase.node.mgr.alert.mail.MailService;
-import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
-import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
-import com.webank.webase.node.mgr.alert.task.AuditMonitorTask;
-import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
-import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.pro.alert.mail.MailService;
+import com.webank.webase.node.mgr.pro.alert.rule.AlertRuleMapper;
+import com.webank.webase.node.mgr.pro.alert.rule.AlertRuleService;
+import com.webank.webase.node.mgr.pro.alert.task.AuditMonitorTask;
+import com.webank.webase.node.mgr.lite.base.tools.AlertRuleTools;
+import com.webank.webase.node.mgr.pro.alert.rule.entity.TbAlertRule;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 

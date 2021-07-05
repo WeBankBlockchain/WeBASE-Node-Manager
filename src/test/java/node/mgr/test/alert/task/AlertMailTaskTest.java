@@ -16,9 +16,9 @@
 
 package node.mgr.test.alert.task;
 
-import com.webank.webase.node.mgr.alert.task.AuditMonitorTask;
-import com.webank.webase.node.mgr.alert.task.CertMonitorTask;
-import com.webank.webase.node.mgr.alert.task.NodeStatusMonitorTask;
+import com.webank.webase.node.mgr.pro.alert.task.AuditMonitorTask;
+import com.webank.webase.node.mgr.pro.alert.task.CertMonitorTask;
+import com.webank.webase.node.mgr.pro.alert.task.NodeStatusMonitorTask;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

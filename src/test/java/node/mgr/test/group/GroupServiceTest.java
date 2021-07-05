@@ -16,7 +16,7 @@
 
 package node.mgr.test.group;
 
-import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.lite.group.GroupService;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
