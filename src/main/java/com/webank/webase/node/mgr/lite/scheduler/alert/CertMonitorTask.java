@@ -42,6 +42,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * cert validity time within 7 days triggers alert mail
  */
+@Deprecated
 @Log4j2
 @Component
 public class CertMonitorTask {

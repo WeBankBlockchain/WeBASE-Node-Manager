@@ -38,6 +38,7 @@ import java.util.List;
 /**
  * user/contract audit triggers alert mail
  */
+@Deprecated
 @Log4j2
 @Component
 public class AuditMonitorTask {

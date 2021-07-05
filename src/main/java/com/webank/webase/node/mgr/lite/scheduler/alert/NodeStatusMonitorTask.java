@@ -44,6 +44,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * cannot connect to node triggers alert mail
  */
+@Deprecated
 @Log4j2
 @Component
 public class NodeStatusMonitorTask {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.pro.event;
+package com.webank.webase.node.mgr.lite.contract.event;
 
 import com.webank.webase.node.mgr.lite.contract.ContractService;
 import com.webank.webase.node.mgr.lite.contract.abi.AbiService;
@@ -24,10 +24,10 @@ import com.webank.webase.node.mgr.lite.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.lite.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.lite.contract.entity.RspContractNoAbi;
-import com.webank.webase.node.mgr.pro.event.entity.ContractEventInfo;
-import com.webank.webase.node.mgr.pro.event.entity.NewBlockEventInfo;
-import com.webank.webase.node.mgr.pro.event.entity.ReqEventLogList;
-import com.webank.webase.node.mgr.pro.event.entity.RspContractInfo;
+import com.webank.webase.node.mgr.lite.contract.event.entity.ContractEventInfo;
+import com.webank.webase.node.mgr.lite.contract.event.entity.NewBlockEventInfo;
+import com.webank.webase.node.mgr.lite.contract.event.entity.ReqEventLogList;
+import com.webank.webase.node.mgr.lite.contract.event.entity.RspContractInfo;
 import com.webank.webase.node.mgr.lite.front.FrontService;
 import com.webank.webase.node.mgr.lite.front.entity.FrontParam;
 import com.webank.webase.node.mgr.lite.front.entity.TbFront;

@@ -1,4 +1,4 @@
-package com.webank.webase.node.mgr.pro.event.entity;
+package com.webank.webase.node.mgr.lite.contract.event.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

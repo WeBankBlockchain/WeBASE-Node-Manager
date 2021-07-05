@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.pro.event;
+package com.webank.webase.node.mgr.lite.contract.event;
 
 import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
 import com.webank.webase.node.mgr.lite.base.entity.BasePageResponse;
@@ -22,10 +22,10 @@ import com.webank.webase.node.mgr.lite.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
 import com.webank.webase.node.mgr.lite.base.tools.pagetools.List2Page;
-import com.webank.webase.node.mgr.pro.event.entity.ContractEventInfo;
-import com.webank.webase.node.mgr.pro.event.entity.NewBlockEventInfo;
-import com.webank.webase.node.mgr.pro.event.entity.ReqEventLogList;
-import com.webank.webase.node.mgr.pro.event.entity.RspContractInfo;
+import com.webank.webase.node.mgr.lite.contract.event.entity.ContractEventInfo;
+import com.webank.webase.node.mgr.lite.contract.event.entity.NewBlockEventInfo;
+import com.webank.webase.node.mgr.lite.contract.event.entity.ReqEventLogList;
+import com.webank.webase.node.mgr.lite.contract.event.entity.RspContractInfo;
 import java.io.IOException;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
