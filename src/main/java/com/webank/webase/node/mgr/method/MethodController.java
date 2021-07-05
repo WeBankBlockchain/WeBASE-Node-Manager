@@ -48,7 +48,7 @@ public class MethodController extends BaseController {
      * add method info.
      */
     @PostMapping(value = "/add")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse addMethod(@RequestBody @Valid NewMethodInputParam newMethodInputParam,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);

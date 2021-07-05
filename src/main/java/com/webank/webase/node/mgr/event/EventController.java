@@ -105,7 +105,7 @@ public class EventController {
 	 * sync get event logs list
 	 */
 	@PostMapping("/eventLogs/list")
-	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+	//@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 	public BasePageResponse queryEventLogList(@RequestBody @Valid ReqEventLogList param) {
 		Instant startTime = Instant.now();
 		log.info("start queryEventLogList startTime:{} param:{}",

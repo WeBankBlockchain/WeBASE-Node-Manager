@@ -63,7 +63,7 @@ public class MailController {
      * @return
      */
     @PostMapping("/test/{toMailAddress}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object sendTestMail(@PathVariable("toMailAddress")String toMailAddress,
                                   @RequestBody ReqMailServerConfigParam reqMailServerConfigParam) {
         Instant startTime = Instant.now();

@@ -73,7 +73,7 @@ public class PrecompiledSysConfigController extends BaseController {
      * set system config by key.
      */
     @PostMapping(value = "config")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object setSysConfigByKeyService(@RequestBody @Valid SysConfigParam sysConfigParam,
                                   BindingResult result) throws NodeMgrException {
         checkBindResult(result);
