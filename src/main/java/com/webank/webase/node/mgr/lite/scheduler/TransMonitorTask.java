@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
  * using in async monitor
  * 交易审计
  */
+@Deprecated
 @Log4j2
 @Component
 public class TransMonitorTask {
@@ -42,12 +43,12 @@ public class TransMonitorTask {
     @Autowired
     private StatService statService;
 
-    @Scheduled(fixedRateString = "${constant.transMonitorTaskFixedRate}")
+    //@Scheduled(fixedRateString = "${constant.transMonitorTaskFixedRate}")
     public void taskStart() {
         monitorStart();
     }
 
-    @Scheduled(fixedRateString = "${constant.statBlockFixedDelay}")
+    //@Scheduled(fixedRateString = "${constant.statBlockFixedDelay}")
     public void statTaskStart() {
         blockStatStart();
     }

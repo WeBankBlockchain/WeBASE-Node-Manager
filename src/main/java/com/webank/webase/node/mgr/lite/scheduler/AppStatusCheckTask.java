@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 /**
  * app status check.
  */
+@Deprecated
 @Log4j2
 @Component
 public class AppStatusCheckTask {
@@ -30,7 +31,7 @@ public class AppStatusCheckTask {
     @Autowired
     private AppIntegrationService appIntegrationService;
 
-    @Scheduled(fixedDelayString = "${constant.appStatusCheckCycle}")
+    //@Scheduled(fixedDelayString = "${constant.appStatusCheckCycle}")
     public void taskStart() {
         appStatusCheck();
     }
