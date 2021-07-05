@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.webank.webase.node.mgr.alert.rule.AlertRuleMapper">
+<mapper namespace="com.webank.webase.node.mgr.pro.alert.rule.AlertRuleMapper">
     <resultMap id="alertRuleMap"
-               type="com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule">
+               type="com.webank.webase.node.mgr.pro.alert.rule.entity.TbAlertRule">
         <id column="rule_id" javaType="java.lang.Integer" jdbcType="INTEGER"
             property="ruleId" />
         <result column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"
@@ -45,7 +45,7 @@
     </resultMap>
 
 
-    <insert id="add" parameterType="com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule">
+    <insert id="add" parameterType="com.webank.webase.node.mgr.pro.alert.rule.entity.TbAlertRule">
         REPLACE INTO tb_alert_rule(rule_name,enable,alert_type,alert_level,alert_interval_seconds,
         alert_content,content_param_list,description,is_all_user,user_list,
         create_time, modify_time,less_than,less_and_equal,larger_than,larger_and_equal,equal,
@@ -62,7 +62,7 @@
         where rule_id = #{ruleId}
     </delete>
 
-    <update id="update" parameterType="com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule">
+    <update id="update" parameterType="com.webank.webase.node.mgr.pro.alert.rule.entity.TbAlertRule">
         update tb_alert_rule set modify_time = now()
         <if test="ruleName != null and ruleName != ''">
             ,rule_name = #{ruleName}

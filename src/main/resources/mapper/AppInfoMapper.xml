@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.webank.webase.node.mgr.appintegration.AppInfoMapper">
+<mapper namespace="com.webank.webase.node.mgr.pro.appintegration.AppInfoMapper">
   <resultMap id="appMap"
-    type="com.webank.webase.node.mgr.appintegration.entity.TbAppInfo">
+    type="com.webank.webase.node.mgr.pro.appintegration.entity.TbAppInfo">
     <id column="id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="id" />
     <result column="app_name" javaType="java.lang.String" jdbcType="VARCHAR"
@@ -36,7 +36,7 @@
       property="modifyTime" />
   </resultMap>
 
-  <insert id="addAppInfo" parameterType="com.webank.webase.node.mgr.appintegration.entity.TbAppInfo">
+  <insert id="addAppInfo" parameterType="com.webank.webase.node.mgr.pro.appintegration.entity.TbAppInfo">
     INSERT INTO tb_app_info(app_name,app_key,app_secret,app_doc_link,app_icon,app_desc,app_status,app_detail,create_time,modify_time)
     VALUES (#{appName},#{appKey},#{appSecret},#{appDocLink},#{appIcon},#{appDesc},#{appStatus},#{appDetail},now(),now())
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
@@ -44,7 +44,7 @@
     </selectKey>
   </insert>
 
-  <select id="countOfAppInfo" parameterType="com.webank.webase.node.mgr.appintegration.entity.AppInfoParam"
+  <select id="countOfAppInfo" parameterType="com.webank.webase.node.mgr.pro.appintegration.entity.AppInfoParam"
     resultType="java.lang.Integer">
     select count(1) from tb_app_info where 1=1
     <if test="appType != null and appType !=''">
@@ -58,7 +58,7 @@
     </if>
   </select>
   
-  <select id="listOfAppInfo" parameterType="com.webank.webase.node.mgr.appintegration.entity.AppInfoParam"
+  <select id="listOfAppInfo" parameterType="com.webank.webase.node.mgr.pro.appintegration.entity.AppInfoParam"
     resultMap="appMap">
     select * from tb_app_info where 1=1
     <if test="appType != null and appType !=''">
@@ -78,7 +78,7 @@
     </if>
   </select>
 
-  <select id="queryAppInfoAdded" parameterType="com.webank.webase.node.mgr.appintegration.entity.AppInfoParam"
+  <select id="queryAppInfoAdded" parameterType="com.webank.webase.node.mgr.pro.appintegration.entity.AppInfoParam"
     resultMap="appMap">
     select * from tb_app_info where app_type=2
     <if test="id != null and id !=''">
@@ -93,7 +93,7 @@
     limit 1
   </select>
   
-  <update id="updateAppInfo" parameterType="com.webank.webase.node.mgr.appintegration.entity.TbAppInfo">
+  <update id="updateAppInfo" parameterType="com.webank.webase.node.mgr.pro.appintegration.entity.TbAppInfo">
     update tb_app_info 
        set modify_time=NOW()
        <if test="appName != null and appName !=''">

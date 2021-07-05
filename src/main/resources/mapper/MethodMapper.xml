@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.webank.webase.node.mgr.method.MethodMapper">
+<mapper namespace="com.webank.webase.node.mgr.lite.transaction.method.MethodMapper">
 	<resultMap id="methodMap"
-		type="com.webank.webase.node.mgr.method.entity.TbMethod">
+		type="com.webank.webase.node.mgr.lite.transaction.method.entity.TbMethod">
 		<id column="method_id" javaType="java.lang.String" jdbcType="VARCHAR"
 			property="methodId" />
 		<id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -21,7 +21,7 @@
 	</resultMap>
 
 
-	<insert id="add" parameterType="com.webank.webase.node.mgr.method.entity.TbMethod">
+	<insert id="add" parameterType="com.webank.webase.node.mgr.lite.transaction.method.entity.TbMethod">
 		REPLACE INTO tb_method(method_id,group_id,abi_info,method_type,contract_type,create_time,modify_time)
 		VALUES (#{methodId},#{groupId},#{abiInfo},#{methodType},#{contractType},now(),now())
 	</insert>

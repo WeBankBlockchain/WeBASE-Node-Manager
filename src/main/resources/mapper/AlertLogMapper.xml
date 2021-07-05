@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.webank.webase.node.mgr.alert.log.AlertLogMapper">
+<mapper namespace="com.webank.webase.node.mgr.pro.alert.log.AlertLogMapper">
     <resultMap id="alertLogMap"
-               type="com.webank.webase.node.mgr.alert.log.entity.AlertLog">
+               type="com.webank.webase.node.mgr.pro.alert.log.entity.AlertLog">
         <id column="log_id" javaType="java.lang.Integer" jdbcType="INTEGER"
             property="logId" />
         <result column="alert_type" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -23,7 +23,7 @@
     </resultMap>
 
 
-    <insert id="add" parameterType="com.webank.webase.node.mgr.alert.log.entity.AlertLog">
+    <insert id="add" parameterType="com.webank.webase.node.mgr.pro.alert.log.entity.AlertLog">
         REPLACE INTO tb_alert_log(alert_type,alert_level,alert_content,description,status,
         create_time,modify_time)
         VALUES (#{alertType},#{alertLevel},#{alertContent},#{description},#{status}, now(), now())
@@ -34,7 +34,7 @@
         where log_id = #{logId}
     </delete>
 
-    <update id="update" parameterType="com.webank.webase.node.mgr.alert.log.entity.AlertLog">
+    <update id="update" parameterType="com.webank.webase.node.mgr.pro.alert.log.entity.AlertLog">
         update tb_alert_log set modify_time = now()
         <if test="alertType != null and alertType != ''">
             ,alert_type = #{alertType}
@@ -54,7 +54,7 @@
         where log_id = #{logId}
     </update>
 
-    <select id="listOfAlertLog" parameterType="com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam"
+    <select id="listOfAlertLog" parameterType="com.webank.webase.node.mgr.pro.alert.log.entity.ReqLogListParam"
             resultMap="alertLogMap">
         select a.* from tb_alert_log a
         where 1=1

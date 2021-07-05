@@ -3,8 +3,8 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.transdaily.TbTransDailyMapper">
-  <resultMap id="seventDayOfTransMap" type="com.webank.webase.node.mgr.transdaily.SeventDaysTrans">
+<mapper namespace="com.webank.webase.node.mgr.lite.transaction.transdaily.TbTransDailyMapper">
+  <resultMap id="seventDayOfTransMap" type="com.webank.webase.node.mgr.lite.transaction.transdaily.entity.SeventDaysTrans">
     <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
     <id column="trans_day" javaType="java.time.LocalDate" jdbcType="TIMESTAMP" property="day"/>
     <result column="trans_count" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -20,7 +20,7 @@
 		where group_id=#{groupId} and trans_day=#{transDay} and block_number=#{oldBlockNumber}
 	</update>
 
-  <insert id="addTransDailyRow" parameterType="com.webank.webase.node.mgr.transdaily.TbTransDaily">
+  <insert id="addTransDailyRow" parameterType="com.webank.webase.node.mgr.lite.transaction.transdaily.entity.TbTransDaily">
 		insert ignore into tb_trans_daily(group_id,trans_day,trans_count,block_number,create_time,modify_time)
 		values(#{groupId},#{transDay},#{transCount},#{blockNumber},NOW(),NOW())
 	</insert>
