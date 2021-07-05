@@ -80,7 +80,7 @@ public class AlertRuleController {
     }
 
 //    @PostMapping("")
-//    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
 //    public Object saveAlertRule(@RequestBody @Valid AlertRuleParam param) {
 //        Instant startTime = Instant.now();
 //        log.info("start saveAlertRule. startTime:{} AlertRuleParam:{}",
@@ -97,7 +97,7 @@ public class AlertRuleController {
 //    }
 
     @PutMapping("")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertRule. startTime:{} AlertRuleParam:{}",
@@ -120,7 +120,7 @@ public class AlertRuleController {
 
 
     @PutMapping("/toggle")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object toggleAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start toggleAlertRule. startTime:{} AlertRuleParam:{}",
@@ -150,7 +150,7 @@ public class AlertRuleController {
      * @Duplicated no need to delete alert_rule for default rules only need updating
      */
 //    @DeleteMapping("/{ruleId}")
-//    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
 //    public Object deleteAlertRuleByRuleId(@PathVariable("ruleId") Integer ruleId) {
 //        Instant startTime = Instant.now();
 //        log.info("start deleteAlertRuleByRuleId. startTime:{} ruleId:{}",

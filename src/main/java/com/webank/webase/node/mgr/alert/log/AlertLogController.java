@@ -74,7 +74,7 @@ public class AlertLogController {
      * @return
      */
     @PutMapping("")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateAlertLog(@RequestBody ReqLogParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertLog. startTime:{} ReqAlertLogParam:{}",

@@ -104,7 +104,7 @@ public class AccountController extends BaseController {
      * add account info.
      */
     @PostMapping(value = "/accountInfo")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse addAccountInfo(@RequestBody @Valid AccountInfo info, BindingResult result)
         throws NodeMgrException {
         checkBindResult(result);
@@ -129,7 +129,7 @@ public class AccountController extends BaseController {
      * update account info.
      */
     @PutMapping(value = "/accountInfo")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateAccountInfo(@RequestBody @Valid AccountInfo info, HttpServletRequest request,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -158,7 +158,7 @@ public class AccountController extends BaseController {
      * query account list.
      */
     @GetMapping(value = "/accountList/{pageNumber}/{pageSize}")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BasePageResponse queryAccountList(@PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
@@ -188,7 +188,7 @@ public class AccountController extends BaseController {
      * delete contract by id.
      */
     @DeleteMapping(value = "/{account}")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deleteAccount(@PathVariable("account") String account)
         throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);

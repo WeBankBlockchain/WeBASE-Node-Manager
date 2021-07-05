@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 @RestController
 @RequestMapping(value = "role")
-//@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
 public class RoleController {
 
     @Autowired

@@ -54,7 +54,7 @@ public class AppIntegrationController extends BaseController {
     private AppIntegrationService appIntegrationService;
 
     @PostMapping("/save")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse saveApp(@RequestBody @Valid AppAddInfo appAddInfo, BindingResult result) {
         checkBindResult(result);
         Instant startTime = Instant.now();

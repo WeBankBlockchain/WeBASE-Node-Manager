@@ -131,7 +131,7 @@ public class PermissionManageController extends BaseController {
      * 更新用户的权限状态 包含cns, sysConfig, deployAndCreate, node
      */
     @PostMapping(value = "sorted")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updatePermission(@RequestBody @Valid PermissionParam permissionParam,
                                   BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -147,7 +147,7 @@ public class PermissionManageController extends BaseController {
     }
 
     @PostMapping(value = "")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object grantPermission(@RequestBody @Valid PermissionParam permissionParam,
                                        BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -167,7 +167,7 @@ public class PermissionManageController extends BaseController {
      * revoke Permission.
      */
     @DeleteMapping(value = "")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object revokePermission(@RequestBody @Valid PermissionParam permissionParam,
                                  BindingResult result) throws NodeMgrException {
         checkBindResult(result);

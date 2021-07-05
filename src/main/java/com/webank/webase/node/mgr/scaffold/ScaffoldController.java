@@ -47,7 +47,7 @@ public class ScaffoldController extends BaseController {
     private ScaffoldService scaffoldService;
 
     @PostMapping("/export")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse exportProjectApi(@Valid @RequestBody ReqProject param) {
         Instant startTime = Instant.now();
         log.info("start exportProjectApi param:{} groupId:{}", startTime.toEpochMilli(),
