@@ -16,6 +16,8 @@ package com.webank.webase.node.mgr.base.filter;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
+import com.webank.webase.node.mgr.base.enums.RoleType;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,26 +25,38 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * validate accoutn info.
+ * validate account info.
  */
 @Component
 public class AccountFilter implements HandlerInterceptor {
 
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private ConstantProperties constants;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
             Object handler) throws Exception {
         // 获取账户信息
         String account = accountService.getCurrentAccount(request);
-        TbAccountInfo accountRow = accountService.queryByAccount(account);
-        // 设置账户信息
-        CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
-        currentAccountInfo.setAccount(account);
-        currentAccountInfo.setRoleId(accountRow.getRoleId());
-        request.setAttribute("currentAccountInfo", currentAccountInfo);
-        return true;
+        // if disabled security
+        if (!constants.getIsUseSecurity()) {
+            // 设置账户信息
+            CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
+            currentAccountInfo.setAccount(account);
+            currentAccountInfo.setRoleId(RoleType.ADMIN.getValue());
+            request.setAttribute("currentAccountInfo", currentAccountInfo);
+            return true;
+        } else {
+            TbAccountInfo accountRow = accountService.queryByAccount(account);
+            // 设置账户信息
+            CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
+            currentAccountInfo.setAccount(account);
+            currentAccountInfo.setRoleId(accountRow.getRoleId());
+            request.setAttribute("currentAccountInfo", currentAccountInfo);
+            return true;
+        }
     }
 
 }

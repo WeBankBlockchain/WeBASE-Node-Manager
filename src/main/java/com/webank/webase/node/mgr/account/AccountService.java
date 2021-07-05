@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.account;
 
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.account.entity.AccountInfo;
@@ -51,6 +52,8 @@ public class AccountService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private ConstantProperties constants;
 
     /**
      * login.
@@ -263,6 +266,10 @@ public class AccountService {
      * get current account.
      */
     public String getCurrentAccount(HttpServletRequest request) {
+        if (!constants.getIsUseSecurity()) {
+            //todo 直接根据request的用户名密码，获取token对应的value
+            return "admin";
+        }
         String token = NodeMgrTools.getToken(request);
         return tokenService.getValueFromToken(token);
     }
