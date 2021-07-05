@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.pro.alert.task;
+package com.webank.webase.node.mgr.lite.scheduler.alert;
 
 import com.webank.webase.node.mgr.pro.alert.rule.entity.TbAlertRule;
 import java.time.Duration;
@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.webank.webase.node.mgr.pro.alert.mail.MailService;
@@ -60,7 +59,7 @@ public class NodeStatusMonitorTask {
     @Autowired
     private AlertRuleService alertRuleService;
 
-    @Scheduled(fixedDelayString = "${constant.nodeStatusMonitorTaskFixedDelay}")
+    //@Scheduled(fixedDelayString = "${constant.nodeStatusMonitorTaskFixedDelay}")
     public void nodeAlertTaskStart() {
         checkAllNodeStatusForAlert();
     }

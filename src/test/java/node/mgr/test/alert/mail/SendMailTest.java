@@ -20,7 +20,7 @@ import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
 import com.webank.webase.node.mgr.pro.alert.mail.MailService;
 import com.webank.webase.node.mgr.pro.alert.rule.AlertRuleMapper;
 import com.webank.webase.node.mgr.pro.alert.rule.AlertRuleService;
-import com.webank.webase.node.mgr.pro.alert.task.AuditMonitorTask;
+import com.webank.webase.node.mgr.lite.scheduler.alert.AuditMonitorTask;
 import com.webank.webase.node.mgr.lite.base.tools.AlertRuleTools;
 import com.webank.webase.node.mgr.pro.alert.rule.entity.TbAlertRule;
 import node.mgr.test.base.TestBase;

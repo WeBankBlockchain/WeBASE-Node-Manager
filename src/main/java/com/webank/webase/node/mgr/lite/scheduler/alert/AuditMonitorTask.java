@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.pro.alert.task;
+package com.webank.webase.node.mgr.lite.scheduler.alert;
 
 import com.webank.webase.node.mgr.pro.alert.mail.MailService;
 import com.webank.webase.node.mgr.pro.alert.rule.AlertRuleService;
@@ -28,7 +28,6 @@ import com.webank.webase.node.mgr.lite.group.entity.TbGroup;
 import com.webank.webase.node.mgr.pro.monitor.MonitorService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -57,7 +56,7 @@ public class AuditMonitorTask {
     /**
      * set scheduler's interval
      */
-    @Scheduled(fixedDelayString = "${constant.auditMonitorTaskFixedDelay}")
+    //@Scheduled(fixedDelayString = "${constant.auditMonitorTaskFixedDelay}")
     public void auditAlertTaskStart() {
         checkUserAndContractForAlert();
     }
