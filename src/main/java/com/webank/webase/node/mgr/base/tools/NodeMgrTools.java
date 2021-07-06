@@ -475,8 +475,7 @@ public class NodeMgrTools {
      */
     public static synchronized String getAccount(HttpServletRequest request) {
         String accountName = request.getHeader(HEADER_ACCOUNT);
-        // todo debug
-        log.info("getAccount {}", accountName);
+        log.debug("getAccount from header: [{}]", accountName);
         return accountName;
     }
 
