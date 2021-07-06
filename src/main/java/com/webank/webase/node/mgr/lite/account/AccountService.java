@@ -287,5 +287,12 @@ public class AccountService {
         String token = NodeMgrTools.getToken(request);
         return tokenService.getValueFromToken(token);
     }
-
+//
+//    public TbAccountInfo getAdminAccount() {
+//        TbAccountInfo adminInfo = accountMapper.queryByAccount(ADMIN_TOKEN_VALUE);
+//        if (adminInfo == null) {
+//            throw new NodeMgrException(ConstantCode.ACCOUNT_NOT_EXISTS.attach("admin not exist!"));
+//        }
+//        return adminInfo;
+//    }
 }

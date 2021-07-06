@@ -70,7 +70,7 @@ public class FrontController extends BaseController {
      * add new front
      */
     @PostMapping("/new")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse newFront(@RequestBody @Valid FrontInfo frontInfo, BindingResult result) {
         checkBindResult(result);
         Instant startTime = Instant.now();
@@ -140,7 +140,7 @@ public class FrontController extends BaseController {
      * query front info list.
      */
     @GetMapping(value = "/refresh/status")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse refreshFrontStatus() throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start refreshFrontStatus startTime:{} ", startTime.toEpochMilli());
@@ -155,7 +155,7 @@ public class FrontController extends BaseController {
      * get front's node config
      */
     @GetMapping(value = "/nodeConfig")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse getFrontNodeConfig(@RequestParam("frontId") int frontId) {
         Instant startTime = Instant.now();
         log.info("start getFrontNodeConfig startTime:{} ", startTime.toEpochMilli());

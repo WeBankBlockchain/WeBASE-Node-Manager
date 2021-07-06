@@ -72,7 +72,7 @@ public class UserController extends BaseController {
      * add new user info.
      */
     @PostMapping(value = "/userInfo")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse addUserInfo(@RequestBody @Valid NewUserInputParam user,
             @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -94,7 +94,7 @@ public class UserController extends BaseController {
      * bind user info.
      */
     @PostMapping(value = "/bind")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse bindUserInfo(@RequestBody @Valid BindUserInputParam user,
             @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -115,7 +115,7 @@ public class UserController extends BaseController {
      * update user info.
      */
     @PutMapping(value = "/userInfo")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse updateUserInfo(@RequestBody @Valid UpdateUserInputParam user,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -178,7 +178,7 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/import")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport,
             @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
         checkBindResult(result);
@@ -200,7 +200,7 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/importPem")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem,
             @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
         checkBindResult(result);
@@ -223,7 +223,7 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/importP12")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
             @RequestParam(required = false, defaultValue = "") String p12Password,
             @RequestParam Integer groupId, @RequestParam String userName,
@@ -249,7 +249,7 @@ public class UserController extends BaseController {
     }
 
     @PostMapping(value = "/exportPem")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -266,7 +266,7 @@ public class UserController extends BaseController {
     }
 
     @PostMapping(value = "/exportP12")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -288,7 +288,7 @@ public class UserController extends BaseController {
 
 
     @PostMapping(value = "/export/{userId}")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse exportRawUserFromSign(@PathVariable("userId") Integer userId)
         throws NodeMgrException {
         Instant startTime = Instant.now();

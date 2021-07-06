@@ -218,7 +218,7 @@ public class GroupController extends BaseController {
      * generate group to single node(single front)
      */
     @PostMapping("/generate/{nodeId}")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse generateToSingleNode(@PathVariable("nodeId") String nodeId,
                                              @RequestBody @Valid ReqGenerateGroup req,
                                              BindingResult result) throws NodeMgrException {
@@ -238,7 +238,7 @@ public class GroupController extends BaseController {
      * generate group to all front(all node)
      */
     @PostMapping("/generate")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse generateGroup(@RequestBody @Valid ReqGenerateGroup req,
                                       BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -258,7 +258,7 @@ public class GroupController extends BaseController {
      * (start, stop, remove, recover, getStatus)
      */
     @PostMapping("/operate/{nodeId}")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object operateGroup(@PathVariable("nodeId") String nodeId, @RequestBody @Valid ReqOperateGroup req,
                                BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -279,7 +279,7 @@ public class GroupController extends BaseController {
      * @return map of <nodeId,<groupId, status>>
      */
     @PostMapping("/queryGroupStatus/list")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse getGroupStatusList(@Valid @RequestBody ReqGroupStatus reqGroupStatus) throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -298,7 +298,7 @@ public class GroupController extends BaseController {
      * batch start group.(start group to all front
      */
     @PostMapping("/batchStart")
-    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse batchStartGroup(@RequestBody @Valid ReqBatchStartGroup req, BindingResult result)
             throws NodeMgrException {
         checkBindResult(result);
