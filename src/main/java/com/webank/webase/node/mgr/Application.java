@@ -52,6 +52,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 
 import lombok.extern.log4j.Log4j2;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Log4j2
 @EnableAsync
@@ -60,6 +61,7 @@ import lombok.extern.log4j.Log4j2;
 @EnableTransactionManagement
 @EnableAspectJAutoProxy(exposeProxy = true)
 @MapperScan("com.webank.webase.node.mgr")
+@EnableSwagger2
 public class Application {
 
     public static void main(String[] args) {

@@ -82,8 +82,13 @@ List scaffold = [
     'com.webank:solc-gradle-plugin:1.0.0'
 ]
 
+List swagger = [
+    'io.springfox:springfox-swagger2:2.8.0',
+    'io.springfox:springfox-swagger-ui:2.8.0'
+]
+
 dependencies {
-    compile springboot,spring,jaxb,jackson,log4j,scaffold
+    compile springboot,spring,jaxb,jackson,log4j,scaffold,swagger
     compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2"
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
