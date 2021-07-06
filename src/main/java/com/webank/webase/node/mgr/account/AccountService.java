@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.account;
 
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.account.entity.AccountInfo;
@@ -51,6 +52,9 @@ public class AccountService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private ConstantProperties constants;
+    private static final String ADMIN_TOKEN_VALUE = "admin";
 
     /**
      * login.
@@ -178,7 +182,7 @@ public class AccountService {
     }
 
     /**
-     * query account info by acountName.
+     * query account info by accountName.
      */
     public TbAccountInfo queryByAccount(String accountStr) {
         log.debug("start queryByAccount. accountStr:{} ", accountStr);
@@ -261,8 +265,22 @@ public class AccountService {
     
     /**
      * get current account.
+     * whether use security:
+     * @case1: get account info from request's header, such as account of admin001
+     * @case2: get account from token, use token to get account, such as 0x001 to get its account of admin001
      */
     public String getCurrentAccount(HttpServletRequest request) {
+        if (!constants.getIsUseSecurity()) {
+            String accountDefault = NodeMgrTools.getAccount(request);
+            if (StringUtils.isNotBlank(accountDefault)) {
+                log.debug("getCurrentAccount default [{}]", accountDefault);
+                return accountDefault;
+            } else {
+                // default return admin
+                log.debug("getCurrentAccount not found account, default admin");
+                return ADMIN_TOKEN_VALUE;
+            }
+        }
         String token = NodeMgrTools.getToken(request);
         return tokenService.getValueFromToken(token);
     }

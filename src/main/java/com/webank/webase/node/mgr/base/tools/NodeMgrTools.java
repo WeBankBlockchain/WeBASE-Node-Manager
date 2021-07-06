@@ -67,6 +67,7 @@ public class NodeMgrTools {
         't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J',
         'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
     private static Random random = new Random();
+    public static final String HEADER_ACCOUNT = "Account";
 
 
     /**
@@ -356,7 +357,7 @@ public class NodeMgrTools {
             SocketAddress address = new InetSocketAddress(serverHost, serverPort);
             socket.connect(address, 1000);
         } catch (Exception ex) {
-            log.warn("fail checkServerConnect");
+            log.warn("fail checkServerConnect [{}:{}]", serverHost, serverPort);
             throw new NodeMgrException(ConstantCode.SERVER_CONNECT_FAIL);
         }finally {
             if(Objects.nonNull(socket)){
@@ -468,6 +469,18 @@ public class NodeMgrTools {
         }
         return token;
     }
+
+    /**
+     * get token.
+     */
+    public static synchronized String getAccount(HttpServletRequest request) {
+        String accountName = request.getHeader(HEADER_ACCOUNT);
+        log.debug("getAccount from header: [{}]", accountName);
+        return accountName;
+    }
+
+
+
 
     /**
      * sort Mappings
