@@ -326,4 +326,6 @@ public class ConstantCode {
 
     /* param exception */
     public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
+
+    public static final RetCode PRIVATE_KEY_NOT_EXISTS  = RetCode.mark(202513,"It is not your private key");
 }

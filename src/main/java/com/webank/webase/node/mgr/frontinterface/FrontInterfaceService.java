@@ -754,4 +754,13 @@ public class FrontInterfaceService {
         return clientVersion;
     }
 
+    public Object getSignMessageHash(String hash, String signUserId) {
+        log.debug("start getSignMessageHash hash:{} signUserId:{}", hash, signUserId);
+        Map<String, String> map = new HashMap<>();
+        map.put("hash", hash);
+        map.put("signUserId", signUserId);
+        Object signMessage = frontRestTools.postForEntity(1, FrontRestTools.URI_SIGN_MESSAGE,map,Object.class);
+        log.debug("end getSignMessageHash, signMessage:{}", signMessage);
+        return signMessage;
+    }
 }

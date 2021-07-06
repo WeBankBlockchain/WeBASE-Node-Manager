@@ -528,8 +528,14 @@ public class UserService {
      * get pem file exported from sign from front api
      * @return ResponseEntity<InputStreamResource>
      */
-    public FileContentHandle exportPemFromSign(int groupId, String signUserId) {
+    public FileContentHandle exportPemFromSign(int groupId, String signUserId, String account,Integer roleId) {
         log.debug("start getExportPemFromSign signUserId:{}", signUserId);
+        TbUser user = queryUser(groupId,null,null,null,account);
+        if(roleId == RoleType.DEVELOPER.getValue()){
+            if(user.getSignUserId() != signUserId){
+                throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_EXISTS);
+            }
+        }
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
         String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
         keyPair.setPrivateKey(decodedPrivateKey);

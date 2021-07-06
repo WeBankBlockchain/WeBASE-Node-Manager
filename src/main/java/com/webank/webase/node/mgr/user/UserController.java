@@ -249,14 +249,17 @@ public class UserController extends BaseController {
     }
 
     @PostMapping(value = "/exportPem")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param,
+                                                                     @CurrentAccount CurrentAccountInfo currentAccount)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start exportPemUserFromSign startTime:{} param:{}", startTime.toEpochMilli(), param);
         Integer groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
-        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId);
+        String account = currentAccount.getAccount();
+        Integer roleId = currentAccount.getRoleId();
+        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId,account,roleId);
 
         log.info("end exportPemUserFromSign useTime:{} fileContentHandle:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
@@ -288,7 +291,7 @@ public class UserController extends BaseController {
 
 
     @PostMapping(value = "/export/{userId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse exportRawUserFromSign(@PathVariable("userId") Integer userId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
