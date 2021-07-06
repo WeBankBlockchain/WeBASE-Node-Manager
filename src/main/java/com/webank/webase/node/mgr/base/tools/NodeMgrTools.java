@@ -67,6 +67,7 @@ public class NodeMgrTools {
         't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J',
         'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
     private static Random random = new Random();
+    public static final String HEADER_ACCOUNT = "Account";
 
 
     /**
@@ -468,6 +469,19 @@ public class NodeMgrTools {
         }
         return token;
     }
+
+    /**
+     * get token.
+     */
+    public static synchronized String getAccount(HttpServletRequest request) {
+        String accountName = request.getHeader(HEADER_ACCOUNT);
+        // todo debug
+        log.info("getAccount {}", accountName);
+        return accountName;
+    }
+
+
+
 
     /**
      * sort Mappings

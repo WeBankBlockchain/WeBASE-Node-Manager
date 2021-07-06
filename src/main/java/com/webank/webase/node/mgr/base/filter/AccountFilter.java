@@ -16,6 +16,8 @@ package com.webank.webase.node.mgr.base.filter;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
+import com.webank.webase.node.mgr.base.enums.RoleType;
+import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +32,12 @@ public class AccountFilter implements HandlerInterceptor {
 
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private ConstantProperties constants;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-            Object handler) throws Exception {
+            Object handler) {
         // 获取账户信息
         String account = accountService.getCurrentAccount(request);
         TbAccountInfo accountRow = accountService.queryByAccount(account);
