@@ -357,7 +357,7 @@ public class NodeMgrTools {
             SocketAddress address = new InetSocketAddress(serverHost, serverPort);
             socket.connect(address, 1000);
         } catch (Exception ex) {
-            log.warn("fail checkServerConnect");
+            log.warn("fail checkServerConnect [{}:{}]", serverHost, serverPort);
             throw new NodeMgrException(ConstantCode.SERVER_CONNECT_FAIL);
         }finally {
             if(Objects.nonNull(socket)){

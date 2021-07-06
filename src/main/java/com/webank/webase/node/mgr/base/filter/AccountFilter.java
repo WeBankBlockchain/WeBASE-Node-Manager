@@ -16,7 +16,9 @@ package com.webank.webase.node.mgr.base.filter;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.RoleType;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,12 +44,8 @@ public class AccountFilter implements HandlerInterceptor {
         String account = accountService.getCurrentAccount(request);
         TbAccountInfo accountRow = accountService.queryByAccount(account);
         // if account of 'admin' not exist, default admin role type
-        if (accountRow == null && !constants.getIsUseSecurity()) {
-            CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
-            currentAccountInfo.setAccount(account);
-            currentAccountInfo.setRoleId(RoleType.ADMIN.getValue());
-            request.setAttribute("currentAccountInfo", currentAccountInfo);
-            return true;
+        if (accountRow == null ) {
+            throw new NodeMgrException(ConstantCode.ACCOUNT_NOT_EXISTS.attach("account: " + account));
         }
         // 设置账户信息
         CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
