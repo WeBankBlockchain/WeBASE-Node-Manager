@@ -142,7 +142,7 @@ public class NodeController {
         return baseResponse;
     }
 
-
+    /* precompiled api */
     /**
      * get node list with consensus status.
      */
@@ -175,5 +175,6 @@ public class NodeController {
 
         return res;
     }
+    /* precompiled api */
 
 }
