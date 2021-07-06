@@ -241,23 +241,7 @@ CREATE TABLE IF NOT EXISTS tb_abi (
   PRIMARY KEY (abi_id),
   UNIQUE KEY unique_address (group_id,account,contract_address)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约ABI表';
-
--- ----------------------------
--- Table structure for tb_govern_vote
--- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_govern_vote (
-  id int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '链治理委员投票记录ID',
-  group_id int(11) NOT NULL COMMENT '群组ID',
-  time_limit bigint DEFAULT NULL COMMENT '投票截止块高',
-  from_address varchar(64) NOT NULL COMMENT '管理员地址',
-  type tinyint(8) NOT NULL COMMENT '投票类型，1-选举，2-去除，3-修改委员权重，4,-修改阈值',
-  to_address varchar(64) DEFAULT NULL COMMENT '选举/去除的地址',
-  detail varchar(64) DEFAULT NULL COMMENT '3-修改权重，4-修改阈值时存储具体信息',
-  create_time datetime NOT NULL COMMENT '创建时间',
-  modify_time datetime NOT NULL COMMENT '最近一次更新时间',
-  PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链治理委员投票信息';
-
+=
 CREATE TABLE IF NOT EXISTS tb_contract_path (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约路径编号',
   contract_path varchar(128) binary NOT NULL COMMENT '合约所在目录',
@@ -332,24 +316,6 @@ CREATE TABLE IF NOT EXISTS tb_external_contract (
   UNIQUE KEY uk_group_path_name (group_id,contract_address)
 ) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='外部合约表';
 
--- ----------------------------
--- Table structure for tb_contract_store
--- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_warehouse (
-  id int(11) NOT NULL COMMENT '自增编号',
-  warehouse_name varchar(255) binary NOT NULL COMMENT '合约仓库名',
-  warehouse_name_en varchar(255) binary NOT NULL COMMENT '仓库名（英文）',
-  type  int(11) NOT NULL COMMENT '仓库类型',
-  warehouse_icon     mediumtext COMMENT '仓库图标（Base64）',
-  description     mediumtext COMMENT '仓库描述(Base64)',
-  description_en  mediumtext COMMENT '仓库描述（英文）(Base64)',
-  warehouse_detail   mediumtext COMMENT '仓库详情',
-  warehouse_detail_en   mediumtext COMMENT '仓库详情（英文）',
-  create_time datetime DEFAULT NULL COMMENT '创建时间',
-  modify_time datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (id),
-  UNIQUE KEY uk_name(warehouse_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库';
 
 CREATE TABLE IF NOT EXISTS tb_contract_folder (
   id int(11) NOT NULL COMMENT '自增编号',
