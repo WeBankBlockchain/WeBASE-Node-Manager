@@ -41,9 +41,13 @@ import com.webank.webase.node.mgr.lite.contract.entity.TbCns;
 import com.webank.webase.node.mgr.lite.contract.entity.TbContract;
 import com.webank.webase.node.mgr.lite.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.lite.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.lite.contract.event.EventService;
+import com.webank.webase.node.mgr.lite.contract.event.entity.ReqEventLogList;
+import com.webank.webase.node.mgr.lite.contract.event.entity.RspContractInfo;
 import com.webank.webase.node.mgr.pro.precompiled.PrecompiledService;
 import com.webank.webase.node.mgr.lite.contract.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.lite.contract.entity.ContractStatusHandle;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -79,6 +83,8 @@ public class ContractController extends BaseController {
     private CnsService cnsService;
     @Autowired
     private PrecompiledService precompiledService;
+    @Autowired
+    private EventService eventService;
 
     /**
      * add new contract info.
@@ -470,6 +476,7 @@ public class ContractController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, req.getContractItems().size());
     }
 
+    /* precompiled contract api */
     /**
      * get cns list
      * 透传front的BaseResponse
@@ -528,5 +535,48 @@ public class ContractController extends BaseController {
 
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
+    /* precompiled contract api */
+
+    /* event api */
+    /**
+     * sync get event logs list
+     */
+    @PostMapping("/eventLogs/list")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BasePageResponse queryEventLogList(@RequestBody @Valid ReqEventLogList param) {
+        Instant startTime = Instant.now();
+        log.info("start queryEventLogList startTime:{} param:{}",
+            startTime.toEpochMilli(), JsonTools.toJSONString(param));
+        BasePageResponse baseResponse = eventService.getEventLogList(param);
+        log.info("end queryEventLogList useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @GetMapping("/contractInfo/{groupId}/{type}/{contractAddress}")
+    public BaseResponse findByAddress( @PathVariable Integer groupId,
+        @PathVariable String type, @PathVariable String contractAddress) {
+        BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("findByAddress start. groupId:{},contractAddress:{},type:{}", groupId, contractAddress, type);
+        Object abiInfo = eventService.getAbiByAddressFromBoth(groupId, type, contractAddress);
+        response.setData(abiInfo);
+        return response;
+    }
+
+    /**
+     * query list of (deployed)contract only contain groupId and contractAddress and contractName
+     */
+    @GetMapping("/listAddress/{groupId}")
+    public BaseResponse listAbi(@PathVariable Integer groupId) throws IOException {
+        BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("listAbi start. groupId:{}", groupId);
+        List<RspContractInfo> resultList = eventService.listContractInfoBoth(groupId);
+        response.setData(resultList);
+        return response;
+    }
+    /* event api */
 
 }
