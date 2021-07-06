@@ -13,16 +13,23 @@
  */
 package com.webank.webase.node.mgr.lite.node;
 
+import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.node.entity.NodeParam;
 import com.webank.webase.node.mgr.lite.node.entity.TbNode;
+import com.webank.webase.node.mgr.pro.precompiled.PrecompiledService;
+import com.webank.webase.node.mgr.lite.contract.entity.ConsensusHandle;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,6 +51,7 @@ import lombok.extern.log4j.Log4j2;
 public class NodeController {
 
     @Autowired private NodeService nodeService;
+    @Autowired private PrecompiledService precompiledService;
 
     /**
      * query node info list.
@@ -134,5 +142,38 @@ public class NodeController {
         return baseResponse;
     }
 
+
+    /**
+     * get node list with consensus status.
+     */
+    @GetMapping("consensus/list")
+    public Object getNodeList(
+        @RequestParam(defaultValue = "1") int groupId,
+        @RequestParam(defaultValue = "10") int pageSize,
+        @RequestParam(defaultValue = "1") int pageNumber) {
+
+        Instant startTime = Instant.now();
+        log.info("start getNodeList startTime:{}", startTime.toEpochMilli());
+
+        Object result = precompiledService.getNodeListService(groupId, pageSize, pageNumber);
+        log.info("end getNodeList useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
+        return result;
+    }
+
+    @PostMapping(value = "consensus")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public Object nodeManage(@RequestBody @Valid ConsensusHandle consensusHandle) throws NodeMgrException {
+        Instant startTime = Instant.now();
+        log.info("start nodeManage startTime:{} consensusHandle:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(consensusHandle));
+
+        Object res = precompiledService.nodeManageService(consensusHandle);
+
+        log.info("end nodeManage useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+
+        return res;
+    }
 
 }

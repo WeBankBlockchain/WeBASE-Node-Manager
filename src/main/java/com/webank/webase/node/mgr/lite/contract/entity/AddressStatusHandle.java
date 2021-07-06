@@ -1,4 +1,4 @@
-package com.webank.webase.node.mgr.pro.precompiled.entity;
+package com.webank.webase.node.mgr.lite.contract.entity;
 
 import java.util.List;
 import javax.validation.constraints.NotNull;

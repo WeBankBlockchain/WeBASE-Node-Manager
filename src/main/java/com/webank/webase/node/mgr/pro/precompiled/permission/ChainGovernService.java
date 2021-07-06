@@ -15,17 +15,15 @@
 package com.webank.webase.node.mgr.pro.precompiled.permission;
 
 import com.webank.webase.node.mgr.lite.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.lite.base.enums.GovernType;
 import com.webank.webase.node.mgr.lite.base.enums.RequestType;
 import com.webank.webase.node.mgr.lite.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
 import com.webank.webase.node.mgr.lite.base.tools.PrecompiledTools;
+import com.webank.webase.node.mgr.lite.contract.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.lite.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.lite.user.UserService;
-import com.webank.webase.node.mgr.pro.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.pro.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.pro.precompiled.entity.RspCommitteeInfo;
-import com.webank.webase.node.mgr.pro.precompiled.permission.governance.GovernVoteService;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -49,8 +47,6 @@ public class ChainGovernService {
     private FrontRestTools frontRestTools;
     @Autowired
     private UserService userService;
-    @Autowired
-    private GovernVoteService governVoteService;
 
     public List listCommittee(Integer groupId) {
         log.debug("start listCommittee. groupId:{}" , groupId);
@@ -115,12 +111,10 @@ public class ChainGovernService {
             frontRsp = frontRestTools.postForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE,
                 governanceHandle, String.class);
-            governVoteService.saveGovernVote(governanceHandle, GovernType.GRANT_COMMITTEE);
         } else if (requestType == RequestType.DELETE) {
             frontRsp = frontRestTools.deleteForEntity(
                 groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE,
                 governanceHandle, String.class);
-            governVoteService.saveGovernVote(governanceHandle, GovernType.REVOKE_COMMITTEE);
         }
         log.debug("end handleCommittee. frontRsp:{}", frontRsp);
         return PrecompiledTools.processResponse(frontRsp);
@@ -145,7 +139,6 @@ public class ChainGovernService {
         String frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_GOVERNANCE_COMMITTEE_WEIGHT,
             governanceHandle, String.class);
         log.debug("end updateCommitteeWeight. frontRsp:{}", JsonTools.toJSONString(frontRsp));
-        governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_COMMITTEE_WEIGHT);
         return PrecompiledTools.processResponse(frontRsp);
     }
 
@@ -186,7 +179,6 @@ public class ChainGovernService {
         String frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_GOVERNANCE_THRESHOLD,
             governanceHandle, String.class);
         log.debug("end updateThreshold. frontRsp:{}", JsonTools.toJSONString(frontRsp));
-        governVoteService.saveGovernVote(governanceHandle, GovernType.UPDATE_THRESHOLD);
         return PrecompiledTools.processResponse(frontRsp);
     }
 

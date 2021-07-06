@@ -41,9 +41,13 @@ import com.webank.webase.node.mgr.lite.contract.entity.TbCns;
 import com.webank.webase.node.mgr.lite.contract.entity.TbContract;
 import com.webank.webase.node.mgr.lite.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.lite.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.pro.precompiled.PrecompiledService;
+import com.webank.webase.node.mgr.lite.contract.entity.AddressStatusHandle;
+import com.webank.webase.node.mgr.lite.contract.entity.ContractStatusHandle;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
@@ -73,6 +77,8 @@ public class ContractController extends BaseController {
     private ContractPathService contractPathService;
     @Autowired
     private CnsService cnsService;
+    @Autowired
+    private PrecompiledService precompiledService;
 
     /**
      * add new contract info.
@@ -463,4 +469,64 @@ public class ContractController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS, req.getContractItems().size());
     }
+
+    /**
+     * get cns list
+     * 透传front的BaseResponse
+     */
+    @GetMapping("cns/list")
+    public Object listCns(
+        @RequestParam(defaultValue = "1") int groupId,
+        @RequestParam String contractNameAndVersion,
+        @RequestParam(defaultValue = "10") int pageSize,
+        @RequestParam(defaultValue = "1") int pageNumber) {
+
+        Instant startTime = Instant.now();
+        log.info("start listCns startTime:{}", startTime.toEpochMilli());
+        Object result = precompiledService.listCnsService(groupId, contractNameAndVersion, pageSize, pageNumber);
+
+        log.info("end listCns useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
+        return result;
+    }
+
+
+
+    /**
+     * contract status control.
+     */
+    @PostMapping(value = "contract/status")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public Object contractStatusManage(@RequestBody @Valid ContractStatusHandle contractStatusHandle,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start crud startTime:{} contractStatusHandle:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(contractStatusHandle));
+
+        Object res = precompiledService.contractStatusManage(contractStatusHandle);
+
+        log.info("end crud useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+
+        return res;
+    }
+
+    @PostMapping(value = "contract/status/list")
+    public BaseResponse listContractStatus(@RequestBody @Valid AddressStatusHandle addressStatusHandle,
+        BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start crud startTime:{} addressStatusHandle:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(addressStatusHandle));
+
+        // return map of <contractAddress, response.data>
+        Map<String, Object> res = precompiledService.queryContractStatus(addressStatusHandle);
+
+        log.info("end crud useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+
+        return new BaseResponse(ConstantCode.SUCCESS, res);
+    }
+
 }

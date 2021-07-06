@@ -33,7 +33,7 @@ import com.webank.webase.node.mgr.lite.front.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.lite.front.frontinterface.entity.RspStatBlock;
 import com.webank.webase.node.mgr.lite.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.lite.user.entity.KeyPair;
-import com.webank.webase.node.mgr.pro.precompiled.entity.ConsensusHandle;
+import com.webank.webase.node.mgr.lite.contract.entity.ConsensusHandle;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;

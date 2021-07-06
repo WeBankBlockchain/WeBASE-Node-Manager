@@ -53,7 +53,6 @@ import com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.lite.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.lite.front.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.pro.precompiled.permission.governance.GovernVoteService;
 import com.webank.webase.node.mgr.lite.node.NodeService;
 import com.webank.webase.node.mgr.lite.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.lite.node.entity.TbNode;
@@ -121,8 +120,6 @@ public class GroupService {
     private ConstantProperties constantProperties;
     @Autowired
     private AbiService abiService;
-    @Autowired
-    private GovernVoteService governVoteService;
     @Autowired
     private CnsService cnsService;
     @Autowired
@@ -754,8 +751,6 @@ public class GroupService {
         transDailyService.deleteByGroupId(groupId);
         // delete imported abi
         abiService.deleteAbiByGroupId(groupId);
-        // delete chain governance vote
-        governVoteService.deleteAllByGroupId(groupId);
         // delete cns record
         cnsService.deleteByGroupId(groupId);
         // delete external user

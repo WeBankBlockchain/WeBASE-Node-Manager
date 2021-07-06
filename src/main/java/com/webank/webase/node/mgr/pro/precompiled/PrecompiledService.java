@@ -30,9 +30,9 @@ import com.webank.webase.node.mgr.lite.front.frontinterface.FrontInterfaceServic
 import com.webank.webase.node.mgr.lite.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.lite.group.GroupService;
 import com.webank.webase.node.mgr.lite.user.UserService;
-import com.webank.webase.node.mgr.pro.precompiled.entity.AddressStatusHandle;
-import com.webank.webase.node.mgr.pro.precompiled.entity.ConsensusHandle;
-import com.webank.webase.node.mgr.pro.precompiled.entity.ContractStatusHandle;
+import com.webank.webase.node.mgr.lite.contract.entity.AddressStatusHandle;
+import com.webank.webase.node.mgr.lite.contract.entity.ConsensusHandle;
+import com.webank.webase.node.mgr.lite.contract.entity.ContractStatusHandle;
 import com.webank.webase.node.mgr.pro.precompiled.entity.CrudHandle;
 import java.util.HashMap;
 import java.util.List;

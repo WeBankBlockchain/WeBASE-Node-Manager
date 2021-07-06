@@ -56,46 +56,6 @@ public class EventController {
 	private EventService eventService;
 
 	/**
-	 * get new block event register info
-	 */
-	@GetMapping(value = {"newBlockEvent/list/{groupId}/{pageNumber}/{pageSize}"})
-	public BasePageResponse getNewBlockEventInfo(@PathVariable("groupId") Integer groupId,
-												 @PathVariable("pageNumber") Integer pageNumber,
-												 @PathVariable("pageSize") Integer pageSize) {
-		Instant startTime = Instant.now();
-		log.debug("start getNewBlockEventInfo. startTime:{},groupId:{}", groupId, startTime.toEpochMilli());
-		List<NewBlockEventInfo> resList;
-		if (pageNumber < 1) {
-			return new BasePageResponse(ConstantCode.INVALID_PARAM_INFO, null, 0);
-		}
-		resList = eventService.getNewBlockEventInfoList(groupId);
-		List2Page list2Page = new List2Page(resList, pageSize, pageNumber);
-		log.info("end getNewBlockEventInfo useTime:{} resList:{}",
-				Duration.between(startTime, Instant.now()).toMillis(), resList);
-		return new BasePageResponse(ConstantCode.SUCCESS, list2Page.getPagedList(), resList.size());
-	}
-
-	/**
-	 * get contract event register info
-	 */
-	@GetMapping(value = {"contractEvent/list/{groupId}/{pageNumber}/{pageSize}"})
-	public BasePageResponse getContractEventInfo(@PathVariable("groupId") Integer groupId,
-												 @PathVariable("pageNumber") Integer pageNumber,
-												 @PathVariable("pageSize") Integer pageSize) {
-		Instant startTime = Instant.now();
-		log.debug("start getContractEventInfo. startTime:{},groupId:{}", groupId, startTime.toEpochMilli());
-		List<ContractEventInfo> resList;
-		if (pageNumber < 1) {
-			return new BasePageResponse(ConstantCode.INVALID_PARAM_INFO, null, 0);
-		}
-		resList = eventService.getContractEventInfoList(groupId);
-		List2Page list2Page = new List2Page(resList, pageSize, pageNumber);
-		log.info("end getContractEventInfo useTime:{} resList:{}",
-				Duration.between(startTime, Instant.now()).toMillis(), resList);
-		return new BasePageResponse(ConstantCode.SUCCESS, list2Page.getPagedList(), resList.size());
-	}
-
-	/**
 	 * sync get event logs list
 	 */
 	@PostMapping("/eventLogs/list")

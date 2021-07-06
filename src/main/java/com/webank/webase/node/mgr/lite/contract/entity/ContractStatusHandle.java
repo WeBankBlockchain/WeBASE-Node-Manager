@@ -1,4 +1,4 @@
-package com.webank.webase.node.mgr.pro.precompiled.entity;
+package com.webank.webase.node.mgr.lite.contract.entity;
 
 import lombok.Data;
 
