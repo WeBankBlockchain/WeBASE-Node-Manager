@@ -76,10 +76,10 @@ public class WarehouseMdTest {
 
     @Test
     public void testBACMdToBase64() {
-        System.out.println("ADDRESS_MD:\n" + Base64.getEncoder().encodeToString(ADDRESS_MD.getBytes()));
-        System.out.println("SAFE_MATH_MD:\n" + Base64.getEncoder().encodeToString(SAFE_MATH_MD.getBytes()));
-        System.out.println("ROLES_MD:\n" + Base64.getEncoder().encodeToString(ROLES_MD.getBytes()));
-        System.out.println("BAC001_MD:\n" + Base64.getEncoder().encodeToString(BAC001_MD.getBytes()));
+//        System.out.println("ADDRESS_MD:\n" + Base64.getEncoder().encodeToString(ADDRESS_MD.getBytes()));
+//        System.out.println("SAFE_MATH_MD:\n" + Base64.getEncoder().encodeToString(SAFE_MATH_MD.getBytes()));
+//        System.out.println("ROLES_MD:\n" + Base64.getEncoder().encodeToString(ROLES_MD.getBytes()));
+//        System.out.println("BAC001_MD:\n" + Base64.getEncoder().encodeToString(BAC001_MD.getBytes()));
         System.out.println("BAC002_MD:\n" + Base64.getEncoder().encodeToString(BAC002_MD.getBytes()));
     }
     public static final String BAC002_MD = "# BAC002 合约规范\n"
@@ -114,7 +114,7 @@ public class WarehouseMdTest {
         + "\n"
         + "- 销毁\n"
         + "\n"
-        + "  调用 destory 以及 destoryFrom 销毁自己地址下资产和特定地址下的资产\n"
+        + "  调用 destroy 以及 destroyFrom 销毁自己地址下资产和特定地址下的资产\n"
         + "\n"
         + "- 暂停\n"
         + "\n"
@@ -275,7 +275,7 @@ public class WarehouseMdTest {
         "\n" +
         "- 销毁\n" +
         "\n" +
-        "  调用 destory 以及 destoryFrom 销毁自己地址下积分和特定地址下的积分\n" +
+        "  调用 destroy 以及 destroyFrom 销毁自己地址下积分和特定地址下的积分\n" +
         "\n" +
         "- 暂停\n" +
         "\n" +
@@ -359,7 +359,7 @@ public class WarehouseMdTest {
         "\n" +
         "  积分描述\n" +
         "\n" +
-        "- <b>destory(uint256 value， string  data)</b>\n" +
+        "- <b>destroy(uint256 value， string  data)</b>\n" +
         "\n" +
         "  减少自己的积分，data 是转账备注\n" +
         "\n" +
