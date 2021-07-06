@@ -16,11 +16,14 @@
 package com.webank.webase.node.mgr.transaction;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.transaction.entity.ReqSignMessage;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import java.math.BigInteger;
@@ -31,19 +34,19 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @Log4j2
 @RestController
 @RequestMapping(value = "transaction")
-public class TransHashController {
+public class TransHashController extends BaseController {
 
     @Autowired
     private TransHashService transHashService;
@@ -132,5 +135,22 @@ public class TransHashController {
         log.info("end getTransaction useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
+    }
+
+    /**
+     * get transaction by hash.
+     */
+    @PostMapping("/signMessageHash")
+    public Object signMessageHash(@RequestBody @Valid ReqSignMessage reqSignMessage,
+                                        BindingResult result)
+            throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start getTransaction startTime:{} hash:{} signUserId:{}",
+                startTime.toEpochMilli(), reqSignMessage.getHash(), reqSignMessage.getSignUserId());
+        Object object = transHashService.getSignMessageHash(reqSignMessage.getHash(), reqSignMessage.getSignUserId());
+        log.info("end signMessageHash useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(object));
+        return object;
     }
 }
