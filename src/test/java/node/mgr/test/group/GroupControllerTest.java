@@ -15,10 +15,10 @@
  */
 package node.mgr.test.group;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
-import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
-import com.webank.webase.node.mgr.group.entity.ReqOperateGroup;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.group.entity.ReqGenerateGroup;
+import com.webank.webase.node.mgr.lite.group.entity.ReqGroupStatus;
+import com.webank.webase.node.mgr.lite.group.entity.ReqOperateGroup;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;

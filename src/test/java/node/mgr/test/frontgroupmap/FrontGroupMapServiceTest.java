@@ -13,10 +13,10 @@
  */
 package node.mgr.test.frontgroupmap;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.front.frontgroupmap.FrontGroupMapService;
+import com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.FrontGroup;
+import com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.MapListParam;
 import java.util.List;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;

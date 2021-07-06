@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.webank.webase.node.mgr.front.FrontMapper">
-  <resultMap id="frontMap" type="com.webank.webase.node.mgr.front.entity.TbFront">
+<mapper namespace="com.webank.webase.node.mgr.lite.front.FrontMapper">
+  <resultMap id="frontMap" type="com.webank.webase.node.mgr.lite.front.entity.TbFront">
     <id column="front_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontId"/>
     <result column="node_id" javaType="java.lang.String" jdbcType="VARCHAR"  property="nodeId"/>
     <result column="front_ip" javaType="java.lang.String" jdbcType="VARCHAR"  property="frontIp"/>
@@ -50,7 +50,7 @@
     </selectKey>
   </insert>
 
-  <update id="update" parameterType="com.webank.webase.node.mgr.front.entity.TbFront">
+  <update id="update" parameterType="com.webank.webase.node.mgr.lite.front.entity.TbFront">
     update tb_front set modify_time = now()
     <if test="status != null and status != ''">
       ,status = #{status}
@@ -58,7 +58,7 @@
     where front_id = #{frontId}
   </update>
   
-  <update id="updateBasicInfo" parameterType="com.webank.webase.node.mgr.front.entity.TbFront">
+  <update id="updateBasicInfo" parameterType="com.webank.webase.node.mgr.lite.front.entity.TbFront">
     update tb_front 
     set node_id = #{nodeId},
         client_version = #{clientVersion},
@@ -77,7 +77,7 @@
     delete from tb_front where front_id=#{frontId}
   </delete>
 
-  <select id="getCount" resultType="java.lang.Integer" parameterType="com.webank.webase.node.mgr.front.entity.FrontParam">
+  <select id="getCount" resultType="java.lang.Integer" parameterType="com.webank.webase.node.mgr.lite.front.entity.FrontParam">
     select count(1) from tb_front
     where front_id in(select front_id from tb_front_group_map where 1=1
     <if test="groupId != null and groupId !=''">
@@ -102,7 +102,7 @@
   </select>
 
 
-  <select id="getList" resultMap="frontMap" parameterType="com.webank.webase.node.mgr.front.entity.FrontParam">
+  <select id="getList" resultMap="frontMap" parameterType="com.webank.webase.node.mgr.lite.front.entity.FrontParam">
     select * from tb_front
     where front_id in(select front_id from tb_front_group_map where 1=1
     <if test="groupId != null and groupId !=''">

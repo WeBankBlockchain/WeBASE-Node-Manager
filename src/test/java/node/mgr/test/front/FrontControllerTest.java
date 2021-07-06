@@ -13,8 +13,8 @@
  */
 package node.mgr.test.front;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.front.entity.FrontInfo;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.front.entity.FrontInfo;
 import node.mgr.test.base.TestBase;
 import org.junit.Before;
 import org.junit.Test;

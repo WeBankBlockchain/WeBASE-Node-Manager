@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.webank.webase.node.mgr.contract.ContractPathMapper">
+<mapper namespace="com.webank.webase.node.mgr.lite.contract.ContractPathMapper">
   <resultMap id="pathMap"
-    type="com.webank.webase.node.mgr.contract.entity.TbContractPath">
+    type="com.webank.webase.node.mgr.lite.contract.entity.TbContractPath">
     <id column="id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="id" />
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -19,7 +19,7 @@
   </resultMap>
 
 
-  <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContractPath">
+  <insert id="add" parameterType="com.webank.webase.node.mgr.lite.contract.entity.TbContractPath">
     REPLACE INTO tb_contract_path(group_id,contract_path,account,create_time,modify_time)
     VALUES (#{groupId},#{contractPath},#{account}, now(), now())
   </insert>
@@ -29,7 +29,7 @@
     where id = #{contractPathId}
   </delete>
 
-  <update id="update" parameterType="com.webank.webase.node.mgr.contract.entity.TbContractPath">
+  <update id="update" parameterType="com.webank.webase.node.mgr.lite.contract.entity.TbContractPath">
     update tb_contract_path set modify_time = now()
     <if test="contractPath != null and contractPath != ''">
       ,contract_path = #{contractPath}
@@ -37,7 +37,7 @@
     where id = #{id}
   </update>
 
-  <delete id="removeByPathName" parameterType="com.webank.webase.node.mgr.contract.entity.ContractPathParam">
+  <delete id="removeByPathName" parameterType="com.webank.webase.node.mgr.lite.contract.entity.ContractPathParam">
     delete from tb_contract_path
     where group_id = #{groupId}
     and contract_path = #{contractPath}
@@ -57,7 +57,7 @@
     order by modify_time desc
   </select>
 
-  <select id="findOne" parameterType="com.webank.webase.node.mgr.contract.entity.ContractPathParam"
+  <select id="findOne" parameterType="com.webank.webase.node.mgr.lite.contract.entity.ContractPathParam"
     resultMap="pathMap">
     select * from tb_contract_path
     where group_id = #{groupId}

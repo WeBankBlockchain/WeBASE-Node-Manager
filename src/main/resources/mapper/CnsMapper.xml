@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.webank.webase.node.mgr.contract.CnsMapper">
+<mapper namespace="com.webank.webase.node.mgr.lite.contract.CnsMapper">
   <resultMap id="cnsMap"
-    type="com.webank.webase.node.mgr.contract.entity.TbCns">
+    type="com.webank.webase.node.mgr.lite.contract.entity.TbCns">
     <id column="id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="id" />
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -26,12 +26,12 @@
       property="modifyTime" />
   </resultMap>
 
-  <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbCns">
+  <insert id="add" parameterType="com.webank.webase.node.mgr.lite.contract.entity.TbCns">
     REPLACE INTO tb_cns(group_id,contract_path,contract_name,cns_name,version,contract_address,contract_abi,create_time,modify_time)
     VALUES (#{groupId},#{contractPath},#{contractName},#{cnsName},#{version},#{contractAddress},#{contractAbi}, now(), now())
   </insert>
 
-  <select id="countOfCns" parameterType="com.webank.webase.node.mgr.contract.entity.QueryCnsParam"
+  <select id="countOfCns" parameterType="com.webank.webase.node.mgr.lite.contract.entity.QueryCnsParam"
     resultType="java.lang.Integer">
     select count(1) from tb_cns
     where group_id = #{groupId}
@@ -49,7 +49,7 @@
     </if>
   </select>
   
-  <select id="getList" parameterType="com.webank.webase.node.mgr.contract.entity.QueryCnsParam"
+  <select id="getList" parameterType="com.webank.webase.node.mgr.lite.contract.entity.QueryCnsParam"
     resultMap="cnsMap">
     select * from tb_cns
     where group_id = #{groupId}
@@ -73,7 +73,7 @@
     </if>
   </select>
 
-  <select id="getCnsByAddress" parameterType="com.webank.webase.node.mgr.contract.entity.QueryCnsParam"
+  <select id="getCnsByAddress" parameterType="com.webank.webase.node.mgr.lite.contract.entity.QueryCnsParam"
     resultMap="cnsMap">
     select * from tb_cns
     where group_id = #{groupId}

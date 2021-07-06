@@ -3,8 +3,8 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.block.BlockMapper">
-  <resultMap id="blockMap" type="com.webank.webase.node.mgr.block.entity.TbBlock">
+<mapper namespace="com.webank.webase.node.mgr.lite.block.BlockMapper">
+  <resultMap id="blockMap" type="com.webank.webase.node.mgr.lite.block.entity.TbBlock">
     <id column="pk_hash" javaType="java.lang.String" jdbcType="VARCHAR" property="pkHash"/>
     <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
       property="blockNumber"/>
@@ -40,7 +40,7 @@
     update ${tableName} set sealer = #{block.sealer} where pk_hash=#{block.pkHash};
   </update>
 
-  <select id="getList" parameterType="com.webank.webase.node.mgr.block.entity.BlockListParam"
+  <select id="getList" parameterType="com.webank.webase.node.mgr.lite.block.entity.BlockListParam"
     resultMap="blockMap">
     select * from ${tableName} where 1=1
     <if test="param.pkHash != null and param.pkHash != ''">

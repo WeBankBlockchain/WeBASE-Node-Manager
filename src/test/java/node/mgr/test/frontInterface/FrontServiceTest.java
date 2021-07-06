@@ -13,11 +13,11 @@
  */
 package node.mgr.test.frontInterface;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.front.entity.TotalTransCountInfo;
+import com.webank.webase.node.mgr.lite.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.lite.front.frontinterface.entity.ChainTransInfo;
+import com.webank.webase.node.mgr.lite.node.entity.PeerInfo;
 import java.math.BigInteger;
 import java.util.List;
 import node.mgr.test.base.TestBase;

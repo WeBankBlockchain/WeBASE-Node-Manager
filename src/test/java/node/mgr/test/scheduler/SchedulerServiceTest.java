@@ -13,9 +13,8 @@
  */
 package node.mgr.test.scheduler;
 
-import com.webank.webase.node.mgr.scheduler.PullBlockTransTask;
-import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
-import com.webank.webase.node.mgr.scheduler.TransMonitorTask;
+import com.webank.webase.node.mgr.lite.scheduler.PullBlockTransTask;
+import com.webank.webase.node.mgr.lite.scheduler.ResetGroupListTask;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,6 @@ public class SchedulerServiceTest extends TestBase {
     private PullBlockTransTask pullBlockTransTask;
     @Autowired
     private ResetGroupListTask resetGroupListTask;
-    @Autowired
-    private TransMonitorTask transMonitorTask;
 
     @Test
     public void pullBlockInfoTaskTest() {
@@ -37,11 +34,6 @@ public class SchedulerServiceTest extends TestBase {
     @Test
     public void resetGroupListTest() {
         resetGroupListTask.resetGroupList();
-    }
-
-    @Test
-    public void transMonitorTest() {
-        transMonitorTask.monitorStart();
     }
 
 }

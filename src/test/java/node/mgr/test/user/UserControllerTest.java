@@ -13,11 +13,11 @@
  */
 package node.mgr.test.user;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
-import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
-import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
-import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.front.frontgroupmap.FrontGroupMapCache;
+import com.webank.webase.node.mgr.lite.user.entity.BindUserInputParam;
+import com.webank.webase.node.mgr.lite.user.entity.NewUserInputParam;
+import com.webank.webase.node.mgr.lite.user.entity.UpdateUserInputParam;
 import node.mgr.test.base.TestBase;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;

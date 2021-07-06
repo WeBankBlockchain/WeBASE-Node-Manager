@@ -3,8 +3,8 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.account.AccountMapper">
-  <resultMap id="accountMap" type="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+<mapper namespace="com.webank.webase.node.mgr.lite.account.AccountMapper">
+  <resultMap id="accountMap" type="com.webank.webase.node.mgr.lite.account.entity.TbAccountInfo">
     <id column="account" javaType="java.lang.String" jdbcType="VARCHAR" property="account"/>
     <result column="account_pwd" javaType="java.lang.String" jdbcType="VARCHAR"
       property="accountPwd"/>
@@ -36,19 +36,19 @@
 		a.description,a.email,a.create_time createTime,a.modify_time modifyTime
 	</sql>
 
-  <insert id="addAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+  <insert id="addAccountRow" parameterType="com.webank.webase.node.mgr.lite.account.entity.TbAccountInfo">
     insert into tb_account_info
     <include refid="NEW_ROW_COLUMN"/>
     values(#{account},#{accountPwd},#{roleId},#{description},#{email},NOW(),NOW())
   </insert>
 
-  <update id="updateAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+  <update id="updateAccountRow" parameterType="com.webank.webase.node.mgr.lite.account.entity.TbAccountInfo">
 		update tb_account_info set account_pwd=#{accountPwd},role_id=#{roleId},login_fail_time=#{loginFailTime},
 		account_status=#{accountStatus},description=#{description},email=#{email},modify_time=now()
 		where account=#{account}
 	</update>
 
-  <select id="queryByAccount" resultType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+  <select id="queryByAccount" resultType="com.webank.webase.node.mgr.lite.account.entity.TbAccountInfo">
     select
     <include refid="QUERY_ROW_COLUMN"/>
     from tb_account_info a left join tb_role b on(a.role_id=b.role_id) where BINARY a.account =
@@ -64,7 +64,7 @@
   </select>
 
 
-  <select id="listOfAccount" parameterType="com.webank.webase.node.mgr.account.entity.AccountListParam"
+  <select id="listOfAccount" parameterType="com.webank.webase.node.mgr.lite.account.entity.AccountListParam"
     resultMap="accountMap">
     select a.*,b.role_name,b.role_name_zh from tb_account_info a
     left join tb_role b on(a.role_id=b.role_id)

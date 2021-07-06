@@ -3,8 +3,8 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper">
-    <resultMap id="frontGroupMap" type="com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup">
+<mapper namespace="com.webank.webase.node.mgr.lite.front.frontgroupmap.FrontGroupMapMapper">
+    <resultMap id="frontGroupMap" type="com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.FrontGroup">
         <id column="map_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="mapId"/>
         <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
         <result column="group_name" javaType="java.lang.String" jdbcType="VARCHAR" property="groupName"/>
@@ -16,7 +16,7 @@
     </resultMap>
 
 
-    <insert id="add" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
+    <insert id="add" parameterType="com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.TbFrontGroupMap">
         insert into tb_front_group_map
         (front_id,group_id,status,type,create_time,modify_time)values(#{frontId},#{groupId},#{status},#{type},NOW(),NOW())
         <selectKey keyProperty="mapId" order="AFTER" resultType="java.lang.Integer">
@@ -24,7 +24,7 @@
         </selectKey>
     </insert>
 
-    <insert id="insertSelective" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
+    <insert id="insertSelective" parameterType="com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.TbFrontGroupMap">
         insert into tb_front_group_map
         <trim prefix="(" suffix=")" suffixOverrides="," >
             <if test="groupId != null" >
@@ -62,7 +62,7 @@
     </insert>
 
 
-    <update id="update" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
+    <update id="update" parameterType="com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.TbFrontGroupMap">
         update tb_front_group_map set modify_time = now()
         <if test="status != null and status != ''">
             ,status = #{status}
@@ -73,7 +73,7 @@
         where map_id = #{mapId}
     </update>
 
-    <select id="queryFrontGroup" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam"
+    <select id="queryFrontGroup" parameterType="com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.MapListParam"
             resultMap="frontGroupMap">
         select * from tb_front_group_map where 1=1
         <if test="mapId != null and mapId != ''">
@@ -95,7 +95,7 @@
     </select>
 
     <select id="getCount" resultType="java.lang.Integer"
-            parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam">
+            parameterType="com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.MapListParam">
         select count(1) from tb_front_group_map where 1=1
         <if test="mapId != null and mapId != ''">
             and map_id = #{param.mapId}
@@ -115,7 +115,7 @@
     </select>
 
     <select id="getList" resultMap="frontGroupMap"
-            parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam">
+            parameterType="com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.MapListParam">
         select a.map_id,a.front_id,a.group_id,a.status,a.type,b.front_ip,b.front_port,c.group_name
         from tb_front_group_map a
         left join tb_front b on(a.front_id=b.front_id)
