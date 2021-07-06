@@ -40,23 +40,23 @@ public class AccountFilter implements HandlerInterceptor {
             Object handler) throws Exception {
         // 获取账户信息
         String account = accountService.getCurrentAccount(request);
-        // if disabled security
-        if (!constants.getIsUseSecurity()) {
+        TbAccountInfo accountRow = accountService.queryByAccount(account);
+        // if account of 'admin' not exist and if disabled security, default admin role type
+        if (accountRow == null && !constants.getIsUseSecurity()) {
             // 设置账户信息
             CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
             currentAccountInfo.setAccount(account);
             currentAccountInfo.setRoleId(RoleType.ADMIN.getValue());
             request.setAttribute("currentAccountInfo", currentAccountInfo);
             return true;
-        } else {
-            TbAccountInfo accountRow = accountService.queryByAccount(account);
-            // 设置账户信息
-            CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
-            currentAccountInfo.setAccount(account);
-            currentAccountInfo.setRoleId(accountRow.getRoleId());
-            request.setAttribute("currentAccountInfo", currentAccountInfo);
-            return true;
         }
+        // 设置账户信息
+        CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
+        currentAccountInfo.setAccount(account);
+        currentAccountInfo.setRoleId(accountRow.getRoleId());
+        request.setAttribute("currentAccountInfo", currentAccountInfo);
+        return true;
+
     }
 
 }

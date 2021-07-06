@@ -40,7 +40,7 @@ logging:
 constant:
   ###http request
   # login's authorization
-  isUseSecurity: true
+  isUseSecurity: false
   # verification code expire time (s)
   verificationCodeMaxAge: 300
   # if disabled as false, code would be constant value

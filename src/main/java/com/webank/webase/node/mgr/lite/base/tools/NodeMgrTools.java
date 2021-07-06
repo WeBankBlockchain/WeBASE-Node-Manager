@@ -59,6 +59,7 @@ import org.fisco.bcos.sdk.utils.Numeric;
 public class NodeMgrTools {
 
     public static final String TOKEN_HEADER_NAME = "AuthorizationToken";
+    public static final String HEADER_ACCOUNT = "Account";
     private static final String TOKEN_START = "Token";
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_TIME_FORMAT_NO_SPACE = "yyyyMMddHHmmss";
@@ -467,6 +468,15 @@ public class NodeMgrTools {
             throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
         }
         return token;
+    }
+
+    /**
+     * get token.
+     */
+    public static synchronized String getAccount(HttpServletRequest request) {
+        String accountName = request.getHeader(HEADER_ACCOUNT);
+        log.debug("getAccount from header: [{}]", accountName);
+        return accountName;
     }
 
     /**

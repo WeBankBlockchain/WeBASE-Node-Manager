@@ -54,6 +54,7 @@ public class AccountService {
     private TokenService tokenService;
     @Autowired
     private ConstantProperties constants;
+    private static final String ADMIN_TOKEN_VALUE = "admin";
 
     /**
      * login.
@@ -265,10 +266,23 @@ public class AccountService {
     /**
      * get current account.
      */
+    /**
+     * get current account.
+     * whether use security:
+     * @case1: get account info from request's header, such as account of admin001
+     * @case2: get account from token, use token to get account, such as 0x001 to get its account of admin001
+     */
     public String getCurrentAccount(HttpServletRequest request) {
         if (!constants.getIsUseSecurity()) {
-            //todo 直接根据request的用户名密码，获取token对应的value
-            return "admin";
+            String accountDefault = NodeMgrTools.getAccount(request);
+            if (StringUtils.isNotBlank(accountDefault)) {
+                log.debug("getCurrentAccount default [{}]", accountDefault);
+                return accountDefault;
+            } else {
+                // default return admin
+                log.debug("getCurrentAccount not found account, default admin");
+                return ADMIN_TOKEN_VALUE;
+            }
         }
         String token = NodeMgrTools.getToken(request);
         return tokenService.getValueFromToken(token);
