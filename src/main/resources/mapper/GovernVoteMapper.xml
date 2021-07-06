@@ -3,8 +3,8 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.pro.governance.GovernVoteMapper">
-  <resultMap id="voteMap" type="com.webank.webase.node.mgr.pro.governance.entity.TbGovernVote">
+<mapper namespace="com.webank.webase.node.mgr.pro.precompiled.permission.governance.GovernVoteMapper">
+  <resultMap id="voteMap" type="com.webank.webase.node.mgr.pro.precompiled.permission.governance.entity.TbGovernVote">
     <id column="id" javaType="java.lang.Integer" jdbcType="INTEGER" property="id"/>
     <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="groupId"/>
@@ -24,7 +24,7 @@
       property="modifyTime"/>
   </resultMap>
 
-  <insert id="add" parameterType="com.webank.webase.node.mgr.pro.governance.entity.TbGovernVote">
+  <insert id="add" parameterType="com.webank.webase.node.mgr.pro.precompiled.permission.governance.entity.TbGovernVote">
     insert into
     tb_govern_vote(group_id,time_limit,from_address,type,to_address,detail,create_time,modify_time)
     values(#{groupId},#{timeLimit},#{fromAddress},#{type},#{toAddress},#{detail},NOW(),NOW())
@@ -34,7 +34,7 @@
   </insert>
 
 
-  <select id="getCount" parameterType="com.webank.webase.node.mgr.pro.governance.entity.GovernParam"
+  <select id="getCount" parameterType="com.webank.webase.node.mgr.pro.precompiled.permission.governance.entity.GovernParam"
     resultType="java.lang.Integer">
     select count(1) from tb_govern_vote where 1=1
     <if test="groupId != null and groupId != ''">
@@ -42,7 +42,7 @@
     </if>
   </select>
 
-  <select id="getList" parameterType="com.webank.webase.node.mgr.pro.governance.entity.GovernParam"
+  <select id="getList" parameterType="com.webank.webase.node.mgr.pro.precompiled.permission.governance.entity.GovernParam"
     resultMap="voteMap">
     select * from tb_govern_vote where 1=1
     <if test="groupId != null and groupId != ''">
