@@ -182,7 +182,7 @@ public class AccountService {
     }
 
     /**
-     * query account info by acountName.
+     * query account info by accountName.
      */
     public TbAccountInfo queryByAccount(String accountStr) {
         log.debug("start queryByAccount. accountStr:{} ", accountStr);

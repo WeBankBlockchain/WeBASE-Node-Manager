@@ -41,6 +41,14 @@ public class AccountFilter implements HandlerInterceptor {
         // 获取账户信息
         String account = accountService.getCurrentAccount(request);
         TbAccountInfo accountRow = accountService.queryByAccount(account);
+        // if account of 'admin' not exist, default admin role type
+        if (accountRow == null && !constants.getIsUseSecurity()) {
+            CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
+            currentAccountInfo.setAccount(account);
+            currentAccountInfo.setRoleId(RoleType.ADMIN.getValue());
+            request.setAttribute("currentAccountInfo", currentAccountInfo);
+            return true;
+        }
         // 设置账户信息
         CurrentAccountInfo currentAccountInfo = new CurrentAccountInfo();
         currentAccountInfo.setAccount(account);
