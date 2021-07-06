@@ -18,10 +18,12 @@ package com.webank.webase.node.mgr.lite.config.security.customizeAuth;
 import com.webank.webase.node.mgr.lite.account.AccountService;
 import com.webank.webase.node.mgr.lite.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.lite.account.token.TokenService;
+import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -30,8 +32,6 @@ import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class TokenAuthenticationProvider implements AuthenticationProvider {
@@ -66,6 +66,12 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
         return TokenAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
+    private AbstractAuthenticationToken buildAuthentication(String account) {
+        TbAccountInfo tbAccountInfo = accountService.queryByAccount(account);
+        log.debug(tbAccountInfo + "****" + tbAccountInfo.getAccount());
+        return new TokenAuthenticationToken(tbAccountInfo.getAccount(), buildAuthorities(tbAccountInfo));
+    }
+
     private Collection<SimpleGrantedAuthority> buildAuthorities(TbAccountInfo user) {
         final Collection<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();
         List<String> authorities = getUserAuthorities(user);
@@ -73,12 +79,6 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
             simpleGrantedAuthorities.add(new SimpleGrantedAuthority(authority));
         }
         return simpleGrantedAuthorities;
-    }
-
-    private AbstractAuthenticationToken buildAuthentication(String account) {
-        TbAccountInfo tbAccountInfo = accountService.queryByAccount(account);
-        log.debug(tbAccountInfo + "****" + tbAccountInfo.getAccount());
-        return new TokenAuthenticationToken(tbAccountInfo.getAccount(), buildAuthorities(tbAccountInfo));
     }
 
     private List<String> getUserAuthorities(TbAccountInfo user) {

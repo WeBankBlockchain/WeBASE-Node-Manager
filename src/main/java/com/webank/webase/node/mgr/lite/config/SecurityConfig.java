@@ -14,9 +14,9 @@
 package com.webank.webase.node.mgr.lite.config;
 
 import com.webank.webase.node.mgr.lite.config.filter.TokenAuthenticationFilter;
-import com.webank.webase.node.mgr.lite.config.filter.TokenAuthenticationFilter;
 import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.config.security.AccountDetailsService;
+import com.webank.webase.node.mgr.lite.config.security.JsonAccessDeniedHandler;
 import com.webank.webase.node.mgr.lite.config.security.JsonAuthenticationEntryPoint;
 import com.webank.webase.node.mgr.lite.config.security.JsonLogoutSuccessHandler;
 import com.webank.webase.node.mgr.lite.config.security.LoginFailHandler;
@@ -39,20 +39,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.lite.config.security.AccountDetailsService;
-import com.webank.webase.node.mgr.lite.config.security.JsonAccessDeniedHandler;
-import com.webank.webase.node.mgr.lite.config.security.JsonAuthenticationEntryPoint;
-import com.webank.webase.node.mgr.lite.config.security.JsonLogoutSuccessHandler;
-import com.webank.webase.node.mgr.lite.config.security.LoginFailHandler;
-import com.webank.webase.node.mgr.lite.config.security.customizeAuth.TokenAuthenticationProvider;
-
 /**
  * security config.
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -105,7 +96,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(userAuthenticationProvider());
         auth.authenticationProvider(tokenAuthenticationProvider());
     }
@@ -116,12 +107,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-
-    @Bean
-    public AuthenticationProvider tokenAuthenticationProvider() {
-        return new TokenAuthenticationProvider();
-    }
-    
     @Bean
     public DaoAuthenticationProvider userAuthenticationProvider(){
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
@@ -130,4 +115,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         return daoAuthenticationProvider;
     }
+
+    @Bean
+    public AuthenticationProvider tokenAuthenticationProvider() {
+        return new TokenAuthenticationProvider();
+    }
+
 }
