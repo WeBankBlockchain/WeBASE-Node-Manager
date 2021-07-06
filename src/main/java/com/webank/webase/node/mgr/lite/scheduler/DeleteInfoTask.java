@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.lite.scheduler;
 
 
+import com.webank.webase.node.mgr.lite.base.enums.DataStatus;
 import com.webank.webase.node.mgr.lite.block.BlockService;
 import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.group.GroupService;
@@ -23,16 +24,11 @@ import com.webank.webase.node.mgr.pro.statistic.StatService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import com.webank.webase.node.mgr.lite.base.enums.DataStatus;
-import com.webank.webase.node.mgr.pro.monitor.MonitorService;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * delete block/trans/monitorTrans data task
@@ -51,8 +47,6 @@ public class DeleteInfoTask {
     private TransHashService transHashService;
     @Autowired
     private ConstantProperties cProperties;
-    @Autowired
-    private MonitorService monitorService;
     @Autowired
     private StatService statService;
 
@@ -89,10 +83,6 @@ public class DeleteInfoTask {
         deleteBlock(groupId);
         //delete transHash
         deleteTransHash(groupId);
-        //delete transaction monitor info
-        deleteTransMonitor(groupId);
-        // delete block stat data
-        deleteBlockStat(groupId);
     }
 
 
@@ -115,8 +105,6 @@ public class DeleteInfoTask {
     private void deleteTransHash(int groupId) {
         log.debug("start deleteTransHash. groupId:{}", groupId);
         try {
-//            TransListParam queryParam = new TransListParam(null, null);
-//            Integer count = transHashService.queryCountOfTran(groupId, queryParam);
             Integer count = transHashService.queryCountOfTranByMinus(groupId);
             Integer removeCount = 0;
             if (count > cProperties.getTransRetainMax().intValue()) {
@@ -126,35 +114,6 @@ public class DeleteInfoTask {
             log.debug("end deleteTransHash. groupId:{} removeCount:{}", groupId, removeCount);
         } catch (Exception ex) {
             log.error("fail deleteTransHash. groupId:{}", groupId, ex);
-        }
-    }
-
-
-    /**
-     * delete monitor info.
-     */
-    private void deleteTransMonitor(int groupId) {
-        log.debug("start deleteTransMonitor. groupId:{}", groupId);
-        try {
-            Integer removeCount = monitorService
-                .delete(groupId, cProperties.getMonitorInfoRetainMax());
-            log.debug("end deleteTransMonitor. groupId:{} removeCount:{}", groupId, removeCount);
-        } catch (Exception ex) {
-            log.error("fail deleteTransMonitor. groupId:{}", groupId, ex);
-        }
-    }
-
-    /**
-     * remove stat block data
-     * @param groupId
-     */
-    private void deleteBlockStat(int groupId) {
-        log.debug("start deleteBlockStat. groupId:{}", groupId);
-        try {
-            Integer removeCount = statService.remove(groupId, cProperties.getStatBlockRetainMax());
-            log.debug("end deleteBlockStat. groupId:{} removeCount:{}", groupId, removeCount);
-        } catch (Exception ex) {
-            log.error("fail deleteBlockStat. groupId:{}", groupId, ex);
         }
     }
 

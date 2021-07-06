@@ -16,15 +16,20 @@
 package com.webank.webase.node.mgr.pro.precompiled;
 
 import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
+import com.webank.webase.node.mgr.lite.base.controller.BaseController;
 import com.webank.webase.node.mgr.lite.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.pro.precompiled.entity.AddressStatusHandle;
+import com.webank.webase.node.mgr.pro.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.pro.precompiled.entity.ContractStatusHandle;
+import com.webank.webase.node.mgr.pro.precompiled.entity.CrudHandle;
 import java.time.Duration;
 import java.time.Instant;
-
 import java.util.Map;
 import javax.validation.Valid;
-
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -34,15 +39,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.webank.webase.node.mgr.lite.base.controller.BaseController;
-import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
-import com.webank.webase.node.mgr.pro.precompiled.entity.ConsensusHandle;
-import com.webank.webase.node.mgr.pro.precompiled.entity.CrudHandle;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Precompiled common controller

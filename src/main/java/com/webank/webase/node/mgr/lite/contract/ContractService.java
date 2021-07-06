@@ -13,31 +13,26 @@
  */
 package com.webank.webase.node.mgr.lite.contract;
 
+import com.webank.webase.node.mgr.lite.base.annotation.entity.CurrentAccountInfo;
+import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
+import com.webank.webase.node.mgr.lite.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.lite.base.enums.ContractStatus;
+import com.webank.webase.node.mgr.lite.base.enums.RoleType;
+import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.base.tools.Web3Tools;
+import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.contract.abi.AbiService;
 import com.webank.webase.node.mgr.lite.contract.abi.entity.AbiInfo;
+import com.webank.webase.node.mgr.lite.contract.entity.Contract;
 import com.webank.webase.node.mgr.lite.contract.entity.ContractParam;
+import com.webank.webase.node.mgr.lite.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.lite.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.lite.contract.entity.ReqCopyContracts;
 import com.webank.webase.node.mgr.lite.contract.entity.ReqListContract;
 import com.webank.webase.node.mgr.lite.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.lite.contract.entity.TbContract;
 import com.webank.webase.node.mgr.lite.contract.entity.TbContractPath;
-import com.webank.webase.node.mgr.pro.appintegration.contractstore.ContractStoreService;
-import com.webank.webase.node.mgr.pro.appintegration.contractstore.entity.ContractStoreParam;
-import com.webank.webase.node.mgr.pro.appintegration.contractstore.entity.ReqContractAddressSave;
-import com.webank.webase.node.mgr.pro.appintegration.contractstore.entity.TbContractStore;
-import com.webank.webase.node.mgr.lite.base.annotation.entity.CurrentAccountInfo;
-import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
-import com.webank.webase.node.mgr.lite.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.lite.base.enums.ContractStatus;
-import com.webank.webase.node.mgr.lite.base.enums.ContractType;
-import com.webank.webase.node.mgr.lite.base.enums.RoleType;
-import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
-import com.webank.webase.node.mgr.lite.base.tools.Web3Tools;
-import com.webank.webase.node.mgr.lite.contract.entity.Contract;
-import com.webank.webase.node.mgr.lite.contract.entity.ContractPathParam;
 import com.webank.webase.node.mgr.lite.contract.entity.TransactionInputParam;
 import com.webank.webase.node.mgr.lite.front.entity.TransactionParam;
 import com.webank.webase.node.mgr.lite.front.frontinterface.FrontInterfaceService;
@@ -45,11 +40,8 @@ import com.webank.webase.node.mgr.lite.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.lite.front.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.lite.group.GroupService;
 import com.webank.webase.node.mgr.lite.transaction.method.MethodService;
-import com.webank.webase.node.mgr.lite.transaction.method.entity.NewMethodInputParam;
-import com.webank.webase.node.mgr.pro.monitor.MonitorService;
-import com.webank.webase.node.mgr.pro.precompiled.permission.PermissionManageService;
 import com.webank.webase.node.mgr.lite.user.UserService;
-import java.io.IOException;
+import com.webank.webase.node.mgr.pro.precompiled.permission.PermissionManageService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,10 +58,7 @@ import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 /**
  * services for contract data.
@@ -88,9 +77,6 @@ public class  ContractService {
     @Autowired
     private FrontRestTools frontRestTools;
     @Autowired
-    @Lazy
-    private MonitorService monitorService;
-    @Autowired
     private FrontInterfaceService frontInterface;
     @Autowired
     private UserService userService;
@@ -100,8 +86,6 @@ public class  ContractService {
     private PermissionManageService permissionManageService;
     @Autowired
     private ContractPathService contractPathService;
-    @Autowired
-    private ContractStoreService contractStoreService;
     @Autowired
     private MethodService methodService;
     @Autowired
@@ -123,12 +107,6 @@ public class  ContractService {
         } else {
             //update
             tbContract = updateContract(contract);
-        }
-
-        if (StringUtils.isNotBlank(tbContract.getContractBin())) {
-            // update monitor unusual deployInputParam's info
-            monitorService.updateUnusualContract(tbContract.getGroupId(),
-                tbContract.getContractName(), tbContract.getContractBin());
         }
 
         return tbContract;
@@ -156,75 +134,6 @@ public class  ContractService {
         // if exist, auto not save (ignore)
         contractPathService.save(contract.getGroupId(), contract.getContractPath(), contract.getAccount(), true);
         return tbContract;
-    }
-
-    /**
-     * save application's contract.
-     *
-     * @param appKey
-     * @param reqContractAddressSave
-     */
-    @Transactional
-    public void appContractSave(String appKey, ReqContractAddressSave reqContractAddressSave)
-        throws IOException {
-        Integer groupId = reqContractAddressSave.getGroupId();
-        // check group id
-        groupService.checkGroupId(groupId);
-        // get runtimeBin
-        String runtimeBin = abiService.getAddressRuntimeBin(groupId,
-            reqContractAddressSave.getContractAddress());
-        String contractName = reqContractAddressSave.getContractName();
-        String contractVersion = reqContractAddressSave.getContractVersion();
-        String contractPath = reqContractAddressSave.getContractPath();
-        // get contract store
-        ContractStoreParam contractStoreParam = new ContractStoreParam();
-        contractStoreParam.setAppKey(appKey);
-        contractStoreParam.setContractVersion(contractVersion);
-        List<TbContractStore> listOfContractStore =
-            contractStoreService.listOfContractStore(contractStoreParam);
-        if (CollectionUtils.isEmpty(listOfContractStore)) {
-            throw new NodeMgrException(ConstantCode.CONTRACT_SOURCE_NOT_EXIST);
-        }
-        boolean pathExist = contractPathService.checkPathExist(groupId, contractPath,
-                listOfContractStore.get(0).getAccount());
-        for (TbContractStore tbContractStore : listOfContractStore) {
-            // check if tbContractStore has been saved
-            if (pathExist && !tbContractStore.getContractName().equals(contractName)) {
-                continue;
-            }
-            ContractParam param = new ContractParam(groupId, contractPath,
-                tbContractStore.getContractName(), tbContractStore.getAccount());
-            TbContract localContract = queryContract(param);
-            // check if deployed contract saved
-            if (Objects.nonNull(localContract)
-                && localContract.getContractStatus() == ContractStatus.DEPLOYED.getValue()
-                && !tbContractStore.getContractName().equals(contractName)) {
-                continue;
-            }
-            TbContract tbContract = new TbContract();
-            BeanUtils.copyProperties(tbContractStore, tbContract);
-            tbContract.setGroupId(groupId);
-            tbContract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
-            tbContract.setContractPath(contractPath);
-            tbContract.setContractType(ContractType.APPIMPORT.getValue());
-            if (tbContractStore.getContractName().equals(contractName)) {
-                tbContract.setContractAddress(reqContractAddressSave.getContractAddress());
-                tbContract.setContractBin(runtimeBin);
-                tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-                // save abi
-                abiService.saveAbiFromAppContract(tbContract);
-            }
-            // save and update contract
-            contractMapper.saveAndUpdate(tbContract);
-            // save and update method
-            NewMethodInputParam newMethodInputParam = new NewMethodInputParam();
-            newMethodInputParam.setGroupId(groupId);
-            newMethodInputParam.setMethodList(
-                Web3Tools.getMethodFromAbi(tbContractStore.getContractAbi(), cryptoSuite));
-            methodService.saveMethod(newMethodInputParam, ContractType.APPIMPORT.getValue());
-        }
-        // if exist, auto not save (ignore)
-        contractPathService.save(groupId, contractPath, listOfContractStore.get(0).getAccount(), true);
     }
 
     /**

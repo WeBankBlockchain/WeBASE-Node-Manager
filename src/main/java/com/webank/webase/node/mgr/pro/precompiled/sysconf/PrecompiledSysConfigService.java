@@ -15,14 +15,6 @@
  */
 package com.webank.webase.node.mgr.pro.precompiled.sysconf;
 
-import com.webank.webase.node.mgr.pro.precompiled.entity.SysConfigParam;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
 import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.lite.base.tools.HttpRequestTools;
@@ -30,8 +22,13 @@ import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
 import com.webank.webase.node.mgr.lite.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.lite.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.lite.user.UserService;
-
+import com.webank.webase.node.mgr.pro.precompiled.entity.SysConfigParam;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * System config service

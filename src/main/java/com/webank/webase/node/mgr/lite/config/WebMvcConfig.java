@@ -2,7 +2,6 @@ package com.webank.webase.node.mgr.lite.config;
 
 import com.webank.webase.node.mgr.lite.base.annotation.CurrentAccountMethodArgumentResolver;
 import com.webank.webase.node.mgr.lite.config.filter.AccountFilter;
-import com.webank.webase.node.mgr.lite.config.filter.AppIntegrationFilter;
 import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import java.util.List;
 import lombok.Data;
@@ -26,8 +25,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private int port;
 
     @Autowired
-    private AppIntegrationFilter appIntegrationFilter;
-    @Autowired
     private ConstantProperties constants;
 
     @Bean
@@ -40,7 +37,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(appIntegrationFilter).addPathPatterns("/api/**");// 自定义拦截的url路径
         registry.addInterceptor(setAccountFilter()).addPathPatterns("/**")
                 .excludePathPatterns(constants.getPermitUrlArray());
     }

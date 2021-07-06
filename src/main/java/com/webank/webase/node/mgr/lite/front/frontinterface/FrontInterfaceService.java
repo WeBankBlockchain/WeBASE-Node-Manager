@@ -18,23 +18,22 @@ import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
 import com.webank.webase.node.mgr.lite.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.lite.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
+import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.lite.contract.event.entity.ContractEventInfo;
+import com.webank.webase.node.mgr.lite.contract.event.entity.NewBlockEventInfo;
+import com.webank.webase.node.mgr.lite.contract.event.entity.ReqEventLogList;
+import com.webank.webase.node.mgr.lite.front.entity.FrontNodeConfig;
+import com.webank.webase.node.mgr.lite.front.entity.TotalTransCountInfo;
+import com.webank.webase.node.mgr.lite.front.frontinterface.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.lite.front.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.lite.front.frontinterface.entity.GroupHandleResult;
 import com.webank.webase.node.mgr.lite.front.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.lite.front.frontinterface.entity.RspStatBlock;
-import com.webank.webase.node.mgr.lite.front.entity.FrontNodeConfig;
-import com.webank.webase.node.mgr.lite.front.entity.TotalTransCountInfo;
-import com.webank.webase.node.mgr.pro.cert.entity.SdkCertInfo;
-import com.webank.webase.node.mgr.lite.contract.event.entity.ContractEventInfo;
-import com.webank.webase.node.mgr.lite.contract.event.entity.NewBlockEventInfo;
-import com.webank.webase.node.mgr.lite.contract.event.entity.ReqEventLogList;
-import com.webank.webase.node.mgr.pro.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.lite.node.entity.PeerInfo;
-import com.webank.webase.node.mgr.pro.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.lite.user.entity.KeyPair;
+import com.webank.webase.node.mgr.pro.precompiled.entity.ConsensusHandle;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -721,20 +720,7 @@ public class FrontInterfaceService {
         log.debug("end searchByBlockNumOrTxHash, blockOrTx:{}", blockOrTx);
         return blockOrTx;
     }
-    
-    /**
-     * get sdk's Cert Content from specific front.
-     */
-    public List<SdkCertInfo> getSdkCertInfo() {
-        List<SdkCertInfo> sdkCertList = new ArrayList<>();
-        Map<String, String> certMap =
-                frontRestTools.getForEntity(1, FrontRestTools.URI_CERT_SDK_FILES, Map.class);
-        for (Map.Entry<String, String> entry : certMap.entrySet()) {
-            SdkCertInfo sdkCertInfo = new SdkCertInfo(entry.getKey(), entry.getValue());
-            sdkCertList.add(sdkCertInfo);
-        }
-        return sdkCertList;
-    }
+
     
     /**
      * get front's sslCryptoType

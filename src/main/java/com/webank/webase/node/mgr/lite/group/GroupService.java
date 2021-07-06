@@ -24,13 +24,9 @@ import com.webank.webase.node.mgr.lite.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.lite.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.lite.base.enums.GroupType;
 import com.webank.webase.node.mgr.lite.base.enums.OperateStatus;
-import com.webank.webase.node.mgr.lite.base.enums.RunTypeEnum;
-import com.webank.webase.node.mgr.lite.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.lite.base.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
-import com.webank.webase.node.mgr.lite.base.tools.ProgressTools;
 import com.webank.webase.node.mgr.lite.block.BlockService;
 import com.webank.webase.node.mgr.lite.block.entity.TbBlock;
 import com.webank.webase.node.mgr.lite.contract.CnsService;
@@ -46,14 +42,6 @@ import com.webank.webase.node.mgr.lite.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.lite.group.entity.TbGroup;
 import com.webank.webase.node.mgr.lite.table.TableService;
 import com.webank.webase.node.mgr.lite.transaction.method.MethodService;
-import com.webank.webase.node.mgr.pro.chain.ChainService;
-import com.webank.webase.node.mgr.pro.deploy.entity.NodeConfig;
-import com.webank.webase.node.mgr.pro.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.pro.deploy.entity.TbHost;
-import com.webank.webase.node.mgr.pro.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.pro.deploy.service.AnsibleService;
-import com.webank.webase.node.mgr.pro.deploy.service.DeployShellService;
-import com.webank.webase.node.mgr.pro.deploy.service.PathService;
 import com.webank.webase.node.mgr.pro.external.ExtAccountService;
 import com.webank.webase.node.mgr.pro.external.ExtContractService;
 import com.webank.webase.node.mgr.lite.front.FrontMapper;
@@ -65,17 +53,13 @@ import com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.lite.front.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.lite.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.lite.front.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.pro.governance.GovernVoteService;
+import com.webank.webase.node.mgr.pro.precompiled.permission.governance.GovernVoteService;
 import com.webank.webase.node.mgr.lite.node.NodeService;
 import com.webank.webase.node.mgr.lite.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.lite.node.entity.TbNode;
 import com.webank.webase.node.mgr.pro.statistic.StatService;
 import com.webank.webase.node.mgr.lite.transaction.transdaily.TransDailyService;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
@@ -111,8 +95,6 @@ public class GroupService {
     @Autowired
     private GroupMapper groupMapper;
     @Autowired
-    private TbHostMapper tbHostMapper;
-    @Autowired
     private FrontMapper frontMapper;
 
     @Autowired
@@ -136,10 +118,6 @@ public class GroupService {
     @Autowired
     private BlockService blockService;
     @Autowired
-    private DeployShellService deployShellService;
-    @Autowired
-    private PathService pathService;
-    @Autowired
     private ConstantProperties constantProperties;
     @Autowired
     private AbiService abiService;
@@ -153,10 +131,6 @@ public class GroupService {
     private ExtContractService extContractService;
     @Autowired
     private StatService statService;
-
-
-    @Autowired private ChainService chainService;
-    @Autowired private AnsibleService ansibleService;
 
     public static final String RUNNING_GROUP = "RUNNING";
     public static final String OPERATE_START_GROUP = "start";
@@ -280,10 +254,6 @@ public class GroupService {
      */
     @Transactional(isolation= Isolation.READ_COMMITTED)
     public synchronized void resetGroupList() {
-        if (!chainService.runTask()) {
-            log.warn("resetGroupList jump over for runTask");
-            return;
-        }
 
         Instant startTime = Instant.now();
         log.info("start resetGroupList. startTime:{}", startTime.toEpochMilli());
@@ -821,8 +791,6 @@ public class GroupService {
         BeanUtils.copyProperties(req, generateGroupInfo);
         frontInterface.generateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(),
                 generateGroupInfo);
-        // fetch group config file
-        this.pullAllGroupFiles(generateGroupId, tbFront);
         // save group, saved as invalid status until start
         log.info("generateToSingleNode generateGroupInfo:{},req:{},tbFront:{}", generateGroupInfo, req, tbFront);
 
@@ -872,8 +840,6 @@ public class GroupService {
                 frontInterface.generateGroup(tbFront.getFrontIp(), tbFront.getFrontPort(),
                         generateGroupInfo);
                 resOperateList.add(operateResult);
-                // fetch group config file
-                this.pullAllGroupFiles(generateGroupId, tbFront);
 
                 if (constantProperties.getDeployType() == 1) { // visual deploy
                     chainId = chainId == 0 ? tbFront.getChainId() : chainId;
@@ -928,7 +894,6 @@ public class GroupService {
         // refresh group status
         // if stop group, cannot update front_group_map as invalid for getGroupPeers fail
         resetGroupList();
-        this.pullGroupStatusFile(groupId, tbFront);
         // return
         return groupOperateStatus;
     }
@@ -1148,147 +1113,6 @@ public class GroupService {
             // update node count
             group.setNodeCount(newGroupCount);
             return Pair.of(group, false);
-        }
-    }
-
-    private void pullAllGroupFiles(int generateGroupId, TbFront tbFront) {
-        this.pullGroupConfigFile(generateGroupId, tbFront);
-        this.pullGroupStatusFile(generateGroupId, tbFront);
-    }
-
-    /**
-     * pull docker node's group config file and group_status file
-     * when generateGroup/operateGroup
-     *
-     * @include group.x.genesis, group.x.ini, .group_status
-     */
-    private void pullGroupConfigFile(int generateGroupId, TbFront tbFront) {
-        // only support docker node/front
-        if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
-            return;
-        }
-        String chainName = tbFront.getChainName();
-        int nodeIndex = tbFront.getHostIndex();
-        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
-
-        // scp group config files from remote to local
-        // path pattern: /host.getRootDir/chain_name
-        // ex: (in the remote host) /opt/fisco/chain1
-        String remoteChainPath = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
-        // ".*" fit in ansible
-        // ex: (in the remote host) /opt/fisco/chain1/node0/conf/group.1001.*
-        // String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.*", remoteChainPath, nodeIndex, generateGroupId);
-        String remoteGroupConfSource = String.format("%s/node%s/conf/group.%s.ini", remoteChainPath, nodeIndex, generateGroupId);
-        String remoteGroupGenesisSource = String.format("%s/node%s/conf/group.%s.genesis", remoteChainPath, nodeIndex, generateGroupId);
-        // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]
-        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
-        String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
-        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
-        String localDst = String.format("%s/conf/", localNodePath, generateGroupId);
-        // copy group config files to local node's conf dir
-        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupConfSource, localDst);
-        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupGenesisSource, localDst);
-    }
-
-
-
-    private void pullGroupStatusFile(int generateGroupId, TbFront tbFront) {
-        // only support docker node/front
-        if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
-            return;
-        }
-        String chainName = tbFront.getChainName();
-        int nodeIndex = tbFront.getHostIndex();
-        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
-        // scp group status files from remote to local
-        // path pattern: /host.getRootDir/chain_name
-        // ex: (in the remote host) /opt/fisco/chain1
-        String remoteChainPath = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
-        // ex: (in the remote host) /opt/fisco/chain1/node0/data/group1001/.group_status
-        String remoteGroupStatusSource = String.format("%s/node%s/data/group%s/.group_status",
-                remoteChainPath, nodeIndex, generateGroupId);
-        // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]
-        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0
-        String localNodePath = pathService.getNodeRoot(chainName, tbHost.getIp(),tbFront.getHostIndex()).toString();
-        // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/data/group[groupId]/group.1001.*
-        Path localDst = Paths.get(CleanPathUtil.cleanString(String.format("%s/data/group%s/.group_status", localNodePath,generateGroupId)));
-        // create data parent directory
-        if (Files.notExists(localDst.getParent())){
-            try {
-                Files.createDirectories(localDst.getParent());
-            } catch (IOException e) {
-                log.error("Create data group:[{}] file error", localDst.toAbsolutePath().toString(),e);
-            }
-        }
-        // copy group status file to local node's conf dir
-        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
-    }
-
-//    private void pullGroupFile(int groupId,TbFront tbFront){
-//        if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
-//            return;
-//        }
-//        String chainName = tbFront.getChainName();
-//        int nodeIndex = tbFront.getHostIndex();
-//        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
-//
-//    }
-
-    /**
-     * generate group.x.ini group.x.genesis
-     * @param chain
-     * @param groupId
-     * @param ip
-     * @param newFrontList
-     * @throws IOException
-     */
-    public void generateNewNodesGroupConfigsAndScp(TbChain chain, int groupId, String ip, List<TbFront> newFrontList) {
-        log.info("start generateNewNodesGroupConfigsAndScp ip:{},newFrontList:{}", ip, newFrontList);
-        int chainId = chain.getId();
-        String chainName = chain.getChainName();
-
-        // 1.4.3 not support add group when add node
-        // long now = System.currentTimeMillis();
-        // List<String> nodeIdList = newFrontList.stream().map(TbFront::getNodeId)
-        //        .collect(Collectors.toList());
-
-        // copy group.x.[genesis|conf] from old front
-        TbNode oldNode = this.nodeService.getOldestNodeByChainIdAndGroupId(chainId, groupId);
-        TbFront oldFront = null;
-        if (oldNode != null){
-             oldFront = this.frontMapper.getByNodeId(oldNode.getNodeId());
-        }
-
-        for (TbFront newFront : newFrontList) {
-            // local node root
-            Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
-
-            // 1.4.3 not support add group when add node
-            //if (newGroup) {
-            //    // generate conf/group.[groupId].ini
-            //    ThymeleafUtil.newGroupConfigs(nodeRoot, groupId, now, nodeIdList);
-            // copy old group files
-            if (oldFront != null) {
-                Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
-                NodeConfig.copyGroupConfigFiles(oldNodePath, nodeRoot, groupId);
-            }
-
-
-            // scp node to remote host
-            // NODES_ROOT/[chainName]/[ip]/node[index] as a {@link Path}, a directory.
-            String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
-            // get host root dir
-            TbHost tbHost = tbHostMapper.getByIp(ip);
-            String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
-
-            log.info("generateNewNodesGroupConfigsAndScp Send files from:[{}] to:[{}:{}].", src, ip, dst);
-            ProgressTools.setScpConfig();
-            try {
-                ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
-                log.info("generateNewNodesGroupConfigsAndScp scp success.");
-            } catch (Exception e) {
-                log.error("generateNewNodesGroupConfigsAndScp Send files from:[{}] to:[{}:{}] error.", src, ip, dst, e);
-            }
         }
     }
 

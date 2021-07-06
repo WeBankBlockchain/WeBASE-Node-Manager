@@ -15,21 +15,17 @@
 package com.webank.webase.node.mgr.lite.configapi;
 
 import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
-import com.webank.webase.node.mgr.lite.config.WebMvcConfig;
 import com.webank.webase.node.mgr.lite.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.lite.base.tools.IPUtil;
+import com.webank.webase.node.mgr.lite.config.WebMvcConfig;
 import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.config.properties.VersionProperties;
-import com.webank.webase.node.mgr.lite.base.tools.IPUtil;
 import com.webank.webase.node.mgr.lite.configapi.entity.ServerInfo;
-import com.webank.webase.node.mgr.pro.deploy.entity.TbConfig;
-import com.webank.webase.node.mgr.pro.deploy.service.ConfigService;
-import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -48,8 +44,6 @@ public class ConfigController {
     private ConstantProperties constantProperties;
     @Autowired
     private VersionProperties versionProperties;
-    @Autowired
-    private ConfigService configService;
 
     /**
      * return encrypt type to web 0 is standard, 1 is guomi.
@@ -90,19 +84,6 @@ public class ConfigController {
         boolean isDeployedModifyEnable = constantProperties.isDeployedModifyEnable();
         log.info("isDeployedModifyEnable:{}", isDeployedModifyEnable);
         return new BaseResponse(ConstantCode.SUCCESS, isDeployedModifyEnable);
-    }
-
-    /**
-     * 获取配置类型（可视化部署）
-     */
-    @GetMapping(value = "/list")
-    public BaseResponse listDockerTag(
-            @RequestParam(value = "type", defaultValue = "0") int type,
-            @RequestParam(value = "update", required = false) boolean update) {
-        log.info("list config, type: [{}], update: [{}]", type, update);
-
-        List<TbConfig> configList = configService.selectConfigList(update, type);
-        return new BaseResponse(ConstantCode.SUCCESS, configList);
     }
 
 }

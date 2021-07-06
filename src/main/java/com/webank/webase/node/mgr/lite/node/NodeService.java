@@ -16,18 +16,14 @@ package com.webank.webase.node.mgr.lite.node;
 import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
 import com.webank.webase.node.mgr.lite.base.enums.ConsensusType;
 import com.webank.webase.node.mgr.lite.base.enums.DataStatus;
-import com.webank.webase.node.mgr.lite.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
 import com.webank.webase.node.mgr.lite.base.tools.ValidateUtil;
+import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.front.FrontService;
 import com.webank.webase.node.mgr.lite.front.entity.TbFront;
 import com.webank.webase.node.mgr.lite.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.lite.front.frontinterface.entity.PeerOfConsensusStatus;
-import com.webank.webase.node.mgr.pro.chain.ChainService;
-import com.webank.webase.node.mgr.pro.deploy.service.AnsibleService;
-import com.webank.webase.node.mgr.pro.deploy.service.PathService;
 import com.webank.webase.node.mgr.lite.node.entity.NodeParam;
 import com.webank.webase.node.mgr.lite.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.lite.node.entity.TbNode;
@@ -63,11 +59,7 @@ public class NodeService {
     @Autowired
     private FrontInterfaceService frontInterface;
     @Autowired
-    private ChainService chainService;
-    @Autowired
     private ConstantProperties constantProperties;
-    @Autowired
-    private AnsibleService ansibleService;
     /**
      * update front status
      */
@@ -273,21 +265,6 @@ public class NodeService {
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
-            // only update front status if deploy manually
-            if (chainService.runTask()) {
-                TbFront updateFront = frontService.getByNodeId(nodeId);
-                if (updateFront != null) {
-                    // update front status as long as update node (7.5s internal)
-                    log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
-                    // update as 2, same as FrontStatuaEnum
-                    if (tbNode.getNodeActive() == DataStatus.NORMAL.getValue()) {
-                        updateFront.setStatus(FrontStatusEnum.RUNNING.getId());
-                    } else if (tbNode.getNodeActive() == DataStatus.INVALID.getValue()) {
-                        updateFront.setStatus(FrontStatusEnum.STOPPED.getId());
-                    }
-                    frontService.updateFront(updateFront);
-                }
-            }
         }
 
     }
@@ -394,107 +371,6 @@ public class NodeService {
         return String.format("%s_%s", groupId, nodeId);
     }
 
-    /**
-     *
-     * @param chainId
-     * @param groupId
-     * @return
-     */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId, final int groupId){
-        // select all fronts by all agencies
-        List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
-        log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}", tbFrontList);
-
-        // filter only not removed node will be added
-        List<TbNode> tbNodeList = tbFrontList.stream()
-                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(), groupId))
-                .filter(Objects::nonNull)
-                .filter((node) -> node.getGroupId() == groupId)
-                .collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(tbNodeList)) {
-            log.error("Group of:[{}] chain:[{}] has no node.", groupId, chainId);
-            return Collections.emptyList();
-        }
-        return tbNodeList;
-    }
-
-    /**
-     * specific target frontList in batchAddNode
-     * @param newFrontIdList specific front
-     * @param chainId
-     * @param groupId
-     * @return
-     */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(List<Integer> newFrontIdList, int chainId, final int groupId){
-        log.info("selectNodeListByChainIdAndGroupId frontIdList:{}", newFrontIdList);
-        List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
-
-        List<TbFront> newFrontList = frontService.selectByFrontIdList(newFrontIdList);
-
-        tbFrontList.removeAll(newFrontList);
-        tbFrontList.addAll(newFrontList);
-
-        List<TbNode> tbNodeList = tbFrontList.stream()
-                .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(),groupId))
-                .filter(Objects::nonNull)
-                .filter((node) -> node.getGroupId() == groupId )
-                .collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(tbNodeList)) {
-            log.error("Group of:[{}] of newFrontIdList:{} has no node.", groupId, newFrontIdList);
-            return Collections.emptyList();
-        }
-        return tbNodeList;
-    }
-
-
-    /**
-     * Find the first node for coping group config files.
-     *
-     * @param chainId
-     * @param groupId
-     * @return
-     */
-    public TbNode getOldestNodeByChainIdAndGroupId(int chainId, int groupId) {
-        List<TbNode> tbNodeList = this.selectNodeListByChainIdAndGroupId(chainId, groupId);
-        if (CollectionUtils.isEmpty(tbNodeList)) {
-            return null;
-        }
-        TbNode oldest = null;
-
-        for (TbNode tbNode : tbNodeList) {
-            if (oldest == null){
-                oldest = tbNode;
-                continue;
-            }
-            if (tbNode.getCreateTime().isBefore(oldest.getCreateTime())){
-                oldest = tbNode;
-            }
-        }
-        return oldest;
-    }
-
-    /**
-     * mv one node on host
-     * @related with hostService mvHostChainDirByIdList(batch mv)
-     */
-    public void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId) {
-        // create /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss as a parent
-        String chainDeleteRootOnHost = PathService.getChainDeletedRootOnHost(rooDirOnHost, chainName);
-        ansibleService.execCreateDir(ip, chainDeleteRootOnHost);
-
-        // e.g. /opt/fisco/default_chain
-        String chainRootOnHost = PathService.getChainRootOnHost(rooDirOnHost, chainName);
-        // e.g. /opt/fisco/default_chain/node[x]
-        String src_nodeRootOnHost = PathService.getNodeRootOnHost(chainRootOnHost, hostIndex);
-
-        // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss/[nodeid(128)]
-        String dst_nodeDeletedRootOnHost =
-                PathService.getNodeDeletedRootOnHost(chainDeleteRootOnHost, nodeId);
-        // move
-        ansibleService.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
-    }
 
     /**
      * update node status by frontId and nodeStatus

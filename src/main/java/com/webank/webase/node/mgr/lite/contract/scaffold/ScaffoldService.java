@@ -24,7 +24,6 @@ import com.webank.webase.node.mgr.lite.contract.ContractService;
 import com.webank.webase.node.mgr.lite.contract.entity.TbContract;
 import com.webank.webase.node.mgr.lite.contract.scaffold.entity.ReqProject;
 import com.webank.webase.node.mgr.lite.contract.scaffold.entity.RspFile;
-import com.webank.webase.node.mgr.pro.cert.CertService;
 import com.webank.webase.node.mgr.lite.front.FrontService;
 import com.webank.webase.node.mgr.lite.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.lite.front.entity.TbFront;
@@ -33,6 +32,7 @@ import com.webank.webase.node.mgr.lite.user.UserService;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +54,6 @@ public class ScaffoldService {
     private ContractService contractService;
     @Autowired
     private CryptoSuite cryptoSuite;
-    @Autowired
-    private CertService certService;
     @Autowired
     private FrontService frontService;
     @Autowired
@@ -108,7 +106,7 @@ public class ScaffoldService {
         frontNodeConfig.setP2pip(reqProject.getChannelIp());
         log.info("exportProject get frontNodeConfig:{}", frontNodeConfig);
         // get front's sdk key cert
-        Map<String, String> sdkMap = certService.getFrontSdkContent(front.getFrontId());
+        Map<String, String> sdkMap = new HashMap<>();
         log.info("exportProject get sdkMap size:{}", sdkMap.size());
         // get user private key if set
         List<String> userAddressList = reqProject.getUserAddressList();

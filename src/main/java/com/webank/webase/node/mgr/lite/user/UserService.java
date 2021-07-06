@@ -22,20 +22,19 @@ import com.webank.webase.node.mgr.lite.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.lite.base.enums.RoleType;
 import com.webank.webase.node.mgr.lite.base.enums.UserType;
 import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.base.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.lite.base.tools.JsonTools;
 import com.webank.webase.node.mgr.lite.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.lite.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lite.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.lite.group.GroupService;
 import com.webank.webase.node.mgr.lite.user.entity.BindUserInputParam;
+import com.webank.webase.node.mgr.lite.user.entity.FileContentHandle;
 import com.webank.webase.node.mgr.lite.user.entity.KeyPair;
 import com.webank.webase.node.mgr.lite.user.entity.ReqImportPem;
 import com.webank.webase.node.mgr.lite.user.entity.TbUser;
 import com.webank.webase.node.mgr.lite.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.lite.user.entity.UserParam;
-import com.webank.webase.node.mgr.pro.cert.entity.FileContentHandle;
-import com.webank.webase.node.mgr.pro.monitor.MonitorService;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -55,7 +54,6 @@ import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,9 +73,6 @@ public class UserService {
     private GroupService groupService;
     @Autowired
     private FrontRestTools frontRestTools;
-    @Lazy
-    @Autowired
-    private MonitorService monitorService;
     @Autowired
     private CryptoSuite cryptoSuite;
     private final static String PEM_FILE_FORMAT = ".pem";
@@ -197,8 +192,6 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
 
-        // update monitor unusual user's info
-        monitorService.updateUnusualUser(groupId, userName, address);
 
         checkUserNameRow = queryByUserId(newUserRow.getUserId());
         // if return privateKey
@@ -268,8 +261,6 @@ public class UserService {
 
         Integer userId = newUserRow.getUserId();
 
-        // update monitor unusual user's info
-        monitorService.updateUnusualUser(user.getGroupId(), user.getUserName(), address);
 
         log.debug("end bindUserInfo userId:{}", userId);
         return queryByUserId(userId);

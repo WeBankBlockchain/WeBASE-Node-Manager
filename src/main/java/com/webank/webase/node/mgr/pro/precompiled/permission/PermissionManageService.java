@@ -15,16 +15,6 @@
  */
 package com.webank.webase.node.mgr.pro.precompiled.permission;
 
-import com.webank.webase.node.mgr.pro.precompiled.entity.PermissionParam;
-import com.webank.webase.node.mgr.pro.precompiled.entity.PermissionState;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.webank.webase.node.mgr.lite.base.code.ConstantCode;
 import com.webank.webase.node.mgr.lite.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.lite.base.exception.NodeMgrException;
@@ -34,8 +24,15 @@ import com.webank.webase.node.mgr.lite.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.lite.user.UserService;
 import com.webank.webase.node.mgr.lite.user.entity.TbUser;
 import com.webank.webase.node.mgr.lite.user.entity.UserParam;
-
+import com.webank.webase.node.mgr.pro.precompiled.entity.PermissionParam;
+import com.webank.webase.node.mgr.pro.precompiled.entity.PermissionState;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Permission manage service
