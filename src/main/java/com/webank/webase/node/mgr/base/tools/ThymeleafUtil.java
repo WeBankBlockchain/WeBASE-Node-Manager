@@ -122,7 +122,8 @@ public class ThymeleafUtil {
         String nodeConfigIni = ThymeleafUtil.generate(ThymeleafUtil.NODE_CONFIG_INI,
                 Pair.of("channelPort", channelPort), Pair.of("p2pPort", p2pPort),
                 Pair.of("jsonrpcPort", jsonrpcPort), Pair.of("nodeList", peerList),
-                Pair.of("guomi", guomi), Pair.of("chainId", chainIdInConfigIni),Pair.of("supportVersion", chainVersion));
+                Pair.of("guomi", guomi), Pair.of("chainId", chainIdInConfigIni),
+            Pair.of("supportVersion", chainVersion));
 
         if (Files.notExists(nodeRoot)){
             Files.createDirectories(nodeRoot);

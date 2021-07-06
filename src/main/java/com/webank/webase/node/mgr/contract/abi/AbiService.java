@@ -72,6 +72,10 @@ public class AbiService {
         }
     }
 
+    /**
+     * save abi and save method_id for transaction analysis
+     * @param param
+     */
     @Transactional
     public void insertAbiInfo(ReqImportAbi param) {
         int groupId = param.getGroupId();

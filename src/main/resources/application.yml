@@ -1,5 +1,5 @@
 # server version
-version: v1.5.1
+version: v1.5.2
 
 #server config
 server:
@@ -59,7 +59,7 @@ constant:
   sleepWhenHttpMaxFail: 60000
 
   ###common
-  developerModeEnable: false
+  developerModeEnable: true
   deployedModifyEnable: true
   isDeleteInfo: true
   transRetainMax: 10000

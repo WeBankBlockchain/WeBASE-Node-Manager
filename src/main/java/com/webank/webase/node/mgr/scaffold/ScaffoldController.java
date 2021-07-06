@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.properties.ConstantProperties;
 import com.webank.webase.node.mgr.base.tools.IPUtil;
 import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.base.tools.ValidateUtil;
 import com.webank.webase.node.mgr.scaffold.entity.ReqProject;
 import com.webank.webase.node.mgr.scaffold.entity.RspFile;
 import java.time.Duration;
@@ -31,9 +32,11 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -86,5 +89,23 @@ public class ScaffoldController extends BaseController {
         log.info("end exportProjectApi useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), rspFile);
         return new BaseResponse(ConstantCode.SUCCESS, rspFile);
+    }
+
+
+    @GetMapping("/check")
+    public BaseResponse checkChannelPort(@RequestParam("nodeIp") String nodeIp,
+        @RequestParam("channelPort") int channelPort) {
+        Instant startTime = Instant.now();
+        log.info("start checkChannelPort startTime:{}, nodeIp:{} channelPort:{}",
+            startTime.toEpochMilli(), nodeIp, channelPort);
+        if(!ValidateUtil.ipv4Valid(nodeIp)) {
+            log.error("not valid nodeIp:{}", nodeIp);
+            throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
+        }
+        Boolean result = scaffoldService.telnetChannelPort(nodeIp, channelPort);
+
+        log.info("end exportProjectApi useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), result);
+        return new BaseResponse(ConstantCode.SUCCESS, result);
     }
 }

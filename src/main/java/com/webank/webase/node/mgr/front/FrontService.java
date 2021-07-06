@@ -492,7 +492,7 @@ public class FrontService {
             log.error("updateFrontStatus updateFront is null");
             return;
         }
-        if (updateFront.getStatus() != null &&  updateFront.getStatus().equals(status)) {
+        if (updateFront.getStatus().equals(status)) {
             return;
         }
         LocalDateTime modifyTime = updateFront.getModifyTime();
@@ -681,12 +681,13 @@ public class FrontService {
      * @param nodeId
      * @return
      */
-    public List<TbFront> selectRelatedFront(String nodeId){
+    public List<TbFront> selectRelatedFront(String nodeId) {
+        log.info("start selectRelatedFront nodeId:{}", nodeId);
         Set<Integer> frontIdSet = new HashSet<>();
         List<Integer> groupIdList = this.nodeMapper.selectGroupIdListOfNode(nodeId);
-        if (CollectionUtils.isEmpty(groupIdList)){
+        if (CollectionUtils.isEmpty(groupIdList)) {
             log.error("Node:[{}] has no group", nodeId);
-            Collections.emptyList();
+            return Collections.emptyList();
         }
         for (Integer groupIdOfNode : groupIdList) {
             List<TbFrontGroupMap> tbFrontGroupMaps = this.frontGroupMapMapper.selectListByGroupId(groupIdOfNode);
@@ -764,7 +765,6 @@ public class FrontService {
 
         // all existed front's nodeid, include removed node's front
         // 游离的front是否需要选进来。
-        // List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
         List<TbNode> dbNodeListOfGroup = this.nodeService.selectNodeListByChainIdAndGroupId(chainId, groupId);
         log.info("updateNodeConfigIniByGroupId dbNodeListOfGroup:{}", dbNodeListOfGroup);
 
@@ -776,7 +776,7 @@ public class FrontService {
         log.info("updateNodeConfigIniByGroupId nodeIdList:{}", allNodeIdList);
 
         // all map's normal front added
-        // <nodeId, List<FrontReleted> map
+        // <nodeId, List<FrontRelated> map
         Map<String, List<TbFront>> nodeIdRelatedFrontMap = new HashMap<>();
 
         // all fronts include old and new
@@ -876,7 +876,6 @@ public class FrontService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void batchScpNodeConfigIni(TbChain chain, int groupId, Map<String, List<TbFront>> newNodeRelatedFrontMap) throws InterruptedException {
-       // List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chain.getId(), groupId);
         log.info("start batchScpNodeConfigIni chainId:{},groupId:{},newNodeRelatedFrontMap:{}",
             chain.getId(), groupId, newNodeRelatedFrontMap);
 
