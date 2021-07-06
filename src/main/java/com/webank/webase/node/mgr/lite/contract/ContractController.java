@@ -90,7 +90,7 @@ public class ContractController extends BaseController {
      * add new contract info.
      */
     @PostMapping(value = "/save")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse saveContract(@RequestBody @Valid Contract contract,
             @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -119,7 +119,7 @@ public class ContractController extends BaseController {
      * delete contract by id.
      */
     @DeleteMapping(value = "/{groupId}/{contractId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse deleteContract(@PathVariable("groupId") Integer groupId,
             @PathVariable("contractId") Integer contractId) throws NodeMgrException, Exception {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -196,7 +196,7 @@ public class ContractController extends BaseController {
      * deploy deployInputParam.
      */
     @PostMapping(value = "/deploy")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse deployContract(@RequestBody @Valid DeployInputParam deployInputParam,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -219,7 +219,7 @@ public class ContractController extends BaseController {
      * send transaction.
      */
     @PostMapping(value = "/transaction")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse sendTransaction(@RequestBody @Valid TransactionInputParam param,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -307,7 +307,7 @@ public class ContractController extends BaseController {
      * add contract path
      */
     @PostMapping(value = "/contractPath")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse addContractPath(@Valid @RequestBody ContractPathParam param,
             @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
@@ -353,7 +353,7 @@ public class ContractController extends BaseController {
      * delete contract by id. only admin batch delete contract
      */
     @DeleteMapping(value = "/batch/path")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param,
             @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -394,7 +394,7 @@ public class ContractController extends BaseController {
      * registerCns.
      */
     @PostMapping(value = "/registerCns")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse registerCns(@RequestBody @Valid ReqRegisterCns reqRegisterCns,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -463,7 +463,7 @@ public class ContractController extends BaseController {
     }
 
     @PostMapping(value = "/copy")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req,
             BindingResult result) {
         Instant startTime = Instant.now();
@@ -503,7 +503,7 @@ public class ContractController extends BaseController {
      * contract status control.
      */
     @PostMapping(value = "contract/status")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public Object contractStatusManage(@RequestBody @Valid ContractStatusHandle contractStatusHandle,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -542,7 +542,7 @@ public class ContractController extends BaseController {
      * sync get event logs list
      */
     @PostMapping("/eventLogs/list")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BasePageResponse queryEventLogList(@RequestBody @Valid ReqEventLogList param) {
         Instant startTime = Instant.now();
         log.info("start queryEventLogList startTime:{} param:{}",

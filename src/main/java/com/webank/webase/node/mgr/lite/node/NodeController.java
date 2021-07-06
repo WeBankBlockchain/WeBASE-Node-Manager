@@ -162,7 +162,7 @@ public class NodeController {
     }
 
     @PostMapping(value = "consensus")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    //@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object nodeManage(@RequestBody @Valid ConsensusHandle consensusHandle) throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start nodeManage startTime:{} consensusHandle:{}", startTime.toEpochMilli(),
