@@ -30,6 +30,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -137,7 +138,7 @@ public class BlockController {
         log.info("start getBlockHeaderByNumber startTime:{} groupId:{} blockNumber:{}",
             startTime.toEpochMilli(), groupId, blockNumber);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        BcosBlockHeader blockInfo = blockService.getBlockHeaderFromFrontByNumber(groupId, blockNumber);
+        BlockHeader blockInfo = blockService.getBlockHeaderFromFrontByNumber(groupId, blockNumber);
         baseResponse.setData(blockInfo);
         log.info("end getBlockHeaderByNumber useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
@@ -148,16 +149,16 @@ public class BlockController {
      * get block header by number.
      */
     @GetMapping("/blockHeaderByHash/{groupId}/{blockHash}")
-    public BaseResponse getBlockHeaderByNumber(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getBlockHeaderByHash(@PathVariable("groupId") Integer groupId,
         @PathVariable("blockHash") String blockHash)
         throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start getBlockHeaderByNumber startTime:{} groupId:{} blockHash:{}",
+        log.info("start blockHeaderByHash startTime:{} groupId:{} blockHash:{}",
             startTime.toEpochMilli(), groupId, blockHash);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        BcosBlockHeader blockInfo = blockService.getBlockHeaderFromFrontByHash(groupId, blockHash);
+        BlockHeader blockInfo = blockService.getBlockHeaderFromFrontByHash(groupId, blockHash);
         baseResponse.setData(blockInfo);
-        log.info("end getBlockHeaderByNumber useTime:{} result:{}",
+        log.info("end blockHeaderByHash useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
