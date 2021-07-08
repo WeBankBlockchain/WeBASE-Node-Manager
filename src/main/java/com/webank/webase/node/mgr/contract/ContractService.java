@@ -167,6 +167,7 @@ public class  ContractService {
     @Transactional
     public void appContractSave(String appKey, ReqContractAddressSave reqContractAddressSave)
         throws IOException {
+        log.info("appContractSave appKey:{},reqContractAddressSave:{}", appKey, reqContractAddressSave);
         Integer groupId = reqContractAddressSave.getGroupId();
         // check group id
         groupService.checkGroupId(groupId);
