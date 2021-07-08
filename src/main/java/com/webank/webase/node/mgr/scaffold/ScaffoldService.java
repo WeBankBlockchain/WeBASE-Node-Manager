@@ -116,8 +116,8 @@ public class ScaffoldService {
         List<String> userAddressList = reqProject.getUserAddressList();
         String hexPrivateKeyListStr = "";
         if (userAddressList != null && !userAddressList.isEmpty()) {
-            // hexPrivateKeyListStr = this.handleUserList(reqProject.getGroupId(), userAddressList);
-            hexPrivateKeyListStr = userService.queryUserDetail(reqProject.getGroupId(), userAddressList.get(0));
+            hexPrivateKeyListStr = this.handleUserList(reqProject.getGroupId(), userAddressList);
+            //hexPrivateKeyListStr = userService.queryUserDetail(reqProject.getGroupId(), userAddressList.get(0));
         }
         // generate
         String projectPath = this.generateProject(frontNodeConfig, reqProject.getGroup(), reqProject.getArtifactName(),
@@ -226,7 +226,7 @@ public class ScaffoldService {
      * @return
      */
     public Boolean telnetChannelPort(String nodeIp, int channelPort) {
-        Pair<Boolean, Integer> telnetResult = NetUtils.checkPorts(nodeIp, channelPort);
+        Pair<Boolean, Integer> telnetResult = NetUtils.checkPorts(nodeIp, 2000, channelPort);
         // if true, telnet success, port is in use, which means node's channelPort is correct
         log.info("telnet {}:{} result:{}", nodeIp, channelPort, telnetResult);
         return telnetResult.getLeft();
