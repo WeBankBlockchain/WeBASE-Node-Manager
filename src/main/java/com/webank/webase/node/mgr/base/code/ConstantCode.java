@@ -302,7 +302,7 @@ public class ConstantCode {
     public static final RetCode APPNAME_EXISTS = RetCode.mark(202516, "app name exists");
     public static final RetCode APPNAME_NOT_EXISTS = RetCode.mark(202517, "app name not exists");
     public static final RetCode ID_NOT_EXISTS = RetCode.mark(202518, "app id not exists");
-    public static final RetCode LINK_FORMAT_INVALID = RetCode.mark(202519, "link format invalid");
+    public static final RetCode LINK_FORMAT_INVALID = RetCode.mark(202519, "link format invalid, ex:[http://{ip}:{port}/index.html]");
     public static final RetCode CONTRACT_SOURCE_NOT_EXIST = RetCode.mark(202520, "contract source not exist");
     public static final RetCode TIMESTAMP_CANNOT_EMPTY = RetCode.mark(202521, "timestamp cannot be empty");
     public static final RetCode APPKEY_CANNOT_EMPTY = RetCode.mark(202522, "app key cannot be empty");
