@@ -1,11 +1,9 @@
 package com.webank.webase.node.mgr.contract.entity;
 
-import javax.validation.constraints.NotBlank;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.List;
 import lombok.NoArgsConstructor;
 
 /**
@@ -14,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ReqCopyContracts {
-    @NotBlank
     private String account;
     @NotNull
     private Integer groupId;

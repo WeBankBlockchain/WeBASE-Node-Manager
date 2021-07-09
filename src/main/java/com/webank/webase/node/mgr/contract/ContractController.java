@@ -453,11 +453,12 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/copy")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req,
-            BindingResult result) {
+        @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
         Instant startTime = Instant.now();
         log.info("copyContracts start. startTime:{}  req:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(req));
         checkBindResult(result);
+        req.setAccount(currentAccountInfo.getAccount());
         contractService.copyContracts(req);
         log.info("end copyContracts. useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
