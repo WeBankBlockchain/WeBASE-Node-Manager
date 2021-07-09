@@ -137,14 +137,10 @@ public class AppIntegrationService {
         if (!ValidateUtil.validateUrl(appLink)) {
             throw new NodeMgrException(ConstantCode.LINK_FORMAT_INVALID);
         }
-
         // update
         TbAppInfo tbAppInfo = queryAppInfoByAppKey(appKey);
         tbAppInfo.setAppStatus(AppStatus.NORMAL.getValue());
         BeanUtils.copyProperties(appRegisterInfo, tbAppInfo);
-        tbAppInfo.setAppIp(appIp);
-        tbAppInfo.setAppPort(appPort);
-        tbAppInfo.setAppLink(appLink);
         log.debug("appRegister tbAppInfo:{}", tbAppInfo);
         updateAppInfo(tbAppInfo);
     }
