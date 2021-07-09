@@ -140,6 +140,7 @@ public class AppIntegrationService {
         tbAppInfo.setAppIp(appIp);
         tbAppInfo.setAppPort(appPort);
         tbAppInfo.setAppLink(appLink);
+        log.debug("appRegister tbAppInfo:{}", tbAppInfo);
         updateAppInfo(tbAppInfo);
     }
 
