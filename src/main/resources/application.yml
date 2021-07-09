@@ -39,7 +39,7 @@ logging:
 #constants
 constant:
   ###http request
-  # login's authorization
+  # login's authorization whether enable, if false, default login as `admin` account
   isUseSecurity: true
   # verification code expire time (s)
   verificationCodeMaxAge: 300
