@@ -128,11 +128,16 @@ public class AppIntegrationService {
         Integer appPort = appRegisterInfo.getAppPort();
         String appLink = appRegisterInfo.getAppLink();
         // check ip and port
-        NodeMgrTools.checkServerConnect(appIp, appPort);
+        try {
+            NodeMgrTools.checkServerConnect(appIp, appPort);
+        } catch (Exception e) {
+            log.error("appRegister connect to [{}:{}] fail", appIp, appPort);
+        }
         // check link
         if (!ValidateUtil.validateUrl(appLink)) {
             throw new NodeMgrException(ConstantCode.LINK_FORMAT_INVALID);
         }
+
         // update
         TbAppInfo tbAppInfo = queryAppInfoByAppKey(appKey);
         tbAppInfo.setAppStatus(AppStatus.NORMAL.getValue());
