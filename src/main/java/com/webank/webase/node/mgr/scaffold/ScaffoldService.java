@@ -87,7 +87,7 @@ public class ScaffoldService {
         List<TbContract> tbContractList = new ArrayList<>();
         for (Integer id : contractIdList) {
             TbContract contract = contractService.queryByContractId(id);
-            if (contract == null || StringUtils.isBlank(contract.getBytecodeBin())) {
+            if (contract == null || contract.getContractAbi() == null) {
                 log.error("exportProject contract not exist or not compiled, id:{}", id);
                 throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
             }
