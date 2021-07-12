@@ -47,7 +47,7 @@ public class AppIntegrationService {
     /**
      * save app info.
      * 
-     * @param save
+     * @param appAddInfo
      * @return
      */
     public TbAppInfo save(AppAddInfo appAddInfo) {
@@ -126,16 +126,22 @@ public class AppIntegrationService {
         log.debug("appRegister appKey:{}", appKey);
         String appIp = appRegisterInfo.getAppIp();
         Integer appPort = appRegisterInfo.getAppPort();
+        String appLink = appRegisterInfo.getAppLink();
         // check ip and port
-        NodeMgrTools.checkServerConnect(appIp, appPort);
+        try {
+            NodeMgrTools.checkServerConnect(appIp, appPort);
+        } catch (Exception e) {
+            log.error("appRegister connect to [{}:{}] fail", appIp, appPort);
+        }
         // check link
-        if (!ValidateUtil.validateUrl(appRegisterInfo.getAppLink())) {
+        if (!ValidateUtil.validateUrl(appLink)) {
             throw new NodeMgrException(ConstantCode.LINK_FORMAT_INVALID);
         }
         // update
         TbAppInfo tbAppInfo = queryAppInfoByAppKey(appKey);
         tbAppInfo.setAppStatus(AppStatus.NORMAL.getValue());
         BeanUtils.copyProperties(appRegisterInfo, tbAppInfo);
+        log.debug("appRegister tbAppInfo:{}", tbAppInfo);
         updateAppInfo(tbAppInfo);
     }
 
@@ -195,7 +201,7 @@ public class AppIntegrationService {
     /**
      * deleteAppInfo.
      * 
-     * @param tbAppInfo
+     * @param id
      * @return
      */
     public void deleteApp(Integer id) {
@@ -223,7 +229,7 @@ public class AppIntegrationService {
     /**
      * check by appName.
      * 
-     * @param id
+     * @param appName
      * @return
      */
     public boolean checkExistByAppName(String appName) {
@@ -237,7 +243,6 @@ public class AppIntegrationService {
     /**
      * queryAppInfo by id.
      * 
-     * @param appInfoParam
      * @return
      */
     public TbAppInfo queryAppInfoById(Integer id) {
@@ -249,7 +254,6 @@ public class AppIntegrationService {
     /**
      * queryAppInfo by appName.
      * 
-     * @param appInfoParam
      * @return
      */
     public TbAppInfo queryAppInfoByAppName(String appName) {
@@ -261,7 +265,6 @@ public class AppIntegrationService {
     /**
      * queryAppInfo by appKey.
      * 
-     * @param appInfoParam
      * @return
      */
     public TbAppInfo queryAppInfoByAppKey(String appKey) {

@@ -39,6 +39,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionObject;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -356,14 +357,14 @@ public class BlockService {
     /**
      * get block by number from front
      */
-    public BcosBlockHeader getBlockHeaderFromFrontByNumber(int groupId, BigInteger blockNumber) {
+    public BlockHeader getBlockHeaderFromFrontByNumber(int groupId, BigInteger blockNumber) {
         return frontInterface.getBlockHeaderByNumber(groupId, blockNumber);
     }
 
     /**
      * get block header by hash from front
      */
-    public BcosBlockHeader getBlockHeaderFromFrontByHash(int groupId, String pkHash) {
+    public BlockHeader getBlockHeaderFromFrontByHash(int groupId, String pkHash) {
         return frontInterface.getBlockHeaderByHash(groupId, pkHash);
     }
 

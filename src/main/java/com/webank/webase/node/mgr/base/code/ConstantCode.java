@@ -114,10 +114,10 @@ public class ConstantCode {
             .mark(202045, "the new password cannot be same as old");
 
     public static final RetCode PUBLICKEY_LENGTH_ERROR = RetCode
-            .mark(202050, "publicKey's length is 130,address's length is 42");
+            .mark(202050, "publicKey's length is 130, address's length is 42");
 
     public static final RetCode SERVER_CONNECT_FAIL = RetCode
-            .mark(202051, "wrong host or port");
+            .mark(202051, "wrong host ip or wrong port: connect failed");
     public static final RetCode INVALID_TOKEN = RetCode.mark(202052, "invalid token");
     public static final RetCode TOKEN_EXPIRE = RetCode.mark(202053, "token expire");
 
@@ -302,7 +302,7 @@ public class ConstantCode {
     public static final RetCode APPNAME_EXISTS = RetCode.mark(202516, "app name exists");
     public static final RetCode APPNAME_NOT_EXISTS = RetCode.mark(202517, "app name not exists");
     public static final RetCode ID_NOT_EXISTS = RetCode.mark(202518, "app id not exists");
-    public static final RetCode LINK_FORMAT_INVALID = RetCode.mark(202519, "link format invalid");
+    public static final RetCode LINK_FORMAT_INVALID = RetCode.mark(202519, "link format invalid, example:[http://{ip}:{port}/index.html]");
     public static final RetCode CONTRACT_SOURCE_NOT_EXIST = RetCode.mark(202520, "contract source not exist");
     public static final RetCode TIMESTAMP_CANNOT_EMPTY = RetCode.mark(202521, "timestamp cannot be empty");
     public static final RetCode APPKEY_CANNOT_EMPTY = RetCode.mark(202522, "app key cannot be empty");
