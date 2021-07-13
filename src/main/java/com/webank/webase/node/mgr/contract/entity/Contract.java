@@ -36,6 +36,7 @@ public class Contract {
     private String contractAbi;
     private String contractBin;
     private String bytecodeBin;
+    private String contractAddress;
 
     public Contract(Integer groupId, String contractName, String contractPath,
         String account) {

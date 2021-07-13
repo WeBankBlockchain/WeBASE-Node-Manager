@@ -240,10 +240,20 @@ public class  ContractService {
             log.info("fail updateContract. deployed contract cannot be modified");
             throw new NodeMgrException(ConstantCode.DEPLOYED_CANNOT_MODIFIED);
         }
-        //check contractName
+        // check contractName
         verifyContractNameNotExist(contract.getGroupId(), contract.getContractPath(),
             contract.getContractName(), contract.getAccount(), contract.getContractId());
         BeanUtils.copyProperties(contract, tbContract);
+        String address = contract.getContractAddress();
+        if (address != null) {
+            if (address.length() != CONTRACT_ADDRESS_LENGTH) {
+                log.warn("fail sendAbi. inputAddress:{}", address);
+                throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+            }
+            log.info("updateContract contract address:{} and deployed status", address);
+            tbContract.setContractAddress(address);
+            tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+        }
         contractMapper.update(tbContract);
         return tbContract;
     }
