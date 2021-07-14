@@ -244,12 +244,15 @@ public class  ContractService {
         verifyContractNameNotExist(contract.getGroupId(), contract.getContractPath(),
             contract.getContractName(), contract.getAccount(), contract.getContractId());
         BeanUtils.copyProperties(contract, tbContract);
+        // bind contract address
         String address = contract.getContractAddress();
         if (address != null) {
             if (address.length() != CONTRACT_ADDRESS_LENGTH) {
                 log.warn("fail sendAbi. inputAddress:{}", address);
                 throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
             }
+            // check address on chain
+            abiService.getAddressRuntimeBin(contract.getGroupId(), address);
             log.info("updateContract contract address:{} and deployed status", address);
             tbContract.setContractAddress(address);
             tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
