@@ -115,7 +115,7 @@ public class  ContractService {
      * add new contract data.
      */
     public TbContract saveContract(Contract contract) throws NodeMgrException {
-        log.debug("start addContractInfo Contract:{}", JsonTools.toJSONString(contract));
+        log.info("start saveContract Contract:{}", JsonTools.toJSONString(contract));
         TbContract tbContract;
         if (contract.getContractId() == null) {
             //new
