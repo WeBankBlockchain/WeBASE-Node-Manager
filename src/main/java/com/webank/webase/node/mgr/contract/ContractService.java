@@ -102,7 +102,7 @@ public class  ContractService {
      * add new contract data.
      */
     public TbContract saveContract(Contract contract) throws NodeMgrException {
-        log.debug("start addContractInfo Contract:{}", JsonTools.toJSONString(contract));
+        log.info("start saveContract Contract:{}", JsonTools.toJSONString(contract));
         TbContract tbContract;
         if (contract.getContractId() == null) {
             //new
@@ -228,10 +228,23 @@ public class  ContractService {
             log.info("fail updateContract. deployed contract cannot be modified");
             throw new NodeMgrException(ConstantCode.DEPLOYED_CANNOT_MODIFIED);
         }
-        //check contractName
+        // check contractName
         verifyContractNameNotExist(contract.getGroupId(), contract.getContractPath(),
             contract.getContractName(), contract.getAccount(), contract.getContractId());
         BeanUtils.copyProperties(contract, tbContract);
+        // bind contract address
+        String address = contract.getContractAddress();
+        if (address != null) {
+            if (address.length() != CONTRACT_ADDRESS_LENGTH) {
+                log.warn("fail sendAbi. inputAddress:{}", address);
+                throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+            }
+            // check address on chain
+            abiService.getAddressRuntimeBin(contract.getGroupId(), address);
+            log.info("updateContract contract address:{} and deployed status", address);
+            tbContract.setContractAddress(address);
+            tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+        }
         contractMapper.update(tbContract);
         return tbContract;
     }
