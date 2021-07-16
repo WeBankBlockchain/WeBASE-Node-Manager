@@ -42,6 +42,8 @@ public class TbExternalContractSqlProvider {
             sql.WHERE("b.abiId is not NULL");
         } else if (param.getContractType() == ExternalInfoType.ABNORMAL.getValue()) {
             sql.WHERE("b.abiId is NULL");
+            // if abi (b) not select
+            sql.ORDER_BY("ext.deploy_time desc");
         }
         // page
         sql.ORDER_BY("b.modifyTime desc");
