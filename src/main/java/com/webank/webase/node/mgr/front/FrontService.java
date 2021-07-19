@@ -555,6 +555,7 @@ public class FrontService {
         // select all agencies by chainId
         List<TbFrontGroupMap> frontGroupMapList = this.frontGroupMapMapper.selectListByGroupId(groupId);
         if (CollectionUtils.isEmpty(frontGroupMapList)) {
+            log.error("Group:[{}] has no front.", groupId);
             return Collections.emptyList();
         }
 
@@ -568,6 +569,7 @@ public class FrontService {
             log.error("Group:[{}] has no front.", groupId);
             return Collections.emptyList();
         }
+        log.info("selectFrontListByGroupId size:{}", tbFrontList.size());
         return tbFrontList;
     }
 
@@ -704,6 +706,7 @@ public class FrontService {
                     .filter((front) -> front != null)
                     .collect(Collectors.toList());
         }
+        log.info("selectRelatedFront size:{}", nodeRelatedFrontList.size());
         return nodeRelatedFrontList;
     }
 
@@ -789,6 +792,9 @@ public class FrontService {
                 // if exist not new front, but removed node's front, not add
                 List<TbFront> oldFrontListDb = this.selectFrontListByGroupId(groupId);
                 dbRelatedFrontList.addAll(oldFrontListDb);
+                if (!oldFrontListDb.isEmpty()) {
+                    dbRelatedFrontList.addAll(oldFrontListDb);
+                }
             }
             dbRelatedFrontList.addAll(newFrontList);
 
