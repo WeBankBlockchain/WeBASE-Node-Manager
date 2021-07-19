@@ -782,7 +782,8 @@ public class FrontService {
         // <nodeId, List<FrontRelated> map
         Map<String, List<TbFront>> nodeIdRelatedFrontMap = new HashMap<>();
 
-        // all fronts include old and new(include removed node
+        // all fronts include old and new(exclude removed(游离) node)
+        // todo support add removed nodes
         for (String nodeId : CollectionUtils.emptyIfNull(allNodeIdList)) {
             // select related peers to update node config.ini p2p part
             // select from existed in db
@@ -794,9 +795,6 @@ public class FrontService {
                 List<TbFront> oldFrontListDb = this.selectFrontListByGroupId(groupId);
                 log.debug("oldFrontListDb :{}", oldFrontListDb);
                 dbRelatedFrontList.addAll(oldFrontListDb);
-//                if (!oldFrontListDb.isEmpty()) {
-//                    dbRelatedFrontList.addAll(oldFrontListDb);
-//                }
             }
             dbRelatedFrontList.addAll(newFrontList);
 
