@@ -99,8 +99,8 @@ List scaffold = [
 ]
 
 List swagger = [
-        'io.springfox:springfox-swagger2:2.8.0',
-        'io.springfox:springfox-swagger-ui:2.8.0'
+    'io.springfox:springfox-swagger2:2.8.0',
+    'io.springfox:springfox-swagger-ui:2.8.0'
 ]
 
 dependencies {
