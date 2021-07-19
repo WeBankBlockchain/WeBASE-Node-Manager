@@ -21,7 +21,7 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.1.15.RELEASE"
+def springboot_version="2.1.18.RELEASE"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
@@ -31,11 +31,27 @@ List springboot = [
 ]
 
 // cover old version
-def spring_version="5.1.15.RELEASE"
-List spring =[
+def spring_version="5.2.15.RELEASE"
+List spring = [
+    "org.springframework:spring-core:$spring_version",
+    "org.springframework:spring-aop:$spring_version",
+    "org.springframework:spring-beans:$spring_version",
+    "org.springframework:spring-context:$spring_version",
+    "org.springframework:spring-expression:$spring_version",
+    "org.springframework:spring-jcl:$spring_version",
     "org.springframework:spring-jdbc:$spring_version",
-    "org.springframework:spring-tx:$spring_version"
+    "org.springframework:spring-tx:$spring_version",
+    "org.springframework:spring-test:$spring_version",
+    "org.springframework:spring-web:$spring_version"
 ]
+// cover old version
+def spring_security_version="5.4.4"
+List spring_security = [
+    "org.springframework.security:spring-security-core:$spring_security_version",
+    "org.springframework.security:spring-security-web:$spring_security_version",
+    "org.springframework.security:spring-security-config:$spring_security_version",
+]
+
 
 List jaxb = [
      "javax.xml.bind:jaxb-api:2.3.0",
@@ -48,7 +64,7 @@ List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
 
-def jackson_version = "2.11.0"
+def jackson_version = "2.11.4"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
@@ -77,13 +93,18 @@ List mbg = [
 ]
 
 List scaffold = [
-    'com.webank.webase:solscaffold:1.0.1',
-    'com.webank:SmartDev-Scaffold:1.0.0-SNAPSHOT',
-    'com.webank:solc-gradle-plugin:1.0.0'
+    'com.webank.webase:solscaffold:1.0.2',
+    'com.webank:SmartDev-Scaffold:1.0.0.1',
+    'com.webank:solc-gradle-plugin:1.0.1'
+]
+
+List swagger = [
+    'io.springfox:springfox-swagger2:2.8.0',
+    'io.springfox:springfox-swagger-ui:2.8.0'
 ]
 
 dependencies {
-    compile springboot,spring,jaxb,jackson,log4j,scaffold
+    compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger
     compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2"
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"

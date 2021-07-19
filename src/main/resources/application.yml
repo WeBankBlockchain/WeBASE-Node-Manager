@@ -1,5 +1,5 @@
 # server version
-version: v1.5.1
+version: v1.5.2
 
 #server config
 server:
@@ -39,7 +39,7 @@ logging:
 #constants
 constant:
   ###http request
-  # login's authorization
+  # login's authorization whether enable, if false, default login as `admin` account
   isUseSecurity: true
   # verification code expire time (s)
   verificationCodeMaxAge: 300
@@ -59,7 +59,7 @@ constant:
   sleepWhenHttpMaxFail: 60000
 
   ###common
-  developerModeEnable: false
+  developerModeEnable: true
   deployedModifyEnable: true
   isDeleteInfo: true
   transRetainMax: 10000

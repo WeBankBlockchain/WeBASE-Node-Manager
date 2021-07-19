@@ -262,4 +262,9 @@ public class TransHashService {
     public JsonTransactionResponse getTransaction(int groupId, String transHash) {
         return frontInterface.getTransaction(groupId, transHash);
     }
+
+
+    public Object getSignMessageHash(String hash, String signUserId) {
+        return frontInterface.getSignMessageHash(hash,signUserId);
+    }
 }

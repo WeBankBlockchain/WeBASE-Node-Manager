@@ -31,9 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NetUtils {
 
-    @Deprecated
     public static Pair<Boolean, Integer> checkPorts(String ip, int timeout, int ... portArray) {
-        if (ArrayUtils.isEmpty(portArray)){
+        if (ArrayUtils.isEmpty(portArray)) {
             return Pair.of(false,0);
         }
 

@@ -44,7 +44,12 @@ public class WarehouseMdTest {
     public static final String ROLES_MD ="# Roles\n" +
         "\n" +
         "Role permissions control contracts\n";
-
+    public static final String REGISTER_MD ="# Register\n" +
+        "\n" +
+        "Register control contract\n";
+    public static final String COUNTER_MD ="# Counters\n" +
+        "\n" +
+        "Counters tool contract\n";
     @Test
     public void testToolMdToBase64() {
         System.out.println("ADDRESS_MD:\n" + Base64.getEncoder().encodeToString(ADDRESS_MD.getBytes()));
@@ -52,6 +57,8 @@ public class WarehouseMdTest {
         System.out.println("SAFE_MATH_MD:\n" + Base64.getEncoder().encodeToString(SAFE_MATH_MD.getBytes()));
         System.out.println("TABLE_MD:\n" + Base64.getEncoder().encodeToString(TABLE_MD.getBytes()));
         System.out.println("ROLES_MD:\n" + Base64.getEncoder().encodeToString(ROLES_MD.getBytes()));
+        System.out.println("REGISTER_MD:\n" + Base64.getEncoder().encodeToString(REGISTER_MD.getBytes()));
+        System.out.println("COUNTER_MD:\n" + Base64.getEncoder().encodeToString(COUNTER_MD.getBytes()));
     }
 
     @Test
@@ -69,12 +76,164 @@ public class WarehouseMdTest {
 
     @Test
     public void testBACMdToBase64() {
-        System.out.println("ADDRESS_MD:\n" + Base64.getEncoder().encodeToString(ADDRESS_MD.getBytes()));
-        System.out.println("SAFE_MATH_MD:\n" + Base64.getEncoder().encodeToString(SAFE_MATH_MD.getBytes()));
-        System.out.println("ROLES_MD:\n" + Base64.getEncoder().encodeToString(ROLES_MD.getBytes()));
-        System.out.println("BAC001_MD:\n" + Base64.getEncoder().encodeToString(BAC001_MD.getBytes()));
+//        System.out.println("ADDRESS_MD:\n" + Base64.getEncoder().encodeToString(ADDRESS_MD.getBytes()));
+//        System.out.println("SAFE_MATH_MD:\n" + Base64.getEncoder().encodeToString(SAFE_MATH_MD.getBytes()));
+//        System.out.println("ROLES_MD:\n" + Base64.getEncoder().encodeToString(ROLES_MD.getBytes()));
+//        System.out.println("BAC001_MD:\n" + Base64.getEncoder().encodeToString(BAC001_MD.getBytes()));
+        System.out.println("BAC002_MD:\n" + Base64.getEncoder().encodeToString(BAC002_MD.getBytes()));
     }
-
+    public static final String BAC002_MD = "# BAC002 合约规范\n"
+        + "\n"
+        + "## 简介\n"
+        + " BAC002 是区块链上定义非同质化资产的一种标准，可以用于唯一性资产类型，如房产、汽车、道具、版权等。，并可以做相应增发，销毁，暂停合约，黑白名单等权限控制。\n"
+        + "## 三个基本元素\n"
+        + "- description\n"
+        + "\n"
+        + "  资产的具体描述\n"
+        + "\n"
+        + "- shortName\n"
+        + "\n"
+        + "  资产简称\n"
+        + "\n"
+        + "- assetId\n"
+        + "\n"
+        + "  资产编号\n"
+        + "\n"
+        + " ## 五个基本行为\n"
+        + "- 发行\n"
+        + "\n"
+        + "  调用合约的 deploy 方法，传入 description 和 shortName，即在区块链上发行指定名称的资产\n"
+        + "\n"
+        + "- 转账\n"
+        + "\n"
+        + "  调用 safeSendFrom 方法实现转账，调用 balance 方法可以查看自己的资产数量\n"
+        + "\n"
+        + "- 增发\n"
+        + "\n"
+        + "  调用 issueWithAssetURI 方法向资产地址增发指定资产编号和资产描述链接信息的资产。另外，可以通过 addIssuer 增加 有权限增发资产的人，也可以通过 renounceIssuer 方法移除增发权限\n"
+        + "\n"
+        + "- 销毁\n"
+        + "\n"
+        + "  调用 destroy 以及 destroyFrom 销毁自己地址下资产和特定地址下的资产\n"
+        + "\n"
+        + "- 暂停\n"
+        + "\n"
+        + "  遇到紧急状况，你可以调用 suspend 方法，暂停合约，这样任何人都不能调用 send 函数。故障修复后，可以调用 unSuspend 方法解除暂停。也可以通过 addSuspender 和 renounceSuspender 相应增加和移除暂停者权限\n"
+        + "\n"
+        + "\n"
+        + "## 接口说明\n"
+        + "\n"
+        + "- <b>shortName()</b>\n"
+        + "\n"
+        + "  资产简称\n"
+        + "\n"
+        + "- <b>description()</b>\n"
+        + "\n"
+        + "  资产描述\n"
+        + "\n"
+        + "- <b>balance(address owner)</b>\n"
+        + "\n"
+        + "  返回 owner 的资产总数\n"
+        + "\n"
+        + "- <b>totalSupply()</b>\n"
+        + "\n"
+        + "  获得当前合约总的资产数目\n"
+        + "\n"
+        + "- <b>ownerOf(uint256 assetId)</b>\n"
+        + "\n"
+        + "  返回资产持有者的地址\n"
+        + "\n"
+        + "- <b>approve(address to, uint256 assetId)</b>\n"
+        + "\n"
+        + "  授予地址to具有指定资产的控制权\n"
+        + "\n"
+        + "  - 此方法配合 getapproved 使用\n"
+        + "\n"
+        + "- <b>getApproved(uint256 assetId)</b>\n"
+        + "\n"
+        + "  获得资产授权的地址用户\n"
+        + "\n"
+        + "  - 此方法配合 approve 使用，注意不要配合 setapprovealforall 方法使用\n"
+        + "\n"
+        + "- <b>setApprovalForAll(address operator, bool approved)</b>\n"
+        + "\n"
+        + "  授予地址operator具有自己所有资产的控制权\n"
+        + "\n"
+        + "- <b>isApprovedForAll(address owner, address operator)</b>\n"
+        + "\n"
+        + "  查询授权\n"
+        + "\n"
+        + "- <b>sendFrom(address from, address to, uint256 assetId, bytes memory data)</b>\n"
+        + "\n"
+        + "  安全转账，防止你转到错误的合约地址 ( to如果是合约地址，必须实现接收接口 BAC002Holder 才可以接收转账 )，并可以带转账备注\n"
+        + "\n"
+        + "  - suspend 状态下无法执行此操作\n"
+        + "\n"
+        + "- <b>batchSendFrom(address from, address[] to, uint256[] assetId, bytes memory data)</b>\n"
+        + "\n"
+        + "  批量安全转账\n"
+        + "\n"
+        + "  - suspend 状态下无法执行此操作\n"
+        + "  - to 数组元素个数需要和 assetid 数组元素个数一致\n"
+        + "\n"
+        + "- <b>issueWithAssetURI(address to, uint256 assetId, string memory assetURI, bytes data)</b>\n"
+        + "\n"
+        + "  给地址 to 创建资产 assetId，data 是转账备注, assetURI  资产描述\n"
+        + "\n"
+        + "- <b>isIssuer(address account)</b>\n"
+        + "\n"
+        + "  检查account是否有增加资产的权限\n"
+        + "\n"
+        + "- <b>addIssuer(address account)</b>\n"
+        + "\n"
+        + "  使地址 account 拥有增加资产的权限\n"
+        + "\n"
+        + "- <b>renounceIssuer()</b>\n"
+        + "\n"
+        + "  移除增加资产的权限\n"
+        + "\n"
+        + "- <b>suspend()</b>\n"
+        + "\n"
+        + "  暂停合约\n"
+        + "\n"
+        + "  - suspend 后无法进行 safesendfrom / sendfrom / safeBatchSendFrom 操作\n"
+        + "\n"
+        + "- <b>unSuspend()</b>\n"
+        + "\n"
+        + "  重启合约\n"
+        + "\n"
+        + "  - 此方法配合 suspend 使用\n"
+        + "\n"
+        + "- <b>isSuspender(address account)</b>\n"
+        + "\n"
+        + "  是否有暂停合约权限\n"
+        + "\n"
+        + "  - 此方法配合  addsuspender 使用\n"
+        + "\n"
+        + "- <b>addSuspender(address account)</b>\n"
+        + "\n"
+        + "  增加暂停权限者\n"
+        + "\n"
+        + "  - 此方法配合 renouncesuspender / issuspender 放啊发使用\n"
+        + "\n"
+        + "- <b>renounceSuspender()</b>\n"
+        + "\n"
+        + "  移除暂停权限\n"
+        + "\n"
+        + "- <b>destroy(uint256 assetId, bytes data)</b>\n"
+        + "\n"
+        + "  减少自己的资产，data 是转账备注\n"
+        + "\n"
+        + "  - 调用时，value 值需要小于等于目前自己的资产总量\n"
+        + "\n"
+        + "- <b>assetOfOwnerByIndex(address owner, uint256 index)</b>\n"
+        + "\n"
+        + "  根据索引 index 获取 owner 的资产 ID\n"
+        + "\n"
+        + "- <b>assetByIndex(uint256 index)</b>\n"
+        + "\n"
+        + "  根据索引  index 获取当前合约的资产 ID\n"
+        + "\n";
     public static final String BAC001_MD = "# 积分合约\n" +
         "\n" +
         "## 简介\n" +
@@ -116,7 +275,7 @@ public class WarehouseMdTest {
         "\n" +
         "- 销毁\n" +
         "\n" +
-        "  调用 destory 以及 destoryFrom 销毁自己地址下积分和特定地址下的积分\n" +
+        "  调用 destroy 以及 destroyFrom 销毁自己地址下积分和特定地址下的积分\n" +
         "\n" +
         "- 暂停\n" +
         "\n" +
@@ -200,7 +359,7 @@ public class WarehouseMdTest {
         "\n" +
         "  积分描述\n" +
         "\n" +
-        "- <b>destory(uint256 value， string  data)</b>\n" +
+        "- <b>destroy(uint256 value， string  data)</b>\n" +
         "\n" +
         "  减少自己的积分，data 是转账备注\n" +
         "\n" +

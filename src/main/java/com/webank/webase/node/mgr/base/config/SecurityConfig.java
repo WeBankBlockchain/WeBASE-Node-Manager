@@ -45,7 +45,6 @@ import com.webank.webase.node.mgr.security.customizeAuth.TokenAuthenticationProv
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired

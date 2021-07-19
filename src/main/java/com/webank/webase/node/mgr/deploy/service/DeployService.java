@@ -234,6 +234,7 @@ public class DeployService {
      * include: gen config & update other nodes & restart all node
      * after check host and init host(dependency,port,image)
      */
+    @Deprecated
     @Transactional(propagation = Propagation.REQUIRED)
     public Pair<RetCode, String> addNodes(ReqAddNode addNode) throws NodeMgrException {
 
@@ -539,7 +540,7 @@ public class DeployService {
                     log.info("batchAddNode generateHostSDKCertAndScp");
                     hostService.generateHostSDKCertAndScp(chain.getEncryptType(), chainName, tbHost, agencyName);
 
-                    // init front config files and db data
+                    // init front config files and db data, including node's cert
                     log.info("batchAddNode initFrontAndNode");
                     List<TbFront> newFrontResult = frontService.initFrontAndNode(nodeListOnSameHost, chain,
                         tbHost, agency.getId(), agency.getAgencyName(), groupId, FrontStatusEnum.ADDING);

@@ -29,16 +29,7 @@ import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.base.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
-import com.webank.webase.node.mgr.contract.entity.Contract;
-import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.ReqCopyContracts;
-import com.webank.webase.node.mgr.contract.entity.ReqListContract;
-import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.contract.entity.TbContractPath;
-import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.contract.entity.*;
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
 import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
@@ -49,15 +40,6 @@ import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
 import com.webank.webase.node.mgr.user.UserService;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
@@ -70,6 +52,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * services for contract data.
@@ -115,7 +102,7 @@ public class  ContractService {
      * add new contract data.
      */
     public TbContract saveContract(Contract contract) throws NodeMgrException {
-        log.debug("start addContractInfo Contract:{}", JsonTools.toJSONString(contract));
+        log.info("start saveContract Contract:{}", JsonTools.toJSONString(contract));
         TbContract tbContract;
         if (contract.getContractId() == null) {
             //new
@@ -167,6 +154,7 @@ public class  ContractService {
     @Transactional
     public void appContractSave(String appKey, ReqContractAddressSave reqContractAddressSave)
         throws IOException {
+        log.info("appContractSave appKey:{},reqContractAddressSave:{}", appKey, reqContractAddressSave);
         Integer groupId = reqContractAddressSave.getGroupId();
         // check group id
         groupService.checkGroupId(groupId);
@@ -180,6 +168,7 @@ public class  ContractService {
         ContractStoreParam contractStoreParam = new ContractStoreParam();
         contractStoreParam.setAppKey(appKey);
         contractStoreParam.setContractVersion(contractVersion);
+        contractStoreParam.setContractName(contractName);
         List<TbContractStore> listOfContractStore =
             contractStoreService.listOfContractStore(contractStoreParam);
         if (CollectionUtils.isEmpty(listOfContractStore)) {
@@ -239,14 +228,45 @@ public class  ContractService {
             log.info("fail updateContract. deployed contract cannot be modified");
             throw new NodeMgrException(ConstantCode.DEPLOYED_CANNOT_MODIFIED);
         }
-        //check contractName
+        // check contractName
         verifyContractNameNotExist(contract.getGroupId(), contract.getContractPath(),
             contract.getContractName(), contract.getAccount(), contract.getContractId());
         BeanUtils.copyProperties(contract, tbContract);
+        // bind contract address
+        String address = contract.getContractAddress();
+        if (address != null) {
+            if (address.length() != CONTRACT_ADDRESS_LENGTH) {
+                log.warn("fail updateContract address. inputAddress:{}", address);
+                throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+            }
+            // check address on chain
+            abiService.getAddressRuntimeBin(contract.getGroupId(), address);
+            log.info("updateContract contract address:{} and deployed status", address);
+            tbContract.setContractAddress(address);
+            tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+            // deploy success, old contract save in tb_abi
+            abiService.saveAbiFromContractId(contract.getContractId(), address);
+        }
         contractMapper.update(tbContract);
         return tbContract;
     }
 
+    private void handleUpdateAddressAbi(Contract contract, TbContract tbContract) {
+        String address = contract.getContractAddress();
+        if (address == null) {
+            return;
+        }
+        if (address.length() != CONTRACT_ADDRESS_LENGTH) {
+            log.warn("fail sendAbi. inputAddress:{}", address);
+            throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+        }
+        // check address on chain
+        abiService.getAddressRuntimeBin(contract.getGroupId(), address);
+        log.info("updateContract contract address:{} and deployed status", address);
+        tbContract.setContractAddress(address);
+        tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+
+    }
 
     /**
      * delete contract by contractId.

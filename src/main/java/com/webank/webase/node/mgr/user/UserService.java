@@ -391,7 +391,12 @@ public class UserService {
     public String getSignUserIdByAddress(int groupId, String address) throws NodeMgrException {
         TbUser user = queryUser(null, groupId, null, address, null);
         if (user == null) {
-            throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
+            throw new NodeMgrException(ConstantCode.USER_SIGN_USER_ID_NOT_EXIST);
+        }
+        if (StringUtils.isBlank(user.getSignUserId())) {
+            log.error("getSignUserIdByAddress userAddress's signUserId not exist, address:{}",
+                address);
+            throw new NodeMgrException(ConstantCode.USER_SIGN_USER_ID_NOT_EXIST);
         }
         return user.getSignUserId();
     }
@@ -528,8 +533,14 @@ public class UserService {
      * get pem file exported from sign from front api
      * @return ResponseEntity<InputStreamResource>
      */
-    public FileContentHandle exportPemFromSign(int groupId, String signUserId) {
+    public FileContentHandle exportPemFromSign(int groupId, String signUserId, String account,Integer roleId) {
         log.debug("start getExportPemFromSign signUserId:{}", signUserId);
+        TbUser user = queryUser(groupId,null,null,null,account);
+        if(roleId == RoleType.DEVELOPER.getValue()){
+            if(user.getSignUserId() != signUserId){
+                throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_EXISTS);
+            }
+        }
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
         String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
         keyPair.setPrivateKey(decodedPrivateKey);

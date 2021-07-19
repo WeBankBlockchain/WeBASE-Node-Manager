@@ -40,4 +40,5 @@ public class ReqImportAbi {
 	private String contractAddress;
 	@NotNull
 	private List<Object> contractAbi;
+//	private String deployAddress;
 }

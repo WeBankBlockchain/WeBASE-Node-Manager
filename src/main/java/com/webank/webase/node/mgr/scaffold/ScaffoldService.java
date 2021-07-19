@@ -18,6 +18,7 @@ import com.webank.scaffold.artifact.NewMainResourceDir.ContractInfo;
 import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.base.tools.NetUtils;
 import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.base.tools.ZipUtils;
 import com.webank.webase.node.mgr.cert.CertService;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +87,7 @@ public class ScaffoldService {
         List<TbContract> tbContractList = new ArrayList<>();
         for (Integer id : contractIdList) {
             TbContract contract = contractService.queryByContractId(id);
-            if (contract == null || StringUtils.isBlank(contract.getBytecodeBin())) {
+            if (contract == null || contract.getContractAbi() == null) {
                 log.error("exportProject contract not exist or not compiled, id:{}", id);
                 throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
             }
@@ -114,8 +116,8 @@ public class ScaffoldService {
         List<String> userAddressList = reqProject.getUserAddressList();
         String hexPrivateKeyListStr = "";
         if (userAddressList != null && !userAddressList.isEmpty()) {
-            // hexPrivateKeyListStr = this.handleUserList(reqProject.getGroupId(), userAddressList);
-            hexPrivateKeyListStr = userService.queryUserDetail(reqProject.getGroupId(), userAddressList.get(0));
+            hexPrivateKeyListStr = this.handleUserList(reqProject.getGroupId(), userAddressList);
+            //hexPrivateKeyListStr = userService.queryUserDetail(reqProject.getGroupId(), userAddressList.get(0));
         }
         // generate
         String projectPath = this.generateProject(frontNodeConfig, reqProject.getGroup(), reqProject.getArtifactName(),
@@ -157,7 +159,7 @@ public class ScaffoldService {
         log.info("generateProject projectGroup:{},artifactName:{},OUTPUT_DIR:{},frontChannelIpPort:{},groupId:{}",
             projectGroup, artifactName, OUTPUT_DIR, frontChannelIpPort, groupId);
         try {
-            projectFactory.buildProjectDir(contractInfoList,
+            projectFactory.buildProjectDirWebase(contractInfoList,
                 projectGroup, artifactName, OUTPUT_DIR, GRADLE_WRAPPER_DIR,
                 frontChannelIpPort, groupId, hexPrivateKeyListStr, sdkMap);
         } catch (Exception e) {
@@ -215,5 +217,18 @@ public class ScaffoldService {
             keyList.add(hexPrivateKey);
         }
         return StringUtils.join(keyList, ",");
+    }
+
+    /**
+     * telnet channel port to check reachable
+     * @param nodeIp
+     * @param channelPort
+     * @return
+     */
+    public Boolean telnetChannelPort(String nodeIp, int channelPort) {
+        Pair<Boolean, Integer> telnetResult = NetUtils.checkPorts(nodeIp, 2000, channelPort);
+        // if true, telnet success, port is in use, which means node's channelPort is correct
+        log.info("telnet {}:{} result:{}", nodeIp, channelPort, telnetResult);
+        return telnetResult.getLeft();
     }
 }

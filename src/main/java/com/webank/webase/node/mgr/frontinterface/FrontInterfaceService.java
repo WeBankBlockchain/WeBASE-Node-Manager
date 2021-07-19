@@ -48,6 +48,7 @@ import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
@@ -645,11 +646,11 @@ public class FrontInterfaceService {
     /**
      * get block by number.
      */
-    public BcosBlockHeader getBlockHeaderByNumber(Integer groupId, BigInteger blockNumber)
+    public BlockHeader getBlockHeaderByNumber(Integer groupId, BigInteger blockNumber)
         throws NodeMgrException {
         log.debug("start getBlockHeaderByNumber groupId:{} blockNumber:{}", groupId, blockNumber);
         String uri = String.format(FrontRestTools.URI_BLOCK_HEADER_BY_NUMBER, blockNumber);
-        BcosBlockHeader blockInfo = frontRestTools.getForEntity(groupId, uri, BcosBlockHeader.class);
+        BlockHeader blockInfo = frontRestTools.getForEntity(groupId, uri, BlockHeader.class);
         log.debug("end getBlockHeaderByNumber");
         return blockInfo;
     }
@@ -658,10 +659,10 @@ public class FrontInterfaceService {
     /**
      * request front for block by hash.
      */
-    public BcosBlockHeader getBlockHeaderByHash(Integer groupId, String blockHash) throws NodeMgrException {
+    public BlockHeader getBlockHeaderByHash(Integer groupId, String blockHash) throws NodeMgrException {
         log.debug("start getBlockHeaderByHash. groupId:{}  blockHash:{}", groupId, blockHash);
         String uri = String.format(FrontRestTools.URI_BLOCK_HEADER_BY_HASH, blockHash);
-        BcosBlockHeader blockInfo = frontRestTools.getForEntity(groupId, uri, BcosBlockHeader.class);
+        BlockHeader blockInfo = frontRestTools.getForEntity(groupId, uri, BlockHeader.class);
         log.debug("end getBlockHeaderByHash. blockInfo:{}", JsonTools.toJSONString(blockInfo));
         return blockInfo;
     }
@@ -754,4 +755,13 @@ public class FrontInterfaceService {
         return clientVersion;
     }
 
+    public Object getSignMessageHash(String hash, String signUserId) {
+        log.debug("start getSignMessageHash hash:{} signUserId:{}", hash, signUserId);
+        Map<String, String> map = new HashMap<>();
+        map.put("hash", hash);
+        map.put("signUserId", signUserId);
+        Object signMessage = frontRestTools.postForEntity(1, FrontRestTools.URI_SIGN_MESSAGE,map,Object.class);
+        log.debug("end getSignMessageHash, signMessage:{}", signMessage);
+        return signMessage;
+    }
 }

@@ -65,6 +65,7 @@ public class AbiService {
 
     @Transactional
     public void saveAbi(ReqImportAbi param) {
+        log.info("saveAbi ReqImportAbi:{}", param);
         if (Objects.isNull(param.getAbiId())) {
             insertAbiInfo(param);
         } else {
@@ -72,6 +73,10 @@ public class AbiService {
         }
     }
 
+    /**
+     * save abi and save method_id for transaction analysis
+     * @param param
+     */
     @Transactional
     public void insertAbiInfo(ReqImportAbi param) {
         int groupId = param.getGroupId();
@@ -174,6 +179,7 @@ public class AbiService {
      * @return address's runtime bin
      */
     public String getAddressRuntimeBin(int groupId, String contractAddress) {
+        log.info("getAddressRuntimeBin groupId:{},contractAddress:{}", groupId, contractAddress);
         if (StringUtils.isBlank(contractAddress)) {
             log.error("fail getAddressRuntimeBin. contractAddress is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_NULL);
@@ -195,7 +201,7 @@ public class AbiService {
     }
 
     public int countOfAbi(ReqAbiListParam param) {
-        log.debug("start countOfAbi ");
+        log.debug("start countOfAbi param:{}", param);
         try {
             int count = abiMapper.countOfAbi(param);
             log.debug("end countOfAbi count:{}", count);
@@ -239,6 +245,7 @@ public class AbiService {
     }
 
     public void saveAbiFromContractId(int contractId, String contractAddress) {
+        log.info("saveAbiFromContractId contractId:{},contractAddress:{}", contractId, contractAddress);
         TbContract tbContract = contractService.queryByContractId(contractId);
 
         int groupId = tbContract.getGroupId();

@@ -583,7 +583,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_item (
   contract_name varchar(255) binary NOT NULL COMMENT '合约名称',
   contract_source mediumtext COMMENT '合约源码(Base64)',
   description     mediumtext COMMENT '合约描述(Base64)',
-  description_en  mediumtext COMMENT '合约描述（英文）(Base64)',
+  description_en  mediumtext COMMENT '合约描述(英文)(Base64)',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',  
   warehouse_id  int(11) NOT NULL COMMENT '合约仓库编号',

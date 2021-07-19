@@ -208,6 +208,7 @@ public class ConstantProperties {
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
+        log.info("Init constant properties,isUseSecurity: [{}]", isUseSecurity);
         log.info("Init constant properties,deploy type: [{}]", deployType);
 
         log.info("Init constant properties, permitUrlArray: [{}]", StringUtils.join(permitUrlArray,","));
