@@ -27,4 +27,5 @@ public class KeyPair {
      * for pull user from front
      */
     private String userName;
+    private Integer userId;
 }
