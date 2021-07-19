@@ -540,7 +540,7 @@ public class FrontService {
 
         if (CollectionUtils.isEmpty(tbFrontList)) {
             log.error("Chain:[{}] has no front.", chainId);
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         return tbFrontList;
     }
@@ -556,7 +556,7 @@ public class FrontService {
         List<TbFrontGroupMap> frontGroupMapList = this.frontGroupMapMapper.selectListByGroupId(groupId);
         if (CollectionUtils.isEmpty(frontGroupMapList)) {
             log.error("Group:[{}] has no front.", groupId);
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
 
         // select all fronts by all agencies
@@ -567,7 +567,7 @@ public class FrontService {
 
         if (CollectionUtils.isEmpty(tbFrontList)) {
             log.error("Group:[{}] has no front.", groupId);
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         log.info("selectFrontListByGroupId size:{}", tbFrontList.size());
         return tbFrontList;
@@ -588,7 +588,7 @@ public class FrontService {
 
         if (CollectionUtils.isEmpty(allTbFrontList)) {
             log.error("Group id set:[{}] has no front.", JsonTools.toJSONString(groupIdSet));
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
 
         // delete replication
@@ -689,7 +689,7 @@ public class FrontService {
         List<Integer> groupIdList = this.nodeMapper.selectGroupIdListOfNode(nodeId);
         if (CollectionUtils.isEmpty(groupIdList)) {
             log.error("Node:[{}] has no group", nodeId);
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         for (Integer groupIdOfNode : groupIdList) {
             List<TbFrontGroupMap> tbFrontGroupMaps = this.frontGroupMapMapper.selectListByGroupId(groupIdOfNode);
@@ -782,19 +782,21 @@ public class FrontService {
         // <nodeId, List<FrontRelated> map
         Map<String, List<TbFront>> nodeIdRelatedFrontMap = new HashMap<>();
 
-        // all fronts include old and new
+        // all fronts include old and new(include removed node
         for (String nodeId : CollectionUtils.emptyIfNull(allNodeIdList)) {
             // select related peers to update node config.ini p2p part
             // select from existed in db
             List<TbFront> dbRelatedFrontList = this.selectRelatedFront(nodeId);
+            log.info("dbRelatedFrontList size:{}", dbRelatedFrontList.size());
             // add just added nodes' new front
             if (dbRelatedFrontList.isEmpty()) {
-                // if exist not new front, but removed node's front, not add
+                // if exist old front, but removed(游离) node's front, not add
                 List<TbFront> oldFrontListDb = this.selectFrontListByGroupId(groupId);
+                log.debug("oldFrontListDb :{}", oldFrontListDb);
                 dbRelatedFrontList.addAll(oldFrontListDb);
-                if (!oldFrontListDb.isEmpty()) {
-                    dbRelatedFrontList.addAll(oldFrontListDb);
-                }
+//                if (!oldFrontListDb.isEmpty()) {
+//                    dbRelatedFrontList.addAll(oldFrontListDb);
+//                }
             }
             dbRelatedFrontList.addAll(newFrontList);
 

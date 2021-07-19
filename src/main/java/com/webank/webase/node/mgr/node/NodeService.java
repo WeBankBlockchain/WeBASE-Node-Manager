@@ -414,7 +414,7 @@ public class NodeService {
 
         if (CollectionUtils.isEmpty(tbNodeList)) {
             log.error("Group of:[{}] chain:[{}] has no node.", groupId, chainId);
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         return tbNodeList;
     }
@@ -443,7 +443,7 @@ public class NodeService {
 
         if (CollectionUtils.isEmpty(tbNodeList)) {
             log.error("Group of:[{}] of newFrontIdList:{} has no node.", groupId, newFrontIdList);
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         return tbNodeList;
     }

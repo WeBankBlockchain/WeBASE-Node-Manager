@@ -168,7 +168,7 @@ public class AgencyService {
         List<TbAgency> tbAgencyList = tbAgencyMapper.selectByChainId(chainId);
         if (CollectionUtils.isEmpty(tbAgencyList)) {
             log.error("Chain:[{}] has no agency.", chainId);
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         return tbAgencyList;
     }
