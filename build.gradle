@@ -93,14 +93,14 @@ List mbg = [
 ]
 
 List scaffold = [
-    'com.webank.webase:solscaffold:1.0.2-SNAPSHOT',
-    'com.webank:SmartDev-Scaffold:1.0.0-SNAPSHOT',
+    'com.webank.webase:solscaffold:1.0.2',
+    'com.webank:SmartDev-Scaffold:1.0.0.1',
     'com.webank:solc-gradle-plugin:1.0.1'
 ]
 
 List swagger = [
-        'io.springfox:springfox-swagger2:2.8.0',
-        'io.springfox:springfox-swagger-ui:2.8.0'
+    'io.springfox:springfox-swagger2:2.8.0',
+    'io.springfox:springfox-swagger-ui:2.8.0'
 ]
 
 dependencies {
