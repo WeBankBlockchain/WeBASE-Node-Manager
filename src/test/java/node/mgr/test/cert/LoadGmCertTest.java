@@ -16,8 +16,8 @@
 
 package node.mgr.test.cert;
 
-import com.webank.webase.node.mgr.base.tools.CertTools;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.tools.CertTools;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.CertService;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;

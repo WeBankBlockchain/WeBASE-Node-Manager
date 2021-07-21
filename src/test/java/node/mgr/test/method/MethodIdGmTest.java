@@ -16,7 +16,7 @@
 
 package node.mgr.test.method;
 
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
+import com.webank.webase.node.mgr.tools.Web3Tools;
 import java.io.IOException;
 import java.util.List;
 import node.mgr.test.base.TestBase;

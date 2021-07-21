@@ -16,7 +16,7 @@ package node.mgr.test.contract.warehouse;
 
 import com.webank.scaffold.util.FileUtils;
 import com.webank.scaffold.util.IOUtil;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
