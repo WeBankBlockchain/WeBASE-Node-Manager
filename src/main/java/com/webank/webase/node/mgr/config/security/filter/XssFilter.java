@@ -11,9 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.base.config.security.filter;
+package com.webank.webase.node.mgr.config.security.filter;
 
-import com.webank.webase.node.mgr.base.config.security.XssHttpServletRequestWrapper;
+import com.webank.webase.node.mgr.config.security.XssHttpServletRequestWrapper;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

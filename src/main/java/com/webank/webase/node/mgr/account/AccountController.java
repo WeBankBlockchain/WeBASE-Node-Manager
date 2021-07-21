@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.ImageToken;
@@ -44,10 +44,10 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.base.tools.TokenImgGenerator;
-import com.webank.webase.node.mgr.token.TokenService;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.tools.TokenImgGenerator;
+import com.webank.webase.node.mgr.account.token.TokenService;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

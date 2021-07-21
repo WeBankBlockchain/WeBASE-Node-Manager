@@ -22,7 +22,7 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.external.entity.RspAllExtAccount;
 import com.webank.webase.node.mgr.external.entity.RspAllExtContract;

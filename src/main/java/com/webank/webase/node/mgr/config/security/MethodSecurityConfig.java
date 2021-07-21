@@ -1,6 +1,6 @@
-package com.webank.webase.node.mgr.base.config.security;
+package com.webank.webase.node.mgr.config.security;
 
-import com.webank.webase.node.mgr.base.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

@@ -11,9 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.chain;
+package com.webank.webase.node.mgr.deploy.chain;
 
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.URI_CHAIN;
+import static com.webank.webase.node.mgr.front.frontinterface.FrontRestTools.URI_CHAIN;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
@@ -24,7 +24,7 @@ import com.webank.webase.node.mgr.base.enums.GroupType;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.tools.CertTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;

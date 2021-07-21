@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.base.config;
+package com.webank.webase.node.mgr.config;
 
 
 import lombok.extern.log4j.Log4j2;

@@ -33,8 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.JsonTools;
 
 import lombok.extern.log4j.Log4j2;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.token;
+package com.webank.webase.node.mgr.account.token;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

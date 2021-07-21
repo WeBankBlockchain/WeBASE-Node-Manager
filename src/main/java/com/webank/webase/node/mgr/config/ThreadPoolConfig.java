@@ -1,5 +1,7 @@
-package com.webank.webase.node.mgr.base.config;
+package com.webank.webase.node.mgr.config;
 
+import com.webank.webase.node.mgr.config.properties.ExecutorProperties;
+import com.webank.webase.node.mgr.config.properties.SchedulerProperties;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-
-import com.webank.webase.node.mgr.base.config.properties.ExecutorProperties;
-import com.webank.webase.node.mgr.base.config.properties.SchedulerProperties;
 
 import lombok.extern.log4j.Log4j2;
 

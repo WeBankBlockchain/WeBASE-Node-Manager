@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.group.GroupService;
 
 import lombok.extern.log4j.Log4j2;

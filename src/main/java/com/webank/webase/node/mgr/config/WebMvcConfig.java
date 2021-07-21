@@ -1,9 +1,9 @@
-package com.webank.webase.node.mgr.base.config;
+package com.webank.webase.node.mgr.config;
 
 import com.webank.webase.node.mgr.base.annotation.CurrentAccountMethodArgumentResolver;
-import com.webank.webase.node.mgr.base.config.security.filter.AccountFilter;
-import com.webank.webase.node.mgr.base.config.security.filter.AppIntegrationFilter;
-import com.webank.webase.node.mgr.base.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.config.security.filter.AccountFilter;
+import com.webank.webase.node.mgr.config.security.filter.AppIntegrationFilter;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import java.util.List;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;

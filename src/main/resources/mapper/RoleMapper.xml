@@ -3,8 +3,8 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.role.RoleMapper">
-  <resultMap id="roleMap" type="com.webank.webase.node.mgr.role.TbRole">
+<mapper namespace="com.webank.webase.node.mgr.account.role.RoleMapper">
+  <resultMap id="roleMap" type="com.webank.webase.node.mgr.account.role.TbRole">
     <id column="role_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="roleId"/>
     <result column="role_name" javaType="java.lang.String" jdbcType="VARCHAR" property="roleName"/>
     <result column="role_name_zh" javaType="java.lang.String" jdbcType="VARCHAR"
@@ -25,14 +25,14 @@
 		description description,create_time createTime,modify_time modifyTime
 	</sql>
 
-  <select id="queryRoleById" resultType="com.webank.webase.node.mgr.role.TbRole">
+  <select id="queryRoleById" resultType="com.webank.webase.node.mgr.account.role.TbRole">
     select
     <include refid="QUERY_ROW_COLUMN"/>
     from tb_role where role_id = #{roleId}
     limit 1
   </select>
 
-  <select id="countOfRole" parameterType="com.webank.webase.node.mgr.role.RoleListParam"
+  <select id="countOfRole" parameterType="com.webank.webase.node.mgr.account.role.RoleListParam"
     resultType="java.lang.Integer">
     select count(1) from tb_role where role_status=1
     <if test="param.roleId != null and param.roleId != ''">
@@ -53,7 +53,7 @@
   </select>
 
 
-  <select id="listOfRole" parameterType="com.webank.webase.node.mgr.role.RoleListParam"
+  <select id="listOfRole" parameterType="com.webank.webase.node.mgr.account.role.RoleListParam"
     resultMap="roleMap">
     select * from tb_role where role_status=1
     <if test="param.roleId != null and param.roleId != ''">

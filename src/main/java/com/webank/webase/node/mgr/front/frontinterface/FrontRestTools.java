@@ -25,7 +25,6 @@ import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.front.frontinterface.entity.FailInfo;
-import com.webank.webase.node.mgr.front.frontinterface.entity.FrontUrlInfo;
 import com.webank.webase.node.mgr.node.NodeService;
 import java.time.Duration;
 import java.time.Instant;

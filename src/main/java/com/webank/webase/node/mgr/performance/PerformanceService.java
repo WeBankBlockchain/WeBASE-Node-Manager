@@ -15,14 +15,14 @@
  */
 package com.webank.webase.node.mgr.performance;
 
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_PERFORMANCE_CONFIG;
-import static com.webank.webase.node.mgr.frontinterface.FrontRestTools.FRONT_PERFORMANCE_RATIO;
+import static com.webank.webase.node.mgr.front.frontinterface.FrontRestTools.FRONT_PERFORMANCE_CONFIG;
+import static com.webank.webase.node.mgr.front.frontinterface.FrontRestTools.FRONT_PERFORMANCE_RATIO;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.time.LocalDateTime;

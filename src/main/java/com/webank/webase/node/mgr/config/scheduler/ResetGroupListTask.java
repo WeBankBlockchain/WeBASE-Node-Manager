@@ -11,10 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.base.config.scheduler;
+package com.webank.webase.node.mgr.config.scheduler;
 
 
-import com.webank.webase.node.mgr.base.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.group.GroupService;
 import java.util.concurrent.atomic.LongAdder;
 import lombok.extern.log4j.Log4j2;

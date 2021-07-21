@@ -3,15 +3,15 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应mapper接口 -->
-<mapper namespace="com.webank.webase.node.mgr.token.TokenMapper">
-    <resultMap id="accountMap" type="com.webank.webase.node.mgr.token.TbToken">
+<mapper namespace="com.webank.webase.node.mgr.account.token.TokenMapper">
+    <resultMap id="accountMap" type="com.webank.webase.node.mgr.account.token.TbToken">
         <id column="token" javaType="java.lang.String" jdbcType="VARCHAR" property="token"/>
         <id column="value" javaType="java.lang.String" jdbcType="VARCHAR" property="value"/>
         <result column="expire_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP" property="expireTime"/>
         <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>
 
-    <insert id="add" parameterType="com.webank.webase.node.mgr.token.TbToken">
+    <insert id="add" parameterType="com.webank.webase.node.mgr.account.token.TbToken">
          insert into tb_token (token,value,expire_time,create_time)values(#{token},#{value},#{expireTime},now())
    </insert>
 

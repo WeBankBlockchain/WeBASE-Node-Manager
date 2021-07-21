@@ -11,8 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.base.config;
+package com.webank.webase.node.mgr.config;
 
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.config.security.AccountDetailsService;
+import com.webank.webase.node.mgr.config.security.JsonAccessDeniedHandler;
+import com.webank.webase.node.mgr.config.security.JsonLogoutSuccessHandler;
+import com.webank.webase.node.mgr.config.security.LoginFailHandler;
+import com.webank.webase.node.mgr.config.security.customizeAuth.TokenAuthenticationProvider;
+import com.webank.webase.node.mgr.config.security.filter.TokenAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -30,14 +37,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import com.webank.webase.node.mgr.base.config.security.filter.TokenAuthenticationFilter;
-import com.webank.webase.node.mgr.base.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.config.security.AccountDetailsService;
-import com.webank.webase.node.mgr.base.config.security.JsonAccessDeniedHandler;
-import com.webank.webase.node.mgr.base.config.security.JsonAuthenticationEntryPoint;
-import com.webank.webase.node.mgr.base.config.security.JsonLogoutSuccessHandler;
-import com.webank.webase.node.mgr.base.config.security.LoginFailHandler;
-import com.webank.webase.node.mgr.base.config.security.customizeAuth.TokenAuthenticationProvider;
+import com.webank.webase.node.mgr.config.security.JsonAuthenticationEntryPoint;
 
 /**
  * security config.

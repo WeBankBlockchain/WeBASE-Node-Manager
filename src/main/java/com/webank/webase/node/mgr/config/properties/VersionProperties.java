@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.base.config.properties;
+package com.webank.webase.node.mgr.config.properties;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

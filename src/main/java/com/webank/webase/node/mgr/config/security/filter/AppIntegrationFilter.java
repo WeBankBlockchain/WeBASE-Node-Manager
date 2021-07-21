@@ -11,13 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.node.mgr.base.config.security.filter;
+package com.webank.webase.node.mgr.config.security.filter;
 
 import com.webank.webase.node.mgr.appintegration.AppIntegrationService;
 import com.webank.webase.node.mgr.appintegration.entity.TbAppInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;

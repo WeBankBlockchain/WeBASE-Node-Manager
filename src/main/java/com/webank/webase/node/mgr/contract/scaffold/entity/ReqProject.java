@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.scaffold.entity;
+package com.webank.webase.node.mgr.contract.scaffold.entity;
 
 import java.util.List;
 import javax.validation.constraints.NotBlank;

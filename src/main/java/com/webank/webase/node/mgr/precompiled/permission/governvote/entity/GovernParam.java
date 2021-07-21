@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.governance.entity;
+package com.webank.webase.node.mgr.precompiled.permission.governvote.entity;
 
 import com.webank.webase.node.mgr.base.entity.BaseQueryParam;
 import lombok.Data;

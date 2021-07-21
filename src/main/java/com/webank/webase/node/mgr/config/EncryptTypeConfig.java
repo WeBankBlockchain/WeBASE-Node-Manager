@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.node.mgr.base.config;
+package com.webank.webase.node.mgr.config;
 
 
 import lombok.Data;

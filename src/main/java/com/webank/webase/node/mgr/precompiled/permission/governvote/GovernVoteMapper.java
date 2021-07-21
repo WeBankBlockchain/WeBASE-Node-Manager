@@ -12,10 +12,10 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.governance;
+package com.webank.webase.node.mgr.precompiled.permission.governvote;
 
-import com.webank.webase.node.mgr.governance.entity.GovernParam;
-import com.webank.webase.node.mgr.governance.entity.TbGovernVote;
+import com.webank.webase.node.mgr.precompiled.permission.governvote.entity.GovernParam;
+import com.webank.webase.node.mgr.precompiled.permission.governvote.entity.TbGovernVote;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 

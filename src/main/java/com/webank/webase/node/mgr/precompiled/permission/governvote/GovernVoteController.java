@@ -12,13 +12,13 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.governance;
+package com.webank.webase.node.mgr.precompiled.permission.governvote;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.governance.entity.GovernParam;
-import com.webank.webase.node.mgr.governance.entity.TbGovernVote;
+import com.webank.webase.node.mgr.precompiled.permission.governvote.entity.GovernParam;
+import com.webank.webase.node.mgr.precompiled.permission.governvote.entity.TbGovernVote;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;

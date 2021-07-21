@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.base.config;
+package com.webank.webase.node.mgr.config;
 
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +24,6 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.client.RestTemplate;
-import com.webank.webase.node.mgr.base.config.properties.ConstantProperties;
 import lombok.extern.log4j.Log4j2;
 
 /**

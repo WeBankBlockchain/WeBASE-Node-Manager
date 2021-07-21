@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.role;
+package com.webank.webase.node.mgr.account.role;
 
 import java.time.LocalDateTime;
 import lombok.Data;

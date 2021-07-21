@@ -31,7 +31,7 @@ import com.webank.webase.node.mgr.event.entity.RspContractInfo;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

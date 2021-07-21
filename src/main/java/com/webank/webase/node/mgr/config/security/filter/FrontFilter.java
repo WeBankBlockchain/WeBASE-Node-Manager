@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.base.config.security.filter;
+package com.webank.webase.node.mgr.config.security.filter;
 
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
-import com.webank.webase.node.mgr.base.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;

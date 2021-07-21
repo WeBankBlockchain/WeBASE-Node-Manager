@@ -12,24 +12,24 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.scaffold;
+package com.webank.webase.node.mgr.contract.scaffold;
 
 import com.webank.scaffold.artifact.NewMainResourceDir.ContractInfo;
 import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.NetUtils;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.base.tools.ZipUtils;
+import com.webank.webase.node.mgr.tools.NetUtils;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.tools.ZipUtils;
 import com.webank.webase.node.mgr.cert.CertService;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.scaffold.entity.ReqProject;
-import com.webank.webase.node.mgr.scaffold.entity.RspFile;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.contract.scaffold.entity.ReqProject;
+import com.webank.webase.node.mgr.contract.scaffold.entity.RspFile;
 import com.webank.webase.node.mgr.user.UserService;
 import java.io.File;
 import java.util.ArrayList;
