@@ -62,7 +62,7 @@ import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
-import com.webank.webase.node.mgr.config.scheduler.ResetGroupListTask;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -199,8 +199,7 @@ public class FrontService {
                 // get node config(add in 1.5.0)
                 // p2p/rpc/channel port etc.
                 FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
-                // get agency of node
-                NodeInformation nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
+
                 tbFront.setP2pPort(nodeConfig.getP2pport());
                 tbFront.setJsonrpcPort(nodeConfig.getRpcport());
                 tbFront.setChannelPort(nodeConfig.getChannelPort());
@@ -208,8 +207,17 @@ public class FrontService {
                 tbFront.setNodeId(syncStatus.getNodeId());
                 tbFront.setClientVersion(clientVersion);
                 tbFront.setSupportVersion(supportVersion);
-                // set agency from chain
-                tbFront.setAgency(nodeInfo.getAgency() == null ? "fisco" : nodeInfo.getAgency());
+                // get agency of node
+                try {
+                    NodeInformation nodeInfo = frontInterface
+                        .getNodeInfoFromSpecificFront(frontIp, frontPort);
+                    // set agency from chain
+                    tbFront.setAgency(nodeInfo.getAgency() == null ? "fisco" : nodeInfo.getAgency());
+                } catch (NodeMgrException ex) {
+                    log.warn("get nodeInfo from front failed for:[]", ex);
+                    // set agency from chain
+                    tbFront.setAgency("fisco");
+                }
                 //update front info
                 frontMapper.updateBasicInfo(tbFront);
                 // save group info
@@ -286,9 +294,16 @@ public class FrontService {
         tbFront.setJsonrpcPort(nodeConfig.getRpcport());
         tbFront.setChannelPort(nodeConfig.getChannelPort());
         // get agency of node
-        NodeInformation nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
-        log.info("front's agency is :{}", nodeInfo);
-        tbFront.setAgency(nodeInfo.getAgency());
+        // get agency of node
+        try {
+            NodeInformation nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
+            // set agency from chain
+            tbFront.setAgency(nodeInfo.getAgency() == null ? "fisco" : nodeInfo.getAgency());
+        } catch (Exception ex) {
+            log.warn("get nodeInfo from front failed for:[]", ex);
+            // set agency from chain
+            tbFront.setAgency("fisco");
+        }
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
