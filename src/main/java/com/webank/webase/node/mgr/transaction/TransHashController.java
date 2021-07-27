@@ -136,7 +136,7 @@ public class TransHashController extends BaseController {
     }
 
     /**
-     * get transaction by hash.
+     * sign transaction hash.
      */
     @PostMapping("/signMessageHash")
     public Object signMessageHash(@RequestBody @Valid ReqSignMessage reqSignMessage,

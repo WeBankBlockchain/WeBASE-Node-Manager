@@ -48,8 +48,8 @@ import com.webank.webase.node.mgr.group.entity.ReqOperateGroup;
 import com.webank.webase.node.mgr.group.entity.RspGroupStatus;
 import com.webank.webase.node.mgr.group.entity.RspOperateResult;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
-import com.webank.webase.node.mgr.config.scheduler.ResetGroupListTask;
-import com.webank.webase.node.mgr.config.scheduler.StatisticsTransdailyTask;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
+import com.webank.webase.node.mgr.scheduler.StatisticsTransdailyTask;
 import com.webank.webase.node.mgr.transdaily.SeventDaysTrans;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
 

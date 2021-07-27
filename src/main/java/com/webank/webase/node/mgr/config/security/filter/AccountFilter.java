@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * validate accoutn info.
+ * validate account info.
  */
 @Component
 public class AccountFilter implements HandlerInterceptor {
