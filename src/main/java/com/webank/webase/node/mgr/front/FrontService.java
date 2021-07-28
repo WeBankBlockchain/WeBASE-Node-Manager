@@ -198,11 +198,15 @@ public class FrontService {
                 }
                 // get node config(add in 1.5.0)
                 // p2p/rpc/channel port etc.
-                FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
-
-                tbFront.setP2pPort(nodeConfig.getP2pport());
-                tbFront.setJsonrpcPort(nodeConfig.getRpcport());
-                tbFront.setChannelPort(nodeConfig.getChannelPort());
+                // get node config(add in 1.5.0)
+                try {
+                    FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+                    tbFront.setP2pPort(nodeConfig.getP2pport());
+                    tbFront.setJsonrpcPort(nodeConfig.getRpcport());
+                    tbFront.setChannelPort(nodeConfig.getChannelPort());
+                } catch (Exception e) {
+                    log.warn("get nodeConfig from front failed for:[]", e);
+                }
                 // copy attribute
                 tbFront.setNodeId(syncStatus.getNodeId());
                 tbFront.setClientVersion(clientVersion);
@@ -289,18 +293,21 @@ public class FrontService {
         // 1.5.0 add check client version cannot be lower than v2.4.0
         this.validateSupportVersion(supportVersion);
         // get node config(add in 1.5.0)
-        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
-        tbFront.setP2pPort(nodeConfig.getP2pport());
-        tbFront.setJsonrpcPort(nodeConfig.getRpcport());
-        tbFront.setChannelPort(nodeConfig.getChannelPort());
-        // get agency of node
+        try {
+            FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+            tbFront.setP2pPort(nodeConfig.getP2pport());
+            tbFront.setJsonrpcPort(nodeConfig.getRpcport());
+            tbFront.setChannelPort(nodeConfig.getChannelPort());
+        } catch (Exception e) {
+            log.warn("get nodeConfig from front failed for:[]", e);
+        }
         // get agency of node
         try {
             NodeInformation nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
             // set agency from chain
             tbFront.setAgency(nodeInfo.getAgency() == null ? "fisco" : nodeInfo.getAgency());
-        } catch (Exception ex) {
-            log.warn("get nodeInfo from front failed for:[]", ex);
+        } catch (Exception e) {
+            log.warn("get nodeInfo from front failed for:[]", e);
             // set agency from chain
             tbFront.setAgency("fisco");
         }
