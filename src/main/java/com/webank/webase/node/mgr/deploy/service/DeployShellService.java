@@ -17,10 +17,10 @@ package com.webank.webase.node.mgr.deploy.service;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
-import com.webank.webase.node.mgr.base.tools.cmd.JavaCommandExecutor;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.tools.cmd.JavaCommandExecutor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

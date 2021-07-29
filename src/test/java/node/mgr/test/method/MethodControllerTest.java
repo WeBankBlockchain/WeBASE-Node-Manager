@@ -15,7 +15,7 @@
  */
 package node.mgr.test.method;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.method.entity.Method;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import java.util.Arrays;

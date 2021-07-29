@@ -19,13 +19,11 @@ import static com.webank.webase.node.mgr.base.code.ConstantCode.GROUPS_CONFIG_ER
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_CONFIG_LINE_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_FORMAT_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.IP_NUM_ERROR;
-import static com.webank.webase.node.mgr.base.code.ConstantCode.NODES_NUM_EXCEED_MAX_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.NODE_PORT_CONFIG_ERROR;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.ValidateUtil;
+import com.webank.webase.node.mgr.tools.ValidateUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

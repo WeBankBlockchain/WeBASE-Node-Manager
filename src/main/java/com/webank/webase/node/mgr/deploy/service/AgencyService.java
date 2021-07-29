@@ -18,14 +18,12 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.AGENCY_NAME_CONFIG_ERROR;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_AGENCY_ERROR;
 
-import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,10 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.ValidateUtil;
-import com.webank.webase.node.mgr.base.tools.cmd.ExecuteResult;
+import com.webank.webase.node.mgr.tools.ValidateUtil;
+import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.deploy.entity.TbAgency;
-import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.front.FrontService;

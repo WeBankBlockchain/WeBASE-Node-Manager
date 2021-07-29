@@ -13,7 +13,7 @@
  */
 package node.mgr.test.user;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;

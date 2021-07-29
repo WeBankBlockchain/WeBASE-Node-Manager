@@ -18,17 +18,17 @@ package com.webank.webase.node.mgr.cert;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.CertTools;
-import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.base.tools.ZipUtils;
+import com.webank.webase.node.mgr.tools.CertTools;
+import com.webank.webase.node.mgr.tools.CleanPathUtil;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.tools.ZipUtils;
 import com.webank.webase.node.mgr.cert.entity.CertParam;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.cert.entity.TbCert;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -516,7 +516,7 @@ public class CertService {
         //├── sdk.crt
         //└── sdk.key
         try {
-            ZipUtils.generateZipFile(TEMP_SDK_DIR, TEMP_ZIP_DIR, "", TEMP_ZIP_FILE_NAME);
+            ZipUtils.generateZipFile(TEMP_SDK_DIR, TEMP_ZIP_DIR, TEMP_SDK_DIR, TEMP_ZIP_FILE_NAME);
         } catch (Exception e) {
             log.error("writeSdkAsFile generateZipFile fail:[]", e);
             throw new NodeMgrException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
