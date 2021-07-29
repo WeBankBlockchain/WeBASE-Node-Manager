@@ -13,9 +13,9 @@
  */
 package node.mgr.test.scheduler;
 
-import com.webank.webase.node.mgr.config.scheduler.PullBlockTransTask;
-import com.webank.webase.node.mgr.config.scheduler.ResetGroupListTask;
-import com.webank.webase.node.mgr.config.scheduler.TransMonitorTask;
+import com.webank.webase.node.mgr.scheduler.PullBlockTransTask;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
+import com.webank.webase.node.mgr.scheduler.TransMonitorTask;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
