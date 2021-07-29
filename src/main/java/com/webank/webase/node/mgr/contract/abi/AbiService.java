@@ -40,6 +40,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +57,7 @@ public class AbiService {
     @Autowired
     MethodService methodService;
     @Autowired
+    @Lazy
     MonitorService monitorService;
 
     public List<AbiInfo> getListByGroupId(ReqAbiListParam param) {

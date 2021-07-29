@@ -92,6 +92,7 @@ public class MonitorService {
     @Autowired
     private CryptoSuite cryptoSuite;
     @Autowired
+    @Lazy
     private AbiService abiService;
 
 
