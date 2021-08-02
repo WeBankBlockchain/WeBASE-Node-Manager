@@ -246,7 +246,7 @@ public class AbiService {
         return countOfAbi(param);
     }
 
-    public void saveAbiFromContractId(int contractId, String contractAddress) {
+    public void saveAbiFromContractId(int contractId, String contractAddress) throws NodeMgrException {
         log.info("saveAbiFromContractId contractId:{},contractAddress:{}", contractId, contractAddress);
         TbContract tbContract = contractService.queryByContractId(contractId);
 
