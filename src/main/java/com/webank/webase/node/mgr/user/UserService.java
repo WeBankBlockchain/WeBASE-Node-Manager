@@ -33,6 +33,7 @@ import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
 import com.webank.webase.node.mgr.user.entity.ReqImportPem;
+import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
@@ -149,6 +150,7 @@ public class UserService {
             }
             // import key pair
             Map<String, Object> param = new HashMap<>();
+            // default external user type in front
             param.put("signUserId", signUserId);
             param.put("appId", appId);
             // already encoded privateKey
@@ -419,12 +421,56 @@ public class UserService {
     }
 
     /**
+     * bind public key user's private key
+     * @privateKeyEncoded raw private key encoded in base64
+     */
+    public KeyPair updateUser(ReqImportPrivateKey bindPrivateKey) throws NodeMgrException {
+        Integer groupId = bindPrivateKey.getGroupId();
+        String privateKeyEncoded = bindPrivateKey.getPrivateKey();
+        int userId = bindPrivateKey.getUserId();
+        // check user
+        TbUser tbUser = queryByUserId(userId);
+        if (Objects.isNull(tbUser)) {
+            log.error("updateUser userId invalid:{}", userId);
+        }
+        // add user by webase-front->webase-sign
+        String signUserId = UUID.randomUUID().toString().replaceAll("-", "");
+        // group id as appId
+        String appId = groupId.toString();
+
+        // import key pair
+        Map<String, Object> param = new HashMap<>();
+        // default external user type in front
+        param.put("signUserId", signUserId);
+        param.put("appId", appId);
+        // already encoded privateKey
+        param.put("privateKey", privateKeyEncoded);
+        KeyPair keyPair = frontRestTools.postForEntity(groupId,
+            FrontRestTools.URI_KEY_PAIR_IMPORT_WITH_SIGN, param, KeyPair.class);
+        log.info("updateUser bind private key response of keyPair:{}", keyPair);
+        tbUser.setHasPk(HasPk.HAS.getValue());
+        tbUser.setSignUserId(signUserId);
+        tbUser.setAppId(appId);
+        try {
+            Integer affectRow = userMapper.updateUser(tbUser);
+            if (affectRow == 0) {
+                log.warn("affect 0 rows of tb_user");
+                throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+            }
+        } catch (RuntimeException ex) {
+            log.error("fail updateUser's private key userId:{}, error:{}", userId, ex);
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+        return keyPair;
+    }
+
+    /**
      * update user info.
      */
     public void updateUser(TbUser user) throws NodeMgrException {
-        log.debug("start updateUser user", JsonTools.toJSONString(user));
-        Integer userId = Optional.ofNullable(user).map(u -> u.getUserId()).orElse(null);
-        String description = Optional.ofNullable(user).map(u -> u.getDescription()).orElse(null);
+        log.debug("start updateUser user:{}", JsonTools.toJSONString(user));
+        Integer userId = Optional.ofNullable(user).map(TbUser::getUserId).orElse(null);
+        String description = Optional.ofNullable(user).map(TbUser::getDescription).orElse(null);
         if (userId == null) {
             log.warn("fail updateUser. user id is null");
             throw new NodeMgrException(ConstantCode.USER_ID_NULL);
@@ -533,14 +579,17 @@ public class UserService {
      * get pem file exported from sign from front api
      * @return ResponseEntity<InputStreamResource>
      */
-    public FileContentHandle exportPemFromSign(int groupId, String signUserId, String account,Integer roleId) {
-        log.debug("start getExportPemFromSign signUserId:{}", signUserId);
-        TbUser user = queryUser(groupId,null,null,null,account);
-        if(roleId == RoleType.DEVELOPER.getValue()){
-            if(user.getSignUserId() != signUserId){
-                throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_EXISTS);
-            }
+    public FileContentHandle exportPemFromSign(int groupId, String signUserId, String account, Integer roleId) {
+        log.debug("start getExportPemFromSign signUserId:{}, account:{}", signUserId, account);
+        TbUser user = userMapper.getBySignUserId(signUserId);
+        if (user == null) {
+            throw new NodeMgrException(ConstantCode.USER_SIGN_USER_ID_NOT_EXIST);
         }
+        // if developer and user not belong to this user(this developer), error
+        if (roleId.equals(RoleType.DEVELOPER.getValue()) && !account.equals(user.getAccount())) {
+            throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_EXISTS);
+        }
+        // get private key from sign
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
         String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
         keyPair.setPrivateKey(decodedPrivateKey);
@@ -562,7 +611,8 @@ public class UserService {
      * @param p12PasswordEncoded password of p12 key in base64 format
      * @return ResponseEntity<InputStreamResource>
      */
-    public FileContentHandle exportP12FromSign(int groupId, String signUserId, String p12PasswordEncoded) {
+    public FileContentHandle exportP12FromSign(int groupId, String signUserId, String p12PasswordEncoded,
+        String account, Integer roleId) {
         log.debug("start getExportP12FromSign signUserId:{}", signUserId);
         // decode p12 password
         String p12Password;
@@ -572,7 +622,16 @@ public class UserService {
             log.error("decode password error:[]", e);
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_ERROR);
         }
-
+        // check user signUserId and account
+        TbUser user = userMapper.getBySignUserId(signUserId);
+        if (user == null) {
+            throw new NodeMgrException(ConstantCode.USER_SIGN_USER_ID_NOT_EXIST);
+        }
+        // if developer and user not belong to this user(this developer), error
+        if (roleId.equals(RoleType.DEVELOPER.getValue()) && !account.equals(user.getAccount())) {
+            throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_EXISTS);
+        }
+        // get private key from sign
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
         String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
         keyPair.setPrivateKey(decodedPrivateKey);

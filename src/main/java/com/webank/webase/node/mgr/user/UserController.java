@@ -29,6 +29,7 @@ import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.tools.PemUtils;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
+import com.webank.webase.node.mgr.user.entity.KeyPair;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
 import com.webank.webase.node.mgr.user.entity.ReqExport;
 import com.webank.webase.node.mgr.user.entity.ReqImportPem;
@@ -78,7 +79,8 @@ public class UserController extends BaseController {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-
+        log.info("start addUserInfo startTime:{},currentAccount:{},NewUserInputParam:{}",
+            startTime.toEpochMilli(), currentAccountInfo, user);
         // add user row
         TbUser userRow = userService.addUserInfoLocal(user.getGroupId(), user.getUserName(),
                 currentAccountInfo.getAccount(), user.getDescription(), user.getUserType(), null);
@@ -100,7 +102,8 @@ public class UserController extends BaseController {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-
+        log.info("start bindUserInfo startTime:{},currentAccount:{},BindUserInputParam:{}",
+            startTime.toEpochMilli(), currentAccountInfo, user);
         // query user row
         TbUser userRow = userService.bindUserInfo(user, currentAccountInfo.getAccount(), CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
@@ -112,7 +115,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * update user info.
+     * update user info of description
      */
     @PutMapping(value = "/userInfo")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
@@ -148,8 +151,8 @@ public class UserController extends BaseController {
             throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start userList startTime:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
-                startTime.toEpochMilli(), groupId, pageNumber, pageSize, commParam);
+        log.info("start userList startTime:{},currentAccountInfo:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
+                startTime.toEpochMilli(), currentAccountInfo, groupId, pageNumber, pageSize, commParam);
 
         String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
                 ? currentAccountInfo.getAccount() : null;
@@ -184,7 +187,8 @@ public class UserController extends BaseController {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-
+        log.info("start importPrivateKey startTime:{},currentAccount:{},reqImport:{}",
+            startTime.toEpochMilli(), currentAccountInfo, reqImport);
         // encoded by web in base64
         String privateKeyEncoded = reqImport.getPrivateKey();
         // add user row
@@ -206,7 +210,8 @@ public class UserController extends BaseController {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-
+        log.info("start importPemPrivateKey startTime:{},currentAccount:{}",
+            startTime.toEpochMilli(), currentAccountInfo);
         String pemContent = reqImportPem.getPemContent();
         if (!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
@@ -231,7 +236,8 @@ public class UserController extends BaseController {
             @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-
+        log.info("start importP12PrivateKey startTime:{},currentAccount:{}",
+            startTime.toEpochMilli(), currentAccountInfo);
         if (!NodeMgrTools.notContainsChinese(p12Password)) {
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
@@ -251,15 +257,15 @@ public class UserController extends BaseController {
     @PostMapping(value = "/exportPem")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param,
-                                                                     @CurrentAccount CurrentAccountInfo currentAccount)
-        throws NodeMgrException {
+        @CurrentAccount CurrentAccountInfo currentAccount) throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start exportPemUserFromSign startTime:{} param:{}", startTime.toEpochMilli(), param);
+        log.info("start exportPemUserFromSign startTime:{} param:{},currentAccount:{}",
+            startTime.toEpochMilli(), param, currentAccount);
         Integer groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
         String account = currentAccount.getAccount();
         Integer roleId = currentAccount.getRoleId();
-        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId,account,roleId);
+        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId, account, roleId);
 
         log.info("end exportPemUserFromSign useTime:{} fileContentHandle:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
@@ -269,18 +275,23 @@ public class UserController extends BaseController {
     }
 
     @PostMapping(value = "/exportP12")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param)
-        throws NodeMgrException {
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param,
+        @CurrentAccount CurrentAccountInfo currentAccount) throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("start exportP12UserFromSign startTime:{} param:{}", startTime.toEpochMilli(), param);
+        log.info("start exportP12UserFromSign startTime:{} param:{},currentAccount:{}",
+            startTime.toEpochMilli(), param, currentAccount);
         Integer groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
         String p12PasswordEncoded = param.getP12Password();
         if (!NodeMgrTools.notContainsChinese(p12PasswordEncoded)) {
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
-        FileContentHandle fileContentHandle = userService.exportP12FromSign(groupId, signUserId, p12PasswordEncoded);
+        // account info
+        String account = currentAccount.getAccount();
+        Integer roleId = currentAccount.getRoleId();
+        FileContentHandle fileContentHandle = userService.exportP12FromSign(groupId, signUserId,
+            p12PasswordEncoded, account, roleId);
 
         log.info("end exportP12UserFromSign useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
@@ -290,6 +301,12 @@ public class UserController extends BaseController {
     }
 
 
+    /**
+     * not check account, cuz this is used for app integration
+     * @param userId
+     * @return
+     * @throws NodeMgrException
+     */
     @PostMapping(value = "/export/{userId}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse exportRawUserFromSign(@PathVariable("userId") Integer userId)
@@ -303,4 +320,26 @@ public class UserController extends BaseController {
             tbUser);
         return new BaseResponse(ConstantCode.SUCCESS, tbUser);
     }
+
+    @PostMapping("/bind/privateKey")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse bindPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport,
+        @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start exportP12UserFromSign startTime:{} userId:{},currentAccount:{}",
+            startTime.toEpochMilli(), reqImport.getUserId(), currentAccountInfo);
+
+        reqImport.setAccount(currentAccountInfo.getAccount());
+        // add user row
+        KeyPair keyPair = userService.updateUser(reqImport);
+        baseResponse.setData(keyPair);
+
+        log.info("end importPrivateKey useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
 }
