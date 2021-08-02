@@ -20,6 +20,10 @@ import org.apache.ibatis.type.JdbcType;
 public interface TbExternalContractMapper {
 
 
+    @Select({"select ", TbExternalContractSqlProvider.ALL_COLUMN_FIELDS, "from tb_external_contract",
+    "where group_id = #{groupId} and contract_address = #{contractAddress}"})
+    TbExternalContract getByGroupIdAndAddress(@Param("groupId") int groupId, @Param("contractAddress") String contractAddress);
+
     @SelectProvider(value = TbExternalContractSqlProvider.class, method = "listJoin")
     List<RspAllExtContract> listContractJoinTbAbi(ContractParam param);
 

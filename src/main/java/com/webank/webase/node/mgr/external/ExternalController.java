@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -211,4 +212,19 @@ public class ExternalController extends BaseController {
         return pageResponse;
     }
 
+    /**
+     * get deploy address
+     */
+    @GetMapping("deployAddress/{groupId}/{contractAddress}")
+    public BaseResponse queryDeployAddress(@PathVariable("groupId") Integer groupId,
+        @PathVariable("contractAddress") String contractAddress) {
+        Instant startTime = Instant.now();
+        log.info("start queryDeployAddress. startTime:{} groupId:{},contractAddress:{}",
+            startTime.toEpochMilli(), groupId, contractAddress);
+        TbExternalContract externalContract = extContractService.getByAddress(groupId, contractAddress);
+        String deployAddress = externalContract.getDeployAddress();
+        log.info("end queryDeployAddress. useTime:{} deployAddress:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), deployAddress);
+        return new BaseResponse(ConstantCode.SUCCESS, deployAddress);
+    }
 }

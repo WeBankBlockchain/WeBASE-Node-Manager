@@ -35,6 +35,7 @@ import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
@@ -175,4 +176,10 @@ public class ExtContractService {
         return contractList;
     }
 
+    public TbExternalContract getByAddress(int groupId, String contractAddress) {
+        log.debug("getByAddress groupId:{}, contractAddress:{}", groupId, contractAddress);
+        TbExternalContract externalContract = extContractMapper.getByGroupIdAndAddress(groupId, contractAddress);
+        log.debug("getByAddress externalContract:{}", externalContract);
+        return externalContract;
+    }
 }
