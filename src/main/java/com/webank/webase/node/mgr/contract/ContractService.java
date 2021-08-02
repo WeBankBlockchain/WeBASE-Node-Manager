@@ -244,8 +244,12 @@ public class  ContractService {
             log.info("updateContract contract address:{} and deployed status", address);
             tbContract.setContractAddress(address);
             tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-            // deploy success, old contract save in tb_abi
-            abiService.saveAbiFromContractId(contract.getContractId(), address);
+            // contract already deploy, try to save in tb_abi
+            try {
+                abiService.saveAbiFromContractId(contract.getContractId(), address);
+            } catch (NodeMgrException e) {
+                log.warn("updateContract new address, already save abi of this contract");
+            }
         }
         contractMapper.update(tbContract);
         return tbContract;
