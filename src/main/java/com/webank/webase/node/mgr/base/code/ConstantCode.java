@@ -320,6 +320,12 @@ public class ConstantCode {
     public static final RetCode PARAM_INVALID_LETTER_DIGIT = RetCode.mark(202533, "Only support letter and digit, please check your params");
     public static final RetCode CONTRACT_PATH_NOT_EXISTS = RetCode.mark(202534, "contract path not exists.");
 
+    // v1.5.2
+    public static final RetCode PRIVATE_KEY_NOT_BELONG_TO = RetCode.mark(202540,"It is not your private key");
+    // v1.5.3
+    public static final RetCode DEVELOPER_CANNOT_MODIFY_OTHER_ACCOUNT = RetCode.mark(202541,"Developer account cannot modify data of other account");
+
+
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
     public static final RetCode ACCESS_DENIED = RetCode.mark(302001, "access denied");
@@ -327,5 +333,4 @@ public class ConstantCode {
     /* param exception */
     public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
 
-    public static final RetCode PRIVATE_KEY_NOT_EXISTS  = RetCode.mark(202513,"It is not your private key");
 }

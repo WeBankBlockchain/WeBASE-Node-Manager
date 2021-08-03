@@ -331,9 +331,8 @@ public class UserController extends BaseController {
         log.info("start exportP12UserFromSign startTime:{} userId:{},currentAccount:{}",
             startTime.toEpochMilli(), reqImport.getUserId(), currentAccountInfo);
 
-        reqImport.setAccount(currentAccountInfo.getAccount());
         // add user row
-        KeyPair keyPair = userService.updateUser(reqImport);
+        KeyPair keyPair = userService.updateUser(reqImport, currentAccountInfo.getAccount(), currentAccountInfo.getRoleId());
         baseResponse.setData(keyPair);
 
         log.info("end importPrivateKey useTime:{} result:{}",

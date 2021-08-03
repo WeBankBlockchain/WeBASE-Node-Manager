@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.user;
 
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
+import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.CheckUserExist;
 import com.webank.webase.node.mgr.base.enums.HasPk;
@@ -424,7 +425,8 @@ public class UserService {
      * bind public key user's private key
      * @privateKeyEncoded raw private key encoded in base64
      */
-    public KeyPair updateUser(ReqImportPrivateKey bindPrivateKey) throws NodeMgrException {
+    public KeyPair updateUser(ReqImportPrivateKey bindPrivateKey, String account, Integer roleId)
+        throws NodeMgrException {
         Integer groupId = bindPrivateKey.getGroupId();
         String privateKeyEncoded = bindPrivateKey.getPrivateKey();
         int userId = bindPrivateKey.getUserId();
@@ -432,6 +434,13 @@ public class UserService {
         TbUser tbUser = queryByUserId(userId);
         if (Objects.isNull(tbUser)) {
             log.error("updateUser userId invalid:{}", userId);
+            throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
+        }
+        // if developer and user not belong to this user(this developer), error
+        if (RoleType.DEVELOPER.getValue().equals(roleId)
+            && !tbUser.getAccount().equals(account)) {
+            log.error("developer cannot bind private key of other account [account:{}]", account);
+            throw new NodeMgrException(ConstantCode.DEVELOPER_CANNOT_MODIFY_OTHER_ACCOUNT);
         }
         // add user by webase-front->webase-sign
         String signUserId = UUID.randomUUID().toString().replaceAll("-", "");
@@ -587,7 +596,7 @@ public class UserService {
         }
         // if developer and user not belong to this user(this developer), error
         if (roleId.equals(RoleType.DEVELOPER.getValue()) && !account.equals(user.getAccount())) {
-            throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_EXISTS);
+            throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_BELONG_TO);
         }
         // get private key from sign
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
@@ -629,7 +638,7 @@ public class UserService {
         }
         // if developer and user not belong to this user(this developer), error
         if (roleId.equals(RoleType.DEVELOPER.getValue()) && !account.equals(user.getAccount())) {
-            throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_EXISTS);
+            throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_BELONG_TO);
         }
         // get private key from sign
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
