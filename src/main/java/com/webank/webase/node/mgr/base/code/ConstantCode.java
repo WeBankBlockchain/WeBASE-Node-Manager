@@ -33,6 +33,7 @@ public class ConstantCode {
     public static final RetCode SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL = RetCode.mark(102001, "system exception: please check front");
     public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(102002, "No group belongs to this groupId(node not belongs to this group)");
     public static final RetCode WEBASE_VERSION_NOT_MATCH_FISCO_SUPPORT_VERSION = RetCode.mark(102003, "When webase is v1.3.2 above(inclusive), fisco-bcos node must be v2.4.1 above(inclusive)!");
+    public static final RetCode CREATE_CHECK_CODE_FAIL = RetCode.mark(102004, "Create check code fail, please check the log of WeBASE-Node-Manager for details");
 
     /**
      * Business exception.

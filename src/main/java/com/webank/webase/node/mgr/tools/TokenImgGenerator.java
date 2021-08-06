@@ -159,9 +159,9 @@ public class TokenImgGenerator {
             bs = new ByteArrayOutputStream();
             ImageIO.write(bufferedimage, "png", bs);//将绘制得图片输出到流
             return Base64.getEncoder().encodeToString(bs.toByteArray());
-        } catch (Exception e) {
-            log.error("fail createPic.", e);
-            return null;
+        } catch (IOException e) {
+            log.error("fail getBase64Image.", e);
+            throw e;
         } finally {
             if (bs != null) {
                 bs.close();

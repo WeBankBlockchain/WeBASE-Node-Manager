@@ -60,8 +60,7 @@ public class BlockController {
         log.info(
             "start queryBlockList startTime:{} groupId:{} pageNumber:{} pageSize:{} "
                 + "pkHash:{} blockNumber:{}",
-            startTime.toEpochMilli(), groupId,
-            pageNumber, pageSize, pkHash, blockNumber);
+            startTime.toEpochMilli(), groupId, pageNumber, pageSize, pkHash, blockNumber);
         int count;
         // if query all block's count
         if(StringUtils.isEmpty(pkHash) && blockNumber == null) {

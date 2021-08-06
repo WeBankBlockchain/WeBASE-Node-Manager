@@ -211,6 +211,9 @@ public class ContractController extends BaseController {
     public BaseResponse sendTransaction(@RequestBody @Valid TransactionInputParam param,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(param));
         // 0x0000000000000000000000000000000000000000 address is invalid
         if (Address.DEFAULT.toString().equals(param.getContractAddress())) {
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
@@ -224,9 +227,7 @@ public class ContractController extends BaseController {
                 throw new NodeMgrException(ConstantCode.CNS_NAME_CANNOT_EMPTY);
             }
         }
-        Instant startTime = Instant.now();
-        log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
-                JsonTools.toJSONString(param));
+
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Object transRsp = contractService.sendTransaction(param);
         baseResponse.setData(transRsp);
@@ -246,7 +247,7 @@ public class ContractController extends BaseController {
             BindingResult result) {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("start getByPartOfByecodebin startTime:{} groupId:{} queryParam:{}",
+        log.info("start getByPartOfByecodebin startTime:{} queryParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(queryParam));
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         ContractParam param = new ContractParam();

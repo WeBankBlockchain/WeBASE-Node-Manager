@@ -328,14 +328,14 @@ public class UserController extends BaseController {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start exportP12UserFromSign startTime:{} userId:{},currentAccount:{}",
+        log.info("start bindPrivateKey startTime:{} userId:{},currentAccount:{}",
             startTime.toEpochMilli(), reqImport.getUserId(), currentAccountInfo);
 
         // add user row
         KeyPair keyPair = userService.updateUser(reqImport, currentAccountInfo.getAccount(), currentAccountInfo.getRoleId());
         baseResponse.setData(keyPair);
 
-        log.info("end importPrivateKey useTime:{} result:{}",
+        log.info("end bindPrivateKey useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
             JsonTools.toJSONString(baseResponse));
         return baseResponse;
