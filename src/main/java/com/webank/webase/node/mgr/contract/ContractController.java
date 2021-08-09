@@ -474,7 +474,7 @@ public class ContractController extends BaseController {
      * which has private key in webase
      */
     @GetMapping("listManager/{groupId}/{contractAddress}")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse queryContractManagerList(@PathVariable("groupId") Integer groupId,
         @PathVariable("contractAddress") String contractAddress) {
         Instant startTime = Instant.now();
