@@ -20,11 +20,15 @@ import com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContract
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.enums.ContractType;
+import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.external.ExtContractService;
+import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.abi.AbiService;
@@ -40,6 +44,7 @@ import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
 import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
@@ -97,6 +102,8 @@ public class  ContractService {
     private CryptoSuite cryptoSuite;
     @Autowired
     private GroupService groupService;
+    @Autowired
+    private ExtContractService extContractService;
 
     /**
      * add new contract data.
@@ -750,4 +757,48 @@ public class  ContractService {
         });
     }
 
+    /**
+     * get contract manager, including user who deploy this contract
+     * and admin user which has private key in webase
+     * @tip if deploy user or admin user not has private key, exclude it
+     * @tip final list is empty, return not contain contract manager error
+     * @param groupId
+     * @param contractAddress
+     * @return List<String>
+     */
+    public List<String> getContractManager(int groupId, String contractAddress) {
+        log.info("start getContractManager groupId:{},contractAddress:{}", groupId, contractAddress);
+        List<String> resultUserList = new ArrayList<>();
+        // get deployAddress from external service
+        TbExternalContract extContract = extContractService.getByAddress(groupId, contractAddress);
+        String deployAddress = extContract.getDeployAddress();
+        // check if address has private key
+        if (userService.checkUserHasPk(groupId, deployAddress)) {
+            resultUserList.add(deployAddress);
+        }
+        // get from permission list or chain governance
+        List<PermissionInfo> deployUserList = new ArrayList<>();
+        BasePageResponse response = permissionManageService.listPermissionFull(groupId,
+            PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
+        if (response.getCode() != 0) {
+            log.error("checkDeployPermission get permission list error");
+        } else {
+            List listData = (List) response.getData();
+            deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
+        }
+        if (deployUserList != null && !deployUserList.isEmpty()) {
+            for (PermissionInfo info : deployUserList) {
+                String adminAddress = info.getAddress();
+                if (userService.checkUserHasPk(groupId, adminAddress)) {
+                    resultUserList.add(deployAddress);
+                }
+            }
+        }
+        //  check resultUserList if empty
+        if (resultUserList.isEmpty()) {
+            log.warn("getContractManager has no private key of contractAddress:{}", contractAddress);
+            throw  new NodeMgrException(ConstantCode.NO_PRIVATE_KEY_OF_CONTRACT_MANAGER.attach(contractAddress));
+        }
+        return resultUserList;
+    }
 }

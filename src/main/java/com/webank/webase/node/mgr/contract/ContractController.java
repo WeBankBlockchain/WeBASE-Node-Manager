@@ -23,6 +23,7 @@ import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
@@ -464,5 +465,24 @@ public class ContractController extends BaseController {
         log.info("end copyContracts. useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS, req.getContractItems().size());
+    }
+
+
+
+    /**
+     * get deploy address or permission admin user address list
+     * which has private key in webase
+     */
+    @GetMapping("listManager/{groupId}/{contractAddress}")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse queryContractManagerList(@PathVariable("groupId") Integer groupId,
+        @PathVariable("contractAddress") String contractAddress) {
+        Instant startTime = Instant.now();
+        log.info("start queryDeployAddress. startTime:{} groupId:{},contractAddress:{}",
+            startTime.toEpochMilli(), groupId, contractAddress);
+        List<String> managerList = contractService.getContractManager(groupId, contractAddress);
+        log.info("end queryDeployAddress. useTime:{} managerList:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), managerList);
+        return new BaseResponse(ConstantCode.SUCCESS, managerList);
     }
 }

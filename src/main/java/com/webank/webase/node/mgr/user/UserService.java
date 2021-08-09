@@ -388,6 +388,10 @@ public class UserService {
         return queryUser(userId, null, null, null, null);
     }
 
+    public TbUser queryByUserAddress(int groupId, String address) throws NodeMgrException {
+        return queryUser(null, groupId, null, address, null);
+    }
+
     /**
      * query by group id and address.
      */
@@ -660,5 +664,10 @@ public class UserService {
         String hexPrivateKey = new String(Base64.getDecoder().decode(privateKeyEncoded.getBytes()));
         CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(hexPrivateKey);
         return cryptoKeyPair.getAddress();
+    }
+
+    public Boolean checkUserHasPk(int groupId, String userAddress) {
+        TbUser user = this.queryByUserAddress(groupId, userAddress);
+        return HasPk.HAS.getValue() == user.getHasPk();
     }
 }
