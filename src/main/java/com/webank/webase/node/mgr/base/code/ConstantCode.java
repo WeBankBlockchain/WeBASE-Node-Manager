@@ -325,6 +325,7 @@ public class ConstantCode {
     public static final RetCode PRIVATE_KEY_NOT_BELONG_TO = RetCode.mark(202540,"It is not your private key");
     // v1.5.3
     public static final RetCode DEVELOPER_CANNOT_MODIFY_OTHER_ACCOUNT = RetCode.mark(202541,"Developer account cannot modify data of other account");
+    public static final RetCode NO_PRIVATE_KEY_OF_CONTRACT_MANAGER = RetCode.mark(202542,"No private key of contract manager address in webase");
 
 
     /* auth */
