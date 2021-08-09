@@ -197,5 +197,17 @@ public class ContractControllerTest extends TestBase {
             .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
     }
 
+    @Test
+    public void testQueryManager() throws Exception {
+        String contractAddress = "0x0";
+        ResultActions resultActions = mockMvc
+            .perform(MockMvcRequestBuilders.get("/listManager/" + groupId + "/" + contractAddress));
+        resultActions.
+//            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+
+            resultActions.andReturn().getResponse().getContentAsString());
+
+    }
 
 }
