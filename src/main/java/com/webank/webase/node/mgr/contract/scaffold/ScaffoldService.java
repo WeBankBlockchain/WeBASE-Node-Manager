@@ -102,12 +102,18 @@ public class ScaffoldService {
         // get front's p2p ip and channel port
         FrontNodeConfig frontNodeConfig = frontInterfaceService
             .getNodeConfigFromSpecificFront(front.getFrontIp(), front.getFrontPort());
-        if (frontNodeConfig.getChannelPort() == null) {
+        // set ip
+        frontNodeConfig.setP2pip(reqProject.getChannelIp());
+        // set port, if param not null, set as param's port
+        // if param null, response from front not null, set as response's port
+        // else all null, set as 20200 default value
+        if (reqProject.getChannelPort() != null) {
+            frontNodeConfig.setChannelPort(reqProject.getChannelPort());
+        } else if (frontNodeConfig.getChannelPort() == null) {
             log.warn("getNodeConfig channelPort return null of {},"
                 + " for front's nodePath not configured! frontId:{}", frontNodeConfig, front.getFrontId());
             frontNodeConfig.setChannelPort(20200);
         }
-        frontNodeConfig.setP2pip(reqProject.getChannelIp());
         log.info("exportProject get frontNodeConfig:{}", frontNodeConfig);
         // get front's sdk key cert
         Map<String, String> sdkMap = certService.getFrontSdkContent(front.getFrontId());
