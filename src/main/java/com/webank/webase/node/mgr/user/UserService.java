@@ -428,10 +428,32 @@ public class UserService {
     }
 
     /**
+     * bind by pem
+     */
+    public TbUser updateUserByPem(int groupId, int userId, String pemContent,
+        CurrentAccountInfo currentAccountInfo) {
+        PEMKeyStore pemManager = new PEMKeyStore(new ByteArrayInputStream(pemContent.getBytes()));
+        String privateKey = KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate());
+        // pem's privateKey encoded here
+        String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
+        return this.updateUser(new ReqBindPrivateKey(groupId, userId, privateKeyEncoded), currentAccountInfo);
+    }
+
+    /**
+     * bind by p12
+     */
+    public TbUser updateUserByP12(int groupId, int userId, MultipartFile p12File, String p12PwdEncoded,
+        CurrentAccountInfo currentAccountInfo) {
+        String privateKey = this.getP12RawPrivateKey(p12File, p12PwdEncoded);
+        // pem's privateKey encoded here
+        String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
+        return this.updateUser(new ReqBindPrivateKey(groupId, userId, privateKeyEncoded), currentAccountInfo);
+    }
+    /**
      * bind public key user's private key
      * @privateKeyEncoded raw private key encoded in base64
      */
-    public TbUser updateUser(ReqBindPrivateKey bindPrivateKey, String account, Integer roleId)
+    public TbUser updateUser(ReqBindPrivateKey bindPrivateKey, CurrentAccountInfo currentAccountInfo)
         throws NodeMgrException {
         Integer groupId = bindPrivateKey.getGroupId();
         String privateKeyEncoded = bindPrivateKey.getPrivateKey();
@@ -443,9 +465,9 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
         }
         // if developer and user not belong to this user(this developer), error
-        if (RoleType.DEVELOPER.getValue().equals(roleId)
-            && !tbUser.getAccount().equals(account)) {
-            log.error("developer cannot bind private key of other account [account:{}]", account);
+        if (RoleType.DEVELOPER.getValue().equals(currentAccountInfo.getRoleId())
+            && !tbUser.getAccount().equals(currentAccountInfo.getAccount())) {
+            log.error("developer cannot bind private key of other account [currentAccountInfo:{}]", currentAccountInfo);
             throw new NodeMgrException(ConstantCode.DEVELOPER_CANNOT_MODIFY_OTHER_ACCOUNT);
         }
         // check already contain private key
@@ -567,6 +589,21 @@ public class UserService {
     @Transactional
     public TbUser importKeyStoreFromP12(MultipartFile p12File, String p12PasswordEncoded, Integer groupId,
             String userName, String account, String description, boolean isCheckExist) {
+        String privateKey = this.getP12RawPrivateKey(p12File, p12PasswordEncoded);
+
+        // pem's privateKey encoded here
+        String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
+
+        // store local and save in sign
+        TbUser tbUser = addUserInfo(groupId, userName, account, description,
+                UserType.GENERALUSER.getValue(), privateKeyEncoded, 
+                ReturnPrivateKey.FALSE.getValue(), isCheckExist);
+
+        return tbUser;
+    }
+
+    private String getP12RawPrivateKey(MultipartFile p12File, String p12PasswordEncoded)
+        throws NodeMgrException {
         // decode p12 password
         String p12Password;
         try{
@@ -590,16 +627,7 @@ public class UserService {
             }
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
-
-        // pem's privateKey encoded here
-        String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
-
-        // store local and save in sign
-        TbUser tbUser = addUserInfo(groupId, userName, account, description,
-                UserType.GENERALUSER.getValue(), privateKeyEncoded, 
-                ReturnPrivateKey.FALSE.getValue(), isCheckExist);
-
-        return tbUser;
+        return privateKey;
     }
 
     /**

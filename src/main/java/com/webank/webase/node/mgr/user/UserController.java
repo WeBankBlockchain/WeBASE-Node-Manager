@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
@@ -332,9 +333,11 @@ public class UserController extends BaseController {
         log.info("start bindPrivateKey startTime:{} userId:{},currentAccount:{}",
             startTime.toEpochMilli(), reqBind.getUserId(), currentAccountInfo);
 
+        if (StringUtils.isBlank(reqBind.getPrivateKey())) {
+            throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
+        }
         // add user row
-        TbUser tbUser = userService.updateUser(reqBind,
-            currentAccountInfo.getAccount(), currentAccountInfo.getRoleId());
+        TbUser tbUser = userService.updateUser(reqBind, currentAccountInfo);
         baseResponse.setData(tbUser);
 
         log.info("end bindPrivateKey useTime:{} result:{}",
@@ -343,4 +346,58 @@ public class UserController extends BaseController {
         return baseResponse;
     }
 
+    @PostMapping("/bind/privateKey/pem")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse bindPrivateKeyByPem(@Valid @RequestBody ReqBindPrivateKey reqBindPem,
+        @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start bindPrivateKeyByPem startTime:{} userId:{},currentAccount:{}",
+            startTime.toEpochMilli(), reqBindPem.getUserId(), currentAccountInfo);
+        String pemContent = reqBindPem.getPemContent();
+        if (StringUtils.isBlank(pemContent)) {
+            throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
+        }
+        if (!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
+            throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
+        }
+        // add user row
+        TbUser tbUser = userService.updateUserByPem(reqBindPem.getGroupId(), reqBindPem.getUserId(),
+            pemContent, currentAccountInfo);
+        baseResponse.setData(tbUser);
+
+        log.info("end bindPrivateKey useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    @PostMapping("/bind/privateKey/p12")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse bindPrivateKeyByP12(@RequestParam MultipartFile p12File,
+        @RequestParam(required = false, defaultValue = "") String p12Password,
+        @RequestParam Integer groupId,
+        @RequestParam Integer userId,
+        @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start bindPrivateKeyByP12 startTime:{},currentAccount:{}",
+            startTime.toEpochMilli(), currentAccountInfo);
+        if (!NodeMgrTools.notContainsChinese(p12Password)) {
+            throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
+        }
+        if (p12File.getSize() == 0) {
+            throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
+        }
+        // add user row
+        TbUser tbUser = userService.updateUserByP12(groupId, userId, p12File, p12Password,
+            currentAccountInfo);
+        baseResponse.setData(tbUser);
+
+        log.info("end bindPrivateKey useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
 }

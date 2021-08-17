@@ -14,7 +14,6 @@
 
 package com.webank.webase.node.mgr.user.entity;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,11 +26,28 @@ public class ReqBindPrivateKey {
     /**
      * encoded in base64
      */
-    @NotBlank
     private String privateKey;
     /**
      * used to bind private key
      */
     @NotNull
     private Integer userId;
+
+    /**
+     * used for pem import
+     */
+    private String pemContent;
+
+    /**
+     * init constructor
+     * @param groupId
+     * @param userId
+     * @param privateKeyEncoded base64
+     */
+    public ReqBindPrivateKey(int groupId, int userId, String privateKeyEncoded) {
+        this.groupId = groupId;
+        this.userId = userId;
+        this.privateKey = privateKeyEncoded;
+    }
+
 }
