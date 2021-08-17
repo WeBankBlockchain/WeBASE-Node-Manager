@@ -621,9 +621,11 @@ public class  ContractService {
         param.setAddress(address);
         param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
         param.setContractBin(contract.getContractBin());
-
-        frontInterface.sendAbi(groupId, param);
-
+//        try {
+            frontInterface.sendAbi(groupId, param);
+//        } catch (NodeMgrException e) {
+//            log.warn("sendAbi to front error :[]", e);
+//        }
         //save address
         if (StringUtils.isBlank(contract.getContractAddress())) {
             contract.setContractAddress(address);
@@ -681,12 +683,12 @@ public class  ContractService {
         log.debug("start deleteByContractPath ContractPathParam:{}", JsonTools.toJSONString(param));
         // check developer
         if (RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
-                && !contractPathService.checkPathExist(param.getGroupId(), param.getContractPath(),
-                        currentAccountInfo.getAccount())) {
+            && !contractPathService.checkPathExist(param.getGroupId(), param.getContractPath(),
+            currentAccountInfo.getAccount())) {
             log.error("end deleteByContractPath. contract path not exists.");
             throw new NodeMgrException(ConstantCode.CONTRACT_PATH_NOT_EXISTS);
         }
-        
+
         ContractParam listParam = new ContractParam();
         BeanUtils.copyProperties(param, listParam);
         List<TbContract> contractList = contractMapper.listOfContract(listParam);
@@ -700,8 +702,8 @@ public class  ContractService {
             contractList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
         } else {
             Collection<TbContract> unDeployedList = contractList.stream()
-                    .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
-                    .collect(Collectors.toList());
+                .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
+                .collect(Collectors.toList());
             // unDeployed's size == list's size, list is all unDeployed
             if (unDeployedList.size() == contractList.size()) {
                 log.debug("deleteByContractPath delete contract in path");

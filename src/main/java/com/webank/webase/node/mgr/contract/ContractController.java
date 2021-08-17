@@ -165,8 +165,7 @@ public class ContractController extends BaseController {
      * query by contract id.
      */
     @GetMapping(value = "/{contractId}")
-    public BaseResponse queryContract(@PathVariable("contractId") Integer contractId)
-            throws NodeMgrException, Exception {
+    public BaseResponse queryContract(@PathVariable("contractId") Integer contractId) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryContract startTime:{} contractId:{}", startTime.toEpochMilli(),
@@ -340,7 +339,7 @@ public class ContractController extends BaseController {
     }
 
     /**
-     * delete contract by id. only admin batch delete contract
+     * delete contract by path. only admin batch delete contract
      */
     @DeleteMapping(value = "/batch/path")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
