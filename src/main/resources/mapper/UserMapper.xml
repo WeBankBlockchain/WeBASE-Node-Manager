@@ -120,6 +120,15 @@
     <if test="description != null and description != ''">
       ,description = #{description}
     </if>
+    <if test="hasPk != null and hasPk != ''">
+      ,has_pk = #{hasPk}
+    </if>
+    <if test="appId != null and appId != ''">
+      ,app_id = #{appId}
+    </if>
+    <if test="signUserId != null and signUserId != ''">
+      ,sign_user_id = #{signUserId}
+    </if>
     where user_id = #{userId}
   </update>
 

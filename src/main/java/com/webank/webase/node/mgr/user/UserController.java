@@ -31,6 +31,7 @@ import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
+import com.webank.webase.node.mgr.user.entity.ReqBindPrivateKey;
 import com.webank.webase.node.mgr.user.entity.ReqExport;
 import com.webank.webase.node.mgr.user.entity.ReqImportPem;
 import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
@@ -323,17 +324,18 @@ public class UserController extends BaseController {
 
     @PostMapping("/bind/privateKey")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse bindPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport,
+    public BaseResponse bindPrivateKey(@Valid @RequestBody ReqBindPrivateKey reqBind,
         @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindPrivateKey startTime:{} userId:{},currentAccount:{}",
-            startTime.toEpochMilli(), reqImport.getUserId(), currentAccountInfo);
+            startTime.toEpochMilli(), reqBind.getUserId(), currentAccountInfo);
 
         // add user row
-        KeyPair keyPair = userService.updateUser(reqImport, currentAccountInfo.getAccount(), currentAccountInfo.getRoleId());
-        baseResponse.setData(keyPair);
+        TbUser tbUser = userService.updateUser(reqBind,
+            currentAccountInfo.getAccount(), currentAccountInfo.getRoleId());
+        baseResponse.setData(tbUser);
 
         log.info("end bindPrivateKey useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),

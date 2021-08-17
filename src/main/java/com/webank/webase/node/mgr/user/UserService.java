@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.user;
 
+import com.webank.scaffold.util.CommonUtil;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
@@ -33,6 +34,7 @@ import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
+import com.webank.webase.node.mgr.user.entity.ReqBindPrivateKey;
 import com.webank.webase.node.mgr.user.entity.ReqImportPem;
 import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
 import com.webank.webase.node.mgr.user.entity.TbUser;
@@ -429,7 +431,7 @@ public class UserService {
      * bind public key user's private key
      * @privateKeyEncoded raw private key encoded in base64
      */
-    public KeyPair updateUser(ReqImportPrivateKey bindPrivateKey, String account, Integer roleId)
+    public TbUser updateUser(ReqBindPrivateKey bindPrivateKey, String account, Integer roleId)
         throws NodeMgrException {
         Integer groupId = bindPrivateKey.getGroupId();
         String privateKeyEncoded = bindPrivateKey.getPrivateKey();
@@ -446,6 +448,18 @@ public class UserService {
             log.error("developer cannot bind private key of other account [account:{}]", account);
             throw new NodeMgrException(ConstantCode.DEVELOPER_CANNOT_MODIFY_OTHER_ACCOUNT);
         }
+        // check already contain private key
+        if (tbUser.getHasPk() == HasPk.HAS.getValue()) {
+            throw new NodeMgrException(ConstantCode.BIND_PRIVATE_ALREADY_HAS_PK);
+        }
+        // check user address same with private key's address
+        String rawPrivateKey = new String(Base64.getDecoder().decode(privateKeyEncoded));
+        String privateKeyAddress = cryptoSuite.createKeyPair(rawPrivateKey).getAddress();
+        if (!tbUser.getAddress().equals(privateKeyAddress)) {
+            log.error("bind private key address :{} not match user's address!", privateKeyAddress);
+            throw new NodeMgrException(ConstantCode.BIND_PRIVATE_KEY_NOT_MATCH);
+        }
+
         // add user by webase-front->webase-sign
         String signUserId = UUID.randomUUID().toString().replaceAll("-", "");
         // group id as appId
@@ -474,7 +488,7 @@ public class UserService {
             log.error("fail updateUser's private key userId:{}, error:{}", userId, ex);
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
         }
-        return keyPair;
+        return tbUser;
     }
 
     /**

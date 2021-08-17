@@ -326,6 +326,8 @@ public class ConstantCode {
     // v1.5.3
     public static final RetCode DEVELOPER_CANNOT_MODIFY_OTHER_ACCOUNT = RetCode.mark(202541,"Developer account cannot modify data of other account");
     public static final RetCode NO_PRIVATE_KEY_OF_CONTRACT_MANAGER = RetCode.mark(202542,"No private key of contract manager address in webase");
+    public static final RetCode BIND_PRIVATE_KEY_NOT_MATCH = RetCode.mark(202543,"Binding private key not match this user's address");
+    public static final RetCode BIND_PRIVATE_ALREADY_HAS_PK = RetCode.mark(202544,"This user already contain private key");
 
 
     /* auth */
