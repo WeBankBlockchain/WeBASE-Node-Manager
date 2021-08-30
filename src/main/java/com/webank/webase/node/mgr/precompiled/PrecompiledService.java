@@ -138,28 +138,11 @@ public class PrecompiledService {
         consensusHandle.setSignUserId(signUserId);
         TbFront front = this.frontMapper.getByNodeId(nodeId);
         Object frontRsp;
-        // if contain node's front
-        if (front != null) {
-            if (StringUtils.equalsIgnoreCase("sealer", consensusHandle.getNodeType())) {
-                log.info("nodeManageService request specific front [{}] for getStatus of group:{}",
-                    front.getFrontIp(), groupId);
-                BaseResponse response = frontInterfaceService.operateGroup(front.getFrontIp(),
-                    front.getFrontPort(), groupId, GROUP_OPERATE_GET_STATUS);
-                log.info("nodeManageService check group genesis file response:{}", response);
-                if (response != null && response.getCode() == 0) {
-                    if (GROUP_FILE_NOT_EXIST.equalsIgnoreCase((String) response.getData())) {
-                        log.error("nodeManageService not support add node as sealer "
-                            + "without group config files response:{}", response);
-                        throw new NodeMgrException(ConstantCode.GENESIS_CONF_NOT_FOUND);
-                    }
-                }
-            }
-        }
         log.info("nodeManageService now request random available front");
         frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONSENSUS,
             consensusHandle, Object.class);
         // update front group map if remove node from sealer/observer
-        if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null){
+        if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null) {
             log.info("remove node/front:[{}] from group:[{}], change front group map status to [{}]",
                     front.getFrontId(), groupId, GroupStatus.MAINTAINING);
             // update map
