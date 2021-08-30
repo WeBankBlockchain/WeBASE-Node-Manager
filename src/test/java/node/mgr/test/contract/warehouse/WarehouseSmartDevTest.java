@@ -93,15 +93,27 @@ public class WarehouseSmartDevTest {
         + "3) RequestRepository 辅助合约，用于数据和逻辑分离\n"
         + "4) Authentication 辅助合约，用于数据和逻辑分离";
 
+    public final static String TRACE_API_MD = "# 溯源\n"
+        + "\n"
+        + "## 简介\n"
+        + "\n"
+        + "包含创建Traceability溯源类目、创建Goods溯源商品、更新溯源/商品状态、获取溯源/商品信息等\n"
+        + "\n"
+        + "合约：\n"
+        + "1) Goods 溯源商品\n"
+        + "2) Traceability 商品溯源类目\n"
+        + "3) TraceabilityFactory 溯源工厂类\n";
+
     @Test
     public void testGetMdBase64() {
-        System.out.println("HELLO_WORLD:\n" + Base64.getEncoder().encodeToString(HELLO_WORLD.getBytes()));
-        System.out.println("CRUD:\n" + Base64.getEncoder().encodeToString(CRUD.getBytes()));
-        System.out.println("CRUD_TEST:\n" + Base64.getEncoder().encodeToString(CRUD_TEST.getBytes()));
-        System.out.println("KVTABLE_TEST:\n" + Base64.getEncoder().encodeToString(KVTABLE_TEST.getBytes()));
-        System.out.println("CRYPTO:\n" + Base64.getEncoder().encodeToString(CRYPTO.getBytes()));
-        System.out.println("CRYPTO_SHA_TEST:\n" + Base64.getEncoder().encodeToString(CRYPTO_SHA_TEST.getBytes()));
-        System.out.println("EVIDENCE_API:\n" + Base64.getEncoder().encodeToString(EVIDENCE_API.getBytes()));
+//        System.out.println("HELLO_WORLD:\n" + Base64.getEncoder().encodeToString(HELLO_WORLD.getBytes()));
+//        System.out.println("CRUD:\n" + Base64.getEncoder().encodeToString(CRUD.getBytes()));
+//        System.out.println("CRUD_TEST:\n" + Base64.getEncoder().encodeToString(CRUD_TEST.getBytes()));
+//        System.out.println("KVTABLE_TEST:\n" + Base64.getEncoder().encodeToString(KVTABLE_TEST.getBytes()));
+//        System.out.println("CRYPTO:\n" + Base64.getEncoder().encodeToString(CRYPTO.getBytes()));
+//        System.out.println("CRYPTO_SHA_TEST:\n" + Base64.getEncoder().encodeToString(CRYPTO_SHA_TEST.getBytes()));
+//        System.out.println("EVIDENCE_API:\n" + Base64.getEncoder().encodeToString(EVIDENCE_API.getBytes()));
+        System.out.println("TRACE_API_MD:\n" + Base64.getEncoder().encodeToString(TRACE_API_MD.getBytes()));
     }
 
 }
