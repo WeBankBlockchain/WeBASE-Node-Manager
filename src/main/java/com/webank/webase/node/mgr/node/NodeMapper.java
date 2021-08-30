@@ -68,6 +68,12 @@ public interface NodeMapper {
     Integer update(TbNode dbNode);
 
     /**
+     * update node info of node ip, node agency, node city
+     */
+    Integer updateNodeInfo(@Param("nodeId") String nodeId, @Param("nodeIp") String nodeIp,
+        @Param("agency") String agency, @Param("city") String city);
+
+    /**
      * query node info.
      */
     TbNode queryNodeInfo(NodeParam nodeParam);

@@ -39,6 +39,8 @@ public class TbNode {
     private int nodeActive;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    private String city;
+    private String agency;
 
     public static TbNode init(
             String nodeId,

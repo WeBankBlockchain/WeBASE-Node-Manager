@@ -567,4 +567,18 @@ public class NodeService {
 //        return 0;
     }
 
+    /**
+     * update node's info in all group
+     * @param nodeId
+     * @param city
+     * @return
+     */
+    public int updateDescription(String nodeId, String nodeIp, String city, String agency) {
+        log.debug("updateDescription nodeId:{},nodeIp:{},city:{},agency:{}",
+            nodeId, nodeIp, city, agency);
+        int result = this.nodeMapper.updateNodeInfo(nodeId, nodeIp, city, agency);
+        log.debug("updateDescription result:{}", result);
+        return result;
+    }
+
 }
