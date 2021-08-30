@@ -417,7 +417,7 @@ public class  ContractService {
         // params.put("version", version);
         params.put("abiInfo", abiArray);
         params.put("bytecodeBin", inputParam.getBytecodeBin());
-        params.put("funcParam", inputParam.getConstructorParams());
+        params.put("funcParam", inputParam.getConstructorParams() == null ? new ArrayList<>() : inputParam.getConstructorParams());
 
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
@@ -621,11 +621,8 @@ public class  ContractService {
         param.setAddress(address);
         param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
         param.setContractBin(contract.getContractBin());
-//        try {
-            frontInterface.sendAbi(groupId, param);
-//        } catch (NodeMgrException e) {
-//            log.warn("sendAbi to front error :[]", e);
-//        }
+        frontInterface.sendAbi(groupId, param);
+
         //save address
         if (StringUtils.isBlank(contract.getContractAddress())) {
             contract.setContractAddress(address);
