@@ -15,13 +15,11 @@
 package com.webank.webase.node.mgr.configapi;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.config.WebMvcConfig;
+import com.webank.webase.node.mgr.config.WebMvcConfig;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.enums.ConfigTypeEnum;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.properties.VersionProperties;
-import com.webank.webase.node.mgr.base.tools.IPUtil;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.config.properties.VersionProperties;
+import com.webank.webase.node.mgr.tools.IPUtil;
 import com.webank.webase.node.mgr.configapi.entity.ServerInfo;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.service.ConfigService;

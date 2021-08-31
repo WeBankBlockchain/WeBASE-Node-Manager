@@ -16,7 +16,7 @@ package com.webank.webase.node.mgr.method;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
+import com.webank.webase.node.mgr.tools.Web3Tools;
 import com.webank.webase.node.mgr.method.entity.Method;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
@@ -30,7 +30,6 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 @Log4j2
 @Service

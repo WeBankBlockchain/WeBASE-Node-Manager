@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +30,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.TbNode;
 
@@ -130,6 +131,27 @@ public class NodeController {
         baseResponse.setData(res);
 
         log.info("end getNodeIdList useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * update tb_node info of city, agency, ip etc.
+     */
+    @PutMapping("/description/{nodeId}")
+    public BaseResponse updateDesc(@PathVariable("nodeId") String nodeId,
+        @RequestParam(value = "nodeIp", required = false) String nodeIp,
+        @RequestParam(value = "city", required = false) String city,
+        @RequestParam(value = "agency", required = false) String agency) {
+        Instant startTime = Instant.now();
+        log.info("updateDesc startTime:{},nodeId:{},nodeIp:{},city:{},agency:{}",
+            startTime.toEpochMilli(), nodeId, nodeIp, city, agency);
+        int res = nodeService.updateDescription(nodeId, nodeIp, city, agency);
+
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(res);
+
+        log.info("end updateDesc useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }

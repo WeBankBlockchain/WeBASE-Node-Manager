@@ -22,8 +22,9 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.external.entity.TbExternalContract;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
@@ -164,8 +165,7 @@ public class ContractController extends BaseController {
      * query by contract id.
      */
     @GetMapping(value = "/{contractId}")
-    public BaseResponse queryContract(@PathVariable("contractId") Integer contractId)
-            throws NodeMgrException, Exception {
+    public BaseResponse queryContract(@PathVariable("contractId") Integer contractId) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryContract startTime:{} contractId:{}", startTime.toEpochMilli(),
@@ -211,6 +211,9 @@ public class ContractController extends BaseController {
     public BaseResponse sendTransaction(@RequestBody @Valid TransactionInputParam param,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(param));
         // 0x0000000000000000000000000000000000000000 address is invalid
         if (Address.DEFAULT.toString().equals(param.getContractAddress())) {
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
@@ -224,9 +227,7 @@ public class ContractController extends BaseController {
                 throw new NodeMgrException(ConstantCode.CNS_NAME_CANNOT_EMPTY);
             }
         }
-        Instant startTime = Instant.now();
-        log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
-                JsonTools.toJSONString(param));
+
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Object transRsp = contractService.sendTransaction(param);
         baseResponse.setData(transRsp);
@@ -246,7 +247,7 @@ public class ContractController extends BaseController {
             BindingResult result) {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("start getByPartOfByecodebin startTime:{} groupId:{} queryParam:{}",
+        log.info("start getByPartOfByecodebin startTime:{} queryParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(queryParam));
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         ContractParam param = new ContractParam();
@@ -338,7 +339,7 @@ public class ContractController extends BaseController {
     }
 
     /**
-     * delete contract by id. only admin batch delete contract
+     * delete contract by path. only admin batch delete contract
      */
     @DeleteMapping(value = "/batch/path")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
@@ -463,5 +464,24 @@ public class ContractController extends BaseController {
         log.info("end copyContracts. useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS, req.getContractItems().size());
+    }
+
+
+
+    /**
+     * get deploy address or permission admin user address list
+     * which has private key in webase
+     */
+    @GetMapping("listManager/{groupId}/{contractAddress}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse queryContractManagerList(@PathVariable("groupId") Integer groupId,
+        @PathVariable("contractAddress") String contractAddress) {
+        Instant startTime = Instant.now();
+        log.info("start queryDeployAddress. startTime:{} groupId:{},contractAddress:{}",
+            startTime.toEpochMilli(), groupId, contractAddress);
+        List<String> managerList = contractService.getContractManager(groupId, contractAddress);
+        log.info("end queryDeployAddress. useTime:{} managerList:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), managerList);
+        return new BaseResponse(ConstantCode.SUCCESS, managerList);
     }
 }

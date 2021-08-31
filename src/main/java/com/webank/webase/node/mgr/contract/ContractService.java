@@ -20,26 +20,31 @@ import com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContract
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.enums.ContractType;
+import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.external.ExtContractService;
+import com.webank.webase.node.mgr.external.entity.TbExternalContract;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.contract.entity.*;
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
-import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
 import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
@@ -97,6 +102,8 @@ public class  ContractService {
     private CryptoSuite cryptoSuite;
     @Autowired
     private GroupService groupService;
+    @Autowired
+    private ExtContractService extContractService;
 
     /**
      * add new contract data.
@@ -410,7 +417,7 @@ public class  ContractService {
         // params.put("version", version);
         params.put("abiInfo", abiArray);
         params.put("bytecodeBin", inputParam.getBytecodeBin());
-        params.put("funcParam", inputParam.getConstructorParams());
+        params.put("funcParam", inputParam.getConstructorParams() == null ? new ArrayList<>() : inputParam.getConstructorParams());
 
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
@@ -614,7 +621,6 @@ public class  ContractService {
         param.setAddress(address);
         param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
         param.setContractBin(contract.getContractBin());
-
         frontInterface.sendAbi(groupId, param);
 
         //save address
@@ -674,12 +680,12 @@ public class  ContractService {
         log.debug("start deleteByContractPath ContractPathParam:{}", JsonTools.toJSONString(param));
         // check developer
         if (RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
-                && !contractPathService.checkPathExist(param.getGroupId(), param.getContractPath(),
-                        currentAccountInfo.getAccount())) {
+            && !contractPathService.checkPathExist(param.getGroupId(), param.getContractPath(),
+            currentAccountInfo.getAccount())) {
             log.error("end deleteByContractPath. contract path not exists.");
             throw new NodeMgrException(ConstantCode.CONTRACT_PATH_NOT_EXISTS);
         }
-        
+
         ContractParam listParam = new ContractParam();
         BeanUtils.copyProperties(param, listParam);
         List<TbContract> contractList = contractMapper.listOfContract(listParam);
@@ -693,8 +699,8 @@ public class  ContractService {
             contractList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
         } else {
             Collection<TbContract> unDeployedList = contractList.stream()
-                    .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
-                    .collect(Collectors.toList());
+                .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
+                .collect(Collectors.toList());
             // unDeployed's size == list's size, list is all unDeployed
             if (unDeployedList.size() == contractList.size()) {
                 log.debug("deleteByContractPath delete contract in path");
@@ -750,4 +756,48 @@ public class  ContractService {
         });
     }
 
+    /**
+     * get contract manager, including user who deploy this contract
+     * and admin user which has private key in webase
+     * @tip if deploy user or admin user not has private key, exclude it
+     * @tip final list is empty, return not contain contract manager error
+     * @param groupId
+     * @param contractAddress
+     * @return List<String>
+     */
+    public List<String> getContractManager(int groupId, String contractAddress) {
+        log.info("start getContractManager groupId:{},contractAddress:{}", groupId, contractAddress);
+        List<String> resultUserList = new ArrayList<>();
+        // get deployAddress from external service
+        TbExternalContract extContract = extContractService.getByAddress(groupId, contractAddress);
+        String deployAddress = extContract.getDeployAddress();
+        // check if address has private key
+        if (userService.checkUserHasPk(groupId, deployAddress)) {
+            resultUserList.add(deployAddress);
+        }
+        // get from permission list or chain governance
+        List<PermissionInfo> deployUserList = new ArrayList<>();
+        BasePageResponse response = permissionManageService.listPermissionFull(groupId,
+            PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
+        if (response.getCode() != 0) {
+            log.error("checkDeployPermission get permission list error");
+        } else {
+            List listData = (List) response.getData();
+            deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
+        }
+        if (deployUserList != null && !deployUserList.isEmpty()) {
+            for (PermissionInfo info : deployUserList) {
+                String adminAddress = info.getAddress();
+                if (userService.checkUserHasPk(groupId, adminAddress)) {
+                    resultUserList.add(deployAddress);
+                }
+            }
+        }
+        //  check resultUserList if empty
+        if (resultUserList.isEmpty()) {
+            log.warn("getContractManager has no private key of contractAddress:{}", contractAddress);
+            throw  new NodeMgrException(ConstantCode.NO_PRIVATE_KEY_OF_CONTRACT_MANAGER.attach(contractAddress));
+        }
+        return resultUserList;
+    }
 }

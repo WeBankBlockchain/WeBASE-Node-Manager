@@ -13,8 +13,10 @@
  */
 package com.webank.webase.node.mgr.user;
 
+import com.webank.scaffold.util.CommonUtil;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
+import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.CheckUserExist;
 import com.webank.webase.node.mgr.base.enums.HasPk;
@@ -22,17 +24,19 @@ import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
-import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
+import com.webank.webase.node.mgr.user.entity.ReqBindPrivateKey;
 import com.webank.webase.node.mgr.user.entity.ReqImportPem;
+import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
@@ -149,6 +153,7 @@ public class UserService {
             }
             // import key pair
             Map<String, Object> param = new HashMap<>();
+            // default external user type in front
             param.put("signUserId", signUserId);
             param.put("appId", appId);
             // already encoded privateKey
@@ -385,6 +390,10 @@ public class UserService {
         return queryUser(userId, null, null, null, null);
     }
 
+    public TbUser queryByUserAddress(int groupId, String address) throws NodeMgrException {
+        return queryUser(null, groupId, null, address, null);
+    }
+
     /**
      * query by group id and address.
      */
@@ -419,12 +428,98 @@ public class UserService {
     }
 
     /**
+     * bind by pem
+     */
+    public TbUser updateUserByPem(int groupId, int userId, String pemContent,
+        CurrentAccountInfo currentAccountInfo) {
+        PEMKeyStore pemManager = new PEMKeyStore(new ByteArrayInputStream(pemContent.getBytes()));
+        String privateKey = KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate());
+        // pem's privateKey encoded here
+        String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
+        return this.updateUser(new ReqBindPrivateKey(groupId, userId, privateKeyEncoded), currentAccountInfo);
+    }
+
+    /**
+     * bind by p12
+     */
+    public TbUser updateUserByP12(int groupId, int userId, MultipartFile p12File, String p12PwdEncoded,
+        CurrentAccountInfo currentAccountInfo) {
+        String privateKey = this.getP12RawPrivateKey(p12File, p12PwdEncoded);
+        // pem's privateKey encoded here
+        String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
+        return this.updateUser(new ReqBindPrivateKey(groupId, userId, privateKeyEncoded), currentAccountInfo);
+    }
+    /**
+     * bind public key user's private key
+     * @privateKeyEncoded raw private key encoded in base64
+     */
+    public TbUser updateUser(ReqBindPrivateKey bindPrivateKey, CurrentAccountInfo currentAccountInfo)
+        throws NodeMgrException {
+        Integer groupId = bindPrivateKey.getGroupId();
+        String privateKeyEncoded = bindPrivateKey.getPrivateKey();
+        int userId = bindPrivateKey.getUserId();
+        // check user
+        TbUser tbUser = queryByUserId(userId);
+        if (Objects.isNull(tbUser)) {
+            log.error("updateUser userId invalid:{}", userId);
+            throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
+        }
+        // if developer and user not belong to this user(this developer), error
+        if (RoleType.DEVELOPER.getValue().equals(currentAccountInfo.getRoleId())
+            && !tbUser.getAccount().equals(currentAccountInfo.getAccount())) {
+            log.error("developer cannot bind private key of other account [currentAccountInfo:{}]", currentAccountInfo);
+            throw new NodeMgrException(ConstantCode.DEVELOPER_CANNOT_MODIFY_OTHER_ACCOUNT);
+        }
+        // check already contain private key
+        if (tbUser.getHasPk() == HasPk.HAS.getValue()) {
+            throw new NodeMgrException(ConstantCode.BIND_PRIVATE_ALREADY_HAS_PK);
+        }
+        // check user address same with private key's address
+        String rawPrivateKey = new String(Base64.getDecoder().decode(privateKeyEncoded));
+        String privateKeyAddress = cryptoSuite.createKeyPair(rawPrivateKey).getAddress();
+        if (!tbUser.getAddress().equals(privateKeyAddress)) {
+            log.error("bind private key address :{} not match user's address!", privateKeyAddress);
+            throw new NodeMgrException(ConstantCode.BIND_PRIVATE_KEY_NOT_MATCH);
+        }
+
+        // add user by webase-front->webase-sign
+        String signUserId = UUID.randomUUID().toString().replaceAll("-", "");
+        // group id as appId
+        String appId = groupId.toString();
+
+        // import key pair
+        Map<String, Object> param = new HashMap<>();
+        // default external user type in front
+        param.put("signUserId", signUserId);
+        param.put("appId", appId);
+        // already encoded privateKey
+        param.put("privateKey", privateKeyEncoded);
+        KeyPair keyPair = frontRestTools.postForEntity(groupId,
+            FrontRestTools.URI_KEY_PAIR_IMPORT_WITH_SIGN, param, KeyPair.class);
+        log.info("updateUser bind private key response of keyPair:{}", keyPair);
+        tbUser.setHasPk(HasPk.HAS.getValue());
+        tbUser.setSignUserId(signUserId);
+        tbUser.setAppId(appId);
+        try {
+            Integer affectRow = userMapper.updateUser(tbUser);
+            if (affectRow == 0) {
+                log.warn("affect 0 rows of tb_user");
+                throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+            }
+        } catch (RuntimeException ex) {
+            log.error("fail updateUser's private key userId:{}, error:{}", userId, ex);
+            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
+        }
+        return tbUser;
+    }
+
+    /**
      * update user info.
      */
     public void updateUser(TbUser user) throws NodeMgrException {
-        log.debug("start updateUser user", JsonTools.toJSONString(user));
-        Integer userId = Optional.ofNullable(user).map(u -> u.getUserId()).orElse(null);
-        String description = Optional.ofNullable(user).map(u -> u.getDescription()).orElse(null);
+        log.debug("start updateUser user:{}", JsonTools.toJSONString(user));
+        Integer userId = Optional.ofNullable(user).map(TbUser::getUserId).orElse(null);
+        String description = Optional.ofNullable(user).map(TbUser::getDescription).orElse(null);
         if (userId == null) {
             log.warn("fail updateUser. user id is null");
             throw new NodeMgrException(ConstantCode.USER_ID_NULL);
@@ -494,6 +589,21 @@ public class UserService {
     @Transactional
     public TbUser importKeyStoreFromP12(MultipartFile p12File, String p12PasswordEncoded, Integer groupId,
             String userName, String account, String description, boolean isCheckExist) {
+        String privateKey = this.getP12RawPrivateKey(p12File, p12PasswordEncoded);
+
+        // pem's privateKey encoded here
+        String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
+
+        // store local and save in sign
+        TbUser tbUser = addUserInfo(groupId, userName, account, description,
+                UserType.GENERALUSER.getValue(), privateKeyEncoded, 
+                ReturnPrivateKey.FALSE.getValue(), isCheckExist);
+
+        return tbUser;
+    }
+
+    private String getP12RawPrivateKey(MultipartFile p12File, String p12PasswordEncoded)
+        throws NodeMgrException {
         // decode p12 password
         String p12Password;
         try{
@@ -517,30 +627,24 @@ public class UserService {
             }
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
-
-        // pem's privateKey encoded here
-        String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
-
-        // store local and save in sign
-        TbUser tbUser = addUserInfo(groupId, userName, account, description,
-                UserType.GENERALUSER.getValue(), privateKeyEncoded, 
-                ReturnPrivateKey.FALSE.getValue(), isCheckExist);
-
-        return tbUser;
+        return privateKey;
     }
 
     /**
      * get pem file exported from sign from front api
      * @return ResponseEntity<InputStreamResource>
      */
-    public FileContentHandle exportPemFromSign(int groupId, String signUserId, String account,Integer roleId) {
-        log.debug("start getExportPemFromSign signUserId:{}", signUserId);
-        TbUser user = queryUser(groupId,null,null,null,account);
-        if(roleId == RoleType.DEVELOPER.getValue()){
-            if(user.getSignUserId() != signUserId){
-                throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_EXISTS);
-            }
+    public FileContentHandle exportPemFromSign(int groupId, String signUserId, String account, Integer roleId) {
+        log.debug("start getExportPemFromSign signUserId:{}, account:{}", signUserId, account);
+        TbUser user = userMapper.getBySignUserId(signUserId);
+        if (user == null) {
+            throw new NodeMgrException(ConstantCode.USER_SIGN_USER_ID_NOT_EXIST);
         }
+        // if developer and user not belong to this user(this developer), error
+        if (roleId.equals(RoleType.DEVELOPER.getValue()) && !account.equals(user.getAccount())) {
+            throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_BELONG_TO);
+        }
+        // get private key from sign
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
         String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
         keyPair.setPrivateKey(decodedPrivateKey);
@@ -562,7 +666,8 @@ public class UserService {
      * @param p12PasswordEncoded password of p12 key in base64 format
      * @return ResponseEntity<InputStreamResource>
      */
-    public FileContentHandle exportP12FromSign(int groupId, String signUserId, String p12PasswordEncoded) {
+    public FileContentHandle exportP12FromSign(int groupId, String signUserId, String p12PasswordEncoded,
+        String account, Integer roleId) {
         log.debug("start getExportP12FromSign signUserId:{}", signUserId);
         // decode p12 password
         String p12Password;
@@ -572,7 +677,16 @@ public class UserService {
             log.error("decode password error:[]", e);
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_ERROR);
         }
-
+        // check user signUserId and account
+        TbUser user = userMapper.getBySignUserId(signUserId);
+        if (user == null) {
+            throw new NodeMgrException(ConstantCode.USER_SIGN_USER_ID_NOT_EXIST);
+        }
+        // if developer and user not belong to this user(this developer), error
+        if (roleId.equals(RoleType.DEVELOPER.getValue()) && !account.equals(user.getAccount())) {
+            throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_BELONG_TO);
+        }
+        // get private key from sign
         KeyPair keyPair = getUserKeyPairFromSign(groupId, signUserId);
         String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
         keyPair.setPrivateKey(decodedPrivateKey);
@@ -592,5 +706,10 @@ public class UserService {
         String hexPrivateKey = new String(Base64.getDecoder().decode(privateKeyEncoded.getBytes()));
         CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(hexPrivateKey);
         return cryptoKeyPair.getAddress();
+    }
+
+    public Boolean checkUserHasPk(int groupId, String userAddress) {
+        TbUser user = this.queryByUserAddress(groupId, userAddress);
+        return HasPk.HAS.getValue() == user.getHasPk();
     }
 }

@@ -41,7 +41,8 @@ public interface UserMapper {
     List<TbUser> listOfUser(UserParam userParam);
 
     /**
-     * Query user list according to some conditions.
+     * Query user according to some conditions.
+     * limit 1
      */
     TbUser queryUser(@Param("userId") Integer userId, @Param("groupId") Integer groupId,
             @Param("userName") String userName, @Param("address") String address,
@@ -71,4 +72,5 @@ public interface UserMapper {
 
     void deleteByAddress(@Param("address") String address);
 
+    TbUser getBySignUserId(@Param("signUserId") String signUserId);
 }

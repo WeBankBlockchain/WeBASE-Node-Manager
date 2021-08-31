@@ -20,9 +20,9 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.ProgressTools;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.ProgressTools;
 import com.webank.webase.node.mgr.deploy.entity.ReqAddNode;
 import com.webank.webase.node.mgr.deploy.entity.ReqConfigChain;
 import com.webank.webase.node.mgr.deploy.entity.ReqInitHost;
@@ -87,8 +87,10 @@ public class DeployController extends BaseController {
             // generate node config and return shell execution log
             hostService.initHostAndDocker(reqInitHost.getChainName(), reqInitHost.getImageTag(), reqInitHost.getHostIdList(),
                 reqInitHost.getDockerImageType());
+            log.info("end initHostList. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
+            log.error("initHostList error:[]", e);
             return new BaseResponse(e.getRetCode());
         }
     }
@@ -111,8 +113,10 @@ public class DeployController extends BaseController {
         try {
             // generate node config and return shell execution log
             List<TbHost> hostList = hostService.checkInitAndListHost(reqInitHost.getHostIdList());
+            log.info("end initCheckHostList. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
             return new BaseResponse(ConstantCode.SUCCESS, hostList);
         } catch (NodeMgrException e) {
+            log.error("initHostList error:[]", e);
             return new BaseResponse(e.getRetCode());
         }
     }
@@ -143,9 +147,11 @@ public class DeployController extends BaseController {
                 .between(startTime, Instant.now()).toMillis());
             return new BaseResponse(ConstantCode.SUCCESS);
         } catch (NodeMgrException e) {
+            log.error("configChainAndHost error:[]", e);
             return new BaseResponse(e.getRetCode());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            log.error("configChainAndHost interrupt error:[]", e);
             throw new NodeMgrException(ConstantCode.EXEC_CHECK_SCRIPT_INTERRUPT);
         }
 
@@ -170,11 +176,13 @@ public class DeployController extends BaseController {
             // generate node config and return shell execution log
             // boolean checkPortRes = hostService.checkPortHostList(checkPort.getDeployNodeInfoList());
             boolean checkPortRes = hostService.syncCheckPortHostList(checkPort.getDeployNodeInfoList());
+            log.info("end checkNodePort. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
             if (!checkPortRes) {
                 return new BaseResponse(ConstantCode.CHECK_HOST_PORT_IN_USE);
             }
             return new BaseResponse(ConstantCode.SUCCESS, checkPortRes);
         } catch (NodeMgrException e) {
+            log.error("checkNodePort error:[]", e);
             return new BaseResponse(e.getRetCode());
         }
     }
@@ -229,6 +237,7 @@ public class DeployController extends BaseController {
 
         this.deployService.startNode(start.getNodeId(), OptionType.MODIFY_CHAIN, FrontStatusEnum.STOPPED,
                 FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
+        log.info("end startNode. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -250,6 +259,7 @@ public class DeployController extends BaseController {
         log.info("Stop node nodeId:[{}], now:[{}]", nodeId, startTime);
 
         this.deployService.stopNode(stop.getNodeId());
+        log.info("end stopNode. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -271,6 +281,7 @@ public class DeployController extends BaseController {
         log.info("stopNodeForce nodeId:[{}], now:[{}]", nodeId, startTime);
 
         deployService.stopNodeForce(stop.getNodeId());
+        log.info("end stopNodeForce. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -289,10 +300,11 @@ public class DeployController extends BaseController {
         String nodeId = start.getNodeId();
         Instant startTime = Instant.now();
 
-        log.info("restart node nodeId:[{}], now:[{}]", nodeId, startTime);
+        log.info("restartNode nodeId:[{}], now:[{}]", nodeId, startTime);
 
         this.deployService.startNode(start.getNodeId(), OptionType.MODIFY_CHAIN, FrontStatusEnum.STOPPED,
             FrontStatusEnum.RUNNING, FrontStatusEnum.STOPPED);
+        log.info("end restartNode. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -314,6 +326,7 @@ public class DeployController extends BaseController {
         log.info("Delete node delete:[{}], now:[{}]", delete, startTime);
 
         deployService.deleteNode(nodeId);
+        log.info("end deleteNode. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -334,6 +347,7 @@ public class DeployController extends BaseController {
         Instant startTime = Instant.now();
         log.info("Start upgrade chain to version:[{}], chainName:[{}], now:[{}]", newTagId, chainName, startTime);
         this.deployService.upgrade(newTagId,chainName);
+        log.info("end upgradeChain. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -360,12 +374,12 @@ public class DeployController extends BaseController {
      */
     @GetMapping(value = "chain/info")
     public BaseResponse getChain(
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-    ) throws IOException {
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName) {
         Instant startTime = Instant.now();
-        log.info("Start get chain info chainName:[{}], now:[{}]", chainName, startTime);
+        log.info("Start getChain info chainName:[{}], now:[{}]", chainName, startTime);
 
         TbChain chain = this.tbChainMapper.getByChainName(chainName);
+        log.info("end getChain. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS, chain);
     }
 
@@ -381,8 +395,9 @@ public class DeployController extends BaseController {
     public BaseResponse startChain(
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName) {
         Instant startTime = Instant.now();
-        log.info("Start chain, chainName:[{}], now:[{}]", chainName, startTime);
+        log.info("startChain, chainName:[{}], now:[{}]", chainName, startTime);
         deployService.startChain(chainName, OptionType.DEPLOY_CHAIN);
+        log.info("end startChain. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS );
     }
 
@@ -395,11 +410,11 @@ public class DeployController extends BaseController {
     @GetMapping(value = "chain/stop")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse stopChain(
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
-    ) throws IOException {
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName) {
         Instant startTime = Instant.now();
         log.info("Stop chain, chainName:[{}], now:[{}]", chainName, startTime);
 
+        log.info("end stopChain. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -414,8 +429,9 @@ public class DeployController extends BaseController {
     public BaseResponse restartChain(@RequestParam(value = "chainName") String chainName,
         @RequestParam(value = "groupId") Integer groupId) throws IOException {
         Instant startTime = Instant.now();
-        log.info("Stop chain, chainName:[{}], groupId:{}, now:[{}]", chainName, groupId, startTime);
+        log.info("restartChain, chainName:[{}], groupId:{}, now:[{}]", chainName, groupId, startTime);
         deployService.restartChain(chainName, groupId);
+        log.info("end restartChain. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
@@ -428,10 +444,11 @@ public class DeployController extends BaseController {
             @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
     ) throws NodeMgrException {
         Instant startTime = Instant.now();
-        log.info("Start delete chainName:[{}], startTime:[{}]",
+        log.info("Start deleteChain chainName:[{}], startTime:[{}]",
                 chainName, startTime.toEpochMilli());
         // include delete chain files and stop node/front docker container(on remote host), delete chain file locally too
         RetCode deleteResult = this.deployService.deleteChain(chainName);
+        log.info("end deleteChain. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(deleteResult);
     }
 
@@ -447,15 +464,4 @@ public class DeployController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, constantProperties.getDeployType());
     }
 
-//    /**
-//     *
-//     * @return
-//     * @throws IOException
-//     */
-//    @GetMapping(value = "host/list")
-//    public BaseResponse listHost() throws IOException {
-//        Instant startTime = Instant.now();
-//        log.info("Start get host list info, now:[{}]",  startTime);
-//        return new BaseResponse(ConstantCode.SUCCESS, this.tbHostMapper.selectAll());
-//    }
 }

@@ -13,7 +13,7 @@
  */
 package node.mgr.test.contract;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
 import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
@@ -197,5 +197,17 @@ public class ContractControllerTest extends TestBase {
             .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
     }
 
+    @Test
+    public void testQueryManager() throws Exception {
+        String contractAddress = "0x0";
+        ResultActions resultActions = mockMvc
+            .perform(MockMvcRequestBuilders.get("/listManager/" + groupId + "/" + contractAddress));
+        resultActions.
+//            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+
+            resultActions.andReturn().getResponse().getContentAsString());
+
+    }
 
 }
