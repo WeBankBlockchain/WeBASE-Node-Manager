@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS tb_node (
   description text DEFAULT NULL COMMENT '描述',
   city varchar(64) DEFAULT NULL COMMENT '城市（城市编号）',
   agency varchar(250) DEFAULT NULL COMMENT '节点机构',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (node_id,group_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='节点表';

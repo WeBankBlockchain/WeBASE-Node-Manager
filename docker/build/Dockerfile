@@ -4,6 +4,7 @@ FROM ubuntu:18.04 as prod
 #RUN apk --no-cache add bash curl wget
 RUN apt-get update \
     && apt-get -y install openjdk-8-jre \
+    && apt-get -y install mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
 COPY script                /dist/script
