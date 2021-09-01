@@ -30,7 +30,7 @@
 	</sql>
 
   <insert id="add" parameterType="com.webank.webase.node.mgr.node.entity.TbNode">
-    insert ignore into tb_node
+    insert into tb_node
     (node_id,node_name,group_id,node_ip,p2p_port,description,create_time,modify_time)
     values(#{nodeId},#{nodeName},#{groupId},#{nodeIp},#{p2pPort},#{description},NOW(),NOW())
   </insert>
