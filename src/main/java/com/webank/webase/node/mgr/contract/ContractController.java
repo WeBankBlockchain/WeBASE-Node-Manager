@@ -50,6 +50,7 @@ import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.utils.AddressUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -479,6 +480,9 @@ public class ContractController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start queryDeployAddress. startTime:{} groupId:{},contractAddress:{}",
             startTime.toEpochMilli(), groupId, contractAddress);
+        if (AddressUtils.isValidAddress(contractAddress)) {
+            throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+        }
         List<String> managerList = contractService.getContractManager(groupId, contractAddress);
         log.info("end queryDeployAddress. useTime:{} managerList:{}",
             Duration.between(startTime, Instant.now()).toMillis(), managerList);
