@@ -58,6 +58,7 @@ import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -475,7 +476,7 @@ public class UserService {
             throw new NodeMgrException(ConstantCode.BIND_PRIVATE_ALREADY_HAS_PK);
         }
         // check user address same with private key's address
-        String rawPrivateKey = new String(Base64.getDecoder().decode(privateKeyEncoded));
+        String rawPrivateKey = Numeric.cleanHexPrefix(new String(Base64.getDecoder().decode(privateKeyEncoded)));
         String privateKeyAddress = cryptoSuite.createKeyPair(rawPrivateKey).getAddress();
         if (!tbUser.getAddress().equals(privateKeyAddress)) {
             log.error("bind private key address :{} not match user's address!", privateKeyAddress);
@@ -703,7 +704,7 @@ public class UserService {
     }
 
     private String getAddressFromPrivateKeyEncoded(String privateKeyEncoded) {
-        String hexPrivateKey = new String(Base64.getDecoder().decode(privateKeyEncoded.getBytes()));
+        String hexPrivateKey = Numeric.cleanHexPrefix(new String(Base64.getDecoder().decode(privateKeyEncoded.getBytes())));
         CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(hexPrivateKey);
         return cryptoKeyPair.getAddress();
     }
