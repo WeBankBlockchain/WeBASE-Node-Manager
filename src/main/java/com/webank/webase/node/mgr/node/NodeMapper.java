@@ -71,7 +71,7 @@ public interface NodeMapper {
      * update node info of node ip, node agency, node city
      */
     Integer updateNodeInfo(@Param("nodeId") String nodeId, @Param("nodeIp") String nodeIp,
-        @Param("agency") String agency, @Param("city") String city);
+       @Param("city") String city,  @Param("agency") String agency);
 
     /**
      * query node info.
