@@ -105,7 +105,7 @@
     where node_id=#{nodeId} and group_id=#{groupId}
   </update>
 
-  <update id="updateNodeInfo">
+  <update id="updateNodeInfo" parameterType="com.webank.webase.node.mgr.node.entity.ReqUpdate">
     update tb_node set modify_time=NOW()
     <if test="nodeIp != null and nodeIp != ''">
       ,node_ip = #{nodeIp}
@@ -117,7 +117,6 @@
       ,city = #{city}
     </if>
     where node_id=#{nodeId}
-<!--    and group_id=#{groupId} batch update -->
   </update>
 
 

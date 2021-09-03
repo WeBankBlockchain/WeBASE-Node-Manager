@@ -14,10 +14,13 @@
 
 package com.webank.webase.node.mgr.node.entity;
 
+import javax.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class ReqUpdate {
+    @NotBlank
+    private String nodeId;
     private String nodeIp;
     private String city;
     private String agency;

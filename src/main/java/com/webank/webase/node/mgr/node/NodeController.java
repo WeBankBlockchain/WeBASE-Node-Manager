@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -140,13 +141,13 @@ public class NodeController {
     /**
      * update tb_node info of city, agency, ip etc.
      */
-    @PutMapping("/description/{nodeId}")
-    public BaseResponse updateDesc(@PathVariable("nodeId") String nodeId, @RequestBody ReqUpdate reqUpdate) {
+    @PutMapping("/description")
+    public BaseResponse updateDesc(@Valid @RequestBody ReqUpdate reqUpdate) {
         Instant startTime = Instant.now();
-        log.info("updateDesc startTime:{},nodeId:{},reqUpdate:{}",
-            startTime.toEpochMilli(), nodeId, reqUpdate);
-        int res = nodeService.updateDescription(nodeId, reqUpdate.getNodeIp(),
-            reqUpdate.getCity(), reqUpdate.getAgency());
+        log.info("updateDesc startTime:{},reqUpdate:{}",
+            startTime.toEpochMilli(), reqUpdate);
+
+        int res = nodeService.updateDescription(reqUpdate);
 
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         baseResponse.setData(res);
