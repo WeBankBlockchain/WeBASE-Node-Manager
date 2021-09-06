@@ -13,15 +13,17 @@
  */
 package com.webank.webase.node.mgr.node;
 
-import com.webank.webase.node.mgr.node.entity.ReqUpdate;
-import java.util.List;
-
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.springframework.stereotype.Repository;
-
 import com.webank.webase.node.mgr.node.entity.NodeParam;
+import com.webank.webase.node.mgr.node.entity.ReqUpdate;
+import com.webank.webase.node.mgr.node.entity.RspCity;
 import com.webank.webase.node.mgr.node.entity.TbNode;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.type.JdbcType;
+import org.springframework.stereotype.Repository;
 
 /**
  * node data interface.
@@ -120,5 +122,14 @@ public interface NodeMapper {
      * @return
      */
     int getHighestBlockHeight(@Param("groupId") Integer groupId);
+
+    @Select({"select city,count(distinct(node_id)) from tb_node",
+        "where city is not NULL",
+        "group by city"})
+    @Results({
+        @Result(column = "city", property = "city", jdbcType = JdbcType.VARCHAR),
+        @Result(column = "count(distinct(node_id))", property = "count", jdbcType = JdbcType.INTEGER)
+    })
+    List<RspCity> selectCityAndNodeNum();
 
 }
