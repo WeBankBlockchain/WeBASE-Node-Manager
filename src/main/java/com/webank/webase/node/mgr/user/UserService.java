@@ -711,6 +711,9 @@ public class UserService {
 
     public Boolean checkUserHasPk(int groupId, String userAddress) {
         TbUser user = this.queryByUserAddress(groupId, userAddress);
+        if (user == null) {
+            return false;
+        }
         return HasPk.HAS.getValue() == user.getHasPk();
     }
 }

@@ -480,7 +480,7 @@ public class ContractController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start queryDeployAddress. startTime:{} groupId:{},contractAddress:{}",
             startTime.toEpochMilli(), groupId, contractAddress);
-        if (AddressUtils.isValidAddress(contractAddress)) {
+        if (!AddressUtils.isValidAddress(contractAddress)) {
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
         List<String> managerList = contractService.getContractManager(groupId, contractAddress);

@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.node.entity.ReqUpdate;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.ValidateUtil;
 import com.webank.webase.node.mgr.deploy.chain.ChainService;
@@ -569,14 +570,12 @@ public class NodeService {
 
     /**
      * update node's info in all group
-     * @param nodeId
-     * @param city
+     * @param reqUpdate
      * @return
      */
-    public int updateDescription(String nodeId, String nodeIp, String city, String agency) {
-        log.debug("updateDescription nodeId:{},nodeIp:{},city:{},agency:{}",
-            nodeId, nodeIp, city, agency);
-        int result = this.nodeMapper.updateNodeInfo(nodeId, nodeIp, city, agency);
+    public int updateDescription(ReqUpdate reqUpdate) {
+        log.debug("updateDescription reqUpdate:{}", reqUpdate);
+        int result = this.nodeMapper.updateNodeInfo(reqUpdate);
         log.debug("updateDescription result:{}", result);
         return result;
     }

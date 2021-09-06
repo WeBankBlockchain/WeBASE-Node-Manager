@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import com.webank.webase.node.mgr.node.entity.ReqUpdate;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
@@ -70,8 +71,7 @@ public interface NodeMapper {
     /**
      * update node info of node ip, node agency, node city
      */
-    Integer updateNodeInfo(@Param("nodeId") String nodeId, @Param("nodeIp") String nodeIp,
-        @Param("agency") String agency, @Param("city") String city);
+    Integer updateNodeInfo(ReqUpdate reqUpdate);
 
     /**
      * query node info.

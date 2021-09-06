@@ -13,15 +13,18 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import com.webank.webase.node.mgr.node.entity.ReqUpdate;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -138,15 +141,13 @@ public class NodeController {
     /**
      * update tb_node info of city, agency, ip etc.
      */
-    @PutMapping("/description/{nodeId}")
-    public BaseResponse updateDesc(@PathVariable("nodeId") String nodeId,
-        @RequestParam(value = "nodeIp", required = false) String nodeIp,
-        @RequestParam(value = "city", required = false) String city,
-        @RequestParam(value = "agency", required = false) String agency) {
+    @PutMapping("/description")
+    public BaseResponse updateDesc(@Valid @RequestBody ReqUpdate reqUpdate) {
         Instant startTime = Instant.now();
-        log.info("updateDesc startTime:{},nodeId:{},nodeIp:{},city:{},agency:{}",
-            startTime.toEpochMilli(), nodeId, nodeIp, city, agency);
-        int res = nodeService.updateDescription(nodeId, nodeIp, city, agency);
+        log.info("updateDesc startTime:{},reqUpdate:{}",
+            startTime.toEpochMilli(), reqUpdate);
+
+        int res = nodeService.updateDescription(reqUpdate);
 
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         baseResponse.setData(res);

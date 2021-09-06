@@ -478,8 +478,8 @@ public class  ContractService {
             contractAbiStr = contract.getContractAbi();
             //send abi to front
             sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
-            //check contract deploy
-            verifyContractDeploy(param.getContractId(), param.getGroupId());
+            //check contract deploy, v1.5.3 remove, support proxy contract
+//            verifyContractDeploy(param.getContractId(), param.getGroupId());
         } else {
             // send tx by TABLE abi
             // get from db and it's deployed
@@ -614,7 +614,7 @@ public class  ContractService {
             log.warn("fail sendAbi. inputAddress:{}", address);
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
-        //send abi
+        // send abi
         PostAbiInfo param = new PostAbiInfo();
         param.setGroupId(groupId);
         param.setContractName(contract.getContractName());
@@ -624,14 +624,14 @@ public class  ContractService {
         frontInterface.sendAbi(groupId, param);
 
         //save address
-        if (StringUtils.isBlank(contract.getContractAddress())) {
-            contract.setContractAddress(address);
-            contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-        }
-
-        contract.setDeployTime(LocalDateTime.now());
-        contract.setDescription("address add by sendAbi");
-        contractMapper.update(contract);
+//        if (StringUtils.isBlank(contract.getContractAddress())) {
+//            contract.setContractAddress(address);
+//            contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+//        }
+//
+//        contract.setDeployTime(LocalDateTime.now());
+//        contract.setDescription("address add by sendAbi");
+//        contractMapper.update(contract);
     }
 
     /**
