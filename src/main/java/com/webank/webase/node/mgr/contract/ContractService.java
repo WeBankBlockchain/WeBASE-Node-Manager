@@ -27,6 +27,7 @@ import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.external.ExtContractService;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.tools.JsonTools;
@@ -458,6 +459,27 @@ public class  ContractService {
         return tbContract;
     }
 
+    public Object queryContractOrAbiByBin(QueryByBinParam queryParam) {
+        log.debug("start queryContractOrAbiByBin. queryParam:{}", JsonTools.toJSONString(queryParam));
+        ContractParam contractParam = new ContractParam();
+        BeanUtils.copyProperties(queryParam, contractParam);
+        TbContract tbContract = this.queryContract(contractParam);
+        if (tbContract != null) {
+            log.debug("queryContractOrAbiByBin return tbContract:{}", tbContract);
+            return tbContract;
+        } else {
+            ReqAbiListParam abiParam = new ReqAbiListParam();
+            abiParam.setGroupId(queryParam.getGroupId());
+            abiParam.setPartOfContractBin(queryParam.getPartOfBytecodeBin());
+            AbiInfo abiInfo = abiService.getAbiInfoByBin(abiParam);
+            if (abiInfo == null) {
+                log.debug("queryContractOrAbiByBin not found");
+                return null;
+            }
+            log.debug("queryContractOrAbiByBin return abiInfo:{}", abiInfo);
+            return abiInfo;
+        }
+    }
 
     /**
      * send transaction.
