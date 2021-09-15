@@ -251,10 +251,8 @@ public class ContractController extends BaseController {
         log.info("start getByPartOfByecodebin startTime:{} queryParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(queryParam));
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        ContractParam param = new ContractParam();
-        BeanUtils.copyProperties(queryParam, param);
-        TbContract tbContract = contractService.queryContract(param);
-        baseResponse.setData(tbContract);
+        Object res = contractService.queryContractOrAbiByBin(queryParam);
+        baseResponse.setData(res);
         log.info("end getByPartOfByecodebin useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JsonTools.toJSONString(baseResponse));
