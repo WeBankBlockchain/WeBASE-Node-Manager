@@ -33,4 +33,8 @@ public class UserParam extends BaseQueryParam {
     private String commParam;
     private Integer hasPk;
     private String address;
+    /**
+     * used in external list all, 0-all,1-normal,3-abnormal
+     */
+    private Integer type;
 }
