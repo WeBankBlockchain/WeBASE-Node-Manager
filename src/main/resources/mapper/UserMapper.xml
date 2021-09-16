@@ -149,7 +149,7 @@
     delete from tb_user where address = #{address}
   </delete>
 
-  <select id="getBySignUserId" parameterType="java.lang.String">
+  <select id="getBySignUserId" parameterType="java.lang.String"  resultMap="userMap">
     select * from tb_user where sign_user_id = #{signUserId}
   </select>
 </mapper>
