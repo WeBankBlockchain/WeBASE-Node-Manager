@@ -71,7 +71,11 @@ public class TbExternalAccountSqlProvider {
             sql.WHERE("b.account = #{account}");
         }
         if (param.getCommParam() != null) {
-            sql.WHERE("and b.userName like CONCAT(#{commParam},'%') or ext.address like CONCAT(#{commParam},'%')");
+            sql.WHERE("(" +
+                    "b.userName like CONCAT(#{commParam},'%') " +
+                    "or " +
+                    "ext.address like CONCAT(#{commParam},'%')" +
+                    ")");
         }
 //        if (param.getUserName() != null) {
 //            sql.WHERE("b.userName = #{userName}");
