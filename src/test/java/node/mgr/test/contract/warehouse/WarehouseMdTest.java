@@ -18,70 +18,113 @@ import java.util.Base64;
 import org.junit.Test;
 
 public class WarehouseMdTest {
-    public static final String ADDRESS_MD = "# Address\n" +
-        "\n" +
-        "Address library\n" +
-        "\n" +
-        "Address contract usage methods can refer to the Points contract warehouse。\n" +
-        "\n" +
-        "1. Detect whether the address is a contract\n" +
-        "2. Detect if the address is 0x0";
-    public static final String LIB_STRING_MD = "# String library\n" +
-        "\n" +
-        "String library\n" +
-        "\n" +
-        "Provides common string-related operations, including copying, finding, replacing, and so on。";
-    public static final String SAFE_MATH_MD = "# SafeMath\n" +
-        "\n" +
-        "SafeMath library\n" +
-        "\n" +
-        "A secure mathematical library that provides a safe addition, subtract, and divide。The use of secure mathematical contracts can refer to the Points contract warehouse。";
-    public static final String TABLE_MD = "# table\n" +
-        "\n" +
-        "table library\n" +
-        "\n" +
-        "BCOS CRUD uses the base library, which you can reference by re-contract calling CRUD.Table contract usage methods can be described by referring to the assat example in the bcos document https://fisco-bcos-documentation.readthedocs.io.";
-    public static final String ROLES_MD ="# Roles\n" +
-        "\n" +
-        "Role permissions control contracts\n";
-    public static final String REGISTER_MD ="# Register\n" +
-        "\n" +
-        "Register control contract\n";
-    public static final String COUNTER_MD ="# Counters\n" +
-        "\n" +
-        "Counters tool contract\n";
+
     @Test
-    public void testToolMdToBase64() {
-        System.out.println("ADDRESS_MD:\n" + Base64.getEncoder().encodeToString(ADDRESS_MD.getBytes()));
-        System.out.println("LIB_STRING_MD:\n" + Base64.getEncoder().encodeToString(LIB_STRING_MD.getBytes()));
-        System.out.println("SAFE_MATH_MD:\n" + Base64.getEncoder().encodeToString(SAFE_MATH_MD.getBytes()));
-        System.out.println("TABLE_MD:\n" + Base64.getEncoder().encodeToString(TABLE_MD.getBytes()));
-        System.out.println("ROLES_MD:\n" + Base64.getEncoder().encodeToString(ROLES_MD.getBytes()));
-        System.out.println("REGISTER_MD:\n" + Base64.getEncoder().encodeToString(REGISTER_MD.getBytes()));
-        System.out.println("COUNTER_MD:\n" + Base64.getEncoder().encodeToString(COUNTER_MD.getBytes()));
+    public void print() {
+//        System.out.println(ENROLL_PROXY_SOURCE);
+//        System.out.println();
     }
 
     @Test
-    public void testEvidenceMdToBase64() {
-        System.out.println("EVIDENCE_MD:\n" + Base64.getEncoder().encodeToString(EVIDENCE_MD.getBytes()));
-    }
-
-
-    public static final String EVIDENCE_MD = "# Evidence 合约\n" +
-        "\n" +
-        "## 简介\n" +
-        "Evidence 示例合约，使用分层的智能合约结构： \n" +
-        "1）工厂合约（EvidenceSignersData.sol），由存证各方事前约定，存储存证生效条件，并管理存证的生成。  \n" +
-        "2）存证合约（Evidence.sol），由工厂合约生成，存储存证id，hash和各方签名（每张存证一个合约）。  ";
-
-    @Test
-    public void testBACMdToBase64() {
+    public void testMdToBase64() {
 //        System.out.println("ADDRESS_MD:\n" + Base64.getEncoder().encodeToString(ADDRESS_MD.getBytes()));
 //        System.out.println("SAFE_MATH_MD:\n" + Base64.getEncoder().encodeToString(SAFE_MATH_MD.getBytes()));
 //        System.out.println("ROLES_MD:\n" + Base64.getEncoder().encodeToString(ROLES_MD.getBytes()));
 //        System.out.println("BAC001_MD:\n" + Base64.getEncoder().encodeToString(BAC001_MD.getBytes()));
-        System.out.println("BAC002_MD:\n" + Base64.getEncoder().encodeToString(BAC002_MD.getBytes()));
+//        System.out.println("BAC002_MD:\n" + Base64.getEncoder().encodeToString(BAC002_MD.getBytes()));
+        System.out.println("PROXY_MD:\n" + Base64.getEncoder().encodeToString(PROXY_MD.getBytes()));
     }
+
+    public static final String PROXY_MD = "# 代理合约模板\n" +
+            "\n" +
+            "\n" +
+            "本合约模板由深圳前海股权交易中心贡献，针对数据上链编写的通用代理存储合约。\n" +
+            "\n" +
+            "## 简介\n" +
+            "代理合约利用solidity的fallback功能，包含EnrollProxy（代理合约），EnrollController（业务合约），EnrollStorage（存储合约）。\n" +
+            "\n" +
+            "- 代理合约对外交互接口\n" +
+            "- 业务合约实现业务逻辑\n" +
+            "- 存储合约完成数据存储\n" +
+            "\n" +
+            "EnrollProxy合约通过Fallback机制调用EnrollController合约的函数进行数据上链（通过EnrollProxy合约地址结合使用EnrollController合约的ABI，操作EnrollController合约的函数），其带来的优点包括：\n" +
+            "\n" +
+            "- 区块链应用的业务层只与EnrollProxy合约进行交互，EnrollProxy合约不会升级，地址不会变化。\n" +
+            "\n" +
+            "- 后续中业务或存储需求导致业务合约或存储合约需要升级，则升级EnrollController和EnrollStorage合约，达到数据、业务逻辑解耦的效果。\n" +
+            "\n" +
+            "*期待你一起完善合约模板中的权限控制逻辑*\n" +
+            "\n" +
+            "## 合约架构说明\n" +
+            "\n" +
+            "```java\n" +
+            "EnrollProxy\n" +
+            "\t继承EnrollStorageStateful\n" +
+            "\t继承Proxy（继承Ownable）　\n" +
+            "    \n" +
+            "EnrollController\n" +
+            "\t继承EnrollStorageStateful\n" +
+            "\t继承Ownable\n" +
+            "\n" +
+            "EnrollStorageStateful\n" +
+            "\t包含成员enrollStorage，EnrollStorage合约实例\n" +
+            "\n" +
+            "由于是继承的关系，EnrollProxy合约和EnrollController合约的存储空间排列是一样的，所以可通过EnrollProxy执行fallback操作。  \n" +
+            "\n" +
+            "enrollStorage是EnrollStorageStateful合约中的成员，所以enrollStorage合约与EnrollStorageStateful合约存储空间排布是不一样。\n" +
+            "```\n" +
+            "\n" +
+            "## 使用说明\n" +
+            "1. 编译部署EnrollProxy，EnrollController，EnrollStorage合约。\n" +
+            "2. 配置代理合约：\n" +
+            "   1. 存储合约合约：调用EnrollProxy合约setStorage函数，参数为EnrollStorage合约地址。\n" +
+            "   2. 配置业务合约：调用EnrollProxy合约upgradeTo函数，参数为：合约版本号，EnrollController合约地址。\n" +
+            "3. 设置存储合约的代理地址：调用EnrollStorage合约setProxy函数，参数为EnrollProxy合约地址。\n" +
+            "       \n" +
+            "\n" +
+            "完成以上步骤后，就可以通过EnrollProxy合约地址，结合业务合约EnrollController合约的ABI，操作EnrollController合约的业务函数。\n" +
+            "\n" +
+            "\n";
+
+    public static final String ADDRESS_MD = "# Address\n" +
+            "\n" +
+            "Address library\n" +
+            "\n" +
+            "Address contract usage methods can refer to the Points contract warehouse。\n" +
+            "\n" +
+            "1. Detect whether the address is a contract\n" +
+            "2. Detect if the address is 0x0";
+    public static final String LIB_STRING_MD = "# String library\n" +
+            "\n" +
+            "String library\n" +
+            "\n" +
+            "Provides common string-related operations, including copying, finding, replacing, and so on。";
+    public static final String SAFE_MATH_MD = "# SafeMath\n" +
+            "\n" +
+            "SafeMath library\n" +
+            "\n" +
+            "A secure mathematical library that provides a safe addition, subtract, and divide。The use of secure mathematical contracts can refer to the Points contract warehouse。";
+    public static final String TABLE_MD = "# table\n" +
+            "\n" +
+            "table library\n" +
+            "\n" +
+            "BCOS CRUD uses the base library, which you can reference by re-contract calling CRUD.Table contract usage methods can be described by referring to the assat example in the bcos document https://fisco-bcos-documentation.readthedocs.io.";
+    public static final String ROLES_MD ="# Roles\n" +
+            "\n" +
+            "Role permissions control contracts\n";
+    public static final String REGISTER_MD ="# Register\n" +
+            "\n" +
+            "Register control contract\n";
+    public static final String COUNTER_MD ="# Counters\n" +
+            "\n" +
+            "Counters tool contract\n";
+
+    public static final String EVIDENCE_MD = "# Evidence 合约\n" +
+            "\n" +
+            "## 简介\n" +
+            "Evidence 示例合约，使用分层的智能合约结构： \n" +
+            "1）工厂合约（EvidenceSignersData.sol），由存证各方事前约定，存储存证生效条件，并管理存证的生成。  \n" +
+            "2）存证合约（Evidence.sol），由工厂合约生成，存储存证id，hash和各方签名（每张存证一个合约）。  ";
     public static final String BAC002_MD = "# BAC002 合约规范\n"
         + "\n"
         + "## 简介\n"
@@ -420,4 +463,6 @@ public class WarehouseMdTest {
         "  - 配合 suspend / addSuspender 方法使用\n" +
         "\n" +
         "\n";
+
+
 }
