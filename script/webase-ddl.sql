@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
 CREATE TABLE IF NOT EXISTS tb_node (
   node_id varchar(250) NOT NULL  COMMENT '节点编号',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
-  node_name varchar(120) NOT NULL COMMENT '节点名称',
+  node_name varchar(255) NOT NULL COMMENT '节点名称',
   node_ip varchar(16) DEFAULT NULL COMMENT '节点ip',
   p2p_port int(11) DEFAULT NULL COMMENT '节点p2p端口',
   block_number bigint(20) DEFAULT '0' COMMENT '节点块高',

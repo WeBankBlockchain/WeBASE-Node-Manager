@@ -3,6 +3,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 ALTER TABLE tb_node ADD COLUMN city varchar(64) DEFAULT NULL COMMENT '城市（城市编号）';
 ALTER TABLE tb_node ADD COLUMN agency varchar(250) DEFAULT NULL COMMENT '节点机构';
+ALTER TABLE tb_node MODIFY COLUMN node_name varchar(255) NOT NULL COMMENT '节点名称';
 
 -- contract warehouse - traceability
 INSERT INTO `tb_warehouse` (`id`, `warehouse_name`, `warehouse_name_en`, `type`, `warehouse_icon`, `description`, `description_en`, `warehouse_detail`, `warehouse_detail_en`, `create_time`, `modify_time`) VALUES
