@@ -201,6 +201,7 @@ public class NodeService {
 
     /**
      * check node status, if pbftView or blockNumber not changing, invalid consensus
+     * @case: observer(no pbftView), if observer's blockNumber not equal consensus blockNumber
      * @1.4.3: if request consensus status but return -1, node is down
      *
      */
@@ -259,11 +260,19 @@ public class NodeService {
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
                 }
             } else { //observer
-                // if latest block number not equal, invalid
+                // if latest block number not equal block number of consensus network
                 if (!latestNumber.equals(frontInterface.getLatestBlockNumber(groupId))) {
-                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                    // if node's block number is not changing, invalid
+                    if (localBlockNumber.equals(latestNumber)) {
+                        log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                             nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
-                    tbNode.setNodeActive(DataStatus.INVALID.getValue());
+                        tbNode.setNodeActive(DataStatus.INVALID.getValue());
+                    } else {
+                        // if latest block number not equal network's, but is changing, normal
+                        tbNode.setBlockNumber(latestNumber);
+                        tbNode.setPbftView(latestView);
+                        tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+                    }
                 } else {
                     tbNode.setBlockNumber(latestNumber);
                     tbNode.setPbftView(latestView);
