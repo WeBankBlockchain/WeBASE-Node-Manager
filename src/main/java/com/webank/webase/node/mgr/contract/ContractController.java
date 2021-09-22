@@ -42,6 +42,7 @@ import com.webank.webase.node.mgr.contract.entity.TbCns;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import com.webank.webase.node.mgr.contract.entity.TbContractPath;
 import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -481,7 +482,7 @@ public class ContractController extends BaseController {
         if (!AddressUtils.isValidAddress(contractAddress)) {
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
-        List<String> managerList = contractService.getContractManager(groupId, contractAddress);
+        List<TbUser> managerList = contractService.getContractManager(groupId, contractAddress);
         log.info("end queryDeployAddress. useTime:{} managerList:{}",
             Duration.between(startTime, Instant.now()).toMillis(), managerList);
         return new BaseResponse(ConstantCode.SUCCESS, managerList);

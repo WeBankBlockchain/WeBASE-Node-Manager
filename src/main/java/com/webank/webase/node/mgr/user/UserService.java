@@ -709,11 +709,11 @@ public class UserService {
         return cryptoKeyPair.getAddress();
     }
 
-    public Boolean checkUserHasPk(int groupId, String userAddress) {
+    public TbUser checkUserHasPk(int groupId, String userAddress) {
         TbUser user = this.queryByUserAddress(groupId, userAddress);
-        if (user == null) {
-            return false;
+        if (user == null || HasPk.HAS.getValue() != user.getHasPk()) {
+            return null;
         }
-        return HasPk.HAS.getValue() == user.getHasPk();
+        return user;
     }
 }
