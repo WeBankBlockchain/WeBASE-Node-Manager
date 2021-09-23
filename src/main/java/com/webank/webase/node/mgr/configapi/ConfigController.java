@@ -97,12 +97,23 @@ public class ConfigController {
      */
     @GetMapping(value = "/list")
     public BaseResponse listDockerTag(
-            @RequestParam(value = "type", defaultValue = "0") int type,
-            @RequestParam(value = "update", required = false) boolean update) {
+        @RequestParam(value = "type", defaultValue = "0") int type,
+        @RequestParam(value = "update", required = false) boolean update) {
         log.info("list config, type: [{}], update: [{}]", type, update);
 
         List<TbConfig> configList = configService.selectConfigList(update, type);
         return new BaseResponse(ConstantCode.SUCCESS, configList);
     }
+
+//    /**
+//     * get whether enable authorization
+//     * @return
+//     */
+//    @GetMapping(value = "/auth")
+//    public BaseResponse getWhetherAuth() {
+//        log.info("getWhetherAuth");
+//        boolean isUseSecurity = constantProperties.getIsUseSecurity();
+//        return new BaseResponse(ConstantCode.SUCCESS, isUseSecurity);
+//    }
 
 }

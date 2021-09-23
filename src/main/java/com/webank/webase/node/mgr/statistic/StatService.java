@@ -147,6 +147,11 @@ public class StatService {
     }
 
     public void saveStat(int groupId, int blockNum, int blockSize, int tps, double blockCycle, String timestamp) {
+        if (this.checkStatExist(groupId, blockNum)) {
+            log.warn("saveStat skip for block num already exist!" +
+                    " groupId:{},blockNum:{}", groupId, blockNum);
+            return;
+        }
         TbStat tbStat = new TbStat();
         tbStat.setGroupId(groupId);
         tbStat.setBlockNumber(blockNum);
@@ -157,6 +162,7 @@ public class StatService {
         Date now = new Date();
         tbStat.setCreateTime(now);
         tbStat.setModifyTime(now);
+        log.debug("saveStat tbStat:{}", tbStat);
         tbStatMapper.insertSelective(tbStat);
     }
 
@@ -325,5 +331,10 @@ public class StatService {
     public void deleteByGroupId(int groupId) {
         int affected = tbStatMapper.deleteByGroupId(groupId);
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
+    }
+
+    public boolean checkStatExist(int groupId, int blockNum) {
+        TbStat maxStat = tbStatMapper.findByGroupAndBlockNum(groupId, blockNum);
+        return maxStat != null;
     }
 }

@@ -787,15 +787,16 @@ public class  ContractService {
      * @param contractAddress
      * @return List<String>
      */
-    public List<String> getContractManager(int groupId, String contractAddress) {
+    public List<TbUser> getContractManager(int groupId, String contractAddress) {
         log.info("start getContractManager groupId:{},contractAddress:{}", groupId, contractAddress);
-        List<String> resultUserList = new ArrayList<>();
+        List<TbUser> resultUserList = new ArrayList<>();
         // get deployAddress from external service
         TbExternalContract extContract = extContractService.getByAddress(groupId, contractAddress);
         String deployAddress = extContract.getDeployAddress();
         // check if address has private key
-        if (userService.checkUserHasPk(groupId, deployAddress)) {
-            resultUserList.add(deployAddress);
+        TbUser deployUser = userService.checkUserHasPk(groupId, deployAddress);
+        if (deployUser != null) {
+            resultUserList.add(deployUser);
         }
         // get from permission list or chain governance
         List<PermissionInfo> deployUserList = new ArrayList<>();
@@ -810,8 +811,9 @@ public class  ContractService {
         if (deployUserList != null && !deployUserList.isEmpty()) {
             for (PermissionInfo info : deployUserList) {
                 String adminAddress = info.getAddress();
-                if (userService.checkUserHasPk(groupId, adminAddress)) {
-                    resultUserList.add(deployAddress);
+                TbUser adminUser = userService.checkUserHasPk(groupId, deployAddress);
+                if (adminUser != null) {
+                    resultUserList.add(adminUser);
                 }
             }
         }

@@ -133,8 +133,8 @@ public class ExternalController extends BaseController {
         @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start listExtUserListJoin startTime:{} groupId:{} pageNumber:{} pageSize:{}",
-            startTime.toEpochMilli(), groupId, pageNumber, pageSize);
+        log.info("start listExtUserListJoin startTime:{} groupId:{} pageNumber:{} pageSize:{},type:{},commParam:{}",
+            startTime.toEpochMilli(), groupId, pageNumber, pageSize, type, commParam);
 
         String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
                 ? currentAccountInfo.getAccount() : null;
