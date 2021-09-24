@@ -811,7 +811,7 @@ public class  ContractService {
         if (deployUserList != null && !deployUserList.isEmpty()) {
             for (PermissionInfo info : deployUserList) {
                 String adminAddress = info.getAddress();
-                TbUser adminUser = userService.checkUserHasPk(groupId, deployAddress);
+                TbUser adminUser = userService.checkUserHasPk(groupId, adminAddress);
                 if (adminUser != null) {
                     resultUserList.add(adminUser);
                 }

@@ -131,6 +131,10 @@
         update tb_group set group_status=#{groupStatus},modify_time=NOW() where group_id=#{groupId}
     </update>
 
+    <update id="updateDescription">
+        update tb_group set description=#{description},modify_time=NOW() where group_id=#{groupId}
+    </update>
+
     <update id="updateNodeCount">
         update tb_group set node_count=#{nodeCount},modify_time=NOW() where group_id=#{groupId}
     </update>

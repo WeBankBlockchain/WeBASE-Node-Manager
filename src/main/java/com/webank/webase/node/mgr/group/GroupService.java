@@ -200,8 +200,8 @@ public class GroupService {
      */
     public void updateGroupStatus(int groupId, int groupStatus) {
         log.debug("start updateGroupStatus groupId:{} groupStatus:{}", groupId, groupStatus);
-        groupMapper.updateStatus(groupId, groupStatus);
-        log.debug("end updateGroupStatus groupId:{} groupStatus:{}", groupId, groupStatus);
+        int res = groupMapper.updateStatus(groupId, groupStatus);
+        log.debug("end updateGroupStatus res:{} groupId:{} groupStatus:{}", res, groupId, groupStatus);
 
     }
 
@@ -1310,4 +1310,16 @@ public class GroupService {
             this.removeAllDataByGroupId(tbGroup.getGroupId());
         }
     }
+
+
+    /**
+     * update status.
+     */
+    public int updateGroupDescription(int groupId, String description) {
+        log.debug("start updateGroupStatus groupId:{} description:{}", groupId, description);
+        int res = groupMapper.updateDescription(groupId, description);
+        log.debug("end updateGroupStatus res", res);
+        return res;
+    }
+
 }
