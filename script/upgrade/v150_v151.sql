@@ -1,5 +1,6 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
 CREATE TABLE IF NOT EXISTS tb_warehouse (
   id int(11) NOT NULL COMMENT '自增编号',
   warehouse_name varchar(255) binary NOT NULL COMMENT '合约仓库名',
