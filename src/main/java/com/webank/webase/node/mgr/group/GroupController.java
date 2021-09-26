@@ -342,6 +342,21 @@ public class GroupController extends BaseController {
         return baseResponse;
     }
 
+    @GetMapping("/detail/{groupId}")
+    public BaseResponse getGroupDetail(@PathVariable("groupId") Integer groupId)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start getGroupDetail startTime:{} groupId:{}", startTime.toEpochMilli(),
+            groupId);
+        TbGroup groupDetail = groupService.getGroupById(groupId);
+        baseResponse.setData(groupDetail);
+        log.info("end getGroupDetail useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
     @PutMapping("/description")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateDescription(@RequestBody @Valid ReqUpdateDesc req, BindingResult result)
