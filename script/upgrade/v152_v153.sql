@@ -5,6 +5,9 @@ ALTER TABLE tb_node ADD COLUMN city varchar(64) DEFAULT NULL COMMENT '城市（�
 ALTER TABLE tb_node ADD COLUMN agency varchar(250) DEFAULT NULL COMMENT '节点机构';
 ALTER TABLE tb_node MODIFY COLUMN node_name varchar(255) NOT NULL COMMENT '节点名称';
 
+-- support new version of fisco-webase image
+INSERT INTO `tb_config`(`config_name`, `config_type`, `config_value`, `create_time`, `modify_time`) VALUES ('docker 镜像版本', 1, 'v2.8.0', now(), now());
+
 -- contract warehouse - traceability
 INSERT INTO `tb_warehouse` (`id`, `warehouse_name`, `warehouse_name_en`, `type`, `warehouse_icon`, `description`, `description_en`, `warehouse_detail`, `warehouse_detail_en`, `create_time`, `modify_time`) VALUES
 (6, '溯源应用', 'Traceability', 5, 'traceId', '一套溯源应用合约模板（Smart-Dev-Contract）', 'Traceability Contract Suite', '一套溯源应用合约模板（Smart-Dev-Contract）', 'Traceability Contract suite', now(), now());
