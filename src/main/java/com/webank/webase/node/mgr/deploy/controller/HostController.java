@@ -84,6 +84,11 @@ public class HostController extends BaseController {
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
         }
 
+        if (!reqAddHost.getRootDir().startsWith("/")) {
+            log.error("not valid rootDir, must be absolute path!:{}", reqAddHost.getRootDir());
+            throw new NodeMgrException(ConstantCode.HOST_DIR_REQUIRE_ABSOLUTE);
+        }
+
         Instant startTime = Instant.now();
         log.info("Start addHost:[{}], start:[{}]", JsonTools.toJSONString(reqAddHost), startTime);
         try {
