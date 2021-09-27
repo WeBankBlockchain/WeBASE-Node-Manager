@@ -792,7 +792,18 @@ public class  ContractService {
         List<TbUser> resultUserList = new ArrayList<>();
         // get deployAddress from external service
         TbExternalContract extContract = extContractService.getByAddress(groupId, contractAddress);
-        String deployAddress = extContract.getDeployAddress();
+        String deployAddress;
+        if (extContract != null) {
+            deployAddress = extContract.getDeployAddress();
+        } else {
+            TbContract contract = this.queryContractByGroupIdAndAddress(groupId, contractAddress);
+            if (contract != null) {
+                deployAddress = contract.getDeployAddress();
+            } else {
+                log.warn("getContractManager get contract's deploy user address fail");
+                return resultUserList;
+            }
+        }
         // check if address has private key
         TbUser deployUser = userService.checkUserHasPk(groupId, deployAddress);
         if (deployUser != null) {
@@ -823,5 +834,16 @@ public class  ContractService {
             throw  new NodeMgrException(ConstantCode.NO_PRIVATE_KEY_OF_CONTRACT_MANAGER.attach(contractAddress));
         }
         return resultUserList;
+    }
+
+    public TbContract queryContractByGroupIdAndAddress(int groupId, String contractAddress) {
+        log.debug("start queryContractByGroupIdAndAddress groupId:{},contractAddress:{}", groupId, contractAddress);
+        ContractParam param = new ContractParam();
+        param.setGroupId(groupId);
+        param.setContractAddress(contractAddress);
+        TbContract contract = this.queryContract(param);
+        log.debug("end queryContractByGroupIdAndAddress contract:{}", contract);
+        return contract;
+
     }
 }
