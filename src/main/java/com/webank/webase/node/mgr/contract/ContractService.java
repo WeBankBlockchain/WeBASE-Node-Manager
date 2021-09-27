@@ -800,10 +800,12 @@ public class  ContractService {
             if (contract != null) {
                 deployAddress = contract.getDeployAddress();
             } else {
-                log.warn("getContractManager get contract's deploy user address fail");
+                log.warn("getContractManager get contract's deploy user address fail, contractAddress not exist");
                 return resultUserList;
             }
         }
+        log.debug("getContractManager deployAddress:{},groupId:{},contractAddress:{}",
+            deployAddress, groupId, contractAddress);
         // check if address has private key
         TbUser deployUser = userService.checkUserHasPk(groupId, deployAddress);
         if (deployUser != null) {
@@ -831,7 +833,7 @@ public class  ContractService {
         //  check resultUserList if empty
         if (resultUserList.isEmpty()) {
             log.warn("getContractManager has no private key of contractAddress:{}", contractAddress);
-            throw  new NodeMgrException(ConstantCode.NO_PRIVATE_KEY_OF_CONTRACT_MANAGER.attach(contractAddress));
+            throw new NodeMgrException(ConstantCode.NO_PRIVATE_KEY_OF_CONTRACT_MANAGER.attach(contractAddress));
         }
         return resultUserList;
     }

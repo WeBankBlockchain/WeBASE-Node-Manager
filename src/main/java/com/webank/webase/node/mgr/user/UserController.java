@@ -95,7 +95,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * bind user info.
+     * bind user info. (add public key user, different from bind private key)
      */
     @PostMapping(value = "/bind")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
