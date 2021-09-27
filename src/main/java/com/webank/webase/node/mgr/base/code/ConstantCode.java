@@ -283,6 +283,7 @@ public class ConstantCode {
     public static final RetCode HOST_ALREADY_EXIST = RetCode.mark(202495, "Host already exist");
     public static final RetCode HOST_ROOT_DIR_ACCESS_DENIED = RetCode.mark(202496, "Host root dir access denied");
     public static final RetCode HOST_NOT_EXIST = RetCode.mark(202497, "Host not exist or already been deleted");
+    public static final RetCode HOST_DIR_REQUIRE_ABSOLUTE = RetCode.mark(202498, "Host's rootDir must be absolute path");
 
 
     // add in v1.4.2
