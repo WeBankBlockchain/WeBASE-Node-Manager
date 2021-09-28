@@ -15,13 +15,11 @@
 package com.webank.webase.node.mgr.configapi;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.config.WebMvcConfig;
+import com.webank.webase.node.mgr.config.WebMvcConfig;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.enums.ConfigTypeEnum;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.properties.VersionProperties;
-import com.webank.webase.node.mgr.base.tools.IPUtil;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.config.properties.VersionProperties;
+import com.webank.webase.node.mgr.tools.IPUtil;
 import com.webank.webase.node.mgr.configapi.entity.ServerInfo;
 import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.service.ConfigService;
@@ -99,12 +97,23 @@ public class ConfigController {
      */
     @GetMapping(value = "/list")
     public BaseResponse listDockerTag(
-            @RequestParam(value = "type", defaultValue = "0") int type,
-            @RequestParam(value = "update", required = false) boolean update) {
+        @RequestParam(value = "type", defaultValue = "0") int type,
+        @RequestParam(value = "update", required = false) boolean update) {
         log.info("list config, type: [{}], update: [{}]", type, update);
 
         List<TbConfig> configList = configService.selectConfigList(update, type);
         return new BaseResponse(ConstantCode.SUCCESS, configList);
     }
+
+//    /**
+//     * get whether enable authorization
+//     * @return
+//     */
+//    @GetMapping(value = "/auth")
+//    public BaseResponse getWhetherAuth() {
+//        log.info("getWhetherAuth");
+//        boolean isUseSecurity = constantProperties.getIsUseSecurity();
+//        return new BaseResponse(ConstantCode.SUCCESS, isUseSecurity);
+//    }
 
 }

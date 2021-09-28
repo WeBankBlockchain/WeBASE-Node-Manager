@@ -108,6 +108,7 @@ dependencies {
     compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2"
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
+    compile 'org.apache.commons:commons-collections4:4.4'
     compile "mysql:mysql-connector-java:8.0.22"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
@@ -124,7 +125,6 @@ dependencies {
     }
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
     compile 'ognl:ognl:3.2.14'
-    compile 'org.apache.commons:commons-collections4:4.4'
 
     testCompile test,mbg
 

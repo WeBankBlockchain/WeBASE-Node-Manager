@@ -14,16 +14,14 @@
 
 package com.webank.webase.node.mgr.precompiled.permission;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GovernType;
 import com.webank.webase.node.mgr.base.enums.RequestType;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.PrecompiledTools;
-import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
-import com.webank.webase.node.mgr.governance.GovernVoteService;
+import com.webank.webase.node.mgr.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.PrecompiledTools;
+import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.precompiled.permission.governvote.GovernVoteService;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ChainGovernanceHandle;
 import com.webank.webase.node.mgr.precompiled.entity.RspCommitteeInfo;
@@ -36,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

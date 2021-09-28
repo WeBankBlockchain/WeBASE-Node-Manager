@@ -19,10 +19,9 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.exception.ParamException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.ValidateUtil;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.ValidateUtil;
 import com.webank.webase.node.mgr.deploy.entity.ReqAddHost;
 import com.webank.webase.node.mgr.deploy.entity.ReqCheckHost;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
@@ -83,6 +82,11 @@ public class HostController extends BaseController {
         if(!ValidateUtil.ipv4Valid(reqAddHost.getSshIp())) {
             log.error("not valid ip!:{}", reqAddHost.getSshIp());
             throw new NodeMgrException(ConstantCode.IP_FORMAT_ERROR);
+        }
+
+        if (!reqAddHost.getRootDir().startsWith("/")) {
+            log.error("not valid rootDir, must be absolute path!:{}", reqAddHost.getRootDir());
+            throw new NodeMgrException(ConstantCode.HOST_DIR_REQUIRE_ABSOLUTE);
         }
 
         Instant startTime = Instant.now();

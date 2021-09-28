@@ -30,17 +30,24 @@ public class TbExternalAccountSqlProvider {
         if (param.getAccount() != null) {
             sql.WHERE("b.account = #{account}");
         }
-        if (param.getUserName() != null) {
-            sql.WHERE("b.userName = #{userName}");
+        if (param.getCommParam() != null) {
+            sql.WHERE("(" +
+                    "b.userName like CONCAT(#{commParam},'%') " +
+                    "or " +
+                    "ext.address like CONCAT(#{commParam},'%')" +
+                    ")");
         }
-        if (param.getAddress() != null) {
-            sql.WHERE("ext.address = #{address}");
-        }
+//        if (param.getUserName() != null) {
+//            sql.WHERE("b.userName = #{userName}");
+//        }
+//        if (param.getAddress() != null) {
+//            sql.WHERE("ext.address = #{address}");
+//        }
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal
-        if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.NORMAL.getValue()) {
+        if (param.getType() == ExternalInfoType.NORMAL.getValue()) {
             sql.WHERE("b.userId is not NULL");
-        } else if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.ABNORMAL.getValue()) {
+        } else if (param.getType() == ExternalInfoType.ABNORMAL.getValue()) {
             sql.WHERE("b.userId is NULL");
         }
         // page
@@ -63,17 +70,24 @@ public class TbExternalAccountSqlProvider {
         if (param.getAccount() != null) {
             sql.WHERE("b.account = #{account}");
         }
-        if (param.getUserName() != null) {
-            sql.WHERE("b.userName = #{userName}");
+        if (param.getCommParam() != null) {
+            sql.WHERE("(" +
+                    "b.userName like CONCAT(#{commParam},'%') " +
+                    "or " +
+                    "ext.address like CONCAT(#{commParam},'%')" +
+                    ")");
         }
-        if (param.getAddress() != null) {
-            sql.WHERE("ext.address = #{address}");
-        }
+//        if (param.getUserName() != null) {
+//            sql.WHERE("b.userName = #{userName}");
+//        }
+//        if (param.getAddress() != null) {
+//            sql.WHERE("ext.address = #{address}");
+//        }
         // get all or some
         // 1-all(default), 2-normal, 3-abnormal
-        if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.NORMAL.getValue()) {
+        if (param.getType() == ExternalInfoType.NORMAL.getValue()) {
             sql.WHERE("b.userId is not NULL");
-        } else if (Integer.parseInt(param.getCommParam()) == ExternalInfoType.ABNORMAL.getValue()) {
+        } else if (param.getType() == ExternalInfoType.ABNORMAL.getValue()) {
             sql.WHERE("b.userId is NULL");
         }
         return sql.toString();

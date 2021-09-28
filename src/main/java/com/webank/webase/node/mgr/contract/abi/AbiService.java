@@ -19,8 +19,8 @@ package com.webank.webase.node.mgr.contract.abi;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
@@ -28,7 +28,7 @@ import com.webank.webase.node.mgr.contract.abi.entity.ReqImportAbi;
 import com.webank.webase.node.mgr.contract.abi.entity.RspAllContract;
 import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import java.math.BigInteger;
@@ -40,6 +40,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +57,7 @@ public class AbiService {
     @Autowired
     MethodService methodService;
     @Autowired
+    @Lazy
     MonitorService monitorService;
 
     public List<AbiInfo> getListByGroupId(ReqAbiListParam param) {
@@ -244,7 +246,7 @@ public class AbiService {
         return countOfAbi(param);
     }
 
-    public void saveAbiFromContractId(int contractId, String contractAddress) {
+    public void saveAbiFromContractId(int contractId, String contractAddress) throws NodeMgrException {
         log.info("saveAbiFromContractId contractId:{},contractAddress:{}", contractId, contractAddress);
         TbContract tbContract = contractService.queryByContractId(contractId);
 

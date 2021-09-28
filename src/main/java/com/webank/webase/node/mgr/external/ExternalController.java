@@ -19,10 +19,11 @@ import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.external.entity.RspAllExtAccount;
 import com.webank.webase.node.mgr.external.entity.RspAllExtContract;
@@ -128,13 +129,12 @@ public class ExternalController extends BaseController {
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "type", defaultValue = "1") Integer type,
-        @RequestParam(value = "userName", required = false) String userName,
-        @RequestParam(value = "address", required = false) String address,
+        @RequestParam(value = "commParam", required = false) String commParam,
         @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start listExtUserListJoin startTime:{} groupId:{} pageNumber:{} pageSize:{}",
-            startTime.toEpochMilli(), groupId, pageNumber, pageSize);
+        log.info("start listExtUserListJoin startTime:{} groupId:{} pageNumber:{} pageSize:{},type:{},commParam:{}",
+            startTime.toEpochMilli(), groupId, pageNumber, pageSize, type, commParam);
 
         String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
                 ? currentAccountInfo.getAccount() : null;
@@ -142,10 +142,10 @@ public class ExternalController extends BaseController {
         param.setGroupId(groupId);
         param.setPageSize(pageSize);
         param.setAccount(account);
-        param.setUserName(userName);
-        param.setAddress(address);
+        // search address or username
+        param.setCommParam(commParam);
         // type: 1-all, 2-normal
-        param.setCommParam(type.toString());
+        param.setType(type);
 
         int count = extAccountService.countExtAccount(param);
         if (count > 0) {
@@ -211,4 +211,19 @@ public class ExternalController extends BaseController {
         return pageResponse;
     }
 
+    /**
+     * get deploy address
+     */
+    @GetMapping("deployAddress/{groupId}/{contractAddress}")
+    public BaseResponse queryDeployAddress(@PathVariable("groupId") Integer groupId,
+        @PathVariable("contractAddress") String contractAddress) {
+        Instant startTime = Instant.now();
+        log.info("start queryDeployAddress. startTime:{} groupId:{},contractAddress:{}",
+            startTime.toEpochMilli(), groupId, contractAddress);
+        TbExternalContract externalContract = extContractService.getByAddress(groupId, contractAddress);
+        String deployAddress = externalContract.getDeployAddress();
+        log.info("end queryDeployAddress. useTime:{} deployAddress:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), deployAddress);
+        return new BaseResponse(ConstantCode.SUCCESS, deployAddress);
+    }
 }

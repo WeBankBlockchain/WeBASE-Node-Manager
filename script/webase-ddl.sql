@@ -80,13 +80,15 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
 CREATE TABLE IF NOT EXISTS tb_node (
   node_id varchar(250) NOT NULL  COMMENT '节点编号',
   group_id int(11) NOT NULL COMMENT '所属群组编号',
-  node_name varchar(120) NOT NULL COMMENT '节点名称',
+  node_name varchar(255) NOT NULL COMMENT '节点名称',
   node_ip varchar(16) DEFAULT NULL COMMENT '节点ip',
   p2p_port int(11) DEFAULT NULL COMMENT '节点p2p端口',
   block_number bigint(20) DEFAULT '0' COMMENT '节点块高',
   pbft_view bigint(20) DEFAULT '0' COMMENT 'pbft_view',
   node_active int(1) NOT NULL DEFAULT '2' COMMENT '节点存活标识(1存活，2不存活)',
   description text DEFAULT NULL COMMENT '描述',
+  city varchar(64) DEFAULT NULL COMMENT '城市（城市编号）',
+  agency varchar(250) DEFAULT NULL COMMENT '节点机构',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (node_id,group_id)

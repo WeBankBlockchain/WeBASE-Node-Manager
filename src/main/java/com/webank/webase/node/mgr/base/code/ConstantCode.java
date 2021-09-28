@@ -33,6 +33,7 @@ public class ConstantCode {
     public static final RetCode SYSTEM_EXCEPTION_GET_PRIVATE_KEY_FAIL = RetCode.mark(102001, "system exception: please check front");
     public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(102002, "No group belongs to this groupId(node not belongs to this group)");
     public static final RetCode WEBASE_VERSION_NOT_MATCH_FISCO_SUPPORT_VERSION = RetCode.mark(102003, "When webase is v1.3.2 above(inclusive), fisco-bcos node must be v2.4.1 above(inclusive)!");
+    public static final RetCode CREATE_CHECK_CODE_FAIL = RetCode.mark(102004, "Create check code fail, please check the log of WeBASE-Node-Manager for details");
 
     /**
      * Business exception.
@@ -282,6 +283,7 @@ public class ConstantCode {
     public static final RetCode HOST_ALREADY_EXIST = RetCode.mark(202495, "Host already exist");
     public static final RetCode HOST_ROOT_DIR_ACCESS_DENIED = RetCode.mark(202496, "Host root dir access denied");
     public static final RetCode HOST_NOT_EXIST = RetCode.mark(202497, "Host not exist or already been deleted");
+    public static final RetCode HOST_DIR_REQUIRE_ABSOLUTE = RetCode.mark(202498, "Host's rootDir must be absolute path");
 
 
     // add in v1.4.2
@@ -320,6 +322,15 @@ public class ConstantCode {
     public static final RetCode PARAM_INVALID_LETTER_DIGIT = RetCode.mark(202533, "Only support letter and digit, please check your params");
     public static final RetCode CONTRACT_PATH_NOT_EXISTS = RetCode.mark(202534, "contract path not exists.");
 
+    // v1.5.2
+    public static final RetCode PRIVATE_KEY_NOT_BELONG_TO = RetCode.mark(202540,"It is not your private key");
+    // v1.5.3
+    public static final RetCode DEVELOPER_CANNOT_MODIFY_OTHER_ACCOUNT = RetCode.mark(202541,"Developer account cannot modify data of other account");
+    public static final RetCode NO_PRIVATE_KEY_OF_CONTRACT_MANAGER = RetCode.mark(202542,"No private key of contract manager address in webase");
+    public static final RetCode BIND_PRIVATE_KEY_NOT_MATCH = RetCode.mark(202543,"Binding private key not match this user's address");
+    public static final RetCode BIND_PRIVATE_ALREADY_HAS_PK = RetCode.mark(202544,"This user already contain private key");
+
+
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
     public static final RetCode ACCESS_DENIED = RetCode.mark(302001, "access denied");
@@ -327,5 +338,4 @@ public class ConstantCode {
     /* param exception */
     public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
 
-    public static final RetCode PRIVATE_KEY_NOT_EXISTS  = RetCode.mark(202513,"It is not your private key");
 }

@@ -14,9 +14,8 @@
 
 package node.mgr.test.scaffold;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.scaffold.entity.ReqProject;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.contract.scaffold.entity.ReqProject;
 import java.util.Collections;
 import node.mgr.test.base.TestBase;
 import org.junit.Before;
@@ -27,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 

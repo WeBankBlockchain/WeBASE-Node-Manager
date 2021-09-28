@@ -33,8 +33,8 @@ import com.webank.webase.node.mgr.alert.mail.MailService;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.AlertRuleType;
-import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
-import com.webank.webase.node.mgr.base.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.tools.AlertRuleTools;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.CertService;
 
 import lombok.extern.log4j.Log4j2;

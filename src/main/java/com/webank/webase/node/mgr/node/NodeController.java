@@ -13,27 +13,29 @@
  */
 package com.webank.webase.node.mgr.node;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
+import com.webank.webase.node.mgr.node.entity.ReqUpdate;
+import com.webank.webase.node.mgr.node.entity.RspCity;
 import com.webank.webase.node.mgr.node.entity.TbNode;
-
+import com.webank.webase.node.mgr.tools.JsonTools;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller for node data.
@@ -44,6 +46,7 @@ import lombok.extern.log4j.Log4j2;
 public class NodeController {
 
     @Autowired private NodeService nodeService;
+    @Autowired private NodeMapper nodeMapper;
 
     /**
      * query node info list.
@@ -134,5 +137,40 @@ public class NodeController {
         return baseResponse;
     }
 
+    /**
+     * update tb_node info of city, agency, ip etc.
+     */
+    @PutMapping("/description")
+    public BaseResponse updateDesc(@Valid @RequestBody ReqUpdate reqUpdate) {
+        Instant startTime = Instant.now();
+        log.info("updateDesc startTime:{},reqUpdate:{}",
+            startTime.toEpochMilli(), reqUpdate);
 
+        int res = nodeService.updateDescription(reqUpdate);
+
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(res);
+
+        log.info("end updateDesc useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * get node id list
+     */
+    @GetMapping("/city/list")
+    public BaseResponse getCityList() {
+        Instant startTime = Instant.now();
+        log.info("start getCityList startTime:{}",
+            startTime.toEpochMilli());
+        List<RspCity> res = nodeMapper.selectCityAndNodeNum();
+
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(res);
+
+        log.info("end getCityList useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
 }

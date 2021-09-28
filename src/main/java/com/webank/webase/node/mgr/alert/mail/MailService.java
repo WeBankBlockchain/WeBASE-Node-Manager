@@ -26,8 +26,8 @@ import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerCo
 import com.webank.webase.node.mgr.alert.rule.AlertRuleMapper;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import com.webank.webase.node.mgr.base.enums.EnableStatus;
-import com.webank.webase.node.mgr.base.tools.AlertRuleTools;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.AlertRuleTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

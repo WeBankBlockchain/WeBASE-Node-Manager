@@ -15,7 +15,7 @@
  */
 package com.webank.webase.node.mgr.base.enums;
 
-import com.webank.webase.node.mgr.base.tools.NumberUtil;
+import com.webank.webase.node.mgr.tools.NumberUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -15,7 +15,7 @@
  */
 package node.mgr.test.group;
 
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
 import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
 import com.webank.webase.node.mgr.group.entity.ReqOperateGroup;

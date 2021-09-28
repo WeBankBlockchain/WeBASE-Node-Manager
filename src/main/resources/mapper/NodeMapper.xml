@@ -96,7 +96,7 @@
     <if test="pbftView != null">
       ,pbft_view = #{pbftView}
     </if>
-    <if test="description != null">
+    <if test="description != null and description != ''">
       ,description = #{description}
     </if>
     <if test="nodeActive != null">
@@ -104,6 +104,22 @@
     </if>
     where node_id=#{nodeId} and group_id=#{groupId}
   </update>
+
+  <update id="updateNodeInfo" parameterType="com.webank.webase.node.mgr.node.entity.ReqUpdate">
+    update tb_node set modify_time=NOW()
+    <if test="nodeIp != null and nodeIp != ''">
+      ,node_ip = #{nodeIp}
+    </if>
+    <if test="agency != null and agency != ''">
+      ,agency = #{agency}
+    </if>
+    <if test="city != null and city != ''">
+      ,city = #{city}
+    </if>
+    where node_id=#{nodeId}
+  </update>
+
+
 
   <select id="queryNodeInfo" parameterType="com.webank.webase.node.mgr.node.entity.NodeParam"
     resultMap="nodeMap">

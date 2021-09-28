@@ -27,13 +27,13 @@ import com.webank.webase.node.mgr.base.enums.OperateStatus;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.CleanPathUtil;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.ProgressTools;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.CleanPathUtil;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.ProgressTools;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
-import com.webank.webase.node.mgr.chain.ChainService;
+import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.contract.CnsService;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
@@ -54,9 +54,9 @@ import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.governance.GovernVoteService;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.entity.GenerateGroupInfo;
+import com.webank.webase.node.mgr.precompiled.permission.governvote.GovernVoteService;
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
 import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
@@ -200,8 +200,8 @@ public class GroupService {
      */
     public void updateGroupStatus(int groupId, int groupStatus) {
         log.debug("start updateGroupStatus groupId:{} groupStatus:{}", groupId, groupStatus);
-        groupMapper.updateStatus(groupId, groupStatus);
-        log.debug("end updateGroupStatus groupId:{} groupStatus:{}", groupId, groupStatus);
+        int res = groupMapper.updateStatus(groupId, groupStatus);
+        log.debug("end updateGroupStatus res:{} groupId:{} groupStatus:{}", res, groupId, groupStatus);
 
     }
 
@@ -1310,4 +1310,16 @@ public class GroupService {
             this.removeAllDataByGroupId(tbGroup.getGroupId());
         }
     }
+
+
+    /**
+     * update status.
+     */
+    public int updateGroupDescription(int groupId, String description) {
+        log.debug("start updateGroupStatus groupId:{} description:{}", groupId, description);
+        int res = groupMapper.updateDescription(groupId, description);
+        log.debug("end updateGroupStatus res", res);
+        return res;
+    }
+
 }

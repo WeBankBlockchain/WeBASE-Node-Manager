@@ -13,13 +13,34 @@
  */
 package com.webank.webase.node.mgr.group;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.controller.BaseController;
+import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.GroupStatus;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.group.entity.GroupGeneral;
+import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
+import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
+import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
+import com.webank.webase.node.mgr.group.entity.ReqOperateGroup;
+import com.webank.webase.node.mgr.group.entity.ReqUpdateDesc;
+import com.webank.webase.node.mgr.group.entity.RspGroupStatus;
+import com.webank.webase.node.mgr.group.entity.RspOperateResult;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
+import com.webank.webase.node.mgr.scheduler.StatisticsTransdailyTask;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.pagetools.List2Page;
+import com.webank.webase.node.mgr.transdaily.SeventDaysTrans;
+import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-
 import javax.validation.Valid;
-
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -27,33 +48,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.controller.BaseController;
-import com.webank.webase.node.mgr.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.pagetools.List2Page;
-import com.webank.webase.node.mgr.group.entity.GroupGeneral;
-import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
-import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
-import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
-import com.webank.webase.node.mgr.group.entity.ReqOperateGroup;
-import com.webank.webase.node.mgr.group.entity.RspGroupStatus;
-import com.webank.webase.node.mgr.group.entity.RspOperateResult;
-import com.webank.webase.node.mgr.group.entity.TbGroup;
-import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
-import com.webank.webase.node.mgr.scheduler.StatisticsTransdailyTask;
-import com.webank.webase.node.mgr.transdaily.SeventDaysTrans;
-import com.webank.webase.node.mgr.transdaily.TransDailyService;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Controller for processing group information.
@@ -341,6 +339,38 @@ public class GroupController extends BaseController {
         log.warn("end deleteGroupData useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    @GetMapping("/detail/{groupId}")
+    public BaseResponse getGroupDetail(@PathVariable("groupId") Integer groupId)
+        throws NodeMgrException {
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start getGroupDetail startTime:{} groupId:{}", startTime.toEpochMilli(),
+            groupId);
+        TbGroup groupDetail = groupService.getGroupById(groupId);
+        baseResponse.setData(groupDetail);
+        log.info("end getGroupDetail useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    @PutMapping("/description")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse updateDescription(@RequestBody @Valid ReqUpdateDesc req, BindingResult result)
+        throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start updateDescription startTime:{} ReqUpdate:{}", startTime.toEpochMilli(),
+            req);
+        int updateResult = groupService.updateGroupDescription(req.getGroupId(), req.getDescription());
+        baseResponse.setData(updateResult);
+        log.info("end updateDescription useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 }

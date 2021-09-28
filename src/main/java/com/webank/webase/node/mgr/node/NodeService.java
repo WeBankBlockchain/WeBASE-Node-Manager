@@ -18,16 +18,17 @@ import com.webank.webase.node.mgr.base.enums.ConsensusType;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.ValidateUtil;
-import com.webank.webase.node.mgr.chain.ChainService;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.node.entity.ReqUpdate;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.ValidateUtil;
+import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.entity.PeerOfConsensusStatus;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
@@ -35,7 +36,6 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -201,6 +201,7 @@ public class NodeService {
 
     /**
      * check node status, if pbftView or blockNumber not changing, invalid consensus
+     * @case: observer(no pbftView), if observer's blockNumber not equal consensus blockNumber
      * @1.4.3: if request consensus status but return -1, node is down
      *
      */
@@ -259,11 +260,19 @@ public class NodeService {
                     tbNode.setNodeActive(DataStatus.NORMAL.getValue());
                 }
             } else { //observer
-                // if latest block number not equal, invalid
+                // if latest block number not equal block number of consensus network
                 if (!latestNumber.equals(frontInterface.getLatestBlockNumber(groupId))) {
-                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                    // if node's block number is not changing, invalid
+                    if (localBlockNumber.equals(latestNumber)) {
+                        log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                             nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
-                    tbNode.setNodeActive(DataStatus.INVALID.getValue());
+                        tbNode.setNodeActive(DataStatus.INVALID.getValue());
+                    } else {
+                        // if latest block number not equal network's, but is changing, normal
+                        tbNode.setBlockNumber(latestNumber);
+                        tbNode.setPbftView(latestView);
+                        tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+                    }
                 } else {
                     tbNode.setBlockNumber(latestNumber);
                     tbNode.setPbftView(latestView);
@@ -566,6 +575,18 @@ public class NodeService {
 //            return ConsensusType.SEALER.getValue();
 //        }
 //        return 0;
+    }
+
+    /**
+     * update node's info in all group
+     * @param reqUpdate
+     * @return
+     */
+    public int updateDescription(ReqUpdate reqUpdate) {
+        log.debug("updateDescription reqUpdate:{}", reqUpdate);
+        int result = this.nodeMapper.updateNodeInfo(reqUpdate);
+        log.debug("updateDescription result:{}", result);
+        return result;
     }
 
 }

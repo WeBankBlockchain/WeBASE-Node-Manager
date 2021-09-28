@@ -20,26 +20,32 @@ import com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContract
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.enums.ContractType;
+import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
-import com.webank.webase.node.mgr.base.tools.Web3Tools;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
+import com.webank.webase.node.mgr.external.ExtContractService;
+import com.webank.webase.node.mgr.external.entity.TbExternalContract;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.contract.entity.*;
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
-import com.webank.webase.node.mgr.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
 import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
@@ -97,6 +103,8 @@ public class  ContractService {
     private CryptoSuite cryptoSuite;
     @Autowired
     private GroupService groupService;
+    @Autowired
+    private ExtContractService extContractService;
 
     /**
      * add new contract data.
@@ -244,8 +252,12 @@ public class  ContractService {
             log.info("updateContract contract address:{} and deployed status", address);
             tbContract.setContractAddress(address);
             tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-            // deploy success, old contract save in tb_abi
-            abiService.saveAbiFromContractId(contract.getContractId(), address);
+            // contract already deploy, try to save in tb_abi
+            try {
+                abiService.saveAbiFromContractId(contract.getContractId(), address);
+            } catch (NodeMgrException e) {
+                log.warn("updateContract new address, already save abi of this contract");
+            }
         }
         contractMapper.update(tbContract);
         return tbContract;
@@ -406,7 +418,7 @@ public class  ContractService {
         // params.put("version", version);
         params.put("abiInfo", abiArray);
         params.put("bytecodeBin", inputParam.getBytecodeBin());
-        params.put("funcParam", inputParam.getConstructorParams());
+        params.put("funcParam", inputParam.getConstructorParams() == null ? new ArrayList<>() : inputParam.getConstructorParams());
 
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
@@ -447,6 +459,27 @@ public class  ContractService {
         return tbContract;
     }
 
+    public Object queryContractOrAbiByBin(QueryByBinParam queryParam) {
+        log.debug("start queryContractOrAbiByBin. queryParam:{}", JsonTools.toJSONString(queryParam));
+        ContractParam contractParam = new ContractParam();
+        BeanUtils.copyProperties(queryParam, contractParam);
+        TbContract tbContract = this.queryContract(contractParam);
+        if (tbContract != null) {
+            log.debug("queryContractOrAbiByBin return tbContract:{}", tbContract);
+            return tbContract;
+        } else {
+            ReqAbiListParam abiParam = new ReqAbiListParam();
+            abiParam.setGroupId(queryParam.getGroupId());
+            abiParam.setPartOfContractBin(queryParam.getPartOfBytecodeBin());
+            AbiInfo abiInfo = abiService.getAbiInfoByBin(abiParam);
+            if (abiInfo == null) {
+                log.debug("queryContractOrAbiByBin not found");
+                return null;
+            }
+            log.debug("queryContractOrAbiByBin return abiInfo:{}", abiInfo);
+            return abiInfo;
+        }
+    }
 
     /**
      * send transaction.
@@ -467,8 +500,8 @@ public class  ContractService {
             contractAbiStr = contract.getContractAbi();
             //send abi to front
             sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
-            //check contract deploy
-            verifyContractDeploy(param.getContractId(), param.getGroupId());
+            //check contract deploy, v1.5.3 remove, support proxy contract
+//            verifyContractDeploy(param.getContractId(), param.getGroupId());
         } else {
             // send tx by TABLE abi
             // get from db and it's deployed
@@ -603,25 +636,24 @@ public class  ContractService {
             log.warn("fail sendAbi. inputAddress:{}", address);
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
-        //send abi
+        // send abi
         PostAbiInfo param = new PostAbiInfo();
         param.setGroupId(groupId);
         param.setContractName(contract.getContractName());
         param.setAddress(address);
         param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
         param.setContractBin(contract.getContractBin());
-
         frontInterface.sendAbi(groupId, param);
 
         //save address
-        if (StringUtils.isBlank(contract.getContractAddress())) {
-            contract.setContractAddress(address);
-            contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-        }
-
-        contract.setDeployTime(LocalDateTime.now());
-        contract.setDescription("address add by sendAbi");
-        contractMapper.update(contract);
+//        if (StringUtils.isBlank(contract.getContractAddress())) {
+//            contract.setContractAddress(address);
+//            contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+//        }
+//
+//        contract.setDeployTime(LocalDateTime.now());
+//        contract.setDescription("address add by sendAbi");
+//        contractMapper.update(contract);
     }
 
     /**
@@ -670,12 +702,12 @@ public class  ContractService {
         log.debug("start deleteByContractPath ContractPathParam:{}", JsonTools.toJSONString(param));
         // check developer
         if (RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
-                && !contractPathService.checkPathExist(param.getGroupId(), param.getContractPath(),
-                        currentAccountInfo.getAccount())) {
+            && !contractPathService.checkPathExist(param.getGroupId(), param.getContractPath(),
+            currentAccountInfo.getAccount())) {
             log.error("end deleteByContractPath. contract path not exists.");
             throw new NodeMgrException(ConstantCode.CONTRACT_PATH_NOT_EXISTS);
         }
-        
+
         ContractParam listParam = new ContractParam();
         BeanUtils.copyProperties(param, listParam);
         List<TbContract> contractList = contractMapper.listOfContract(listParam);
@@ -689,8 +721,8 @@ public class  ContractService {
             contractList.forEach( c -> deleteContract(c.getContractId(), c.getGroupId()));
         } else {
             Collection<TbContract> unDeployedList = contractList.stream()
-                    .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
-                    .collect(Collectors.toList());
+                .filter( contract -> ContractStatus.DEPLOYED.getValue() != contract.getContractStatus())
+                .collect(Collectors.toList());
             // unDeployed's size == list's size, list is all unDeployed
             if (unDeployedList.size() == contractList.size()) {
                 log.debug("deleteByContractPath delete contract in path");
@@ -746,4 +778,72 @@ public class  ContractService {
         });
     }
 
+    /**
+     * get contract manager, including user who deploy this contract
+     * and admin user which has private key in webase
+     * @tip if deploy user or admin user not has private key, exclude it
+     * @tip final list is empty, return not contain contract manager error
+     * @param groupId
+     * @param contractAddress
+     * @return List<String>
+     */
+    public List<TbUser> getContractManager(int groupId, String contractAddress) {
+        log.info("start getContractManager groupId:{},contractAddress:{}", groupId, contractAddress);
+        List<TbUser> resultUserList = new ArrayList<>();
+        // get deployAddress from external service
+        TbExternalContract extContract = extContractService.getByAddress(groupId, contractAddress);
+        String deployAddress;
+        if (extContract != null) {
+            deployAddress = extContract.getDeployAddress();
+        } else {
+            TbContract contract = this.queryContractByGroupIdAndAddress(groupId, contractAddress);
+            if (contract != null) {
+                deployAddress = contract.getDeployAddress();
+            } else {
+                log.warn("getContractManager get contract's deploy user address fail");
+                return resultUserList;
+            }
+        }
+        // check if address has private key
+        TbUser deployUser = userService.checkUserHasPk(groupId, deployAddress);
+        if (deployUser != null) {
+            resultUserList.add(deployUser);
+        }
+        // get from permission list or chain governance
+        List<PermissionInfo> deployUserList = new ArrayList<>();
+        BasePageResponse response = permissionManageService.listPermissionFull(groupId,
+            PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
+        if (response.getCode() != 0) {
+            log.error("checkDeployPermission get permission list error");
+        } else {
+            List listData = (List) response.getData();
+            deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
+        }
+        if (deployUserList != null && !deployUserList.isEmpty()) {
+            for (PermissionInfo info : deployUserList) {
+                String adminAddress = info.getAddress();
+                TbUser adminUser = userService.checkUserHasPk(groupId, adminAddress);
+                if (adminUser != null) {
+                    resultUserList.add(adminUser);
+                }
+            }
+        }
+        //  check resultUserList if empty
+        if (resultUserList.isEmpty()) {
+            log.warn("getContractManager has no private key of contractAddress:{}", contractAddress);
+            throw  new NodeMgrException(ConstantCode.NO_PRIVATE_KEY_OF_CONTRACT_MANAGER.attach(contractAddress));
+        }
+        return resultUserList;
+    }
+
+    public TbContract queryContractByGroupIdAndAddress(int groupId, String contractAddress) {
+        log.debug("start queryContractByGroupIdAndAddress groupId:{},contractAddress:{}", groupId, contractAddress);
+        ContractParam param = new ContractParam();
+        param.setGroupId(groupId);
+        param.setContractAddress(contractAddress);
+        TbContract contract = this.queryContract(param);
+        log.debug("end queryContractByGroupIdAndAddress contract:{}", contract);
+        return contract;
+
+    }
 }

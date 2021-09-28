@@ -51,6 +51,8 @@ public interface GroupMapper {
      */
     int updateStatus(@Param("groupId") Integer groupId, @Param("groupStatus") Integer groupStatus);
 
+    int updateDescription(@Param("groupId") Integer groupId, @Param("description") String description);
+
 
     /**
      * query group count.

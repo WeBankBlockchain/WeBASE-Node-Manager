@@ -20,17 +20,15 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DeployType;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.base.properties.ConstantProperties;
-import com.webank.webase.node.mgr.base.tools.HttpRequestTools;
-import com.webank.webase.node.mgr.base.tools.JsonTools;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
-import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
@@ -140,28 +138,11 @@ public class PrecompiledService {
         consensusHandle.setSignUserId(signUserId);
         TbFront front = this.frontMapper.getByNodeId(nodeId);
         Object frontRsp;
-        // if contain node's front
-        if (front != null) {
-            if (StringUtils.equalsIgnoreCase("sealer", consensusHandle.getNodeType())) {
-                log.info("nodeManageService request specific front [{}] for getStatus of group:{}",
-                    front.getFrontIp(), groupId);
-                BaseResponse response = frontInterfaceService.operateGroup(front.getFrontIp(),
-                    front.getFrontPort(), groupId, GROUP_OPERATE_GET_STATUS);
-                log.info("nodeManageService check group genesis file response:{}", response);
-                if (response != null && response.getCode() == 0) {
-                    if (GROUP_FILE_NOT_EXIST.equalsIgnoreCase((String) response.getData())) {
-                        log.error("nodeManageService not support add node as sealer "
-                            + "without group config files response:{}", response);
-                        throw new NodeMgrException(ConstantCode.GENESIS_CONF_NOT_FOUND);
-                    }
-                }
-            }
-        }
         log.info("nodeManageService now request random available front");
         frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONSENSUS,
             consensusHandle, Object.class);
         // update front group map if remove node from sealer/observer
-        if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null){
+        if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null) {
             log.info("remove node/front:[{}] from group:[{}], change front group map status to [{}]",
                     front.getFrontId(), groupId, GroupStatus.MAINTAINING);
             // update map
