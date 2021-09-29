@@ -72,6 +72,7 @@ import java.util.stream.Collectors;
 public class  ContractService {
 
     private static final int CONTRACT_ADDRESS_LENGTH = 42;
+    public static final String PERMISSION_TYPE_PERMISSION = "permission";
     private static final String PERMISSION_TYPE_DEPLOY_AND_CREATE = "deployAndCreate";
     public static final String STATE_MUTABILITY_VIEW = "view";
     public static final String STATE_MUTABILITY_PURE = "pure";
@@ -813,8 +814,9 @@ public class  ContractService {
         }
         // get from permission list or chain governance
         List<PermissionInfo> deployUserList = new ArrayList<>();
+        // check committee
         BasePageResponse response = permissionManageService.listPermissionFull(groupId,
-            PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
+            PERMISSION_TYPE_PERMISSION, null);
         if (response.getCode() != 0) {
             log.error("checkDeployPermission get permission list error");
         } else {
