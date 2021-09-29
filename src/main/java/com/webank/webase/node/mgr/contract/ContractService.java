@@ -72,6 +72,7 @@ import java.util.stream.Collectors;
 public class  ContractService {
 
     private static final int CONTRACT_ADDRESS_LENGTH = 42;
+    public static final String PERMISSION_TYPE_PERMISSION = "permission";
     private static final String PERMISSION_TYPE_DEPLOY_AND_CREATE = "deployAndCreate";
     public static final String STATE_MUTABILITY_VIEW = "view";
     public static final String STATE_MUTABILITY_PURE = "pure";
@@ -800,10 +801,12 @@ public class  ContractService {
             if (contract != null) {
                 deployAddress = contract.getDeployAddress();
             } else {
-                log.warn("getContractManager get contract's deploy user address fail");
+                log.warn("getContractManager get contract's deploy user address fail, contractAddress not exist");
                 return resultUserList;
             }
         }
+        log.debug("getContractManager deployAddress:{},groupId:{},contractAddress:{}",
+            deployAddress, groupId, contractAddress);
         // check if address has private key
         TbUser deployUser = userService.checkUserHasPk(groupId, deployAddress);
         if (deployUser != null) {
@@ -811,8 +814,9 @@ public class  ContractService {
         }
         // get from permission list or chain governance
         List<PermissionInfo> deployUserList = new ArrayList<>();
+        // check committee
         BasePageResponse response = permissionManageService.listPermissionFull(groupId,
-            PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
+            PERMISSION_TYPE_PERMISSION, null);
         if (response.getCode() != 0) {
             log.error("checkDeployPermission get permission list error");
         } else {
@@ -831,7 +835,7 @@ public class  ContractService {
         //  check resultUserList if empty
         if (resultUserList.isEmpty()) {
             log.warn("getContractManager has no private key of contractAddress:{}", contractAddress);
-            throw  new NodeMgrException(ConstantCode.NO_PRIVATE_KEY_OF_CONTRACT_MANAGER.attach(contractAddress));
+            throw new NodeMgrException(ConstantCode.NO_PRIVATE_KEY_OF_CONTRACT_MANAGER.attach(contractAddress));
         }
         return resultUserList;
     }
