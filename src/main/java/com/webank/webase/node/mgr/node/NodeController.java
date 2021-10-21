@@ -108,7 +108,7 @@ public class NodeController {
         // param
         NodeParam param = new NodeParam();
         param.setGroupId(groupId);
-        param.setNodeIp(nodeId);
+        param.setNodeId(nodeId);
 
         // query node row
         TbNode tbNode = nodeService.queryNodeInfo(param);
