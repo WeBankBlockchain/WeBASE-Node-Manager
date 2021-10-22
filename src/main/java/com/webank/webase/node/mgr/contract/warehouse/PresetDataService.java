@@ -14,7 +14,6 @@
 
 package com.webank.webase.node.mgr.contract.warehouse;
 
-import com.webank.scaffold.util.CommonUtil;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractFolder;
@@ -27,7 +26,6 @@ import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -126,7 +124,6 @@ public class PresetDataService {
             return jsonStr;
         } catch (Exception e) {
             log.error("loadWarehouseJson, Exception:[]", e);
-            throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
         } 
     }
 }
