@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.contract.warehouse;
 
+import com.webank.scaffold.util.CommonUtil;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractFolder;
@@ -23,6 +24,7 @@ import com.webank.webase.node.mgr.contract.warehouse.mapper.TbContractFolderMapp
 import com.webank.webase.node.mgr.contract.warehouse.mapper.TbContractItemMapper;
 import com.webank.webase.node.mgr.contract.warehouse.mapper.TbWarehouseMapper;
 import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -106,6 +108,9 @@ public class PresetDataService {
             if (contractItemMapper.selectByPrimaryKey(item.getId()) == null) {
                 item.setCreateTime(new Date());
                 item.setModifyTime(item.getCreateTime());
+                // contract item's desc parse into base64
+                item.setDescription(NodeMgrTools.encodedBase64Str(item.getDescription()));
+                item.setDescriptionEn(NodeMgrTools.encodedBase64Str(item.getDescriptionEn()));
                 item2Save.add(item);
             }
         }
