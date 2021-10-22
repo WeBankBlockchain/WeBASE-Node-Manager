@@ -124,6 +124,7 @@ public class PresetDataService {
             return jsonStr;
         } catch (Exception e) {
             log.error("loadWarehouseJson, Exception:[]", e);
-        } 
+            return null;
+        }
     }
 }
