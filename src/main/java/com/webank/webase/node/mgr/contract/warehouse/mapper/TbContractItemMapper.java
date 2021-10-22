@@ -1,6 +1,7 @@
 package com.webank.webase.node.mgr.contract.warehouse.mapper;
 
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractItem;
+import com.webank.webase.node.mgr.contract.warehouse.entity.TbWarehouse;
 import java.util.List;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -15,6 +16,9 @@ import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
 
 public interface TbContractItemMapper {
+
+    @Select({ "select", TbContractItemSqlProvider.ALL_COLUMN_FIELDS, "from tb_contract_item" })
+    List<TbContractItem> findAll();
 
     @Select({ "select", TbContractItemSqlProvider.ALL_COLUMN_FIELDS, "from tb_contract_item",
         "where contract_folder_id = #{contractFolderId}  order by id asc" })
