@@ -71,7 +71,9 @@ public class PresetDataService {
                 item2Save.add(item);
             }
         }
-        warehouseMapper.batchInsert(item2Save);
+        if (!item2Save.isEmpty()) {
+            warehouseMapper.batchInsert(item2Save);
+        }
         log.info("readAndInitStoreItem save {} items", storeItems.size());
     }
 
@@ -90,7 +92,9 @@ public class PresetDataService {
                 item2Save.add(item);
             }
         }
-        contractFolderMapper.batchInsert(item2Save);
+        if (!item2Save.isEmpty()) {
+            contractFolderMapper.batchInsert(item2Save);
+        }
         log.info("readAndInitFolderItem save {} items", folderItems.size());
     }
 
@@ -107,12 +111,14 @@ public class PresetDataService {
                 item.setCreateTime(new Date());
                 item.setModifyTime(item.getCreateTime());
                 // contract item's desc parse into base64
-                item.setDescription(NodeMgrTools.encodedBase64Str(item.getDescription()));
-                item.setDescriptionEn(NodeMgrTools.encodedBase64Str(item.getDescriptionEn()));
+//                item.setDescription(NodeMgrTools.encodedBase64Str(item.getDescription()));
+//                item.setDescriptionEn(NodeMgrTools.encodedBase64Str(item.getDescriptionEn()));
                 item2Save.add(item);
             }
         }
-        contractItemMapper.batchInsert(item2Save);
+        if (!item2Save.isEmpty()) {
+            contractItemMapper.batchInsert(item2Save);
+        }
         log.info("readAndInitContractItem save {} items", contractItems.size());
     }
 
