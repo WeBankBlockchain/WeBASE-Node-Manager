@@ -81,20 +81,20 @@ public class EventService {
 
 	/**
 	 * list contract info from contract & abi
+	 * 2021/10/25 重复合约地址问题：tb_abi中保存了所有的合约，因此去除contract表的数据
 	 */
 	public List<RspContractInfo> listContractInfoBoth(int groupId) {
 		// find contract list
-		ContractParam contractParam = new ContractParam();
-		contractParam.setGroupId(groupId);
-		contractParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
-		List<RspContractNoAbi> contractList = contractService.queryContractListNoAbi(contractParam);
+//		ContractParam contractParam = new ContractParam();
+//		contractParam.setGroupId(groupId);
+//		contractParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
+//		List<RspContractNoAbi> contractList = contractService.queryContractListNoAbi(contractParam);
 		// find abi list
 		List<RspContractNoAbi> abiInfoList = abiService.listByGroupIdNoAbi(groupId);
 		// add abi info and contract info in result list
 		List<RspContractInfo> resultList = new ArrayList<>();
-		contractList.forEach(c -> resultList.add(new RspContractInfo(TYPE_CONTRACT, c.getContractAddress(), c.getContractName())));
 		abiInfoList.forEach(c -> resultList.add(new RspContractInfo(TYPE_ABI_INFO, c.getContractAddress(), c.getContractName())));
-
+//		contractList.forEach(c -> resultList.add(new RspContractInfo(TYPE_CONTRACT, c.getContractAddress(), c.getContractName())));
 		return resultList;
 	}
 
