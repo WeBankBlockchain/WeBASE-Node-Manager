@@ -1,0 +1,74 @@
+[
+  {
+    "id" : 1,
+    "folderName" : "Tools",
+    "warehouseId" : 1,
+    "description" : "工具箱中有常用的工具合约",
+    "descriptionEn" : "Toolbox Contract suite",
+    "folderDetail" : "工具箱中有常用的工具合约",
+    "folderDetailEn" : "Toolbox Contract suite"
+  },
+  {
+    "id" : 2,
+    "folderName" : "Evidence",
+    "warehouseId" : 2,
+    "description" : "一套区块链存证合约，实现区块链存证、取证",
+    "descriptionEn" : "Evidence Contract suite",
+    "folderDetail" : "一套区块链存证合约，实现区块链存证、取证",
+    "folderDetailEn" : "Evidence Contract suite"
+  },
+  {
+    "id" : 3,
+    "folderName" : "Points",
+    "warehouseId" : 3,
+    "description" : "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+    "descriptionEn" : "Points Contract suite",
+    "folderDetail" : "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+    "folderDetailEn" : "Points Contract suite"
+  },
+  {
+    "id" : 4,
+    "folderName" : "Smart_Dev_Basic",
+    "warehouseId" : 1,
+    "description" : "SmartDev基础合约，包含Table/KVTable/Sha/Crypto/HelloWorld等",
+    "descriptionEn" : "Smart-Dev-Contract basic contract suite, including Table/KVTable/Sha/Crypto/HelloWorld etc.",
+    "folderDetail" : "SmartDev基础合约，包含Table/KVTable/Sha/Crypto/HelloWorld等",
+    "folderDetailEn" : "Smart-Dev-Contract default contract suite"
+  },
+  {
+    "id" : 5,
+    "folderName" : "Smart_Dev_Evidence",
+    "warehouseId" : 4,
+    "description" : "SmartDev存证合约案例",
+    "descriptionEn" : "Smart-Dev-Contract Evidence contract suite",
+    "folderDetail" : "SmartDev存证合约案例",
+    "folderDetailEn" : "Smart-Dev-Contract Evidence contract suite"
+  },
+  {
+    "id" : 6,
+    "folderName" : "Asset",
+    "warehouseId" : 5,
+    "description" : "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
+    "descriptionEn" : "Asset Contract suite",
+    "folderDetail" : "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
+    "folderDetailEn" : "Asset Contract suite"
+  },
+  {
+    "id" : 7,
+    "folderName" : "Tracebility",
+    "warehouseId" : 6,
+    "description" : "一套溯源应用合约模板（Smart-Dev-Contract）",
+    "descriptionEn" : "Traceability Contract Suite",
+    "folderDetail" : "一套溯源应用合约模板（Smart-Dev-Contract）",
+    "folderDetailEn" : "Traceability Contract Suite"
+  },
+  {
+    "id" : 8,
+    "folderName" : "Proxy",
+    "warehouseId" : 7,
+    "description" : "一套可升级的业务、数据分离的代理合约模板",
+    "descriptionEn" : "Proxy Contract Suite",
+    "folderDetail" : "一套可升级的业务、数据分离的代理合约模板",
+    "folderDetailEn" : "Proxy Contract Suite"
+  }
+]

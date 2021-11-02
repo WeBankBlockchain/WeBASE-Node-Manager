@@ -91,7 +91,7 @@ constant:
   auditMonitorTaskFixedDelay: 300000
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
-  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/config/encrypt,/config/version,/front/refresh,/api/*
+  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/config/encrypt,/config/version,/front/refresh,/api/*,/config/auth
   ###interval to async refresh group list locally
   resetGroupListInterval: 15000
   ###interval block statistic, unit: ms
