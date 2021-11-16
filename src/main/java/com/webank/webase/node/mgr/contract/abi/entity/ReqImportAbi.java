@@ -33,7 +33,7 @@ public class ReqImportAbi {
 	@NotBlank
     private String account;
 	@NotNull
-	private Integer groupId;
+	private String groupId;
 	@NotBlank
 	private String contractName;
 	@NotBlank

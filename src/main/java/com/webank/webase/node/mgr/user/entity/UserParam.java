@@ -25,7 +25,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class UserParam extends BaseQueryParam {
 
-    private Integer groupId;
+    private String groupId;
     private Integer orgId;
     private Integer userId;
     private String userName;

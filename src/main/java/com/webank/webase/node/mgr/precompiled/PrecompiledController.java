@@ -61,7 +61,7 @@ public class PrecompiledController extends BaseController {
      */
     @GetMapping("cns/list")
     public Object listCns(
-            @RequestParam(defaultValue = "1") int groupId,
+            @RequestParam(defaultValue = "1") String groupId,
             @RequestParam String contractNameAndVersion,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) {
@@ -78,7 +78,7 @@ public class PrecompiledController extends BaseController {
     /**
      * get node list with consensus status.
      */
-    @GetMapping("consensus/list")
+/*    @GetMapping("consensus/list")
     public Object getNodeList(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
@@ -91,7 +91,7 @@ public class PrecompiledController extends BaseController {
         log.info("end getNodeList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
-    }
+    }*/
 
     @PostMapping(value = "consensus")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)

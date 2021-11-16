@@ -55,7 +55,7 @@ public class PrecompiledSysConfigController extends BaseController {
      */
     @GetMapping("config/list")
     public Object getSysConfigList(
-            @RequestParam(defaultValue = "1") int groupId,
+            @RequestParam(defaultValue = "1") String groupId,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) {
 

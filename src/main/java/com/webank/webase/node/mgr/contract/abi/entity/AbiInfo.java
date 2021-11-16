@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AbiInfo {
 	private Integer abiId;
-	private Integer groupId;
+	private String groupId;
 	private String account;
 	private String contractName;
 	private String contractAddress;

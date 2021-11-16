@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TbGroup {
 
-    private Integer groupId;
+    private String groupId;
     private String groupName;
     /**
      * 1-normal, 2-invalid
@@ -58,7 +58,7 @@ public class TbGroup {
     private String chainName;
 
 
-    public TbGroup(Integer groupId, String groupName, Integer nodeCount, String description,
+    public TbGroup(String groupId, String groupName, Integer nodeCount, String description,
                    GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName){
         this.groupId = groupId;
         this.groupName = groupName;

@@ -47,7 +47,7 @@ public class TransHashService {
     /**
      * add trans hash info.
      */
-    public void addTransInfo(int groupId, TbTransHash tbTransHash) throws NodeMgrException {
+    public void addTransInfo(String groupId, TbTransHash tbTransHash) throws NodeMgrException {
         log.debug("start addTransInfo groupId:{} tbTransHash:{}", groupId,
                 JsonTools.toJSONString(tbTransHash));
         String tableName = TableName.TRANS.getTableName(groupId);
@@ -58,7 +58,7 @@ public class TransHashService {
     /**
      * query trans list.
      */
-    public List<TbTransHash> queryTransList(int groupId, TransListParam param)
+    public List<TbTransHash> queryTransList(String groupId, TransListParam param)
             throws NodeMgrException {
         log.debug("start queryTransList. TransListParam:{}", JsonTools.toJSONString(param));
         String tableName = TableName.TRANS.getTableName(groupId);
@@ -77,7 +77,7 @@ public class TransHashService {
     /**
      * query count of trans hash.
      */
-    public Integer queryCountOfTran(int groupId, TransListParam queryParam)
+    public Integer queryCountOfTran(String groupId, TransListParam queryParam)
             throws NodeMgrException {
         log.debug("start queryCountOfTran. queryParam:{}", JsonTools.toJSONString(queryParam));
         String tableName = TableName.TRANS.getTableName(groupId);
@@ -95,7 +95,7 @@ public class TransHashService {
     /**
      * query count of trans by minus max and min trans_number
      */
-    public Integer queryCountOfTranByMinus(int groupId)
+    public Integer queryCountOfTranByMinus(String groupId)
             throws NodeMgrException {
         log.debug("start queryCountOfTranByMinus.");
         String tableName = TableName.TRANS.getTableName(groupId);
@@ -147,7 +147,7 @@ public class TransHashService {
     /**
      * query min and max block number.
      */
-    public List<MinMaxBlock> queryMinMaxBlock(int groupId) throws NodeMgrException {
+    public List<MinMaxBlock> queryMinMaxBlock(String groupId) throws NodeMgrException {
         log.debug("start queryMinMaxBlock");
         String tableName = TableName.TRANS.getTableName(groupId);
         try {
@@ -164,7 +164,7 @@ public class TransHashService {
     /**
      * Remove trans info.
      */
-    public Integer remove(Integer groupId, Integer subTransNum) {
+    public Integer remove(String groupId, Integer subTransNum) {
         String tableName = TableName.TRANS.getTableName(groupId);
         Integer affectRow = transHashMapper.remove(tableName, subTransNum, groupId);
         return affectRow;
@@ -174,7 +174,7 @@ public class TransHashService {
     /**
      * query un statistics transaction list.
      */
-    public List<TbTransHash> queryUnStatTransHashList(int groupId) {
+    public List<TbTransHash> queryUnStatTransHashList(String groupId) {
         List<TbTransHash> list = transHashMapper
                 .listOfUnStatTransHash(TableName.TRANS.getTableName(groupId));
         return list;
@@ -183,7 +183,7 @@ public class TransHashService {
     /**
      * query un statistic transaction list by job.
      */
-    public List<TbTransHash> queryUnStatTransHashListByJob(int groupId, Integer shardingTotalCount,
+    public List<TbTransHash> queryUnStatTransHashListByJob(String groupId, Integer shardingTotalCount,
                                                            Integer shardingItem) {
         String tableName = TableName.TRANS.getTableName(groupId);
         List<TbTransHash> list = transHashMapper
@@ -194,7 +194,7 @@ public class TransHashService {
     /**
      * update trans statistic flag.
      */
-    public void updateTransStatFlag(int groupId, String transHash) {
+    public void updateTransStatFlag(String groupId, String transHash) {
         String tableName = TableName.TRANS.getTableName(groupId);
         transHashMapper.updateTransStatFlag(tableName, transHash);
     }
@@ -202,7 +202,7 @@ public class TransHashService {
     /**
      * get tbTransInfo from chain
      */
-    public List<TbTransHash> getTransListFromChain(Integer groupId, String transHash,
+    public List<TbTransHash> getTransListFromChain(String groupId, String transHash,
                                                    BigInteger blockNumber) {
         log.debug("start getTransListFromChain.");
         List<TbTransHash> transList = new ArrayList<>();
@@ -220,7 +220,7 @@ public class TransHashService {
             if (transInBlock != null && transInBlock.size() != 0) {
                 transInBlock.forEach(tran -> {
                     TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getFrom(),
-                            tran.getTo(), tran.getBlockNumber(),
+                            tran.getTo(), BigInteger.valueOf(tran.getBlockLimit()),
                             null);
                     transList.add(tbTransHash);
                 });
@@ -234,7 +234,7 @@ public class TransHashService {
     /**
      * request front for transaction by hash.
      */
-    public TbTransHash getTbTransFromFrontByHash(Integer groupId, String transHash)
+    public TbTransHash getTbTransFromFrontByHash(String groupId, String transHash)
             throws NodeMgrException {
         log.info("start getTransFromFrontByHash. groupId:{}  transaction:{}", groupId,
                 transHash);
@@ -242,7 +242,7 @@ public class TransHashService {
         TbTransHash tbTransHash = null;
         if (trans != null) {
             tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
-                    trans.getBlockNumber(), null);
+                    BigInteger.valueOf(trans.getBlockLimit()), null);
         }
         log.info("end getTransFromFrontByHash. tbTransHash:{}", JsonTools.toJSONString(tbTransHash));
         return tbTransHash;
@@ -251,7 +251,7 @@ public class TransHashService {
     /**
      * get transaction receipt
      */
-    public TransactionReceipt getTransReceipt(int groupId, String transHash) {
+    public TransactionReceipt getTransReceipt(String groupId, String transHash) {
         return frontInterface.getTransReceipt(groupId, transHash);
     }
 
@@ -259,7 +259,7 @@ public class TransHashService {
     /**
      * get transaction info
      */
-    public JsonTransactionResponse getTransaction(int groupId, String transHash) {
+    public JsonTransactionResponse getTransaction(String groupId, String transHash) {
         return frontInterface.getTransaction(groupId, transHash);
     }
 

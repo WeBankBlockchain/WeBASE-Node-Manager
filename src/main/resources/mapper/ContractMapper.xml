@@ -14,7 +14,7 @@
       property="contractVersion"/>
     <result column="account" javaType="java.lang.String" jdbcType="VARCHAR"
       property="account"/>
-    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+    <result column="group_id" javaType="java.lang.String" jdbcType="VARCHAR"
       property="groupId"/>
     <result column="contract_source" javaType="java.lang.String" jdbcType="VARCHAR"
       property="contractSource"/>
@@ -47,7 +47,7 @@
   <resultMap id="contractPathMap" type="com.webank.webase.node.mgr.contract.entity.RspContractPath">
     <id column="contract_path" javaType="java.lang.String" jdbcType="VARCHAR"
       property="contractPath"/>
-    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+    <result column="group_id" javaType="java.lang.String" jdbcType="VARCHAR"
       property="groupId"/>
   </resultMap>
 

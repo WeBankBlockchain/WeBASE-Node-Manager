@@ -24,7 +24,7 @@ import org.hibernate.validator.constraints.Length;
 @Data
 public class ReqContractAddressSave {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotBlank
     @Length(max=120)
     private String contractName;

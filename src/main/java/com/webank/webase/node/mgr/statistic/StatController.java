@@ -45,7 +45,7 @@ public class StatController {
         @RequestParam(required = false) Long contrastBeginDate,
         @RequestParam(required = false) Long contrastEndDate,
         @RequestParam(required = false, defaultValue = "1") int gap,
-        @RequestParam(defaultValue = "1") int groupId) {
+        @RequestParam(defaultValue = "1") String groupId) {
         Instant startTime = Instant.now();
         log.info("getBlockStat start. groupId:[{}], startTime:{}", groupId,
             startTime.toEpochMilli());

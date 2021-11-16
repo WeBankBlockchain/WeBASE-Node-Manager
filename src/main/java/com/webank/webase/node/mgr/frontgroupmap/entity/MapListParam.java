@@ -21,16 +21,16 @@ import lombok.NoArgsConstructor;
 public class MapListParam {
     private Integer mapId;
     private Integer frontId;
-    private Integer groupId;
+    private String groupId;
     private Integer status;
     private Integer type;
 
-    public MapListParam(Integer frontId, Integer groupId) {
+    public MapListParam(Integer frontId, String groupId) {
         this.frontId = frontId;
         this.groupId = groupId;
     }
 
-    public MapListParam(Integer frontId, Integer groupId, Integer status, Integer type) {
+    public MapListParam(Integer frontId, String groupId, Integer status, Integer type) {
         this.frontId = frontId;
         this.groupId = groupId;
         this.status = status;

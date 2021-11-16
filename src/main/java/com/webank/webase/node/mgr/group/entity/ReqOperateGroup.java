@@ -28,7 +28,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class ReqOperateGroup {
 	@NotNull
-	private Integer generateGroupId;
+	private String generateGroupId;
 	@NotBlank
 	private String type;
 }

@@ -24,7 +24,7 @@ import lombok.Data;
 @Data
 public class NewMethodInputParam {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotNull
     List<Method> methodList;
 }

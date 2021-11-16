@@ -25,5 +25,5 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class GovernParam extends BaseQueryParam {
-    private Integer groupId;
+    private String groupId;
 }

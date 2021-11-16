@@ -39,7 +39,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class GroupControllerTest extends TestBase {
     private MockMvc mockMvc;
     private String targetNodeId = "dd7a2964007d583b719412d86dab9dcf773c61bccab18cb646cd480973de0827cc94fa84f33982285701c8b7a7f465a69e980126a77e8353981049831b550f5c";
-    private Integer newGroupId = 2022;
+    private String newGroupId = "2022";
 
     @Autowired
     private WebApplicationContext webApplicationContext;

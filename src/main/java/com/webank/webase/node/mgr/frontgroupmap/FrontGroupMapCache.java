@@ -92,7 +92,7 @@ public class FrontGroupMapCache {
      * filter by group status
      */
     @Transactional
-    public List<FrontGroup> getMapListByGroupId(int groupId) {
+    public List<FrontGroup> getMapListByGroupId(String groupId) {
         List<FrontGroup> list = getAllMap();
         if (list == null) {
             log.warn("getMapListByGroupId getAllMap is null.");
@@ -100,7 +100,7 @@ public class FrontGroupMapCache {
         }
         // filter all FrontGroup which groupStatus is normal
         List<FrontGroup> map = list.stream()
-            .filter(m -> groupId == m.getGroupId()
+            .filter(m -> groupId.equals(m.getGroupId())
                     && m.getStatus() == GroupStatus.NORMAL.getValue())
             .collect(Collectors.toList());
         log.debug("getMapListByGroupId map size:{}", map.size());

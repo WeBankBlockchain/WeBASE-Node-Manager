@@ -32,8 +32,8 @@ public interface ContractPathMapper {
 
     TbContractPath findOne(ContractPathParam param);
 
-    List<TbContractPath> listOfContractPath(@Param("groupId") Integer groupId, @Param("account") String account);
+    List<TbContractPath> listOfContractPath(@Param("groupId") String groupId, @Param("account") String account);
 
-    void removeByGroupId(@Param("groupId") Integer groupId);
+    void removeByGroupId(@Param("groupId") String groupId);
 
 }

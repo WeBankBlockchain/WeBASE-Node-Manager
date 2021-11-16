@@ -6,7 +6,7 @@
 <mapper namespace="com.webank.webase.node.mgr.precompiled.permission.governvote.GovernVoteMapper">
   <resultMap id="voteMap" type="com.webank.webase.node.mgr.precompiled.permission.governvote.entity.TbGovernVote">
     <id column="id" javaType="java.lang.Integer" jdbcType="INTEGER" property="id"/>
-    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+    <result column="group_id" javaType="java.lang.String" jdbcType="VARCHAR"
       property="groupId"/>
     <result column="time_limit" javaType="java.lang.Long" jdbcType="BIGINT"
       property="timeLimit"/>

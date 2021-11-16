@@ -59,7 +59,7 @@ public class ExtContractService {
      */
     @Async(value = "mgrAsyncExecutor")
     @Transactional
-    public void asyncSaveContract(int groupId, String txHash, String timestampStr) {
+    public void asyncSaveContract(String groupId, String txHash, String timestampStr) {
         log.debug("start asyncSaveContract groupId:{}, txHash:{}, timestampStr:{}",
             groupId, txHash, timestampStr);
 
@@ -87,7 +87,7 @@ public class ExtContractService {
      * save contract on chain
      */
     @Transactional
-    public int saveContractOnChain(int groupId, String contractAddress, String txHash,
+    public int saveContractOnChain(String groupId, String contractAddress, String txHash,
         String deployAddress, String timestamp) {
         log.debug("saveContractOnChain groupId:{} contractAddress:{}", groupId, contractAddress);
         if (checkAddressExist(groupId, contractAddress)) {
@@ -130,7 +130,7 @@ public class ExtContractService {
         return insertRes;
     }
 
-    private boolean checkAddressExist(int groupId, String contractAddress) {
+    private boolean checkAddressExist(String groupId, String contractAddress) {
         int count = extContractMapper.countOfExtContract(groupId, contractAddress);
         if (count > 0) {
             log.info("saveContractOnChain exists tb_external_contract"
@@ -161,7 +161,7 @@ public class ExtContractService {
         return extContractMapper.updateByPrimaryKeySelective(update);
     }
 
-    public void deleteByGroupId(int groupId) {
+    public void deleteByGroupId(String groupId) {
         int affected = extContractMapper.deleteByGroupId(groupId);
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
     }
@@ -176,7 +176,7 @@ public class ExtContractService {
         return contractList;
     }
 
-    public TbExternalContract getByAddress(int groupId, String contractAddress) {
+    public TbExternalContract getByAddress(String groupId, String contractAddress) {
         log.debug("getByAddress groupId:{}, contractAddress:{}", groupId, contractAddress);
         TbExternalContract externalContract = extContractMapper.getByGroupIdAndAddress(groupId, contractAddress);
         log.debug("getByAddress externalContract:{}", externalContract);

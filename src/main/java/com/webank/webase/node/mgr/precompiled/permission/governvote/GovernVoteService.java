@@ -80,7 +80,7 @@ public class GovernVoteService {
         governVoteMapper.deleteById(voteId);
     }
 
-    public void deleteAllByGroupId(int groupId) {
+    public void deleteAllByGroupId(String groupId) {
         log.info("deleteAllByGroupId groupId:{}", groupId);
         governVoteMapper.deleteByGroupId(groupId);
     }

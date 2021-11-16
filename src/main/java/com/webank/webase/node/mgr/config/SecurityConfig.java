@@ -68,7 +68,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 无权访问 JSON 格式的数据
         http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler);
 
-        // login page
+//        // login page
         http.formLogin().loginPage("/login")
             .loginProcessingUrl("/account/login") // login request uri
             .usernameParameter("account").passwordParameter("accountPwd").permitAll()

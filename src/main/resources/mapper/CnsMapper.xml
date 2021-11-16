@@ -6,7 +6,7 @@
     type="com.webank.webase.node.mgr.contract.entity.TbCns">
     <id column="id" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="id" />
-    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+    <result column="group_id" javaType="java.lang.String" jdbcType="VARCHAR"
       property="groupId" />
     <result column="contract_path" javaType="java.lang.String" jdbcType="VARCHAR"
       property="contractPath" />

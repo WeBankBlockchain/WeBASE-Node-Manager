@@ -22,7 +22,7 @@ import lombok.Data;
 
 @Data
 public class ConsensusHandle {
-    private int groupId;
+    private String groupId;
     /**
      * sealer, observer, remove
      */

@@ -23,7 +23,7 @@ import lombok.Data;
 @Data
 public class TbGovernVote {
     private Integer id;
-    private Integer groupId;
+    private String groupId;
     /**
      * blockHeight of ten times BlockLimit at voting time
      */

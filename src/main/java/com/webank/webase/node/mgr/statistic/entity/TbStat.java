@@ -33,7 +33,7 @@ public class TbStat implements Serializable {
      *
      * @mbg.generated
      */
-    private Integer groupId;
+    private String groupId;
 
     /**
      *

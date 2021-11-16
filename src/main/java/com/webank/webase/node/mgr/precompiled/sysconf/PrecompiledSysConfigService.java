@@ -49,7 +49,7 @@ public class PrecompiledSysConfigService {
     /**
      * get system config list
      */
-    public Object getSysConfigListService(int groupId, int pageSize, int pageNumber) {
+    public Object getSysConfigListService(String groupId, int pageSize, int pageNumber) {
         log.debug("start getSysConfigListService. groupId:{}", groupId);
         Map<String, String> map = new HashMap<>();
         map.put("groupId", String.valueOf(groupId));
@@ -74,7 +74,7 @@ public class PrecompiledSysConfigService {
             log.error("fail setSysConfigByKeyService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        int groupId = sysConfigParam.getGroupId();
+        String groupId = sysConfigParam.getGroupId();
         String signUserId = userService.getSignUserIdByAddress(groupId, sysConfigParam.getFromAddress());
         sysConfigParam.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.postForEntity(

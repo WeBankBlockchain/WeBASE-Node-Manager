@@ -24,7 +24,7 @@ import lombok.Data;
  */
 @Data
 public class StatisticalGroupTransInfo {
-    private Integer groupId;
+    private String groupId;
     private LocalDate maxDay;
     private BigInteger blockNumber = BigInteger.ZERO;
     private BigInteger transCount = BigInteger.ZERO;

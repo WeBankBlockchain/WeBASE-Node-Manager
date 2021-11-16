@@ -49,7 +49,7 @@ public class BlockController {
      * query block list.
      */
     @GetMapping(value = "/blockList/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse queryBlockList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse queryBlockList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "pkHash", required = false) String pkHash,
@@ -111,7 +111,7 @@ public class BlockController {
      * get block by number.
      */
     @GetMapping("/blockByNumber/{groupId}/{blockNumber}")
-    public BaseResponse getBlockByNumber(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getBlockByNumber(@PathVariable("groupId") String groupId,
         @PathVariable("blockNumber") BigInteger blockNumber)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -129,7 +129,7 @@ public class BlockController {
      * get block header by number.
      */
     @GetMapping("/blockHeaderByNumber/{groupId}/{blockNumber}")
-    public BaseResponse getBlockHeaderByNumber(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getBlockHeaderByNumber(@PathVariable("groupId") String groupId,
         @PathVariable("blockNumber") BigInteger blockNumber)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -147,7 +147,7 @@ public class BlockController {
      * get block header by number.
      */
     @GetMapping("/blockHeaderByHash/{groupId}/{blockHash}")
-    public BaseResponse getBlockHeaderByHash(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getBlockHeaderByHash(@PathVariable("groupId") String groupId,
         @PathVariable("blockHash") String blockHash)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -165,7 +165,7 @@ public class BlockController {
      * get block or tx
      */
     @GetMapping("/search/{groupId}/{input}")
-    public BaseResponse searchByBlockNumOrTxHash(@PathVariable("groupId") Integer groupId,
+    public BaseResponse searchByBlockNumOrTxHash(@PathVariable("groupId") String groupId,
         @PathVariable("input") String input)
         throws NodeMgrException {
         Instant startTime = Instant.now();

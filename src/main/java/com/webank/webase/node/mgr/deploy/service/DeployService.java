@@ -238,7 +238,7 @@ public class DeployService {
     @Transactional(propagation = Propagation.REQUIRED)
     public Pair<RetCode, String> addNodes(ReqAddNode addNode) throws NodeMgrException {
 
-        int groupId = addNode.getGroupId();
+        String groupId = addNode.getGroupId();
         String chainName = addNode.getChainName();
         String agencyName = addNode.getAgencyName();
 
@@ -419,7 +419,7 @@ public class DeployService {
 
         // get delete node's group id list from ./NODES_ROOT/default_chain/ip/node[x]/conf/group.[groupId].genesis
         Path nodePath = this.pathService.getNodeRoot(chain.getChainName(), host.getIp(), front.getHostIndex());
-        Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
+        Set<String> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
         log.info("deleteNode updateNodeConfigIniByGroupList chain:{}, groupIdSet:{}", chain, groupIdSet);
         // update related node's config.ini file, e.g. p2p
         try {
@@ -477,7 +477,7 @@ public class DeployService {
     public Pair<RetCode, String> batchAddNode(ReqAddNode addNode)
         throws NodeMgrException, InterruptedException {
 
-        int groupId = addNode.getGroupId();
+        String groupId = addNode.getGroupId();
         String chainName = addNode.getChainName();
         String agencyName = addNode.getAgencyName();
 
@@ -603,7 +603,7 @@ public class DeployService {
         return Pair.of(ConstantCode.SUCCESS, "success");
     }
 
-    public void restartChain(String chainName, Integer groupId) {
+    public void restartChain(String chainName, String groupId) {
         log.info("restartChain chainName:{},groupId:{}", chainName, groupId);
         TbChain chain = tbChainMapper.getByChainName(chainName);
         nodeAsyncService.asyncRestartRelatedFront(chain.getId(), Collections.singleton(groupId), OptionType.MODIFY_CHAIN,

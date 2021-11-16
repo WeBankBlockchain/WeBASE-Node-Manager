@@ -54,7 +54,7 @@ public class TransHashController extends BaseController {
      * query trans list.
      */
     @GetMapping(value = "/transList/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse queryTransList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse queryTransList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "transactionHash", required = false) String transHash,
@@ -103,7 +103,7 @@ public class TransHashController extends BaseController {
      * get transaction receipt.
      */
     @GetMapping("/transactionReceipt/{groupId}/{transHash}")
-    public BaseResponse getTransReceipt(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getTransReceipt(@PathVariable("groupId") String groupId,
         @PathVariable("transHash") String transHash)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -121,7 +121,7 @@ public class TransHashController extends BaseController {
      * get transaction by hash.
      */
     @GetMapping("/transInfo/{groupId}/{transHash}")
-    public BaseResponse getTransaction(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getTransaction(@PathVariable("groupId") String groupId,
         @PathVariable("transHash") String transHash)
         throws NodeMgrException {
         Instant startTime = Instant.now();

@@ -35,6 +35,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionObject;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class BlockService {
      * ThreadPool configuration in /base/config/BeanConfig
      */
     @Async(value = "mgrAsyncExecutor")
-    public void pullBlockByGroupId(CountDownLatch latch, int groupId) {
+    public void pullBlockByGroupId(CountDownLatch latch, String groupId) {
         log.debug("start pullBlockByGroupId groupId:{}", groupId);
         try {
             //max block in chain
@@ -105,10 +106,10 @@ public class BlockService {
     /**
      * pull block by number.
      */
-    private void pullBlockByNumber(int groupId, BigInteger blockNumber) {
+    private void pullBlockByNumber(String groupId, BigInteger blockNumber) {
         //get block by number
         BcosBlock.Block blockInfo = frontInterface.getBlockByNumber(groupId, blockNumber);
-        if (blockInfo == null || blockInfo.getNumber() == null) {
+        if (blockInfo == null || blockInfo.getNumber() == Long.valueOf(0)) {
             log.info("pullBlockByNumber jump over. not found new block.");
             return;
         }
@@ -119,7 +120,7 @@ public class BlockService {
     /**
      * get next blockNumber
      */
-    private BigInteger getNextBlockNumber(int groupId) {
+    private BigInteger getNextBlockNumber(String groupId) {
         //get max blockNumber in table
         BigInteger localMaxBlockNumber = getLatestBlockNumber(groupId);
         if (Objects.nonNull(localMaxBlockNumber)) {
@@ -148,10 +149,10 @@ public class BlockService {
         if (blockInfo == null) {
             return null;
         }
-        BigInteger bigIntegerNumber = blockInfo.getNumber();
+        BigInteger bigIntegerNumber = BigInteger.valueOf(blockInfo.getNumber());
         LocalDateTime blockTimestamp = NodeMgrTools
                 .timestamp2LocalDateTime(Long.valueOf(blockInfo.getTimestamp()));
-        int sealerIndex = Integer.parseInt(blockInfo.getSealer().substring(2), 16);
+        int sealerIndex = Integer.parseInt(String.valueOf(blockInfo.getSealer()).substring(2), 16);
 
         int transSize = blockInfo.getTransactions().size();
 
@@ -165,8 +166,8 @@ public class BlockService {
      * save report block info and save tx in block
      */
     @Transactional
-    public void saveBLockInfo(BcosBlock.Block blockInfo, Integer groupId) throws NodeMgrException {
-        List<TransactionResult> transList = blockInfo.getTransactions();
+    public void saveBLockInfo(BcosBlock.Block blockInfo, String groupId) throws NodeMgrException {
+        List<TransactionObject> transList = blockInfo.getTransactions();
 
         // save block info
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
@@ -179,7 +180,7 @@ public class BlockService {
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
             // save user or contract from block's transaction
-            this.saveExternalInfo(groupId, trans, blockInfo.getTimestamp());
+            this.saveExternalInfo(groupId, trans, String.valueOf(blockInfo.getTimestamp()));
             try {
                 Thread.sleep(SAVE_TRANS_SLEEP_TIME);
             } catch (InterruptedException ex) {
@@ -193,7 +194,7 @@ public class BlockService {
      * add block info to db.
      */
     @Transactional
-    public void addBlockInfo(TbBlock tbBlock, int groupId) throws NodeMgrException {
+    public void addBlockInfo(TbBlock tbBlock, String groupId) throws NodeMgrException {
         log.debug("start addBlockInfo tbBlock:{}", JsonTools.toJSONString(tbBlock));
         String tableName = TableName.BLOCK.getTableName(groupId);
         //check newBLock == dbMaxBLock +1
@@ -212,7 +213,7 @@ public class BlockService {
     /**
      * query block info list.
      */
-    public List<TbBlock> queryBlockList(int groupId, BlockListParam queryParam)
+    public List<TbBlock> queryBlockList(String groupId, BlockListParam queryParam)
         throws NodeMgrException {
         log.debug("start queryBlockList groupId:{},queryParam:{}", groupId,
             JsonTools.toJSONString(queryParam));
@@ -229,7 +230,7 @@ public class BlockService {
     /**
      * query count of block.
      */
-    public Integer queryCountOfBlock(Integer groupId, String pkHash, BigInteger blockNumber)
+    public Integer queryCountOfBlock(String groupId, String pkHash, BigInteger blockNumber)
         throws NodeMgrException {
         log.debug("start countOfBlock groupId:{} pkHash:{} blockNumber:{}", groupId, pkHash,
             blockNumber);
@@ -247,7 +248,7 @@ public class BlockService {
         }
     }
 
-    public Integer queryCountOfBlockByMinus(Integer groupId) {
+    public Integer queryCountOfBlockByMinus(String groupId) {
         log.debug("start queryCountOfBlockByMinus groupId:{}", groupId);
         try {
             Integer count = blockmapper
@@ -266,7 +267,7 @@ public class BlockService {
     /**
      * get sealer by index.
      */
-    public void checkSearlerOfBlock(int groupId, TbBlock tbBlock) {
+    public void checkSearlerOfBlock(String groupId, TbBlock tbBlock) {
         if (StringUtils.isNotBlank(tbBlock.getSealer())) {
             return;
         }
@@ -291,7 +292,7 @@ public class BlockService {
     /**
      * remove block info.
      */
-    public Integer remove(Integer groupId, BigInteger blockRetainMax)
+    public Integer remove(String groupId, BigInteger blockRetainMax)
         throws NodeMgrException {
         String tableName = TableName.BLOCK.getTableName(groupId);
         Integer affectRow = blockmapper.remove(tableName, blockRetainMax);
@@ -301,21 +302,21 @@ public class BlockService {
     /**
      * get latest block number
      */
-    public BigInteger getLatestBlockNumber(int groupId) {
+    public BigInteger getLatestBlockNumber(String groupId) {
         return blockmapper.getLatestBlockNumber(TableName.BLOCK.getTableName(groupId));
     }
 
     /**
      * get block by blockNumber from front server
      */
-    public BcosBlock.Block getBlockFromFrontByNumber(int groupId, BigInteger blockNumber) {
+    public BcosBlock.Block getBlockFromFrontByNumber(String groupId, BigInteger blockNumber) {
         return frontInterface.getBlockByNumber(groupId, blockNumber);
     }
 
     /**
      * get block by hash from front server
      */
-    public BcosBlock.Block getBlockFromFrontByHash(int groupId, String pkHash) {
+    public BcosBlock.Block getBlockFromFrontByHash(String groupId, String pkHash) {
         return frontInterface.getBlockByHash(groupId, pkHash);
     }
 
@@ -323,7 +324,7 @@ public class BlockService {
      * get smallest block height in local db
 	 *
      */
-    public TbBlock getSmallestBlockInfo(int groupId) {
+    public TbBlock getSmallestBlockInfo(String groupId) {
         BigInteger smallestHeight = getSmallestBlockHeight(groupId);
         if (smallestHeight == null) {
         	log.debug("getSmallestBlockInfo groupId:{} has no block local", groupId);
@@ -336,7 +337,7 @@ public class BlockService {
      * get block of smallest height in local db
      * @param groupId
      */
-    public BigInteger getSmallestBlockHeight(int groupId) {
+    public BigInteger getSmallestBlockHeight(String groupId) {
         return blockmapper.getSmallestBlockNumber(TableName.BLOCK.getTableName(groupId));
     }
 
@@ -346,7 +347,7 @@ public class BlockService {
      * @param blockNumber
      * @return TbBlock
      */
-    public TbBlock getBlockByBlockNumber(int groupId, BigInteger blockNumber) {
+    public TbBlock getBlockByBlockNumber(String groupId, BigInteger blockNumber) {
         return blockmapper.getBlockByBlockNumber(TableName.BLOCK.getTableName(groupId),
                 blockNumber);
     }
@@ -354,14 +355,14 @@ public class BlockService {
     /**
      * get block by number from front
      */
-    public BlockHeader getBlockHeaderFromFrontByNumber(int groupId, BigInteger blockNumber) {
+    public BlockHeader getBlockHeaderFromFrontByNumber(String groupId, BigInteger blockNumber) {
         return frontInterface.getBlockHeaderByNumber(groupId, blockNumber);
     }
 
     /**
      * get block header by hash from front
      */
-    public BlockHeader getBlockHeaderFromFrontByHash(int groupId, String pkHash) {
+    public BlockHeader getBlockHeaderFromFrontByHash(String groupId, String pkHash) {
         return frontInterface.getBlockHeaderByHash(groupId, pkHash);
     }
 
@@ -369,12 +370,12 @@ public class BlockService {
      * get block header by hash from front
      * @param input block height or tx hash
      */
-    public Object searchByBlockNumOrTxHash(int groupId, String input) {
+    public Object searchByBlockNumOrTxHash(String groupId, String input) {
         return frontInterface.searchByBlockNumOrTxHash(groupId, input);
     }
 
-    private void saveExternalInfo(int groupId, JsonTransactionResponse trans, String timestamp) {
-        log.info("saveExternalInfo trans block number:{}", trans.getBlockNumber());
+    private void saveExternalInfo(String groupId, JsonTransactionResponse trans, String timestamp) {
+        log.info("saveExternalInfo trans block number:{}", trans.getBlockLimit());
         if (!cProperties.getEnableExternalFromBlock()) {
             return;
         }

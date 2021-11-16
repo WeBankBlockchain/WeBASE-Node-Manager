@@ -43,14 +43,12 @@ import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
-import com.webank.webase.node.mgr.precompiled.permission.PermissionManageService;
 import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.datatypes.Address;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
-import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
+import org.fisco.bcos.sdk.codec.datatypes.Address;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,8 +88,8 @@ public class  ContractService {
     private UserService userService;
     @Autowired
     private AbiService abiService;
-    @Autowired
-    private PermissionManageService permissionManageService;
+//    @Autowired
+//    private PermissionManageService permissionManageService;
     @Autowired
     private ContractPathService contractPathService;
     @Autowired
@@ -164,7 +162,7 @@ public class  ContractService {
     public void appContractSave(String appKey, ReqContractAddressSave reqContractAddressSave)
         throws IOException {
         log.info("appContractSave appKey:{},reqContractAddressSave:{}", appKey, reqContractAddressSave);
-        Integer groupId = reqContractAddressSave.getGroupId();
+        String groupId = reqContractAddressSave.getGroupId();
         // check group id
         groupService.checkGroupId(groupId);
         // get runtimeBin
@@ -284,7 +282,7 @@ public class  ContractService {
     /**
      * delete contract by contractId.
      */
-    public void deleteContract(Integer contractId, int groupId) throws NodeMgrException {
+    public void deleteContract(Integer contractId, String groupId) throws NodeMgrException {
         log.debug("start deleteContract contractId:{} groupId:{}", contractId, groupId);
         // check if contract deployed
         if (!constantProperties.isDeployedModifyEnable()) {
@@ -362,7 +360,7 @@ public class  ContractService {
     /**
      * query DeployInputParam By Address.
      */
-    public List<TbContract> queryContractByBin(Integer groupId, String contractBin)
+    public List<TbContract> queryContractByBin(String groupId, String contractBin)
         throws NodeMgrException {
         try {
             if (StringUtils.isEmpty(contractBin)) {
@@ -383,10 +381,10 @@ public class  ContractService {
      */
     public TbContract deployContract(DeployInputParam inputParam) throws NodeMgrException {
         log.info("start deployContract. inputParam:{}", JsonTools.toJSONString(inputParam));
-        int groupId = inputParam.getGroupId();
+        String groupId = inputParam.getGroupId();
 
         // check deploy permission
-        checkDeployPermission(groupId, inputParam.getUser());
+        //checkDeployPermission(groupId, inputParam.getUser());
 
         String contractName = inputParam.getContractName();
         // check contract
@@ -537,7 +535,7 @@ public class  ContractService {
     /**
      * verify that the contract does not exist.
      */
-    private void verifyContractNotExist(int groupId, String name, String path, String account) {
+    private void verifyContractNotExist(String groupId, String name, String path, String account) {
         ContractParam param = new ContractParam(groupId, path, name, account);
         TbContract contract = queryContract(param);
         if (Objects.nonNull(contract)) {
@@ -549,7 +547,7 @@ public class  ContractService {
     /**
      * verify that the contract had not deployed.
      */
-    private TbContract verifyContractNotDeploy(int contractId, int groupId) {
+    private TbContract verifyContractNotDeploy(int contractId, String groupId) {
         TbContract contract = verifyContractIdExist(contractId, groupId);
         if (ContractStatus.DEPLOYED.getValue() == contract.getContractStatus()) {
             log.info("contract had bean deployed contractId:{}", contractId);
@@ -561,7 +559,7 @@ public class  ContractService {
     /**
      * verify that the contract had bean deployed.
      */
-    private TbContract verifyContractDeploy(int contractId, int groupId) {
+    private TbContract verifyContractDeploy(int contractId, String groupId) {
         TbContract contract = verifyContractIdExist(contractId, groupId);
         if (ContractStatus.DEPLOYED.getValue() != contract.getContractStatus()) {
             log.info("contract had bean deployed contractId:{}", contractId);
@@ -573,7 +571,7 @@ public class  ContractService {
     /**
      * verify that the contractId is exist.
      */
-    private TbContract verifyContractIdExist(int contractId, int groupId) {
+    private TbContract verifyContractIdExist(int contractId, String groupId) {
         ContractParam param = new ContractParam(contractId, groupId);
         TbContract contract = queryContract(param);
         if (Objects.isNull(contract)) {
@@ -586,7 +584,7 @@ public class  ContractService {
     /**
      * contract name can not be repeated.
      */
-    private void verifyContractNameNotExist(int groupId, String path, String name, String account, int contractId) {
+    private void verifyContractNameNotExist(String groupId, String path, String name, String account, int contractId) {
         ContractParam param = new ContractParam(groupId, path, name, account);
         TbContract localContract = queryContract(param);
         if (Objects.isNull(localContract)) {
@@ -601,8 +599,8 @@ public class  ContractService {
     /**
      * delete by groupId
      */
-    public void deleteByGroupId(int groupId) {
-        if (groupId == 0) {
+    public void deleteByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return;
         }
         log.info("delete contract by groupId");
@@ -615,7 +613,7 @@ public class  ContractService {
     /**
      * send abi.
      */
-    public void sendAbi(int groupId, int contractId, String address) {
+    public void sendAbi(String groupId, int contractId, String address) {
         log.info("start sendAbi, groupId:{} contractId:{} address:{}", groupId, contractId,
             address);
         TbContract contract = verifyContractIdExist(contractId, groupId);
@@ -642,7 +640,7 @@ public class  ContractService {
         param.setGroupId(groupId);
         param.setContractName(contract.getContractName());
         param.setAddress(address);
-        param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
+        //param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
         param.setContractBin(contract.getContractBin());
         frontInterface.sendAbi(groupId, param);
 
@@ -660,36 +658,36 @@ public class  ContractService {
     /**
      * check user deploy permission
      */
-    private void checkDeployPermission(int groupId, String userAddress) {
-        // get deploy permission list
-        List<PermissionInfo> deployUserList = new ArrayList<>();
-        BasePageResponse response = permissionManageService.listPermissionFull(groupId, PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
-        if (response.getCode() != 0) {
-            log.error("checkDeployPermission get permission list error");
-            return;
-        } else {
-            List listData = (List) response.getData();
-            deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
-        }
-
-        // check user in the list
-        if (deployUserList == null || deployUserList.isEmpty()) {
-            return;
-        } else {
-            long count = 0;
-            count = deployUserList.stream().filter( admin -> userAddress.equals(admin.getAddress())).count();
-            // if not in the list, permission denied
-            if (count == 0) {
-                log.error("checkDeployPermission permission denied for user:{}", userAddress);
-                throw new NodeMgrException(ConstantCode.PERMISSION_DENIED_ON_CHAIN);
-            }
-        }
-    }
+//    private void checkDeployPermission(int groupId, String userAddress) {
+//        // get deploy permission list
+//        List<PermissionInfo> deployUserList = new ArrayList<>();
+//        BasePageResponse response = permissionManageService.listPermissionFull(groupId, PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
+//        if (response.getCode() != 0) {
+//            log.error("checkDeployPermission get permission list error");
+//            return;
+//        } else {
+//            List listData = (List) response.getData();
+//            deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
+//        }
+//
+//        // check user in the list
+//        if (deployUserList == null || deployUserList.isEmpty()) {
+//            return;
+//        } else {
+//            long count = 0;
+//            count = deployUserList.stream().filter( admin -> userAddress.equals(admin.getAddress())).count();
+//            // if not in the list, permission denied
+//            if (count == 0) {
+//                log.error("checkDeployPermission permission denied for user:{}", userAddress);
+//                throw new NodeMgrException(ConstantCode.PERMISSION_DENIED_ON_CHAIN);
+//            }
+//        }
+//    }
 
     /**
      * get contract path list
      */
-    public List<TbContractPath> queryContractPathList(Integer groupId, String account) {
+    public List<TbContractPath> queryContractPathList(String groupId, String account) {
         List<TbContractPath> pathList = contractPathService.listContractPath(groupId, account);
         // not return null, but return empty list
         List<TbContractPath> resultList = new ArrayList<>();
@@ -744,7 +742,7 @@ public class  ContractService {
      */
     public List<TbContract> queryContractListMultiPath(ReqListContract param) throws NodeMgrException {
         log.debug("start queryContractListMultiPath ReqListContract:{}", JsonTools.toJSONString(param));
-        int groupId = param.getGroupId();
+        String groupId = param.getGroupId();
         String account = param.getAccount();
         List<String> pathList = param.getContractPathList();
 
@@ -788,7 +786,7 @@ public class  ContractService {
      * @param contractAddress
      * @return List<String>
      */
-    public List<TbUser> getContractManager(int groupId, String contractAddress) {
+    public List<TbUser> getContractManager(String groupId, String contractAddress) {
         log.info("start getContractManager groupId:{},contractAddress:{}", groupId, contractAddress);
         List<TbUser> resultUserList = new ArrayList<>();
         // get deployAddress from external service
@@ -813,25 +811,25 @@ public class  ContractService {
             resultUserList.add(deployUser);
         }
         // get from permission list or chain governance
-        List<PermissionInfo> deployUserList = new ArrayList<>();
+       // List<PermissionInfo> deployUserList = new ArrayList<>();
         // check committee
-        BasePageResponse response = permissionManageService.listPermissionFull(groupId,
-            PERMISSION_TYPE_PERMISSION, null);
-        if (response.getCode() != 0) {
-            log.error("checkDeployPermission get permission list error");
-        } else {
-            List listData = (List) response.getData();
-            deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
-        }
-        if (deployUserList != null && !deployUserList.isEmpty()) {
-            for (PermissionInfo info : deployUserList) {
-                String adminAddress = info.getAddress();
-                TbUser adminUser = userService.checkUserHasPk(groupId, adminAddress);
-                if (adminUser != null) {
-                    resultUserList.add(adminUser);
-                }
-            }
-        }
+//        BasePageResponse response = permissionManageService.listPermissionFull(groupId,
+//            PERMISSION_TYPE_PERMISSION, null);
+//        if (response.getCode() != 0) {
+//            log.error("checkDeployPermission get permission list error");
+//        } else {
+//            List listData = (List) response.getData();
+//           // deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
+//        }
+////        if (deployUserList != null && !deployUserList.isEmpty()) {
+////            for (PermissionInfo info : deployUserList) {
+////                String adminAddress = info.getAddress();
+////                TbUser adminUser = userService.checkUserHasPk(groupId, adminAddress);
+////                if (adminUser != null) {
+////                    resultUserList.add(adminUser);
+////                }
+////            }
+////        }
         //  check resultUserList if empty
         if (resultUserList.isEmpty()) {
             log.warn("getContractManager has no private key of contractAddress:{}", contractAddress);
@@ -840,7 +838,7 @@ public class  ContractService {
         return resultUserList;
     }
 
-    public TbContract queryContractByGroupIdAndAddress(int groupId, String contractAddress) {
+    public TbContract queryContractByGroupIdAndAddress(String groupId, String contractAddress) {
         log.debug("start queryContractByGroupIdAndAddress groupId:{},contractAddress:{}", groupId, contractAddress);
         ContractParam param = new ContractParam();
         param.setGroupId(groupId);

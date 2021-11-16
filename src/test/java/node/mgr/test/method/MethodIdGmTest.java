@@ -20,7 +20,7 @@ import com.webank.webase.node.mgr.tools.Web3Tools;
 import java.io.IOException;
 import java.util.List;
 import node.mgr.test.base.TestBase;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

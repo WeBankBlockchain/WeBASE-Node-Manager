@@ -42,7 +42,7 @@ public class TransDailyService {
     /**
      * query Trading within seven days.
      */
-    public List<SeventDaysTrans> listSeventDayOfTrans(Integer groupId) throws NodeMgrException {
+    public List<SeventDaysTrans> listSeventDayOfTrans(String groupId) throws NodeMgrException {
         log.debug("start listSeventDayOfTrans groupId:{}", groupId);
         try {
             // query
@@ -59,7 +59,7 @@ public class TransDailyService {
     /**
      * update trans daily info.
      */
-    public void updateTransDaily(Integer groupId, LocalDate transDay, BigInteger oldBlockNumber,
+    public void updateTransDaily(String groupId, LocalDate transDay, BigInteger oldBlockNumber,
         BigInteger latestBlockNumber, BigInteger transCount)
         throws NodeMgrException {
         log.debug(
@@ -89,7 +89,7 @@ public class TransDailyService {
     /**
      * add trans daily info.
      */
-    public void addTbTransDailyInfo(Integer groupId, LocalDate transDay, Integer transCount,
+    public void addTbTransDailyInfo(String groupId, LocalDate transDay, Integer transCount,
         BigInteger blockNumber) throws NodeMgrException {
         log.debug("start addTbTransDailyInfo groupId:{} transDay:{} transCount:{} blockNumber:{}",
             groupId, JsonTools.toJSONString(transDay),
@@ -117,8 +117,8 @@ public class TransDailyService {
     /**
      * delete by groupId.
      */
-    public void deleteByGroupId(int groupId) {
-        if (groupId == 0) {
+    public void deleteByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return;
         }
         tbTransDailyMapper.deleteByGroupId(groupId);

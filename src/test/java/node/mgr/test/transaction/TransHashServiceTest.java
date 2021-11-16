@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TransHashServiceTest extends TestBase {
     @Autowired
     private TransHashService transHashService;
-    private Integer groupId = 300001;
+    private String groupId = "300001";
     @Autowired
     private TransHashMapper transHashMapper;
 
@@ -59,7 +59,7 @@ public class TransHashServiceTest extends TestBase {
 
     @Test
     public void queryCountOfTranByMinus() {
-        int count = transHashService.queryCountOfTranByMinus(1);
+        int count = transHashService.queryCountOfTranByMinus("1");
         System.out.println(count);
     }
 }

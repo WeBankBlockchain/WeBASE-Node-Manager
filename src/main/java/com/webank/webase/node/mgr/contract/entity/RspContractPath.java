@@ -7,6 +7,6 @@ import lombok.Data;
  */
 @Data
 public class RspContractPath {
-    private Integer groupId;
+    private String groupId;
     private String contractPath;
 }

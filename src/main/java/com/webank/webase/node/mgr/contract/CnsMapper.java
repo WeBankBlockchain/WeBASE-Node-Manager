@@ -31,5 +31,5 @@ public interface CnsMapper {
 
     List<TbCns> getList(QueryCnsParam param);
 
-    void deleteByGroupId(@Param("groupId") int groupId);
+    void deleteByGroupId(@Param("groupId") String groupId);
 }

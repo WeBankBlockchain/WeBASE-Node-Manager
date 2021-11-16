@@ -95,7 +95,7 @@ public class NodeAsyncService {
      * @param optionType
      */
     @Async("deployAsyncScheduler")
-    public void asyncRestartRelatedFront(int chainId, Set<Integer> groupIdSet, OptionType optionType,
+    public void asyncRestartRelatedFront(int chainId, Set<String> groupIdSet, OptionType optionType,
                          FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess, FrontStatusEnum frontFailed ) {
         log.info("start asyncRestartRelatedFront chainName:{}", chainId);
         ProgressTools.setStarting();
@@ -120,7 +120,7 @@ public class NodeAsyncService {
      * @param newFrontIdList
      */
     @Async("deployAsyncScheduler")
-    public void asyncRestartNode(TbChain chain, int groupId, OptionType optionType, List<Integer> newFrontIdList) {
+    public void asyncRestartNode(TbChain chain, String groupId, OptionType optionType, List<Integer> newFrontIdList) {
         try {
             log.info("start asyncRestartNode newFrontIdList:{}", newFrontIdList);
             // start front and  related front
@@ -175,7 +175,7 @@ public class NodeAsyncService {
      * @param groupIdSet
      * @param optionType
      */
-    private boolean restartFrontOfGroupSet(int chainId, Set<Integer> groupIdSet, OptionType optionType,
+    private boolean restartFrontOfGroupSet(int chainId, Set<String> groupIdSet, OptionType optionType,
                                 FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess, FrontStatusEnum frontFailed ){
         List<TbFront> frontList = this.frontService.selectFrontListByGroupIdSet(groupIdSet);
         if (CollectionUtils.isEmpty(frontList)){

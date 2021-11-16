@@ -45,7 +45,7 @@ public class IpConfigParse {
     private String ip;
     private int num;
     private String agencyName;
-    private Set<Integer> groupIdSet;
+    private Set<String> groupIdSet;
     private int channelPort;
     private int p2pPort;
     private int rpcPort;
@@ -158,14 +158,23 @@ public class IpConfigParse {
 
         try {
             // parse groupIdList
-            Set<Integer> groupIdSet = Arrays.stream(configArray[2].split(","))
-                    .map((group) -> {
-                        int groupId = Integer.parseInt(group);
-                        if (groupId <= 0) {
-                            throw new NodeMgrException(GROUPS_CONFIG_ERROR.attach(configArray[2]));
-                        }
-                        return groupId;
-                    }).collect(Collectors.toSet());
+//            Set<Integer> groupIdSet = Arrays.stream(configArray[2].split(","))
+//                    .map((group) -> {
+//                        int groupId = Integer.parseInt(group);
+//                        if (groupId <= 0) {
+//                            throw new NodeMgrException(GROUPS_CONFIG_ERROR.attach(configArray[2]));
+//                        }
+//                        return groupId;
+//                    }).collect(Collectors.toSet());
+//            ipConfigParse.groupIdSet = groupIdSet;
+            Set<String> groupIdSet = Arrays.stream(configArray[2].split(","))
+                .map((group) -> {
+                    String groupId = group;
+                    if (groupId.isEmpty()) {
+                        throw new NodeMgrException(GROUPS_CONFIG_ERROR.attach(configArray[2]));
+                    }
+                    return groupId;
+                }).collect(Collectors.toSet());
             ipConfigParse.groupIdSet = groupIdSet;
         } catch (Exception e) {
             throw new NodeMgrException(GROUPS_CONFIG_ERROR.attach(configArray[2]), e);

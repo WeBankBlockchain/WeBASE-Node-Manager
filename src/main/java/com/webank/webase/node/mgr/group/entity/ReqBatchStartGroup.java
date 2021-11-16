@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReqBatchStartGroup {
 	@NotNull
-	private Integer generateGroupId;
+	private String generateGroupId;
 	@NotEmpty
 	private List<String> nodeList;
 }

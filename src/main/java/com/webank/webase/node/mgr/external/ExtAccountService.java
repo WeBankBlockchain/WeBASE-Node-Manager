@@ -45,7 +45,7 @@ public class ExtAccountService {
      * @param userAddress
      * @return
      */
-    public int saveAccountOnChain(int groupId, String userAddress) {
+    public int saveAccountOnChain(String groupId, String userAddress) {
         if (checkAddressExist(groupId, userAddress)) {
             return 0;
         }
@@ -70,7 +70,7 @@ public class ExtAccountService {
         return insertRes;
     }
 
-    private boolean checkAddressExist(int groupId, String userAddress) {
+    private boolean checkAddressExist(String groupId, String userAddress) {
         int count = extAccountMapper.countOfExtAccount(groupId, userAddress);
         if (count > 0) {
             log.debug("checkAddressExist is true groupId:{} address:{}", groupId, userAddress);
@@ -101,7 +101,7 @@ public class ExtAccountService {
         return extAccountMapper.updateByPrimaryKeySelective(update);
     }
 
-    public void deleteByGroupId(int groupId) {
+    public void deleteByGroupId(String groupId) {
         int affected = extAccountMapper.deleteByGroupId(groupId);
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
     }

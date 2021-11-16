@@ -51,7 +51,7 @@ public class EventService {
 	private static final String TYPE_CONTRACT = "contract";
 	private static final String TYPE_ABI_INFO = "abi";
 
-	public List<NewBlockEventInfo> getNewBlockEventInfoList(int groupId) {
+	public List<NewBlockEventInfo> getNewBlockEventInfoList(String groupId) {
 		//get all front
 		List<TbFront> frontList = frontService.getFrontList(new FrontParam());
 		List<NewBlockEventInfo> eventList = new ArrayList<>();
@@ -62,7 +62,7 @@ public class EventService {
 	}
 
 
-	public List<ContractEventInfo> getContractEventInfoList(int groupId) {
+	public List<ContractEventInfo> getContractEventInfoList(String groupId) {
 		//get all front
 		List<TbFront> frontList = frontService.getFrontList(new FrontParam());
 		List<ContractEventInfo> eventList = new ArrayList<>();
@@ -82,7 +82,7 @@ public class EventService {
 	/**
 	 * list contract info from contract & abi
 	 */
-	public List<RspContractInfo> listContractInfoBoth(int groupId) {
+	public List<RspContractInfo> listContractInfoBoth(String groupId) {
 		// find contract list
 		ContractParam contractParam = new ContractParam();
 		contractParam.setGroupId(groupId);
@@ -99,7 +99,7 @@ public class EventService {
 	}
 
 
-	public Object getAbiByAddressFromBoth(int groupId, String type, String contractAddress) {
+	public Object getAbiByAddressFromBoth(String groupId, String type, String contractAddress) {
 		if (TYPE_CONTRACT.equals(type)) {
 			ContractParam param = new ContractParam();
 			param.setGroupId(groupId);

@@ -31,7 +31,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class ReqAbiListParam extends BaseQueryParam {
 
-	private Integer groupId;
+	private String groupId;
 	private String account;
 	private String contractName;
 	private String contractAddress;

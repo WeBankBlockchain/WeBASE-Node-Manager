@@ -24,7 +24,7 @@ public class RspContractNoAbi {
     private String contractName;
     private String account;
     private Integer contractStatus;
-    private Integer groupId;
+    private String groupId;
     private Integer contractType;
     private String contractAddress;
     private LocalDateTime deployTime;

@@ -46,7 +46,7 @@ public class MethodService {
      * @param abiStr
      * @param type
      */
-    public void saveMethod(int groupId, String abiStr, int type) {
+    public void saveMethod(String groupId, String abiStr, int type) {
         List<Method> methodList;
         try {
             methodList = new ArrayList<>(Web3Tools.getMethodFromAbi(abiStr, cryptoSuite));
@@ -64,7 +64,7 @@ public class MethodService {
      * save method info
      */
     public void saveMethod(NewMethodInputParam newMethodInputParam, Integer type) {
-        int groupId = newMethodInputParam.getGroupId();
+        String groupId = newMethodInputParam.getGroupId();
         List<Method> methodList = newMethodInputParam.getMethodList();
         TbMethod tbMethod = new TbMethod();
         tbMethod.setGroupId(groupId);
@@ -86,7 +86,7 @@ public class MethodService {
      * @param groupId
      * @return
      */
-    private boolean checkMethodExist(String methodId, int groupId) {
+    private boolean checkMethodExist(String methodId, String groupId) {
         TbMethod check = methodMapper.getMethodById(methodId, groupId);
         if (Objects.nonNull(check)) {
             return true;
@@ -97,7 +97,7 @@ public class MethodService {
     /**
      * query by methodId.
      */
-    public TbMethod getByMethodId(String methodId, Integer groupId) {
+    public TbMethod getByMethodId(String methodId, String groupId) {
         TbMethod tbMethod = methodMapper.getMethodById(methodId, null);
         if (Objects.nonNull(tbMethod)) {
             if (ContractType.SYSTEMCONTRACT.getValue() == tbMethod.getContractType().intValue()) {
@@ -112,8 +112,8 @@ public class MethodService {
     /**
      * delete by groupId.
      */
-    public void deleteByGroupId(int groupId){
-        if (groupId == 0) {
+    public void deleteByGroupId(String groupId){
+        if (groupId.isEmpty()) {
             return;
         }
         methodMapper.removeByGroupId(groupId);

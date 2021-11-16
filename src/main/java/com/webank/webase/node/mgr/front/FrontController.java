@@ -91,7 +91,7 @@ public class FrontController extends BaseController {
     @GetMapping(value = "/find")
     public BasePageResponse queryFrontList(
         @RequestParam(value = "frontId", required = false) Integer frontId,
-        @RequestParam(value = "groupId", required = false) Integer groupId,
+        @RequestParam(value = "groupId", required = false) String groupId,
         @RequestParam(value = "frontStatus", required = false) Integer frontStatus)
         throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);

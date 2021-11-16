@@ -21,7 +21,7 @@ import lombok.Data;
 
 @Data
 public class CrudHandle {
-    private int groupId;
+    private String groupId;
     @NotBlank
     private String fromAddress;
     private String signUserId;

@@ -32,7 +32,7 @@ public class ContractPathService {
     @Autowired
     private ContractPathMapper contractPathMapper;
 
-    public List<TbContractPath> listContractPath(Integer groupId, String account) {
+    public List<TbContractPath> listContractPath(String groupId, String account) {
         return contractPathMapper.listOfContractPath(groupId, account);
     }
 
@@ -43,7 +43,7 @@ public class ContractPathService {
      * @param pathName
      * @return
      */
-    public int save(Integer groupId, String pathName, String account, boolean ignoreRepeat) {
+    public int save(String groupId, String pathName, String account, boolean ignoreRepeat) {
         TbContractPath check =
                 contractPathMapper.findOne(new ContractPathParam(groupId, pathName, null));
         if (check != null) {
@@ -80,11 +80,11 @@ public class ContractPathService {
         return contractPathMapper.removeByPathName(param);
     }
 
-    public void removeByGroupId(Integer groupId) {
+    public void removeByGroupId(String groupId) {
         contractPathMapper.removeByGroupId(groupId);
     }
 
-    public boolean checkPathExist(Integer groupId, String pathName, String account) {
+    public boolean checkPathExist(String groupId, String pathName, String account) {
         TbContractPath contractPath =
                 contractPathMapper.findOne(new ContractPathParam(groupId, pathName, account));
         if (contractPath != null) {

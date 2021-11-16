@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class ContractStatusHandle {
-    private int groupId;
+    private String groupId;
     @NotBlank
     private String contractAddress;
     // 4 types: freeze, unfreeze, getStatus

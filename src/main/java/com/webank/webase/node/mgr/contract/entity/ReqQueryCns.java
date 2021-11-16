@@ -25,7 +25,7 @@ import lombok.Data;
 @Data
 public class ReqQueryCns {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotBlank
     private String contractAddress;
 }

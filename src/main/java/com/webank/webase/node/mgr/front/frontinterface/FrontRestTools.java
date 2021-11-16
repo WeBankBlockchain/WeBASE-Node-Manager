@@ -186,7 +186,7 @@ public class FrontRestTools {
     /**
      * append groupId to uri.
      */
-    public static String uriAddGroupId(Integer groupId, String uri) {
+    public static String uriAddGroupId(String groupId, String uri) {
         if (groupId == null || StringUtils.isBlank(uri)) {
             return null;
         }
@@ -337,7 +337,7 @@ public class FrontRestTools {
     /**
      * get from front for entity.
      */
-    public <T> T getForEntity(Integer groupId, String uri, Class<T> clazz) {
+    public <T> T getForEntity(String groupId, String uri, Class<T> clazz) {
         T response = restTemplateExchange(groupId, uri, HttpMethod.GET, null, clazz);
         if (response == null) {
             log.error("getForEntity response is null!");
@@ -349,7 +349,7 @@ public class FrontRestTools {
     /**
      * post from front for entity.
      */
-    public <T> T postForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
+    public <T> T postForEntity(String groupId, String uri, Object params, Class<T> clazz) {
         T response = restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
         if (response == null) {
             log.error("postForEntity response is null!");
@@ -361,7 +361,7 @@ public class FrontRestTools {
     /**
      * delete from front for entity.
      */
-    public <T> T deleteForEntity(Integer groupId, String uri, Object params, Class<T> clazz) {
+    public <T> T deleteForEntity(String groupId, String uri, Object params, Class<T> clazz) {
         T response = restTemplateExchange(groupId, uri, HttpMethod.DELETE, params, clazz);
         if (response == null) {
             log.error("deleteForEntity response is null!");
@@ -373,7 +373,7 @@ public class FrontRestTools {
     /**
      * restTemplate exchange.
      */
-    private <T> T restTemplateExchange(int groupId, String uri, HttpMethod method,
+    private <T> T restTemplateExchange(String groupId, String uri, HttpMethod method,
         Object param, Class<T> clazz) {
         List<FrontGroup> frontList = frontGroupMapCache.getMapListByGroupId(groupId);
         if (frontList == null || frontList.size() == 0) {
@@ -450,12 +450,17 @@ public class FrontRestTools {
         if (block == null) {
             return;
         }
-        String gasLimit = block.getGasLimit();
+//        String gasLimit = block.getGasLimit();
+//        String gasUsed = block.getGasUsed();
+//        String timestamp = block.getTimestamp();
+//        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+//        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+//        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+
         String gasUsed = block.getGasUsed();
-        String timestamp = block.getTimestamp();
-        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        Long timestamp = block.getTimestamp();
         block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
-        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+        block.setTimestamp(timestamp);
         log.info("processBlockHexNumber :{}", block);
     }
 
@@ -467,12 +472,15 @@ public class FrontRestTools {
         if (trans == null) {
             return;
         }
-        String gas = trans.getGas();
-        String gasPrice = trans.getGasPrice();
-        String groupId = trans.getGroupId();
-        trans.setGas(Numeric.toBigInt(gas).toString(10));
-        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
-        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+//        String gas = trans.getGas();
+//        String gasPrice = trans.getGasPrice();
+//        String groupId = trans.getGroupId();
+//        trans.setGas(Numeric.toBigInt(gas).toString(10));
+//        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
+//        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+
+        String groupId = trans.getGroupID();
+        trans.setGroupID(Numeric.toBigInt(groupId).toString(10));
         log.info("processTransHexNumber :{}", trans);
     }
 
