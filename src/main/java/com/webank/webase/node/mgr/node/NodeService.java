@@ -25,6 +25,7 @@ import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.entity.NodeStatusInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.ReqUpdate;
@@ -40,6 +41,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
@@ -190,103 +192,36 @@ public class NodeService {
 
 
     /**
-     * check node status, if pbftView or blockNumber not changing, invalid consensus
-     * @case: observer(no pbftView), if observer's blockNumber not equal consensus blockNumber
-     * @1.4.3: if request consensus status but return -1, node is down
-     *
+     * check status by if node timeout
      */
     public void checkAndUpdateNodeStatus(String groupId) {
         //get local node list
         List<TbNode> nodeList = queryByGroupId(groupId);
-
-        //getPeerOfConsensusStatus
-        List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
-        if (Objects.isNull(consensusList)){
-            log.error("fail checkNodeStatus, consensusList is null");
-            return;
-        }
-
-        // getObserverList
-        List<String> observerList = frontInterface.getObserverList(groupId);
-
-        int nodeCount = CollectionUtils.size(consensusList) + CollectionUtils.size(observerList);
-
+        List<NodeStatusInfo> nodeStatusInfoList = frontInterface.getNodeStatusList(groupId);
         for (TbNode tbNode : nodeList) {
             String nodeId = tbNode.getNodeId();
-            BigInteger localBlockNumber = tbNode.getBlockNumber();
-            BigInteger localPbftView = tbNode.getPbftView();
             LocalDateTime modifyTime = tbNode.getModifyTime();
             LocalDateTime createTime = tbNode.getCreateTime();
 
-            Duration duration = Duration.between(modifyTime, LocalDateTime.now());
-            Long subTime = duration.toMillis();
-            if (subTime < (nodeCount * 1000 + EXT_CHECK_NODE_WAIT_MIN_MILLIS) && createTime.isBefore(modifyTime)) {
-                log.warn("checkNodeStatus jump over. for time internal subTime:{}", subTime);
-                return;
+//            Duration duration = Duration.between(modifyTime, LocalDateTime.now());
+//            Long subTime = duration.toMillis();
+//            if (subTime < (nodeCount * 1000 + EXT_CHECK_NODE_WAIT_MIN_MILLIS) && createTime.isBefore(modifyTime)) {
+//                log.warn("checkNodeStatus jump over. for time internal subTime:{}", subTime);
+//                return;
+//            }
+            NodeStatusInfo nodeStatusInfo = nodeStatusInfoList.stream()
+                .filter(status -> status.getNodeId().equalsIgnoreCase(nodeId))
+                .findFirst().orElse(null);
+            if (nodeStatusInfo == null) {
+                log.info("checkAndUpdateNodeStatus not found status of :{}", nodeId);
+                continue;
             }
-
-
-            int nodeType = 0;   //0-consensus;1-observer
-            if (observerList != null) {
-                nodeType = observerList.stream()
-                        .filter(observer -> observer.equals(tbNode.getNodeId())).map(c -> 1).findFirst()
-                        .orElse(0);
-            }
-
-            BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
-            BigInteger latestView = consensusList.stream()
-                .filter(cl -> nodeId.equals(cl.getNodeId())).map(PeerOfConsensusStatus::getView).findFirst()
-                .orElse(BigInteger.ZERO);//pbftView
-
-            if (nodeType == 0) {    //0-consensus;1-observer
-                // if local block number and pbftView equals chain's, invalid
-                if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
-                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
-                        nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
-                    tbNode.setNodeActive(DataStatus.INVALID.getValue());
-                } else {
-                    tbNode.setBlockNumber(latestNumber);
-                    tbNode.setPbftView(latestView);
-                    tbNode.setNodeActive(DataStatus.NORMAL.getValue());
-                }
-            } else { //observer
-                // if latest block number not equal block number of consensus network
-                if (!latestNumber.equals(frontInterface.getLatestBlockNumber(groupId))) {
-                    // if node's block number is not changing, invalid
-                    if (localBlockNumber.equals(latestNumber)) {
-                        log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
-                            nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
-                        tbNode.setNodeActive(DataStatus.INVALID.getValue());
-                    } else {
-                        // if latest block number not equal network's, but is changing, normal
-                        tbNode.setBlockNumber(latestNumber);
-                        tbNode.setPbftView(latestView);
-                        tbNode.setNodeActive(DataStatus.NORMAL.getValue());
-                    }
-                } else {
-                    tbNode.setBlockNumber(latestNumber);
-                    tbNode.setPbftView(latestView);
-                    tbNode.setNodeActive(DataStatus.NORMAL.getValue());
-                }
-            }
+            tbNode.setBlockNumber(new BigInteger(String.valueOf(nodeStatusInfo.getBlockNumber())));
+            tbNode.setPbftView(new BigInteger(String.valueOf(nodeStatusInfo.getPbftView())));
+            tbNode.setNodeActive(nodeStatusInfo.getStatus() == 1 ? DataStatus.NORMAL.getValue() : DataStatus.INVALID.getValue());
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
-            // only update front status if deploy manually
-            if (chainService.runTask()) {
-                TbFront updateFront = frontService.getByNodeId(nodeId);
-                if (updateFront != null) {
-                    // update front status as long as update node (7.5s internal)
-                    log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
-                    // update as 2, same as FrontStatuaEnum
-                    if (tbNode.getNodeActive() == DataStatus.NORMAL.getValue()) {
-                        updateFront.setStatus(FrontStatusEnum.RUNNING.getId());
-                    } else if (tbNode.getNodeActive() == DataStatus.INVALID.getValue()) {
-                        updateFront.setStatus(FrontStatusEnum.STOPPED.getId());
-                    }
-                    frontService.updateFront(updateFront);
-                }
-            }
         }
 
     }

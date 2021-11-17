@@ -71,7 +71,7 @@ public class NodeController {
 
         //check node status before query
         try{
-            //nodeService.checkAndUpdateNodeStatus(groupId);
+            nodeService.checkAndUpdateNodeStatus(groupId);
         }catch (Exception e) {
             log.error("queryNodeList checkAndUpdateNodeStatus groupId:{}, error: []", groupId, e);
         }
