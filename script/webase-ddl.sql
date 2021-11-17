@@ -5,7 +5,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Table structure for tb_group
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_group (
-    group_id int(11) NOT NULL COMMENT '群组ID',
+    group_id varchar(64) NOT NULL COMMENT '群组ID',
     group_name varchar(64) NOT NULL COMMENT '群组名字',
     group_status int(1) DEFAULT '1' COMMENT '状态（1-正常 2-异常 3-脏数据冲突 4-创世块冲突）',
     node_count int DEFAULT '0' COMMENT '群组下节点数',
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS tb_front (
 CREATE TABLE IF NOT EXISTS tb_front_group_map (
   map_id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
   front_id int(11) NOT NULL COMMENT '前置服务编号',
-  group_id int(11) NOT NULL COMMENT '群组编号',
+  group_id varchar(64)  NOT NULL COMMENT '群组编号',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   status int(11) DEFAULT 1 NOT NULL COMMENT '节点（前置）的群组状态，1-normal，2-invalid',
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_node (
   node_id varchar(250) NOT NULL  COMMENT '节点编号',
-  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  group_id varchar(64)  NOT NULL COMMENT '所属群组编号',
   node_name varchar(255) NOT NULL COMMENT '节点名称',
   node_ip varchar(16) DEFAULT NULL COMMENT '节点ip',
   p2p_port int(11) DEFAULT NULL COMMENT '节点p2p端口',
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
   contract_version varchar(120) DEFAULT NULL COMMENT '合约版本',
   account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
-  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  group_id varchar(64)  NOT NULL COMMENT '所属群组编号',
   contract_source mediumtext COMMENT '合约源码',
   contract_abi mediumtext COMMENT '编译合约生成的abi文件内容',
   contract_bin mediumtext COMMENT '合约binary',
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_method(
   method_id varchar(128) COMMENT '方法id',
-  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  group_id varchar(64) NOT NULL COMMENT '所属群组编号',
   abi_info text COMMENT 'abi信息',
   method_type varchar(32) COMMENT '方法类型',
   contract_type tinyint(4) DEFAULT '0' COMMENT '合约类型(0-普通合约，1-系统合约)',
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS tb_method(
 -- Table structure for tb_trans_daily
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_trans_daily (
-  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  group_id varchar(64)  NOT NULL COMMENT '所属群组编号',
   trans_day date NOT NULL COMMENT '日期',
   trans_count int(11) DEFAULT '0' COMMENT '交易数量',
   block_number int(11) DEFAULT '0' COMMENT '当前统计到的块高',
@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
   user_id int(11) NOT NULL AUTO_INCREMENT COMMENT '用户编号',
   user_name varchar(64) binary NOT NULL COMMENT '用户名',
   account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
-  group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
+  group_id varchar(64)  DEFAULT NULL COMMENT '所属群组编号',
   public_key varchar(250) NOT NULL COMMENT '公钥',
   user_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-正常 2-停用）',
   user_type int(1) NOT NULL DEFAULT '1' COMMENT '用户类型（1-普通用户 2-系统用户）',
@@ -321,7 +321,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_log (
 CREATE TABLE IF NOT EXISTS tb_abi (
   abi_id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约ABI的编号',
   account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
-  group_id int(11) NOT NULL COMMENT '合约ABI所属群组的编号',
+  group_id varchar(64)  NOT NULL COMMENT '合约ABI所属群组的编号',
   contract_name varchar(120) NOT NULL COMMENT '合约ABI的合约名',
   contract_address varchar(64) NOT NULL COMMENT '合约ABI的合约地址',
   contract_abi mediumtext NOT NULL COMMENT '合约ABI的内容',
@@ -403,7 +403,7 @@ CREATE TABLE IF NOT EXISTS `tb_host` (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_govern_vote (
   id int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '链治理委员投票记录ID',
-  group_id int(11) NOT NULL COMMENT '群组ID',
+  group_id varchar(64)  NOT NULL COMMENT '群组ID',
   time_limit bigint DEFAULT NULL COMMENT '投票截止块高',
   from_address varchar(64) NOT NULL COMMENT '管理员地址',
   type tinyint(8) NOT NULL COMMENT '投票类型，1-选举，2-去除，3-修改委员权重，4,-修改阈值',
@@ -417,7 +417,7 @@ CREATE TABLE IF NOT EXISTS tb_govern_vote (
 CREATE TABLE IF NOT EXISTS tb_contract_path (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约路径编号',
   contract_path varchar(128) binary NOT NULL COMMENT '合约所在目录',
-  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  group_id varchar(64)  NOT NULL COMMENT '所属群组编号',
   account varchar(50) binary DEFAULT 'admin' COMMENT '关联账号',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
@@ -427,7 +427,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_path (
 
 CREATE TABLE IF NOT EXISTS tb_cns (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
-  group_id int(11) NOT NULL COMMENT '群组ID',
+  group_id varchar(64)  NOT NULL COMMENT '群组ID',
   contract_path varchar(128) binary DEFAULT NULL COMMENT '合约所在目录',
   contract_name varchar(120) binary NOT NULL COMMENT '合约名称',
   cns_name varchar(120) binary NOT NULL COMMENT 'cns名称',
@@ -443,7 +443,7 @@ CREATE TABLE IF NOT EXISTS tb_cns (
 
 CREATE TABLE IF NOT EXISTS tb_stat (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '统计编号',
-  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  group_id varchar(64)  NOT NULL COMMENT '所属群组编号',
   block_cycle double DEFAULT '0' COMMENT '出块周期（秒）',
   tps int(11) DEFAULT '0' COMMENT '每秒交易量',
   block_number int(11) DEFAULT '0' COMMENT '当前统计到的块高度',
@@ -461,7 +461,7 @@ CREATE TABLE IF NOT EXISTS tb_stat (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_external_account (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '外部账户编号',
-  group_id int(11) DEFAULT NULL COMMENT '所属群组编号',
+  group_id varchar(64)  DEFAULT NULL COMMENT '所属群组编号',
   address varchar(64) DEFAULT NULL COMMENT '在链上位置的hash',
   public_key varchar(250) DEFAULT NULL COMMENT '公钥',
   sign_user_id varchar(64) DEFAULT NULL COMMENT '签名服务中的user的业务id',
@@ -485,7 +485,7 @@ CREATE TABLE IF NOT EXISTS tb_external_account (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_external_contract (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '外部合约编号',
-  group_id int(11) NOT NULL COMMENT '所属群组编号',
+  group_id varchar(64)  NOT NULL COMMENT '所属群组编号',
   contract_address varchar(64) NOT NULL COMMENT '合约地址',
   deploy_address varchar(64) NOT NULL COMMENT '合约部署者地址',
   deploy_tx_hash varchar(120) NOT NULL COMMENT '合约部署的交易哈希',
