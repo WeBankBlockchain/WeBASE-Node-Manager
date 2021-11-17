@@ -63,7 +63,6 @@ import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.TbNode;
-import com.webank.webase.node.mgr.precompiled.permission.governvote.GovernVoteService;
 import com.webank.webase.node.mgr.statistic.StatService;
 import com.webank.webase.node.mgr.table.TableService;
 import com.webank.webase.node.mgr.tools.CleanPathUtil;
@@ -141,8 +140,6 @@ public class GroupService {
     private ConstantProperties constantProperties;
     @Autowired
     private AbiService abiService;
-    @Autowired
-    private GovernVoteService governVoteService;
     @Autowired
     private CnsService cnsService;
     @Autowired
@@ -774,8 +771,6 @@ public class GroupService {
         transDailyService.deleteByGroupId(groupId);
         // delete imported abi
         abiService.deleteAbiByGroupId(groupId);
-        // delete chain governance vote
-        governVoteService.deleteAllByGroupId(groupId);
         // delete cns record
         cnsService.deleteByGroupId(groupId);
         // delete external user
