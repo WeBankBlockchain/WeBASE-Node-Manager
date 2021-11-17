@@ -36,7 +36,7 @@ public class ReqAddNode {
     /**
      * default 1
      */
-    private int groupId;
+    private String groupId;
     /**
      * default one same agency
      */

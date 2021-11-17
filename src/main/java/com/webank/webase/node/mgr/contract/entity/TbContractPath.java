@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TbContractPath {
     private Integer id;
-    private Integer groupId;
+    private String groupId;
     private String contractPath;
     private String account;
     private LocalDateTime createTime;

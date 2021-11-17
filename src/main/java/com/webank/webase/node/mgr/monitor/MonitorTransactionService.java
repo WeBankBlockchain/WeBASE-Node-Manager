@@ -34,7 +34,7 @@ public class MonitorTransactionService {
      * insert and update.
      */
     @Transactional
-    public void dataAddAndUpdate(int groupId, TbMonitor tbMonitor) {
+    public void dataAddAndUpdate(String groupId, TbMonitor tbMonitor) {
         TbMonitor dbInfo = this.queryTbMonitor(groupId, tbMonitor);
         if (dbInfo == null) {
             log.info("====== data is not exist, add tbMonitor:{}", JsonTools.toJSONString(tbMonitor));
@@ -58,15 +58,15 @@ public class MonitorTransactionService {
     /**
      * query monitor info.
      */
-    public TbMonitor queryTbMonitor(int groupId, TbMonitor tbMonitor) {
+    public TbMonitor queryTbMonitor(String groupId, TbMonitor tbMonitor) {
         return monitorMapper.queryTbMonitor(TableName.MONITOR.getTableName(groupId), tbMonitor);
     }
 
-    public void addRow(int groupId, TbMonitor tbMonitor) {
+    public void addRow(String groupId, TbMonitor tbMonitor) {
         monitorMapper.add(TableName.MONITOR.getTableName(groupId), tbMonitor);
     }
 
-    public void updateRow(int groupId, TbMonitor tbMonitor) {
+    public void updateRow(String groupId, TbMonitor tbMonitor) {
         monitorMapper.update(TableName.MONITOR.getTableName(groupId), tbMonitor);
     }
 

@@ -45,8 +45,8 @@ public class TableService {
     /**
      * create table by groupId
      */
-    public void newTableByGroupId(int groupId) {
-        if (groupId == 0) {
+    public void newTableByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return;
         }
 
@@ -61,10 +61,10 @@ public class TableService {
     /**
      * deop table.
      */
-    public void dropTableByGroupId(int groupId) {
+    public void dropTableByGroupId(String groupId) {
         Instant startTime = Instant.now();
         log.info("start dropTableByGroupId. startTime:{}", startTime.toEpochMilli());
-        if (groupId == 0) {
+        if (groupId.isEmpty()) {
             return;
         }
         for (TableName enumName : TableName.values()) {

@@ -75,8 +75,8 @@ public class ImportCertTest {
         byte[] pubBytes = pub.getEncodedPublicValue();
         String publicKey = Numeric.toHexStringNoPrefix(pubBytes);
         CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
-        String address = cryptoSuite.createKeyPair().getAddress(publicKey);
-        byte[] addByteArray = cryptoSuite.createKeyPair().getAddress(pubBytes);
+        String address = cryptoSuite.getCryptoKeyPair().getAddress(publicKey);
+        byte[] addByteArray = cryptoSuite.getCryptoKeyPair().getAddress(pubBytes);
         System.out.println("byte[] : pub ");
         System.out.println(pubBytes);
         System.out.println("====================================");
@@ -95,7 +95,7 @@ public class ImportCertTest {
     public void testAddress() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
 
-        CryptoKeyPair key = cryptoSuite.createKeyPair();
+        CryptoKeyPair key = cryptoSuite.getCryptoKeyPair();
         // 用byte[]穿进去获取公钥，就会可能多出一位0
         System.out.println("=============原生的==============");
         System.out.println(key.getHexPublicKey()); //64bytes BigInteger

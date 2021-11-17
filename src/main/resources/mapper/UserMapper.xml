@@ -8,7 +8,7 @@
     <id column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="userId"/>
     <result column="user_name" javaType="java.lang.String" jdbcType="VARCHAR" property="userName"/>
     <result column="account" javaType="java.lang.String" jdbcType="VARCHAR" property="account"/>
-    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+    <result column="group_id" javaType="java.lang.String" jdbcType="VARCHAR"
       property="groupId"/>
     <result column="user_status" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="userStatus"/>

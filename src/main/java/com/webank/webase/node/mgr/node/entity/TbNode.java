@@ -30,7 +30,7 @@ public class TbNode {
 
     private String nodeId;
     private String nodeName;
-    private Integer groupId;
+    private String groupId;
     private String nodeIp;
     private Integer p2pPort;
     private String description;
@@ -45,7 +45,7 @@ public class TbNode {
     public static TbNode init(
             String nodeId,
             String nodeName,
-            int groupId ,
+            String groupId ,
             String ip,
             int p2pPort,
             String description,

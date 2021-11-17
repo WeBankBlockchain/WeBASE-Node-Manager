@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class ChainGovernanceHandle {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotBlank
     private String fromAddress;
     private String address;

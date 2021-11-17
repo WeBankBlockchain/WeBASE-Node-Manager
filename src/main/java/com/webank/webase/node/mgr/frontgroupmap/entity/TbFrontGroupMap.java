@@ -24,7 +24,7 @@ public class TbFrontGroupMap {
 
     private int mapId;
     private Integer frontId;
-    private Integer groupId;
+    private String groupId;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
     /**
@@ -37,18 +37,18 @@ public class TbFrontGroupMap {
      */
     private Integer type;
 
-    public TbFrontGroupMap(Integer frontId, Integer groupId, Integer status){
+    public TbFrontGroupMap(Integer frontId, String groupId, Integer status){
         this.frontId = frontId;
         this.groupId = groupId;
         this.status = status;
     }
 
-    public TbFrontGroupMap(Integer frontId, Integer groupId) {
+    public TbFrontGroupMap(Integer frontId, String groupId) {
         this.frontId = frontId;
         this.groupId = groupId;
     }
 
-    public TbFrontGroupMap(int frontId, int groupId, int status, int type){
+    public TbFrontGroupMap(int frontId, String groupId, int status, int type){
         this.frontId = frontId;
         this.groupId = groupId;
         this.status = status;

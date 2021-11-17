@@ -50,7 +50,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.codec.datatypes.Address;
 import org.fisco.bcos.sdk.utils.AddressUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +111,7 @@ public class ContractController extends BaseController {
      */
     @DeleteMapping(value = "/{groupId}/{contractId}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse deleteContract(@PathVariable("groupId") Integer groupId,
+    public BaseResponse deleteContract(@PathVariable("groupId") String groupId,
             @PathVariable("contractId") Integer contractId) throws NodeMgrException, Exception {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -265,7 +265,7 @@ public class ContractController extends BaseController {
      * query contract info list by groupId without abi/bin
      */
     @GetMapping(value = "/contractList/all/light")
-    public BasePageResponse queryContractListNoAbi(@RequestParam Integer groupId,
+    public BasePageResponse queryContractListNoAbi(@RequestParam String groupId,
             @RequestParam Integer contractStatus) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -320,7 +320,7 @@ public class ContractController extends BaseController {
      * query contract info list.
      */
     @PostMapping(value = "/contractPath/list/{groupId}")
-    public BasePageResponse queryContractPathList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse queryContractPathList(@PathVariable("groupId") String groupId,
             @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -474,7 +474,7 @@ public class ContractController extends BaseController {
      */
     @GetMapping("listManager/{groupId}/{contractAddress}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse queryContractManagerList(@PathVariable("groupId") Integer groupId,
+    public BaseResponse queryContractManagerList(@PathVariable("groupId") String groupId,
         @PathVariable("contractAddress") String contractAddress) {
         Instant startTime = Instant.now();
         log.info("start queryDeployAddress. startTime:{} groupId:{},contractAddress:{}",

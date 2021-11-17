@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class ReqCopyContracts {
     private String account;
     @NotNull
-    private Integer groupId;
+    private String groupId;
     private String contractPath;
     private List<RepCopyContractItem> contractItems;
 

@@ -34,7 +34,7 @@ public class ParseToolTest extends TestBase {
      */
     @Test
     public void testParseResponseFromFromt() {
-        int groupId = 1;
+        String groupId = "1";
         String nodeId = "17b9cdf9b764b97fd1a93e7153608f7fc40a122b552075eac3d2ddd4f2b32eec080e50ba60045c0840fe5d0f62d7a3070227f89dd6854e35534d27ec7da026f7";
         Object responseFromFront = precompiledService.getNodeListService(groupId, 100, 1);
 //        Object responseFromFront = {code=0, message=success, data=[{nodeId=e5e7efc9e8d5bed699313d5a0cd5b024b3c11811d50473b987b9429c2f6379742c88249a7a8ea64ab0e6f2b69fb8bb280454f28471e38621bea8f38be45bc42d, nodeType=sealer}, {nodeId=089846e75c7b18098bb67c77c0b97b3905fc41f5f328fbc52a1580371393fca4a89dda81ab76944942a5e8d307f17f0fb3a139b8333dd933b8e534f2e9a56d9a, nodeType=sealer}, {nodeId=67a9fa9a3994a441c9a77dc24fa85d1e47a88f9a632dbe003ee33cf4a85ba690f874408b447ebb1a316c9c2e18640b5f2840aa1c1aa746cd84eda65ff5743c98, nodeType=sealer}, {nodeId=17b9cdf9b764b97fd1a93e7153608f7fc40a122b552075eac3d2ddd4f2b32eec080e50ba60045c0840fe5d0f62d7a3070227f89dd6854e35534d27ec7da026f7, nodeType=sealer}], totalCount=4};

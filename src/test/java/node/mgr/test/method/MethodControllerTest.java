@@ -53,7 +53,7 @@ public class MethodControllerTest extends TestBase {
 
         NewMethodInputParam param = new NewMethodInputParam();
         param.setMethodList(Arrays.asList(method));
-        param.setGroupId(2);
+        param.setGroupId("2");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post( "/method/add").
             content(JsonTools.toJSONString(param)).

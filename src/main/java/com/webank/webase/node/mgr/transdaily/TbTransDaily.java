@@ -26,7 +26,7 @@ import lombok.Data;
 @Data
 public class TbTransDaily {
 
-    private Integer groupId;
+    private String groupId;
     private LocalDate transDay;
     private Integer transCount;
     private BigInteger blockNumber;
@@ -40,7 +40,7 @@ public class TbTransDaily {
     /**
      * init by groupId、transDay、transCount、blockNumber.
      */
-    public TbTransDaily(Integer groupId, LocalDate transDay, Integer transCount,
+    public TbTransDaily(String groupId, LocalDate transDay, Integer transCount,
         BigInteger blockNumber) {
         super();
         this.groupId = groupId;

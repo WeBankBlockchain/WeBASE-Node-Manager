@@ -58,7 +58,7 @@ public class AbiController extends BaseController {
 
 	@GetMapping("/list/{groupId}/{pageNumber}/{pageSize}")
 	public Object listAbi(
-			@PathVariable("groupId") Integer groupId,
+			@PathVariable("groupId") String groupId,
 			@PathVariable("pageNumber") Integer pageNumber,
 			@PathVariable("pageSize") Integer pageSize,
             @RequestParam(value = "account", required = false) String account) {
@@ -86,7 +86,7 @@ public class AbiController extends BaseController {
 
 	@GetMapping("/list/all/{groupId}/{pageNumber}/{pageSize}")
 	public BasePageResponse listAllContractIncludeAbi(
-			@PathVariable("groupId") Integer groupId,
+			@PathVariable("groupId") String groupId,
 			@PathVariable("pageNumber") Integer pageNumber,
 			@PathVariable("pageSize") Integer pageSize,
             @RequestParam(value = "account", required = false) String account,

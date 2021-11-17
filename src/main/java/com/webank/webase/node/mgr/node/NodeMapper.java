@@ -84,11 +84,11 @@ public interface NodeMapper {
     /**
      * delete by nodeId and groupId.
      */
-    Integer deleteByNodeAndGroup(@Param("nodeId") String nodeId, @Param("groupId") Integer groupId);
+    Integer deleteByNodeAndGroup(@Param("nodeId") String nodeId, @Param("groupId") String groupId);
     /**
      * delete by groupId.
      */
-    Integer deleteByGroupId( @Param("groupId") Integer groupId);
+    Integer deleteByGroupId( @Param("groupId") String groupId);
 
     int deleteByNodeId(@Param("nodeId") String nodeId);
 
@@ -96,7 +96,7 @@ public interface NodeMapper {
     @Select({
             "select * from tb_node where node_id= #{nodeId,jdbcType=VARCHAR} and group_id=#{groupId,jdbcType=INTEGER}"
     })
-    TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId, @Param("groupId") int groupId);
+    TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId, @Param("groupId") String groupId);
 
     @Select({
             " SELECT " +
@@ -109,19 +109,19 @@ public interface NodeMapper {
     @Select({
            "SELECT DISTINCT (group_id ) FROM tb_node WHERE node_id = #{nodeId,jdbcType=VARCHAR} "
     })
-    List<Integer> selectGroupIdListOfNode(@Param("nodeId") String nodeId);
+    List<String> selectGroupIdListOfNode(@Param("nodeId") String nodeId);
 
     @Select({
             "select * from tb_node where group_id=#{groupId,jdbcType=INTEGER}"
     })
-    List<TbNode> selectByGroupId(@Param("groupId") int groupId);
+    List<TbNode> selectByGroupId(@Param("groupId") String groupId);
 
     /**
      * default 0
      * @param groupId
      * @return
      */
-    int getHighestBlockHeight(@Param("groupId") Integer groupId);
+    int getHighestBlockHeight(@Param("groupId") String groupId);
 
     @Select({"select city,count(distinct(node_id)) from tb_node",
         "where city is not NULL",

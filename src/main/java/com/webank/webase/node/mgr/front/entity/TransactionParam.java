@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 public class TransactionParam {
 
     @NotNull
-    private Integer groupId;
+    private String groupId;
     private String signUserId;
     @NotBlank
     private String contractName;

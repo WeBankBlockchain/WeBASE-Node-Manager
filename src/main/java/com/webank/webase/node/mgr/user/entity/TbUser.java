@@ -27,7 +27,7 @@ public class TbUser {
     private Integer userId;
     private String userName;
     private String account;
-    private Integer groupId;
+    private String groupId;
     private String publicKey;
     // add in 1.5.0
     private String privateKey;
@@ -50,7 +50,7 @@ public class TbUser {
      * init TbUser.
      */
     public TbUser(Integer chainIndex, Integer hasPk, Integer userType, String userName,
-            Integer groupId, String address, String publicKey, String description) {
+            String groupId, String address, String publicKey, String description) {
         super();
         this.chainIndex = chainIndex;
         this.hasPk = hasPk;
@@ -65,7 +65,7 @@ public class TbUser {
     /**
      * init TbUser.
      */
-    public TbUser(Integer hasPk, Integer userType, String userName, String account, Integer groupId,
+    public TbUser(Integer hasPk, Integer userType, String userName, String account, String groupId,
             String address, String publicKey, String description) {
         super();
         this.hasPk = hasPk;

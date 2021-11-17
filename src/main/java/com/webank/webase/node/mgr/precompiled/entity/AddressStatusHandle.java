@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class AddressStatusHandle {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     /**
      * account address or contract address
      */

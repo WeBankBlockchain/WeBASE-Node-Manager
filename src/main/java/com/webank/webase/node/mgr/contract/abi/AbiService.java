@@ -81,7 +81,7 @@ public class AbiService {
      */
     @Transactional
     public void insertAbiInfo(ReqImportAbi param) {
-        int groupId = param.getGroupId();
+        String groupId = param.getGroupId();
         String account = param.getAccount();
         String contractAddress = param.getContractAddress();
         String contractAbiStr;
@@ -139,13 +139,13 @@ public class AbiService {
         abiMapper.deleteByAbiId(id);
     }
 
-    private void checkAbiExist(int groupId, String account, String address) {
+    private void checkAbiExist(String groupId, String account, String address) {
         if (ifAbiExist(groupId, account, address)) {
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_ALREADY_EXISTS);
         }
     }
     
-    private boolean ifAbiExist(int groupId, String account, String address) {
+    private boolean ifAbiExist(String groupId, String account, String address) {
         AbiInfo checkAbiAddressExist = abiMapper.queryByGroupIdAndAddress(groupId, account, address);
         if (Objects.nonNull(checkAbiAddressExist)) {
             return true;
@@ -164,7 +164,7 @@ public class AbiService {
         }
     }
 
-    public AbiInfo getAbiByGroupIdAndAddress(Integer groupId, String contractAddress) {
+    public AbiInfo getAbiByGroupIdAndAddress(String groupId, String contractAddress) {
         AbiInfo abiInfo = this.getAbi(groupId, contractAddress);
         if (Objects.isNull(abiInfo)) {
             throw new NodeMgrException(ConstantCode.ABI_INFO_NOT_EXISTS);
@@ -172,7 +172,7 @@ public class AbiService {
         return abiInfo;
     }
 
-    public AbiInfo getAbi(Integer groupId, String contractAddress) {
+    public AbiInfo getAbi(String groupId, String contractAddress) {
         return abiMapper.queryByGroupIdAndAddress(groupId, null, contractAddress);
     }
 
@@ -180,7 +180,7 @@ public class AbiService {
      * check address is valid.
      * @return address's runtime bin
      */
-    public String getAddressRuntimeBin(int groupId, String contractAddress) {
+    public String getAddressRuntimeBin(String groupId, String contractAddress) {
         log.info("getAddressRuntimeBin groupId:{},contractAddress:{}", groupId, contractAddress);
         if (StringUtils.isBlank(contractAddress)) {
             log.error("fail getAddressRuntimeBin. contractAddress is empty");
@@ -218,7 +218,7 @@ public class AbiService {
     /**
      * query contract list.
      */
-    public List<RspContractNoAbi> listByGroupIdNoAbi(int groupId) throws NodeMgrException {
+    public List<RspContractNoAbi> listByGroupIdNoAbi(String groupId) throws NodeMgrException {
         log.debug("start listByGroupIdNoAbi groupId:{}", groupId);
         ReqAbiListParam param = new ReqAbiListParam();
         param.setGroupId(groupId);
@@ -234,12 +234,12 @@ public class AbiService {
         return resultList;
     }
 
-    public void deleteAbiByGroupId(int groupId) {
+    public void deleteAbiByGroupId(String groupId) {
         log.info("deleteAbiByGroupId groupId:{}", groupId);
         abiMapper.deleteByGroupId(groupId);
     }
 
-    public int countOfAbiByGroupId(int groupId) {
+    public int countOfAbiByGroupId(String groupId) {
         log.debug("start countOfAbiByGroupId groupId:{}", groupId);
         ReqAbiListParam param = new ReqAbiListParam();
         param.setGroupId(groupId);
@@ -250,7 +250,7 @@ public class AbiService {
         log.info("saveAbiFromContractId contractId:{},contractAddress:{}", contractId, contractAddress);
         TbContract tbContract = contractService.queryByContractId(contractId);
 
-        int groupId = tbContract.getGroupId();
+        String groupId = tbContract.getGroupId();
         String account = tbContract.getAccount();
         // concat contract name with address
         String contractName = tbContract.getContractName();
@@ -273,7 +273,7 @@ public class AbiService {
     }
     
     public void saveAbiFromAppContract(TbContract tbContract) {
-        int groupId = tbContract.getGroupId();
+        String groupId = tbContract.getGroupId();
         String account = tbContract.getAccount();
         String contractAddress = tbContract.getContractAddress();
         String contractName = tbContract.getContractName();
@@ -299,7 +299,7 @@ public class AbiService {
      * @param contractAbiStr
      * @param contractBin
      */
-    private void addAbiToDb(int groupId, String contractName, String account, String contractAddress,
+    private void addAbiToDb(String groupId, String contractName, String account, String contractAddress,
             String contractAbiStr, String contractBin) {
         AbiInfo saveAbi = new AbiInfo();
         saveAbi.setGroupId(groupId);

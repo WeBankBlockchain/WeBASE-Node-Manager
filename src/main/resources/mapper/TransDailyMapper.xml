@@ -5,7 +5,7 @@
 <!--对应mapper接口 -->
 <mapper namespace="com.webank.webase.node.mgr.transdaily.TbTransDailyMapper">
   <resultMap id="seventDayOfTransMap" type="com.webank.webase.node.mgr.transdaily.SeventDaysTrans">
-    <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
+    <id column="group_id" javaType="java.lang.String" jdbcType="VARCHAR" property="groupId"/>
     <id column="trans_day" javaType="java.time.LocalDate" jdbcType="TIMESTAMP" property="day"/>
     <result column="trans_count" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="transCount"/>

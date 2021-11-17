@@ -21,7 +21,7 @@ import lombok.Data;
 @Data
 public class MonitorTrans {
 
-    private Integer groupId;
+    private String groupId;
     private String userName;
     private String interfaceName;
     private Integer totalCount;
@@ -34,7 +34,7 @@ public class MonitorTrans {
     /**
      * init by groupId、userName、interfaceName、totalCount、transInfoList.
      */
-    public MonitorTrans(Integer groupId, String userName, String interfaceName,
+    public MonitorTrans(String groupId, String userName, String interfaceName,
         Integer totalCount,
         List<PageTransInfo> transInfoList) {
         super();

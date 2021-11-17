@@ -31,5 +31,5 @@ public interface GovernVoteMapper {
 
     void deleteById(int id);
 
-    void deleteByGroupId(int groupId);
+    void deleteByGroupId(String groupId);
 }

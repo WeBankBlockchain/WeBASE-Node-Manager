@@ -56,7 +56,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +100,7 @@ public class MonitorService {
      * monitor every group.
      */
     @Async(value = "mgrAsyncExecutor")
-    public void transMonitorByGroupId(CountDownLatch latch, int groupId) {
+    public void transMonitorByGroupId(CountDownLatch latch, String groupId) {
         try {
             Instant startTimem = Instant.now();//start time
             Long useTimeSum = 0L;
@@ -155,7 +155,7 @@ public class MonitorService {
     /**
      * check unusualUserCount or unusualContractCount is max.
      */
-    private boolean checkUnusualMax(int groupId) {
+    private boolean checkUnusualMax(String groupId) {
         int unusualUserCount = this.countOfUnusualUser(groupId, null);
         int unusualContractCount = this.countOfUnusualContract(groupId, null);
         int unusualMaxCount = cProperties.getMonitorUnusualMaxCount();
@@ -170,7 +170,7 @@ public class MonitorService {
     }
 
 
-    public void updateUnusualUser(Integer groupId, String userName, String address) {
+    public void updateUnusualUser(String groupId, String userName, String address) {
         log.info("start updateUnusualUser address:{}", address);
         monitorMapper.updateUnusualUser(TableName.MONITOR.getTableName(groupId), userName, address);
     }
@@ -178,7 +178,7 @@ public class MonitorService {
     /**
      * Remove trans monitor info.
      */
-    public Integer delete(Integer groupId, Integer monitorInfoRetainMax) {
+    public Integer delete(String groupId, Integer monitorInfoRetainMax) {
         String tableName = TableName.MONITOR.getTableName(groupId);
         Integer affectRow = monitorMapper.deleteAndRetainMax(tableName, monitorInfoRetainMax);
         return affectRow;
@@ -187,7 +187,7 @@ public class MonitorService {
     /**
      * update unusual contract.
      */
-    public void updateUnusualContract(Integer groupId, String contractName, String contractBin)
+    public void updateUnusualContract(String groupId, String contractName, String contractBin)
         throws NodeMgrException {
         try {
             log.info("start updateUnusualContract groupId:{} contractName:{} contractBin:{}",
@@ -218,7 +218,7 @@ public class MonitorService {
     /**
      * query monitor user list.
      */
-    public List<TbMonitor> queryMonitorUserList(Integer groupId) throws NodeMgrException {
+    public List<TbMonitor> queryMonitorUserList(String groupId) throws NodeMgrException {
 
         List<TbMonitor> monitorUserList = monitorMapper
             .monitorUserList(TableName.MONITOR.getTableName(groupId));
@@ -231,7 +231,7 @@ public class MonitorService {
     /**
      * query monitor interface list.
      */
-    public List<TbMonitor> queryMonitorInterfaceList(Integer groupId, String userName)
+    public List<TbMonitor> queryMonitorInterfaceList(String groupId, String userName)
         throws NodeMgrException {
 
         List<TbMonitor> monitorInterfaceList = monitorMapper
@@ -245,7 +245,7 @@ public class MonitorService {
     /**
      * query monitor trans list.
      */
-    public BaseResponse queryMonitorTransList(Integer groupId, String userName, String startDate,
+    public BaseResponse queryMonitorTransList(String groupId, String userName, String startDate,
         String endDate, String interfaceName)
         throws NodeMgrException {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
@@ -270,14 +270,14 @@ public class MonitorService {
     /**
      * query count of unusual user.
      */
-    public Integer countOfUnusualUser(Integer groupId, String userName) {
+    public Integer countOfUnusualUser(String groupId, String userName) {
         return monitorMapper.countOfUnusualUser(TableName.MONITOR.getTableName(groupId), userName);
     }
 
     /**
      * query unusual user list.
      */
-    public List<UnusualUserInfo> queryUnusualUserList(Integer groupId, String userName,
+    public List<UnusualUserInfo> queryUnusualUserList(String groupId, String userName,
         Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
         log.debug("start queryUnusualUserList groupId:{} userName:{} pageNumber:{} pageSize:{}",
@@ -302,7 +302,7 @@ public class MonitorService {
     /**
      * query count of unusual contract.
      */
-    public Integer countOfUnusualContract(Integer groupId, String contractAddress) {
+    public Integer countOfUnusualContract(String groupId, String contractAddress) {
         return monitorMapper
             .countOfUnusualContract(TableName.MONITOR.getTableName(groupId), contractAddress);
     }
@@ -310,7 +310,7 @@ public class MonitorService {
     /**
      * query unusual contract list.
      */
-    public List<UnusualContractInfo> queryUnusualContractList(Integer groupId,
+    public List<UnusualContractInfo> queryUnusualContractList(String groupId,
         String contractAddress, Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
         log.debug(
@@ -338,7 +338,7 @@ public class MonitorService {
     /**
      * monitor TransHash.
      */
-    public void monitorTransHash(int groupId, TbTransHash trans, LocalDateTime createTime) {
+    public void monitorTransHash(String groupId, TbTransHash trans, LocalDateTime createTime) {
 
         try {
             ChainTransInfo chanTrans = frontInterface
@@ -382,7 +382,7 @@ public class MonitorService {
     /**
      * monitor contract.
      */
-    private ContractMonitorResult monitorContract(int groupId, String transHash, String transTo,
+    private ContractMonitorResult monitorContract(String groupId, String transHash, String transTo,
         String transInput, BigInteger blockNumber) {
         String contractAddress, contractName, interfaceName = "", contractBin;
         int transType = TransType.DEPLOY.getValue();
@@ -477,7 +477,7 @@ public class MonitorService {
     /**
      * monitor user.
      */
-    private UserMonitorResult monitorUser(int groupId, String userAddress) {
+    private UserMonitorResult monitorUser(String groupId, String userAddress) {
         String userName = userService.queryUserNameByAddress(groupId, userAddress);
 
         int userType = MonitorUserType.NORMAL.getValue();
@@ -553,7 +553,7 @@ public class MonitorService {
     /**
      * get contractName from contractBin.
      */
-    private String getNameFromContractBin(int groupId, String contractBin) {
+    private String getNameFromContractBin(String groupId, String contractBin) {
         List<TbContract> contractList = contractService.queryContractByBin(groupId, contractBin);
         if (contractList != null && contractList.size() > 0) {
             return contractList.get(0).getContractName();

@@ -19,7 +19,7 @@ import lombok.Data;
 
 @Data
 public class ReqListContract {
-    private Integer groupId;
+    private String groupId;
     private String account;
     /**
      * list contract by multi path

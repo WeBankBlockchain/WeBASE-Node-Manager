@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 public class Contract {
     private String account;
     @NotNull
-    private Integer groupId;
+    private String groupId;
     private Integer contractId;
     @NotBlank
     private String contractName;
@@ -38,7 +38,7 @@ public class Contract {
     private String bytecodeBin;
     private String contractAddress;
 
-    public Contract(Integer groupId, String contractName, String contractPath,
+    public Contract(String groupId, String contractName, String contractPath,
         String account) {
         this.groupId = groupId;
         this.contractName = contractName;

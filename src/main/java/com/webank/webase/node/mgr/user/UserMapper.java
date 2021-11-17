@@ -44,7 +44,7 @@ public interface UserMapper {
      * Query user according to some conditions.
      * limit 1
      */
-    TbUser queryUser(@Param("userId") Integer userId, @Param("groupId") Integer groupId,
+    TbUser queryUser(@Param("userId") Integer userId, @Param("groupId") String groupId,
             @Param("userName") String userName, @Param("address") String address,
             @Param("account") String account);
 
@@ -56,19 +56,19 @@ public interface UserMapper {
     /**
      * query max chainIndex of user.
      */
-    String queryUserNameByAddress(@Param("groupId") Integer groupId,
+    String queryUserNameByAddress(@Param("groupId") String groupId,
             @Param("address") String address);
 
     /**
      * query email of user.
      */
-    String queryUserEmailByAddress(@Param("groupId") Integer groupId,
+    String queryUserEmailByAddress(@Param("groupId") String groupId,
             @Param("address") String address);
 
     /**
      * delete user.
      */
-    void deleteUser(@Param("groupId") Integer groupId);
+    void deleteUser(@Param("groupId") String groupId);
 
     void deleteByAddress(@Param("address") String address);
 

@@ -18,7 +18,7 @@ import lombok.Data;
 @Data
 public class QueryContractParam {
 
-    private Integer groupId;
+    private String groupId;
     private String contractName;
     @Deprecated
     private String account;

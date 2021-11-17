@@ -33,7 +33,7 @@ public class DeployInputParam {
     @NotBlank
     private String user;
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotNull
     private Integer contractId;
     @NotBlank

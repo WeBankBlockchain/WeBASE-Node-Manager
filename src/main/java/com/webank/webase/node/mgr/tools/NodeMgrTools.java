@@ -657,7 +657,7 @@ public class NodeMgrTools {
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + PEM_FILE_FORMAT;
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.loadKeyPair(rawPrivateKey);
         cryptoKeyPair.storeKeyPairWithPem(exportedKeyPath);
         return exportedKeyPath;
     }
@@ -684,7 +684,7 @@ public class NodeMgrTools {
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + P12_FILE_FORMAT;
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.loadKeyPair(rawPrivateKey);
         cryptoKeyPair.storeKeyPairWithP12(exportedKeyPath, p12Password);
 
         return exportedKeyPath;

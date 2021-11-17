@@ -46,7 +46,7 @@ public class MonitorController {
      * monitor user list.
      */
     @GetMapping(value = "/userList/{groupId}")
-    public BaseResponse monitorUserList(@PathVariable("groupId") Integer groupId)
+    public BaseResponse monitorUserList(@PathVariable("groupId") String groupId)
         throws NodeMgrException {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -65,7 +65,7 @@ public class MonitorController {
      * monitor interface list.
      */
     @GetMapping(value = "/interfaceList/{groupId}")
-    public BaseResponse monitorInterfaceList(@PathVariable("groupId") Integer groupId,
+    public BaseResponse monitorInterfaceList(@PathVariable("groupId") String groupId,
         @RequestParam(value = "userName") String userName) throws NodeMgrException {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -85,7 +85,7 @@ public class MonitorController {
      * monitor trans list.
      */
     @GetMapping(value = "/transList/{groupId}")
-    public BaseResponse monitorTransList(@PathVariable("groupId") Integer groupId,
+    public BaseResponse monitorTransList(@PathVariable("groupId") String groupId,
         @RequestParam(value = "userName", required = false) String userName,
         @RequestParam(value = "startDate", required = false) String startDate,
         @RequestParam(value = "endDate", required = false) String endDate,
@@ -110,7 +110,7 @@ public class MonitorController {
      * unusual user list.
      */
     @GetMapping(value = "/unusualUserList/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse unusualUserList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse unusualUserList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "userName", required = false) String userName)
@@ -140,7 +140,7 @@ public class MonitorController {
      * unusual contract list.
      */
     @GetMapping(value = "/unusualContractList/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse unusualContractList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse unusualContractList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "contractAddress", required = false) String contractAddress)

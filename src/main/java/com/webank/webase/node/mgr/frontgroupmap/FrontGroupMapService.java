@@ -62,7 +62,7 @@ public class FrontGroupMapService {
      * @param: type: map consensus type
      */
     @Transactional
-    public TbFrontGroupMap newFrontGroupWithStatus(Integer frontId, Integer groupId, Integer status) {
+    public TbFrontGroupMap newFrontGroupWithStatus(Integer frontId, String groupId, Integer status) {
         log.debug("start newFrontGroup frontId:{} groupId:{} status:{}", frontId, groupId, status);
         MapListParam param = new MapListParam(frontId, groupId);
         FrontGroup frontGroup = frontGroupMapMapper.queryFrontGroup(param);
@@ -93,7 +93,7 @@ public class FrontGroupMapService {
      * add new mapping in visual deploy
      */
     @Transactional
-    public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, GroupStatus groupStatus) {
+    public TbFrontGroupMap newFrontGroup(Integer frontId, String groupId, GroupStatus groupStatus) {
         TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, groupStatus.getValue());
 
         //add db
@@ -108,7 +108,7 @@ public class FrontGroupMapService {
      * v1.4.3: add consensus type of front group map
      */
     @Transactional
-    public void newFrontGroup(TbFront front, Integer groupId) {
+    public void newFrontGroup(TbFront front, String groupId) {
         // check front's all group status
         BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
                 groupId, OPERATE_STATUS_GROUP);
@@ -141,8 +141,8 @@ public class FrontGroupMapService {
      * remove by groupId
      */
     @Transactional(isolation= Isolation.READ_COMMITTED)
-    public void removeByGroupId(int groupId) {
-        if (groupId == 0) {
+    public void removeByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return;
         }
         // remove by groupId
@@ -173,8 +173,8 @@ public class FrontGroupMapService {
     /**
      * get map list by groupId
      */
-    public List<FrontGroup> listByGroupId(int groupId) {
-        if (groupId == 0) {
+    public List<FrontGroup> listByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return null;
         }
         MapListParam param = new MapListParam();
@@ -202,7 +202,7 @@ public class FrontGroupMapService {
         allList.forEach(map -> {
             int mapId= map.getMapId();
             int frontId = map.getFrontId();
-            int groupId = map.getGroupId();
+            String groupId = map.getGroupId();
             long frontCount = frontList.stream().filter(f -> frontId == f.getFrontId()).count();
             long groupCount = groupList.stream().filter(g -> groupId == g.getGroupId()).count();
             if (frontCount == 0 || groupCount == 0) {
@@ -221,7 +221,7 @@ public class FrontGroupMapService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void updateFrontMapStatus(int frontId, int groupId, GroupStatus status) {
+    public void updateFrontMapStatus(int frontId, String groupId, GroupStatus status) {
         // update status
         log.info("Update frontGroupMap:[{}] group:[{}] map to status:[{}]", frontId, groupId, status);
         frontGroupMapMapper.updateOneGroupStatus(frontId, status.getValue(), groupId);
@@ -234,7 +234,7 @@ public class FrontGroupMapService {
      * @param groupId
      * @return
      */
-    private int checkFrontGroupType(int frontId, int groupId) {
+    private int checkFrontGroupType(int frontId, String groupId) {
         TbFront front = frontMapper.getById(frontId);
         if (front == null) {
             log.error("frontId :{} not exist!", frontId);
@@ -249,7 +249,7 @@ public class FrontGroupMapService {
         return type;
     }
 
-    public FrontGroup getOneNormalMap(Integer frontId, Integer groupId) {
+    public FrontGroup getOneNormalMap(Integer frontId, String groupId) {
         MapListParam param = new MapListParam(frontId, groupId);
         param.setStatus(GroupStatus.NORMAL.getValue());
         log.info("getOneNormalMap param:{}", param);

@@ -166,7 +166,7 @@ public class GroupService {
     /**
      * query count of group.
      */
-    public Integer countOfGroup(Integer groupId, Integer groupStatus) throws NodeMgrException {
+    public Integer countOfGroup(String groupId, Integer groupStatus) throws NodeMgrException {
         log.debug("start countOfGroup groupId:{}", groupId);
         try {
             Integer count = groupMapper.getCount(groupId, groupStatus);
@@ -198,7 +198,7 @@ public class GroupService {
     /**
      * update status.
      */
-    public void updateGroupStatus(int groupId, int groupStatus) {
+    public void updateGroupStatus(String groupId, int groupStatus) {
         log.debug("start updateGroupStatus groupId:{} groupStatus:{}", groupId, groupStatus);
         int res = groupMapper.updateStatus(groupId, groupStatus);
         log.debug("end updateGroupStatus res:{} groupId:{} groupStatus:{}", res, groupId, groupStatus);
@@ -210,7 +210,7 @@ public class GroupService {
      *
      * @throws NodeMgrException INVALID_GROUP_ID
      */
-    public void checkGroupId(Integer groupId) throws NodeMgrException {
+    public void checkGroupId(String groupId) throws NodeMgrException {
         log.debug("start checkGroupId groupId:{}", groupId);
 
         if (groupId == null) {
@@ -247,7 +247,7 @@ public class GroupService {
     /**
      * query group overview information.
      */
-    public GroupGeneral queryGroupGeneral(int groupId) throws NodeMgrException {
+    public GroupGeneral queryGroupGeneral(String groupId) throws NodeMgrException {
         log.debug("start queryGroupGeneral groupId:{}", groupId);
         GroupGeneral generalInfo = this.getGeneralAndUpdateNodeCount(groupId);
         if (generalInfo != null) {
@@ -265,7 +265,7 @@ public class GroupService {
      * @param groupId
      * @return
      */
-    private GroupGeneral getGeneralAndUpdateNodeCount(int groupId) {
+    private GroupGeneral getGeneralAndUpdateNodeCount(String groupId) {
         List<String> groupPeers = frontInterface.getGroupPeers(groupId);
         groupMapper.updateNodeCount(groupId, groupPeers.size());
         log.debug("getGeneralAndUpdateNodeCount gId:{} count:{}", groupId, groupPeers.size());
@@ -289,7 +289,7 @@ public class GroupService {
         log.info("start resetGroupList. startTime:{}", startTime.toEpochMilli());
 
         // all groupId from chain and all node, to check the whole group whether normal
-        Set<Integer> allGroupSet = new HashSet<>();
+        Set<String> allGroupSet = new HashSet<>();
 
         // get all front
         List<TbFront> frontList = frontMapper.getAllList();
@@ -335,7 +335,7 @@ public class GroupService {
      * @param allGroupSet to record all group from each front
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    private void saveDataOfGroup(List<TbFront> frontList, Set<Integer> allGroupSet) {
+    private void saveDataOfGroup(List<TbFront> frontList, Set<String> allGroupSet) {
         log.info("saveDataOfGroup frontList:{}", frontList);
         for (TbFront front : frontList) {
             String frontIp = front.getFrontIp();
@@ -352,7 +352,7 @@ public class GroupService {
             // update by group list on chain
             log.info("saveDataOfGroup groupIdList:{}", groupIdList);
             for (String groupId : groupIdList) {
-                Integer gId = Integer.valueOf(groupId);
+                String gId = groupId;
 
                 allGroupSet.add(gId);
                 // peer in group
@@ -408,7 +408,7 @@ public class GroupService {
             // update by group list on chain
             log.info("removeInvalidPeer groupIdList:{}", groupIdList);
             for (String groupId : groupIdList) {
-                Integer gId = Integer.valueOf(groupId);
+                String gId = groupId;
 
                 // peer in group
                 List<String> groupPeerList;
@@ -429,8 +429,8 @@ public class GroupService {
     /**
      * remove invalid peer.
      */
-    private void removeInvalidPeer(int groupId, List<String> groupPeerList) {
-        if (groupId == 0) {
+    private void removeInvalidPeer(String groupId, List<String> groupPeerList) {
+        if (groupId.isEmpty()) {
             return;
         }
         //get local peers
@@ -457,7 +457,7 @@ public class GroupService {
      * @param nodeId
      * @return
      */
-    private boolean checkSealerAndObserverListContains(int groupId, String nodeId) {
+    private boolean checkSealerAndObserverListContains(String groupId, String nodeId) {
         //get sealer and observer on chain
         List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(groupId);
         for (PeerInfo peerInfo : sealerAndObserverList) {
@@ -475,7 +475,7 @@ public class GroupService {
     /**
      * save new peers that not in group peers
      */
-    private void savePeerList(String frontIp, Integer frontPort, int groupId, List<String> groupPeerList) {
+    private void savePeerList(String frontIp, Integer frontPort, String groupId, List<String> groupPeerList) {
         //get all local nodes
         List<TbNode> localNodeList = nodeService.queryByGroupId(groupId);
         //get peers on chain
@@ -505,7 +505,7 @@ public class GroupService {
      *
      * @param allGroupOnChain if groupid not in allGroupSet, remove it
      */
-    private void checkAndUpdateGroupStatus(Set<Integer> allGroupOnChain) {
+    private void checkAndUpdateGroupStatus(Set<String> allGroupOnChain) {
         log.info("checkAndUpdateGroupStatus allGroupOnChain:{}", allGroupOnChain);
         if (CollectionUtils.isEmpty(allGroupOnChain)) {
             return;
@@ -518,7 +518,7 @@ public class GroupService {
         }
 
         for (TbGroup localGroup : allLocalGroup) {
-            int localGroupId = localGroup.getGroupId();
+            String localGroupId = localGroup.getGroupId();
             long count = 0;
             count = allGroupOnChain.stream().filter(id -> id == localGroupId).count();
             try {
@@ -565,7 +565,7 @@ public class GroupService {
         }
 
         for (TbGroup tbGroup : allGroupList) {
-            int groupId = tbGroup.getGroupId();
+            String groupId = tbGroup.getGroupId();
             String lastBlockHash = "";
             for (TbFront front : frontList) {
                 if( ! FrontStatusEnum.isRunning(front.getStatus()) ){
@@ -610,7 +610,7 @@ public class GroupService {
         }
 
         for (TbGroup tbGroup : allGroupList) {
-            int groupId = tbGroup.getGroupId();
+            String groupId = tbGroup.getGroupId();
             // find smallest block from db of group
             TbBlock smallestBlockLocal = blockService.getSmallestBlockInfo(groupId);
             // if no block in local db
@@ -695,7 +695,7 @@ public class GroupService {
             }
             // group list local
             groupListLocal.forEach(group -> {
-                Integer groupId = group.getGroupId();
+                String groupId = group.getGroupId();
                 // only check local group id
                 if (!groupListOnChain.contains(groupId.toString())) {
                     log.info("update front_group_map by local data front:{}, groupId:{} ",
@@ -724,7 +724,7 @@ public class GroupService {
      * case2: stop all front of one group, call this
      * @param groupId
      */
-    private void removeGroupBy2MapStatus(Integer groupId) {
+    private void removeGroupBy2MapStatus(String groupId) {
         log.debug("removeGroupByMapStatus groupId:{}", groupId);
         // get list of this group
         MapListParam param = new MapListParam();
@@ -764,8 +764,8 @@ public class GroupService {
      * included: tb_group, tb_front_group_map, group contract/trans, group method, group node etc.
      */
     @Transactional(isolation= Isolation.READ_COMMITTED)
-    public void removeAllDataByGroupId(int groupId) {
-        if (groupId == 0) {
+    public void removeAllDataByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return;
         }
         checkGroupId(groupId);
@@ -809,7 +809,7 @@ public class GroupService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public TbGroup generateToSingleNode(String nodeId, ReqGenerateGroup req) {
-        Integer generateGroupId = req.getGenerateGroupId();
+        String generateGroupId = req.getGenerateGroupId();
 
         TbFront tbFront = frontService.getByNodeId(nodeId);
         if (tbFront == null) {
@@ -840,7 +840,7 @@ public class GroupService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public List<RspOperateResult> generateGroup(ReqGenerateGroup req) {
-        Integer generateGroupId = req.getGenerateGroupId();
+        String generateGroupId = req.getGenerateGroupId();
         if (checkGroupIdExisted(generateGroupId)) {
             throw new NodeMgrException(ConstantCode.GROUP_ID_EXISTS);
         }
@@ -910,7 +910,7 @@ public class GroupService {
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Object operateGroup(String nodeId, Integer groupId, String type) {
+    public Object operateGroup(String nodeId, String groupId, String type) {
         // get front
         TbFront tbFront = frontService.getByNodeId(nodeId);
         if (tbFront == null) {
@@ -940,7 +940,7 @@ public class GroupService {
      * @param groupIdList
      * @return GroupStatusInfo
      */
-    public List<RspGroupStatus> listGroupStatus(List<String> nodeIdList, List<Integer> groupIdList) {
+    public List<RspGroupStatus> listGroupStatus(List<String> nodeIdList, List<String> groupIdList) {
         List<RspGroupStatus> resList = new ArrayList<>(nodeIdList.size());
         for (String nodeId : nodeIdList) {
             // get front
@@ -971,7 +971,7 @@ public class GroupService {
      * @param groupIdList
      * @return map of <groupId, status>
      */
-    private Map<String, String> getGroupStatus(TbFront tbFront, List<Integer> groupIdList) {
+    private Map<String, String> getGroupStatus(TbFront tbFront, List<String> groupIdList) {
         // groupId, status
         Map<String, String> statusRes = frontInterface.queryGroupStatus(tbFront.getFrontIp(),
                 tbFront.getFrontPort(), tbFront.getNodeId(), groupIdList);
@@ -986,7 +986,7 @@ public class GroupService {
     @Transactional(propagation = Propagation.REQUIRED)
     public List<RspOperateResult> batchStartGroup(ReqBatchStartGroup req) {
         log.info("start batchStartGroup:{}", req);
-        Integer groupId = req.getGenerateGroupId();
+        String groupId = req.getGenerateGroupId();
         // check id
         checkGroupId(groupId);
         List<String> nodeIdList = req.getNodeList();
@@ -1026,10 +1026,10 @@ public class GroupService {
 
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbGroup saveGroup(int groupId, int nodeCount, String groupDesc,
+    public TbGroup saveGroup(String groupId, int nodeCount, String groupDesc,
                              GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
         log.info("saveGroup groupId:{},groupStatus:{}", groupId, groupStatus);
-        if (groupId == 0) {
+        if (groupId.isEmpty()) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
         //save group id
@@ -1044,11 +1044,11 @@ public class GroupService {
     }
 
     @Transactional
-    public TbGroup saveGroup(int groupId, int nodeCount, String description,
+    public TbGroup saveGroup(String groupId, int nodeCount, String description,
                              GroupType groupType, GroupStatus groupStatus, BigInteger timestamp, List<String> nodeIdList,
                              Integer chainId, String chainName) {
         log.debug("start saveGroup");
-        if (groupId == 0) {
+        if (groupId.isEmpty()) {
             return null;
         }
         // save group id
@@ -1068,7 +1068,7 @@ public class GroupService {
     /**
      * Check the validity of the groupId.
      */
-    public boolean checkGroupIdExisted(Integer groupId) throws NodeMgrException {
+    public boolean checkGroupIdExisted(String groupId) throws NodeMgrException {
         log.debug("start checkGroupIdExisted groupId:{}", groupId);
 
         if (groupId == null) {
@@ -1085,7 +1085,7 @@ public class GroupService {
         return false;
     }
 
-    public TbGroup getGroupById(Integer groupId) {
+    public TbGroup getGroupById(String groupId) {
         log.debug("getGroupById groupId:{}", groupId);
         return groupMapper.getGroupById(groupId);
     }
@@ -1095,7 +1095,7 @@ public class GroupService {
      * update status.
      */
     @Transactional
-    public void updateGroupNodeCount(int groupId, int nodeCount) {
+    public void updateGroupNodeCount(String groupId, int nodeCount) {
         log.debug("start updateGroupNodeCount groupId:{} nodeCount:{}", groupId, nodeCount);
         groupMapper.updateNodeCount(groupId, nodeCount);
         log.debug("end updateGroupNodeCount groupId:{} nodeCount:{}", groupId, nodeCount);
@@ -1103,14 +1103,14 @@ public class GroupService {
     }
 
     @Transactional
-    public void updateTimestampNodeIdList(int groupId, long timestamp,List<String> nodeIdList) {
+    public void updateTimestampNodeIdList(String groupId, long timestamp,List<String> nodeIdList) {
         log.debug("start updateTimestampNodeIdList groupId:{} nodeCount:{}", groupId, timestamp, nodeIdList);
         this.groupMapper.updateTimestampNodeList(groupId, timestamp,JsonTools.toJSONString(nodeIdList));
     }
 
 
     @Transactional
-    public TbGroup insertIfNew(int groupId, int nodeCount, String groupDesc,
+    public TbGroup insertIfNew(String groupId, int nodeCount, String groupDesc,
                                GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
 
         TbGroup group = this.groupMapper.getGroupByChainIdAndGroupId(chainId,groupId);
@@ -1135,7 +1135,7 @@ public class GroupService {
      * @return return true if insert.
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(int groupId, int num, Integer chainId, String chainName) {
+    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(String groupId, int num, Integer chainId, String chainName) {
         TbGroup group = this.getGroupById(groupId);
         if (group == null) {
             // group not exists, insert a new one
@@ -1151,7 +1151,7 @@ public class GroupService {
         }
     }
 
-    private void pullAllGroupFiles(int generateGroupId, TbFront tbFront) {
+    private void pullAllGroupFiles(String generateGroupId, TbFront tbFront) {
         this.pullGroupConfigFile(generateGroupId, tbFront);
         this.pullGroupStatusFile(generateGroupId, tbFront);
     }
@@ -1162,7 +1162,7 @@ public class GroupService {
      *
      * @include group.x.genesis, group.x.ini, .group_status
      */
-    private void pullGroupConfigFile(int generateGroupId, TbFront tbFront) {
+    private void pullGroupConfigFile(String generateGroupId, TbFront tbFront) {
         // only support docker node/front
         if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
             return;
@@ -1192,7 +1192,7 @@ public class GroupService {
 
 
 
-    private void pullGroupStatusFile(int generateGroupId, TbFront tbFront) {
+    private void pullGroupStatusFile(String generateGroupId, TbFront tbFront) {
         // only support docker node/front
         if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
             return;
@@ -1242,7 +1242,7 @@ public class GroupService {
      * @param newFrontList
      * @throws IOException
      */
-    public void generateNewNodesGroupConfigsAndScp(TbChain chain, int groupId, String ip, List<TbFront> newFrontList) {
+    public void generateNewNodesGroupConfigsAndScp(TbChain chain, String groupId, String ip, List<TbFront> newFrontList) {
         log.info("start generateNewNodesGroupConfigsAndScp ip:{},newFrontList:{}", ip, newFrontList);
         int chainId = chain.getId();
         String chainName = chain.getChainName();
@@ -1315,7 +1315,7 @@ public class GroupService {
     /**
      * update status.
      */
-    public int updateGroupDescription(int groupId, String description) {
+    public int updateGroupDescription(String groupId, String description) {
         log.debug("start updateGroupStatus groupId:{} description:{}", groupId, description);
         int res = groupMapper.updateDescription(groupId, description);
         log.debug("end updateGroupStatus res", res);

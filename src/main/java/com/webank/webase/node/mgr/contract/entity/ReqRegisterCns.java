@@ -25,7 +25,7 @@ import lombok.Data;
 @Data
 public class ReqRegisterCns {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     private String contractPath;
     @NotBlank
     private String contractName;

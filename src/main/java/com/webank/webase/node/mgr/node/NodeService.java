@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.front.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.node.entity.ReqUpdate;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.ValidateUtil;
@@ -28,7 +29,6 @@ import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.front.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
@@ -42,8 +42,7 @@ import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
-import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.*;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +80,7 @@ public class NodeService {
      * add new node data.
      */
     @Transactional
-    public void addNodeInfo(Integer groupId, PeerInfo peerInfo) throws NodeMgrException {
+    public void addNodeInfo(String groupId, PeerInfo peerInfo) throws NodeMgrException {
         String nodeIp = null;
         Integer nodeP2PPort = null;
 
@@ -136,7 +135,7 @@ public class NodeService {
     /**
      * query node by groupId
      */
-    public List<TbNode> queryByGroupId(int groupId) {
+    public List<TbNode> queryByGroupId(String groupId) {
         NodeParam nodeParam = new NodeParam();
         nodeParam.setGroupId(groupId);
         return queryNodeList(nodeParam);
@@ -182,7 +181,7 @@ public class NodeService {
     /**
      * delete by node and group.
      */
-    public void deleteByNodeAndGroupId(String nodeId, int groupId) throws NodeMgrException {
+    public void deleteByNodeAndGroupId(String nodeId, String groupId) throws NodeMgrException {
         log.info("start deleteByNodeAndGroupId nodeId:{} groupId:{}", nodeId, groupId);
         nodeMapper.deleteByNodeAndGroup(nodeId, groupId);
         log.info("end deleteByNodeAndGroupId");
@@ -191,8 +190,8 @@ public class NodeService {
     /**
      * delete by groupId.
      */
-    public void deleteByGroupId(int groupId) {
-        if (groupId == 0) {
+    public void deleteByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return;
         }
         nodeMapper.deleteByGroupId(groupId);
@@ -205,7 +204,7 @@ public class NodeService {
      * @1.4.3: if request consensus status but return -1, node is down
      *
      */
-    public void checkAndUpdateNodeStatus(int groupId) {
+    public void checkAndUpdateNodeStatus(String groupId) {
         //get local node list
         List<TbNode> nodeList = queryByGroupId(groupId);
 
@@ -215,7 +214,7 @@ public class NodeService {
             log.error("fail checkNodeStatus, consensusList is null");
             return;
         }
-        
+
         // getObserverList
         List<String> observerList = frontInterface.getObserverList(groupId);
 
@@ -247,7 +246,7 @@ public class NodeService {
             BigInteger latestView = consensusList.stream()
                 .filter(cl -> nodeId.equals(cl.getNodeId())).map(PeerOfConsensusStatus::getView).findFirst()
                 .orElse(BigInteger.ZERO);//pbftView
-            
+
             if (nodeType == 0) {    //0-consensus;1-observer
                 // if local block number and pbftView equals chain's, invalid
                 if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
@@ -305,15 +304,15 @@ public class NodeService {
     /**
      * get latest number of peer on chain.
      */
-    private BigInteger getBlockNumberOfNodeOnChain(int groupId, String nodeId) {
+    private BigInteger getBlockNumberOfNodeOnChain(String groupId, String nodeId) {
         SyncStatusInfo syncStatus = frontInterface.getSyncStatus(groupId);
         if (nodeId.equals(syncStatus.getNodeId())) {
-            return new BigInteger(syncStatus.getBlockNumber());
+            return new BigInteger(String.valueOf(syncStatus.getBlockNumber()));
         }
         List<PeersInfo> peerList = syncStatus.getPeers();
         // blockNumber
         BigInteger latestNumber = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
-            .map(p -> new BigInteger(p.getBlockNumber())).findFirst().orElse(BigInteger.ZERO);
+            .map(p -> new BigInteger(String.valueOf(p.getBlockNumber()))).findFirst().orElse(BigInteger.ZERO);
         return latestNumber;
     }
 
@@ -321,18 +320,18 @@ public class NodeService {
     /**
      * get peer of consensusStatus
      */
-    private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
-        ConsensusInfo consensusInfo = frontInterface.getConsensusStatus(groupId);
+    private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(String groupId) {
+        ConsensusStatusInfo consensusInfo = frontInterface.getConsensusStatus(groupId);
         if (consensusInfo == null) {
             log.debug("getPeerOfConsensusStatus is null");
             return null;
         }
         List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
-        List<ViewInfo> viewInfos = consensusInfo.getViewInfos();
-        for (ViewInfo viewInfo : viewInfos) {
-            dataIsList.add(
-                new PeerOfConsensusStatus(viewInfo.getNodeId(), new BigInteger(viewInfo.getView())));
-        }
+//        List<ViewInfo> viewInfos = consensusInfo.getTimeout();
+//        for (ViewInfo viewInfo : viewInfos) {
+//            dataIsList.add(
+//                new PeerOfConsensusStatus(viewInfo.getNodeId(), new BigInteger(viewInfo.getView())));
+//        }
         return dataIsList;
     }
 
@@ -340,7 +339,7 @@ public class NodeService {
      * add sealer and observer in NodeList
      * return: List<String> nodeIdList
      */
-    public List<PeerInfo> getSealerAndObserverList(int groupId) {
+    public List<PeerInfo> getSealerAndObserverList(String groupId) {
         log.debug("start getSealerAndObserverList groupId:{}", groupId);
         List<String> sealerList = frontInterface.getSealerList(groupId);
         List<String> observerList = frontInterface.getObserverList(groupId);
@@ -352,7 +351,7 @@ public class NodeService {
     }
 
 
-    public List<String> getNodeIdListService(int groupId) {
+    public List<String> getNodeIdListService(String groupId) {
         log.debug("start getSealerAndObserverList groupId:{}", groupId);
         try {
             List<String> nodeIdList = frontInterface.getNodeIdList(groupId);
@@ -371,7 +370,7 @@ public class NodeService {
     public TbNode insert(
             String nodeId,
             String nodeName,
-            int groupId,
+            String groupId,
             String ip,
             int p2pPort,
             String description,
@@ -399,7 +398,7 @@ public class NodeService {
      * @param nodeId
      * @return
      */
-    public static String getNodeName(int groupId, String nodeId) {
+    public static String getNodeName(String groupId, String nodeId) {
         return String.format("%s_%s", groupId, nodeId);
     }
 
@@ -409,7 +408,7 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId, final int groupId){
+    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId, final String groupId){
         // select all fronts by all agencies
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
         log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}", tbFrontList);
@@ -435,7 +434,7 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(List<Integer> newFrontIdList, int chainId, final int groupId){
+    public List<TbNode> selectNodeListByChainIdAndGroupId(List<Integer> newFrontIdList, int chainId, final String groupId){
         log.info("selectNodeListByChainIdAndGroupId frontIdList:{}", newFrontIdList);
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
 
@@ -465,7 +464,7 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public TbNode getOldestNodeByChainIdAndGroupId(int chainId, int groupId) {
+    public TbNode getOldestNodeByChainIdAndGroupId(int chainId, String groupId) {
         List<TbNode> tbNodeList = this.selectNodeListByChainIdAndGroupId(chainId, groupId);
         if (CollectionUtils.isEmpty(tbNodeList)) {
             return null;
@@ -529,7 +528,7 @@ public class NodeService {
      * return: true: is sealer
      */
     @Deprecated
-    public boolean checkSealerListContains(int groupId, String nodeId, String ip, int port) {
+    public boolean checkSealerListContains(String groupId, String nodeId, String ip, int port) {
         log.debug("start checkSealerListContains groupId:{},nodeId:{}", groupId, nodeId);
         List<String> sealerList = frontInterface.getSealerListFromSpecificFront(ip, port, groupId);
         boolean isSealer = sealerList.stream().anyMatch(n -> n.equals(nodeId));
@@ -542,7 +541,7 @@ public class NodeService {
      * return: true: is sealer
      */
     @Deprecated
-    public boolean checkObserverListContains(int groupId, String nodeId, String ip, int port) {
+    public boolean checkObserverListContains(String groupId, String nodeId, String ip, int port) {
         log.debug("start checkObserverListContains groupId:{},nodeId:{}", groupId, nodeId);
         List<String> sealerList = frontInterface.getObserverListFromSpecificFront(ip, port, groupId);
         boolean isObserver = sealerList.stream().anyMatch(n -> n.equals(nodeId));
@@ -556,7 +555,7 @@ public class NodeService {
      * @param nodeId
      * @return
      */
-    public int checkNodeType(int groupId, String nodeId) {
+    public int checkNodeType(String groupId, String nodeId) {
         int localHighestHeight = nodeMapper.getHighestBlockHeight(groupId);
         TbNode node = nodeMapper.getByNodeIdAndGroupId(nodeId, groupId);
         int nodeBlockHeight = node != null ? node.getBlockNumber().intValue() : 0;

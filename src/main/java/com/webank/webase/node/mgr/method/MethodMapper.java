@@ -23,8 +23,8 @@ public interface MethodMapper {
 
     void add(TbMethod tbMethod);
 
-    void removeByGroupId(@Param("groupId") int groupId);
+    void removeByGroupId(@Param("groupId") String groupId);
 
-    TbMethod getMethodById(@Param("methodId") String methodId, @Param("groupId") Integer groupId);
+    TbMethod getMethodById(@Param("methodId") String methodId, @Param("groupId") String groupId);
 
 }

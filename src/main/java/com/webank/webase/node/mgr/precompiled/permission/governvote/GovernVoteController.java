@@ -41,7 +41,7 @@ public class GovernVoteController {
      * get contract freeze record list
      */
     @GetMapping("record/list")
-    public BasePageResponse listGovernVote(@RequestParam Integer groupId,
+    public BasePageResponse listGovernVote(@RequestParam String groupId,
         @RequestParam(defaultValue = "1") Integer pageNumber,
         @RequestParam(defaultValue = "10") Integer pageSize) {
         BasePageResponse response = new BasePageResponse(ConstantCode.SUCCESS);

@@ -13,7 +13,6 @@
  */
 package com.webank.webase.node.mgr.config.security.filter;
 
-import com.webank.webase.node.mgr.appintegration.AppIntegrationService;
 import com.webank.webase.node.mgr.appintegration.entity.TbAppInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -35,8 +34,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class AppIntegrationFilter implements HandlerInterceptor {
 
-    @Autowired
-    private AppIntegrationService appIntegrationService;
     @Autowired
     private ConstantProperties cproperties;
 
@@ -71,16 +68,17 @@ public class AppIntegrationFilter implements HandlerInterceptor {
         if (StringUtils.isBlank(signature)) {
             throw new NodeMgrException(ConstantCode.SIGNATURE_CANNOT_EMPTY);
         }
-        TbAppInfo tbAppInfo = appIntegrationService.queryAppInfoByAppKey(appKey);
-        if (Objects.isNull(tbAppInfo)) {
-            throw new NodeMgrException(ConstantCode.APPKEY_NOT_EXISTS);
-        }
+//        TbAppInfo tbAppInfo = appIntegrationService.queryAppInfoByAppKey(appKey);
+//        if (Objects.isNull(tbAppInfo)) {
+//            throw new NodeMgrException(ConstantCode.APPKEY_NOT_EXISTS);
+//        }
         long reqeustInterval = System.currentTimeMillis() - Long.valueOf(timestamp);
         if (reqeustInterval > cproperties.getAppRequestTimeOut()) {
             throw new NodeMgrException(ConstantCode.TIMESTAMP_TIMEOUT);
         }
         // joint data string to md5
-        String dataStr = timestamp + appKey + tbAppInfo.getAppSecret();
+//        String dataStr = timestamp + appKey + tbAppInfo.getAppSecret();
+        String dataStr = timestamp + appKey;
         if (!signature.equals(NodeMgrTools.md5Encrypt(dataStr))) {
             log.warn("fail validateAppRequest. signature not match.");
             throw new NodeMgrException(ConstantCode.SIGNATURE_NOT_MATCH);

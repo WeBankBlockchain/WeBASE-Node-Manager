@@ -24,7 +24,7 @@ import lombok.Data;
 @Data
 public class ReqQueryCnsList {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotNull
     private Integer pageNumber;
     @NotNull

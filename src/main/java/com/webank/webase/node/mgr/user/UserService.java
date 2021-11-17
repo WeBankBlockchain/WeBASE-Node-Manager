@@ -95,7 +95,7 @@ public class UserService {
      * @throws NodeMgrException
      */
     @Transactional
-    public TbUser addUserInfoLocal(Integer groupId, String userName, String account, String description,
+    public TbUser addUserInfoLocal(String groupId, String userName, String account, String description,
         Integer userType, String privateKeyEncoded) throws NodeMgrException {
         return addUserInfo(groupId, userName, account, description, userType,
             privateKeyEncoded, ReturnPrivateKey.FALSE.getValue(), CheckUserExist.TURE.getValue());
@@ -105,7 +105,7 @@ public class UserService {
      * add new user data.
      */
     @Transactional
-    public TbUser addUserInfo(Integer groupId, String userName, String account, String description,
+    public TbUser addUserInfo(String groupId, String userName, String account, String description,
             Integer userType, String privateKeyEncoded, boolean returnPrivateKey, 
             boolean isCheckExist) throws NodeMgrException {
         log.debug("start addUserInfo groupId:{},userName:{},description:{},userType:{},", groupId,
@@ -249,7 +249,7 @@ public class UserService {
         }
         String address = publicKey;
         if (publicKey.length() == ConstantProperties.PUBLICKEY_LENGTH) {
-            address = cryptoSuite.createKeyPair().getAddress(publicKey);
+            address = cryptoSuite.getCryptoKeyPair().getAddress(publicKey);
         }
 
         // check address
@@ -324,7 +324,7 @@ public class UserService {
         return user;
     }
 
-    public String queryUserDetail(int groupId, String userAddress) throws NodeMgrException {
+    public String queryUserDetail(String groupId, String userAddress) throws NodeMgrException {
         // query sign user id
         String signUserId = getSignUserIdByAddress(groupId, userAddress);
         // get key from sign
@@ -340,7 +340,7 @@ public class UserService {
      * @param signUserId
      * @return the private key of KeyPair is encoded in base64
      */
-    private KeyPair getUserKeyPairFromSign(int groupId, String signUserId) {
+    private KeyPair getUserKeyPairFromSign(String groupId, String signUserId) {
         Map<String, String> param = new HashMap<>();
         param.put("signUserId", signUserId);
         param.put("returnPrivateKey", "true");
@@ -352,7 +352,7 @@ public class UserService {
     /**
      * query user row.
      */
-    public TbUser queryUser(Integer userId, Integer groupId, String userName, String address,
+    public TbUser queryUser(Integer userId, String groupId, String userName, String address,
             String account) throws NodeMgrException {
         log.debug("start queryUser userId:{} groupId:{} userName:{} address:{}", userId, groupId,
                 userName, address);
@@ -371,14 +371,14 @@ public class UserService {
     /**
      * query by groupId、userName.
      */
-    public TbUser queryUser(Integer groupId, String userName) throws NodeMgrException {
+    public TbUser queryUser(String groupId, String userName) throws NodeMgrException {
         return queryUser(null, groupId, userName, null, null);
     }
 
     /**
      * query by userName.
      */
-    public TbUser queryByName(int groupId, String userName, String account)
+    public TbUser queryByName(String groupId, String userName, String account)
             throws NodeMgrException {
         return queryUser(null, groupId, userName, null, account);
     }
@@ -391,14 +391,14 @@ public class UserService {
         return queryUser(userId, null, null, null, null);
     }
 
-    public TbUser queryByUserAddress(int groupId, String address) throws NodeMgrException {
+    public TbUser queryByUserAddress(String groupId, String address) throws NodeMgrException {
         return queryUser(null, groupId, null, address, null);
     }
 
     /**
      * query by group id and address.
      */
-    public String getSignUserIdByAddress(int groupId, String address) throws NodeMgrException {
+    public String getSignUserIdByAddress(String groupId, String address) throws NodeMgrException {
         TbUser user = queryUser(null, groupId, null, address, null);
         if (user == null) {
             throw new NodeMgrException(ConstantCode.USER_SIGN_USER_ID_NOT_EXIST);
@@ -411,7 +411,7 @@ public class UserService {
         return user.getSignUserId();
     }
 
-    public String getUserNameByAddress(int groupId, String address) throws NodeMgrException {
+    public String getUserNameByAddress(String groupId, String address) throws NodeMgrException {
         TbUser user = queryUser(null, groupId, null, address, null);
         if (user == null) {
             throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
@@ -431,7 +431,7 @@ public class UserService {
     /**
      * bind by pem
      */
-    public TbUser updateUserByPem(int groupId, int userId, String pemContent,
+    public TbUser updateUserByPem(String groupId, int userId, String pemContent,
         CurrentAccountInfo currentAccountInfo) {
         PEMKeyStore pemManager = new PEMKeyStore(new ByteArrayInputStream(pemContent.getBytes()));
         String privateKey = KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate());
@@ -443,7 +443,7 @@ public class UserService {
     /**
      * bind by p12
      */
-    public TbUser updateUserByP12(int groupId, int userId, MultipartFile p12File, String p12PwdEncoded,
+    public TbUser updateUserByP12(String groupId, int userId, MultipartFile p12File, String p12PwdEncoded,
         CurrentAccountInfo currentAccountInfo) {
         String privateKey = this.getP12RawPrivateKey(p12File, p12PwdEncoded);
         // pem's privateKey encoded here
@@ -456,7 +456,7 @@ public class UserService {
      */
     public TbUser updateUser(ReqBindPrivateKey bindPrivateKey, CurrentAccountInfo currentAccountInfo)
         throws NodeMgrException {
-        Integer groupId = bindPrivateKey.getGroupId();
+        String groupId = bindPrivateKey.getGroupId();
         String privateKeyEncoded = bindPrivateKey.getPrivateKey();
         int userId = bindPrivateKey.getUserId();
         // check user
@@ -477,7 +477,7 @@ public class UserService {
         }
         // check user address same with private key's address
         String rawPrivateKey = Numeric.cleanHexPrefix(new String(Base64.getDecoder().decode(privateKeyEncoded)));
-        String privateKeyAddress = cryptoSuite.createKeyPair(rawPrivateKey).getAddress();
+        String privateKeyAddress = cryptoSuite.loadKeyPair(rawPrivateKey).getAddress();
         if (!tbUser.getAddress().equals(privateKeyAddress)) {
             log.error("bind private key address :{} not match user's address!", privateKeyAddress);
             throw new NodeMgrException(ConstantCode.BIND_PRIVATE_KEY_NOT_MATCH);
@@ -546,7 +546,7 @@ public class UserService {
     /**
      * get user name by address.
      */
-    public String queryUserNameByAddress(Integer groupId, String address) throws NodeMgrException {
+    public String queryUserNameByAddress(String groupId, String address) throws NodeMgrException {
         log.debug("queryUserNameByAddress address:{} ", address);
         String userName = userMapper.queryUserNameByAddress(groupId, address);
         log.debug("end queryUserNameByAddress");
@@ -588,7 +588,7 @@ public class UserService {
      * @return KeyStoreInfo
      */
     @Transactional
-    public TbUser importKeyStoreFromP12(MultipartFile p12File, String p12PasswordEncoded, Integer groupId,
+    public TbUser importKeyStoreFromP12(MultipartFile p12File, String p12PasswordEncoded, String groupId,
             String userName, String account, String description, boolean isCheckExist) {
         String privateKey = this.getP12RawPrivateKey(p12File, p12PasswordEncoded);
 
@@ -635,7 +635,7 @@ public class UserService {
      * get pem file exported from sign from front api
      * @return ResponseEntity<InputStreamResource>
      */
-    public FileContentHandle exportPemFromSign(int groupId, String signUserId, String account, Integer roleId) {
+    public FileContentHandle exportPemFromSign(String groupId, String signUserId, String account, Integer roleId) {
         log.debug("start getExportPemFromSign signUserId:{}, account:{}", signUserId, account);
         TbUser user = userMapper.getBySignUserId(signUserId);
         if (user == null) {
@@ -667,7 +667,7 @@ public class UserService {
      * @param p12PasswordEncoded password of p12 key in base64 format
      * @return ResponseEntity<InputStreamResource>
      */
-    public FileContentHandle exportP12FromSign(int groupId, String signUserId, String p12PasswordEncoded,
+    public FileContentHandle exportP12FromSign(String groupId, String signUserId, String p12PasswordEncoded,
         String account, Integer roleId) {
         log.debug("start getExportP12FromSign signUserId:{}", signUserId);
         // decode p12 password
@@ -705,11 +705,11 @@ public class UserService {
 
     private String getAddressFromPrivateKeyEncoded(String privateKeyEncoded) {
         String hexPrivateKey = Numeric.cleanHexPrefix(new String(Base64.getDecoder().decode(privateKeyEncoded.getBytes())));
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(hexPrivateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.loadKeyPair(hexPrivateKey);
         return cryptoKeyPair.getAddress();
     }
 
-    public TbUser checkUserHasPk(int groupId, String userAddress) {
+    public TbUser checkUserHasPk(String groupId, String userAddress) {
         TbUser user = this.queryByUserAddress(groupId, userAddress);
         if (user == null || HasPk.HAS.getValue() != user.getHasPk()) {
             return null;

@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReqGenerateGroup {
 	@NotNull
-	private Integer generateGroupId;
+	private String generateGroupId;
 	@NotNull
 	private BigInteger timestamp;
 	/**

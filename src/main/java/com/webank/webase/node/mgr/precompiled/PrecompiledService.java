@@ -77,7 +77,7 @@ public class PrecompiledService {
     /**
      * get cns list /{groupId}/{pathValue} /a?groupId=xx
      */
-    public Object listCnsService(int groupId, String contractNameAndVersion, int pageSize, int pageNumber) {
+    public Object listCnsService(String groupId, String contractNameAndVersion, int pageSize, int pageNumber) {
         log.debug("start listCnsService. groupId:{}, contractNameAndVersion:{}" + groupId + contractNameAndVersion);
         String uri;
         Map<String, String> map = new HashMap<>();
@@ -96,7 +96,7 @@ public class PrecompiledService {
     /**
      * get node list with consensus status
      */
-    public Object getNodeListService(int groupId, int pageSize, int pageNumber) {
+    public Object getNodeListService(String groupId, int pageSize, int pageNumber) {
         log.debug("start getNodeListService. groupId:{}", groupId);
         String uri;
         Map<String, String> map = new HashMap<>();
@@ -121,7 +121,7 @@ public class PrecompiledService {
             log.error("fail nodeManageService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        int groupId = consensusHandle.getGroupId();
+        String groupId = consensusHandle.getGroupId();
         String nodeId = consensusHandle.getNodeId();
 
         // check sealer num in group
@@ -164,7 +164,7 @@ public class PrecompiledService {
             log.error("fail crudService. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        int groupId = crudHandle.getGroupId();
+        String groupId = crudHandle.getGroupId();
         String signUserId = userService.getSignUserIdByAddress(groupId, crudHandle.getFromAddress());
         crudHandle.setSignUserId(signUserId);
         Object frontRsp = frontRestTools.postForEntity(
@@ -183,7 +183,7 @@ public class PrecompiledService {
             log.error("fail contractStatusManage. request param is null");
             throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
         }
-        int groupId = contractStatusHandle.getGroupId();
+        String groupId = contractStatusHandle.getGroupId();
         String handleType = contractStatusHandle.getHandleType();
         Object frontRsp;
         if (CONTRACT_MANAGE_GETSTATUS.equals(handleType) || CONTRACT_MANAGE_LISTMANAGER.equals(handleType)) {
@@ -214,7 +214,7 @@ public class PrecompiledService {
         }
         Map<String, Object> resMap = new HashMap<>();
 
-        int groupId = addressStatusHandle.getGroupId();
+        String groupId = addressStatusHandle.getGroupId();
         List<String> addressList = addressStatusHandle.getAddressList();
         // init param
         ContractStatusHandle statusHandle = new ContractStatusHandle();

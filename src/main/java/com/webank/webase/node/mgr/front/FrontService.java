@@ -25,6 +25,7 @@ import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.config.properties.VersionProperties;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.tools.CertTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
@@ -62,7 +63,6 @@ import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
-import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,7 +90,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
-import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo.*;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
@@ -180,12 +181,14 @@ public class FrontService {
                 groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
                 // get syncStatus
                 SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
-                    frontPort, Integer.valueOf(groupIdList.get(0)));
+                    frontPort, groupIdList.get(0));
                 // get version info
-                ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
-                    frontPort, Integer.valueOf(groupIdList.get(0)));
-                String clientVersion = versionResponse.getVersion();
-                String supportVersion = versionResponse.getSupportedVersion();
+//                ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
+//                    frontPort, groupIdList.get(0));
+//                String clientVersion = versionResponse.getVersion();
+//                String supportVersion = versionResponse.getSupportedVersion();
+                  String clientVersion = "3.0";
+                  String supportVersion = "2.0";
                 // get front server version and sign server version
                 try {
                     String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
@@ -213,10 +216,10 @@ public class FrontService {
                 tbFront.setSupportVersion(supportVersion);
                 // get agency of node
                 try {
-                    NodeInformation nodeInfo = frontInterface
+                    GroupNodeInfo nodeInfo = frontInterface
                         .getNodeInfoFromSpecificFront(frontIp, frontPort);
                     // set agency from chain
-                    tbFront.setAgency(nodeInfo.getAgency() == null ? "fisco" : nodeInfo.getAgency());
+                    tbFront.setAgency(nodeInfo.getName() == null ? "fisco" : nodeInfo.getName());
                 } catch (NodeMgrException ex) {
                     log.warn("get nodeInfo from front failed for:[]", ex);
                     // set agency from chain
@@ -264,53 +267,59 @@ public class FrontService {
             throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
         }
         // check front's encrypt type same as nodemgr(guomi or standard)
-        int encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort);
-        if (encryptType != cryptoSuite.cryptoTypeConfig) {
-            log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{}," +
-                    "local encryptType not match:{}",
-                frontIp, frontPort, encryptType, cryptoSuite.cryptoTypeConfig);
-            throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
-        }
+//        int encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort);
+//        if (encryptType != cryptoSuite.cryptoTypeConfig) {
+//            log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{}," +
+//                    "local encryptType not match:{}",
+//                frontIp, frontPort, encryptType, cryptoSuite.cryptoTypeConfig);
+//            throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
+//        }
         //check front not exist
         SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
-            frontPort, Integer.valueOf(groupIdList.get(0)));
+            frontPort, groupIdList.get(0));
         FrontParam param = new FrontParam();
+        log.info("node id is "+syncStatus.getNodeId());
         param.setNodeId(syncStatus.getNodeId());
         int count = getFrontCount(param);
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
         }
-        ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
-            frontPort, Integer.valueOf(groupIdList.get(0)));
-        String clientVersion = versionResponse.getVersion();
-        String supportVersion = versionResponse.getSupportedVersion();
+        //todo delete getClientVersionFromSpecificFront
+//        ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
+//            frontPort, groupIdList.get(0));
+//        String clientVersion = versionResponse.getVersion();
+//        String supportVersion = versionResponse.getSupportedVersion();
+        String clientVersion = "v3.0.0";
+        String supportVersion = "v2.0.0";
         // copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
-        tbFront.setNodeId(syncStatus.getNodeId());
+//        tbFront.setNodeId(syncStatus.getNodeId());
+        tbFront.setNodeId("node1");
         tbFront.setClientVersion(clientVersion);
         tbFront.setSupportVersion(supportVersion);
 
         // 1.5.0 add check client version cannot be lower than v2.4.0
-        this.validateSupportVersion(supportVersion);
+        //this.validateSupportVersion(supportVersion);
         // get node config(add in 1.5.0)
-        try {
-            FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
-            tbFront.setP2pPort(nodeConfig.getP2pport());
-            tbFront.setJsonrpcPort(nodeConfig.getRpcport());
-            tbFront.setChannelPort(nodeConfig.getChannelPort());
-        } catch (Exception e) {
-            log.warn("get nodeConfig from front failed for:[]", e);
-        }
+//        try {
+//            FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+//            tbFront.setP2pPort(nodeConfig.getP2pport());
+//            tbFront.setJsonrpcPort(nodeConfig.getRpcport());
+//            tbFront.setChannelPort(nodeConfig.getChannelPort());
+//        } catch (Exception e) {
+//            log.warn("get nodeConfig from front failed for:[]", e);
+//        }
         // get agency of node
-        try {
-            NodeInformation nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
-            // set agency from chain
-            tbFront.setAgency(nodeInfo.getAgency() == null ? "fisco" : nodeInfo.getAgency());
-        } catch (Exception e) {
-            log.warn("get nodeInfo from front failed for:[]", e);
-            // set agency from chain
-            tbFront.setAgency("fisco");
-        }
+//        try {
+//            GroupNodeInfo nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
+//            // set agency from chain
+//            tbFront.setAgency(nodeInfo.getName() == null ? "fisco" : nodeInfo.getName());
+//            tbFront.setAgency("fisco");
+//        } catch (Exception e) {
+//            log.warn("get nodeInfo from front failed for:[]", e);
+//            // set agency from chain
+//            tbFront.setAgency("fisco");
+//        }
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
@@ -348,7 +357,7 @@ public class FrontService {
         String frontIp = tbFront.getFrontIp();
         Integer frontPort = tbFront.getFrontPort();
         for (String groupId : groupIdList) {
-            Integer group = Integer.valueOf(groupId);
+            String group =groupId;
             //peer in group
             List<String> groupPeerList = frontInterface
                 .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
@@ -383,7 +392,7 @@ public class FrontService {
      * add sealer(consensus node) and observer in nodeList
      * @param groupId
      */
-    public void refreshSealerAndObserverInNodeList(String frontIp, int frontPort, int groupId) {
+    public void refreshSealerAndObserverInNodeList(String frontIp, int frontPort, String groupId) {
         log.debug("start refreshSealerAndObserverInNodeList frontIp:{}, frontPort:{}, groupId:{}",
             frontIp, frontPort, groupId);
         List<String> sealerList = frontInterface.getSealerListFromSpecificFront(frontIp, frontPort, groupId);
@@ -428,7 +437,7 @@ public class FrontService {
      * if exist:throw exception
      */
     private void checkFrontNotExist(String frontIp, int frontPort) {
-        SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, frontPort, 1);
+        SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp, frontPort, "1");
         FrontParam param = new FrontParam();
         param.setNodeId(syncStatus.getNodeId());
         int count = getFrontCount(param);
@@ -570,7 +579,7 @@ public class FrontService {
      * @param groupId
      * @return
      */
-    public List<TbFront> selectFrontListByGroupId(int groupId) {
+    public List<TbFront> selectFrontListByGroupId(String groupId) {
         log.info("selectFrontListByGroupId groupId:{}", groupId);
         // select all agencies by chainId
         List<TbFrontGroupMap> frontGroupMapList = this.frontGroupMapMapper.selectListByGroupId(groupId);
@@ -598,7 +607,7 @@ public class FrontService {
      * @param groupIdSet
      * @return
      */
-    public List<TbFront> selectFrontListByGroupIdSet(Set<Integer> groupIdSet) {
+    public List<TbFront> selectFrontListByGroupIdSet(Set<String> groupIdSet) {
         // select all fronts of all group id
         List<TbFront> allTbFrontList = groupIdSet.stream()
             .map((groupId) -> this.selectFrontListByGroupId(groupId))
@@ -624,7 +633,7 @@ public class FrontService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public List<TbFront> initFrontAndNode(List<DeployNodeInfo> nodeInfoList, TbChain chain, TbHost host, int agencyId,
-        String agencyName, int groupId, FrontStatusEnum frontStatusEnum)
+        String agencyName, String groupId, FrontStatusEnum frontStatusEnum)
         throws NodeMgrException, IOException {
         log.info("start initFrontAndNode nodeInfoList:{}, host:{}", nodeInfoList, host);
         ProgressTools.setInitChainData();
@@ -706,12 +715,12 @@ public class FrontService {
     public List<TbFront> selectRelatedFront(String nodeId) {
         log.info("start selectRelatedFront nodeId:{}", nodeId);
         Set<Integer> frontIdSet = new HashSet<>();
-        List<Integer> groupIdList = this.nodeMapper.selectGroupIdListOfNode(nodeId);
+        List<String> groupIdList = this.nodeMapper.selectGroupIdListOfNode(nodeId);
         if (CollectionUtils.isEmpty(groupIdList)) {
             log.error("Node:[{}] has no group", nodeId);
             return new ArrayList<>();
         }
-        for (Integer groupIdOfNode : groupIdList) {
+        for (String groupIdOfNode : groupIdList) {
             List<TbFrontGroupMap> tbFrontGroupMaps = this.frontGroupMapMapper.selectListByGroupId(groupIdOfNode);
             if (CollectionUtils.isNotEmpty(tbFrontGroupMaps)){
                 tbFrontGroupMaps.forEach(map->{
@@ -736,7 +745,7 @@ public class FrontService {
      * @param groupId
      * @throws IOException
      */
-    public void updateNodeConfigIniByGroupId(TbChain chain, int groupId) throws IOException {
+    public void updateNodeConfigIniByGroupId(TbChain chain, String groupId) throws IOException {
         int chainId = chain.getId();
         log.info("start updateNodeConfigIniByGroupId chainId:{},groupId:{}", chainId, groupId);
         String chainName = chain.getChainName();
@@ -780,7 +789,7 @@ public class FrontService {
      * @param newFrontList when task exec another transaction, this cannot select new front list in db, so pass it
      * @throws IOException
      */
-    public void updateConfigIniByGroupIdAndNewFront(TbChain chain, int groupId, final List<TbFront> newFrontList) throws IOException {
+    public void updateConfigIniByGroupIdAndNewFront(TbChain chain, String groupId, final List<TbFront> newFrontList) throws IOException {
         int chainId = chain.getId();
         log.info("start updateNodeConfigIniByGroupId chainId:{},groupId:{}newFrontList:{}", chainId, groupId, newFrontList);
         String chainName = chain.getChainName();
@@ -857,9 +866,9 @@ public class FrontService {
      * @param groupIdList
      */
     public void updateNodeConfigIniByGroupList(TbChain chain,
-        Set<Integer> groupIdList) throws IOException {
+        Set<String> groupIdList) throws IOException {
         // update config.ini of related nodes
-        for (Integer groupId : CollectionUtils.emptyIfNull(groupIdList)) {
+        for (String groupId : CollectionUtils.emptyIfNull(groupIdList)) {
             // update node config.ini in group
             this.updateNodeConfigIniByGroupId(chain, groupId);
         }
@@ -871,7 +880,7 @@ public class FrontService {
      * @param chain
      * @param groupId
      */
-    public void scpNodeConfigIni(TbChain chain, int groupId) {
+    public void scpNodeConfigIni(TbChain chain, String groupId) {
         List<TbNode> tbNodeList = this.nodeService.selectNodeListByChainIdAndGroupId(chain.getId(), groupId);
 
         for (TbNode tbNode : CollectionUtils.emptyIfNull(tbNodeList)){
@@ -901,7 +910,7 @@ public class FrontService {
      * @param newNodeRelatedFrontMap nodeId include new Front new node
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public void batchScpNodeConfigIni(TbChain chain, int groupId, Map<String, List<TbFront>> newNodeRelatedFrontMap) throws InterruptedException {
+    public void batchScpNodeConfigIni(TbChain chain, String groupId, Map<String, List<TbFront>> newNodeRelatedFrontMap) throws InterruptedException {
         log.info("start batchScpNodeConfigIni chainId:{},groupId:{},newNodeRelatedFrontMap:{}",
             chain.getId(), groupId, newNodeRelatedFrontMap);
 
@@ -1040,7 +1049,7 @@ public class FrontService {
                         // check front is in group
                         Path nodePath = this.pathService
                             .getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());
-                        Set<Integer> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
+                        Set<String> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
                         Optional.of(groupIdSet).ifPresent(idSet -> idSet.forEach(groupId -> {
                             List<String> list = frontInterface.getGroupPeers(groupId);
                             if (CollectionUtils.containsAny(list, front.getNodeId())) {
@@ -1114,10 +1123,10 @@ public class FrontService {
 
         if (!nodeRemovable) {
             // node belongs to some groups, check if it is the last one of each group.
-            Set<Integer> groupIdSet = nodeList.stream().map(TbNode::getGroupId)
+            Set<String> groupIdSet = nodeList.stream().map(TbNode::getGroupId)
                 .collect(Collectors.toSet());
 
-            for (Integer groupId : groupIdSet) {
+            for (String groupId : groupIdSet) {
                 int nodeCountOfGroup = CollectionUtils.size(this.nodeMapper.selectByGroupId(groupId));
                 if (nodeCountOfGroup != 1){ // group has another node.
                     throw new NodeMgrException(ConstantCode.NODE_NEED_REMOVE_FROM_GROUP_ERROR.attach(groupId));

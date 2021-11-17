@@ -32,7 +32,7 @@ public class TbContract {
     private String contractName;
     private String account;
     private Integer contractStatus;
-    private Integer groupId;
+    private String groupId;
     private Integer contractType;
     private String contractSource;
     private String contractAbi;
@@ -54,7 +54,7 @@ public class TbContract {
     /**
      * init by contractId、contractName、groupId、contractPath.
      */
-    public TbContract(Integer contractId, String contractName, Integer groupId) {
+    public TbContract(Integer contractId, String contractName, String groupId) {
         super();
         this.contractId = contractId;
         this.contractName = contractName;

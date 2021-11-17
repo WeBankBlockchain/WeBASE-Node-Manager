@@ -28,7 +28,7 @@ public enum TableName {
     public String getValue() {
         return value;
     }
-    public String getTableName(int i){
+    public String getTableName(String i){
         return value+i;
     };
 }

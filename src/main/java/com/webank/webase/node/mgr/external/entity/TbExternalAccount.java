@@ -29,7 +29,7 @@ public class TbExternalAccount implements Serializable {
      *
      * @mbg.generated
      */
-    private Integer groupId;
+    private String groupId;
 
     /**
      *

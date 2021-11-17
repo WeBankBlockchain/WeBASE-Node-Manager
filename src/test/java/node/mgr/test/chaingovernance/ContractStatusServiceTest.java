@@ -28,7 +28,7 @@ public class ContractStatusServiceTest extends TestBase {
     @Test
     public void testListVote() {
         GovernParam param = new GovernParam();
-        param.setGroupId(1);
+        param.setGroupId("1");
         System.out.println(governVoteService.getVoteList(param));
     }
 }

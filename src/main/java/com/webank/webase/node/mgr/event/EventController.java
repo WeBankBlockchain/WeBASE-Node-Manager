@@ -59,7 +59,7 @@ public class EventController {
 	 * get new block event register info
 	 */
 	@GetMapping(value = {"newBlockEvent/list/{groupId}/{pageNumber}/{pageSize}"})
-	public BasePageResponse getNewBlockEventInfo(@PathVariable("groupId") Integer groupId,
+	public BasePageResponse getNewBlockEventInfo(@PathVariable("groupId") String groupId,
 												 @PathVariable("pageNumber") Integer pageNumber,
 												 @PathVariable("pageSize") Integer pageSize) {
 		Instant startTime = Instant.now();
@@ -79,7 +79,7 @@ public class EventController {
 	 * get contract event register info
 	 */
 	@GetMapping(value = {"contractEvent/list/{groupId}/{pageNumber}/{pageSize}"})
-	public BasePageResponse getContractEventInfo(@PathVariable("groupId") Integer groupId,
+	public BasePageResponse getContractEventInfo(@PathVariable("groupId") String groupId,
 												 @PathVariable("pageNumber") Integer pageNumber,
 												 @PathVariable("pageSize") Integer pageSize) {
 		Instant startTime = Instant.now();
@@ -114,7 +114,7 @@ public class EventController {
 	 * query list of contract only contain groupId and contractAddress and contractName
 	 */
 	@GetMapping("/contractInfo/{groupId}/{type}/{contractAddress}")
-	public BaseResponse findByAddress( @PathVariable Integer groupId,
+	public BaseResponse findByAddress( @PathVariable String groupId,
 		@PathVariable String type, @PathVariable String contractAddress) {
 		BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
 		log.info("findByAddress start. groupId:{},contractAddress:{},type:{}", groupId, contractAddress, type);
@@ -127,7 +127,7 @@ public class EventController {
 	 * query list of (deployed)contract only contain groupId and contractAddress and contractName
 	 */
 	@GetMapping("/listAddress/{groupId}")
-	public BaseResponse listAbi(@PathVariable Integer groupId) throws IOException {
+	public BaseResponse listAbi(@PathVariable String groupId) throws IOException {
 		BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
 		log.info("listAbi start. groupId:{}", groupId);
 		List<RspContractInfo> resultList = eventService.listContractInfoBoth(groupId);

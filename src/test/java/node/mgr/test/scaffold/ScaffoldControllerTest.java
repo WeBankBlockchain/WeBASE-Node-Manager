@@ -48,7 +48,7 @@ public class ScaffoldControllerTest extends TestBase {
         param.setGroup("org.webank");
         param.setContractIdList(Collections.singletonList(1));
         param.setFrontId(1);
-        param.setGroupId(1);
+        param.setGroupId("1");
         ResultActions resultActions = mockMvc.perform(
             MockMvcRequestBuilders.post( "/scaffold/export").
                 content(JsonTools.toJSONString(param)).

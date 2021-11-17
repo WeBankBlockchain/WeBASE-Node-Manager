@@ -95,7 +95,7 @@ public class StatisticsTransdailyTask {
             BigInteger netTransCount = Optional.ofNullable(statisticalInfo.getTransCount())
                 .orElse(BigInteger.ZERO);
             BigInteger maxBlockNumber = latestSaveBlockNumber;
-            Integer groupId = statisticalInfo.getGroupId();
+            String groupId = statisticalInfo.getGroupId();
 
             // query block list
             BlockListParam queryParam = new BlockListParam(maxBlockNumber, latestSaveDay,

@@ -6,7 +6,7 @@
 <mapper namespace="com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper">
     <resultMap id="frontGroupMap" type="com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup">
         <id column="map_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="mapId"/>
-        <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
+        <result column="group_id" javaType="java.lang.String" jdbcType="VARCHAR" property="groupId"/>
         <result column="group_name" javaType="java.lang.String" jdbcType="VARCHAR" property="groupName"/>
         <result column="front_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="frontId"/>
         <result column="front_ip" javaType="java.lang.String" jdbcType="VARCHAR" property="frontIp"/>
