@@ -29,6 +29,7 @@ import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.GroupHandleResult;
+import com.webank.webase.node.mgr.front.frontinterface.entity.NodeStatusInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.RspStatBlock;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
@@ -49,6 +50,7 @@ import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionObject;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
@@ -238,6 +240,16 @@ public class FrontInterfaceService {
     public Peers.PeersInfo getPeers(String groupId) {
         return frontRestTools.getForEntity(groupId, FrontRestTools.URI_PEERS, Peers.PeersInfo.class);
     }
+
+    /**
+     * include node name list
+     */
+    public List<NodeStatusInfo> getNodeStatusList(String groupId) {
+        List nodeStatusList = frontRestTools.getForEntity(groupId, FrontRestTools.URI_NODE_STATUS_LIST, List.class);
+        List<NodeStatusInfo> resList = JsonTools.toJavaObjectList(JsonTools.toJSONString(nodeStatusList), NodeStatusInfo.class);
+        return resList;
+    }
+
 
     /**
      * get contract code.
@@ -540,11 +552,13 @@ public class FrontInterfaceService {
         return nodeConfig;
     }
 
-    public GroupNodeInfo getNodeInfoFromSpecificFront(String frontIp, Integer frontPort) {
-        String groupId = "1";
-        GroupNodeInfo nodeInfo = (GroupNodeInfo) getFromSpecificFront(groupId, frontIp, frontPort,
-            FrontRestTools.URI_NODE_INFO, GroupNodeInfo.class);
-        return nodeInfo;
+    /**
+     * include node name list
+     */
+    public GroupInfo getGroupInfoFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
+        GroupInfo groupInfo = getFromSpecificFront(groupId, frontIp, frontPort,
+            FrontRestTools.URI_GROUP_INFO, GroupInfo.class);
+        return groupInfo;
     }
 
     /**
