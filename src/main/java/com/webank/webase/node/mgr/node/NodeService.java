@@ -472,12 +472,7 @@ public class NodeService {
         } else {
             return 0;
         }
-//        if (checkObserverListContains(groupId, nodeId, ip, port)) {
-//            return ConsensusType.OBSERVER.getValue();
-//        } else if (checkSealerListContains(groupId, nodeId, ip, port)) {
-//            return ConsensusType.SEALER.getValue();
-//        }
-//        return 0;
+
     }
 
     /**

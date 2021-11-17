@@ -562,63 +562,6 @@ public class FrontInterfaceService {
     }
 
     /**
-     * generate group.
-     */
-    public GroupHandleResult generateGroup(String frontIp, Integer frontPort,
-            GenerateGroupInfo param) {
-        log.debug("start generateGroup frontIp:{} frontPort:{} param:{}", frontIp, frontPort, JsonTools.toJSONString(param));
-
-        String groupId = "";
-        GroupHandleResult groupHandleResult = requestSpecificFront(groupId, frontIp, frontPort,
-                HttpMethod.POST, FrontRestTools.URI_GENERATE_GROUP, param, GroupHandleResult.class);
-
-        log.debug("end generateGroup");
-        return groupHandleResult;
-    }
-
-    /**
-     * start group.
-     */
-    public BaseResponse operateGroup(String frontIp, Integer frontPort, String groupId, String type) {
-        log.info("start operateGroup frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
-                groupId);
-        String uri = String.format(FrontRestTools.URI_OPERATE_GROUP, type);
-        BaseResponse response =
-                getFromSpecificFront(groupId, frontIp, frontPort, uri, BaseResponse.class);
-        log.info("end operateGroup");
-        return response;
-    }
-
-    /**
-     * node consensus type manage
-     */
-    public Object nodeManageFromSpecificFront(String frontIp, Integer frontPort, ConsensusHandle consensusHandle) {
-        log.info("start nodeManageFromSpecificFront frontIp:{} frontPort:{} groupId:{}", frontIp, frontPort,
-            consensusHandle);
-//        int groupId = consensusHandle.getGroupId();
-        String groupId = consensusHandle.getGroupId();
-        Object response = requestSpecificFront(groupId, frontIp, frontPort,
-                HttpMethod.POST, FrontRestTools.URI_CONSENSUS, consensusHandle, Object.class);
-        log.info("end nodeManageFromSpecificFront");
-        return response;
-    }
-
-    /**
-     * query group status list
-     */
-    public Map<String, String> queryGroupStatus(String frontIp, Integer frontPort, String nodeId, List<String> groupIdList) {
-        log.debug("start queryGroupStatusList frontIp:{} frontPort:{} nodeId:{} groupIdList:{}",
-                frontIp, frontPort, nodeId, groupIdList);
-        String uselessGroupId = "1";
-        Map<String, Object> param = new HashMap<>(1);
-        param.put("groupIdList", groupIdList);
-        BaseResponse response = requestSpecificFront(uselessGroupId, frontIp, frontPort,
-                        HttpMethod.POST, FrontRestTools.URI_QUERY_GROUP_STATUS, param, BaseResponse.class);
-        log.debug("end queryGroupStatusList");
-        return (Map<String, String>) response.getData();
-    }
-    
-    /**
      * refresh front.
      */
     public void refreshFront(String frontIp, Integer frontPort) {
@@ -663,13 +606,6 @@ public class FrontInterfaceService {
 		return resList;
 	}
 
-	public List<KeyPair> getKeyStoreList(String groupId, String frontIp, Integer frontPort) {
-        List data = getFromSpecificFront(groupId, frontIp, frontPort,
-                FrontRestTools.URI_KEY_PAIR_LOCAL_KEYSTORE, List.class);
-        List<KeyPair> resList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), KeyPair.class);
-        return resList;
-    }
-
     /**
      * get block by number.
      */
@@ -705,23 +641,6 @@ public class FrontInterfaceService {
         return resultList;
     }
 
-    /**
-     * get block by number.
-     */
-    public Integer getBlockTransCountByNumber(String groupId, BigInteger blockNumber)
-        throws NodeMgrException {
-        log.debug("start getBlockTransCountByNumber groupId:{} blockNumber:{}", groupId, blockNumber);
-        String uri = String.format(FrontRestTools.URI_BLOCK_TRANS_COUNT_BY_NUMBER, blockNumber);
-        Integer blockTransCnt = null;
-        // catch error to avoid task abort
-        try {
-            blockTransCnt = frontRestTools.getForEntity(groupId, uri, Integer.class);
-        } catch (Exception ex) {
-            log.error("fail getBlockTransCountByNumber,exception:[]", ex);
-        }
-        log.debug("end getBlockTransCountByNumber, blockTransCnt:{}", blockTransCnt);
-        return blockTransCnt;
-    }
 
      /**
      * get block statistic by number.

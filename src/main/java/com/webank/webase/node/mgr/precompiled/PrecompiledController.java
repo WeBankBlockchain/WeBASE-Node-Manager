@@ -15,16 +15,16 @@
  */
 package com.webank.webase.node.mgr.precompiled;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
-import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
+import com.webank.webase.node.mgr.base.controller.BaseController;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
+import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import java.time.Duration;
 import java.time.Instant;
-
-import java.util.Map;
 import javax.validation.Valid;
-
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -34,15 +34,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.webank.webase.node.mgr.base.controller.BaseController;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
-import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
-
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Precompiled common controller
@@ -56,31 +47,11 @@ public class PrecompiledController extends BaseController {
     PrecompiledService precompiledService;
 
     /**
-     * get cns list
-     * 透传front的BaseResponse
-     */
-    @GetMapping("cns/list")
-    public Object listCns(
-            @RequestParam(defaultValue = "1") String groupId,
-            @RequestParam String contractNameAndVersion,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) {
-
-        Instant startTime = Instant.now();
-        log.info("start listCns startTime:{}", startTime.toEpochMilli());
-        Object result = precompiledService.listCnsService(groupId, contractNameAndVersion, pageSize, pageNumber);
-
-        log.info("end listCns useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
-        return result;
-    }
-
-    /**
      * get node list with consensus status.
      */
-/*    @GetMapping("consensus/list")
+    @GetMapping("consensus/list")
     public Object getNodeList(
-            @RequestParam(defaultValue = "1") int groupId,
+            @RequestParam(defaultValue = "1") String groupId,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) {
 
@@ -91,7 +62,7 @@ public class PrecompiledController extends BaseController {
         log.info("end getNodeList useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return result;
-    }*/
+    }
 
     @PostMapping(value = "consensus")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
@@ -130,40 +101,4 @@ public class PrecompiledController extends BaseController {
         return res;
     }
 
-    /**
-     * contract status control.
-     */
-    @PostMapping(value = "contract/status")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public Object contractStatusManage(@RequestBody @Valid ContractStatusHandle contractStatusHandle,
-        BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        Instant startTime = Instant.now();
-        log.info("start crud startTime:{} contractStatusHandle:{}", startTime.toEpochMilli(),
-            JsonTools.toJSONString(contractStatusHandle));
-
-        Object res = precompiledService.contractStatusManage(contractStatusHandle);
-
-        log.info("end crud useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
-
-        return res;
-    }
-
-    @PostMapping(value = "contract/status/list")
-    public BaseResponse listContractStatus(@RequestBody @Valid AddressStatusHandle addressStatusHandle,
-        BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        Instant startTime = Instant.now();
-        log.info("start crud startTime:{} addressStatusHandle:{}", startTime.toEpochMilli(),
-            JsonTools.toJSONString(addressStatusHandle));
-
-        // return map of <contractAddress, response.data>
-        Map<String, Object> res = precompiledService.queryContractStatus(addressStatusHandle);
-
-        log.info("end crud useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
-
-        return new BaseResponse(ConstantCode.SUCCESS, res);
-    }
 }

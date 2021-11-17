@@ -258,7 +258,7 @@ public class FrontService {
                 JsonTools.toJSONString(tbFront), e);
             throw new NodeMgrException(ConstantCode.SAVE_FRONT_FAIL.getCode(), e.getMessage());
         }
-        // save group info
+        // save group info todo抛出异常后，没有回滚front
         saveGroup(groupIdList, tbFront);
         // pull cert from new front and its node
         CertTools.isPullFrontCertsDone = false;

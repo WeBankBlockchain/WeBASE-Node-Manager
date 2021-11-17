@@ -91,8 +91,6 @@ public class FrontRestTools {
     public static final String URI_GROUP_INFO = "web3/groupInfo";
     public static final String URI_NODE_STATUS_LIST = "web3/nodeStatusList";
 
-    public static final String FRONT_PERFORMANCE_RATIO = "performance";
-    public static final String FRONT_PERFORMANCE_CONFIG = "performance/config";
     public static final String URI_KEY_PAIR = "privateKey";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
     public static final String URI_KEY_PAIR_IMPORT_WITH_SIGN = "privateKey/importWithSign";
