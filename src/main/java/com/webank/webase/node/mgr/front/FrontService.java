@@ -25,14 +25,6 @@ import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.config.properties.VersionProperties;
-import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
-import com.webank.webase.node.mgr.tools.CertTools;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.tools.NumberUtil;
-import com.webank.webase.node.mgr.tools.ProgressTools;
-import com.webank.webase.node.mgr.tools.ThymeleafUtil;
-import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
@@ -51,18 +43,25 @@ import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapMapper;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
-import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeMapper;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
+import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
+import com.webank.webase.node.mgr.tools.CertTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.tools.NumberUtil;
+import com.webank.webase.node.mgr.tools.ProgressTools;
+import com.webank.webase.node.mgr.tools.ThymeleafUtil;
+import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,12 +89,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
-import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
-import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo.*;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,82 +157,6 @@ public class FrontService {
     // interval of check front status
     private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
 
-    /**
-     * refresh front, group, frontGroupMap, nodeList
-     */
-    @Transactional
-    public void refreshFront() {
-        //get all front
-        List<TbFront> frontList = frontMapper.getAllList();
-        if (frontList == null || frontList.size() == 0) {
-            log.info("refreshFront. not find any front.");
-            return;
-        }
-        for (TbFront tbFront : frontList) {
-            try {
-                String frontIp = tbFront.getFrontIp();
-                Integer frontPort = tbFront.getFrontPort();
-                // query group list from chain
-                List<String> groupIdList;
-                groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
-                // get syncStatus
-                SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
-                    frontPort, groupIdList.get(0));
-                // get version info
-//                ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
-//                    frontPort, groupIdList.get(0));
-//                String clientVersion = versionResponse.getVersion();
-//                String supportVersion = versionResponse.getSupportedVersion();
-                  String clientVersion = "3.0";
-                  String supportVersion = "2.0";
-                // get front server version and sign server version
-                try {
-                    String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
-                    String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
-                    tbFront.setFrontVersion(frontVersion);
-                    tbFront.setSignVersion(signVersion);
-                } catch (Exception e) {
-                    // catch old version front and sign that not have '/version' api
-                    log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
-                }
-                // get node config(add in 1.5.0)
-                // p2p/rpc/channel port etc.
-                // get node config(add in 1.5.0)
-                try {
-                    FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
-                    tbFront.setP2pPort(nodeConfig.getP2pport());
-                    tbFront.setJsonrpcPort(nodeConfig.getRpcport());
-                    tbFront.setChannelPort(nodeConfig.getChannelPort());
-                } catch (Exception e) {
-                    log.warn("get nodeConfig from front failed for:[]", e);
-                }
-                // copy attribute
-                tbFront.setNodeId(syncStatus.getNodeId());
-                tbFront.setClientVersion(clientVersion);
-                tbFront.setSupportVersion(supportVersion);
-                // get agency of node
-                try {
-                    GroupNodeInfo nodeInfo = frontInterface
-                        .getNodeInfoFromSpecificFront(frontIp, frontPort);
-                    // set agency from chain
-                    tbFront.setAgency(nodeInfo.getName() == null ? "fisco" : nodeInfo.getName());
-                } catch (NodeMgrException ex) {
-                    log.warn("get nodeInfo from front failed for:[]", ex);
-                    // set agency from chain
-                    tbFront.setAgency("fisco");
-                }
-                //update front info
-                frontMapper.updateBasicInfo(tbFront);
-                // save group info
-                saveGroup(groupIdList, tbFront);
-            } catch (Exception ex) {
-                log.error("refreshFront fail. frontId:{}", tbFront.getFrontId(), ex);
-                continue;
-            }
-        }
-        // clear cache
-        frontGroupMapCache.clearMapList();
-    }
 
     /**
      * add new front, save front, frontGroupMap, check front's groupStatus, refresh nodeList
@@ -266,7 +186,7 @@ public class FrontService {
             log.error("fail newFront, frontIp:{},frontPort:{}",frontIp,frontPort);
             throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
         }
-        // check front's encrypt type same as nodemgr(guomi or standard)
+        // check front's encrypt type same as nodemgr(guomi or standard) todo 群组中才有encrypt
 //        int encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort);
 //        if (encryptType != cryptoSuite.cryptoTypeConfig) {
 //            log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{}," +
@@ -274,11 +194,11 @@ public class FrontService {
 //                frontIp, frontPort, encryptType, cryptoSuite.cryptoTypeConfig);
 //            throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
 //        }
-        //check front not exist
+        //check front not exist todo front根据rpc判断是否
         SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
             frontPort, groupIdList.get(0));
         FrontParam param = new FrontParam();
-        log.info("node id is "+syncStatus.getNodeId());
+        log.info("node id is " + syncStatus.getNodeId());
         param.setNodeId(syncStatus.getNodeId());
         int count = getFrontCount(param);
         if (count > 0) {
@@ -290,11 +210,10 @@ public class FrontService {
 //        String clientVersion = versionResponse.getVersion();
 //        String supportVersion = versionResponse.getSupportedVersion();
         String clientVersion = "v3.0.0";
-        String supportVersion = "v2.0.0";
+        String supportVersion = "v3.0.0";
         // copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
-//        tbFront.setNodeId(syncStatus.getNodeId());
-        tbFront.setNodeId("node1");
+        tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
         tbFront.setSupportVersion(supportVersion);
 
@@ -353,19 +272,14 @@ public class FrontService {
      * @param tbFront
      */
     @Transactional
-    public void saveGroup(List<String> groupIdList, TbFront tbFront){
+    public void saveGroup(List<String> groupIdList, TbFront tbFront) {
         String frontIp = tbFront.getFrontIp();
         Integer frontPort = tbFront.getFrontPort();
-        for (String groupId : groupIdList) {
-            String group =groupId;
-            //peer in group
+        for (String group : groupIdList) {
+            // peer in group, include removed nodes
             List<String> groupPeerList = frontInterface
                 .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
-            //get peers on chain
-            PeerInfo[] peerArr = frontInterface
-                .getPeersFromSpecificFront(frontIp, frontPort, group);
-            List<PeerInfo> peerList = Arrays.asList(peerArr);
-            //add group
+            // add group
             // check group not existed or node count differs
             TbGroup checkGroup = groupService.getGroupById(group);
             if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
@@ -376,12 +290,7 @@ public class FrontService {
             frontGroupMapService.newFrontGroup(tbFront, group);
             //save nodes
             for (String nodeId : groupPeerList) {
-                PeerInfo newPeer = peerList.stream()
-                    .map(p -> NodeMgrTools.object2JavaBean(p, PeerInfo.class))
-                    .filter(Objects::nonNull)
-                    .filter(peer -> nodeId.equals(peer.getNodeId()))
-                    .findFirst().orElseGet(() -> new PeerInfo(nodeId));
-                nodeService.addNodeInfo(group, newPeer);
+                nodeService.addNodeInfo(group, nodeId);
             }
             // add sealer(consensus node) and observer in nodeList
             refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
@@ -397,20 +306,20 @@ public class FrontService {
             frontIp, frontPort, groupId);
         List<String> sealerList = frontInterface.getSealerListFromSpecificFront(frontIp, frontPort, groupId);
         List<String> observerList = frontInterface.getObserverListFromSpecificFront(frontIp, frontPort, groupId);
-        List<PeerInfo> sealerAndObserverList = new ArrayList<>();
-        sealerList.forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
-        observerList.forEach(nodeId -> sealerAndObserverList.add(new PeerInfo(nodeId)));
+        List<String> sealerAndObserverList = new ArrayList<>();
+        sealerAndObserverList.addAll(sealerList);
+        sealerAndObserverList.addAll(observerList);
         log.debug("refreshSealerAndObserverInNodeList sealerList:{},observerList:{}",
             sealerList, observerList);
-        sealerAndObserverList.forEach(peerInfo -> {
+        sealerAndObserverList.forEach(nodeId -> {
             NodeParam checkParam = new NodeParam();
             checkParam.setGroupId(groupId);
-            checkParam.setNodeId(peerInfo.getNodeId());
+            checkParam.setNodeId(nodeId);
             int existedNodeCount = nodeService.countOfNode(checkParam);
-            log.debug("addSealerAndObserver peerInfo:{},existedNodeCount:{}",
-                peerInfo, existedNodeCount);
-            if(existedNodeCount == 0) {
-                nodeService.addNodeInfo(groupId, peerInfo);
+            log.debug("addSealerAndObserver nodeId:{},existedNodeCount:{}",
+                nodeId, existedNodeCount);
+            if (existedNodeCount == 0) {
+                nodeService.addNodeInfo(groupId, nodeId);
             }
         });
         log.debug("end addSealerAndObserver");

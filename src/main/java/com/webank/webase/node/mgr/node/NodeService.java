@@ -80,20 +80,13 @@ public class NodeService {
      * add new node data.
      */
     @Transactional
-    public void addNodeInfo(String groupId, PeerInfo peerInfo) throws NodeMgrException {
+    public void addNodeInfo(String groupId, String nodeId) throws NodeMgrException {
         String nodeIp = null;
         Integer nodeP2PPort = null;
-
-        if (StringUtils.isNotBlank(peerInfo.getIPAndPort())) {
-            String[] ipPort = peerInfo.getIPAndPort().split(":");
-            nodeIp = ipPort[0];
-            nodeP2PPort = Integer.valueOf(ipPort[1]);
-        }
-        String nodeName = getNodeName(groupId, peerInfo.getNodeId());
-
+        String nodeName = getNodeName(groupId, nodeId);
         // add row
         TbNode tbNode = new TbNode();
-        tbNode.setNodeId(peerInfo.getNodeId());
+        tbNode.setNodeId(nodeId);
         tbNode.setGroupId(groupId);
         tbNode.setNodeIp(nodeIp);
         tbNode.setNodeName(nodeName);

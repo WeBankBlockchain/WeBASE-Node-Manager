@@ -14,27 +14,27 @@
 package com.webank.webase.node.mgr.front.frontinterface;
 
 import static com.webank.webase.node.mgr.front.frontinterface.FrontRestTools.URI_CONTAIN_GROUP_ID;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.front.frontinterface.entity.GroupHandleResult;
-import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
-import com.webank.webase.node.mgr.front.frontinterface.entity.RspStatBlock;
-import com.webank.webase.node.mgr.tools.HttpRequestTools;
-import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.cert.entity.SdkCertInfo;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
 import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.GenerateGroupInfo;
+import com.webank.webase.node.mgr.front.frontinterface.entity.GroupHandleResult;
+import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.front.frontinterface.entity.RspStatBlock;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
+import com.webank.webase.node.mgr.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -50,6 +50,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionObject;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
@@ -191,9 +192,9 @@ public class FrontInterfaceService {
     /**
      * get peers from specific front.
      */
-    public PeerInfo[] getPeersFromSpecificFront(String frontIp, Integer frontPort,
+    public Peers.PeersInfo getPeersFromSpecificFront(String frontIp, Integer frontPort,
             String groupId) {
-        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_PEERS, PeerInfo[].class);
+        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_PEERS, Peers.PeersInfo.class);
     }
 
     /**
@@ -223,8 +224,8 @@ public class FrontInterfaceService {
     /**
      * get peers.
      */
-    public PeerInfo[] getPeers(String groupId) {
-        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_PEERS, PeerInfo[].class);
+    public Peers.PeersInfo getPeers(String groupId) {
+        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_PEERS, Peers.PeersInfo.class);
     }
 
     /**
