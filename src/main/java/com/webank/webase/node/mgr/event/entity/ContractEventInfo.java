@@ -31,7 +31,7 @@ public class ContractEventInfo {
 	 */
 	private Integer eventType;
 	private String appId;
-	private Integer groupId;
+	private String groupId;
 	private String exchangeName;
 	private String queueName;
 	/**

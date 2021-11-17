@@ -16,23 +16,20 @@
 package com.webank.webase.node.mgr.precompiled;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DeployType;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.tools.HttpRequestTools;
-import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.precompiled.entity.AddressStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
-import com.webank.webase.node.mgr.precompiled.entity.ContractStatusHandle;
 import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
+import com.webank.webase.node.mgr.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.user.UserService;
 import java.util.HashMap;
 import java.util.List;
@@ -74,24 +71,6 @@ public class PrecompiledService {
     private static final String GROUP_OPERATE_GET_STATUS = "getStatus";
     public static final String GROUP_FILE_NOT_EXIST = "INEXISTENT";
 
-    /**
-     * get cns list /{groupId}/{pathValue} /a?groupId=xx
-     */
-    public Object listCnsService(String groupId, String contractNameAndVersion, int pageSize, int pageNumber) {
-        log.debug("start listCnsService. groupId:{}, contractNameAndVersion:{}" + groupId + contractNameAndVersion);
-        String uri;
-        Map<String, String> map = new HashMap<>();
-        map.put("groupId", String.valueOf(groupId));
-        map.put("contractNameAndVersion", contractNameAndVersion);
-        map.put("pageSize", String.valueOf(pageSize));
-        map.put("pageNumber", String.valueOf(pageNumber));
-        uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CNS_LIST, map);
-
-
-        Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
-        log.debug("end listCnsService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
-        return frontRsp;
-    }
 
     /**
      * get node list with consensus status
@@ -174,60 +153,5 @@ public class PrecompiledService {
         return frontRsp;
     }
 
-    /**
-     *  post contract status operation
-     */
-    public Object contractStatusManage(ContractStatusHandle contractStatusHandle) {
-        log.debug("start contractStatusManage. contractStatusHandle:{}", JsonTools.toJSONString(contractStatusHandle));
-        if (Objects.isNull(contractStatusHandle)) {
-            log.error("fail contractStatusManage. request param is null");
-            throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
-        }
-        String groupId = contractStatusHandle.getGroupId();
-        String handleType = contractStatusHandle.getHandleType();
-        Object frontRsp;
-        if (CONTRACT_MANAGE_GETSTATUS.equals(handleType) || CONTRACT_MANAGE_LISTMANAGER.equals(handleType)) {
-            // no need to set signUserId
-            frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_STATUS,
-                contractStatusHandle, Object.class);
-        } else {
-            String signUserId = userService.getSignUserIdByAddress(groupId,
-                contractStatusHandle.getFromAddress());
-            contractStatusHandle.setSignUserId(signUserId);
-            frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_STATUS,
-                contractStatusHandle, Object.class);
-        }
-        log.debug("end contractStatusManage. frontRsp:{}", JsonTools.toJSONString(frontRsp));
-        return frontRsp;
-    }
 
-    /**
-     * query status of contract address list
-     * @param addressStatusHandle
-     * @return
-     */
-    public Map<String, Object> queryContractStatus(AddressStatusHandle addressStatusHandle) {
-        log.debug("start queryContractStatus. addressStatusHandle:{}", JsonTools.toJSONString(addressStatusHandle));
-        if (Objects.isNull(addressStatusHandle)) {
-            log.error("fail queryContractStatus. request param is null");
-            throw new NodeMgrException(ConstantCode.INVALID_PARAM_INFO);
-        }
-        Map<String, Object> resMap = new HashMap<>();
-
-        String groupId = addressStatusHandle.getGroupId();
-        List<String> addressList = addressStatusHandle.getAddressList();
-        // init param
-        ContractStatusHandle statusHandle = new ContractStatusHandle();
-        statusHandle.setGroupId(groupId);
-        statusHandle.setHandleType(CONTRACT_MANAGE_GETSTATUS);
-        for (String contractAddress: addressList) {
-            statusHandle.setContractAddress(contractAddress);
-            log.debug("start batch query. statusHandle:{}", JsonTools.toJSONString(statusHandle));
-            BaseResponse response = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_STATUS,
-                statusHandle, BaseResponse.class);
-            resMap.put(contractAddress, response.getData());
-        }
-        log.debug("end queryContractStatus. frontRsp:{}", JsonTools.toJSONString(resMap));
-        return resMap;
-    }
 }

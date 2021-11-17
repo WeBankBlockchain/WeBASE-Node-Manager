@@ -109,25 +109,27 @@ public class FrontGroupMapService {
      */
     @Transactional
     public void newFrontGroup(TbFront front, String groupId) {
+        newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
+
         // check front's all group status
-        BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
-                groupId, OPERATE_STATUS_GROUP);
-        log.debug("newFrontGroupWithStatus getGroupStatus frontId{} groupId{} res{}",
-                front.getFrontId(), groupId, res);
-        // "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
-        if (res.getCode() == 0) {
-            String groupStatus = (String) res.getData();
-            if (RUNNING_GROUP.equals(groupStatus)) {
-                log.debug("newFrontGroupWithStatus update map's groupStatus NORMAL.");
-                newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
-            } else {
-                log.debug("newFrontGroupWithStatus update map's groupStatus MAINTAINING.");
-                newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
-            }
-        } else {
-            log.warn("newFrontGroupWithStatus get group status fail, " +
-                    "update front_group_map status fail. res:{}", res);
-        }
+//        BaseResponse res = frontInterface.operateGroup(front.getFrontIp(), front.getFrontPort(),
+//                groupId, OPERATE_STATUS_GROUP);
+//        log.debug("newFrontGroupWithStatus getGroupStatus frontId{} groupId{} res{}",
+//                front.getFrontId(), groupId, res);
+//        // "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
+//        if (res.getCode() == 0) {
+//            String groupStatus = (String) res.getData();
+//            if (RUNNING_GROUP.equals(groupStatus)) {
+//                log.debug("newFrontGroupWithStatus update map's groupStatus NORMAL.");
+//                newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.NORMAL.getValue());
+//            } else {
+//                log.debug("newFrontGroupWithStatus update map's groupStatus MAINTAINING.");
+//                newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
+//            }
+//        } else {
+//            log.warn("newFrontGroupWithStatus get group status fail, " +
+//                    "update front_group_map status fail. res:{}", res);
+//        }
     }
 
     /**
@@ -204,7 +206,7 @@ public class FrontGroupMapService {
             int frontId = map.getFrontId();
             String groupId = map.getGroupId();
             long frontCount = frontList.stream().filter(f -> frontId == f.getFrontId()).count();
-            long groupCount = groupList.stream().filter(g -> groupId == g.getGroupId()).count();
+            long groupCount = groupList.stream().filter(g -> groupId.equals(g.getGroupId())).count();
             if (frontCount == 0 || groupCount == 0) {
                 log.warn("removeInvalidFrontGroupMap mapId:{} map's group/front is not in table", mapId);
                 frontGroupMapMapper.removeByMapId(mapId);

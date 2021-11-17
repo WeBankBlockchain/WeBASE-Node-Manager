@@ -56,15 +56,15 @@ public class FrontController extends BaseController {
     /**
      * refresh frontn
      */
-    @GetMapping("/refresh")
-    public BaseResponse refreshFront() {
-    	Instant startTime = Instant.now();
-    	log.info("start refreshFront startTime:{}", startTime.toEpochMilli());
-    	BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-    	frontService.refreshFront();
-    	log.info("end refreshFront useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
-    	return baseResponse;
-    }
+//    @GetMapping("/refresh")
+//    public BaseResponse refreshFront() {
+//    	Instant startTime = Instant.now();
+//    	log.info("start refreshFront startTime:{}", startTime.toEpochMilli());
+//    	BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+//    	frontService.refreshFront();
+//    	log.info("end refreshFront useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+//    	return baseResponse;
+//    }
     
     /**
      * add new front
