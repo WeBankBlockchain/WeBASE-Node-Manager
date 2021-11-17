@@ -19,19 +19,18 @@ import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.front.frontinterface.entity.PeerOfConsensusStatus;
-import com.webank.webase.node.mgr.node.entity.ReqUpdate;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.ValidateUtil;
 import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.node.entity.ReqUpdate;
 import com.webank.webase.node.mgr.node.entity.TbNode;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.ValidateUtil;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -41,8 +40,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.*;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -320,41 +318,19 @@ public class NodeService {
             return null;
         }
         List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
-//        List<ViewInfo> viewInfos = consensusInfo.getTimeout();
-//        for (ViewInfo viewInfo : viewInfos) {
-//            dataIsList.add(
-//                new PeerOfConsensusStatus(viewInfo.getNodeId(), new BigInteger(viewInfo.getView())));
-//        }
         return dataIsList;
     }
 
-    /**
-     * add sealer and observer in NodeList
-     * return: List<String> nodeIdList
-     */
-    public List<PeerInfo> getSealerAndObserverList(String groupId) {
-        log.debug("start getSealerAndObserverList groupId:{}", groupId);
-        List<String> sealerList = frontInterface.getSealerList(groupId);
-        List<String> observerList = frontInterface.getObserverList(groupId);
-        List<PeerInfo> resList = new ArrayList<>();
-        sealerList.forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
-        observerList.forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
-        log.debug("end getSealerAndObserverList resList:{}", resList);
+
+    public List<String> getSealerAndObserverListBySyncStatus(String groupId) {
+        log.debug("start getSealerAndObserverListBySyncStatus groupId:{}", groupId);
+        List<String> resList = new ArrayList<>();
+        SyncStatusInfo syncStatusInfo = frontInterface.getSyncStatus(groupId);
+        resList.add(syncStatusInfo.getNodeId());
+        resList.addAll(syncStatusInfo.getPeers().stream().map(PeersInfo::getNodeId).collect(
+            Collectors.toList()));
+        log.debug("end getSealerAndObserverListBySyncStatus resList:{}", resList);
         return resList;
-    }
-
-
-    public List<String> getNodeIdListService(String groupId) {
-        log.debug("start getSealerAndObserverList groupId:{}", groupId);
-        try {
-            List<String> nodeIdList = frontInterface.getNodeIdList(groupId);
-            log.debug("end getSealerAndObserverList nodeIdList:{}", nodeIdList);
-            return nodeIdList;
-        } catch (Exception e) {
-            log.error("getNodeIdList error groupId:{}, exception:{}", groupId, e.getMessage());
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), e.getMessage());
-        }
-
     }
 
 

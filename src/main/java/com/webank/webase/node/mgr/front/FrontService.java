@@ -89,6 +89,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
@@ -275,25 +276,24 @@ public class FrontService {
     public void saveGroup(List<String> groupIdList, TbFront tbFront) {
         String frontIp = tbFront.getFrontIp();
         Integer frontPort = tbFront.getFrontPort();
-        for (String group : groupIdList) {
-            // peer in group, include removed nodes
-            List<String> groupPeerList = frontInterface
-                .getGroupPeersFromSpecificFront(frontIp, frontPort, group);
+        for (String groupId : groupIdList) {
+            // peer in group
+            List<String> nodesInGroup = frontInterface.getSealerObserverFromSpecificFront(frontIp, frontPort, groupId);
             // add group
             // check group not existed or node count differs
-            TbGroup checkGroup = groupService.getGroupById(group);
-            if (Objects.isNull(checkGroup) || groupPeerList.size() != checkGroup.getNodeCount()) {
-                groupService.saveGroup(group, groupPeerList.size(), "synchronous",
+            TbGroup checkGroup = groupService.getGroupById(groupId);
+            if (Objects.isNull(checkGroup) || nodesInGroup.size() != checkGroup.getNodeCount()) {
+                groupService.saveGroup(groupId, nodesInGroup.size(), "synchronous",
                     GroupType.SYNC, GroupStatus.NORMAL,0,"");
             }
             //save front group map
-            frontGroupMapService.newFrontGroup(tbFront, group);
+            frontGroupMapService.newFrontGroup(tbFront, groupId);
             //save nodes
-            for (String nodeId : groupPeerList) {
-                nodeService.addNodeInfo(group, nodeId);
+            for (String nodeId : nodesInGroup) {
+                nodeService.addNodeInfo(groupId, nodeId);
             }
             // add sealer(consensus node) and observer in nodeList
-            refreshSealerAndObserverInNodeList(frontIp, frontPort, group);
+//            refreshSealerAndObserverInNodeList(frontIp, frontPort, groupId);
         }
     }
 
@@ -304,14 +304,10 @@ public class FrontService {
     public void refreshSealerAndObserverInNodeList(String frontIp, int frontPort, String groupId) {
         log.debug("start refreshSealerAndObserverInNodeList frontIp:{}, frontPort:{}, groupId:{}",
             frontIp, frontPort, groupId);
-        List<String> sealerList = frontInterface.getSealerListFromSpecificFront(frontIp, frontPort, groupId);
-        List<String> observerList = frontInterface.getObserverListFromSpecificFront(frontIp, frontPort, groupId);
-        List<String> sealerAndObserverList = new ArrayList<>();
-        sealerAndObserverList.addAll(sealerList);
-        sealerAndObserverList.addAll(observerList);
-        log.debug("refreshSealerAndObserverInNodeList sealerList:{},observerList:{}",
-            sealerList, observerList);
-        sealerAndObserverList.forEach(nodeId -> {
+        List<String> nodeInGroupList = frontInterface.getSealerObserverFromSpecificFront(frontIp, frontPort, groupId);
+        log.debug("refreshSealerAndObserverInNodeList nodeInGroupList:{}",
+            nodeInGroupList);
+        nodeInGroupList.forEach(nodeId -> {
             NodeParam checkParam = new NodeParam();
             checkParam.setGroupId(groupId);
             checkParam.setNodeId(nodeId);

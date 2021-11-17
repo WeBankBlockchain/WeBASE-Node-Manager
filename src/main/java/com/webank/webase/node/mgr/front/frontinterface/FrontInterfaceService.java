@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
@@ -51,6 +52,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
@@ -181,13 +183,6 @@ public class FrontInterfaceService {
         return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_GROUP_PEERS, List.class);
     }
 
-    /**
-     * get NodeIDList from specific front.
-     */
-    public List<String> getNodeIDListFromSpecificFront(String frontIp, Integer frontPort,
-            String groupId) {
-        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_NODEID_LIST, List.class);
-    }
 
     /**
      * get peers from specific front.
@@ -204,6 +199,22 @@ public class FrontInterfaceService {
             String groupId) {
         return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_SYNC_STATUS,
             SyncStatusInfo.class);
+    }
+
+    public List<String> getSealerObserverFromSpecificFront(String frontIp, Integer frontPort,
+        String groupId) {
+        List<String> groupPeerList = new ArrayList<>();
+        SyncStatusInfo syncStatusInfo = this.getSyncStatusFromSpecificFront(frontIp, frontPort, groupId);
+        groupPeerList.add(syncStatusInfo.getNodeId());
+        groupPeerList.addAll(syncStatusInfo.getPeers().stream().map(PeersInfo::getNodeId).collect(
+            Collectors.toList()));
+        return groupPeerList;
+    }
+
+    public ConsensusStatusInfo getConsensusStatusFromSpecificFront(String frontIp, Integer frontPort,
+        String groupId) {
+        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_CONSENSUS_STATUS,
+            ConsensusStatusInfo.class);
     }
 
     public BcosBlock.Block getBlockByNumberFromSpecificFront(String frontIp, Integer frontPort,
@@ -643,10 +654,6 @@ public class FrontInterfaceService {
                 FrontRestTools.URI_KEY_PAIR_LOCAL_KEYSTORE, List.class);
         List<KeyPair> resList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), KeyPair.class);
         return resList;
-    }
-
-    public List<String> getNodeIdList(String groupId) {
-        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_NODEID_LIST, List.class);
     }
 
     /**

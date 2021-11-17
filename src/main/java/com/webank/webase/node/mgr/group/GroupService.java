@@ -15,7 +15,6 @@ package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
-import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
@@ -27,15 +26,13 @@ import com.webank.webase.node.mgr.base.enums.OperateStatus;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.tools.CleanPathUtil;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.ProgressTools;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
-import com.webank.webase.node.mgr.deploy.chain.ChainService;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.contract.CnsService;
 import com.webank.webase.node.mgr.contract.ContractService;
+import com.webank.webase.node.mgr.contract.abi.AbiService;
+import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
 import com.webank.webase.node.mgr.deploy.entity.TbHost;
@@ -50,13 +47,12 @@ import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
-import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.front.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.precompiled.permission.governvote.GovernVoteService;
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
 import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
 import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
@@ -66,10 +62,13 @@ import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.node.NodeService;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
 import com.webank.webase.node.mgr.node.entity.TbNode;
+import com.webank.webase.node.mgr.precompiled.permission.governvote.GovernVoteService;
 import com.webank.webase.node.mgr.statistic.StatService;
 import com.webank.webase.node.mgr.table.TableService;
+import com.webank.webase.node.mgr.tools.CleanPathUtil;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.ProgressTools;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -80,7 +79,6 @@ import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -352,14 +350,13 @@ public class GroupService {
             // update by group list on chain
             log.info("saveDataOfGroup groupIdList:{}", groupIdList);
             for (String groupId : groupIdList) {
-                String gId = groupId;
 
-                allGroupSet.add(gId);
+                allGroupSet.add(groupId);
                 // peer in group
                 List<String> groupPeerList;
                 try {
                     // if observer set removed, it still return itself as observer
-                    groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+                    groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, groupId);
                 } catch (Exception e) {
                     // case: if front1 group1 stopped, getGroupPeers error, update front1_group1_map invalid fail
                     log.warn("saveDataOfGroup getGroupPeersFromSpecificFront fail, frontId:{}, groupId:{}",
@@ -368,21 +365,21 @@ public class GroupService {
                 }
                 // check group not existed or node count differs
                 // save group entity
-                TbGroup checkGroupExist = getGroupById(gId);
+                TbGroup checkGroupExist = getGroupById(groupId);
                 if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
-                    saveGroup(gId, groupPeerList.size(), "synchronous",
+                    saveGroup(groupId, groupPeerList.size(), "synchronous",
                             GroupType.SYNC, GroupStatus.NORMAL, front.getChainId(), front.getChainName());
                 }
                 // refresh front group map by group list on chain
                 // different from checkGroupMapByLocalGroupList which update by local groupList
                 // 1.4.3 add consensus type of front group map
-                frontGroupMapService.newFrontGroup(front, gId);
+                frontGroupMapService.newFrontGroup(front, groupId);
 
                 //save new peers(tb_node)
-                savePeerList(frontIp, frontPort, gId, groupPeerList);
+                savePeerList(groupId, groupPeerList);
 
                 //refresh: add sealer and observer no matter validity
-                frontService.refreshSealerAndObserverInNodeList(frontIp, frontPort, gId);
+//                frontService.refreshSealerAndObserverInNodeList(frontIp, frontPort, groupId);
             }
         }
     }
@@ -459,9 +456,9 @@ public class GroupService {
      */
     private boolean checkSealerAndObserverListContains(String groupId, String nodeId) {
         //get sealer and observer on chain
-        List<PeerInfo> sealerAndObserverList = nodeService.getSealerAndObserverList(groupId);
-        for (PeerInfo peerInfo : sealerAndObserverList) {
-            if (nodeId.equals(peerInfo.getNodeId())) {
+        List<String> sealerAndObserverList = nodeService.getSealerAndObserverListBySyncStatus(groupId);
+        for (String nId : sealerAndObserverList) {
+            if (nodeId.equals(nId)) {
                 log.debug("checkSealerAndObserverListNotContains true nodeId:{},groupId:{}",
                     nodeId, groupId);
                 return true;
@@ -475,25 +472,18 @@ public class GroupService {
     /**
      * save new peers that not in group peers
      */
-    private void savePeerList(String frontIp, Integer frontPort, String groupId, List<String> groupPeerList) {
+    private void savePeerList(String groupId, List<String> groupPeerList) {
         //get all local nodes
         List<TbNode> localNodeList = nodeService.queryByGroupId(groupId);
-        //get peers on chain
-        PeerInfo[] peerArr = frontInterface.getPeersFromSpecificFront(frontIp, frontPort, groupId);
-        List<PeerInfo> peerList = Arrays.asList(peerArr);
         //save new nodes
         for (String nodeId : groupPeerList) {
-            // if local hash node, count = 1
+            // if local has this node, count = 1
             long count = localNodeList.stream()
-                .filter(
-                    ln -> nodeId.equals(ln.getNodeId()) && groupId == ln.getGroupId())
+                .filter(ln -> nodeId.equals(ln.getNodeId()) && groupId.equals(ln.getGroupId()))
                 .count();
             // local node not contains this one:
             if (count != 1) {
-                PeerInfo newPeer = peerList.stream()
-                    .filter(peer -> nodeId.equals(peer.getNodeId()))
-                    .findFirst().orElseGet(() -> new PeerInfo(nodeId));
-                nodeService.addNodeInfo(groupId, newPeer);
+                nodeService.addNodeInfo(groupId, nodeId);
             }
         }
     }
