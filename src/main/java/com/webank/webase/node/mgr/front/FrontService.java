@@ -99,6 +99,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -162,7 +163,7 @@ public class FrontService {
     /**
      * add new front, save front, frontGroupMap, check front's groupStatus, refresh nodeList
      */
-    @Transactional
+    @Transactional(isolation= Isolation.READ_COMMITTED)
     public TbFront newFront(FrontInfo frontInfo) {
         log.debug("start newFront frontInfo:{}", frontInfo);
         TbFront tbFront = new TbFront();
@@ -272,7 +273,7 @@ public class FrontService {
      * @param groupIdList
      * @param tbFront
      */
-    @Transactional
+    @Transactional(isolation= Isolation.READ_COMMITTED)
     public void saveGroup(List<String> groupIdList, TbFront tbFront) {
         String frontIp = tbFront.getFrontIp();
         Integer frontPort = tbFront.getFrontPort();

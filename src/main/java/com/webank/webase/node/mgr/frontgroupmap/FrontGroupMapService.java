@@ -206,7 +206,7 @@ public class FrontGroupMapService {
             int frontId = map.getFrontId();
             String groupId = map.getGroupId();
             long frontCount = frontList.stream().filter(f -> frontId == f.getFrontId()).count();
-            long groupCount = groupList.stream().filter(g -> groupId == g.getGroupId()).count();
+            long groupCount = groupList.stream().filter(g -> groupId.equals(g.getGroupId())).count();
             if (frontCount == 0 || groupCount == 0) {
                 log.warn("removeInvalidFrontGroupMap mapId:{} map's group/front is not in table", mapId);
                 frontGroupMapMapper.removeByMapId(mapId);

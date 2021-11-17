@@ -305,6 +305,7 @@ public class GroupService {
 
         // check group status(normal or maintaining), update by local group list
         // if groupid not in allGroupSet, remove it
+        // todo remove, because dynamic group manage removed
         checkAndUpdateGroupStatus(allGroupSet);
 
 
@@ -375,8 +376,6 @@ public class GroupService {
                 //save new peers(tb_node)
                 savePeerList(groupId, groupPeerList);
 
-                //refresh: add sealer and observer no matter validity
-//                frontService.refreshSealerAndObserverInNodeList(frontIp, frontPort, groupId);
             }
         }
     }
@@ -402,20 +401,19 @@ public class GroupService {
             // update by group list on chain
             log.info("removeInvalidPeer groupIdList:{}", groupIdList);
             for (String groupId : groupIdList) {
-                String gId = groupId;
 
                 // peer in group
-                List<String> groupPeerList;
+                List<String> nodeInGroup;
                 try {
                     // if observer set removed, it still return itself as observer
-                    groupPeerList = frontInterface.getGroupPeersFromSpecificFront(frontIp, frontPort, gId);
+                    nodeInGroup = frontInterface.getSealerObserverFromSpecificFront(frontIp, frontPort, groupId);
                 } catch (Exception e) {
                     // case: if front1 group1 stopped, getGroupPeers error, update front1_group1_map invalid fail
                     log.warn("saveDataOfGroup getGroupPeersFromSpecificFront fail, frontId:{}, groupId:{}",
                         front.getFrontId(), groupId);
                     continue;
                 }
-                removeInvalidPeer(gId, groupPeerList);
+                removeInvalidPeer(groupId, nodeInGroup);
             }
         }
     }
@@ -423,7 +421,7 @@ public class GroupService {
     /**
      * remove invalid peer.
      */
-    private void removeInvalidPeer(String groupId, List<String> groupPeerList) {
+    private void removeInvalidPeer(String groupId, List<String> nodeInGroup) {
         if (groupId.isEmpty()) {
             return;
         }
@@ -435,10 +433,13 @@ public class GroupService {
         //remove node that's not in groupPeerList and not in sealer/observer list
         // 1.4.3 if observer is removed, observer's nodeId still in groupPeerList
         localNodes.stream()
-                .filter(n -> ! DataStatus.starting(n.getNodeActive()))
+                .filter(n -> !DataStatus.starting(n.getNodeActive()))
                 .forEach(node -> {
-                    boolean isRemoved = !checkSealerAndObserverListContains(groupId, node.getNodeId());
-                    if(isRemoved || !groupPeerList.contains(node.getNodeId()) ) {
+                    // todo check: if front connected to rpc node, and this rpc node connected to observer node,
+                    // and if this observer was removed, then nodeInGroup might still contains this observer as an observer but not a removed node
+//                    boolean isRemoved = !checkSealerAndObserverListContains(groupId, node.getNodeId());
+//                    if(isRemoved || !nodeInGroup.contains(node.getNodeId()) ) {
+                    if(!nodeInGroup.contains(node.getNodeId()) ) {
                         nodeService.deleteByNodeAndGroupId(node.getNodeId(), groupId);
                     }
                 });
@@ -451,6 +452,7 @@ public class GroupService {
      * @param nodeId
      * @return
      */
+    @Deprecated
     private boolean checkSealerAndObserverListContains(String groupId, String nodeId) {
         //get sealer and observer on chain
         List<String> sealerAndObserverList = nodeService.getSealerAndObserverListBySyncStatus(groupId);
@@ -507,7 +509,7 @@ public class GroupService {
         for (TbGroup localGroup : allLocalGroup) {
             String localGroupId = localGroup.getGroupId();
             long count = 0;
-            count = allGroupOnChain.stream().filter(id -> id == localGroupId).count();
+            count = allGroupOnChain.stream().filter(id -> id.equals(localGroupId)).count();
             try {
                 // found groupId in groupOnChain, local status is invalid, set as normal
                 if (count > 0 && localGroup.getGroupStatus() == GroupStatus.MAINTAINING.getValue()) {
@@ -668,7 +670,7 @@ public class GroupService {
         log.debug("checkGroupMapByLocalGroupList frontList:{},groupListLocal:{}",
                 frontList, groupListLocal);
         for (TbFront front : frontList) {
-            if( ! FrontStatusEnum.isRunning(front.getStatus())){
+            if (!FrontStatusEnum.isRunning(front.getStatus())) {
                 log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
                 continue;
             }
@@ -684,7 +686,7 @@ public class GroupService {
             groupListLocal.forEach(group -> {
                 String groupId = group.getGroupId();
                 // only check local group id
-                if (!groupListOnChain.contains(groupId.toString())) {
+                if (!groupListOnChain.contains(groupId)) {
                     log.info("update front_group_map by local data front:{}, groupId:{} ",
                             front, groupId);
                     // case: group2 in font1, not in front2, but local has group2, so add front1_group2_map but not front2_group2_map
