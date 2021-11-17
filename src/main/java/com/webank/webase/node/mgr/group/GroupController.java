@@ -232,7 +232,7 @@ public class GroupController extends BaseController {
      * delete all group's data(trans, contract, node etc.)
      */
   /*  @DeleteMapping("/{groupId}")
-    public BaseResponse deleteGroupData(@PathVariable("groupId") Integer groupId) {
+    public BaseResponse deleteGroupData(@PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         log.warn("start deleteGroupData startTime:{}", startTime.toEpochMilli());
