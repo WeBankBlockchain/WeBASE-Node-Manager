@@ -71,7 +71,7 @@ public class NodeController {
 
         //check node status before query
         try{
-            //nodeService.checkAndUpdateNodeStatus(groupId);
+            nodeService.checkAndUpdateNodeStatus(groupId);
         }catch (Exception e) {
             log.error("queryNodeList checkAndUpdateNodeStatus groupId:{}, error: []", groupId, e);
         }
@@ -123,7 +123,7 @@ public class NodeController {
      * get node id list
      */
 /*    @GetMapping("/nodeIdList/{groupId}")
-    public BaseResponse getNodeIdList(@PathVariable("groupId") Integer groupId) {
+    public BaseResponse getNodeIdList(@PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();
         log.info("start getNodeIdList startTime:{} groupId:{}",
                 startTime.toEpochMilli(), groupId);

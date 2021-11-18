@@ -383,7 +383,6 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统配置信息表';
 
 
-
 -- ----------------------------
 -- Table structure for tb_host
 -- ----------------------------
@@ -414,7 +413,6 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
 --  modify_time datetime NOT NULL COMMENT '最近一次更新时间',
 --  PRIMARY KEY (id)
 -- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链治理委员投票信息';
-
 
 CREATE TABLE IF NOT EXISTS tb_contract_path (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约路径编号',

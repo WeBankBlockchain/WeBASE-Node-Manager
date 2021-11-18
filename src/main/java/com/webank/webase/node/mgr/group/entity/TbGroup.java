@@ -45,6 +45,7 @@ public class TbGroup {
     private LocalDateTime modifyTime;
     private String description;
     private Integer groupType;
+    private Integer encryptType;
     /**
      * group.x.genesis timestamp
      */
@@ -59,7 +60,7 @@ public class TbGroup {
 
 
     public TbGroup(String groupId, String groupName, Integer nodeCount, String description,
-                   GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName){
+        GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName, Integer encryptType){
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
@@ -67,7 +68,7 @@ public class TbGroup {
         this.groupType = groupType.getValue();
         this.groupStatus = groupStatus.getValue();
         this.chainId = chainId;
-        this.chainName = chainName;
+        this.encryptType = encryptType;
     }
 
 }

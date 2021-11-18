@@ -140,7 +140,6 @@ public class ConstantProperties {
     private Boolean enableExternalFromBlock = true;
 
     //******************* Add in v1.4.0 start. *******************
-    public static final boolean RETURN_EXECUTE_LOG = true;
     public static final int LEAST_SEALER_TWO = 2;
 
     private int deployType = 0;

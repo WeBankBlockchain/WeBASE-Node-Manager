@@ -14,18 +14,10 @@
 
 package node.mgr.test.scaffold;
 
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.contract.scaffold.entity.ReqProject;
-import java.util.Collections;
 import node.mgr.test.base.TestBase;
 import org.junit.Before;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -41,22 +33,4 @@ public class ScaffoldControllerTest extends TestBase {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
-    @Test
-    public void testExportProject() throws Exception {
-        ReqProject param = new ReqProject();
-        param.setArtifactName("demo");
-        param.setGroup("org.webank");
-        param.setContractIdList(Collections.singletonList(1));
-        param.setFrontId(1);
-        param.setGroupId("1");
-        ResultActions resultActions = mockMvc.perform(
-            MockMvcRequestBuilders.post( "/scaffold/export").
-                content(JsonTools.toJSONString(param)).
-                contentType(MediaType.APPLICATION_JSON_UTF8)
-        );
-        resultActions.
-//            andExpect(MockMvcResultMatchers.status().isOk()).
-            andDo(MockMvcResultHandlers.print());
-        System.out.println("response:"+resultActions.andReturn().getResponse().getContentAsString());
-    }
 }
