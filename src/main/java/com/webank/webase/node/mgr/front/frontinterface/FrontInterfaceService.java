@@ -148,7 +148,7 @@ public class FrontInterfaceService {
      * get map's Cert Content from specific front.
      */
     public Map<String, String> getCertMapFromSpecificFront(String nodeIp, Integer frontPort) {
-        String groupId = "1";
+        String groupId = "group";
         return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_CERT, Map.class);
     }
 
@@ -157,7 +157,7 @@ public class FrontInterfaceService {
      * get map's Cert Content from specific front.
      */
     public Map<String, String> getSdkFilesFromSpecificFront(String nodeIp, Integer frontPort) {
-        String groupId = "1";
+        String groupId = "group";
         return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_CERT_SDK_FILES, Map.class);
     }
 
@@ -167,7 +167,7 @@ public class FrontInterfaceService {
      */
     public List<String> getGroupListFromSpecificFront(String nodeIp, Integer frontPort) {
 //        String groupId = Integer.MAX_VALUE;
-        String groupId = "1";
+        String groupId = "group";
         List<String> resList = getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_GROUP_PLIST, List.class);
         if (resList.isEmpty()) {
             throw new NodeMgrException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
@@ -527,7 +527,7 @@ public class FrontInterfaceService {
      */
     public String getFrontVersionFromSpecificFront(String frontIp, Integer frontPort) {
         log.debug("start getClientVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp, frontPort);
-        String groupId = "String.MAX_VALUE";
+        String groupId = "group";
         String frontVersion = getFromSpecificFront(groupId,
             frontIp, frontPort, FrontRestTools.URI_FRONT_VERSION, String.class);
         log.debug("end getFrontVersionFromSpecificFront. frontVersion:{}", frontVersion);
@@ -539,7 +539,7 @@ public class FrontInterfaceService {
      */
     public String getSignVersionFromSpecificFront(String frontIp, Integer frontPort) {
         log.debug("start getSignVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp, frontPort);
-        String groupId = "String.MAX_VALUE";
+        String groupId = "group";
         String signVersion = getFromSpecificFront(groupId,
             frontIp, frontPort, FrontRestTools.URI_SIGN_VERSION, String.class);
         log.debug("end getSignVersionFromSpecificFront. signVersion:{}", signVersion);
