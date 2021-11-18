@@ -137,7 +137,6 @@ public class FrontInterfaceService {
      */
     public void sendAbi(String groupId, PostAbiInfo param) {
         log.debug("start sendAbi groupId:{} param:{}", groupId, JsonTools.toJSONString(param));
-
         frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_SENDABI, param,
                 Object.class);
         log.debug("end sendAbi groupId:{} param:{}", groupId, JsonTools.toJSONString(param));
@@ -706,11 +705,11 @@ public class FrontInterfaceService {
         return clientVersion;
     }
 
-    public Object getSignMessageHash(String hash, String signUserId) {
+    public Object getSignMessageHash(String groupId,String hash, String signUserId) {
         log.debug("start getSignMessageHash hash:{} signUserId:{}", hash, signUserId);
         Map<String, String> map = new HashMap<>();
         map.put("hash", hash);
-        map.put("groupId", "group");
+        map.put("groupId", groupId);
         map.put("signUserId", signUserId);
         Object signMessage = frontRestTools.postForEntity("1", FrontRestTools.URI_SIGN_MESSAGE,map,Object.class);
         log.debug("end getSignMessageHash, signMessage:{}", signMessage);

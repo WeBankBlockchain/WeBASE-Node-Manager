@@ -136,7 +136,7 @@ public class UserService {
         // add user by webase-front->webase-sign
         String signUserId = UUID.randomUUID().toString().replaceAll("-", "");
         // group id as appId
-        String appId = groupId.toString();
+        String appId = groupId;
 
         // request sign or not
         KeyPair keyPair;
@@ -156,7 +156,7 @@ public class UserService {
             Map<String, Object> param = new HashMap<>();
             // default external user type in front
             param.put("signUserId", signUserId);
-            param.put("groupId", "group");
+            param.put("groupId", groupId);
             param.put("appId", appId);
             // already encoded privateKey
             param.put("privateKey", privateKeyEncoded);
@@ -166,7 +166,7 @@ public class UserService {
             // not import, but new key pair
             Map<String, String> param = new HashMap<>();
             // for front, its type is 2-external account
-            param.put("groupId", "group");
+            param.put("groupId", groupId);
             param.put("type", "2");
             param.put("userName", userName);
             param.put("signUserId", signUserId);
@@ -345,6 +345,7 @@ public class UserService {
     private KeyPair getUserKeyPairFromSign(String groupId, String signUserId) {
         Map<String, String> param = new HashMap<>();
         param.put("signUserId", signUserId);
+        param.put("groupId", groupId);
         param.put("returnPrivateKey", "true");
         String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_KEY_PAIR_USERINFO_WITH_SIGN, param);
         KeyPair keyPair = frontRestTools.getForEntity(groupId, uri, KeyPair.class);
@@ -488,14 +489,14 @@ public class UserService {
         // add user by webase-front->webase-sign
         String signUserId = UUID.randomUUID().toString().replaceAll("-", "");
         // group id as appId
-        String appId = groupId.toString();
+        String appId = groupId;
 
         // import key pair
         Map<String, Object> param = new HashMap<>();
         // default external user type in front
         param.put("signUserId", signUserId);
         param.put("appId", appId);
-        param.put("groupId", "group");
+        param.put("groupId", groupId);
         // already encoded privateKey
         param.put("privateKey", privateKeyEncoded);
         KeyPair keyPair = frontRestTools.postForEntity(groupId,

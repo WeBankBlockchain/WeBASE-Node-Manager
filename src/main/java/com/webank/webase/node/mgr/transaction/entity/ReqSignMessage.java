@@ -9,4 +9,6 @@ public class ReqSignMessage {
     private String hash;
 
     private String signUserId;
+    private String groupId;
+
 }
