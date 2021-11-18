@@ -16,13 +16,10 @@ package com.webank.webase.node.mgr.group;
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.DeployType;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.OperateStatus;
 import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -48,16 +45,11 @@ import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.front.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
-import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
-import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
-import com.webank.webase.node.mgr.group.entity.RspGroupStatus;
-import com.webank.webase.node.mgr.group.entity.RspOperateResult;
 import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.method.MethodService;
@@ -77,26 +69,19 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.springframework.aop.framework.AopContext;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.ResourceAccessException;
 
 /**
  * services for group data.
@@ -365,8 +350,10 @@ public class GroupService {
                 // save group entity
                 TbGroup checkGroupExist = getGroupById(groupId);
                 if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
+                    Integer encryptType = frontInterface.getEncryptType(groupId);
                     saveGroup(groupId, groupPeerList.size(), "synchronous",
-                            GroupType.SYNC, GroupStatus.NORMAL, front.getChainId(), front.getChainName());
+                            GroupType.SYNC, GroupStatus.NORMAL,
+                        front.getChainId(), front.getChainName(), encryptType);
                 }
                 // refresh front group map by group list on chain
                 // different from checkGroupMapByLocalGroupList which update by local groupList
@@ -792,16 +779,18 @@ public class GroupService {
 
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbGroup saveGroup(String groupId, int nodeCount, String groupDesc,
-                             GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
-        log.info("saveGroup groupId:{},groupStatus:{}", groupId, groupStatus);
+    public TbGroup saveGroup(String groupId, int nodeCount, String groupDesc, GroupType groupType,
+        GroupStatus groupStatus, Integer chainId, String chainName, Integer encryptType) {
+        log.info("saveGroup groupId:{},groupStatus:{},encryptType:{}",
+            groupId, groupStatus, encryptType);
         if (groupId.isEmpty()) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
         //save group id
         TbGroup tbGroup = new TbGroup(groupId,
-                String.format("group%s", groupId),
-                nodeCount, groupDesc, groupType, groupStatus, chainId, chainName);
+            String.format("group_%s", groupId),
+            nodeCount, groupDesc, groupType, groupStatus,
+            chainId, chainName, encryptType);
         groupMapper.insertSelective(tbGroup);
 
         //create table by group id
@@ -812,7 +801,7 @@ public class GroupService {
     @Transactional
     public TbGroup saveGroup(String groupId, int nodeCount, String description,
                              GroupType groupType, GroupStatus groupStatus, BigInteger timestamp, List<String> nodeIdList,
-                             Integer chainId, String chainName) {
+                             Integer chainId, String chainName, int encryptType) {
         log.debug("start saveGroup");
         if (groupId.isEmpty()) {
             return null;
@@ -821,7 +810,7 @@ public class GroupService {
         String groupName = "group" + groupId;
         TbGroup tbGroup =
                 new TbGroup(groupId, groupName, nodeCount, description,
-                        groupType, groupStatus,chainId,chainName);
+                        groupType, groupStatus,chainId, chainName, encryptType);
         tbGroup.setGroupTimestamp(timestamp.toString(10));
         tbGroup.setNodeIdList(JsonTools.toJSONString(nodeIdList));
         log.debug("saveGroup tbGroup:{}", tbGroup);
@@ -885,7 +874,7 @@ public class GroupService {
         }
 
         return ((GroupService) AopContext.currentProxy()).saveGroup(groupId,nodeCount,
-                groupDesc,groupType,groupStatus,chainId,chainName);
+                groupDesc,groupType,groupStatus,chainId,chainName, 0);//todo 获取群组的加密类型
     }
 
 
@@ -900,22 +889,22 @@ public class GroupService {
      * @param chainName
      * @return return true if insert.
      */
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(String groupId, int num, Integer chainId, String chainName) {
-        TbGroup group = this.getGroupById(groupId);
-        if (group == null) {
-            // group not exists, insert a new one
-            return Pair.of(((GroupService) AopContext.currentProxy())
-                    .saveGroup(groupId, num, "deploy", GroupType.DEPLOY, GroupStatus.MAINTAINING, chainId, chainName), true);
-        } else {
-            // group exists, update group count
-            int newGroupCount = group.getNodeCount() + num;
-            ((GroupService) AopContext.currentProxy()).updateGroupNodeCount(groupId, newGroupCount);
-            // update node count
-            group.setNodeCount(newGroupCount);
-            return Pair.of(group, false);
-        }
-    }
+//    @Transactional(propagation = Propagation.REQUIRED)
+//    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(String groupId, int num, Integer chainId, String chainName) {
+//        TbGroup group = this.getGroupById(groupId);
+//        if (group == null) {
+//            // group not exists, insert a new one
+//            return Pair.of(((GroupService) AopContext.currentProxy())
+//                    .saveGroup(groupId, num, "deploy", GroupType.DEPLOY, GroupStatus.MAINTAINING, chainId, chainName), true);
+//        } else {
+//            // group exists, update group count
+//            int newGroupCount = group.getNodeCount() + num;
+//            ((GroupService) AopContext.currentProxy()).updateGroupNodeCount(groupId, newGroupCount);
+//            // update node count
+//            group.setNodeCount(newGroupCount);
+//            return Pair.of(group, false);
+//        }
+//    }
 
     private void pullAllGroupFiles(String generateGroupId, TbFront tbFront) {
         this.pullGroupConfigFile(generateGroupId, tbFront);
@@ -1087,5 +1076,14 @@ public class GroupService {
         log.debug("end updateGroupStatus res", res);
         return res;
     }
+
+    public int getEncryptTypeByGroupId(String groupId) {
+        log.debug("start getEncryptTypeByGroupId groupId:{}", groupId);
+        int res = groupMapper.getEncryptType(groupId);
+        log.debug("end getEncryptTypeByGroupId res", res);
+        return res;
+    }
+
+
 
 }

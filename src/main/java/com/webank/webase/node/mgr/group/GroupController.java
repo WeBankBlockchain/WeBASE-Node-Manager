@@ -69,7 +69,23 @@ public class GroupController extends BaseController {
     private StatisticsTransdailyTask statisticsTask;
     @Autowired
     private ResetGroupListTask resetGroupListTask;
-    
+
+    /**
+     * return encrypt type to web 0 is standard, 1 is guomi.
+     */
+    @GetMapping("/encrypt/{groupId}")
+    public BaseResponse getEncryptType(@PathVariable("groupId") String groupId) {
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start getEncryptType startTime:{} groupId:{}", startTime.toEpochMilli(),
+            groupId);
+        int encrypt = groupService.getEncryptTypeByGroupId(groupId);
+        baseResponse.setData(encrypt);
+        log.info("end getEncryptType useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
 
     /**
      * get group general.
