@@ -293,11 +293,6 @@ public class DeployService {
             //hostService.scpHostSdkCert(chainName, tbHost);
             log.info("addNodes after generateHostSDKCertAndScp usedTime:{}", Duration.between(startTime, Instant.now()).toMillis());
 
-            // 1.4.3 deprecated, when add nodes, not support add group id
-            // update group node count
-            // log.info("addNodes saveOrUpdateNodeCount groupId:{},new node num:{}", groupId, num);
-            // groupService.saveOrUpdateNodeCount(groupId, num, chain.getId(), chainName);
-
             // init front and node (gen node cert & init db)
             try {
                 // gen node cert and gen front's yml

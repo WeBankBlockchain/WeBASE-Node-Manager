@@ -26,6 +26,7 @@
                 property="modifyTime"/>
         <result column="chain_id" jdbcType="INTEGER" property="chainId" />
         <result column="chain_name" jdbcType="VARCHAR" property="chainName" />
+        <result column="encrypt_type" jdbcType="INTEGER" property="encryptType" />
     </resultMap>
 
 
@@ -123,7 +124,7 @@
         ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
     </insert>
 
-    <delete id="remove" parameterType="java.lang.Integer">
+    <delete id="remove" parameterType="java.lang.String">
         delete from tb_group where group_id=#{groupId}
     </delete>
 
@@ -139,7 +140,7 @@
         update tb_group set node_count=#{nodeCount},modify_time=NOW() where group_id=#{groupId}
     </update>
 
-    <select id="getCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+    <select id="getCount" parameterType="java.lang.String" resultType="java.lang.Integer">
         select count(1) from tb_group where 1 = 1
         <if test="groupId != null and groupId !=''">
             and group_id = #{groupId}

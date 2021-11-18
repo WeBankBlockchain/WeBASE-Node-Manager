@@ -17,8 +17,9 @@ CREATE TABLE IF NOT EXISTS tb_group (
     modify_time datetime DEFAULT NULL COMMENT '修改时间',
     chain_id int(10) unsigned DEFAULT '0' COMMENT '所属链 ID',
     chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
+    encrypt_type tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '加密类型：0，标密；1，国密；默认 0 ',
     PRIMARY KEY (group_id),
-  UNIQUE KEY `unique_chain_id_group_id` (`chain_id`,`group_id`)
+    UNIQUE KEY `unique_chain_id_group_id` (`chain_id`,`group_id`)
 ) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8;
 
 
@@ -358,7 +359,7 @@ CREATE TABLE IF NOT EXISTS `tb_chain` (
   `chain_name` varchar(64) NOT NULL COMMENT '链名称',
   `chain_desc` varchar(1024) DEFAULT NULL COMMENT '链描述信息',
   `version` varchar(64) NOT NULL DEFAULT '' COMMENT '创建链时选择的镜像版本',
-  `encrypt_type` tinyint(8) unsigned NOT NULL DEFAULT '1' COMMENT '加密类型：1，标密；2，国密；默认 1 ',
+  `encrypt_type` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '加密类型：0，标密；1，国密；默认 0 ',
   `chain_status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '链状态：0，初始化；1，部署中；2，部署失败；3，部署成功等等',
   `webase_sign_addr` varchar(255) NOT NULL DEFAULT '127.0.0.1:5004' COMMENT 'WeBASE-Sign 的访问地址',
   `create_time` datetime NOT NULL COMMENT '创建时间',
@@ -386,33 +387,33 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
 -- ----------------------------
 -- Table structure for tb_host
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS `tb_host` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
-  `ip` varchar(16) NOT NULL COMMENT '主机IP',
-  `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
-  `status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '主机状态：0，新建；1，初始化；2，运行等等',
-  `remark` text DEFAULT NULL COMMENT 'remark',
-  `create_time` datetime NOT NULL COMMENT '创建时间',
-  `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_ip` (`ip`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物理主机信息';
+-- CREATE TABLE IF NOT EXISTS `tb_host` (
+--  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长 ID',
+--  `ip` varchar(16) NOT NULL COMMENT '主机IP',
+--  `root_dir` varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos' COMMENT '主机存放节点配置文件的根目录，可能存放多个节点配置',
+--  `status` tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '主机状态：0，新建；1，初始化；2，运行等等',
+--  `remark` text DEFAULT NULL COMMENT 'remark',
+--  `create_time` datetime NOT NULL COMMENT '创建时间',
+--  `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
+--  PRIMARY KEY (`id`),
+--  UNIQUE KEY `unique_ip` (`ip`) USING BTREE
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物理主机信息';
 
 -- ----------------------------
 -- Table structure for tb_govern_vote
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS tb_govern_vote (
-  id int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '链治理委员投票记录ID',
-  group_id varchar(255) NOT NULL COMMENT '群组ID',
-  time_limit bigint DEFAULT NULL COMMENT '投票截止块高',
-  from_address varchar(64) NOT NULL COMMENT '管理员地址',
-  type tinyint(8) NOT NULL COMMENT '投票类型，1-选举，2-去除，3-修改委员权重，4,-修改阈值',
-  to_address varchar(64) DEFAULT NULL COMMENT '选举/去除的地址',
-  detail varchar(64) DEFAULT NULL COMMENT '3-修改权重，4-修改阈值时存储具体信息',
-  create_time datetime NOT NULL COMMENT '创建时间',
-  modify_time datetime NOT NULL COMMENT '最近一次更新时间',
-  PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链治理委员投票信息';
+-- CREATE TABLE IF NOT EXISTS tb_govern_vote (
+--  id int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '链治理委员投票记录ID',
+--  group_id varchar(255) NOT NULL COMMENT '群组ID',
+--  time_limit bigint DEFAULT NULL COMMENT '投票截止块高',
+--  from_address varchar(64) NOT NULL COMMENT '管理员地址',
+--  type tinyint(8) NOT NULL COMMENT '投票类型，1-选举，2-去除，3-修改委员权重，4,-修改阈值',
+--  to_address varchar(64) DEFAULT NULL COMMENT '选举/去除的地址',
+--  detail varchar(64) DEFAULT NULL COMMENT '3-修改权重，4-修改阈值时存储具体信息',
+--  create_time datetime NOT NULL COMMENT '创建时间',
+--  modify_time datetime NOT NULL COMMENT '最近一次更新时间',
+--  PRIMARY KEY (id)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链治理委员投票信息';
 
 CREATE TABLE IF NOT EXISTS tb_contract_path (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约路径编号',

@@ -98,4 +98,7 @@ public interface GroupMapper {
        "update tb_group set group_timestamp=#{timestamp}, node_id_list=#{nodeIdList},modify_time=NOW() where group_id=#{groupId}"
     })
     int updateTimestampNodeList(@Param("groupId") String groupId, @Param("timestamp") long timestamp, @Param("nodeIdList") String nodeIdList);
+
+    @Select("select encrypt_type from tb_group where group_id = #{groupId}")
+    int getEncryptType(@Param("groupId") String groupId);
 }

@@ -250,6 +250,11 @@ public class FrontInterfaceService {
         return resList;
     }
 
+    public Integer getEncryptType(String groupId) {
+        Integer encryptType = frontRestTools.getForEntity(groupId, FrontRestTools.URI_ENCRYPT_TYPE, Integer.class);
+        return encryptType;
+    }
+
 
     /**
      * get contract code.

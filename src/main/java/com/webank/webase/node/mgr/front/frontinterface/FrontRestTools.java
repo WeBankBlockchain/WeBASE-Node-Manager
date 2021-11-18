@@ -90,6 +90,7 @@ public class FrontRestTools {
     public static final String URI_NODE_CONFIG = "web3/nodeConfig";
     public static final String URI_GROUP_INFO = "web3/groupInfo";
     public static final String URI_NODE_STATUS_LIST = "web3/nodeStatusList";
+    public static final String URI_ENCRYPT_TYPE = "web3/encrypt";
 
     public static final String URI_KEY_PAIR = "privateKey";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
@@ -127,7 +128,6 @@ public class FrontRestTools {
 
     public static final String URI_CERT = "cert";
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
-    public static final String URI_ENCRYPT_TYPE = "encrypt";
     public static final String URI_SSL_CRYPTO_TYPE = "sslCryptoType";
 
     public static final String URI_CONTRACT_EVENT_INFO_LIST = "event/contractEvent/list";
