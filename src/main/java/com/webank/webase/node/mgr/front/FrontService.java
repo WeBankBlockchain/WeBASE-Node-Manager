@@ -284,8 +284,9 @@ public class FrontService {
             // check group not existed or node count differs
             TbGroup checkGroup = groupService.getGroupById(groupId);
             if (Objects.isNull(checkGroup) || nodesInGroup.size() != checkGroup.getNodeCount()) {
+                Integer encryptType = frontInterface.getEncryptType(groupId);
                 groupService.saveGroup(groupId, nodesInGroup.size(), "synchronous",
-                    GroupType.SYNC, GroupStatus.NORMAL,0,"");
+                    GroupType.SYNC, GroupStatus.NORMAL,0,"", encryptType);
             }
             //save front group map
             frontGroupMapService.newFrontGroup(tbFront, groupId);
