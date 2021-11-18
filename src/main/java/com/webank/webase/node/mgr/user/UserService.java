@@ -156,6 +156,7 @@ public class UserService {
             Map<String, Object> param = new HashMap<>();
             // default external user type in front
             param.put("signUserId", signUserId);
+            param.put("groupId", "group");
             param.put("appId", appId);
             // already encoded privateKey
             param.put("privateKey", privateKeyEncoded);
@@ -165,6 +166,7 @@ public class UserService {
             // not import, but new key pair
             Map<String, String> param = new HashMap<>();
             // for front, its type is 2-external account
+            param.put("groupId", "group");
             param.put("type", "2");
             param.put("userName", userName);
             param.put("signUserId", signUserId);
@@ -493,6 +495,7 @@ public class UserService {
         // default external user type in front
         param.put("signUserId", signUserId);
         param.put("appId", appId);
+        param.put("groupId", "group");
         // already encoded privateKey
         param.put("privateKey", privateKeyEncoded);
         KeyPair keyPair = frontRestTools.postForEntity(groupId,

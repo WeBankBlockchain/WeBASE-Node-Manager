@@ -34,5 +34,5 @@ public class ReqGroupStatus {
 	@NotNull
 	private List<String> nodeIdList;
 	@NotNull
-	private List<Integer> groupIdList;
+	private List<String> groupIdList;
 }

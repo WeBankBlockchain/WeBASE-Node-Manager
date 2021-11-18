@@ -383,7 +383,6 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统配置信息表';
 
 
-
 -- ----------------------------
 -- Table structure for tb_host
 -- ----------------------------
