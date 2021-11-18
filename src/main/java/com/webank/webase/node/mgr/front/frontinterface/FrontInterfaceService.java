@@ -497,18 +497,6 @@ public class FrontInterfaceService {
         return config;
     }
 
-    /**
-     * get front's encryptType
-     */
-    public Integer getEncryptTypeFromSpecificFront(String nodeIp, Integer frontPort) {
-        log.debug("start getEncryptTypeFromSpecificFront. nodeIp:{},frontPort:{}", nodeIp,
-                frontPort);
-        String groupId = "String_MAX_VALUE";
-        int encryptType =
-                getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_ENCRYPT_TYPE, Integer.class);
-        log.debug("end getEncryptTypeFromSpecificFront. encryptType:{}", encryptType);
-        return encryptType;
-    }
 
 //    public ClientVersion getClientVersionFromSpecificFront(String frontIp, Integer frontPort,
 //                                   String groupId) {
@@ -706,11 +694,11 @@ public class FrontInterfaceService {
         return clientVersion;
     }
 
-    public Object getSignMessageHash(String hash, String signUserId) {
-        log.debug("start getSignMessageHash hash:{} signUserId:{}", hash, signUserId);
+    public Object getSignMessageHash(String hash, String signUserId, String groupId) {
+        log.debug("start getSignMessageHash hash:{} signUserId:{}", hash, signUserId, groupId);
         Map<String, String> map = new HashMap<>();
         map.put("hash", hash);
-        map.put("groupId", "group");
+        map.put("groupId", groupId);
         map.put("signUserId", signUserId);
         Object signMessage = frontRestTools.postForEntity("1", FrontRestTools.URI_SIGN_MESSAGE,map,Object.class);
         log.debug("end getSignMessageHash, signMessage:{}", signMessage);

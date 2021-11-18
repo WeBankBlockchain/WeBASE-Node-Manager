@@ -146,7 +146,7 @@ public class TransHashController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start getTransaction startTime:{} hash:{} signUserId:{}",
                 startTime.toEpochMilli(), reqSignMessage.getHash(), reqSignMessage.getSignUserId());
-        Object object = transHashService.getSignMessageHash(reqSignMessage.getHash(), reqSignMessage.getSignUserId());
+        Object object = transHashService.getSignMessageHash(reqSignMessage.getHash(), reqSignMessage.getSignUserId(), reqSignMessage.getGroupId());
         log.info("end signMessageHash useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(object));
         return object;

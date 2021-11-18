@@ -264,7 +264,7 @@ public class TransHashService {
     }
 
 
-    public Object getSignMessageHash(String hash, String signUserId) {
-        return frontInterface.getSignMessageHash(hash,signUserId);
+    public Object getSignMessageHash(String hash, String signUserId, String groupId) {
+        return frontInterface.getSignMessageHash(hash, signUserId, groupId);
     }
 }
