@@ -41,8 +41,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConfigController {
 
     @Autowired
-    private CryptoSuite cryptoSuite;
-    @Autowired
     private WebMvcConfig webMvcConfig;
     @Autowired
     private ConstantProperties constantProperties;
@@ -51,15 +49,7 @@ public class ConfigController {
     @Autowired
     private ConfigService configService;
 
-    /**
-     * return encrypt type to web 0 is standard, 1 is guomi.
-     */
-    @GetMapping("/encrypt")
-    public Object getEncryptType() {
-        int encrypt = cryptoSuite.cryptoTypeConfig;
-        log.info("getEncryptType:{}", encrypt);
-        return new BaseResponse(ConstantCode.SUCCESS, encrypt);
-    }
+
 
     /**
      * webase-web: when add first front, return version and tips.
