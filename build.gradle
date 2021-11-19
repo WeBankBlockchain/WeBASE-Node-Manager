@@ -105,7 +105,7 @@ List swagger = [
 
 dependencies {
     compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger
-    compile ("org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.1.0-2021111401-SNAPSHOT")
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.1.0-SNAPSHOT')
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile 'org.apache.commons:commons-collections4:4.4'
