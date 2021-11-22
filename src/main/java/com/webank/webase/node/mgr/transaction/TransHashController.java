@@ -68,7 +68,7 @@ public class TransHashController extends BaseController {
         TransListParam queryParam = new TransListParam(transHash, blockNumber);
         Integer count;
         // if param's empty, getCount by minus between max and min
-        if(StringUtils.isEmpty(transHash) && blockNumber == null) {
+        if (StringUtils.isEmpty(transHash) && blockNumber == null) {
             count = transHashService.queryCountOfTranByMinus(groupId);
         } else {
             // select count(1) in InnoDb is slow when data gets large, instead use tx_id to record count
@@ -80,13 +80,13 @@ public class TransHashController extends BaseController {
             queryParam.setStart(start);
             queryParam.setPageSize(pageSize);
             queryParam.setFlagSortedByBlock(SqlSortType.DESC.getValue());
-            List<TbTransHash> transList = transHashService.queryTransList(groupId,queryParam);
+            List<TbTransHash> transList = transHashService.queryTransList(groupId, queryParam);
             pageResponse.setData(transList);
             // on chain tx count
             pageResponse.setTotalCount(count);
         } else {
             List<TbTransHash> transList = new ArrayList<>();
-            transList = transHashService.getTransListFromChain(groupId,transHash,blockNumber);
+            transList = transHashService.getTransListFromChain(groupId, transHash, blockNumber);
             //result
             if (transList.size() > 0) {
                 pageResponse.setData(transList);
@@ -95,7 +95,8 @@ public class TransHashController extends BaseController {
         }
 
         log.info("end queryBlockList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(pageResponse));
         return pageResponse;
     }
 
@@ -113,7 +114,8 @@ public class TransHashController extends BaseController {
         TransactionReceipt transReceipt = transHashService.getTransReceipt(groupId, transHash);
         baseResponse.setData(transReceipt);
         log.info("end getTransReceipt useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -131,7 +133,8 @@ public class TransHashController extends BaseController {
         JsonTransactionResponse transInfo = transHashService.getTransaction(groupId, transHash);
         baseResponse.setData(transInfo);
         log.info("end getTransaction useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -140,15 +143,17 @@ public class TransHashController extends BaseController {
      */
     @PostMapping("/signMessageHash")
     public Object signMessageHash(@RequestBody @Valid ReqSignMessage reqSignMessage,
-                                        BindingResult result)
-            throws NodeMgrException {
+        BindingResult result)
+        throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("start getTransaction startTime:{} hash:{} signUserId:{}",
-                startTime.toEpochMilli(), reqSignMessage.getHash(), reqSignMessage.getSignUserId());
-        Object object = transHashService.getSignMessageHash(reqSignMessage.getHash(), reqSignMessage.getSignUserId(), reqSignMessage.getGroupId());
+        log.info("start getTransaction startTime:{} hash:{} signUserId:{} groupId:{} ",
+            startTime.toEpochMilli(), reqSignMessage.getHash(), reqSignMessage.getSignUserId(),
+            reqSignMessage.getGroupId());
+        Object object = transHashService.getSignMessageHash(reqSignMessage.getGroupId(),
+            reqSignMessage.getHash(), reqSignMessage.getSignUserId());
         log.info("end signMessageHash useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(object));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(object));
         return object;
     }
 }
