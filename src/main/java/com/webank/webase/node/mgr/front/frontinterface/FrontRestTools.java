@@ -92,6 +92,11 @@ public class FrontRestTools {
     public static final String URI_NODE_STATUS_LIST = "web3/nodeStatusList";
     public static final String URI_ENCRYPT_TYPE = "web3/encrypt";
 
+    // config sdk
+
+    public static final String URI_CONFIG_SDK = "config/bcosSDK";
+
+
     public static final String URI_KEY_PAIR = "privateKey";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
     public static final String URI_KEY_PAIR_IMPORT_WITH_SIGN = "privateKey/importWithSign";
@@ -153,7 +158,7 @@ public class FrontRestTools {
                 URI_GOVERNANCE_COMMITTEE_WEIGHT, URI_GOVERNANCE_THRESHOLD,
                 URI_GOVERNANCE_OPERATOR, URI_GOVERNANCE_OPERATOR_LIST,
                 URI_GOVERNANCE_ACCOUNT_STATUS, URI_GOVERNANCE_ACCOUNT_FREEZE, URI_GOVERNANCE_ACCOUNT_UNFREEZE,
-                URI_CONTRACT_STATUS, URI_EVENT_LOG_LIST,URI_SIGN_MESSAGE);
+                URI_CONTRACT_STATUS, URI_EVENT_LOG_LIST,URI_SIGN_MESSAGE,URI_CONFIG_SDK);
 
     public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 

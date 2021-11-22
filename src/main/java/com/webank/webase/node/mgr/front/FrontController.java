@@ -20,6 +20,8 @@ import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.entity.ReqSdkConfig;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
@@ -52,6 +54,8 @@ public class FrontController extends BaseController {
 
     @Autowired
     private FrontService frontService;
+    @Autowired
+    private FrontInterfaceService frontInterfaceService;
 
     /**
      * refresh frontn
@@ -164,5 +168,35 @@ public class FrontController extends BaseController {
         log.info("end getFrontNodeConfig useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS, nodeConfig);
     }
+
+
+    @GetMapping(value = "/bcosSDK")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse getFrontBcosSDKInfo(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort,
+        @RequestBody ReqSdkConfig param) {
+        Instant startTime = Instant.now();
+        log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{},param:{}",
+            startTime.toEpochMilli(), frontIp, frontPort, param);
+        BaseResponse response = frontInterfaceService.getFrontSdkFromSpecifiFront(frontIp, frontPort);
+
+        log.info("end getFrontNodeConfig useTime:{},response:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), response);
+        return new BaseResponse(ConstantCode.SUCCESS, response);
+    }
+
+    @GetMapping(value = "/bcosSDK/config")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse configFrontBcosSDKInfo(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort,
+        @RequestBody ReqSdkConfig param) {
+        Instant startTime = Instant.now();
+        log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{},param:{}",
+            startTime.toEpochMilli(), frontIp, frontPort, param);
+        BaseResponse response = frontInterfaceService.configFrontSdkFromSpecifiFront(frontIp, frontPort, param);
+
+        log.info("end getFrontNodeConfig useTime:{},response:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), response);
+        return new BaseResponse(ConstantCode.SUCCESS, response);
+    }
+
 
 }

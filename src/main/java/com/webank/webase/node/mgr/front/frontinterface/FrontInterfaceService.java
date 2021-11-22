@@ -31,6 +31,7 @@ import com.webank.webase.node.mgr.front.frontinterface.entity.GenerateGroupInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.GroupHandleResult;
 import com.webank.webase.node.mgr.front.frontinterface.entity.NodeStatusInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.front.frontinterface.entity.ReqSdkConfig;
 import com.webank.webase.node.mgr.front.frontinterface.entity.RspStatBlock;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
@@ -131,6 +132,14 @@ public class FrontInterfaceService {
         return requestSpecificFront(groupId, frontIp, frontPort, HttpMethod.GET, uri, null, clazz);
     }
 
+    private <T> T postFromSpecificFront(String groupId, String frontIp, Integer frontPort, String uri, Object param,
+        Class<T> clazz) {
+        log.debug("start postFromSpecificFront. groupId:{} frontIp:{} frontPort:{}  uri:{}", groupId,
+            frontIp, frontPort.toString(), uri);
+        String url = String.format(cproperties.getFrontUrl(), frontIp, frontPort, uri);
+        log.debug("postFromSpecificFront. url:{}", url);
+        return requestSpecificFront(groupId, frontIp, frontPort, HttpMethod.POST, uri, param, clazz);
+    }
 
     /**
      * send contract abi
@@ -496,18 +505,6 @@ public class FrontInterfaceService {
         return config;
     }
 
-    /**
-     * get front's encryptType
-     */
-    public Integer getEncryptTypeFromSpecificFront(String nodeIp, Integer frontPort) {
-        log.debug("start getEncryptTypeFromSpecificFront. nodeIp:{},frontPort:{}", nodeIp,
-                frontPort);
-        String groupId = "String_MAX_VALUE";
-        int encryptType =
-                getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_ENCRYPT_TYPE, Integer.class);
-        log.debug("end getEncryptTypeFromSpecificFront. encryptType:{}", encryptType);
-        return encryptType;
-    }
 
 //    public ClientVersion getClientVersionFromSpecificFront(String frontIp, Integer frontPort,
 //                                   String groupId) {
@@ -714,5 +711,24 @@ public class FrontInterfaceService {
         Object signMessage = frontRestTools.postForEntity("1", FrontRestTools.URI_SIGN_MESSAGE,map,Object.class);
         log.debug("end getSignMessageHash, signMessage:{}", signMessage);
         return signMessage;
+    }
+
+    public BaseResponse getFrontSdkFromSpecifiFront(String frontIp, Integer frontPort) {
+        log.debug("start getFrontSdkFromSpecifiFront frontIp:{},frontPort:{}", frontIp, frontPort);
+        String groupId = "group";
+        BaseResponse response = this.getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_CONFIG_SDK,
+            BaseResponse.class);
+        log.debug("end getFrontSdkFromSpecifiFront response:{}", JsonTools.toJSONString(response));
+        return response;
+    }
+    public BaseResponse configFrontSdkFromSpecifiFront(String frontIp, Integer frontPort, ReqSdkConfig param) {
+        log.debug("start configFrontSdkFromSpecifiFront frontIp:{},frontPort:{},param:{}", frontIp, frontPort,
+            JsonTools.toJSONString(param));
+        String groupId = "group";
+        BaseResponse response = this.postFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_CONFIG_SDK, param,
+            BaseResponse.class);
+        log.debug("end configFrontSdkFromSpecifiFront response:{}", JsonTools.toJSONString(response));
+        return response;
+
     }
 }
