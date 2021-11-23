@@ -125,7 +125,7 @@ public class TransHashService {
      * @return number of block height
      * @throws NodeMgrException
      */
-//    public Integer queryLatestTransBlockNum(int groupId, TransListParam param)
+//    public Integer queryLatestTransBlockNum(String groupId, TransListParam param)
 //            throws NodeMgrException {
 //        log.debug("start queryApproximateCount. groupId:{}", groupId);
 //        String tableName = TableName.TRANS.getTableName(groupId);

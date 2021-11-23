@@ -979,7 +979,7 @@ public class GroupService {
         ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
     }
 
-//    private void pullGroupFile(int groupId,TbFront tbFront){
+//    private void pullGroupFile(String groupId,TbFront tbFront){
 //        if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
 //            return;
 //        }

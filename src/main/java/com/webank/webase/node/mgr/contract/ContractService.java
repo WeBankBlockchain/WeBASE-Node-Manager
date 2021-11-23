@@ -657,7 +657,7 @@ public class  ContractService {
     /**
      * check user deploy permission
      */
-//    private void checkDeployPermission(int groupId, String userAddress) {
+//    private void checkDeployPermission(String groupId, String userAddress) {
 //        // get deploy permission list
 //        List<PermissionInfo> deployUserList = new ArrayList<>();
 //        BasePageResponse response = permissionManageService.listPermissionFull(groupId, PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
