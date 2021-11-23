@@ -26,18 +26,13 @@ import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
 import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
-import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
-import com.webank.webase.node.mgr.front.frontinterface.entity.GenerateGroupInfo;
-import com.webank.webase.node.mgr.front.frontinterface.entity.GroupHandleResult;
 import com.webank.webase.node.mgr.front.frontinterface.entity.NodeStatusInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.ReqSdkConfig;
 import com.webank.webase.node.mgr.front.frontinterface.entity.RspStatBlock;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
-import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.user.entity.KeyPair;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,14 +44,14 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionObject;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
-import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -381,10 +376,10 @@ public class FrontInterfaceService {
      * get total transaction count
      * @param groupId
      */
-    public TotalTransCountInfo getTotalTransactionCount(String groupId) {
+    public TransactionCountInfo getTotalTransactionCount(String groupId) {
         log.debug("start getTotalTransactionCount. groupId:{}", groupId);
-        TotalTransCountInfo totalCount = frontRestTools.getForEntity(groupId,
-                FrontRestTools.URI_TRANS_TOTAL, TotalTransCountInfo.class);
+        TransactionCountInfo totalCount = frontRestTools.getForEntity(groupId,
+                FrontRestTools.URI_TRANS_TOTAL, TransactionCountInfo.class);
         log.debug("end getTotalTransactionCount:{}", totalCount);
         return totalCount;
     }
@@ -400,9 +395,9 @@ public class FrontInterfaceService {
         }
         List<JsonTransactionResponse> transactionResponses = new ArrayList<>();
         //TransactionResult->TransactionObject
-        List<TransactionObject> transInBLock = blockInfo.getTransactions();
-        for (TransactionObject t: transInBLock) {
-            JsonTransactionResponse tran = (JsonTransactionResponse) t;
+        List<TransactionResult> transInBLock = blockInfo.getTransactions();
+        for (TransactionResult<JsonTransactionResponse> t: transInBLock) {
+            JsonTransactionResponse tran = t.get();
             transactionResponses.add(tran);
         }
         log.debug("end getTransByBlockNumber. transInBLock:{}", JsonTools.toJSONString(transInBLock));

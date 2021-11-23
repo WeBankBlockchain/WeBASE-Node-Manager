@@ -127,7 +127,7 @@ public class ChainService {
      */
     public Object getChainMonitorInfo(Integer frontId, LocalDateTime beginDate,
         LocalDateTime endDate, LocalDateTime contrastBeginDate,
-        LocalDateTime contrastEndDate, int gap, int groupId) {
+        LocalDateTime contrastEndDate, int gap, String groupId) {
         log.debug(
             "start getChainMonitorInfo.  frontId:{} beginDate:{} endDate:{}"
                 + " contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}",

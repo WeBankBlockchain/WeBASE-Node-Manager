@@ -13,7 +13,6 @@
  */
 package node.mgr.test.frontInterface;
 
-import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.tools.JsonTools;
@@ -26,6 +25,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +107,7 @@ public class FrontServiceTest extends TestBase {
 
     @Test
     public void getTotalTransactionCountTest() {
-        TotalTransCountInfo totalTransCount = frontInterface.getTotalTransactionCount(groupId);
+        TransactionCountInfo totalTransCount = frontInterface.getTotalTransactionCount(groupId);
         assert (totalTransCount != null);
         System.out.println(JsonTools.toJSONString(totalTransCount));
     }

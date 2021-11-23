@@ -43,7 +43,6 @@ import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
@@ -76,6 +75,7 @@ import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -231,10 +231,10 @@ public class GroupService {
         log.debug("start queryGroupGeneral groupId:{}", groupId);
         GroupGeneral generalInfo = this.getGeneralAndUpdateNodeCount(groupId);
         if (generalInfo != null) {
-            TotalTransCountInfo transCountInfo = frontInterface.getTotalTransactionCount(groupId);
+            TransactionCountInfo transCountInfo = frontInterface.getTotalTransactionCount(groupId);
             if (transCountInfo != null) {
-                generalInfo.setLatestBlock(transCountInfo.getBlockNumber());
-                generalInfo.setTransactionCount(transCountInfo.getTxSum());
+                generalInfo.setLatestBlock(new BigInteger(transCountInfo.getBlockNumber()));
+                generalInfo.setTransactionCount(new BigInteger(transCountInfo.getTransactionCount()));
             }
         }
         return generalInfo;
@@ -878,17 +878,17 @@ public class GroupService {
     }
 
 
-    /**
-     * Insert group when group id not exists.
-     * <p>
-     * When group exists, update node count with num.
-     *
-     * @param groupId
-     * @param num
-     * @param chainId
-     * @param chainName
-     * @return return true if insert.
-     */
+//    /**
+//     * Insert group when group id not exists.
+//     * <p>
+//     * When group exists, update node count with num.
+//     *
+//     * @param groupId
+//     * @param num
+//     * @param chainId
+//     * @param chainName
+//     * @return return true if insert.
+//     */
 //    @Transactional(propagation = Propagation.REQUIRED)
 //    public Pair<TbGroup, Boolean> saveOrUpdateNodeCount(String groupId, int num, Integer chainId, String chainName) {
 //        TbGroup group = this.getGroupById(groupId);
@@ -979,7 +979,7 @@ public class GroupService {
         ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
     }
 
-//    private void pullGroupFile(int groupId,TbFront tbFront){
+//    private void pullGroupFile(String groupId,TbFront tbFront){
 //        if (tbFront.getRunType() != RunTypeEnum.DOCKER.getId()) {
 //            return;
 //        }

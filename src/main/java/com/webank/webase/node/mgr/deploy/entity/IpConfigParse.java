@@ -160,7 +160,7 @@ public class IpConfigParse {
             // parse groupIdList
 //            Set<Integer> groupIdSet = Arrays.stream(configArray[2].split(","))
 //                    .map((group) -> {
-//                        int groupId = Integer.parseInt(group);
+//                        String groupId = Integer.parseInt(group);
 //                        if (groupId <= 0) {
 //                            throw new NodeMgrException(GROUPS_CONFIG_ERROR.attach(configArray[2]));
 //                        }

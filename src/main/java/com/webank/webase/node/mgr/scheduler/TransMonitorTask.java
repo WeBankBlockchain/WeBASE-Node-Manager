@@ -44,7 +44,7 @@ public class TransMonitorTask {
 
     @Scheduled(fixedRateString = "${constant.transMonitorTaskFixedRate}")
     public void taskStart() {
-        monitorStart();
+//        monitorStart(); todo
     }
 
     @Scheduled(fixedRateString = "${constant.statBlockFixedDelay}")

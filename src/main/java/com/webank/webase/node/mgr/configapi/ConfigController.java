@@ -95,15 +95,15 @@ public class ConfigController {
         return new BaseResponse(ConstantCode.SUCCESS, configList);
     }
 
-//    /**
-//     * get whether enable authorization
-//     * @return
-//     */
-//    @GetMapping(value = "/auth")
-//    public BaseResponse getWhetherAuth() {
-//        log.info("getWhetherAuth");
-//        boolean isUseSecurity = constantProperties.getIsUseSecurity();
-//        return new BaseResponse(ConstantCode.SUCCESS, isUseSecurity);
-//    }
+    /**
+     * get whether enable authorization
+     * @return
+     */
+    @GetMapping(value = "/auth")
+    public BaseResponse getWhetherAuth() {
+        log.info("getWhetherAuth");
+        boolean isUseSecurity = constantProperties.getIsUseSecurity();
+        return new BaseResponse(ConstantCode.SUCCESS, isUseSecurity);
+    }
 
 }

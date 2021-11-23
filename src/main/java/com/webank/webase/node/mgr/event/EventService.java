@@ -87,12 +87,12 @@ public class EventService {
 		ContractParam contractParam = new ContractParam();
 		contractParam.setGroupId(groupId);
 		contractParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
-		List<RspContractNoAbi> contractList = contractService.queryContractListNoAbi(contractParam);
+//		List<RspContractNoAbi> contractList = contractService.queryContractListNoAbi(contractParam);
 		// find abi list
 		List<RspContractNoAbi> abiInfoList = abiService.listByGroupIdNoAbi(groupId);
 		// add abi info and contract info in result list
 		List<RspContractInfo> resultList = new ArrayList<>();
-		contractList.forEach(c -> resultList.add(new RspContractInfo(TYPE_CONTRACT, c.getContractAddress(), c.getContractName())));
+//		contractList.forEach(c -> resultList.add(new RspContractInfo(TYPE_CONTRACT, c.getContractAddress(), c.getContractName())));
 		abiInfoList.forEach(c -> resultList.add(new RspContractInfo(TYPE_ABI_INFO, c.getContractAddress(), c.getContractName())));
 
 		return resultList;

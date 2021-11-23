@@ -50,7 +50,7 @@ public class ChainController {
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime contrastBeginDate,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime contrastEndDate,
         @RequestParam(required = false, defaultValue = "1") int gap,
-        @RequestParam(required = false, defaultValue = "1") int groupId)
+        @RequestParam(required = false, defaultValue = "1") String groupId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);

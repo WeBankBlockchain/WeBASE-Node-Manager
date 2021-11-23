@@ -138,7 +138,7 @@ public class ThymeleafUtil {
      * @param groupId
      * @throws IOException
      */
-    public static void newGroupConfigs(Path nodeRoot, int groupId,
+    public static void newGroupConfigs(Path nodeRoot, String groupId,
                                        long timestamp, List<String> nodeIdList) throws IOException {
         String nodeConfigIni = ThymeleafUtil.generate(ThymeleafUtil.NODE_GROUP_INI);
         Files.write(nodeRoot.resolve(String.format("conf/group.%s.ini",groupId)), nodeConfigIni.getBytes());
