@@ -55,11 +55,11 @@ public class TbExternalContractSqlProvider {
 
     public String count(ContractParam param) {
         SQL sql = new SQL();
-        sql.SELECT("count(1),ext.group_id,ext.contract_address,b.abiId,b.account,b.contract_name"
+        sql.SELECT("count(1)"
             + " from tb_external_contract ext "
             + "left join "
             + "(select abi_id abiId,contract_address,group_id,account,contract_name from tb_abi) b "
-            + "on ext.contract_address=b.contract_address and ext.group_id=b.group_id ");
+            + "on ext.contract_address=b.contract_address and ext.group_id=b.group_id");
         if (param.getGroupId() != null) {
             sql.WHERE("ext.group_id = #{groupId}");
         }

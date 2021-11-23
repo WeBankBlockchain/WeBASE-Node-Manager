@@ -60,7 +60,7 @@ public class TbExternalAccountSqlProvider {
 
     public String count(UserParam param) {
         SQL sql = new SQL();
-        sql.SELECT("count(1),ext.group_id,ext.address,b.userId,b.account,b.userName from tb_external_account ext "
+        sql.SELECT("count(1) from tb_external_account ext "
             + "left join "
             + "(select user_id userId,group_id,address,account,user_name userName from tb_user) b "
             + "on ext.address=b.address and ext.group_id=b.group_id ");
