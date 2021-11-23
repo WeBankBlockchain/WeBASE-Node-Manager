@@ -25,6 +25,6 @@ import lombok.Data;
 public class SeventDaysTrans {
 
     private LocalDate day;
-    private int groupId;
+    private String groupId;
     private int transCount;
 }

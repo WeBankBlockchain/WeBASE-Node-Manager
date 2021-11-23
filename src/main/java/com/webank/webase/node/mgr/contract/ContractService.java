@@ -165,9 +165,8 @@ public class  ContractService {
         String groupId = reqContractAddressSave.getGroupId();
         // check group id
         groupService.checkGroupId(groupId);
-        // get runtimeBin
-        String runtimeBin = abiService.getAddressRuntimeBin(groupId,
-            reqContractAddressSave.getContractAddress());
+        // get runtimeBin todo
+//        String runtimeBin = abiService.getAddressRuntimeBin(groupId, reqContractAddressSave.getContractAddress());
         String contractName = reqContractAddressSave.getContractName();
         String contractVersion = reqContractAddressSave.getContractVersion();
         String contractPath = reqContractAddressSave.getContractPath();
@@ -205,7 +204,7 @@ public class  ContractService {
             tbContract.setContractType(ContractType.APPIMPORT.getValue());
             if (tbContractStore.getContractName().equals(contractName)) {
                 tbContract.setContractAddress(reqContractAddressSave.getContractAddress());
-                tbContract.setContractBin(runtimeBin);
+//                tbContract.setContractBin(runtimeBin); todo
                 tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
                 // save abi
                 abiService.saveAbiFromAppContract(tbContract);
@@ -247,7 +246,7 @@ public class  ContractService {
                 throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
             }
             // check address on chain
-            abiService.getAddressRuntimeBin(contract.getGroupId(), address);
+//            abiService.getAddressRuntimeBin(contract.getGroupId(), address);todo
             log.info("updateContract contract address:{} and deployed status", address);
             tbContract.setContractAddress(address);
             tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
@@ -272,7 +271,7 @@ public class  ContractService {
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
         // check address on chain
-        abiService.getAddressRuntimeBin(contract.getGroupId(), address);
+//        abiService.getAddressRuntimeBin(contract.getGroupId(), address);todo
         log.info("updateContract contract address:{} and deployed status", address);
         tbContract.setContractAddress(address);
         tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());

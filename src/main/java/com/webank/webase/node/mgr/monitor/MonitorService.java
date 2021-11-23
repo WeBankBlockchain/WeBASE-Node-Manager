@@ -341,8 +341,7 @@ public class MonitorService {
     public void monitorTransHash(String groupId, TbTransHash trans, LocalDateTime createTime) {
 
         try {
-            ChainTransInfo chanTrans = frontInterface
-                .getTransInfoByHash(groupId, trans.getTransHash());
+            ChainTransInfo chanTrans = frontInterface.getTransInfoByHash(groupId, trans.getTransHash());
             if (Objects.isNull(chanTrans)) {
                 log.error("monitor jump over,invalid hash. groupId:{} hash:{}", groupId,
                     trans.getTransHash());

@@ -91,18 +91,19 @@ public class AbiService {
             log.warn("abi parse string error:{}", param.getContractAbi());
             throw new NodeMgrException(ConstantCode.PARAM_FAIL_ABI_INVALID);
         }
-        // check address
-        String contractBin = getAddressRuntimeBin(groupId, contractAddress);
+        // check address todo
+//        String contractBin = getAddressRuntimeBin(groupId, contractAddress);
         // check name and address of abi not exist
         checkAbiExist(groupId, account, contractAddress);
         // add
-        addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, contractBin);
+//        addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, contractBin);
+        addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, "0x0");
         // save and update method
         methodService.saveMethod(groupId, contractAbiStr, ContractType.GENERALCONTRACT.getValue());
-        if (StringUtils.isNotBlank(contractBin)) {
-            // update monitor unusual deployInputParam's info
-            monitorService.updateUnusualContract(groupId, param.getContractName(), contractBin);
-        }
+//        if (StringUtils.isNotBlank(contractBin)) {
+//            // update monitor unusual deployInputParam's info
+//            monitorService.updateUnusualContract(groupId, param.getContractName(), contractBin);
+//        }
     }
 
     @Transactional
@@ -121,17 +122,17 @@ public class AbiService {
             throw new NodeMgrException(ConstantCode.PARAM_FAIL_ABI_INVALID);
         }
         // check address
-        String contractBin = getAddressRuntimeBin(param.getGroupId(), param.getContractAddress());
+//        String contractBin = getAddressRuntimeBin(param.getGroupId(), param.getContractAddress()); //todo
         updateAbi.setContractAbi(contractAbiStr);
-        updateAbi.setContractBin(contractBin);
+//        updateAbi.setContractBin(contractBin);
         updateAbi.setModifyTime(LocalDateTime.now());
         abiMapper.update(updateAbi);
         // update method
         methodService.saveMethod(param.getGroupId(), contractAbiStr, ContractType.GENERALCONTRACT.getValue());
-        if (StringUtils.isNotBlank(contractBin)) {
-            // update monitor unusual deployInputParam's info
-            monitorService.updateUnusualContract(param.getGroupId(), param.getContractName(), contractBin);
-        }
+//        if (StringUtils.isNotBlank(contractBin)) {
+//            // update monitor unusual deployInputParam's info
+//            monitorService.updateUnusualContract(param.getGroupId(), param.getContractName(), contractBin);
+//        }
     }
 
     public void delete(Integer id) {

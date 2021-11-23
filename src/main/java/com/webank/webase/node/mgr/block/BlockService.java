@@ -109,8 +109,8 @@ public class BlockService {
     private void pullBlockByNumber(String groupId, BigInteger blockNumber) {
         //get block by number
         BcosBlock.Block blockInfo = frontInterface.getBlockByNumber(groupId, blockNumber);
-        if (blockInfo == null || blockInfo.getNumber() == Long.valueOf(0)) {
-            log.info("pullBlockByNumber jump over. not found new block.");
+        if (blockInfo == null) {
+            log.info("pullBlockByNumber jump over. not found new block. blockInfo:{}", blockInfo);
             return;
         }
         //save block info
@@ -121,8 +121,8 @@ public class BlockService {
      * get next blockNumber
      */
     private BigInteger getNextBlockNumber(String groupId) {
-        //get max blockNumber in table
-        BigInteger localMaxBlockNumber = getLatestBlockNumber(groupId);
+        //get max blockNumber in db table
+        BigInteger localMaxBlockNumber = this.getLatestBlockNumberFromDb(groupId);
         if (Objects.nonNull(localMaxBlockNumber)) {
             return localMaxBlockNumber.add(BigInteger.ONE);
         }
@@ -150,9 +150,8 @@ public class BlockService {
             return null;
         }
         BigInteger bigIntegerNumber = BigInteger.valueOf(blockInfo.getNumber());
-        LocalDateTime blockTimestamp = NodeMgrTools
-                .timestamp2LocalDateTime(Long.valueOf(blockInfo.getTimestamp()));
-        int sealerIndex = Integer.parseInt(String.valueOf(blockInfo.getSealer()).substring(2), 16);
+        LocalDateTime blockTimestamp = NodeMgrTools.timestamp2LocalDateTime(blockInfo.getTimestamp());
+        int sealerIndex = blockInfo.getSealer();
 
         int transSize = blockInfo.getTransactions().size();
 
@@ -167,15 +166,15 @@ public class BlockService {
      */
     @Transactional
     public void saveBLockInfo(BcosBlock.Block blockInfo, String groupId) throws NodeMgrException {
-        List<TransactionObject> transList = blockInfo.getTransactions();
+        List<TransactionResult> transList = blockInfo.getTransactions();
 
         // save block info
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
         addBlockInfo(tbBlock, groupId);
 
         // save trans hash
-        for (TransactionResult t : transList) {
-            JsonTransactionResponse trans = (JsonTransactionResponse) t;
+        for (TransactionResult<JsonTransactionResponse> t : transList) {
+            JsonTransactionResponse trans = t.get();
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
@@ -302,7 +301,7 @@ public class BlockService {
     /**
      * get latest block number
      */
-    public BigInteger getLatestBlockNumber(String groupId) {
+    public BigInteger getLatestBlockNumberFromDb(String groupId) {
         return blockmapper.getLatestBlockNumber(TableName.BLOCK.getTableName(groupId));
     }
 
