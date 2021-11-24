@@ -219,6 +219,7 @@ public class FrontService {
         tbFront.setNodeId(syncStatus.getNodeId());
         tbFront.setClientVersion(clientVersion);
         tbFront.setSupportVersion(supportVersion);
+        tbFront.setAgency("fisco");
 
         // 1.5.0 add check client version cannot be lower than v2.4.0
         //this.validateSupportVersion(supportVersion);
