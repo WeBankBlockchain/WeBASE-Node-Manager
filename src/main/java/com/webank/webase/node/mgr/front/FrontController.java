@@ -199,7 +199,7 @@ public class FrontController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, response);
     }
 
-    @GetMapping("")
+    @GetMapping("connected")
     public BaseResponse checkFrontConnected(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort) {
         Instant startTime = Instant.now();
         log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{}",
