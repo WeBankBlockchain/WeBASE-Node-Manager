@@ -47,9 +47,9 @@
 
     <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
         insert into tb_group
-        (group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time,chain_id,chain_name)
-        values(#{groupId},#{groupName},#{nodeCount},#{description},#{groupType},#{groupStatus},
-        #{groupTimestamp},#{nodeIdList},NOW(),NOW(),#{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR})
+        (group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time,chain_id,chain_name,encrypt_type)
+        values(#{groupId},#{groupName},#{nodeCount},#{description},#{groupType},#{groupStatus},p
+        #{groupTimestamp},#{nodeIdList},NOW(),NOW(),#{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR}, #{encryptType,jdbcType=INTEGER})
         ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
     </insert>
 
@@ -86,6 +86,9 @@
             <if test="chainName != null" >
                 chain_name,
             </if>
+            <if test="encryptType != null" >
+                encrypt_type,
+            </if>
             create_time,modify_time,
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides="," >
@@ -118,6 +121,9 @@
             </if>
             <if test="chainName != null" >
                 #{chainName},
+            </if>
+            <if test="encryptType != null" >
+                #{encryptType},
             </if>
             NOW(),NOW(),
         </trim>

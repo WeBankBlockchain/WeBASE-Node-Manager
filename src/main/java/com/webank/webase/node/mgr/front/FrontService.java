@@ -58,6 +58,7 @@ import com.webank.webase.node.mgr.node.entity.TbNode;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.tools.CertTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.NetUtils;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.tools.NumberUtil;
 import com.webank.webase.node.mgr.tools.ProgressTools;
@@ -189,14 +190,6 @@ public class FrontService {
             log.error("fail newFront, frontIp:{},frontPort:{}",frontIp,frontPort);
             throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
         }
-        // check front's encrypt type same as nodemgr(guomi or standard) todo 群组中才有encrypt
-//        int encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort);
-//        if (encryptType != cryptoSuite.cryptoTypeConfig) {
-//            log.error("fail newFront, frontIp:{},frontPort:{},front's encryptType:{}," +
-//                    "local encryptType not match:{}",
-//                frontIp, frontPort, encryptType, cryptoSuite.cryptoTypeConfig);
-//            throw new NodeMgrException(ConstantCode.ENCRYPT_TYPE_NOT_MATCH);
-//        }
         //check front not exist todo front根据rpc判断是否
         SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
             frontPort, groupIdList.get(0));
@@ -286,7 +279,7 @@ public class FrontService {
             // check group not existed or node count differs
             TbGroup checkGroup = groupService.getGroupById(groupId);
             if (Objects.isNull(checkGroup) || nodesInGroup.size() != checkGroup.getNodeCount()) {
-                Integer encryptType = frontInterface.getEncryptType(groupId);
+                Integer encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort, groupId);
                 groupService.saveGroup(groupId, nodesInGroup.size(), "synchronous",
                     GroupType.SYNC, GroupStatus.NORMAL,0,"", encryptType);
             }

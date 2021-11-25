@@ -237,6 +237,11 @@ public class FrontInterfaceService {
 		return block;
 	}
 
+    public Integer getEncryptTypeFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
+        Integer encryptType = getFromSpecificFront(groupId, frontIp, frontPort,  FrontRestTools.URI_ENCRYPT_TYPE, Integer.class);
+        return encryptType;
+    }
+
     /**
      * get peers.
      */
@@ -251,11 +256,6 @@ public class FrontInterfaceService {
         List nodeStatusList = frontRestTools.getForEntity(groupId, FrontRestTools.URI_NODE_STATUS_LIST, List.class);
         List<NodeStatusInfo> resList = JsonTools.toJavaObjectList(JsonTools.toJSONString(nodeStatusList), NodeStatusInfo.class);
         return resList;
-    }
-
-    public Integer getEncryptType(String groupId) {
-        Integer encryptType = frontRestTools.getForEntity(groupId, FrontRestTools.URI_ENCRYPT_TYPE, Integer.class);
-        return encryptType;
     }
 
 
