@@ -27,6 +27,7 @@ import com.webank.webase.node.mgr.front.entity.FrontInfo;
 import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.tools.NetUtils;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -198,5 +199,14 @@ public class FrontController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, response);
     }
 
-
+    @GetMapping("")
+    public BaseResponse checkFrontConnected(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort) {
+        Instant startTime = Instant.now();
+        log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{}",
+            startTime.toEpochMilli(), frontIp, frontPort);
+        boolean connected = NetUtils.checkAddress(frontIp, frontPort, 2000);
+        log.info("end getFrontNodeConfig useTime:{},connected:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), connected);
+        return new BaseResponse(ConstantCode.SUCCESS, connected);
+    }
 }

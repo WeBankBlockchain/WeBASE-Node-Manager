@@ -350,7 +350,7 @@ public class GroupService {
                 // save group entity
                 TbGroup checkGroupExist = getGroupById(groupId);
                 if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
-                    Integer encryptType = frontInterface.getEncryptType(groupId);
+                    Integer encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort, groupId);
                     saveGroup(groupId, groupPeerList.size(), "synchronous",
                             GroupType.SYNC, GroupStatus.NORMAL,
                         front.getChainId(), front.getChainName(), encryptType);
