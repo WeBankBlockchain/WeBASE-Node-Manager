@@ -43,11 +43,11 @@
     and contract_path = #{contractPath}
   </delete>
 
-  <delete id="removeByGroupId" parameterType="java.lang.Integer">
+  <delete id="removeByGroupId" parameterType="java.lang.String">
     delete from tb_contract_path where group_id = #{groupId}
   </delete>
 
-  <select id="listOfContractPath" parameterType="java.lang.Integer"
+  <select id="listOfContractPath" parameterType="java.lang.String"
     resultMap="pathMap">
     select * from tb_contract_path
     where group_id = #{groupId}

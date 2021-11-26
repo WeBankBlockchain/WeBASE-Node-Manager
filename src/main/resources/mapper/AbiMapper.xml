@@ -36,7 +36,7 @@
         where abi_id = #{abiId}
     </delete>
 
-    <delete id="deleteByGroupId" parameterType="java.lang.Integer">
+    <delete id="deleteByGroupId" parameterType="java.lang.String">
         delete from tb_abi
         where group_id = #{groupId}
     </delete>
