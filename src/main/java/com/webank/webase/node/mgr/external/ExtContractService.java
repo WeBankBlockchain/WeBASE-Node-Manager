@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -69,7 +70,7 @@ public class ExtContractService {
         String contractAddress = txReceipt.getTo();
 
         // if receipt's to is all zero, deploy transaction
-        if (ConstantProperties.ADDRESS_DEPLOY.equalsIgnoreCase(txReceipt.getTo())) {
+        if (StringUtils.isBlank(txReceipt.getTo())) {
             log.debug("deploy contract tx :{}", txReceipt.getContractAddress());
             contractAddress = txReceipt.getContractAddress();
         }

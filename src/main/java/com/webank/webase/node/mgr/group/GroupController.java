@@ -38,6 +38,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -239,7 +240,7 @@ public class GroupController extends BaseController {
     /**
      * delete all group's data(trans, contract, node etc.)
      */
-  /*  @DeleteMapping("/{groupId}")
+    @DeleteMapping("/{groupId}")
     public BaseResponse deleteGroupData(@PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -249,7 +250,7 @@ public class GroupController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JsonTools.toJSONString(baseResponse));
         return baseResponse;
-    }*/
+    }
 
     @GetMapping("/detail/{groupId}")
     public BaseResponse getGroupDetail(@PathVariable("groupId") String groupId)

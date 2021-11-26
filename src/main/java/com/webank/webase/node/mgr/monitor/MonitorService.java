@@ -387,29 +387,29 @@ public class MonitorService {
         int transType = TransType.DEPLOY.getValue();
         int transUnusualType = TransUnusualType.NORMAL.getValue();
         // deploy contract tx
-        if (isDeploy(transTo)) {
+        if (StringUtils.isBlank(transTo)) {
             contractAddress = frontInterface.getAddressByHash(groupId, transHash);
-            if (ConstantProperties.ADDRESS_DEPLOY.equals(contractAddress)) {
-                contractBin = StringUtils.removeStart(transInput, "0x");
-                
-                ContractParam param = new ContractParam();
-                param.setGroupId(groupId);
-                param.setPartOfBytecodeBin(contractBin);
-                TbContract tbContract = contractService.queryContract(param);
-                // add abi query
-                ReqAbiListParam paramTbAbi = new ReqAbiListParam();
-                paramTbAbi.setGroupId(groupId);
-                paramTbAbi.setPartOfContractBin(contractBin);
-                AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
-                if (Objects.nonNull(tbContract)) {
-                    contractName = tbContract.getContractName();
-                } else if (Objects.nonNull(abiInfo)) {
-                    contractName = abiInfo.getContractName();
-                } else {
-                    contractName = getNameFromContractBin(groupId, contractBin);
-                    transUnusualType = TransUnusualType.CONTRACT.getValue();
-                }
-            } else {
+//            if (ConstantProperties.ADDRESS_DEPLOY.equals(contractAddress) || contractAddress.isEmpty()) {
+//                contractBin = StringUtils.removeStart(transInput, "0x");
+//
+//                ContractParam param = new ContractParam();
+//                param.setGroupId(groupId);
+//                param.setPartOfBytecodeBin(contractBin);
+//                TbContract tbContract = contractService.queryContract(param);
+//                // add abi query
+//                ReqAbiListParam paramTbAbi = new ReqAbiListParam();
+//                paramTbAbi.setGroupId(groupId);
+//                paramTbAbi.setPartOfContractBin(contractBin);
+//                AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
+//                if (Objects.nonNull(tbContract)) {
+//                    contractName = tbContract.getContractName();
+//                } else if (Objects.nonNull(abiInfo)) {
+//                    contractName = abiInfo.getContractName();
+//                } else {
+//                    contractName = getNameFromContractBin(groupId, contractBin);
+//                    transUnusualType = TransUnusualType.CONTRACT.getValue();
+//                }
+//            } else {
                 contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
                 contractBin = removeBinFirstAndLast(contractBin);
 
@@ -427,9 +427,9 @@ public class MonitorService {
                     contractName = getNameFromContractBin(groupId, contractBin);
                     transUnusualType = TransUnusualType.CONTRACT.getValue();
                 }
-            }
+//            }
             interfaceName = contractName;
-        } else {    // function call
+        } else {    // function call transaction
             transType = TransType.CALL.getValue();
             String methodId = transInput.substring(0, 10);
             contractAddress = transTo;
@@ -537,16 +537,6 @@ public class MonitorService {
             contractBin = contractBin.substring(0, contractBin.length() - 68);
         }
         return contractBin;
-    }
-
-    /**
-     * check the address is deploy.
-     */
-    private boolean isDeploy(String address) {
-        if (StringUtils.isBlank(address)) {
-            return false;
-        }
-        return ConstantProperties.ADDRESS_DEPLOY.equals(address);
     }
 
     /**
