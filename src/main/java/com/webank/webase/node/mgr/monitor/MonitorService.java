@@ -387,7 +387,7 @@ public class MonitorService {
         int transType = TransType.DEPLOY.getValue();
         int transUnusualType = TransUnusualType.NORMAL.getValue();
         // deploy contract tx
-        if (StringUtils.isBlank(transTo)) {
+        if (StringUtils.isBlank(transTo) || "0x".equalsIgnoreCase(transTo)) {
             contractAddress = frontInterface.getAddressByHash(groupId, transHash);
 //            if (ConstantProperties.ADDRESS_DEPLOY.equals(contractAddress) || contractAddress.isEmpty()) {
 //                contractBin = StringUtils.removeStart(transInput, "0x");

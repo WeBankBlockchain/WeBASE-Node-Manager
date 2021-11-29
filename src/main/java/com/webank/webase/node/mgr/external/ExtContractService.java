@@ -70,7 +70,7 @@ public class ExtContractService {
         String contractAddress = txReceipt.getTo();
 
         // if receipt's to is all zero, deploy transaction
-        if (StringUtils.isBlank(txReceipt.getTo())) {
+        if (StringUtils.isBlank(txReceipt.getTo()) || "0x".equalsIgnoreCase(txReceipt.getTo())) {
             log.debug("deploy contract tx :{}", txReceipt.getContractAddress());
             contractAddress = txReceipt.getContractAddress();
         }
