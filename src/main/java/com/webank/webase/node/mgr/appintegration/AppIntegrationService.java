@@ -148,7 +148,7 @@ public class AppIntegrationService {
     /**
      * appStatusCheck.
      */
-    @Async(value = "mgrAsyncExecutor")
+//    @Async(value = "mgrAsyncExecutor")
     public void appStatusCheck() {
         AppInfoParam param = new AppInfoParam();
         param.setAppType(AppType.NEW.getValue());
