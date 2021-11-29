@@ -35,7 +35,7 @@
 		limit 1
 	</select>
 
-	<delete id="removeByGroupId" parameterType="java.lang.Integer">
+	<delete id="removeByGroupId" parameterType="java.lang.String">
 		delete from tb_method
 		where group_id=#{groupId}
 	</delete>

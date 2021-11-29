@@ -72,7 +72,7 @@
 		delete from tb_contract where contract_id = #{contractId}
 	</delete>
 
-  <delete id="removeByGroupId" parameterType="java.lang.Integer">
+  <delete id="removeByGroupId" parameterType="java.lang.String">
 		delete from tb_contract where group_id = #{groupId}
 	</delete>
 

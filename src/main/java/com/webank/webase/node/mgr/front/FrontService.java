@@ -1243,4 +1243,58 @@ public class FrontService {
         FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
         return nodeConfig;
     }
+
+    /**
+     * refresh front, group, frontGroupMap, nodeList
+     */
+    @Transactional
+    public void refreshFront() {
+        //get all front
+        List<TbFront> frontList = frontMapper.getAllList();
+        if (frontList == null || frontList.size() == 0) {
+            log.info("refreshFront. not find any front.");
+            return;
+        }
+        for (TbFront tbFront : frontList) {
+            try {
+                String frontIp = tbFront.getFrontIp();
+                Integer frontPort = tbFront.getFrontPort();
+                // query group list from chain
+                List<String> groupIdList = frontInterface.getGroupListFromSpecificFront(frontIp, frontPort);
+                // get syncStatus
+                SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
+                    frontPort, groupIdList.get(0));
+                // get version info
+//                ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
+//                    frontPort, Integer.valueOf(groupIdList.get(0)));
+                String clientVersion = "v3.0.0";
+                String supportVersion = "v3.0.0";
+                // get front server version and sign server version
+                try {
+                    String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
+                    String signVersion = frontInterface.getSignVersionFromSpecificFront(frontIp, frontPort);
+                    tbFront.setFrontVersion(frontVersion);
+                    tbFront.setSignVersion(signVersion);
+                } catch (Exception e) {
+                    // catch old version front and sign that not have '/version' api
+                    log.warn("get version of Front and Sign failed (required front and sign v1.4.0+).");
+                }
+                // copy attribute
+                tbFront.setNodeId(syncStatus.getNodeId());
+                tbFront.setClientVersion(clientVersion);
+                tbFront.setSupportVersion(supportVersion);
+//                tbFront.setAgency("fisco");
+                //update front info
+                frontMapper.updateBasicInfo(tbFront);
+                // save group info
+                saveGroup(groupIdList, tbFront);
+            } catch (Exception ex) {
+                log.error("refreshFront fail. frontId:{}", tbFront.getFrontId(), ex);
+                continue;
+            }
+        }
+        // clear cache
+        frontGroupMapCache.clearMapList();
+    }
+
 }

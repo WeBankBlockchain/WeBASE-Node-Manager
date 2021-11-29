@@ -59,17 +59,17 @@ public class FrontController extends BaseController {
     private FrontInterfaceService frontInterfaceService;
 
     /**
-     * refresh frontn
+     * refresh front
      */
-//    @GetMapping("/refresh")
-//    public BaseResponse refreshFront() {
-//    	Instant startTime = Instant.now();
-//    	log.info("start refreshFront startTime:{}", startTime.toEpochMilli());
-//    	BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-//    	frontService.refreshFront();
-//    	log.info("end refreshFront useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
-//    	return baseResponse;
-//    }
+    @GetMapping("/refresh")
+    public BaseResponse refreshFront() {
+    	Instant startTime = Instant.now();
+    	log.info("start refreshFront startTime:{}", startTime.toEpochMilli());
+    	BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+    	frontService.refreshFront();
+    	log.info("end refreshFront useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+    	return baseResponse;
+    }
     
     /**
      * add new front
@@ -199,7 +199,7 @@ public class FrontController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, response);
     }
 
-    @GetMapping("")
+    @GetMapping("connected")
     public BaseResponse checkFrontConnected(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort) {
         Instant startTime = Instant.now();
         log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{}",
