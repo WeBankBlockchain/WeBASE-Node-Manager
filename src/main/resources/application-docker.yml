@@ -1,0 +1,119 @@
+# server version
+version: v2.0.0-rc1
+
+#server config
+server:
+  port: ${SERVER_PORT:5001}
+  servlet:
+    context-path: /WeBASE-Node-Manager
+
+
+#mybatis config
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  typeAliasesPackage: com.webank.webase.node.mgr
+  mapperLocations: classpath:mapper/*.xml
+
+
+# database connection configuration
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${WEBASE_DB_IP:127.0.0.1}:${WEBASE_DB_PORT:3306}/${WEBASE_DB_NAME:webasenodemanager}?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+    username: ${WEBASE_DB_UNAME:defaultAccount}
+    password: ${WEBASE_DB_PWD:defaultPassword}
+    initialSize: 10
+    minIdle: 5
+    maxActive: 30
+
+  aop:
+    proxy-target-class: true
+
+
+
+#log config
+logging:
+  config: classpath:log/log4j2.xml
+  level:
+    com.webank.webase.node.mgr: info
+
+#constants
+constant:
+  ###http request
+  # login's authorization whether enable, if false, default login as `admin` account
+  # WARN!! disabled authorization is unsafe in public internet
+  isUseSecurity: true
+  # verification code expire time (s)
+  verificationCodeMaxAge: 300
+  # if disabled as false, code would be constant value
+  # WARN!! disabled random verification code is unsafe in public internet
+  enableVerificationCode: true
+  # verification code constant value, only when enableVerificationCode is false works
+  verificationCodeValue: "8888"
+  # auth token code expire time (s)
+  authTokenMaxAge: 3600
+  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/find,/config/version,/group/all/invalidIncluded
+  ###front http request
+  frontUrl: http://%1s:%2d/WeBASE-Front/%3s
+  httpTimeOut: 5000
+  contractDeployTimeOut: 30000
+  maxRequestFail: 3
+  sleepWhenHttpMaxFail: 60000
+
+  ###common
+  developerModeEnable: true
+  deployedModifyEnable: true
+  isDeleteInfo: true
+  transRetainMax: 10000
+  deleteInfoCron: "0 0/1 * * * ?"
+  statisticsTransDailyCron: "0 0/1 * * * ?"
+  resetGroupListCycle: 600000
+  groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
+  notSupportFrontIp:
+
+  ###application integration
+  # app request timestamp timeout (ms)
+  appRequestTimeOut: 300000
+  appStatusCheckCycle: 3000
+
+  ###block info (pulling data from chain)
+  isBlockPullFromZero: false
+  pullBlockInitCnts: 1000
+  pullBlockSleepTime: 200
+  pullBlockTaskFixedDelay: 30000
+  blockRetainMax: 10000
+  ###transaction monitor
+  transMonitorTaskFixedRate: 60000  #How long does it take to start the next task after the end (second)
+  analysisSleepTime: 200
+  monitorInfoRetainMax: 10000
+  isMonitorIgnoreUser: false
+  isMonitorIgnoreContract: false
+  monitorUnusualMaxCount: 20
+  ###alert mail monitor task interval: 5mins unit: ms
+  auditMonitorTaskFixedDelay: 300000
+  nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
+  certMonitorTaskFixedDelay: 300000
+  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/config/encrypt,/config/auth,/config/version,/front/refresh,/api/*
+  ###interval to async refresh group list locally
+  resetGroupListInterval: 15000
+  ###interval block statistic, unit: ms
+  statBlockRetainMax: 100000
+  statBlockFixedDelay: 10000
+  statBlockPageSize: 20 # block stat data to pull in one time
+  enableExternalFromBlock: true # enable record account and contract from block
+
+# executor config for async pulling data from chain
+executor:
+  corePoolSize: 10
+  maxPoolSize: 20
+  queueSize: 50
+  threadNamePrefix: "node-mgr-async-"
+
+# scheduler config for sync scheduled task
+scheduler:
+  poolSize: 30
+  threadNamePrefix: "node-mgr-task-"
+  awaitTerminationSeconds: 600
+  waitForTasksToCompleteOnShutdown: true
+
