@@ -97,7 +97,6 @@ public class ConstantProperties {
     private String frontUrl = "http://%1s:%2d/WeBASE-Front/%3s";
     private Integer contractDeployTimeOut = 30000;
     private Integer httpTimeOut = 5000;
-    private Boolean isPrivateKeyEncrypt = true;
     private Integer maxRequestFail = 3;
     private Long sleepWhenHttpMaxFail = 60000L;
 
