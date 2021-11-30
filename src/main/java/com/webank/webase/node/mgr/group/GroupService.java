@@ -432,28 +432,6 @@ public class GroupService {
                 });
     }
 
-    /**
-     * simular as frontInterface's getGroupPeers
-     * but if observer is removed, observer's nodeId still in groupPeerList
-     * @param groupId
-     * @param nodeId
-     * @return
-     */
-    @Deprecated
-    private boolean checkSealerAndObserverListContains(String groupId, String nodeId) {
-        //get sealer and observer on chain
-        List<String> sealerAndObserverList = nodeService.getSealerAndObserverListBySyncStatus(groupId);
-        for (String nId : sealerAndObserverList) {
-            if (nodeId.equals(nId)) {
-                log.debug("checkSealerAndObserverListNotContains true nodeId:{},groupId:{}",
-                    nodeId, groupId);
-                return true;
-            }
-        }
-        log.debug("checkSealerAndObserverListNotContains false nodeId:{},groupId:{} ",
-            nodeId, groupId);
-        return false;
-    }
 
     /**
      * save new peers that not in group peers
@@ -787,8 +765,7 @@ public class GroupService {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
         //save group id
-        TbGroup tbGroup = new TbGroup(groupId,
-            String.format("group_%s", groupId),
+        TbGroup tbGroup = new TbGroup(groupId, groupId,
             nodeCount, groupDesc, groupType, groupStatus,
             chainId, chainName, encryptType);
         groupMapper.insertSelective(tbGroup);
