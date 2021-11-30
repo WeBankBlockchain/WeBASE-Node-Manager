@@ -32,4 +32,5 @@ public class ConsensusHandle {
     private String signUserId;
     @NotBlank
     private String nodeId;
+    private Integer weight;
 }

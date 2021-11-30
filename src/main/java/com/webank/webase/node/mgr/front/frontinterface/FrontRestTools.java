@@ -78,17 +78,14 @@ public class FrontRestTools {
     public static final String URI_CODE = "web3/code/%1s/%2s";
     public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
     public static final String URI_GET_SEALER_LIST = "web3/sealerList";
+    public static final String URI_GET_SEALER_LIST_WEIGHT = "web3/sealerList/weight";
     public static final String URI_GET_OBSERVER_LIST = "web3/observerList";
     public static final String URI_GET_CLIENT_VERSION = "web3/clientVersion";
-    public static final String URI_GENERATE_GROUP = "web3/generateGroup";
-    public static final String URI_OPERATE_GROUP = "web3/operateGroup/%1s";
-    public static final String URI_QUERY_GROUP_STATUS = "web3/queryGroupStatus";
     public static final String URI_REFRESH_FRONT = "web3/refresh";
-    public static final String URI_BLOCK_HEADER_BY_NUMBER = "web3/blockHeaderByNumber/%1d";
-    public static final String URI_BLOCK_HEADER_BY_HASH = "web3/blockHeaderByHash/%1s";
     public static final String URI_SEARCH_BLOCK_OR_TX = "web3/search";
-    public static final String URI_NODE_CONFIG = "web3/nodeConfig";
+//    public static final String URI_NODE_CONFIG = "web3/nodeConfig";
     public static final String URI_GROUP_INFO = "web3/groupInfo";
+    public static final String URI_GROUP_NODE_INFO = "web3/groupNodeInfo";
     public static final String URI_NODE_STATUS_LIST = "web3/nodeStatusList";
     public static final String URI_ENCRYPT_TYPE = "web3/encrypt";
 
@@ -109,27 +106,13 @@ public class FrontRestTools {
     public static final String URI_SEND_TRANSACTION_WITH_SIGN = "trans/handleWithSign";
     public static final String URI_CHAIN = "chain";
 
-    public static final String URI_PERMISSION = "permission";
-    public static final String URI_PERMISSION_FULL_LIST = "permission/full";
-    public static final String URI_PERMISSION_SORTED_LIST = "permission/sorted";
-    public static final String URI_PERMISSION_SORTED_FULL_LIST = "permission/sorted/full";
     public static final String URI_SYS_CONFIG_LIST = "sys/config/list";
     public static final String URI_SYS_CONFIG = "sys/config";
     public static final String URI_CNS_LIST = "precompiled/cns/list";
     public static final String URI_CONSENSUS_LIST = "precompiled/consensus/list";
     public static final String URI_CONSENSUS = "precompiled/consensus";
     public static final String URI_CRUD = "precompiled/crud";
-    public static final String URI_CONTRACT_STATUS = "precompiled/contractStatusManage";
-    public static final String URI_GOVERNANCE = "governance";
-    public static final String URI_GOVERNANCE_COMMITTEE = "governance/committee";
-    public static final String URI_GOVERNANCE_COMMITTEE_LIST = "governance/committee/list";
-    public static final String URI_GOVERNANCE_COMMITTEE_WEIGHT = "governance/committee/weight";
-    public static final String URI_GOVERNANCE_THRESHOLD = "governance/threshold";
-    public static final String URI_GOVERNANCE_OPERATOR = "governance/operator";
-    public static final String URI_GOVERNANCE_OPERATOR_LIST = "governance/operator/list";
-    public static final String URI_GOVERNANCE_ACCOUNT_STATUS = "governance/account/status";
-    public static final String URI_GOVERNANCE_ACCOUNT_FREEZE = "governance/account/freeze";
-    public static final String URI_GOVERNANCE_ACCOUNT_UNFREEZE = "governance/account/unfreeze";
+
 
     public static final String URI_CERT = "cert";
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
@@ -149,16 +132,11 @@ public class FrontRestTools {
     //不需要在url的前面添加groupId的
     private static final List<String> URI_NOT_PREPEND_GROUP_ID = Arrays
         .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
-                URI_CONTRACT_SENDABI, URI_PERMISSION, URI_PERMISSION_FULL_LIST, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
-                URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_PERMISSION_SORTED_LIST,
-                URI_PERMISSION_SORTED_FULL_LIST, URI_CERT, URI_CERT_SDK_FILES, URI_SSL_CRYPTO_TYPE,
+                URI_CONTRACT_SENDABI, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
+                URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_CERT, URI_CERT_SDK_FILES, URI_SSL_CRYPTO_TYPE,
                 URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_KEY_PAIR_USERINFO_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
                 URI_FRONT_VERSION, URI_SIGN_VERSION, URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN, URI_KEY_PAIR_EXPORT_P12_WITH_SIGN,
-                URI_GOVERNANCE, URI_GOVERNANCE_COMMITTEE, URI_GOVERNANCE_COMMITTEE_LIST,
-                URI_GOVERNANCE_COMMITTEE_WEIGHT, URI_GOVERNANCE_THRESHOLD,
-                URI_GOVERNANCE_OPERATOR, URI_GOVERNANCE_OPERATOR_LIST,
-                URI_GOVERNANCE_ACCOUNT_STATUS, URI_GOVERNANCE_ACCOUNT_FREEZE, URI_GOVERNANCE_ACCOUNT_UNFREEZE,
-                URI_CONTRACT_STATUS, URI_EVENT_LOG_LIST,URI_SIGN_MESSAGE,URI_CONFIG_SDK);
+                URI_EVENT_LOG_LIST,URI_SIGN_MESSAGE,URI_CONFIG_SDK);
 
     public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 

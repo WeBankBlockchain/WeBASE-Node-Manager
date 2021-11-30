@@ -33,6 +33,7 @@ import java.time.Instant;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -159,54 +160,68 @@ public class FrontController extends BaseController {
     /**
      * get front's node config
      */
-    @GetMapping(value = "/nodeConfig")
+//    @GetMapping(value = "/nodeConfig")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+//    public BaseResponse getFrontNodeConfig(@RequestParam("frontId") int frontId) {
+//        Instant startTime = Instant.now();
+//        log.info("start getFrontNodeConfig startTime:{} ", startTime.toEpochMilli());
+//        FrontNodeConfig nodeConfig = frontService.getFrontNodeConfig(frontId);
+//
+//        log.info("end getFrontNodeConfig useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+//        return new BaseResponse(ConstantCode.SUCCESS, nodeConfig);
+//    }
+
+    @GetMapping(value = "/groupInfo")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse getFrontNodeConfig(@RequestParam("frontId") int frontId) {
+    public BaseResponse getGroupInfo(@RequestParam("frontId") int frontId,
+        @RequestParam("groupId") String groupId) {
         Instant startTime = Instant.now();
-        log.info("start getFrontNodeConfig startTime:{} ", startTime.toEpochMilli());
-        FrontNodeConfig nodeConfig = frontService.getFrontNodeConfig(frontId);
+        log.info("start getFrontNodeConfig startTime:{},frontId:{},groupId:{} ",
+            startTime.toEpochMilli(), frontId, groupId);
+        GroupInfo groupInfo = frontService.getGroupInfo(frontId, groupId);
 
-        log.info("end getFrontNodeConfig useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
-        return new BaseResponse(ConstantCode.SUCCESS, nodeConfig);
+        log.info("end getFrontNodeConfig useTime:{},groupInfo:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), groupInfo);
+        return new BaseResponse(ConstantCode.SUCCESS, groupInfo);
     }
 
 
-    @GetMapping(value = "/bcosSDK")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse getFrontBcosSDKInfo(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort,
-        @RequestBody ReqSdkConfig param) {
-        Instant startTime = Instant.now();
-        log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{},param:{}",
-            startTime.toEpochMilli(), frontIp, frontPort, param);
-        BaseResponse response = frontInterfaceService.getFrontSdkFromSpecifiFront(frontIp, frontPort);
-
-        log.info("end getFrontNodeConfig useTime:{},response:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), response);
-        return new BaseResponse(ConstantCode.SUCCESS, response);
-    }
-
-    @GetMapping(value = "/bcosSDK/config")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse configFrontBcosSDKInfo(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort,
-        @RequestBody ReqSdkConfig param) {
-        Instant startTime = Instant.now();
-        log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{},param:{}",
-            startTime.toEpochMilli(), frontIp, frontPort, param);
-        BaseResponse response = frontInterfaceService.configFrontSdkFromSpecifiFront(frontIp, frontPort, param);
-
-        log.info("end getFrontNodeConfig useTime:{},response:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), response);
-        return new BaseResponse(ConstantCode.SUCCESS, response);
-    }
-
-    @GetMapping("connected")
-    public BaseResponse checkFrontConnected(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort) {
-        Instant startTime = Instant.now();
-        log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{}",
-            startTime.toEpochMilli(), frontIp, frontPort);
-        boolean connected = NetUtils.checkAddress(frontIp, frontPort, 2000);
-        log.info("end getFrontNodeConfig useTime:{},connected:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), connected);
-        return new BaseResponse(ConstantCode.SUCCESS, connected);
-    }
+//    @GetMapping(value = "/bcosSDK")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+//    public BaseResponse getFrontBcosSDKInfo(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort,
+//        @RequestBody ReqSdkConfig param) {
+//        Instant startTime = Instant.now();
+//        log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{},param:{}",
+//            startTime.toEpochMilli(), frontIp, frontPort, param);
+//        BaseResponse response = frontInterfaceService.getFrontSdkFromSpecifiFront(frontIp, frontPort);
+//
+//        log.info("end getFrontNodeConfig useTime:{},response:{}",
+//            Duration.between(startTime, Instant.now()).toMillis(), response);
+//        return new BaseResponse(ConstantCode.SUCCESS, response);
+//    }
+//
+//    @GetMapping(value = "/bcosSDK/config")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+//    public BaseResponse configFrontBcosSDKInfo(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort,
+//        @RequestBody ReqSdkConfig param) {
+//        Instant startTime = Instant.now();
+//        log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{},param:{}",
+//            startTime.toEpochMilli(), frontIp, frontPort, param);
+//        BaseResponse response = frontInterfaceService.configFrontSdkFromSpecifiFront(frontIp, frontPort, param);
+//
+//        log.info("end getFrontNodeConfig useTime:{},response:{}",
+//            Duration.between(startTime, Instant.now()).toMillis(), response);
+//        return new BaseResponse(ConstantCode.SUCCESS, response);
+//    }
+//
+//    @GetMapping("connected")
+//    public BaseResponse checkFrontConnected(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort) {
+//        Instant startTime = Instant.now();
+//        log.info("start getFrontNodeConfig startTime:{},frontIp:{},frontPort:{}",
+//            startTime.toEpochMilli(), frontIp, frontPort);
+//        boolean connected = NetUtils.checkAddress(frontIp, frontPort, 2000);
+//        log.info("end getFrontNodeConfig useTime:{},connected:{}",
+//            Duration.between(startTime, Instant.now()).toMillis(), connected);
+//        return new BaseResponse(ConstantCode.SUCCESS, connected);
+//    }
 }

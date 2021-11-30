@@ -428,32 +428,6 @@ public class NodeService {
     }
 
     /**
-     * check sealer list contain
-     * return: true: is sealer
-     */
-    @Deprecated
-    public boolean checkSealerListContains(String groupId, String nodeId, String ip, int port) {
-        log.debug("start checkSealerListContains groupId:{},nodeId:{}", groupId, nodeId);
-        List<String> sealerList = frontInterface.getSealerListFromSpecificFront(ip, port, groupId);
-        boolean isSealer = sealerList.stream().anyMatch(n -> n.equals(nodeId));
-        log.debug("end checkSealerListContains isSealer:{}", isSealer);
-        return isSealer;
-    }
-
-    /**
-     * check observer list contain
-     * return: true: is sealer
-     */
-    @Deprecated
-    public boolean checkObserverListContains(String groupId, String nodeId, String ip, int port) {
-        log.debug("start checkObserverListContains groupId:{},nodeId:{}", groupId, nodeId);
-        List<String> sealerList = frontInterface.getObserverListFromSpecificFront(ip, port, groupId);
-        boolean isObserver = sealerList.stream().anyMatch(n -> n.equals(nodeId));
-        log.debug("end checkObserverListContains isObserver:{}", isObserver);
-        return isObserver;
-    }
-
-    /**
      * get local highest block height, if node equal, return 1, else return 2
      * @param groupId
      * @param nodeId

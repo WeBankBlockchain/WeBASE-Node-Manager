@@ -47,8 +47,10 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
@@ -480,14 +482,16 @@ public class FrontInterfaceService {
         return getSealerList;
     }
 
-    /**
-     * get sealer list from specific front
-     */
-    public List<String> getSealerListFromSpecificFront(String frontIp, Integer frontPort,
-            String groupId) {
-        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_GET_SEALER_LIST,
-                List.class);
+    public List<Sealer> getSealerListWithWeight(String groupId) {
+        log.debug("start getSealerListWithWeight. groupId:{}", groupId);
+        List data = frontRestTools.getForEntity(groupId,
+                FrontRestTools.URI_GET_SEALER_LIST_WEIGHT, List.class);
+        List<Sealer> sealerList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), Sealer.class);
+
+        log.debug("end getSealerList. sealerList:{}", JsonTools.toJSONString(sealerList));
+        return sealerList;
     }
+
 
     /**
      * get config by key
@@ -501,18 +505,6 @@ public class FrontInterfaceService {
     }
 
 
-//    public ClientVersion getClientVersionFromSpecificFront(String frontIp, Integer frontPort,
-//                                   String groupId) {
-//        log.debug("start getClientVersionFromSpecificFront. frontIp:{},frontPort:{},groupId:{}",
-//            frontIp, frontPort, groupId);
-//        //todo delete web3/clientVersion
-////        ClientVersion clientVersion = getFromSpecificFront(groupId, frontIp, frontPort,
-////            FrontRestTools.URI_GET_CLIENT_VERSION, ClientVersion.class);
-//        //
-//        log.debug("end getClientVersionFromSpecificFront. consensusStatus:{}", clientVersion);
-//        // return clientVersion.getVersion();
-//        return clientVersion;
-//    }
 
     /**
      * get front version
@@ -541,12 +533,12 @@ public class FrontInterfaceService {
     /**
      * get front node info
      */
-    public FrontNodeConfig getNodeConfigFromSpecificFront(String frontIp, Integer frontPort) {
-        String groupId = "1";
-        FrontNodeConfig nodeConfig = getFromSpecificFront(groupId, frontIp, frontPort,
-            FrontRestTools.URI_NODE_CONFIG, FrontNodeConfig.class);
-        return nodeConfig;
-    }
+//    public FrontNodeConfig getNodeConfigFromSpecificFront(String frontIp, Integer frontPort) {
+//        String groupId = "1";
+//        FrontNodeConfig nodeConfig = getFromSpecificFront(groupId, frontIp, frontPort,
+//            FrontRestTools.URI_NODE_CONFIG, FrontNodeConfig.class);
+//        return nodeConfig;
+//    }
 
     /**
      * include node name list
@@ -555,6 +547,17 @@ public class FrontInterfaceService {
         GroupInfo groupInfo = getFromSpecificFront(groupId, frontIp, frontPort,
             FrontRestTools.URI_GROUP_INFO, GroupInfo.class);
         return groupInfo;
+    }
+
+
+    /**
+     * include node name list
+     */
+    public List<GroupNodeInfo> getGroupNodeInfoFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
+        List data = getFromSpecificFront(groupId, frontIp, frontPort,
+            FrontRestTools.URI_GROUP_NODE_INFO, List.class);
+        List<GroupNodeInfo> resList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data), GroupNodeInfo.class);
+        return resList;
     }
 
     /**
@@ -601,30 +604,6 @@ public class FrontInterfaceService {
 		resList.forEach(info -> info.setFrontInfo(frontIp));
 		return resList;
 	}
-
-    /**
-     * get block by number.
-     */
-    public BlockHeader getBlockHeaderByNumber(String groupId, BigInteger blockNumber)
-        throws NodeMgrException {
-        log.debug("start getBlockHeaderByNumber groupId:{} blockNumber:{}", groupId, blockNumber);
-        String uri = String.format(FrontRestTools.URI_BLOCK_HEADER_BY_NUMBER, blockNumber);
-        BlockHeader blockInfo = frontRestTools.getForEntity(groupId, uri, BlockHeader.class);
-        log.debug("end getBlockHeaderByNumber");
-        return blockInfo;
-    }
-
-
-    /**
-     * request front for block by hash.
-     */
-    public BlockHeader getBlockHeaderByHash(String groupId, String blockHash) throws NodeMgrException {
-        log.debug("start getBlockHeaderByHash. groupId:{}  blockHash:{}", groupId, blockHash);
-        String uri = String.format(FrontRestTools.URI_BLOCK_HEADER_BY_HASH, blockHash);
-        BlockHeader blockInfo = frontRestTools.getForEntity(groupId, uri, BlockHeader.class);
-        log.debug("end getBlockHeaderByHash. blockInfo:{}", JsonTools.toJSONString(blockInfo));
-        return blockInfo;
-    }
 
     /**
      * get event log list from front

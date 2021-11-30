@@ -91,6 +91,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
@@ -200,42 +201,10 @@ public class FrontService {
         if (count > 0) {
             throw new NodeMgrException(ConstantCode.FRONT_EXISTS);
         }
-        //todo delete getClientVersionFromSpecificFront
-//        ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
-//            frontPort, groupIdList.get(0));
-//        String clientVersion = versionResponse.getVersion();
-//        String supportVersion = versionResponse.getSupportedVersion();
-        String clientVersion = "v3.0.0";
-        String supportVersion = "v3.0.0";
         // copy attribute
         BeanUtils.copyProperties(frontInfo, tbFront);
         tbFront.setNodeId(syncStatus.getNodeId());
-        tbFront.setClientVersion(clientVersion);
-        tbFront.setSupportVersion(supportVersion);
-        tbFront.setAgency("fisco");
 
-        // 1.5.0 add check client version cannot be lower than v2.4.0
-        //this.validateSupportVersion(supportVersion);
-        // get node config(add in 1.5.0)
-//        try {
-//            FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
-//            tbFront.setP2pPort(nodeConfig.getP2pport());
-//            tbFront.setJsonrpcPort(nodeConfig.getRpcport());
-//            tbFront.setChannelPort(nodeConfig.getChannelPort());
-//        } catch (Exception e) {
-//            log.warn("get nodeConfig from front failed for:[]", e);
-//        }
-        // get agency of node
-//        try {
-//            GroupNodeInfo nodeInfo = frontInterface.getNodeInfoFromSpecificFront(frontIp, frontPort);
-//            // set agency from chain
-//            tbFront.setAgency(nodeInfo.getName() == null ? "fisco" : nodeInfo.getName());
-//            tbFront.setAgency("fisco");
-//        } catch (Exception e) {
-//            log.warn("get nodeInfo from front failed for:[]", e);
-//            // set agency from chain
-//            tbFront.setAgency("fisco");
-//        }
         // get front server version and sign server version
         try {
             String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
@@ -1232,7 +1201,19 @@ public class FrontService {
         }
     }
 
-    public FrontNodeConfig getFrontNodeConfig(int frontId) {
+//    public FrontNodeConfig getFrontNodeConfig(int frontId) {
+//        TbFront front = this.getById(frontId);
+//        if (front == null) {
+//            log.error("");
+//            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+//        }
+//        String frontIp = front.getFrontIp();
+//        int frontPort = front.getFrontPort();
+//        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+//        return nodeConfig;
+//    }
+
+    public GroupInfo getGroupInfo(int frontId, String groupId) {
         TbFront front = this.getById(frontId);
         if (front == null) {
             log.error("");
@@ -1240,8 +1221,8 @@ public class FrontService {
         }
         String frontIp = front.getFrontIp();
         int frontPort = front.getFrontPort();
-        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
-        return nodeConfig;
+        GroupInfo groupInfo = frontInterface.getGroupInfoFromSpecificFront(frontIp, frontPort, groupId);
+        return groupInfo;
     }
 
     /**
@@ -1264,11 +1245,6 @@ public class FrontService {
                 // get syncStatus
                 SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
                     frontPort, groupIdList.get(0));
-                // get version info
-//                ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
-//                    frontPort, Integer.valueOf(groupIdList.get(0)));
-                String clientVersion = "v3.0.0";
-                String supportVersion = "v3.0.0";
                 // get front server version and sign server version
                 try {
                     String frontVersion = frontInterface.getFrontVersionFromSpecificFront(frontIp, frontPort);
@@ -1281,9 +1257,6 @@ public class FrontService {
                 }
                 // copy attribute
                 tbFront.setNodeId(syncStatus.getNodeId());
-                tbFront.setClientVersion(clientVersion);
-                tbFront.setSupportVersion(supportVersion);
-//                tbFront.setAgency("fisco");
                 //update front info
                 frontMapper.updateBasicInfo(tbFront);
                 // save group info

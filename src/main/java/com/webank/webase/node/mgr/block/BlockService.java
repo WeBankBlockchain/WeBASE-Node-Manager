@@ -220,7 +220,7 @@ public class BlockService {
         List<TbBlock> listOfBlock = blockmapper
             .getList(TableName.BLOCK.getTableName(groupId), queryParam);
         //check sealer
-        listOfBlock.stream().forEach(block -> checkSearlerOfBlock(groupId, block));
+        listOfBlock.forEach(block -> checkSearlerOfBlock(groupId, block));
 
         log.debug("end queryBlockList listOfBlockSize:{}", listOfBlock.size());
         return listOfBlock;
@@ -349,20 +349,6 @@ public class BlockService {
     public TbBlock getBlockByBlockNumber(String groupId, BigInteger blockNumber) {
         return blockmapper.getBlockByBlockNumber(TableName.BLOCK.getTableName(groupId),
                 blockNumber);
-    }
-
-    /**
-     * get block by number from front
-     */
-    public BlockHeader getBlockHeaderFromFrontByNumber(String groupId, BigInteger blockNumber) {
-        return frontInterface.getBlockHeaderByNumber(groupId, blockNumber);
-    }
-
-    /**
-     * get block header by hash from front
-     */
-    public BlockHeader getBlockHeaderFromFrontByHash(String groupId, String pkHash) {
-        return frontInterface.getBlockHeaderByHash(groupId, pkHash);
     }
 
     /**
