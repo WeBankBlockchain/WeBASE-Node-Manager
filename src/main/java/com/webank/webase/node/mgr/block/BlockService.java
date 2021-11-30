@@ -352,20 +352,6 @@ public class BlockService {
     }
 
     /**
-     * get block by number from front
-     */
-    public BlockHeader getBlockHeaderFromFrontByNumber(String groupId, BigInteger blockNumber) {
-        return frontInterface.getBlockHeaderByNumber(groupId, blockNumber);
-    }
-
-    /**
-     * get block header by hash from front
-     */
-    public BlockHeader getBlockHeaderFromFrontByHash(String groupId, String pkHash) {
-        return frontInterface.getBlockHeaderByHash(groupId, pkHash);
-    }
-
-    /**
      * get block header by hash from front
      * @param input block height or tx hash
      */

@@ -125,41 +125,6 @@ public class BlockController {
         return baseResponse;
     }
 
-    /**
-     * get block header by number.
-     */
-    @GetMapping("/blockHeaderByNumber/{groupId}/{blockNumber}")
-    public BaseResponse getBlockHeaderByNumber(@PathVariable("groupId") String groupId,
-        @PathVariable("blockNumber") BigInteger blockNumber)
-        throws NodeMgrException {
-        Instant startTime = Instant.now();
-        log.info("start getBlockHeaderByNumber startTime:{} groupId:{} blockNumber:{}",
-            startTime.toEpochMilli(), groupId, blockNumber);
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        BlockHeader blockInfo = blockService.getBlockHeaderFromFrontByNumber(groupId, blockNumber);
-        baseResponse.setData(blockInfo);
-        log.info("end getBlockHeaderByNumber useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
-    /**
-     * get block header by number.
-     */
-    @GetMapping("/blockHeaderByHash/{groupId}/{blockHash}")
-    public BaseResponse getBlockHeaderByHash(@PathVariable("groupId") String groupId,
-        @PathVariable("blockHash") String blockHash)
-        throws NodeMgrException {
-        Instant startTime = Instant.now();
-        log.info("start blockHeaderByHash startTime:{} groupId:{} blockHash:{}",
-            startTime.toEpochMilli(), groupId, blockHash);
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        BlockHeader blockInfo = blockService.getBlockHeaderFromFrontByHash(groupId, blockHash);
-        baseResponse.setData(blockInfo);
-        log.info("end blockHeaderByHash useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
-        return baseResponse;
-    }
 
     /**
      * get block or tx
