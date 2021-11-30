@@ -220,7 +220,7 @@ public class BlockService {
         List<TbBlock> listOfBlock = blockmapper
             .getList(TableName.BLOCK.getTableName(groupId), queryParam);
         //check sealer
-        listOfBlock.stream().forEach(block -> checkSearlerOfBlock(groupId, block));
+        listOfBlock.forEach(block -> checkSearlerOfBlock(groupId, block));
 
         log.debug("end queryBlockList listOfBlockSize:{}", listOfBlock.size());
         return listOfBlock;
