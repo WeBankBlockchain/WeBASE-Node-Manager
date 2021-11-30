@@ -261,18 +261,6 @@ public class FrontInterfaceService {
     }
 
 
-    /**
-     * get contract code.
-     */
-    public String getContractCode(String groupId, String address, BigInteger blockNumber)
-            throws NodeMgrException {
-        log.debug("start getContractCode groupId:{} address:{} blockNumber:{}", groupId, address,
-                blockNumber);
-        String uri = String.format(FrontRestTools.URI_CODE, address, blockNumber);
-        String contractCode = frontRestTools.getForEntity(groupId, uri, String.class);
-        log.debug("end getContractCode. contractCode:{}", contractCode);
-        return contractCode;
-    }
 
     /**
      * get transaction receipt.
