@@ -13,12 +13,16 @@
  */
 package com.webank.webase.node.mgr.monitor.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * user monitor result info.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserMonitorResult implements Cloneable {
 
     private String userName;

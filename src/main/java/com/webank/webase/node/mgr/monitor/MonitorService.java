@@ -479,7 +479,7 @@ public class MonitorService {
     private UserMonitorResult monitorUser(String groupId, String userAddress) {
         if ("0x".equalsIgnoreCase(userAddress) || userAddress.isEmpty()) {
             log.debug("monitorUser ignore empty user:{}", userAddress);
-            return new UserMonitorResult();
+            return new UserMonitorResult("0x", MonitorUserType.NORMAL.getValue());
         }
         String userName = userService.queryUserNameByAddress(groupId, userAddress);
 
