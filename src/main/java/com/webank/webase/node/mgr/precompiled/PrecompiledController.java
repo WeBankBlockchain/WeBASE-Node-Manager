@@ -19,7 +19,6 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precompiled.entity.ConsensusHandle;
-import com.webank.webase.node.mgr.precompiled.entity.CrudHandle;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import java.time.Duration;
 import java.time.Instant;
@@ -84,21 +83,21 @@ public class PrecompiledController extends BaseController {
     /**
      * crud control.
      */
-    @PostMapping(value = "crud")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public Object crud(@RequestBody @Valid CrudHandle crudHandle,
-                                   BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        Instant startTime = Instant.now();
-        log.info("start crud startTime:{} crudHandle:{}", startTime.toEpochMilli(),
-                JsonTools.toJSONString(crudHandle));
-
-        Object res = precompiledService.crudService(crudHandle);
-
-        log.info("end crud useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
-
-        return res;
-    }
+//    @PostMapping(value = "crud")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+//    public Object crud(@RequestBody @Valid CrudHandle crudHandle,
+//                                   BindingResult result) throws NodeMgrException {
+//        checkBindResult(result);
+//        Instant startTime = Instant.now();
+//        log.info("start crud startTime:{} crudHandle:{}", startTime.toEpochMilli(),
+//                JsonTools.toJSONString(crudHandle));
+//
+//        Object res = precompiledService.crudService(crudHandle);
+//
+//        log.info("end crud useTime:{} result:{}",
+//                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+//
+//        return res;
+//    }
 
 }

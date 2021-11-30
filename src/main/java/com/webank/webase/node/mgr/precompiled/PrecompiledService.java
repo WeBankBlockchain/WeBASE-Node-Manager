@@ -83,8 +83,7 @@ public class PrecompiledService {
         map.put("pageSize", String.valueOf(pageSize));
         map.put("pageNumber", String.valueOf(pageNumber));
         uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CONSENSUS_LIST, map);
-        Object frontRsp = null;
-        frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
+        Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
         log.debug("end getNodeListService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
@@ -104,21 +103,20 @@ public class PrecompiledService {
         String nodeId = consensusHandle.getNodeId();
 
         // check sealer num in group
-        List<String> sealerList = this.frontInterfaceService.getSealerList(groupId);
-        sealerList.remove(nodeId);
+//        List<String> sealerList = this.frontInterfaceService.getSealerList(groupId);
+//        sealerList.remove(nodeId);
         // @visual-deploy: at least 2 sealers in group after remove
-        if (constants.getDeployType() == DeployType.VISUAL_DEPLOY.getValue()
-            && CollectionUtils.size(sealerList) < ConstantProperties.LEAST_SEALER_TWO) {
-            log.error("fail nodeManageService. Group only has 1 sealers after remove.(visual_deploy)");
-            throw new NodeMgrException(ConstantCode.TWO_SEALER_IN_GROUP_AT_LEAST);
-        }
+//        if (constants.getDeployType() == DeployType.VISUAL_DEPLOY.getValue()
+//            && CollectionUtils.size(sealerList) < ConstantProperties.LEAST_SEALER_TWO) {
+//            log.error("fail nodeManageService. Group only has 1 sealers after remove.(visual_deploy)");
+//            throw new NodeMgrException(ConstantCode.TWO_SEALER_IN_GROUP_AT_LEAST);
+//        }
 
         String signUserId = userService.getSignUserIdByAddress(groupId, consensusHandle.getFromAddress());
         consensusHandle.setSignUserId(signUserId);
         TbFront front = this.frontMapper.getByNodeId(nodeId);
-        Object frontRsp;
         log.info("nodeManageService now request random available front");
-        frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONSENSUS,
+        Object frontRsp = frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONSENSUS,
             consensusHandle, Object.class);
         // update front group map if remove node from sealer/observer
         if (StringUtils.equalsIgnoreCase("remove", consensusHandle.getNodeType()) && front != null) {
