@@ -91,6 +91,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
@@ -1232,7 +1233,19 @@ public class FrontService {
         }
     }
 
-    public FrontNodeConfig getFrontNodeConfig(int frontId) {
+//    public FrontNodeConfig getFrontNodeConfig(int frontId) {
+//        TbFront front = this.getById(frontId);
+//        if (front == null) {
+//            log.error("");
+//            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+//        }
+//        String frontIp = front.getFrontIp();
+//        int frontPort = front.getFrontPort();
+//        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
+//        return nodeConfig;
+//    }
+
+    public GroupInfo getGroupInfo(int frontId, String groupId) {
         TbFront front = this.getById(frontId);
         if (front == null) {
             log.error("");
@@ -1240,8 +1253,8 @@ public class FrontService {
         }
         String frontIp = front.getFrontIp();
         int frontPort = front.getFrontPort();
-        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
-        return nodeConfig;
+        GroupInfo groupInfo = frontInterface.getGroupInfoFromSpecificFront(frontIp, frontPort, groupId);
+        return groupInfo;
     }
 
     /**
@@ -1264,9 +1277,6 @@ public class FrontService {
                 // get syncStatus
                 SyncStatusInfo syncStatus = frontInterface.getSyncStatusFromSpecificFront(frontIp,
                     frontPort, groupIdList.get(0));
-                // get version info
-//                ClientVersion versionResponse = frontInterface.getClientVersionFromSpecificFront(frontIp,
-//                    frontPort, Integer.valueOf(groupIdList.get(0)));
                 String clientVersion = "v3.0.0";
                 String supportVersion = "v3.0.0";
                 // get front server version and sign server version
