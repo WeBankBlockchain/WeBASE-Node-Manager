@@ -1213,15 +1213,16 @@ public class FrontService {
 //        return nodeConfig;
 //    }
 
-    public GroupInfo getGroupInfo(int frontId, String groupId) {
-        TbFront front = this.getById(frontId);
+//    public GroupInfo getGroupInfo(int frontId, String groupId) {
+    public Object getGroupInfo(int frontId, String groupId) {
+            TbFront front = this.getById(frontId);
         if (front == null) {
             log.error("");
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
         }
         String frontIp = front.getFrontIp();
         int frontPort = front.getFrontPort();
-        GroupInfo groupInfo = frontInterface.getGroupInfoFromSpecificFront(frontIp, frontPort, groupId);
+        Object groupInfo = frontInterface.getGroupInfoFromSpecificFront(frontIp, frontPort, groupId);
         return groupInfo;
     }
 

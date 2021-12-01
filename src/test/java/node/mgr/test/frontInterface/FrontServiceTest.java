@@ -44,13 +44,6 @@ public class FrontServiceTest extends TestBase {
     private String frontIp = "localhost";
     private Integer frontPort = 5002;
 
-    @Test
-    public void getContractCodeTest() {
-        String contractAddress = "0xb68b0ca60cc4d8b207875c9a0ab6c3a782db9318";
-        String str = frontInterface.getContractCode(groupId, contractAddress, blockNumber);
-        assert (str != null);
-        System.out.println(str);
-    }
 
     @Test
     public void getTransReceiptTest() {

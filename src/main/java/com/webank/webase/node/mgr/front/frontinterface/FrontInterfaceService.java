@@ -531,9 +531,9 @@ public class FrontInterfaceService {
     /**
      * include node name list
      */
-    public GroupInfo getGroupInfoFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
-        GroupInfo groupInfo = getFromSpecificFront(groupId, frontIp, frontPort,
-            FrontRestTools.URI_GROUP_INFO, GroupInfo.class);
+    public Object getGroupInfoFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
+        Object groupInfo = getFromSpecificFront(groupId, frontIp, frontPort,
+            FrontRestTools.URI_GROUP_INFO, Object.class);
         return groupInfo;
     }
 

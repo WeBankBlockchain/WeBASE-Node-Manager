@@ -178,7 +178,7 @@ public class FrontController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start getFrontNodeConfig startTime:{},frontId:{},groupId:{} ",
             startTime.toEpochMilli(), frontId, groupId);
-        GroupInfo groupInfo = frontService.getGroupInfo(frontId, groupId);
+        Object groupInfo = frontService.getGroupInfo(frontId, groupId);
 
         log.info("end getFrontNodeConfig useTime:{},groupInfo:{}",
             Duration.between(startTime, Instant.now()).toMillis(), groupInfo);
