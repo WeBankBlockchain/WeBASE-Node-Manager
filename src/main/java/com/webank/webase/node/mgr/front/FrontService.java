@@ -1222,7 +1222,8 @@ public class FrontService {
         }
         String frontIp = front.getFrontIp();
         int frontPort = front.getFrontPort();
-        Object groupInfo = frontInterface.getGroupInfoFromSpecificFront(frontIp, frontPort, groupId);
+        Object groupInfo = frontInterface
+            .getGroupInfoFromSpecificFront(frontIp, frontPort, groupId);
         return groupInfo;
     }
 
