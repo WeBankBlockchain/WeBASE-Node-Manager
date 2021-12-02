@@ -89,6 +89,7 @@ constant:
   monitorInfoRetainMax: 10000
   isMonitorIgnoreUser: false
   isMonitorIgnoreContract: false
+  # if abnormal contract, abnormal user reach the max count, stop monitor
   monitorUnusualMaxCount: 20
   ###alert mail monitor task interval: 5mins unit: ms
   auditMonitorTaskFixedDelay: 300000
