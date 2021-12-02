@@ -172,9 +172,9 @@ public class BlockService {
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
         addBlockInfo(tbBlock, groupId);
 
-        // save trans hash
-        for (TransactionResult<JsonTransactionResponse> t : transList) {
-            JsonTransactionResponse trans = t.get();
+        // save trans hash todo
+        for (TransactionResult t : transList) {
+            TransactionObject trans = (TransactionObject) t;
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
