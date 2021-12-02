@@ -325,12 +325,12 @@ public class FrontInterfaceService {
      */
     public ChainTransInfo getTransInfoByHash(String groupId, String hash) throws NodeMgrException {
         log.debug("start getTransInfoByHash. groupId:{} hash:{}", groupId, hash);
-        JsonTransactionResponse trans = getTransaction(groupId, hash);
-        if (Objects.isNull(trans)) {
+        TransactionReceipt receipt = getTransReceipt(groupId, hash);
+        if (Objects.isNull(receipt) || StringUtils.isBlank(receipt.getTransactionHash())) {
             return null;
         }
-        ChainTransInfo chainTransInfo = new ChainTransInfo(trans.getFrom(), trans.getTo(),
-                trans.getInput(), BigInteger.valueOf(trans.getBlockLimit()));
+        ChainTransInfo chainTransInfo = new ChainTransInfo(receipt.getFrom(), receipt.getTo(),
+            receipt.getInput(), new BigInteger(receipt.getBlockNumber()));
         log.debug("end getTransInfoByHash:{}", JsonTools.toJSONString(chainTransInfo));
         return chainTransInfo;
     }

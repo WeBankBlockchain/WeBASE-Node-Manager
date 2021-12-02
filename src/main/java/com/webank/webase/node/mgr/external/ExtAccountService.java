@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,9 @@ public class ExtAccountService {
      */
     public int saveAccountOnChain(String groupId, String userAddress) {
         if (checkAddressExist(groupId, userAddress)) {
+            return 0;
+        }
+        if (StringUtils.isBlank(userAddress) || "0x".equalsIgnoreCase(userAddress)) {
             return 0;
         }
         TbExternalAccount tbAccount = new TbExternalAccount();

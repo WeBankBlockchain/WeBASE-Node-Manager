@@ -37,7 +37,8 @@ public class TbTransHash {
     /**
      * init by transaction、blockNumber、blockTimestamp.
      */
-    public TbTransHash(String transHash,String transFrom,String transTo, BigInteger blockNumber, LocalDateTime blockTimestamp) {
+    public TbTransHash(String transHash, String transFrom,
+        String transTo, BigInteger blockNumber, LocalDateTime blockTimestamp) {
         this.transHash = transHash;
         this.transFrom = transFrom;
         this.transTo = transTo;
