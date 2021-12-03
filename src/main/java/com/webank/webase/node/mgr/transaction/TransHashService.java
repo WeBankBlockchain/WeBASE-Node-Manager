@@ -19,14 +19,17 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -217,11 +220,12 @@ public class TransHashService {
         if (transList.size() == 0 && blockNumber != null) {
             List<JsonTransactionResponse> transInBlock = frontInterface
                 .getTransByBlockNumber(groupId, blockNumber);
+            BcosBlock.Block blockOnChain = frontInterface.getBlockByNumber(groupId, blockNumber);//todo fix blockLimit
             if (transInBlock != null && transInBlock.size() != 0) {
                 transInBlock.forEach(tran -> {
                     TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getFrom(),
-                            tran.getTo(), BigInteger.valueOf(tran.getBlockLimit()),
-                            null);
+                            tran.getTo(), blockNumber,
+                        NodeMgrTools.timestamp2LocalDateTime(blockOnChain.getTimestamp()));
                     transList.add(tbTransHash);
                 });
             }
@@ -238,11 +242,13 @@ public class TransHashService {
             throws NodeMgrException {
         log.info("start getTransFromFrontByHash. groupId:{}  transaction:{}", groupId,
                 transHash);
-        JsonTransactionResponse trans = frontInterface.getTransaction(groupId, transHash);
+        TransactionReceipt trans = frontInterface.getTransReceipt(groupId, transHash);
+        BcosBlock.Block block = frontInterface.getBlockByNumber(groupId, new BigInteger(trans.getBlockNumber()));
         TbTransHash tbTransHash = null;
         if (trans != null) {
             tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
-                    BigInteger.valueOf(trans.getBlockLimit()), null);
+                new BigInteger(trans.getBlockNumber()),
+                NodeMgrTools.timestamp2LocalDateTime(block.getTimestamp()));
         }
         log.info("end getTransFromFrontByHash. tbTransHash:{}", JsonTools.toJSONString(tbTransHash));
         return tbTransHash;

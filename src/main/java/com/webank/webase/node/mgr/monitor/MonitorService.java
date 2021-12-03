@@ -200,6 +200,7 @@ public class MonitorService {
                 return;
             }
             ChainTransInfo trans = frontInterface.getTransInfoByHash(groupId, txHash);
+            log.info("updateUnusualContract trans from front:{}", trans);
             if (trans == null) {
                 return;
             }
@@ -389,45 +390,28 @@ public class MonitorService {
         // deploy contract tx
         if (StringUtils.isBlank(transTo) || "0x".equalsIgnoreCase(transTo)) {
             contractAddress = frontInterface.getAddressByHash(groupId, transHash);
-//            if (ConstantProperties.ADDRESS_DEPLOY.equals(contractAddress) || contractAddress.isEmpty()) {
-//                contractBin = StringUtils.removeStart(transInput, "0x");
-//
-//                ContractParam param = new ContractParam();
-//                param.setGroupId(groupId);
-//                param.setPartOfBytecodeBin(contractBin);
-//                TbContract tbContract = contractService.queryContract(param);
-//                // add abi query
-//                ReqAbiListParam paramTbAbi = new ReqAbiListParam();
-//                paramTbAbi.setGroupId(groupId);
-//                paramTbAbi.setPartOfContractBin(contractBin);
-//                AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
-//                if (Objects.nonNull(tbContract)) {
-//                    contractName = tbContract.getContractName();
-//                } else if (Objects.nonNull(abiInfo)) {
-//                    contractName = abiInfo.getContractName();
-//                } else {
-//                    contractName = getNameFromContractBin(groupId, contractBin);
-//                    transUnusualType = TransUnusualType.CONTRACT.getValue();
-//                }
-//            } else {
-                contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
-                contractBin = removeBinFirstAndLast(contractBin);
+            // todo rm this log
+            if (StringUtils.isBlank(contractAddress)) {
+                log.warn("transTo is empty:{}, and contract address is :{}",
+                    transTo, contractAddress);
+            }
+            contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
+            contractBin = removeBinFirstAndLast(contractBin);
 
-                List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
-                // add abi query
-                ReqAbiListParam paramTbAbi = new ReqAbiListParam();
-                paramTbAbi.setGroupId(groupId);
-                paramTbAbi.setPartOfContractBin(contractBin);
-                AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
-                if (contractRow != null && contractRow.size() > 0) {
-                    contractName = contractRow.get(0).getContractName();
-                } else if (Objects.nonNull(abiInfo)) {
-                    contractName = abiInfo.getContractName();
-                } else {
-                    contractName = getNameFromContractBin(groupId, contractBin);
-                    transUnusualType = TransUnusualType.CONTRACT.getValue();
-                }
-//            }
+            List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
+            // add abi query
+            ReqAbiListParam paramTbAbi = new ReqAbiListParam();
+            paramTbAbi.setGroupId(groupId);
+            paramTbAbi.setPartOfContractBin(contractBin);
+            AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
+            if (contractRow != null && contractRow.size() > 0) {
+                contractName = contractRow.get(0).getContractName();
+            } else if (Objects.nonNull(abiInfo)) {
+                contractName = abiInfo.getContractName();
+            } else {
+                contractName = getNameFromContractBin(groupId, contractBin);
+                transUnusualType = TransUnusualType.CONTRACT.getValue();
+            }
             interfaceName = contractName;
         } else {    // function call transaction
             transType = TransType.CALL.getValue();
@@ -477,7 +461,7 @@ public class MonitorService {
      * monitor user.
      */
     private UserMonitorResult monitorUser(String groupId, String userAddress) {
-        if ("0x".equalsIgnoreCase(userAddress) || userAddress.isEmpty()) {
+        if (StringUtils.isBlank(userAddress) || "0x".equalsIgnoreCase(userAddress)) {
             log.debug("monitorUser ignore empty user:{}", userAddress);
             return new UserMonitorResult("0x", MonitorUserType.NORMAL.getValue());
         }

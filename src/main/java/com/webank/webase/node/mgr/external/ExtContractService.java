@@ -70,12 +70,13 @@ public class ExtContractService {
         String contractAddress = txReceipt.getTo();
 
         // if receipt's to is all zero, deploy transaction
-        if (StringUtils.isBlank(txReceipt.getTo()) || "0x".equalsIgnoreCase(txReceipt.getTo())) {
+        if (StringUtils.isNotBlank(txReceipt.getContractAddress())) {
             log.debug("deploy contract tx :{}", txReceipt.getContractAddress());
             contractAddress = txReceipt.getContractAddress();
         }
         // ignore precompiled contract address
-        if (contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED)) {
+        if (contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED)
+        || contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED_NO_PREFIX)) {
             log.debug("ignore precompiled contract:{}", contractAddress);
             return;
         }

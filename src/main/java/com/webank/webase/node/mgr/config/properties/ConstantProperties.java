@@ -42,8 +42,8 @@ public class ConstantProperties {
     // constant
     public static final String CONSTANT_PREFIX = "constant";
     public static final String CONTRACT_NAME_ZERO = "0x00000000";
-//    public static final String ADDRESS_DEPLOY = "0x0000000000000000000000000000000000000000";
     public static final String ADDRESS_PRECOMPILED = "0x000000000000000000000000000000000000";
+    public static final String ADDRESS_PRECOMPILED_NO_PREFIX = "000000000000000000000000000000000000";
     public static final int PUBLICKEY_LENGTH = 130;
     public static final int ADDRESS_LENGTH = 42;
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";

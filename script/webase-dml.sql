@@ -163,8 +163,6 @@ INSERT INTO `tb_warehouse` (`id`, `warehouse_name`, `warehouse_name_en`, `type`,
 (5, '资产应用', 'Asset', 4, 'pointsId', '一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等', 'Asset Contract suite', '一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等', 'Asset Contract suite', now(), now());
 INSERT INTO `tb_warehouse` (`id`, `warehouse_name`, `warehouse_name_en`, `type`, `warehouse_icon`, `description`, `description_en`, `warehouse_detail`, `warehouse_detail_en`, `create_time`, `modify_time`) VALUES
 (6, '溯源应用', 'Traceability', 5, 'traceId', '一套溯源应用合约模板（Smart-Dev-Contract）', 'Traceability Contract Suite', '一套溯源应用合约模板（Smart-Dev-Contract）', 'Traceability Contract suite', now(), now());
-INSERT INTO `tb_warehouse` (`id`, `warehouse_name`, `warehouse_name_en`, `type`, `warehouse_icon`, `description`, `description_en`, `warehouse_detail`, `warehouse_detail_en`, `create_time`, `modify_time`) VALUES
-(7, '代理合约模板', 'Proxy', 5, 'toolboxId', '一套可升级的业务、数据分离的代理合约模板', 'Proxy Contract Suite', '一套可升级的业务、数据分离的代理合约模板', 'Proxy Contract Suite', now(), now());
 
 -- folder
 INSERT INTO `tb_contract_folder` (`id`, `warehouse_id`, `folder_name`, `description`, `description_en`, `folder_detail`, `folder_detail_en`, `create_time`, `modify_time`) VALUES
@@ -181,8 +179,6 @@ INSERT INTO `tb_contract_folder` (`id`, `warehouse_id`, `folder_name`, `descript
 (6, 5, 'Asset', '一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等', 'Asset Contract suite', '一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等', 'Asset Contract suite', now(), now());
 INSERT INTO `tb_contract_folder` (`id`, `warehouse_id`, `folder_name`, `description`, `description_en`, `folder_detail`, `folder_detail_en`, `create_time`, `modify_time`) VALUES
 (7, 6, 'Tracebility', '一套溯源应用合约模板（Smart-Dev-Contract）', 'Traceability Contract Suite', '一套溯源应用合约模板（Smart-Dev-Contract）', 'Traceability Contract Suite', now(), now());
-INSERT INTO `tb_contract_folder` (`id`, `warehouse_id`, `folder_name`, `description`, `description_en`, `folder_detail`, `folder_detail_en`, `create_time`, `modify_time`) VALUES
-(8, 7, 'Proxy', '一套可升级的业务、数据分离的代理合约模板', 'Proxy Contract Suite', '一套可升级的业务、数据分离的代理合约模板', 'Proxy Contract Suite', now(), now());
 
 -- contract item
 -- of contract source & md desc, including tools, evidence, points(BAC) --
