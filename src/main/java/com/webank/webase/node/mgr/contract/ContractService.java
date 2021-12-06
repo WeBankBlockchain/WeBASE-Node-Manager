@@ -639,7 +639,7 @@ public class  ContractService {
         param.setGroupId(groupId);
         param.setContractName(contract.getContractName());
         param.setAddress(address);
-        //param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
+        param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
         param.setContractBin(contract.getContractBin());
         frontInterface.sendAbi(groupId, param);
 
@@ -657,6 +657,7 @@ public class  ContractService {
     /**
      * check user deploy permission
      */
+     //todo 需要部署权限再启用
 //    private void checkDeployPermission(String groupId, String userAddress) {
 //        // get deploy permission list
 //        List<PermissionInfo> deployUserList = new ArrayList<>();

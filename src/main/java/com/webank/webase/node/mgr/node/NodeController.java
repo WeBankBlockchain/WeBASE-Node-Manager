@@ -122,6 +122,7 @@ public class NodeController {
     /**
      * get node id list
      */
+    //todo check
 /*    @GetMapping("/nodeIdList/{groupId}")
     public BaseResponse getNodeIdList(@PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();

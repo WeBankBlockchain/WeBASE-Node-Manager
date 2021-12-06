@@ -432,6 +432,7 @@ public class FrontRestTools {
         if (block == null) {
             return;
         }
+        //todo check bug
 //        String gasLimit = block.getGasLimit();
 //        String gasUsed = block.getGasUsed();
 //        String timestamp = block.getTimestamp();
@@ -454,6 +455,7 @@ public class FrontRestTools {
         if (trans == null) {
             return;
         }
+        //todo check bug
 //        String gas = trans.getGas();
 //        String gasPrice = trans.getGasPrice();
 //        String groupId = trans.getGroupId();
