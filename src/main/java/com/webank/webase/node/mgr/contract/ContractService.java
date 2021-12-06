@@ -165,8 +165,8 @@ public class  ContractService {
         String groupId = reqContractAddressSave.getGroupId();
         // check group id
         groupService.checkGroupId(groupId);
-        // get runtimeBin todo
-//        String runtimeBin = abiService.getAddressRuntimeBin(groupId, reqContractAddressSave.getContractAddress());
+        // get runtimeBin
+        String runtimeBin = abiService.getAddressRuntimeBin(groupId, reqContractAddressSave.getContractAddress());
         String contractName = reqContractAddressSave.getContractName();
         String contractVersion = reqContractAddressSave.getContractVersion();
         String contractPath = reqContractAddressSave.getContractPath();
@@ -204,7 +204,7 @@ public class  ContractService {
             tbContract.setContractType(ContractType.APPIMPORT.getValue());
             if (tbContractStore.getContractName().equals(contractName)) {
                 tbContract.setContractAddress(reqContractAddressSave.getContractAddress());
-//                tbContract.setContractBin(runtimeBin); todo
+                tbContract.setContractBin(runtimeBin);
                 tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
                 // save abi
                 abiService.saveAbiFromAppContract(tbContract);
@@ -246,7 +246,7 @@ public class  ContractService {
                 throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
             }
             // check address on chain
-//            abiService.getAddressRuntimeBin(contract.getGroupId(), address);todo
+            abiService.getAddressRuntimeBin(contract.getGroupId(), address);
             log.info("updateContract contract address:{} and deployed status", address);
             tbContract.setContractAddress(address);
             tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
@@ -259,23 +259,6 @@ public class  ContractService {
         }
         contractMapper.update(tbContract);
         return tbContract;
-    }
-
-    private void handleUpdateAddressAbi(Contract contract, TbContract tbContract) {
-        String address = contract.getContractAddress();
-        if (address == null) {
-            return;
-        }
-        if (address.length() != CONTRACT_ADDRESS_LENGTH) {
-            log.warn("fail sendAbi. inputAddress:{}", address);
-            throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
-        }
-        // check address on chain
-//        abiService.getAddressRuntimeBin(contract.getGroupId(), address);todo
-        log.info("updateContract contract address:{} and deployed status", address);
-        tbContract.setContractAddress(address);
-        tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-
     }
 
     /**
@@ -498,8 +481,6 @@ public class  ContractService {
             contractAbiStr = contract.getContractAbi();
             //send abi to front
             sendAbi(param.getGroupId(), param.getContractId(), param.getContractAddress());
-            //check contract deploy, v1.5.3 remove, support proxy contract
-//            verifyContractDeploy(param.getContractId(), param.getGroupId());
         } else {
             // send tx by TABLE abi
             // get from db and it's deployed
@@ -643,46 +624,8 @@ public class  ContractService {
         param.setContractBin(contract.getContractBin());
         frontInterface.sendAbi(groupId, param);
 
-        //save address
-//        if (StringUtils.isBlank(contract.getContractAddress())) {
-//            contract.setContractAddress(address);
-//            contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-//        }
-//
-//        contract.setDeployTime(LocalDateTime.now());
-//        contract.setDescription("address add by sendAbi");
-//        contractMapper.update(contract);
     }
 
-    /**
-     * check user deploy permission
-     */
-     //todo 需要部署权限再启用
-//    private void checkDeployPermission(String groupId, String userAddress) {
-//        // get deploy permission list
-//        List<PermissionInfo> deployUserList = new ArrayList<>();
-//        BasePageResponse response = permissionManageService.listPermissionFull(groupId, PERMISSION_TYPE_DEPLOY_AND_CREATE, null);
-//        if (response.getCode() != 0) {
-//            log.error("checkDeployPermission get permission list error");
-//            return;
-//        } else {
-//            List listData = (List) response.getData();
-//            deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
-//        }
-//
-//        // check user in the list
-//        if (deployUserList == null || deployUserList.isEmpty()) {
-//            return;
-//        } else {
-//            long count = 0;
-//            count = deployUserList.stream().filter( admin -> userAddress.equals(admin.getAddress())).count();
-//            // if not in the list, permission denied
-//            if (count == 0) {
-//                log.error("checkDeployPermission permission denied for user:{}", userAddress);
-//                throw new NodeMgrException(ConstantCode.PERMISSION_DENIED_ON_CHAIN);
-//            }
-//        }
-//    }
 
     /**
      * get contract path list
@@ -810,26 +753,6 @@ public class  ContractService {
         if (deployUser != null) {
             resultUserList.add(deployUser);
         }
-        // get from permission list or chain governance
-       // List<PermissionInfo> deployUserList = new ArrayList<>();
-        // check committee
-//        BasePageResponse response = permissionManageService.listPermissionFull(groupId,
-//            PERMISSION_TYPE_PERMISSION, null);
-//        if (response.getCode() != 0) {
-//            log.error("checkDeployPermission get permission list error");
-//        } else {
-//            List listData = (List) response.getData();
-//           // deployUserList = JsonTools.toJavaObjectList(JsonTools.toJSONString(listData), PermissionInfo.class);
-//        }
-////        if (deployUserList != null && !deployUserList.isEmpty()) {
-////            for (PermissionInfo info : deployUserList) {
-////                String adminAddress = info.getAddress();
-////                TbUser adminUser = userService.checkUserHasPk(groupId, adminAddress);
-////                if (adminUser != null) {
-////                    resultUserList.add(adminUser);
-////                }
-////            }
-////        }
         //  check resultUserList if empty
         if (resultUserList.isEmpty()) {
             log.warn("getContractManager has no private key of contractAddress:{}", contractAddress);
