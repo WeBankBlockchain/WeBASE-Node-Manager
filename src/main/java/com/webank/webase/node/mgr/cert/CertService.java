@@ -103,18 +103,19 @@ public class CertService {
             String fatherCertContent = "";
             // node cert has PublicKey and Address:
             // standard: type=node;  guomi: type = node || type=encrypt_node || type=sdk&&name=sdk
-            if (CertTools.TYPE_NODE.equals(certType) || CertTools.TYPE_ENCRYPT_NODE.equals(certType) ||
-                    ("sdk".equals(certType) && "sdk".equals(certName))) {
+            if (CertTools.TYPE_SDK.equals(certType) || CertTools.TYPE_SM2_EN_SDK.equals(certType) ||
+                CertTools.TYPE_SM2_SDK.equals(certType)) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
                 address = cryptoSuite.getCryptoKeyPair().getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
-            }else if (CertTools.TYPE_AGENCY.equals(certType)) {
+            } else if (CertTools.TYPE_SDK_CHAIN.equals(certType)) {
                 fatherCertContent = findFatherCert(certImpl);
                 setSonCert(certImpl);
-            }else if (CertTools.TYPE_CHAIN.equals(certType)) {
-                setSonCert(certImpl);
             }
+//            else if (CertTools.TYPE_CHAIN.equals(certType)) {
+//                setSonCert(certImpl);
+//            }
 
             // 实体赋值
             tbCert.setPublicKey(publicKeyString);
@@ -249,11 +250,12 @@ public class CertService {
         log.debug("start setSonCert. Father FingerPrint:{}", NodeMgrTools.getCertFingerPrint(fatherCert.getEncoded()));
         List<X509Certificate> x509CertList = new ArrayList<>();
         String fatherType = CertTools.getCertType(fatherCert.getSubjectDN());
-        if(CertTools.TYPE_CHAIN.equals(fatherType)){
-            x509CertList = loadAllX509CertsByType(CertTools.TYPE_AGENCY);
-        }else if(CertTools.TYPE_AGENCY.equals(fatherType)){
-            x509CertList = loadAllX509CertsByType(CertTools.TYPE_NODE);
+        if(CertTools.TYPE_SDK_CHAIN.equals(fatherType)){
+            x509CertList = loadAllX509CertsByType(CertTools.TYPE_SDK);
         }
+//        else if(CertTools.TYPE_AGENCY.equals(fatherType)){
+//            x509CertList = loadAllX509CertsByType(CertTools.TYPE_NODE);
+//        }
 
         for(int i = 0; i < x509CertList.size(); i++) {
             X509Certificate temp = x509CertList.get(i);
@@ -363,22 +365,22 @@ public class CertService {
 
     private void saveFrontCert(Map<String, String> certContents) throws CertificateException {
         log.debug("start saveFrontCert. certContents:{} ", certContents);
-        String chainCertContent = certContents.get(CertTools.TYPE_CHAIN);
-        String agencyCertContent = certContents.get(CertTools.TYPE_AGENCY);
-        String nodeCertContent = certContents.get(CertTools.TYPE_NODE);
+        String chainCertContent = certContents.get(CertTools.TYPE_SDK_CHAIN);
+//        String agencyCertContent = certContents.get(CertTools.TYPE_AGENCY);
+        String nodeCertContent = certContents.get(CertTools.TYPE_SDK);
         // guomi encrypt node cert
-        String encryptNodeCertContent = certContents.get(CertTools.TYPE_ENCRYPT_NODE);
-        String sdkChainCertContent = certContents.get(CertTools.TYPE_SDK_CHAIN);
-        String sdkAgencyCertContent = certContents.get(CertTools.TYPE_SDK_AGENCY);
-        String sdkNodeCertContent = certContents.get(CertTools.TYPE_SDK_NODE);
+        String encryptNodeCertContent = certContents.get(CertTools.TYPE_SM2_EN_SDK);
+//        String sdkChainCertContent = certContents.get(CertTools.TYPE_SDK_CHAIN);
+//        String sdkAgencyCertContent = certContents.get(CertTools.TYPE_SDK_AGENCY);
+        String sdkNodeCertContent = certContents.get(CertTools.TYPE_SM2_SDK);
         // fisco's cert
         handleSaveFrontCertStr(chainCertContent);
-        handleSaveFrontCertStr(agencyCertContent);
+//        handleSaveFrontCertStr(agencyCertContent);
         handleSaveFrontCertStr(nodeCertContent);
         handleSaveFrontCertStr(encryptNodeCertContent);
         //sdk's cert
-        handleSaveFrontCertStr(sdkChainCertContent);
-        handleSaveFrontCertStr(sdkAgencyCertContent);
+//        handleSaveFrontCertStr(sdkChainCertContent);
+//        handleSaveFrontCertStr(sdkAgencyCertContent);
         handleSaveFrontCertStr(sdkNodeCertContent);
         log.debug("end saveFrontCert. certContents. ");
     }

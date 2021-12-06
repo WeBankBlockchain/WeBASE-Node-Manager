@@ -34,16 +34,22 @@ public class CertTools {
     public static final String crtContentTail = "-----END CERTIFICATE-----\n" ;
     public static final String crtTailForConcat = "\n-----END CERTIFICATE-----\n" ;
 
-    // all is sdk cert
-    public static final String TYPE_CHAIN = "chain";
-    public static final String TYPE_AGENCY = "agency";
-    public static final String TYPE_NODE = "node";
+    // ecdsa sdk cert
+    public static final String TYPE_SDK_CHAIN = "chain";
+    public static final String TYPE_SDK = "agency";
+    // sm2 sdk cert
+    public static final String TYPE_SM2_SDK = "sdk";
+    public static final String TYPE_SM2_EN_SDK = "ensdk";
+    // deprecated in 3.0
+//    public static final String TYPE_CHAIN = "chain";
+//    public static final String TYPE_AGENCY = "agency";
+    //    public static final String TYPE_NODE = "node";
     // 2019/12: support guomi, double cert mechanism
-    public static final String TYPE_ENCRYPT_NODE = "ennode";
-    public static final String TYPE_SDK_CHAIN = "sdkca";
-    public static final String TYPE_SDK_AGENCY = "sdkagency";
-    // cert name: sdk ,type: node or sdk
-    public static final String TYPE_SDK_NODE = "sdknode";
+//    public static final String TYPE_ENCRYPT_NODE = "ensdk";
+//    public static final String TYPE_SDK_CHAIN = "sdkca";
+//    public static final String TYPE_SDK_AGENCY = "sdkagency";
+//    // cert name: sdk ,type: node or sdk
+//    public static final String TYPE_SDK_NODE = "sdknode";
     // pull flag: 首次启动时需要拉取Front与节点的证书
     public static boolean isPullFrontCertsDone = false;
 
