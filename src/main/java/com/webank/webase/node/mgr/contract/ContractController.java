@@ -378,78 +378,78 @@ public class ContractController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis(), contractList.size());
         return pageResponse;
     }
+//
+//    /**
+//     * registerCns.
+//     */
+//    @PostMapping(value = "/registerCns")
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+//    public BaseResponse registerCns(@RequestBody @Valid ReqRegisterCns reqRegisterCns,
+//            BindingResult result) throws NodeMgrException {
+//        checkBindResult(result);
+//        Instant startTime = Instant.now();
+//        log.info("start registerCns startTime:{} reqRegisterCns:{}", startTime.toEpochMilli(),
+//                JsonTools.toJSONString(reqRegisterCns));
+//
+//        cnsService.registerCns(reqRegisterCns);
+//
+//        log.info("end registerCns useTime:{}",
+//                Duration.between(startTime, Instant.now()).toMillis());
+//
+//        return new BaseResponse(ConstantCode.SUCCESS);
+//    }
 
-    /**
-     * registerCns.
-     */
-    @PostMapping(value = "/registerCns")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse registerCns(@RequestBody @Valid ReqRegisterCns reqRegisterCns,
-            BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        Instant startTime = Instant.now();
-        log.info("start registerCns startTime:{} reqRegisterCns:{}", startTime.toEpochMilli(),
-                JsonTools.toJSONString(reqRegisterCns));
-
-        cnsService.registerCns(reqRegisterCns);
-
-        log.info("end registerCns useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-
-        return new BaseResponse(ConstantCode.SUCCESS);
-    }
-
-    /**
-     * query cns info
-     */
-    @PostMapping(value = "/findCns")
-    public BaseResponse findCnsByAddress(@RequestBody @Valid ReqQueryCns reqQueryCns,
-            BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        BaseResponse pageResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start findCnsByAddress startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
-                JsonTools.toJSONString(reqQueryCns));
-        TbCns tbCns = cnsService.getCnsByAddress(
-                new QueryCnsParam(reqQueryCns.getGroupId(), reqQueryCns.getContractAddress()));
-        pageResponse.setData(tbCns);
-        log.info("end findCnsByAddress. useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        return pageResponse;
-    }
-
-    /**
-     * query cns info list
-     */
-    @PostMapping(value = "/findCnsList")
-    public BasePageResponse findCnsList(@RequestBody @Valid ReqQueryCnsList inputParam,
-            BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start findCnsList startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
-                JsonTools.toJSONString(inputParam));
-
-        // param
-        QueryCnsParam queryParam = new QueryCnsParam();
-        BeanUtils.copyProperties(inputParam, queryParam);
-
-        int count = cnsService.countOfCns(queryParam);
-        if (count > 0) {
-            Integer start = Optional.ofNullable(inputParam.getPageNumber())
-                    .map(page -> (page - 1) * inputParam.getPageSize()).orElse(0);
-            queryParam.setStart(start);
-            queryParam.setFlagSortedByTime(SqlSortType.DESC.getValue());
-            // query list
-            List<TbCns> listOfCns = cnsService.getList(queryParam);
-            pageResponse.setData(listOfCns);
-            pageResponse.setTotalCount(count);
-        }
-
-        log.info("end findCnsList. useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        return pageResponse;
-    }
+//    /**
+//     * query cns info
+//     */
+//    @PostMapping(value = "/findCns")
+//    public BaseResponse findCnsByAddress(@RequestBody @Valid ReqQueryCns reqQueryCns,
+//            BindingResult result) throws NodeMgrException {
+//        checkBindResult(result);
+//        BaseResponse pageResponse = new BaseResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//        log.info("start findCnsByAddress startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
+//                JsonTools.toJSONString(reqQueryCns));
+//        TbCns tbCns = cnsService.getCnsByAddress(
+//                new QueryCnsParam(reqQueryCns.getGroupId(), reqQueryCns.getContractAddress()));
+//        pageResponse.setData(tbCns);
+//        log.info("end findCnsByAddress. useTime:{}",
+//                Duration.between(startTime, Instant.now()).toMillis());
+//        return pageResponse;
+//    }
+//
+//    /**
+//     * query cns info list
+//     */
+//    @PostMapping(value = "/findCnsList")
+//    public BasePageResponse findCnsList(@RequestBody @Valid ReqQueryCnsList inputParam,
+//            BindingResult result) throws NodeMgrException {
+//        checkBindResult(result);
+//        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//        log.info("start findCnsList startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
+//                JsonTools.toJSONString(inputParam));
+//
+//        // param
+//        QueryCnsParam queryParam = new QueryCnsParam();
+//        BeanUtils.copyProperties(inputParam, queryParam);
+//
+//        int count = cnsService.countOfCns(queryParam);
+//        if (count > 0) {
+//            Integer start = Optional.ofNullable(inputParam.getPageNumber())
+//                    .map(page -> (page - 1) * inputParam.getPageSize()).orElse(0);
+//            queryParam.setStart(start);
+//            queryParam.setFlagSortedByTime(SqlSortType.DESC.getValue());
+//            // query list
+//            List<TbCns> listOfCns = cnsService.getList(queryParam);
+//            pageResponse.setData(listOfCns);
+//            pageResponse.setTotalCount(count);
+//        }
+//
+//        log.info("end findCnsList. useTime:{}",
+//                Duration.between(startTime, Instant.now()).toMillis());
+//        return pageResponse;
+//    }
 
     @PostMapping(value = "/copy")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
