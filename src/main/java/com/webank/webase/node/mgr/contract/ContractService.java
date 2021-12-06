@@ -165,8 +165,8 @@ public class  ContractService {
         String groupId = reqContractAddressSave.getGroupId();
         // check group id
         groupService.checkGroupId(groupId);
-        // get runtimeBin todo
-//        String runtimeBin = abiService.getAddressRuntimeBin(groupId, reqContractAddressSave.getContractAddress());
+        // get runtimeBin
+        String runtimeBin = abiService.getAddressRuntimeBin(groupId, reqContractAddressSave.getContractAddress());
         String contractName = reqContractAddressSave.getContractName();
         String contractVersion = reqContractAddressSave.getContractVersion();
         String contractPath = reqContractAddressSave.getContractPath();
@@ -204,7 +204,7 @@ public class  ContractService {
             tbContract.setContractType(ContractType.APPIMPORT.getValue());
             if (tbContractStore.getContractName().equals(contractName)) {
                 tbContract.setContractAddress(reqContractAddressSave.getContractAddress());
-//                tbContract.setContractBin(runtimeBin); todo
+                tbContract.setContractBin(runtimeBin);
                 tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
                 // save abi
                 abiService.saveAbiFromAppContract(tbContract);
@@ -620,7 +620,7 @@ public class  ContractService {
         param.setGroupId(groupId);
         param.setContractName(contract.getContractName());
         param.setAddress(address);
-        //param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
+        param.setAbiInfo(JsonTools.toJavaObjectList(abiInfo, ABIDefinition.class));
         param.setContractBin(contract.getContractBin());
         frontInterface.sendAbi(groupId, param);
 

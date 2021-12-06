@@ -252,6 +252,7 @@ public class NodeService {
             log.debug("getPeerOfConsensusStatus is null");
             return null;
         }
+        //todo  check bug
         List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
         return dataIsList;
     }
