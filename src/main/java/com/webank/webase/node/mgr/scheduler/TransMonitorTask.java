@@ -42,7 +42,7 @@ public class TransMonitorTask {
     @Autowired
     private StatService statService;
 
-//    @Scheduled(fixedRateString = "${constant.transMonitorTaskFixedRate}")
+    @Scheduled(fixedRateString = "${constant.transMonitorTaskFixedRate}")
     public void taskStart() {
         monitorStart();
     }
