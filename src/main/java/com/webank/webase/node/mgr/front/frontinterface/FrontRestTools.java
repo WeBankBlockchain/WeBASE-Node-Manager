@@ -114,7 +114,6 @@ public class FrontRestTools {
     public static final String URI_CRUD = "precompiled/crud";
 
 
-    public static final String URI_CERT = "cert";
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
     public static final String URI_SSL_CRYPTO_TYPE = "sslCryptoType";
 
@@ -133,7 +132,7 @@ public class FrontRestTools {
     private static final List<String> URI_NOT_PREPEND_GROUP_ID = Arrays
         .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
                 URI_CONTRACT_SENDABI, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
-                URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_CERT, URI_CERT_SDK_FILES, URI_SSL_CRYPTO_TYPE,
+                URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_CERT_SDK_FILES, URI_SSL_CRYPTO_TYPE,
                 URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_KEY_PAIR_USERINFO_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
                 URI_FRONT_VERSION, URI_SIGN_VERSION, URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN, URI_KEY_PAIR_EXPORT_P12_WITH_SIGN,
                 URI_EVENT_LOG_LIST,URI_SIGN_MESSAGE,URI_CONFIG_SDK);
