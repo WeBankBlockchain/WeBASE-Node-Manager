@@ -13,16 +13,26 @@
  */
 package com.webank.webase.node.mgr.monitor.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * contract monitor result info.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ContractMonitorResult {
     private String contractName;
     private String contractAddress;
     private String interfaceName;
     private Integer transType;
     private Integer transUnusualType;
+
+    public ContractMonitorResult(String contractName, String contractAddress, Integer transUnusualType) {
+        this.contractName = contractName;
+        this.contractAddress = contractAddress;
+        this.transUnusualType = transUnusualType;
+    }
 }

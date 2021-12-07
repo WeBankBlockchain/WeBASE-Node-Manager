@@ -390,10 +390,10 @@ public class MonitorService {
         // deploy contract tx
         if (StringUtils.isBlank(transTo) || "0x".equalsIgnoreCase(transTo)) {
             contractAddress = frontInterface.getAddressByHash(groupId, transHash);
-            // todo rm this log
+            // if contract deploy error, contract address is null and transTo is null
             if (StringUtils.isBlank(contractAddress)) {
-                log.warn("transTo is empty:{}, and contract address is :{}",
-                    transTo, contractAddress);
+                log.warn("transTo is empty, and contract address is empty for deploy error");
+                return new ContractMonitorResult("0x", "0x", MonitorUserType.NORMAL.getValue());
             }
             contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
             contractBin = removeBinFirstAndLast(contractBin);
