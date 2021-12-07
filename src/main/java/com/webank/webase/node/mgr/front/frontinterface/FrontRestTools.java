@@ -114,7 +114,6 @@ public class FrontRestTools {
     public static final String URI_CRUD = "precompiled/crud";
 
 
-    public static final String URI_CERT = "cert";
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
     public static final String URI_SSL_CRYPTO_TYPE = "sslCryptoType";
 

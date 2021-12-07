@@ -153,15 +153,6 @@ public class FrontInterfaceService {
     /**
      * get map's Cert Content from specific front.
      */
-    public Map<String, String> getCertMapFromSpecificFront(String nodeIp, Integer frontPort) {
-        String groupId = "group";
-        return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_CERT, Map.class);
-    }
-
-
-    /**
-     * get map's Cert Content from specific front.
-     */
     public Map<String, String> getSdkFilesFromSpecificFront(String nodeIp, Integer frontPort) {
         String groupId = "group";
         return getFromSpecificFront(groupId, nodeIp, frontPort, FrontRestTools.URI_CERT_SDK_FILES, Map.class);
@@ -633,21 +624,7 @@ public class FrontInterfaceService {
         log.debug("end searchByBlockNumOrTxHash, blockOrTx:{}", blockOrTx);
         return blockOrTx;
     }
-    
-    /**
-     * get sdk's Cert Content from specific front.
-     */
-    public List<SdkCertInfo> getSdkCertInfo() {
-        List<SdkCertInfo> sdkCertList = new ArrayList<>();
-        Map<String, String> certMap =
-                frontRestTools.getForEntity("1", FrontRestTools.URI_CERT_SDK_FILES, Map.class);
-        for (Map.Entry<String, String> entry : certMap.entrySet()) {
-            SdkCertInfo sdkCertInfo = new SdkCertInfo(entry.getKey(), entry.getValue());
-            sdkCertList.add(sdkCertInfo);
-        }
-        return sdkCertList;
-    }
-    
+
     /**
      * get front's sslCryptoType
      */
