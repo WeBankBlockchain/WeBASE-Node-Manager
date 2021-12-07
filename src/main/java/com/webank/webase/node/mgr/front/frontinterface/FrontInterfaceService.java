@@ -334,7 +334,7 @@ public class FrontInterfaceService {
 
         TransactionReceipt transReceipt = getTransReceipt(groupId, transHash);
         String contractAddress = transReceipt.getContractAddress();
-        log.debug("end getAddressByHash. contractAddress{}", contractAddress);
+        log.debug("end getAddressByHash. contractAddress:{}", contractAddress);
         return contractAddress;
     }
 

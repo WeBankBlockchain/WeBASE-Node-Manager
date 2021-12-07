@@ -26,7 +26,6 @@ import lombok.Data;
 public class AccountInfo {
     @NotBlank
     private String account;
-    @NotBlank
     private String accountPwd;
     @NotNull
     private Integer roleId;
