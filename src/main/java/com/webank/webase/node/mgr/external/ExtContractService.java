@@ -76,7 +76,8 @@ public class ExtContractService {
         }
         // ignore precompiled contract address
         if (contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED)
-        || contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED_NO_PREFIX)) {
+        || contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED_NO_PREFIX)
+        || StringUtils.isBlank(contractAddress)) {
             log.debug("ignore precompiled contract:{}", contractAddress);
             return;
         }
