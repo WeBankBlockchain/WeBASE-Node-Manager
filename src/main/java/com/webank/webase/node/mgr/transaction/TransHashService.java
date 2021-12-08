@@ -97,6 +97,7 @@ public class TransHashService {
 
     /**
      * query count of trans by minus max and min trans_number
+     * todo 数据正在删除时，读取数目不准确
      */
     public Integer queryCountOfTranByMinus(String groupId)
             throws NodeMgrException {
