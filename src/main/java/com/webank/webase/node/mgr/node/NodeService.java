@@ -200,15 +200,7 @@ public class NodeService {
         List<NodeStatusInfo> nodeStatusInfoList = frontInterface.getNodeStatusList(groupId);
         for (TbNode tbNode : nodeList) {
             String nodeId = tbNode.getNodeId();
-            LocalDateTime modifyTime = tbNode.getModifyTime();
-            LocalDateTime createTime = tbNode.getCreateTime();
 
-//            Duration duration = Duration.between(modifyTime, LocalDateTime.now());
-//            Long subTime = duration.toMillis();
-//            if (subTime < (nodeCount * 1000 + EXT_CHECK_NODE_WAIT_MIN_MILLIS) && createTime.isBefore(modifyTime)) {
-//                log.warn("checkNodeStatus jump over. for time internal subTime:{}", subTime);
-//                return;
-//            }
             NodeStatusInfo nodeStatusInfo = nodeStatusInfoList.stream()
                 .filter(status -> status.getNodeId().equalsIgnoreCase(nodeId))
                 .findFirst().orElse(null);
@@ -217,7 +209,7 @@ public class NodeService {
                 continue;
             }
             tbNode.setBlockNumber(new BigInteger(String.valueOf(nodeStatusInfo.getBlockNumber())));
-            tbNode.setPbftView(new BigInteger(String.valueOf(nodeStatusInfo.getPbftView())));
+//            tbNode.setPbftView(new BigInteger(String.valueOf(nodeStatusInfo.getPbftView())));
             tbNode.setNodeActive(nodeStatusInfo.getStatus() == 1 ? DataStatus.NORMAL.getValue() : DataStatus.INVALID.getValue());
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
