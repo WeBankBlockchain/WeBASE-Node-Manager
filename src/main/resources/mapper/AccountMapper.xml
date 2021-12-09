@@ -44,16 +44,16 @@
 
   <update id="updateAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
 		update tb_account_info set modify_time=now()
-    <if test="login_fail_time != null and login_fail_time != ''">
+    <if test="loginFailTime != null and loginFailTime != ''">
       ,login_fail_time = #{loginFailTime}
     </if>
-    <if test="account_pwd != null and account_pwd != ''">
+    <if test="accountPwd != null and accountPwd != ''">
       ,account_pwd = #{accountPwd}
     </if>
-    <if test="role_id != null and role_id != ''">
+    <if test="roleId != null and roleId != ''">
       ,role_id = #{roleId}
     </if>
-    <if test="account_status != null and account_status != ''">
+    <if test="accountStatus != null and accountStatus != ''">
       ,account_status = #{accountStatus}
     </if>
     <if test="description != null and description != ''">
