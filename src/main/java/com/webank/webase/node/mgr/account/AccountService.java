@@ -132,7 +132,6 @@ public class AccountService {
         }
         accountRow.setRoleId(accountInfo.getRoleId());
         accountRow.setEmail(accountInfo.getEmail());
-        //accountRow.setDescription(accountInfo.getDescription());
 
         // update account info
         Integer affectRow = accountMapper.updateAccountRow(accountRow);
