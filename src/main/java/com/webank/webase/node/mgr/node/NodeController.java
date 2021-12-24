@@ -94,6 +94,34 @@ public class NodeController {
     }
 
     /**
+     * get node info detail
+     */
+    @GetMapping(value = "/nodeInfo/{groupId}/{nodeId}")
+    public BaseResponse getNodeInfo(@PathVariable("groupId") String groupId,
+        @PathVariable("nodeId") String nodeId)
+        throws NodeMgrException {
+
+        Instant startTime = Instant.now();
+        log.info("start getNodeInfo startTime:{} groupId:{},nodeId:{}",
+            startTime.toEpochMilli(), groupId, nodeId);
+
+        // param
+        NodeParam param = new NodeParam();
+        param.setGroupId(groupId);
+        param.setNodeId(nodeId);
+
+        // query node row
+        TbNode tbNode = nodeService.queryNodeInfo(param);
+
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(tbNode);
+
+        log.info("end getNodeInfo useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
      * get node info.
      */
     @GetMapping(value = "/nodeInfo/{groupId}")
@@ -118,25 +146,6 @@ public class NodeController {
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
-
-    /**
-     * get node id list
-     */
-    //todo check
-/*    @GetMapping("/nodeIdList/{groupId}")
-    public BaseResponse getNodeIdList(@PathVariable("groupId") String groupId) {
-        Instant startTime = Instant.now();
-        log.info("start getNodeIdList startTime:{} groupId:{}",
-                startTime.toEpochMilli(), groupId);
-        List<String> res = nodeService.getNodeIdListService(groupId);
-
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        baseResponse.setData(res);
-
-        log.info("end getNodeIdList useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
-        return baseResponse;
-    }*/
 
     /**
      * update tb_node info of city, agency, ip etc.
@@ -174,4 +183,6 @@ public class NodeController {
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
+
+
 }
