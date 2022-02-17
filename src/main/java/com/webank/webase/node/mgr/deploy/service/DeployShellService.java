@@ -49,6 +49,8 @@ public class DeployShellService {
 
     /**
      * build_chain.sh
+     * 重要！！！build_chain脚本中, main()的output_dir去掉了$pwd/的前缀，采用了相对路径
+     * 即：output_dir="${output_dir}"
      * @param encryptType
      * @param ipLines
      * @param chainName
