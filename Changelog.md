@@ -1,3 +1,20 @@
+### v1.5.4(2022-02-22)
+
+**Add**
+- 增加查询是否开启鉴权接口
+
+**Fix**
+- 优化合约仓库加载方式，通过`conf/warehouse`目录中的.json文件加载合约模板
+- 修复可视化部署中检测localhost的误判
+- 修复根据nodeId获取节点信息接口入参
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Web v1.5.4+
+- WeBASE-Front v1.5.1+
+- WeBASE-Sign v1.5.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
 
 ### v1.5.3(2021-09-27)
 
