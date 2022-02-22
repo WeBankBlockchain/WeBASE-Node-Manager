@@ -1,0 +1,79 @@
+[
+  {
+    "id" : 1,
+    "warehouseName" : "工具箱",
+    "warehouseNameEn" : "Toolbox",
+    "type" : 1,
+    "warehouseIcon" : "toolboxId",
+    "description" : "工具箱中有常用的工具合约",
+    "descriptionEn" : "Toolbox Contract suite",
+    "warehouseDetail" : "工具箱中有常用的工具合约",
+    "warehouseDetailEn" : "Toolbox Contract suite"
+  },
+  {
+    "id" : 2,
+    "warehouseName" : "存证应用",
+    "warehouseNameEn" : "Evidence",
+    "type" : 2,
+    "warehouseIcon" : "evidenceId",
+    "description" : "一套区块链存证合约，实现区块链存证、取证",
+    "descriptionEn" : "Evidence Contract suite",
+    "warehouseDetail" : "一套区块链存证合约，实现区块链存证、取证",
+    "warehouseDetailEn" : "Evidence Contract suite"
+  },
+  {
+    "id" : 3,
+    "warehouseName" : "积分应用",
+    "warehouseNameEn" : "Points",
+    "type" : 3,
+    "warehouseIcon" : "pointsId",
+    "description" : "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+    "descriptionEn" : "Points Contract suite",
+    "warehouseDetail" : "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+    "warehouseDetailEn" : "Points Contract suite"
+  },
+  {
+    "id" : 4,
+    "warehouseName" : "SmartDev存证应用",
+    "warehouseNameEn" : "Smart_Dev_Evidence",
+    "type" : 4,
+    "warehouseIcon" : "evidenceId",
+    "description" : "Smart-Dev-Contracts仓库中的存证应用模板",
+    "descriptionEn" : "Smart-Dev-Contract's Evidence Contract suite of business_template",
+    "warehouseDetail" : "Smart-Dev-Contracts仓库中的存证应用模板",
+    "warehouseDetailEn" : "Smart-Dev-Contract's Evidence Contract suite of business_template"
+  },
+  {
+    "id" : 5,
+    "warehouseName" : "资产应用",
+    "warehouseNameEn" : "Asset",
+    "type" : 4,
+    "warehouseIcon" : "pointsId",
+    "description" : "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
+    "descriptionEn" : "Asset Contract suite",
+    "warehouseDetail" : "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
+    "warehouseDetailEn" : "Asset Contract suite"
+  },
+  {
+    "id" : 6,
+    "warehouseName" : "溯源应用",
+    "warehouseNameEn" : "Traceability",
+    "type" : 5,
+    "warehouseIcon" : "traceId",
+    "description" : "一套溯源应用合约模板（Smart-Dev-Contract）",
+    "descriptionEn" : "Traceability Contract Suite",
+    "warehouseDetail" : "一套溯源应用合约模板（Smart-Dev-Contract）",
+    "warehouseDetailEn" : "Traceability Contract suite"
+  },
+  {
+    "id" : 7,
+    "warehouseName" : "代理合约模板",
+    "warehouseNameEn" : "Proxy",
+    "type" : 5,
+    "warehouseIcon" : "toolboxId",
+    "description" : "一套可升级的业务、数据分离的代理合约模板",
+    "descriptionEn" : "Proxy Contract Suite",
+    "warehouseDetail" : "一套可升级的业务、数据分离的代理合约模板",
+    "warehouseDetailEn" : "Proxy Contract Suite"
+  }
+]

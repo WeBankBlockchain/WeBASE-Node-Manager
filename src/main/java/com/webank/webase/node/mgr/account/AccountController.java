@@ -129,6 +129,7 @@ public class AccountController extends BaseController {
 
     /**
      * update account info.
+     * only admin can request this api
      */
     @PutMapping(value = "/accountInfo")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)

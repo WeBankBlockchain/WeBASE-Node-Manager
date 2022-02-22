@@ -94,19 +94,21 @@ public class NodeController {
     }
 
     /**
-     * get node info.
+     * get node info detail
      */
-    @GetMapping(value = "/nodeInfo/{groupId}")
-    public BaseResponse getNodeInfo(@PathVariable("groupId") Integer groupId)
+    @GetMapping(value = "/nodeInfo/{groupId}/{nodeId}")
+    public BaseResponse getNodeInfo(@PathVariable("groupId") Integer groupId,
+        @PathVariable("nodeId") String nodeId)
         throws NodeMgrException {
 
         Instant startTime = Instant.now();
-        log.info("start addNodeInfo startTime:{} groupId:{}",
-            startTime.toEpochMilli(), groupId);
+        log.info("start getNodeInfo startTime:{} groupId:{},nodeId:{}",
+            startTime.toEpochMilli(), groupId, nodeId);
 
         // param
         NodeParam param = new NodeParam();
         param.setGroupId(groupId);
+        param.setNodeId(nodeId);
 
         // query node row
         TbNode tbNode = nodeService.queryNodeInfo(param);
@@ -114,7 +116,7 @@ public class NodeController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         baseResponse.setData(tbNode);
 
-        log.info("end addNodeInfo useTime:{} result:{}",
+        log.info("end getNodeInfo useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
