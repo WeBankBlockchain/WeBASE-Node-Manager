@@ -6,6 +6,8 @@
 **Fix**
 - 优化合约仓库加载方式，通过`conf/warehouse`目录中的.json文件加载合约模板
 - 修复可视化部署中检测localhost的误判
+- 更新可视化部署的build_chain脚本
+- 修复查询event获取合约时重复的问题
 - 修复根据nodeId获取节点信息接口入参
 
 **兼容性**
