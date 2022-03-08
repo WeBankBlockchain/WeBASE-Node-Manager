@@ -235,7 +235,7 @@ public class FrontInterfaceService {
     /**
      * liquid related
      */
-    public BaseResponse getLiquidEnvFromSpecificFront(String frontIp, Integer frontPort) {
+    public BaseResponse checkLiquidEnvFromSpecificFront(String frontIp, Integer frontPort) {
         String groupId = String.valueOf(Integer.MAX_VALUE);
         return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_CONTRACT_LIQUID_CHECK,
             BaseResponse.class);

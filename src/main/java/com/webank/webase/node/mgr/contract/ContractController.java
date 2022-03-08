@@ -23,25 +23,9 @@ import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.contract.entity.*;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.contract.entity.Contract;
-import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
-import com.webank.webase.node.mgr.contract.entity.QueryCnsParam;
-import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
-import com.webank.webase.node.mgr.contract.entity.ReqCopyContracts;
-import com.webank.webase.node.mgr.contract.entity.ReqListContract;
-import com.webank.webase.node.mgr.contract.entity.ReqQueryCns;
-import com.webank.webase.node.mgr.contract.entity.ReqQueryCnsList;
-import com.webank.webase.node.mgr.contract.entity.ReqRegisterCns;
-import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
-import com.webank.webase.node.mgr.contract.entity.TbCns;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.contract.entity.TbContractPath;
-import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import java.time.Duration;
 import java.time.Instant;
@@ -486,5 +470,49 @@ public class ContractController extends BaseController {
         log.info("end queryDeployAddress. useTime:{} managerList:{}",
             Duration.between(startTime, Instant.now()).toMillis(), managerList);
         return new BaseResponse(ConstantCode.SUCCESS, managerList);
+    }
+
+
+    /**
+     * compile liquid
+     */
+    @PostMapping(value = "/liquid/compile")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse compileLiquid(@RequestBody @Valid ReqCompileLiquid param,
+                                       BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start compileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(param));
+
+        BaseResponse response = contractService.compileLiquidContract(param);
+        log.info("end compileLiquid useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(response));
+
+        return response;
+    }
+
+
+    /**
+     * compile liquid
+     */
+    @PostMapping(value = "/liquid/compile/check")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse checkCompileLiquid(@RequestBody @Valid ReqCompileLiquid param,
+                                      BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start checkCompileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(param));
+
+        BaseResponse response = contractService.checkCompileLiquid(param);
+
+        log.info("end checkCompileLiquid useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(response));
+
+        return response;
     }
 }

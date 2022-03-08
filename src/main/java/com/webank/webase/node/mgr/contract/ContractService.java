@@ -30,6 +30,9 @@ import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.external.ExtContractService;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
+import com.webank.webase.node.mgr.front.frontinterface.entity.ReqCompileTask;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.abi.AbiService;
@@ -88,8 +91,6 @@ public class  ContractService {
     private UserService userService;
     @Autowired
     private AbiService abiService;
-//    @Autowired
-//    private PermissionManageService permissionManageService;
     @Autowired
     private ContractPathService contractPathService;
     @Autowired
@@ -104,6 +105,8 @@ public class  ContractService {
     private GroupService groupService;
     @Autowired
     private ExtContractService extContractService;
+    @Autowired
+    private FrontService frontService;
 
     /**
      * add new contract data.
@@ -769,6 +772,33 @@ public class  ContractService {
         TbContract contract = this.queryContract(param);
         log.debug("end queryContractByGroupIdAndAddress contract:{}", contract);
         return contract;
+
+    }
+
+    public BaseResponse compileLiquidContract(ReqCompileLiquid reqCompileLiquid) {
+        int frontId = reqCompileLiquid.getFrontId();
+        TbFront tbFront = frontService.getById(frontId);
+        String frontIp = tbFront.getFrontIp();
+        int frontPort = tbFront.getFrontPort();
+        // todo 缓存不用每次都check
+        frontInterface.checkLiquidEnvFromSpecificFront(frontIp, frontPort);
+        // compile
+        return frontInterface.compileLiquidFromFront(frontIp, frontPort, frontId, reqCompileLiquid);
+        // todo update tb_contract
+        // return contract
+    }
+
+    public BaseResponse checkCompileLiquid(ReqCompileLiquid reqCompileLiquid) {
+        int frontId = reqCompileLiquid.getFrontId();
+        TbFront tbFront = frontService.getById(frontId);
+        String frontIp = tbFront.getFrontIp();
+        int frontPort = tbFront.getFrontPort();
+        frontInterface.checkLiquidEnvFromSpecificFront(frontIp, frontPort);
+        // compile
+        return frontInterface.checkCompileLiquidFromFront(frontIp, frontPort, frontId,
+            reqCompileLiquid.getGroupId(), reqCompileLiquid.getContractPath(), reqCompileLiquid.getContractName());
+        // todo update tb_contract
+        // return contract
 
     }
 }
