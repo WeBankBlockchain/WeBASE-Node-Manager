@@ -22,14 +22,12 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.cert.entity.SdkCertInfo;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.contract.entity.Contract;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
 import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
-import com.webank.webase.node.mgr.front.frontinterface.entity.NodeStatusInfo;
-import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
-import com.webank.webase.node.mgr.front.frontinterface.entity.ReqSdkConfig;
-import com.webank.webase.node.mgr.front.frontinterface.entity.RspStatBlock;
+import com.webank.webase.node.mgr.front.frontinterface.entity.*;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
@@ -234,7 +232,42 @@ public class FrontInterfaceService {
         Integer encryptType = getFromSpecificFront(groupId, frontIp, frontPort,  FrontRestTools.URI_ENCRYPT_TYPE, Integer.class);
         return encryptType;
     }
+    /**
+     * liquid related
+     */
+    public BaseResponse getLiquidEnvFromSpecificFront(String frontIp, Integer frontPort) {
+        String groupId = String.valueOf(Integer.MAX_VALUE);
+        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_CONTRACT_LIQUID_CHECK,
+            BaseResponse.class);
+    }
 
+    public BaseResponse compileLiquidFromFront(String frontIp, Integer frontPort, Integer frontId,
+                                               Contract param) {
+        // 拼接frontid，避免路径在front的文件里冲突
+        String contractPath = param.getContractPath();
+        param.setContractPath(contractPath + frontId);
+        log.debug("start compileLiquidFromFront frontIp:{} frontPort:{} param:{}", frontIp, frontPort, JsonTools.toJSONString(param));
+
+        BaseResponse response = requestSpecificFront(param.getGroupId(), frontIp, frontPort,
+            HttpMethod.POST, FrontRestTools.URI_CONTRACT_LIQUID_COMPILE, param, BaseResponse.class);
+
+        log.debug("end generateGroup, response:{}", response);
+        return response;
+    }
+
+    // todo contract path要追加一个frontId
+    public BaseResponse checkCompileLiquidFromFront(String frontIp, Integer frontPort, Integer frontId,
+                                                    String groupId, String contractPath, String contractName) {
+        log.debug("start checkCompileLiquidFromFront frontIp:{} frontPort:{},groupId:{},contractPath:{},contractName:{}", frontIp, frontPort,
+            groupId, contractPath, contractName);
+        // 拼接frontid，避免路径在front的文件里冲突
+        ReqCompileTask param = new ReqCompileTask(groupId, contractPath + frontId, contractName);
+        BaseResponse response = requestSpecificFront(groupId, frontIp, frontPort,
+            HttpMethod.POST, FrontRestTools.URI_CONTRACT_LIQUID_COMPILE_CHECK, param, BaseResponse.class);
+
+        log.debug("end checkCompileLiquidFromFront, response:{}", response);
+        return response;
+    }
     /**
      * get peers.
      */

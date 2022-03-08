@@ -103,6 +103,11 @@ public class FrontRestTools {
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_REGISTER_CNS = "contract/registerCns";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
+    // liquid contract
+    public static final String URI_CONTRACT_LIQUID_CHECK = "contract/liquid/check";
+    public static final String URI_CONTRACT_LIQUID_COMPILE = "contract/liquid/compile";
+    public static final String URI_CONTRACT_LIQUID_COMPILE_CHECK = "contract/liquid/compile/check";
+
     public static final String URI_SEND_TRANSACTION_WITH_SIGN = "trans/handleWithSign";
     public static final String URI_CHAIN = "chain";
 
