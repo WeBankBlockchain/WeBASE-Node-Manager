@@ -142,6 +142,8 @@ public class  ContractService {
         //add to database.
         TbContract tbContract = new TbContract();
         BeanUtils.copyProperties(contract, tbContract);
+        // todo 是否会copy失败
+        tbContract.setIsWasm(contract.getIsWasm() ? 1 : 0);
         log.debug("newContract save contract");
         contractMapper.add(tbContract);
         // save contract path

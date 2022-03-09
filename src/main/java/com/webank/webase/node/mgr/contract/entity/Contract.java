@@ -40,7 +40,7 @@ public class Contract {
     /**
      * false-solidity, true-liquid
      */
-    private boolean isWasm = false;
+    private Boolean isWasm = false;
 
     public Contract(String groupId, String contractName, String contractPath,
         String account) {
