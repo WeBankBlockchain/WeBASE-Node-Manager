@@ -49,5 +49,6 @@ public class DeployInputParam {
     @NotBlank
     private String bytecodeBin;
     private List<Object> constructorParams;
+    private Boolean isWasm = false;
 }
 

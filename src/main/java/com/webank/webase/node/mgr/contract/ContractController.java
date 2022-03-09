@@ -485,13 +485,16 @@ public class ContractController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start compileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(param));
-
-        BaseResponse response = contractService.compileLiquidContract(param);
+        if (param.getContractId() == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
+        }
+        RspCompileTask rspCompileTask = contractService.compileLiquidContract(param);
+        baseResponse.setData(rspCompileTask);
         log.info("end compileLiquid useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
-            JsonTools.toJSONString(response));
+            JsonTools.toJSONString(baseResponse));
 
-        return response;
+        return baseResponse;
     }
 
 
@@ -503,16 +506,19 @@ public class ContractController extends BaseController {
     public BaseResponse checkCompileLiquid(@RequestBody @Valid ReqCompileLiquid param,
                                       BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start checkCompileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(param));
-
-        BaseResponse response = contractService.checkCompileLiquid(param);
-
+        if (param.getContractId() == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
+        }
+        RspCompileTask rspCompileTask = contractService.checkCompileLiquid(param);
+        baseResponse.setData(rspCompileTask);
         log.info("end checkCompileLiquid useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
-            JsonTools.toJSONString(response));
+            JsonTools.toJSONString(baseResponse));
 
-        return response;
+        return baseResponse;
     }
 }

@@ -15,18 +15,29 @@
  */
 package com.webank.webase.node.mgr.contract.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
-import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
+/**
+ * 保存编译的任务，单个合约只允许编译一次
+ * 编译的任务完成不删除，只要不等于running，group_contractPath_contractName 与合约项目的目录名保持一致
+ * @author lining
+ */
 @Data
-@AllArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class ReqCompileLiquid extends Contract {
-    @NotNull
-    private Integer frontId;
+public class RspCompileTask {
+    private static final long serialVersionUID = 3286516914027062195L;
+    private String groupId;
+
+    private String contractName;
+    private String contractPath;
+    /**
+     * compile status: 1-running, 2-success, 3-fail
+     */
+    private Integer status;
+    private String abi;
+    private String bin;
+    private String description;
+    private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
 }
