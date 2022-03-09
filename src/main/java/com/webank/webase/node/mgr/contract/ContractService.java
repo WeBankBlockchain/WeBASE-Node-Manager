@@ -399,6 +399,7 @@ public class  ContractService {
         params.put("abiInfo", abiArray);
         params.put("bytecodeBin", inputParam.getBytecodeBin());
         params.put("funcParam", inputParam.getConstructorParams() == null ? new ArrayList<>() : inputParam.getConstructorParams());
+        params.put("isWasm", inputParam.getIsWasm());
 
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
