@@ -55,12 +55,12 @@ public class SysConfigController extends BaseController {
     /**
      * get system config list 透传front的BaseResponse
      */
+    @ApiImplicitParam(name = "groupId", value = "groupId info", required = true)
     @GetMapping("config/list")
-    @ApiOperation(value = "querySystemConfigList", notes = "query system config list")
-    public Object getSysConfigList(@RequestParam String groudId) {
+    public BaseResponse getSysConfigList(@RequestParam(defaultValue = "group") String groupId) {
         Instant startTime = Instant.now();
         log.info("start getSysConfigList startTime:{}", startTime.toEpochMilli());
-        Object result = SysConfigServiceInWebase.querySysConfigByGroupId(groudId);
+        Object result = SysConfigServiceInWebase.querySysConfigByGroupId(groupId);
         log.info("end getSysConfigList useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(result));
         return new BaseResponse(ConstantCode.SUCCESS, result);
