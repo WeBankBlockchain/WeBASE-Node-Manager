@@ -1,4 +1,4 @@
-package com.webank.webase.node.mgr.precompiled.entity;
+package com.webank.webase.node.mgr.precntauth.authmanager.base;
 
 import lombok.Data;
 

@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.precompiled.entity;
+package com.webank.webase.node.mgr.precntauth.authmanager.base;
 
 import lombok.Data;
 
 @Data
-public class SysConfigParam {
-
-//    private Long id;
-    private String groupId;
-    private String fromAddress;
-    private String signUserId;
-    private String configKey;
-    private String configValue;
+public class PermissionState {
+    private int deployAndCreate;
+    private int cns;
+    private int sysConfig;
+    private int node;
 }
