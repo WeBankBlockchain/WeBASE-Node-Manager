@@ -330,6 +330,7 @@ CREATE TABLE IF NOT EXISTS tb_abi (
   contract_bin mediumtext NOT NULL COMMENT '合约ABI的runtime-bin',
   create_time datetime DEFAULT NULL COMMENT '合约ABI的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '合约ABI的修改时间',
+  is_wasm tinyint(4) DEFAULT '0' COMMENT '是否为liquid合约(0-solidity合约，1-liquid合约)',
   PRIMARY KEY (abi_id),
   UNIQUE KEY unique_address (group_id,account,contract_address)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约ABI表';
