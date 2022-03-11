@@ -485,9 +485,6 @@ public class ContractController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start compileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(param));
-        if (param.getContractId() == null) {
-            throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
-        }
         RspCompileTask rspCompileTask = contractService.compileLiquidContract(param);
         baseResponse.setData(rspCompileTask);
         log.info("end compileLiquid useTime:{} result:{}",
@@ -510,9 +507,6 @@ public class ContractController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start checkCompileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(param));
-        if (param.getContractId() == null) {
-            throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
-        }
         RspCompileTask rspCompileTask = contractService.checkCompileLiquid(param);
         baseResponse.setData(rspCompileTask);
         log.info("end checkCompileLiquid useTime:{} result:{}",

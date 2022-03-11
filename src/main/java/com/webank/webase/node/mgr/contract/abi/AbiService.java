@@ -84,6 +84,7 @@ public class AbiService {
         String groupId = param.getGroupId();
         String account = param.getAccount();
         String contractAddress = param.getContractAddress();
+        int isWasm = param.getIsWasm() ? 1 : 0;
         String contractAbiStr;
         try {
             contractAbiStr = JsonTools.toJSONString(param.getContractAbi());
@@ -96,7 +97,7 @@ public class AbiService {
         // check name and address of abi not exist
         checkAbiExist(groupId, account, contractAddress);
         // add
-        addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, contractBin);
+        addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, contractBin, isWasm);
 //        addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, "0x0");
         // save and update method
         methodService.saveMethod(groupId, contractAbiStr, ContractType.GENERALCONTRACT.getValue());
@@ -247,7 +248,7 @@ public class AbiService {
         return countOfAbi(param);
     }
 
-    public void saveAbiFromContractId(int contractId, String contractAddress) throws NodeMgrException {
+    public void saveAbiFromContractId(int contractId, String contractAddress, String contractBin) throws NodeMgrException {
         log.info("saveAbiFromContractId contractId:{},contractAddress:{}", contractId, contractAddress);
         TbContract tbContract = contractService.queryByContractId(contractId);
 
@@ -257,12 +258,11 @@ public class AbiService {
         String contractName = tbContract.getContractName();
         // check name and address of abi not exist
         checkAbiExist(groupId, account, contractAddress);
-        String contractBin = tbContract.getContractBin();
         String contractAbiStr = tbContract.getContractAbi();
         log.info("saveAbiFromContractId of re-deploying contractId:{},contractAddress:{}",
             contractId, contractAddress);
         // add
-        addAbiToDb(groupId, contractName, account, contractAddress, contractAbiStr, contractBin);
+        addAbiToDb(groupId, contractName, account, contractAddress, contractAbiStr, contractBin, tbContract.getIsWasm());
     }
     
     /**
@@ -287,7 +287,7 @@ public class AbiService {
         log.info("saveAbiFromAppContract of contractName:{} contractAddress:{}", 
                 contractName, contractAddress);
         // add
-        addAbiToDb(groupId, contractName, account, contractAddress, contractAbiStr, contractBin);
+        addAbiToDb(groupId, contractName, account, contractAddress, contractAbiStr, contractBin, tbContract.getIsWasm());
     }
     
     /**
@@ -301,7 +301,7 @@ public class AbiService {
      * @param contractBin
      */
     private void addAbiToDb(String groupId, String contractName, String account, String contractAddress,
-            String contractAbiStr, String contractBin) {
+            String contractAbiStr, String contractBin, int isWasm) {
         AbiInfo saveAbi = new AbiInfo();
         saveAbi.setGroupId(groupId);
         saveAbi.setContractAddress(contractAddress);
@@ -312,6 +312,7 @@ public class AbiService {
         saveAbi.setCreateTime(now);
         saveAbi.setModifyTime(now);
         saveAbi.setAccount(account);
+        saveAbi.setIsWasm(isWasm);
         abiMapper.add(saveAbi);
     }
 
