@@ -16,16 +16,15 @@
 package node.mgr.test.contract;
 
 import com.webank.webase.node.mgr.contract.ContractService;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.ReqCompileLiquid;
-import com.webank.webase.node.mgr.contract.entity.RspCompileTask;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
+import com.webank.webase.node.mgr.contract.entity.*;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import node.mgr.test.base.TestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class LiquidContractTest extends TestBase {
   @Autowired
@@ -96,5 +95,32 @@ public class LiquidContractTest extends TestBase {
     param.setContractAddress("/test_4_3");
     TbContract contract1 = contractService.deployContract(param);
     System.out.println("contract address " + contract1.getContractAddress());
+  }
+
+  @Test
+  public void testSetAndCallLiquid() {
+    TbContract contract = contractService.queryByContractId(contractId);
+
+    TransactionInputParam param = new TransactionInputParam();
+    param.setContractAddress("/test_4_3");
+    param.setIsWasm(true);
+    param.setUser(user);
+    param.setGroupId(groupId);
+    param.setContractId(contractId);
+    param.setContractId(contractId);
+    param.setContractName(contractName);
+    param.setContractAbi(JsonTools.toList(contract.getContractAbi()));
+
+    param.setFuncName("set");
+    param.setFuncParam(Collections.singletonList("Bob1"));
+
+    Object res1 = contractService.sendTransaction(param);
+    System.out.println("res1 " + JsonTools.objToString(res1));
+
+    param.setFuncName("get");
+    param.setFuncParam(new ArrayList<>());
+
+    Object res2 = contractService.sendTransaction(param);
+    System.out.println("res2 " + JsonTools.objToString(res2));
   }
 }
