@@ -246,27 +246,37 @@ public class FrontInterfaceService {
                                                  Contract param) {
         // 拼接frontid，避免路径在front的文件里冲突
         String contractPath = param.getContractPath();
-        param.setContractPath(contractPath + frontId);
-        log.debug("start compileLiquidFromFront frontIp:{} frontPort:{} param:{}", frontIp, frontPort, JsonTools.toJSONString(param));
+        if ("/".equals(contractPath)) {
+            param.setContractPath("mgr_" + frontId);
+        } else {
+            param.setContractPath("mgr_" + contractPath + frontId);
+        }
+        log.info("start compileLiquidFromFront frontIp:{} frontPort:{} param:{}", frontIp, frontPort, JsonTools.toJSONString(param));
 
         BaseResponse response = requestSpecificFront(param.getGroupId(), frontIp, frontPort,
             HttpMethod.POST, FrontRestTools.URI_CONTRACT_LIQUID_COMPILE, param, BaseResponse.class);
-
-        log.debug("end generateGroup, response:{}", response);
-        return (RspCompileTask) response.getData();
+        RspCompileTask task = JsonTools.stringToObj(JsonTools.toJSONString(response.getData()), RspCompileTask.class);
+        log.info("end compileLiquidFromFront, response:{}", response);
+        return task;
     }
 
     public RspCompileTask checkCompileLiquidFromFront(String frontIp, Integer frontPort, Integer frontId,
                                                     String groupId, String contractPath, String contractName) {
-        log.debug("start checkCompileLiquidFromFront frontIp:{} frontPort:{},groupId:{},contractPath:{},contractName:{}", frontIp, frontPort,
-            groupId, contractPath, contractName);
         // 拼接frontid，避免路径在front的文件里冲突
-        ReqCompileTask param = new ReqCompileTask(groupId, contractPath + frontId, contractName);
+        if ("/".equals(contractPath)) {
+            contractPath = "mgr_" + frontId;
+        } else {
+            contractPath = "mgr_" + contractPath + frontId;
+        }
+        log.info("start checkCompileLiquidFromFront frontIp:{} frontPort:{},groupId:{},contractPath:{},contractName:{}", frontIp, frontPort,
+            groupId, contractPath, contractName);
+        ReqCompileTask param = new ReqCompileTask(groupId, contractPath, contractName);
         BaseResponse response = requestSpecificFront(groupId, frontIp, frontPort,
             HttpMethod.POST, FrontRestTools.URI_CONTRACT_LIQUID_COMPILE_CHECK, param, BaseResponse.class);
+        RspCompileTask task = JsonTools.stringToObj(JsonTools.toJSONString(response.getData()), RspCompileTask.class);
 
-        log.debug("end checkCompileLiquidFromFront, response:{}", response);
-        return (RspCompileTask) response.getData();
+        log.info("end checkCompileLiquidFromFront, response:{}", response);
+        return task;
     }
     /**
      * get peers.
