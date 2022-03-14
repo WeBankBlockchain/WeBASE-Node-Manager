@@ -15,10 +15,7 @@
  */
 package com.webank.webase.node.mgr.contract.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,6 +23,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public class ReqCompileLiquid extends Contract {
     @NotNull
     private Integer frontId;
