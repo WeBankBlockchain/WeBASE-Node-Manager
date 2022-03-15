@@ -190,7 +190,7 @@ public class AbiService {
         }
         String binOnChain;
         try {
-            binOnChain = frontInterfaceService.getCodeFromFront(groupId, contractAddress, BigInteger.ZERO);
+            binOnChain = frontInterfaceService.getCodeV2FromFront(groupId, contractAddress, BigInteger.ZERO);
         } catch (Exception e) {
             log.error("fail getAddressRuntimeBin.", e);
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);

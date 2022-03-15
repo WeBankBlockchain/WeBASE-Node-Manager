@@ -385,6 +385,7 @@ public class FrontInterfaceService {
     /**
      * get code from front.
      */
+    @Deprecated
     public String getCodeFromFront(String groupId, String contractAddress, BigInteger blockNumber)
             throws NodeMgrException {
         log.debug("start getCodeFromFront. groupId:{} contractAddress:{} blockNumber:{}", groupId,
@@ -393,6 +394,23 @@ public class FrontInterfaceService {
         String code = frontRestTools.getForEntity(groupId, uri, String.class);
 
         log.debug("end getCodeFromFront:{}", code);
+        return code;
+    }
+
+    /**
+     * get code from front by get param (not path param
+     */
+    public String getCodeV2FromFront(String groupId, String contractAddress, BigInteger blockNumber)
+            throws NodeMgrException {
+        log.debug("start getCodeV2FromFront. groupId:{} contractAddress:{} blockNumber:{}", groupId,
+                contractAddress, blockNumber);
+        Map<String, String> map = new HashMap<>();
+        map.put("address", contractAddress);
+        map.put("blockNumber", blockNumber.toString(10));
+        String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CODE_V2, map);
+        String code = frontRestTools.getForEntity(groupId, uri, String.class);
+
+        log.debug("end getCodeV2FromFront:{}", code);
         return code;
     }
 
