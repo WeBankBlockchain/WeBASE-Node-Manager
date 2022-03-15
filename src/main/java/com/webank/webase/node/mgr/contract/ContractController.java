@@ -32,6 +32,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
+
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.codec.datatypes.Address;
@@ -470,6 +472,23 @@ public class ContractController extends BaseController {
         log.info("end queryDeployAddress. useTime:{} managerList:{}",
             Duration.between(startTime, Instant.now()).toMillis(), managerList);
         return new BaseResponse(ConstantCode.SUCCESS, managerList);
+    }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "check", notes = "check cargo liquid env")
+    @GetMapping(value = "/liquid/check/{frontId}")
+    public BaseResponse checkLiquidEnv(@PathVariable("frontId") Integer frontId) {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start checkLiquidEnv startTime:{} frontId:{}", startTime.toEpochMilli(),
+            frontId);
+        contractService.checkFrontLiquidEnv(frontId);
+        log.info("end checkLiquidEnv useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
     }
 
 
