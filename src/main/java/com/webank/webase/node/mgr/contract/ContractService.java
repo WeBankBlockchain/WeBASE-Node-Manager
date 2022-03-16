@@ -243,7 +243,7 @@ public class  ContractService {
         // bind contract address
         String address = contract.getContractAddress();
         if (address != null) {
-            if (address.length() != CONTRACT_ADDRESS_LENGTH) {
+            if (!contract.getIsWasm() && address.length() != CONTRACT_ADDRESS_LENGTH) {
                 log.warn("fail updateContract address. inputAddress:{}", address);
                 throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
             }
@@ -618,7 +618,7 @@ public class  ContractService {
             log.info("ignore sendAbi. inputAddress:{} localAddress:{}", address, localAddress);
             return;
         }
-        if (address.length() != CONTRACT_ADDRESS_LENGTH) {
+        if (contract.getIsWasm() != 1 && address.length() != CONTRACT_ADDRESS_LENGTH) {
             log.warn("fail sendAbi. inputAddress:{}", address);
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }

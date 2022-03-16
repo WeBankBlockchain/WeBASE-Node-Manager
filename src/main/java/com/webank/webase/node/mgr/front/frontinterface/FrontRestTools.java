@@ -89,6 +89,7 @@ public class FrontRestTools {
     public static final String URI_GROUP_NODE_INFO = "web3/groupNodeInfo";
     public static final String URI_NODE_STATUS_LIST = "web3/nodeStatusList";
     public static final String URI_ENCRYPT_TYPE = "web3/encrypt";
+    public static final String URI_IS_WASM = "web3/isWasm";
 
     // config sdk
 

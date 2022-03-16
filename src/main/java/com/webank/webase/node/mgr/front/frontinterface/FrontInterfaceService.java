@@ -233,6 +233,12 @@ public class FrontInterfaceService {
         Integer encryptType = getFromSpecificFront(groupId, frontIp, frontPort,  FrontRestTools.URI_ENCRYPT_TYPE, Integer.class);
         return encryptType;
     }
+
+    public Boolean getIsWasmFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
+        Boolean encryptType = getFromSpecificFront(groupId, frontIp, frontPort,  FrontRestTools.URI_IS_WASM, Boolean.class);
+        return encryptType;
+    }
+
     /**
      * liquid related
      */
