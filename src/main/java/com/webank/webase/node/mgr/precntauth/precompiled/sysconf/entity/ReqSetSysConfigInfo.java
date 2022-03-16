@@ -1,5 +1,5 @@
-/**
- * Copyright 2014-2021 the original author or authors.
+/*
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.precompiled.entity;
+package com.webank.webase.node.mgr.precntauth.precompiled.sysconf.entity;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 
-
+/**
+ * handle POST request to manage system config value
+ * check param's validation
+ */
 @Data
-public class ConsensusHandle {
+public class ReqSetSysConfigInfo {
+
     private String groupId;
-    /**
-     * sealer, observer, remove
-     */
-    private String nodeType;
-    @NotBlank
-    private String fromAddress;
     private String signUserId;
-    @NotBlank
-    private String nodeId;
-    private Integer weight;
+    private String configKey;
+    private String configValue;
+    private String fromAddress;
+
 }
