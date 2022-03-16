@@ -21,7 +21,7 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.1.18.RELEASE"
+def springboot_version="2.3.12.RELEASE"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
@@ -31,7 +31,7 @@ List springboot = [
 ]
 
 // cover old version
-def spring_version="5.2.15.RELEASE"
+def spring_version="5.2.19.RELEASE"
 List spring = [
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-aop:$spring_version",
@@ -113,13 +113,16 @@ dependencies {
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.67'
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+    implementation 'org.hibernate.validator:hibernate-validator:6.0.21.Final'
     // cover old version
     compile 'com.google.guava:guava:28.2-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
+    implementation 'org.yaml:snakeyaml:1.30'
 
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
-    compile ('com.github.docker-java:docker-java:3.2.1') {
+    compile ('com.github.docker-java:docker-java:3.2.13') {
         exclude group: 'io.netty'
         exclude group: 'org.bouncycastle'
     }
