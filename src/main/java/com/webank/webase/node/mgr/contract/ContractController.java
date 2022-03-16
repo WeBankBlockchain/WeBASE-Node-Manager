@@ -203,7 +203,7 @@ public class ContractController extends BaseController {
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(param));
         // 0x0000000000000000000000000000000000000000 address is invalid
-        if (Address.DEFAULT.toString().equals(param.getContractAddress())) {
+        if (!param.getIsWasm() && Address.DEFAULT.toString().equals(param.getContractAddress())) {
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
         // check version
