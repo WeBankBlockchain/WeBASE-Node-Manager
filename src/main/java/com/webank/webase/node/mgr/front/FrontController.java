@@ -227,7 +227,7 @@ public class FrontController extends BaseController {
 //
 
     @GetMapping("/isWasm/{frontId}/{groupId}")
-    public BaseResponse checkFrontConnected(@PathVariable("frontId") Integer frontId, @RequestParam("groupId") String groupId) {
+    public BaseResponse checkFrontConnected(@PathVariable("frontId") Integer frontId, @PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();
         log.info("start getFrontNodeConfig startTime:{},frontId:{},groupId:{}",
             startTime.toEpochMilli(), frontId, groupId);
