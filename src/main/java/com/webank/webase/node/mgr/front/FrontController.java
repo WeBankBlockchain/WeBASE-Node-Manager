@@ -227,12 +227,12 @@ public class FrontController extends BaseController {
 //
 
     @GetMapping("/isWasm/{frontId}/{groupId}")
-    public BaseResponse checkFrontConnected(@PathVariable("frontId") Integer frontId, @PathVariable("groupId") String groupId) {
+    public BaseResponse checkFrontWasmEnv(@PathVariable("frontId") Integer frontId, @PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();
-        log.info("start getFrontNodeConfig startTime:{},frontId:{},groupId:{}",
+        log.info("start checkFrontWasmEnv startTime:{},frontId:{},groupId:{}",
             startTime.toEpochMilli(), frontId, groupId);
         boolean isWasm = frontService.getFrontGroupIsWasm(frontId, groupId);
-        log.info("end getFrontNodeConfig useTime:{},connected:{}",
+        log.info("end checkFrontWasmEnv useTime:{},connected:{}",
             Duration.between(startTime, Instant.now()).toMillis(), isWasm);
         return new BaseResponse(ConstantCode.SUCCESS, isWasm);
     }
