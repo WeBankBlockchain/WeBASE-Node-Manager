@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2021 the original author or authors.
+ * Copyright 2014-2022 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,36 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webank.webase.node.mgr.contract.entity;
 
-package com.webank.webase.node.mgr.contract.abi.entity;
+import lombok.*;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
-/**
- * entity to import/update abi info
- */
 @Data
+@AllArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class ReqImportAbi {
-	private Integer abiId;
-	@NotBlank
-	private String account;
-	@NotNull
-	private String groupId;
-	@NotBlank
-	private String contractName;
-	@NotBlank
-	private String contractAddress;
-	@NotNull
-	private List<Object> contractAbi;
-
-	/**
-	 * 0-solidity, 1-liquid
-	 */
-	private Boolean isWasm = false;
+public class ReqCompileLiquid extends Contract {
+    @NotNull
+    private Integer frontId;
 }

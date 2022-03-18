@@ -19,30 +19,30 @@ import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContrac
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContractStore;
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BasePageResponse;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.CompileStatus;
 import com.webank.webase.node.mgr.base.enums.ContractStatus;
 import com.webank.webase.node.mgr.base.enums.ContractType;
-import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
-import com.webank.webase.node.mgr.external.ExtContractService;
-import com.webank.webase.node.mgr.external.entity.TbExternalContract;
-import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.Web3Tools;
 import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
+import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.contract.entity.*;
+import com.webank.webase.node.mgr.external.ExtContractService;
+import com.webank.webase.node.mgr.external.entity.TbExternalContract;
+import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.entity.TransactionParam;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.Web3Tools;
 import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import lombok.extern.log4j.Log4j2;
@@ -88,8 +88,6 @@ public class  ContractService {
     private UserService userService;
     @Autowired
     private AbiService abiService;
-//    @Autowired
-//    private PermissionManageService permissionManageService;
     @Autowired
     private ContractPathService contractPathService;
     @Autowired
@@ -104,6 +102,8 @@ public class  ContractService {
     private GroupService groupService;
     @Autowired
     private ExtContractService extContractService;
+    @Autowired
+    private FrontService frontService;
 
     /**
      * add new contract data.
@@ -143,6 +143,8 @@ public class  ContractService {
         //add to database.
         TbContract tbContract = new TbContract();
         BeanUtils.copyProperties(contract, tbContract);
+        // todo 是否会copy失败
+        tbContract.setIsWasm(contract.getIsWasm() ? 1 : 0);
         log.debug("newContract save contract");
         contractMapper.add(tbContract);
         // save contract path
@@ -241,18 +243,18 @@ public class  ContractService {
         // bind contract address
         String address = contract.getContractAddress();
         if (address != null) {
-            if (address.length() != CONTRACT_ADDRESS_LENGTH) {
+            if (!contract.getIsWasm() && address.length() != CONTRACT_ADDRESS_LENGTH) {
                 log.warn("fail updateContract address. inputAddress:{}", address);
                 throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
             }
             // check address on chain
-            abiService.getAddressRuntimeBin(contract.getGroupId(), address);
+            String runtimeBin = abiService.getAddressRuntimeBin(contract.getGroupId(), address);
             log.info("updateContract contract address:{} and deployed status", address);
             tbContract.setContractAddress(address);
             tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
             // contract already deploy, try to save in tb_abi
             try {
-                abiService.saveAbiFromContractId(contract.getContractId(), address);
+                abiService.saveAbiFromContractId(contract.getContractId(), address, runtimeBin);
             } catch (NodeMgrException e) {
                 log.warn("updateContract new address, already save abi of this contract");
             }
@@ -364,6 +366,16 @@ public class  ContractService {
     public TbContract deployContract(DeployInputParam inputParam) throws NodeMgrException {
         log.info("start deployContract. inputParam:{}", JsonTools.toJSONString(inputParam));
         String groupId = inputParam.getGroupId();
+        boolean isWasm = inputParam.getIsWasm();
+        String liquidAddress = inputParam.getContractAddress();
+        if (isWasm) {
+            if (StringUtils.isBlank(liquidAddress)) {
+                throw new NodeMgrException(ConstantCode.DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY);
+            }
+            if (!liquidAddress.startsWith("/")) {
+                throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+            }
+        }
 
         // check deploy permission
         //checkDeployPermission(groupId, inputParam.getUser());
@@ -381,7 +393,6 @@ public class  ContractService {
         verifyContractNameNotExist(inputParam.getGroupId(), inputParam.getContractPath(),
             inputParam.getContractName(), inputParam.getAccount(), inputParam.getContractId());
 
-//        List<ABIDefinition> abiArray = JsonTools.toJavaObjectList(inputParam.getContractAbi(), ABIDefinition.class);
         List<Object> abiArray = JsonTools.toJavaObjectList(inputParam.getContractAbi(), Object.class);
         if (abiArray == null || abiArray.isEmpty()) {
             log.info("fail deployContract. abi is empty");
@@ -396,10 +407,11 @@ public class  ContractService {
         params.put("groupId", groupId);
         params.put("signUserId", signUserId);
         params.put("contractName", contractName);
-        // params.put("version", version);
         params.put("abiInfo", abiArray);
         params.put("bytecodeBin", inputParam.getBytecodeBin());
         params.put("funcParam", inputParam.getConstructorParams() == null ? new ArrayList<>() : inputParam.getConstructorParams());
+        params.put("isWasm", isWasm);
+        params.put("contractAddress", liquidAddress);
 
         //deploy
         String contractAddress = frontRestTools.postForEntity(groupId,
@@ -408,8 +420,9 @@ public class  ContractService {
             log.error("fail deploy, contractAddress is empty");
             throw new NodeMgrException(ConstantCode.CONTRACT_DEPLOY_FAIL);
         }
+        String runtimeBin = abiService.getAddressRuntimeBin(groupId, contractAddress);
         // deploy success, old contract save in tb_abi
-        abiService.saveAbiFromContractId(inputParam.getContractId(), contractAddress);
+        abiService.saveAbiFromContractId(inputParam.getContractId(), contractAddress, runtimeBin);
 
         // get deploy user name
         String userName = userService.getUserNameByAddress(groupId, inputParam.getUser());
@@ -420,8 +433,8 @@ public class  ContractService {
         tbContract.setDeployUserName(userName);
         tbContract.setContractAddress(contractAddress);
         tbContract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-        //tbContract.setContractVersion(version);
         tbContract.setDeployTime(LocalDateTime.now());
+        tbContract.setContractBin(runtimeBin);
         contractMapper.update(tbContract);
 
         log.debug("end deployContract. contractId:{} groupId:{} contractAddress:{}",
@@ -611,7 +624,7 @@ public class  ContractService {
             log.info("ignore sendAbi. inputAddress:{} localAddress:{}", address, localAddress);
             return;
         }
-        if (address.length() != CONTRACT_ADDRESS_LENGTH) {
+        if (contract.getIsWasm() != 1 && address.length() != CONTRACT_ADDRESS_LENGTH) {
             log.warn("fail sendAbi. inputAddress:{}", address);
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
@@ -770,5 +783,70 @@ public class  ContractService {
         log.debug("end queryContractByGroupIdAndAddress contract:{}", contract);
         return contract;
 
+    }
+    public void checkFrontLiquidEnv(int frontId) {
+        TbFront tbFront = frontService.getById(frontId);
+        if (tbFront == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+        }
+        String frontIp = tbFront.getFrontIp();
+        int frontPort = tbFront.getFrontPort();
+        frontInterface.checkLiquidEnvFromSpecificFront(frontIp, frontPort);
+    }
+
+    public RspCompileTask compileLiquidContract(ReqCompileLiquid reqCompileLiquid) {
+        int frontId = reqCompileLiquid.getFrontId();
+        TbFront tbFront = frontService.getById(frontId);
+        if (tbFront == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+        }
+        String frontIp = tbFront.getFrontIp();
+        int frontPort = tbFront.getFrontPort();
+        if (reqCompileLiquid.getContractId() == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
+        }
+        // compile
+        RspCompileTask compileTask = frontInterface.compileLiquidFromFront(frontIp, frontPort, frontId, reqCompileLiquid);
+        int compileStatus = compileTask.getStatus();
+        if (compileStatus == CompileStatus.SUCCESS.getValue()) {
+            // update contract
+            Contract contract = new Contract();
+            BeanUtils.copyProperties(reqCompileLiquid, contract);
+            contract.setBytecodeBin(compileTask.getBin());
+            contract.setContractAbi(compileTask.getAbi());
+            this.saveContract(contract);
+        } else if (compileStatus == CompileStatus.FAIL.getValue()) {
+            // get error from desc
+            log.error("compileLiquidContract compileTask failed:{}", compileTask);
+        }
+        return compileTask;
+    }
+
+    public RspCompileTask checkCompileLiquid(ReqCompileLiquid reqCompileLiquid) {
+        int frontId = reqCompileLiquid.getFrontId();
+        TbFront tbFront = frontService.getById(frontId);
+        String frontIp = tbFront.getFrontIp();
+        int frontPort = tbFront.getFrontPort();
+        if (reqCompileLiquid.getContractId() == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
+        }
+
+        // compile
+        RspCompileTask compileTask = frontInterface.checkCompileLiquidFromFront(frontIp, frontPort, frontId,
+            reqCompileLiquid.getGroupId(), reqCompileLiquid.getContractPath(), reqCompileLiquid.getContractName());
+        // check finished
+        int compileStatus = compileTask.getStatus();
+        if (compileStatus == CompileStatus.SUCCESS.getValue()) {
+            // update contract
+            Contract contract = new Contract();
+            BeanUtils.copyProperties(reqCompileLiquid, contract);
+            contract.setBytecodeBin(compileTask.getBin());
+            contract.setContractAbi(compileTask.getAbi());
+            this.saveContract(contract);
+        } else if (compileStatus == CompileStatus.FAIL.getValue()) {
+            // get error from desc
+            log.error("checkCompileLiquid compileTask failed:{}", compileTask);
+        }
+        return compileTask;
     }
 }

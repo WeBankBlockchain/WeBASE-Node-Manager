@@ -330,6 +330,11 @@ public class ConstantCode {
     public static final RetCode BIND_PRIVATE_KEY_NOT_MATCH = RetCode.mark(202543,"Binding private key not match this user's address");
     public static final RetCode BIND_PRIVATE_ALREADY_HAS_PK = RetCode.mark(202544,"This user already contain private key");
 
+    // lab
+    public static final RetCode LIQUID_COMPILE_FAILED = RetCode.mark(202550,"Liquid compile error");
+    public static final RetCode DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY = RetCode.mark(202551, "When deploying liquid, contract address must not be empty");
+
+
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

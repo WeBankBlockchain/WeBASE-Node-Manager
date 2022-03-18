@@ -44,7 +44,7 @@ checkProcess(){
 JAVA_OPTS=" -Dfile.encoding=UTF-8"
 JAVA_OPTS+=" -Djava.security.egd=file:/dev/./urandom"
 JAVA_OPTS+=" -Xmx512m -Xms512m -Xmn256m -Xss512k -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=512m"
-JAVA_OPTS+=" -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOG_DIR}/heap_error.log"
+JAVA_OPTS+=" -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOG_DIR}/heap_error.hprof"
 
 
 start(){

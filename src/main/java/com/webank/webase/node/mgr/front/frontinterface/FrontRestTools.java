@@ -76,6 +76,7 @@ public class FrontRestTools {
     public static final String URI_SYNC_STATUS = "web3/syncStatus";
     public static final String URI_SYSTEM_CONFIG = "web3/systemConfigByKey/%1s";
     public static final String URI_CODE = "web3/code/%1s/%2s";
+    public static final String URI_CODE_V2 = "web3/code";
     public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
     public static final String URI_GET_SEALER_LIST = "web3/sealerList";
     public static final String URI_GET_SEALER_LIST_WEIGHT = "web3/sealerList/weight";
@@ -88,6 +89,7 @@ public class FrontRestTools {
     public static final String URI_GROUP_NODE_INFO = "web3/groupNodeInfo";
     public static final String URI_NODE_STATUS_LIST = "web3/nodeStatusList";
     public static final String URI_ENCRYPT_TYPE = "web3/encrypt";
+    public static final String URI_IS_WASM = "web3/isWasm";
 
     // config sdk
     public static final String URI_CONFIG_SDK = "config/bcosSDK";
@@ -101,6 +103,11 @@ public class FrontRestTools {
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_REGISTER_CNS = "contract/registerCns";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
+    // liquid contract
+    public static final String URI_CONTRACT_LIQUID_CHECK = "contract/liquid/check";
+    public static final String URI_CONTRACT_LIQUID_COMPILE = "contract/liquid/compile";
+    public static final String URI_CONTRACT_LIQUID_COMPILE_CHECK = "contract/liquid/compile/check";
+
     public static final String URI_SEND_TRANSACTION_WITH_SIGN = "trans/handleWithSign";
     public static final String URI_CHAIN = "chain";
 
@@ -172,7 +179,8 @@ public class FrontRestTools {
             URI_CONTRACT_REGISTER_CNS,
             URI_FRONT_VERSION, URI_SIGN_VERSION, URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN,
             URI_KEY_PAIR_EXPORT_P12_WITH_SIGN,
-            URI_EVENT_LOG_LIST, URI_SIGN_MESSAGE, URI_CONFIG_SDK, RPC_AUTHMANAGER_EVERYONE_CMTINFO,
+            URI_EVENT_LOG_LIST, URI_SIGN_MESSAGE, URI_CONFIG_SDK,
+                RPC_AUTHMANAGER_EVERYONE_CMTINFO,
             RPC_AUTHMANAGER_EVERYONE_PROINFO, RPC_AUTHMANAGER_EVERYONE_PROINFOLIST,
             RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY, RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN,
             RPC_AUTHMANAGER_EVERYONE_DEPLOY_TYPE,
@@ -188,7 +196,8 @@ public class FrontRestTools {
             RPC_PRECOM_CNS_CNSINFO_BY_NAME_VERSION,
             RPC_PRECOM_CONSENSUS_LIST, RPC_PRECOM_CONSENSUS_MGR, RPC_PRECOM_CRUD_SET
             , RPC_PRECOM_CRUD_GET, RPC_PRECOM_CRUD_CREATE, RPC_PRECOM_BFS_QUERY,
-            RPC_PRECOM_BFS_CREATE);
+            RPC_PRECOM_BFS_CREATE,
+            URI_CONTRACT_LIQUID_CHECK, URI_CONTRACT_LIQUID_COMPILE, URI_CONTRACT_LIQUID_COMPILE_CHECK);
 
     public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 

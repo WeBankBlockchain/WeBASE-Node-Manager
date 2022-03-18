@@ -22,14 +22,13 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.cert.entity.SdkCertInfo;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.contract.entity.Contract;
+import com.webank.webase.node.mgr.contract.entity.RspCompileTask;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
 import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
-import com.webank.webase.node.mgr.front.frontinterface.entity.NodeStatusInfo;
-import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
-import com.webank.webase.node.mgr.front.frontinterface.entity.ReqSdkConfig;
-import com.webank.webase.node.mgr.front.frontinterface.entity.RspStatBlock;
+import com.webank.webase.node.mgr.front.frontinterface.entity.*;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
@@ -250,6 +249,56 @@ public class FrontInterfaceService {
         return encryptType;
     }
 
+    public Boolean getIsWasmFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
+        Boolean encryptType = getFromSpecificFront(groupId, frontIp, frontPort,  FrontRestTools.URI_IS_WASM, Boolean.class);
+        return encryptType;
+    }
+
+    /**
+     * liquid related
+     */
+    public BaseResponse checkLiquidEnvFromSpecificFront(String frontIp, Integer frontPort) {
+        String groupId = String.valueOf(Integer.MAX_VALUE);
+        return getFromSpecificFront(groupId, frontIp, frontPort, FrontRestTools.URI_CONTRACT_LIQUID_CHECK,
+            BaseResponse.class);
+    }
+
+    public RspCompileTask compileLiquidFromFront(String frontIp, Integer frontPort, Integer frontId,
+                                                 Contract param) {
+        // 拼接frontid，避免路径在front的文件里冲突
+        String contractPath = param.getContractPath();
+        if ("/".equals(contractPath)) {
+            param.setContractPath("mgr_" + frontId);
+        } else {
+            param.setContractPath("mgr_" + contractPath + frontId);
+        }
+        log.info("start compileLiquidFromFront frontIp:{} frontPort:{} param:{}", frontIp, frontPort, JsonTools.toJSONString(param));
+
+        BaseResponse response = requestSpecificFront(param.getGroupId(), frontIp, frontPort,
+            HttpMethod.POST, FrontRestTools.URI_CONTRACT_LIQUID_COMPILE, param, BaseResponse.class);
+        RspCompileTask task = JsonTools.stringToObj(JsonTools.toJSONString(response.getData()), RspCompileTask.class);
+        log.info("end compileLiquidFromFront, response:{}", response);
+        return task;
+    }
+
+    public RspCompileTask checkCompileLiquidFromFront(String frontIp, Integer frontPort, Integer frontId,
+                                                    String groupId, String contractPath, String contractName) {
+        // 拼接frontid，避免路径在front的文件里冲突
+        if ("/".equals(contractPath)) {
+            contractPath = "mgr_" + frontId;
+        } else {
+            contractPath = "mgr_" + contractPath + frontId;
+        }
+        log.info("start checkCompileLiquidFromFront frontIp:{} frontPort:{},groupId:{},contractPath:{},contractName:{}", frontIp, frontPort,
+            groupId, contractPath, contractName);
+        ReqCompileTask param = new ReqCompileTask(groupId, contractPath, contractName);
+        BaseResponse response = requestSpecificFront(groupId, frontIp, frontPort,
+            HttpMethod.POST, FrontRestTools.URI_CONTRACT_LIQUID_COMPILE_CHECK, param, BaseResponse.class);
+        RspCompileTask task = JsonTools.stringToObj(JsonTools.toJSONString(response.getData()), RspCompileTask.class);
+
+        log.info("end checkCompileLiquidFromFront, response:{}", response);
+        return task;
+    }
     /**
      * get peers.
      */
@@ -363,6 +412,7 @@ public class FrontInterfaceService {
     /**
      * get code from front.
      */
+    @Deprecated
     public String getCodeFromFront(String groupId, String contractAddress, BigInteger blockNumber)
         throws NodeMgrException {
         log.debug("start getCodeFromFront. groupId:{} contractAddress:{} blockNumber:{}", groupId,
@@ -371,6 +421,23 @@ public class FrontInterfaceService {
         String code = frontRestTools.getForEntity(groupId, uri, String.class);
 
         log.debug("end getCodeFromFront:{}", code);
+        return code;
+    }
+
+    /**
+     * get code from front by get param (not path param
+     */
+    public String getCodeV2FromFront(String groupId, String contractAddress, BigInteger blockNumber)
+            throws NodeMgrException {
+        log.debug("start getCodeV2FromFront. groupId:{} contractAddress:{} blockNumber:{}", groupId,
+                contractAddress, blockNumber);
+        Map<String, String> map = new HashMap<>();
+        map.put("address", contractAddress);
+        map.put("blockNumber", blockNumber.toString(10));
+        String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CODE_V2, map);
+        String code = frontRestTools.getForEntity(groupId, uri, String.class);
+
+        log.debug("end getCodeV2FromFront:{}", code);
         return code;
     }
 

@@ -1272,4 +1272,14 @@ public class FrontService {
         frontGroupMapCache.clearMapList();
     }
 
+    public Boolean getFrontGroupIsWasm(int frontId, String groupId) {
+        TbFront tbFront = this.getById(frontId);
+        if (tbFront == null) {
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+        }
+        String frontIp = tbFront.getFrontIp();
+        int frontPort = tbFront.getFrontPort();
+        return frontInterface.getIsWasmFromSpecificFront(frontIp, frontPort, groupId);
+    }
+
 }
