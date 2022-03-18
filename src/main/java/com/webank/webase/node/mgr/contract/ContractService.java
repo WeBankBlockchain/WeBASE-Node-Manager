@@ -368,9 +368,15 @@ public class  ContractService {
         String groupId = inputParam.getGroupId();
         boolean isWasm = inputParam.getIsWasm();
         String liquidAddress = inputParam.getContractAddress();
-        if (isWasm && StringUtils.isBlank(liquidAddress)) {
-            throw new NodeMgrException(ConstantCode.DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY);
+        if (isWasm) {
+            if (StringUtils.isBlank(liquidAddress)) {
+                throw new NodeMgrException(ConstantCode.DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY);
+            }
+            if (!liquidAddress.startsWith("/")) {
+                throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+            }
         }
+
         // check deploy permission
         //checkDeployPermission(groupId, inputParam.getUser());
 
