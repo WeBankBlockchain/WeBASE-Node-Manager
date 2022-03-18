@@ -19,7 +19,7 @@ package com.webank.webase.node.mgr.base.enums;
  * compile liquid status
  */
 public enum CompileStatus {
-  RUNNING(1), SUCCESS(2), FAIL(3);
+  RUNNING(1), SUCCESS(2), FAIL(3), INIT(4);
 
   private int value;
 
