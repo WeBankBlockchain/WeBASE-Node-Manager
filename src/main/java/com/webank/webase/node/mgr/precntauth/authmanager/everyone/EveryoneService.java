@@ -81,6 +81,19 @@ public class EveryoneService {
   }
 
   /**
+   * 从front服务查询交易列表
+   */
+  public Object queryProposalListInfoCount(String groupId) {
+    Map<String, String> map = new HashMap<>();
+    map.put("groupId", groupId);
+    String uri = HttpRequestTools.getQueryUri(
+        FrontRestTools.RPC_AUTHMANAGER_EVERYONE_PROINFOCOUNT, map);
+    BigInteger frontRsp = frontRestTools.getForEntity(groupId, uri, BigInteger.class);
+    return frontRsp;
+  }
+
+
+  /**
    * 从front服务检查账号是否具有全局部署权限
    */
   public Object checkDeployAuth(ReqUsrDeployAuthInfo reqUsrDeployAuthInfo) {

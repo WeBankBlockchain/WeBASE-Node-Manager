@@ -73,7 +73,6 @@ public class SysConfigController extends BaseController {
     @ApiImplicitParam(name = "reqSetSysConfigInfo", value = "system config info", required = true,
         dataType = "ReqSetSysConfigInfo")
     @PostMapping(value = "config")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object setSysConfigByKeyService(
         @RequestBody @Valid ReqSetSysConfigInfo reqSetSysConfigInfo,
         BindingResult result) throws NodeMgrException {
