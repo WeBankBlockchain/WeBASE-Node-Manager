@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class ReqRegisterCnsInfo {
 
-  private String groudId;
+  private String groupId;
   private String contractName;
   private String contractVersion;
   private String contractAddress;

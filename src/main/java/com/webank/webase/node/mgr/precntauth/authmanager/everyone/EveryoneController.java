@@ -95,6 +95,17 @@ public class EveryoneController extends BaseController {
   }
 
   /**
+   * 获取提案总数
+   */
+  @ApiOperation(value = "query the proposal info count")
+  @ApiImplicitParam(name = "groupId", value = "proposal info count", required = true)
+  @GetMapping("proposalInfoCount")
+  public BaseResponse queryProposalCount(String groupId) {
+    return new BaseResponse(ConstantCode.SUCCESS,
+        everyoneService.queryProposalListInfoCount(groupId));
+  }
+
+  /**
    * 检查账号是否具有全局部署权限
    */
   @ApiOperation(value = "query the user deploy auth")
