@@ -395,7 +395,7 @@ public class MonitorService {
                 log.warn("transTo is empty, and contract address is empty for deploy error");
                 return new ContractMonitorResult("0x", "0x", MonitorUserType.NORMAL.getValue());
             }
-            contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
+            contractBin = frontInterface.getCodeV2FromFront(groupId, contractAddress, blockNumber);
             contractBin = removeBinFirstAndLast(contractBin);
 
             List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
@@ -417,7 +417,7 @@ public class MonitorService {
             transType = TransType.CALL.getValue();
             String methodId = transInput.substring(0, 10);
             contractAddress = transTo;
-            contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
+            contractBin = frontInterface.getCodeV2FromFront(groupId, contractAddress, blockNumber);
             contractBin = removeBinFirstAndLast(contractBin);
 
             List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);

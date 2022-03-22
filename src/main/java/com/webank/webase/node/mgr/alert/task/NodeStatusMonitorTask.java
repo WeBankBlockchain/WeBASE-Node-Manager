@@ -16,12 +16,12 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
+import com.webank.webase.node.mgr.precntauth.precompiled.consensus.ConsensusServiceInWebase;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -38,7 +38,6 @@ import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.Node;
 import com.webank.webase.node.mgr.node.entity.TbNode;
-import com.webank.webase.node.mgr.precompiled.PrecompiledService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -54,7 +53,7 @@ public class NodeStatusMonitorTask {
     @Autowired
     private GroupService groupService;
     @Autowired
-    private PrecompiledService precompiledService;
+    private ConsensusServiceInWebase consensusServiceInWebase;
     @Autowired
     private MailService alertMailService;
     @Autowired
@@ -177,7 +176,7 @@ public class NodeStatusMonitorTask {
      * @return [{nodeId=xxx,nodeType=xxx}, {..}]
      */
     public List<LinkedHashMap<String, String>> getNodeListWithType(String groupId) {
-        Object responseFromFront = precompiledService.getNodeListService(groupId,
+        Object responseFromFront = consensusServiceInWebase.getNodeListService(groupId,
                 100, 1);
         try {
             // get data from response

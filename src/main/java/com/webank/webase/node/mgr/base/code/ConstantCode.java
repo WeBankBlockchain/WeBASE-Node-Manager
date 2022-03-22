@@ -330,6 +330,11 @@ public class ConstantCode {
     public static final RetCode BIND_PRIVATE_KEY_NOT_MATCH = RetCode.mark(202543,"Binding private key not match this user's address");
     public static final RetCode BIND_PRIVATE_ALREADY_HAS_PK = RetCode.mark(202544,"This user already contain private key");
 
+    // lab
+    public static final RetCode LIQUID_COMPILE_FAILED = RetCode.mark(202550,"Liquid compile error");
+    public static final RetCode DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY = RetCode.mark(202551, "When deploying liquid, contract address must not be empty");
+
+
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
@@ -337,5 +342,12 @@ public class ConstantCode {
 
     /* param exception */
     public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
+
+    // consensus (node manager)
+    public static final RetCode INVALID_NODE_ID = RetCode.mark(201216,"node id is invalid");
+    public static final RetCode INVALID_NODE_TYPE = RetCode.mark(201217,"invalid node type: sealer, observer, remove ");
+    public static final RetCode FAIL_CHANGE_NODE_TYPE = RetCode.mark(201218,"set node consensus type fail, check permission or node's group config file");
+    public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
+
 
 }

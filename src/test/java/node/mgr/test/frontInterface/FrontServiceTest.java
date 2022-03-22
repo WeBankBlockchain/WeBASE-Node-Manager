@@ -91,7 +91,7 @@ public class FrontServiceTest extends TestBase {
     @Test
     public void getCodeFromFronthTest() {
         String contractAddress = "0xb68b0ca60cc4d8b207875c9a0ab6c3a782db9318";
-        String code = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
+        String code = frontInterface.getCodeV2FromFront(groupId, contractAddress, blockNumber);
         assert (code != null);
         System.out.println(code);
     }

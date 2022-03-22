@@ -1,5 +1,5 @@
 # server version
-version: v2.0.0-rc1
+version: lab-rc2
 
 #server config
 server:
@@ -53,10 +53,10 @@ constant:
   verificationCodeValue: "8888"
   # auth token code expire time (s)
   authTokenMaxAge: 3600
-  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/refresh,/front/find,/config/version,/group/all/invalidIncluded
+  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/refresh,/front/find,/config/version,/group/all/invalidIncluded,/swagger-ui.html
   ###front http request
   frontUrl: http://%1s:%2d/WeBASE-Front/%3s
-  httpTimeOut: 5000
+  httpTimeOut: 15000
   contractDeployTimeOut: 30000
   maxRequestFail: 3
   sleepWhenHttpMaxFail: 60000

@@ -52,6 +52,11 @@ public class TbContract {
     private String deployAddress;
     private String deployUserName;
     /**
+     * 0-solidity, 1-liquid
+     */
+    private Integer isWasm;
+
+    /**
      * init by contractId、contractName、groupId、contractPath.
      */
     public TbContract(Integer contractId, String contractName, String groupId) {

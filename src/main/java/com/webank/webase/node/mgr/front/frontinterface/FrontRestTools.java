@@ -76,6 +76,7 @@ public class FrontRestTools {
     public static final String URI_SYNC_STATUS = "web3/syncStatus";
     public static final String URI_SYSTEM_CONFIG = "web3/systemConfigByKey/%1s";
     public static final String URI_CODE = "web3/code/%1s/%2s";
+    public static final String URI_CODE_V2 = "web3/code";
     public static final String URI_BLOCK_NUMBER = "web3/blockNumber";
     public static final String URI_GET_SEALER_LIST = "web3/sealerList";
     public static final String URI_GET_SEALER_LIST_WEIGHT = "web3/sealerList/weight";
@@ -83,16 +84,15 @@ public class FrontRestTools {
     public static final String URI_GET_CLIENT_VERSION = "web3/clientVersion";
     public static final String URI_REFRESH_FRONT = "web3/refresh";
     public static final String URI_SEARCH_BLOCK_OR_TX = "web3/search";
-//    public static final String URI_NODE_CONFIG = "web3/nodeConfig";
+    //  public static final String URI_NODE_CONFIG = "web3/nodeConfig";
     public static final String URI_GROUP_INFO = "web3/groupInfo";
     public static final String URI_GROUP_NODE_INFO = "web3/groupNodeInfo";
     public static final String URI_NODE_STATUS_LIST = "web3/nodeStatusList";
     public static final String URI_ENCRYPT_TYPE = "web3/encrypt";
+    public static final String URI_IS_WASM = "web3/isWasm";
 
     // config sdk
-
     public static final String URI_CONFIG_SDK = "config/bcosSDK";
-
 
     public static final String URI_KEY_PAIR = "privateKey";
     public static final String URI_KEY_PAIR_LOCAL_KEYSTORE = "privateKey/localKeyStores";
@@ -103,16 +103,58 @@ public class FrontRestTools {
     public static final String URI_CONTRACT_DEPLOY_WITH_SIGN = "contract/deployWithSign";
     public static final String URI_CONTRACT_REGISTER_CNS = "contract/registerCns";
     public static final String URI_CONTRACT_SENDABI = "contract/abiInfo";
+    // liquid contract
+    public static final String URI_CONTRACT_LIQUID_CHECK = "contract/liquid/check";
+    public static final String URI_CONTRACT_LIQUID_COMPILE = "contract/liquid/compile";
+    public static final String URI_CONTRACT_LIQUID_COMPILE_CHECK = "contract/liquid/compile/check";
+
     public static final String URI_SEND_TRANSACTION_WITH_SIGN = "trans/handleWithSign";
     public static final String URI_CHAIN = "chain";
 
-    public static final String URI_SYS_CONFIG_LIST = "sys/config/list";
-    public static final String URI_SYS_CONFIG = "sys/config";
-    public static final String URI_CNS_LIST = "precompiled/cns/list";
-    public static final String URI_CONSENSUS_LIST = "precompiled/consensus/list";
-    public static final String URI_CONSENSUS = "precompiled/consensus";
-    public static final String URI_CRUD = "precompiled/crud";
+    /**
+     * rpc precompiled
+     */
+    // 1)sys config
+    public static final String RPC_PRECOM_SYS_CONFIG_LIST = "/precntauth/precompiled/sys/config/list";
+    public static final String RPC_PRECOM_SYS_CONFIG = "/precntauth/precompiled/sys/config";
+    // 2)CNS
+    public static final String RPC_PRECOM_CNS_ADDRESS_BY_NAME_VERSION = "/precntauth/precompiled/cns/reqAddressInfoByNameVersion";
+    public static final String RPC_PRECOM_CNS_REGISTER = "/precntauth/precompiled/cns/register";
+    public static final String RPC_PRECOM_CNS_CNSINFO_BY_NAME_VERSION = "/precntauth/precompiled/cns/queryCnsByNameVersion";
+    public static final String RPC_PRECOM_CNS_CNSINFO_BY_NAME = "/precntauth/precompiled/cns/queryCnsByName";
+    // 3)conseensus
+    public static final String RPC_PRECOM_CONSENSUS_LIST = "/precntauth/precompiled/consensus/list";
+    public static final String RPC_PRECOM_CONSENSUS_MGR = "/precntauth/precompiled/consensus/manage";
+    // 4)CRUD
+    public static final String RPC_PRECOM_CRUD_SET = "/precntauth/precompiled/kvtable/reqSetTable";
+    public static final String RPC_PRECOM_CRUD_GET = "/precntauth/precompiled/kvtable/reqGetTable";
+    public static final String RPC_PRECOM_CRUD_CREATE = "/precntauth/precompiled/kvtable/reqCreateTable";
+    // 5)bfs
+    public static final String RPC_PRECOM_BFS_QUERY = "/precntauth/precompiled/bfs/query";
+    public static final String RPC_PRECOM_BFS_CREATE = "/precntauth/precompiled/bfs/create";
 
+    /**
+     * rpc authmanager
+     */
+    // 1) everyone
+    public static final String RPC_AUTHMANAGER_EVERYONE_CMTINFO = "/precntauth/authmanager/everyone/cmtInfo";
+    public static final String RPC_AUTHMANAGER_EVERYONE_PROINFO = "/precntauth/authmanager/everyone/proposalInfo";
+    public static final String RPC_AUTHMANAGER_EVERYONE_PROINFOLIST = "/precntauth/authmanager/everyone/proposalInfoList";
+    public static final String RPC_AUTHMANAGER_EVERYONE_DEPLOY_TYPE = "/precntauth/authmanager/everyone/deploy/type";
+    public static final String RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY = "/precntauth/authmanager/everyone/usr/deploy";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN = "/precntauth/authmanager/everyone/contract/admin";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_METHOD_AUTH = "/precntauth/authmanager/everyone/contract/method/auth";
+    // 2) committee
+    public static final String RPC_AUTHMANAGER_COMMITTEE_GOVERNOR = "/precntauth/authmanager/committee/governor";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_RATE = "/precntauth/authmanager/committee/rate";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_PRO_VOTE = "/precntauth/authmanager/committee/proposal/vote";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_PRO_REVOKE = "/precntauth/authmanager/committee/proposal/revoke";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE = "/precntauth/authmanager/committee/deploy/type";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN = "/precntauth/authmanager/committee/contract/admin";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY = "/precntauth/authmanager/committee/usr/deploy";
+    // 3) admin
+    public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET = "/precntauth/authmanager/admin/method/auth/set";
+    public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE = "/precntauth/authmanager/admin/method/auth/type";
 
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
     public static final String URI_SSL_CRYPTO_TYPE = "sslCryptoType";
@@ -126,16 +168,36 @@ public class FrontRestTools {
     // event log list api
     public static final String URI_EVENT_LOG_LIST = "event/eventLogs/list";
 
-    public static final String URI_SIGN_MESSAGE= "trans/signMessageHashExternal";
+    public static final String URI_SIGN_MESSAGE = "trans/signMessageHashExternal";
 
     //不需要在url的前面添加groupId的
     private static final List<String> URI_NOT_PREPEND_GROUP_ID = Arrays
-        .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR, URI_KEY_PAIR_LOCAL_KEYSTORE,
-                URI_CONTRACT_SENDABI, URI_CNS_LIST, URI_SYS_CONFIG_LIST,
-                URI_SYS_CONFIG, URI_CONSENSUS_LIST, URI_CONSENSUS, URI_CRUD, URI_CERT_SDK_FILES, URI_SSL_CRYPTO_TYPE,
-                URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_KEY_PAIR_USERINFO_WITH_SIGN, URI_CONTRACT_REGISTER_CNS,
-                URI_FRONT_VERSION, URI_SIGN_VERSION, URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN, URI_KEY_PAIR_EXPORT_P12_WITH_SIGN,
-                URI_EVENT_LOG_LIST,URI_SIGN_MESSAGE,URI_CONFIG_SDK);
+        .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR,
+            URI_KEY_PAIR_LOCAL_KEYSTORE,
+            URI_CONTRACT_SENDABI, URI_CERT_SDK_FILES, URI_SSL_CRYPTO_TYPE,
+            URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_KEY_PAIR_USERINFO_WITH_SIGN,
+            URI_CONTRACT_REGISTER_CNS,
+            URI_FRONT_VERSION, URI_SIGN_VERSION, URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN,
+            URI_KEY_PAIR_EXPORT_P12_WITH_SIGN,
+            URI_EVENT_LOG_LIST, URI_SIGN_MESSAGE, URI_CONFIG_SDK,
+                RPC_AUTHMANAGER_EVERYONE_CMTINFO,
+            RPC_AUTHMANAGER_EVERYONE_PROINFO, RPC_AUTHMANAGER_EVERYONE_PROINFOLIST,
+            RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY, RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN,
+            RPC_AUTHMANAGER_EVERYONE_DEPLOY_TYPE,
+            RPC_AUTHMANAGER_EVERYONE_CNT_METHOD_AUTH, RPC_AUTHMANAGER_COMMITTEE_GOVERNOR,
+            RPC_AUTHMANAGER_COMMITTEE_RATE,
+            RPC_AUTHMANAGER_COMMITTEE_PRO_VOTE, RPC_AUTHMANAGER_COMMITTEE_PRO_REVOKE,
+            RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE,
+            RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN, RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY,
+            RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET,
+            RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE, RPC_PRECOM_SYS_CONFIG_LIST,
+            RPC_PRECOM_SYS_CONFIG,
+            RPC_PRECOM_CNS_ADDRESS_BY_NAME_VERSION, RPC_PRECOM_CNS_REGISTER,
+            RPC_PRECOM_CNS_CNSINFO_BY_NAME_VERSION,
+            RPC_PRECOM_CONSENSUS_LIST, RPC_PRECOM_CONSENSUS_MGR, RPC_PRECOM_CRUD_SET
+            , RPC_PRECOM_CRUD_GET, RPC_PRECOM_CRUD_CREATE, RPC_PRECOM_BFS_QUERY,
+            RPC_PRECOM_BFS_CREATE,
+            URI_CONTRACT_LIQUID_CHECK, URI_CONTRACT_LIQUID_COMPILE, URI_CONTRACT_LIQUID_COMPILE_CHECK);
 
     public static List<String> URI_CONTAIN_GROUP_ID = new ArrayList<>();
 
@@ -174,8 +236,10 @@ public class FrontRestTools {
 
         final String tempUri = uri.contains("?") ? uri.substring(0, uri.indexOf("?")) : uri;
 
-        long countNotAppend = URI_NOT_PREPEND_GROUP_ID.stream().filter(u -> u.contains(tempUri)).count();
-        long countNotContain = URI_CONTAIN_GROUP_ID.stream().filter(u -> u.contains(tempUri)).count();
+        long countNotAppend = URI_NOT_PREPEND_GROUP_ID.stream().filter(u -> u.contains(tempUri))
+            .count();
+        long countNotContain = URI_CONTAIN_GROUP_ID.stream().filter(u -> u.contains(tempUri))
+            .count();
         if (countNotAppend > 0 || countNotContain > 0) {
             return uri;
         }
@@ -184,6 +248,7 @@ public class FrontRestTools {
 
     /**
      * check url status.
+     *
      * @return if sleeping, true
      */
     private boolean isServiceSleep(String url, String methType) {
@@ -255,9 +320,11 @@ public class FrontRestTools {
 
     /**
      * build  url of front service.
+     *
      * @remind v1.4.1 rm random
      */
-    private FrontUrlInfo buildFrontUrl(ArrayList<FrontGroup> list, String uri, HttpMethod httpMethod) {
+    private FrontUrlInfo buildFrontUrl(ArrayList<FrontGroup> list, String uri,
+        HttpMethod httpMethod) {
         // v1.4.2 recover random one
         Collections.shuffle(list);
         log.debug("====================map list:{}", JsonTools.toJSONString(list));
@@ -322,7 +389,8 @@ public class FrontRestTools {
         T response = restTemplateExchange(groupId, uri, HttpMethod.GET, null, clazz);
         if (response == null) {
             log.error("getForEntity response is null!");
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.attach("getForEntity response is null"));
+            throw new NodeMgrException(
+                ConstantCode.REQUEST_FRONT_FAIL.attach("getForEntity response is null"));
         }
         return response;
     }
@@ -334,7 +402,8 @@ public class FrontRestTools {
         T response = restTemplateExchange(groupId, uri, HttpMethod.POST, params, clazz);
         if (response == null) {
             log.error("postForEntity response is null!");
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.attach("postForEntity response is null"));
+            throw new NodeMgrException(
+                ConstantCode.REQUEST_FRONT_FAIL.attach("postForEntity response is null"));
         }
         return response;
     }
@@ -346,7 +415,8 @@ public class FrontRestTools {
         T response = restTemplateExchange(groupId, uri, HttpMethod.DELETE, params, clazz);
         if (response == null) {
             log.error("deleteForEntity response is null!");
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.attach("deleteForEntity response is null"));
+            throw new NodeMgrException(
+                ConstantCode.REQUEST_FRONT_FAIL.attach("deleteForEntity response is null"));
         }
         return response;
     }
@@ -360,7 +430,7 @@ public class FrontRestTools {
         if (frontList == null || frontList.size() == 0) {
             log.error("fail restTemplateExchange. frontList is empty groupId:{}", groupId);
             throw new NodeMgrException(ConstantCode.FRONT_LIST_NOT_FOUNT.getCode(),
-                    "all front of group: " + groupId + " is stopped");
+                "all front of group: " + groupId + " is stopped");
         }
         ArrayList<FrontGroup> list = new ArrayList<>(frontList);
         RestTemplate restTemplate = caseRestemplate(uri);
@@ -386,18 +456,21 @@ public class FrontRestTools {
                 HttpEntity entity = buildHttpEntity(param);// build entity
                 if (null == restTemplate) {
                     log.error("fail restTemplateExchange, rest is null. groupId:{} uri:{}",
-                        groupId,uri);
-                    throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION.attach("restTemplate is null"));
+                        groupId, uri);
+                    throw new NodeMgrException(
+                        ConstantCode.SYSTEM_EXCEPTION.attach("restTemplate is null"));
                 }
                 ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
-                frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.NORMAL.getValue());
+                frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(),
+                    DataStatus.NORMAL.getValue());
                 return response.getBody();
             } catch (ResourceAccessException ex) {
                 // case1: request front failed
                 log.warn("fail restTemplateExchange", ex);
                 setFailCount(url, method.toString());
                 if (isServiceSleep(url, method.toString())) {
-                    frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
+                    frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(),
+                        DataStatus.INVALID.getValue());
                     throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL, ex);
                 }
                 log.info("continue next front");
@@ -405,14 +478,17 @@ public class FrontRestTools {
             } catch (HttpStatusCodeException ex) {
                 // case2: request front success but return fail
                 JsonNode error = JsonTools.stringToJsonNode(ex.getResponseBodyAsString());
-                log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error), ex);
+                log.error("http request:[{}] fail. error:{}", url, JsonTools.toJSONString(error),
+                    ex);
                 try {
                     int code = error.get("code").intValue();
                     String errorMessage = error.get("errorMessage").asText();
-                    frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(), DataStatus.INVALID.getValue());
+                    frontService.updateFrontWithInternal(frontUrlInfo.getFrontId(),
+                        DataStatus.INVALID.getValue());
                     // v1.4.3 if node is down but front normal, return -1
                     if (code == NODE_IS_DOWN) {
-                        nodeService.updateNodeActiveStatus(frontUrlInfo.getFrontId(), DataStatus.DOWN.getValue());
+                        nodeService.updateNodeActiveStatus(frontUrlInfo.getFrontId(),
+                            DataStatus.DOWN.getValue());
                     }
                     throw new NodeMgrException(code, errorMessage);
                 } catch (NullPointerException e) {
@@ -422,6 +498,4 @@ public class FrontRestTools {
         }
         return null;
     }
-
-
 }

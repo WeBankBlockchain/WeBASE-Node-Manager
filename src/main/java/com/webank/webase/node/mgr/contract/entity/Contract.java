@@ -37,6 +37,10 @@ public class Contract {
     private String contractBin;
     private String bytecodeBin;
     private String contractAddress;
+    /**
+     * false-solidity, true-liquid
+     */
+    private Boolean isWasm = false;
 
     public Contract(String groupId, String contractName, String contractPath,
         String account) {
