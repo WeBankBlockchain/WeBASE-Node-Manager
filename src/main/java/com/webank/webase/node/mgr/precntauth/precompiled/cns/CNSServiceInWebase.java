@@ -35,11 +35,11 @@ public class CNSServiceInWebase {
 
   public Object registerCNS(ReqRegisterCnsInfo reqCnsInfo)
       throws ContractException {
-    String signUserId = userService.getSignUserIdByAddress(reqCnsInfo.getGroudId(),
+    String signUserId = userService.getSignUserIdByAddress(reqCnsInfo.getGroupId(),
         reqCnsInfo.getFromAddress());
     reqCnsInfo.setSignUserId(signUserId);
     String frontRsp = frontRestTools.postForEntity(
-        reqCnsInfo.getGroudId(), FrontRestTools.RPC_PRECOM_CNS_REGISTER,
+        reqCnsInfo.getGroupId(), FrontRestTools.RPC_PRECOM_CNS_REGISTER,
         reqCnsInfo, String.class);
     return frontRsp;
   }
