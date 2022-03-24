@@ -80,9 +80,8 @@ public class CnsService {
         params.put("contractAddress", inputParam.getContractAddress());
         params.put("abiInfo", abiArray);
 
-        // register remove in 3.0
-//        frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_REGISTER_CNS, params,
-//                Object.class);
+        frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_REGISTER_CNS, params,
+                Object.class);
         // save cns
         TbCns tbCns = new TbCns();
         BeanUtils.copyProperties(inputParam, tbCns);
