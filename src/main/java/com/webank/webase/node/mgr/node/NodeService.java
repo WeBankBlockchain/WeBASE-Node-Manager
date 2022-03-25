@@ -209,7 +209,6 @@ public class NodeService {
                 continue;
             }
             tbNode.setBlockNumber(new BigInteger(String.valueOf(nodeStatusInfo.getBlockNumber())));
-//            tbNode.setPbftView(new BigInteger(String.valueOf(nodeStatusInfo.getPbftView())));
             tbNode.setNodeActive(nodeStatusInfo.getStatus() == 1 ? DataStatus.NORMAL.getValue() : DataStatus.INVALID.getValue());
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
