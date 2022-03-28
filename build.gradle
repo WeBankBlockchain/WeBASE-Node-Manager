@@ -78,7 +78,7 @@ List test = [
     "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
-def log4j_version="2.15.0"
+def log4j_version="2.17.1"
 List log4j = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
