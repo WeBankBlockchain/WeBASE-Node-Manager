@@ -66,7 +66,6 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqUpdateGovernorInfo", value = "governor info", required = true
         , dataType = "ReqUpdateGovernorInfo")
     @PostMapping("governor")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateGovernor(
         @Valid @RequestBody ReqUpdateGovernorInfo reqUpdateGovernorInfo, BindingResult result)
         throws ContractException, ABICodecException, TransactionException, IOException {
