@@ -67,7 +67,7 @@ public class CommitteeController extends BaseController {
         , dataType = "ReqUpdateGovernorInfo")
     @PostMapping("governor")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse updateGovernor(
+    public Object updateGovernor(
         @Valid @RequestBody ReqUpdateGovernorInfo reqUpdateGovernorInfo, BindingResult result)
         throws ContractException, ABICodecException, TransactionException, IOException {
         checkBindResult(result);
@@ -78,7 +78,7 @@ public class CommitteeController extends BaseController {
         Object res = committeeService.updateGovernor(reqUpdateGovernorInfo);
         log.info("end grantCommittee useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
-        return new BaseResponse(ConstantCode.SUCCESS, res);
+        return res;
     }
 
     /**
