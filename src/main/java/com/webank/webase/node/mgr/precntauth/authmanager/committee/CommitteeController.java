@@ -14,10 +14,7 @@
 
 package com.webank.webase.node.mgr.precntauth.authmanager.committee;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqDeployAuthTypeInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqResetAdminInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqRevokeProposalInfo;
@@ -38,7 +35,6 @@ import org.fisco.bcos.sdk.codec.ABICodecException;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.transaction.model.exception.TransactionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,8 +62,7 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqUpdateGovernorInfo", value = "governor info", required = true
         , dataType = "ReqUpdateGovernorInfo")
     @PostMapping("governor")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse updateGovernor(
+    public Object updateGovernor(
         @Valid @RequestBody ReqUpdateGovernorInfo reqUpdateGovernorInfo, BindingResult result)
         throws ContractException, ABICodecException, TransactionException, IOException {
         checkBindResult(result);
@@ -78,7 +73,7 @@ public class CommitteeController extends BaseController {
         Object res = committeeService.updateGovernor(reqUpdateGovernorInfo);
         log.info("end grantCommittee useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
-        return new BaseResponse(ConstantCode.SUCCESS, res);
+        return res;
     }
 
     /**
