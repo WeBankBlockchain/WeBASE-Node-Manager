@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.precntauth.authmanager.everyone;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.precntauth.authmanager.base.BaseService;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqCheckMethodAuthInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqContractAdminInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqProposalInfo;
@@ -28,6 +29,7 @@ import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.model.RetCode;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +51,8 @@ public class EveryoneController extends BaseController {
 
   @Autowired
   private EveryoneService everyoneService;
+  @Autowired
+  private BaseService baseService;
 
   /**
    * 获取治理委员会信息
@@ -56,6 +60,9 @@ public class EveryoneController extends BaseController {
   @ApiImplicitParam(name = "groupId", value = "committee info", required = true)
   @GetMapping("cmtInfo")
   public BaseResponse queryCommittee(@RequestParam(defaultValue = "group") String groupId) {
+    if (baseService.queryExecEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
     return new BaseResponse(ConstantCode.SUCCESS, everyoneService.queryCommitteeInfo(groupId));
   }
 
@@ -66,6 +73,9 @@ public class EveryoneController extends BaseController {
   @ApiImplicitParam(name = "groupId", value = "groupId", required = true)
   @GetMapping("deploy/type")
   public Object queryDeployAuthType(String groupId) {
+    if (baseService.queryExecEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
     return new BaseResponse(ConstantCode.SUCCESS, everyoneService.queryDeployAuthType(groupId));
   }
 
@@ -77,6 +87,9 @@ public class EveryoneController extends BaseController {
       dataType = "ReqProposalInfo")
   @PostMapping("proposalInfo")
   public BaseResponse queryProposalInfo(@Valid @RequestBody ReqProposalInfo reqProposalInfo) {
+    if (baseService.queryExecEnvIsWasm(reqProposalInfo.getGroupId())) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
     return new BaseResponse(ConstantCode.SUCCESS,
         everyoneService.queryProposalInfo(reqProposalInfo));
   }
@@ -90,6 +103,9 @@ public class EveryoneController extends BaseController {
   @PostMapping("proposalInfoList")
   public BaseResponse queryProposalList(
       @Valid @RequestBody ReqProposalListInfo reqProposalListInfo) {
+    if (baseService.queryExecEnvIsWasm(reqProposalListInfo.getGroupId())) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
     return new BaseResponse(ConstantCode.SUCCESS,
         everyoneService.queryProposalListInfo(reqProposalListInfo));
   }
@@ -101,6 +117,9 @@ public class EveryoneController extends BaseController {
   @ApiImplicitParam(name = "groupId", value = "proposal info count", required = true)
   @GetMapping("proposalInfoCount")
   public BaseResponse queryProposalCount(String groupId) {
+    if (baseService.queryExecEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
     return new BaseResponse(ConstantCode.SUCCESS,
         everyoneService.queryProposalListInfoCount(groupId));
   }
@@ -113,6 +132,9 @@ public class EveryoneController extends BaseController {
       dataType = "ReqUsrDeployAuthInfo")
   @PostMapping("usr/deploy")
   public Object checkDeployAuth(@Valid @RequestBody ReqUsrDeployAuthInfo reqUsrDeployAuthInfo) {
+    if (baseService.queryExecEnvIsWasm(reqUsrDeployAuthInfo.getGroupId())) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
     return new BaseResponse(ConstantCode.SUCCESS,
         everyoneService.checkDeployAuth(reqUsrDeployAuthInfo));
   }
@@ -125,6 +147,9 @@ public class EveryoneController extends BaseController {
       dataType = "ReqContractAdminInfo")
   @PostMapping("contract/admin")
   public Object queryAdmin(@Valid @RequestBody ReqContractAdminInfo reqContractAdminInfo) {
+    if (baseService.queryExecEnvIsWasm(reqContractAdminInfo.getGroupId())) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
     return new BaseResponse(ConstantCode.SUCCESS, everyoneService.queryAdmin(reqContractAdminInfo));
   }
 
@@ -135,7 +160,10 @@ public class EveryoneController extends BaseController {
   @ApiImplicitParam(name = "reqCheckMethodAuthInfo", value = "contractAdmin info", required = true,
       dataType = "ReqCheckMethodAuthInfo")
   @PostMapping("contract/method/auth")
-  public Object checkMethodAuth(@Valid @RequestBody ReqCheckMethodAuthInfo reqCheckMethodAuthInfo){
+  public Object checkMethodAuth(@Valid @RequestBody ReqCheckMethodAuthInfo reqCheckMethodAuthInfo) {
+    if (baseService.queryExecEnvIsWasm(reqCheckMethodAuthInfo.getGroupId())) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
     return new BaseResponse(ConstantCode.SUCCESS,
         everyoneService.checkMethodAuth(reqCheckMethodAuthInfo));
   }

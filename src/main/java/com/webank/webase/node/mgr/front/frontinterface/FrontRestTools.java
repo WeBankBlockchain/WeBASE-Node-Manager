@@ -136,6 +136,8 @@ public class FrontRestTools {
     /**
      * rpc authmanager
      */
+    public static final String RPC_AUTHMANAGER_BASE_ENV = "/precntauth/authmanager/base/queryExecEnvIsWasm";
+    public static final String RPC_AUTHMANAGER_BASE_AUTH = "/precntauth/authmanager/base/queryChainHasAuth";
     // 1) everyone
     public static final String RPC_AUTHMANAGER_EVERYONE_CMTINFO = "/precntauth/authmanager/everyone/cmtInfo";
     public static final String RPC_AUTHMANAGER_EVERYONE_PROINFO = "/precntauth/authmanager/everyone/proposalInfo";
@@ -156,6 +158,7 @@ public class FrontRestTools {
     // 3) admin
     public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET = "/precntauth/authmanager/admin/method/auth/set";
     public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE = "/precntauth/authmanager/admin/method/auth/type";
+
 
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
     public static final String URI_SSL_CRYPTO_TYPE = "sslCryptoType";
@@ -181,6 +184,7 @@ public class FrontRestTools {
             URI_FRONT_VERSION, URI_SIGN_VERSION, URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN,
             URI_KEY_PAIR_EXPORT_P12_WITH_SIGN,
             URI_EVENT_LOG_LIST, URI_SIGN_MESSAGE, URI_CONFIG_SDK,
+            RPC_AUTHMANAGER_BASE_ENV,   RPC_AUTHMANAGER_BASE_AUTH,
                 RPC_AUTHMANAGER_EVERYONE_CMTINFO,
             RPC_AUTHMANAGER_EVERYONE_PROINFO, RPC_AUTHMANAGER_EVERYONE_PROINFOLIST,
             RPC_AUTHMANAGER_EVERYONE_PROINFOCOUNT,
