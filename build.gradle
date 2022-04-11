@@ -113,12 +113,12 @@ dependencies {
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.67'
-    implementation 'javax.validation:validation-api:2.0.1.Final'
-    implementation 'org.hibernate.validator:hibernate-validator:6.0.21.Final'
+    compile 'javax.validation:validation-api:2.0.1.Final'
+    compile 'org.hibernate.validator:hibernate-validator:6.0.21.Final'
     // cover old version
     compile 'com.google.guava:guava:28.2-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
-    implementation 'org.yaml:snakeyaml:1.30'
+    compile 'org.yaml:snakeyaml:1.30'
 
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
