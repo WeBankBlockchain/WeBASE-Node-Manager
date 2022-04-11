@@ -140,6 +140,7 @@ public class FrontRestTools {
     public static final String RPC_AUTHMANAGER_EVERYONE_CMTINFO = "/precntauth/authmanager/everyone/cmtInfo";
     public static final String RPC_AUTHMANAGER_EVERYONE_PROINFO = "/precntauth/authmanager/everyone/proposalInfo";
     public static final String RPC_AUTHMANAGER_EVERYONE_PROINFOLIST = "/precntauth/authmanager/everyone/proposalInfoList";
+    public static final String RPC_AUTHMANAGER_EVERYONE_PROINFOCOUNT = "/precntauth/authmanager/everyone/proposalInfoCount";
     public static final String RPC_AUTHMANAGER_EVERYONE_DEPLOY_TYPE = "/precntauth/authmanager/everyone/deploy/type";
     public static final String RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY = "/precntauth/authmanager/everyone/usr/deploy";
     public static final String RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN = "/precntauth/authmanager/everyone/contract/admin";
@@ -182,6 +183,7 @@ public class FrontRestTools {
             URI_EVENT_LOG_LIST, URI_SIGN_MESSAGE, URI_CONFIG_SDK,
                 RPC_AUTHMANAGER_EVERYONE_CMTINFO,
             RPC_AUTHMANAGER_EVERYONE_PROINFO, RPC_AUTHMANAGER_EVERYONE_PROINFOLIST,
+            RPC_AUTHMANAGER_EVERYONE_PROINFOCOUNT,
             RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY, RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN,
             RPC_AUTHMANAGER_EVERYONE_DEPLOY_TYPE,
             RPC_AUTHMANAGER_EVERYONE_CNT_METHOD_AUTH, RPC_AUTHMANAGER_COMMITTEE_GOVERNOR,
