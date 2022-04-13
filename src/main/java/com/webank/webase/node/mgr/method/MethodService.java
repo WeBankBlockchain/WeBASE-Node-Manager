@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ public class MethodService {
 
     /**
      * save method by abi string
+     *
      * @param groupId
      * @param abiStr
      * @param type
@@ -72,7 +74,8 @@ public class MethodService {
         //save each method
         for (Method method : methodList) {
             if (checkMethodExist(method.getMethodId(), groupId)) {
-                log.info("methodId of [{}] in group [{}] exist, jump over", method.getMethodId(), groupId);
+                log.info("methodId of [{}] in group [{}] exist, jump over", method.getMethodId(),
+                    groupId);
                 continue;
             }
             BeanUtils.copyProperties(method, tbMethod);
@@ -82,6 +85,7 @@ public class MethodService {
 
     /**
      * checkMethod whether exist
+     *
      * @param methodId
      * @param groupId
      * @return
@@ -112,11 +116,32 @@ public class MethodService {
     /**
      * delete by groupId.
      */
-    public void deleteByGroupId(String groupId){
+    public void deleteByGroupId(String groupId) {
         if (groupId.isEmpty()) {
             return;
         }
         methodMapper.removeByGroupId(groupId);
+    }
+
+    /**
+     * compute MethodId
+     */
+    public String computeMethodId(List<ABIDefinition> abiDefinitionList, Integer integer) {
+        String buildMethodId = "";
+        for (ABIDefinition abiDefinition : abiDefinitionList) {
+            if ("function".equals(abiDefinition.getType())) {
+                // support guomi sm3
+                if (integer == 1) {
+                    CryptoSuite c1 = new CryptoSuite(1);
+                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c1);
+                } else {
+                    CryptoSuite c2 = new CryptoSuite(2);
+                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c2);
+                }
+                System.out.println(abiDefinition.getName() + ": " + buildMethodId);
+            }
+        }
+        return buildMethodId;
     }
 
 }
