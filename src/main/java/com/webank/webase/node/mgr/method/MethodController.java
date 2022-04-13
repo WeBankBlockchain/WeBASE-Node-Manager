@@ -26,7 +26,9 @@ import com.webank.webase.node.mgr.tools.Web3Tools;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
@@ -100,10 +102,32 @@ public class MethodController extends BaseController {
         log.info("start computeMethodId. startTime:{}",
             startTime.toEpochMilli());
         List<ABIDefinition> abiDefinitionList = Web3Tools.loadContractDefinition(abiInfoStr);
-        String resMethod = methodService.computeMethodId(abiDefinitionList, integer);
+        List<Map<String, String>> resMethod = methodService.computeMethodId(abiDefinitionList,
+            integer);
         baseResponse.setData(resMethod);
 
         log.info("end computeMethodId. useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * get methodId dmlSql.
+     */
+    @GetMapping(value = "getMethodIdDmlSql")
+    public BaseResponse getMethodIdDmlSql(String abiInfoStr, Integer integer)
+        throws IOException {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start getMethodIdDmlSql. startTime:{}",
+            startTime.toEpochMilli());
+        List<ABIDefinition> abiDefinitionList = Web3Tools.loadContractDefinition(abiInfoStr);
+        ArrayList<String> resMethod = methodService.getMethodIdDmlSql(abiDefinitionList,
+            integer);
+        baseResponse.setData(resMethod);
+
+        log.info("end getMethodIdDmlSql. useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
             JsonTools.toJSONString(baseResponse));
         return baseResponse;
