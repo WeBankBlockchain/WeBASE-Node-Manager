@@ -13,6 +13,8 @@
  */
 package com.webank.webase.node.mgr.method;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -22,11 +24,15 @@ import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +48,7 @@ public class MethodService {
 
     /**
      * save method by abi string
+     *
      * @param groupId
      * @param abiStr
      * @param type
@@ -72,7 +79,8 @@ public class MethodService {
         //save each method
         for (Method method : methodList) {
             if (checkMethodExist(method.getMethodId(), groupId)) {
-                log.info("methodId of [{}] in group [{}] exist, jump over", method.getMethodId(), groupId);
+                log.info("methodId of [{}] in group [{}] exist, jump over", method.getMethodId(),
+                    groupId);
                 continue;
             }
             BeanUtils.copyProperties(method, tbMethod);
@@ -82,6 +90,7 @@ public class MethodService {
 
     /**
      * checkMethod whether exist
+     *
      * @param methodId
      * @param groupId
      * @return
@@ -112,11 +121,71 @@ public class MethodService {
     /**
      * delete by groupId.
      */
-    public void deleteByGroupId(String groupId){
+    public void deleteByGroupId(String groupId) {
         if (groupId.isEmpty()) {
             return;
         }
         methodMapper.removeByGroupId(groupId);
     }
 
+    /**
+     * compute MethodId
+     */
+    public ArrayList<Map<String, String>> computeMethodId(List<ABIDefinition> abiDefinitionList,
+        Integer integer) throws JsonProcessingException {
+        ArrayList<Map<String, String>> mapList = new ArrayList<>();
+        String buildMethodId = "";
+        for (ABIDefinition abiDefinition : abiDefinitionList) {
+            if ("function".equals(abiDefinition.getType())) {
+                Map<String, String> stringMap = new HashMap<>();
+                // support guomi sm3
+                if (integer == 1) {
+                    CryptoSuite c1 = new CryptoSuite(1);
+                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c1);
+                } else {
+                    CryptoSuite c2 = new CryptoSuite(0);
+                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c2);
+                }
+                ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+                String abiStr = objectMapper.writeValueAsString(abiDefinition);
+                System.out.println(
+                    buildMethodId + ": " + abiDefinition.getName() + ": " + abiStr);
+                stringMap.put(buildMethodId, abiStr);
+                mapList.add(stringMap);
+            }
+        }
+        return mapList;
+    }
+
+    /**
+     * get MethodId DmlSql
+     */
+    public ArrayList<String> getMethodIdDmlSql(List<ABIDefinition> abiDefinitionList,
+        Integer integer) throws JsonProcessingException {
+        ArrayList<String> stringArrayList = new ArrayList<>();
+        String buildMethodId = "";
+        for (ABIDefinition abiDefinition : abiDefinitionList) {
+            if ("function".equals(abiDefinition.getType())) {
+                String sql = "";
+                // support guomi sm3
+                if (integer == 1) {
+                    CryptoSuite c1 = new CryptoSuite(1);
+                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c1);
+                } else {
+                    CryptoSuite c2 = new CryptoSuite(0);
+                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c2);
+                }
+                ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+                String abiStr = objectMapper.writeValueAsString(abiDefinition);
+                System.out.println(
+                    buildMethodId + ": " + abiDefinition.getName() + ": " + abiStr);
+                sql = "INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, "
+                    + "`contract_type`, `create_time`, `modify_time`) VALUES (" + "'"
+                    + buildMethodId + "'" + ", 'group'," + "'"
+                    + abiStr + "'" + ", 'function', 1, now(), now());";
+                stringArrayList.add(sql);
+            }
+        }
+        return stringArrayList;
+    }
 }
