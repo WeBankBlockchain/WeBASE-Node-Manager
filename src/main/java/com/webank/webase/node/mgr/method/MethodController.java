@@ -91,45 +91,46 @@ public class MethodController extends BaseController {
         return baseResponse;
     }
 
-    /**
-     * query by methodId.
-     */
-    @GetMapping(value = "computeMethodId")
-    public BaseResponse computeMethodId(String abiInfoStr, Integer integer)
-        throws IOException {
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start computeMethodId. startTime:{}",
-            startTime.toEpochMilli());
-        List<ABIDefinition> abiDefinitionList = Web3Tools.loadContractDefinition(abiInfoStr);
-        List<Map<String, String>> resMethod = methodService.computeMethodId(abiDefinitionList,
-            integer);
-        baseResponse.setData(resMethod);
-
-        log.info("end computeMethodId. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(),
-            JsonTools.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
-    /**
-     * get methodId dmlSql.
-     */
-    @GetMapping(value = "getMethodIdDmlSql")
-    public BaseResponse getMethodIdDmlSql(String abiInfoStr, Integer integer)
-        throws IOException {
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start getMethodIdDmlSql. startTime:{}",
-            startTime.toEpochMilli());
-        List<ABIDefinition> abiDefinitionList = Web3Tools.loadContractDefinition(abiInfoStr);
-        ArrayList<String> resMethod = methodService.getMethodIdDmlSql(abiDefinitionList,
-            integer);
-        baseResponse.setData(resMethod);
-
-        log.info("end getMethodIdDmlSql. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(),
-            JsonTools.toJSONString(baseResponse));
-        return baseResponse;
-    }
+    /**Below API For Developer**/
+//    /**
+//     * compute methodId.
+//     */
+//    @GetMapping(value = "computeMethodId")
+//    public BaseResponse computeMethodId(String abiInfoStr, Integer integer)
+//        throws IOException {
+//        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//        log.info("start computeMethodId. startTime:{}",
+//            startTime.toEpochMilli());
+//        List<ABIDefinition> abiDefinitionList = Web3Tools.loadContractDefinition(abiInfoStr);
+//        List<Map<String, String>> resMethod = methodService.computeMethodId(abiDefinitionList,
+//            integer);
+//        baseResponse.setData(resMethod);
+//
+//        log.info("end computeMethodId. useTime:{} result:{}",
+//            Duration.between(startTime, Instant.now()).toMillis(),
+//            JsonTools.toJSONString(baseResponse));
+//        return baseResponse;
+//    }
+//
+//    /**
+//     * get methodId dmlSql.
+//     */
+//    @GetMapping(value = "getMethodIdDmlSql")
+//    public BaseResponse getMethodIdDmlSql(String abiInfoStr, Integer integer)
+//        throws IOException {
+//        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//        log.info("start getMethodIdDmlSql. startTime:{}",
+//            startTime.toEpochMilli());
+//        List<ABIDefinition> abiDefinitionList = Web3Tools.loadContractDefinition(abiInfoStr);
+//        ArrayList<String> resMethod = methodService.getMethodIdDmlSql(abiDefinitionList,
+//            integer);
+//        baseResponse.setData(resMethod);
+//
+//        log.info("end getMethodIdDmlSql. useTime:{} result:{}",
+//            Duration.between(startTime, Instant.now()).toMillis(),
+//            JsonTools.toJSONString(baseResponse));
+//        return baseResponse;
+//    }
 }
