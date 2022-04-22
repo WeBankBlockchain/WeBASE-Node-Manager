@@ -64,7 +64,7 @@ List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
 
-def jackson_version = "2.11.4"
+def jackson_version = "2.13.2"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
@@ -109,16 +109,17 @@ dependencies {
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile 'org.apache.commons:commons-collections4:4.4'
+    compile 'org.apache.commons:commons-compress:1.21'
     compile "mysql:mysql-connector-java:8.0.22"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.67'
-    implementation 'javax.validation:validation-api:2.0.1.Final'
-    implementation 'org.hibernate.validator:hibernate-validator:6.0.21.Final'
+    compile 'javax.validation:validation-api:2.0.1.Final'
+    compile 'org.hibernate.validator:hibernate-validator:6.0.21.Final'
     // cover old version
     compile 'com.google.guava:guava:28.2-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
-    implementation 'org.yaml:snakeyaml:1.30'
+    compile 'org.yaml:snakeyaml:1.30'
 
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
