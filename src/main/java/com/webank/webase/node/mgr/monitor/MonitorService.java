@@ -56,6 +56,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.codec.datatypes.Address;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.BeanUtils;
@@ -391,9 +392,15 @@ public class MonitorService {
         if (StringUtils.isBlank(transTo) || "0x".equalsIgnoreCase(transTo)) {
             contractAddress = frontInterface.getAddressByHash(groupId, transHash);
             // if contract deploy error, contract address is null and transTo is null
-            if (StringUtils.isBlank(contractAddress)) {
-                log.warn("transTo is empty, and contract address is empty for deploy error");
-                return new ContractMonitorResult("0x", "0x", MonitorUserType.NORMAL.getValue());
+            if (StringUtils.isBlank(contractAddress) || Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress) ) {
+                log.warn("transTo is empty, and contract address is empty because deploy error");
+                return new ContractMonitorResult("0x", "0x", TransType.DEPLOY.getValue(),
+                    MonitorUserType.NORMAL.getValue());
+            }
+            if (contractAddress.startsWith("0x0000000000000000000000000000000000") || contractAddress.startsWith("/sys")) {
+                log.info("contractAddress is precompiled contract, skip");
+                return new ContractMonitorResult(contractAddress, contractAddress, TransType.DEPLOY.getValue(),
+                    MonitorUserType.NORMAL.getValue());
             }
             contractBin = frontInterface.getCodeV2FromFront(groupId, contractAddress, blockNumber);
             contractBin = removeBinFirstAndLast(contractBin);
@@ -417,6 +424,11 @@ public class MonitorService {
             transType = TransType.CALL.getValue();
             String methodId = transInput.substring(0, 10);
             contractAddress = transTo;
+            if (contractAddress.startsWith("0x0000000000000000000000000000000000") || contractAddress.startsWith("/sys")) {
+                log.info("contractAddress is precompiled contract, skip");
+                return new ContractMonitorResult(contractAddress, contractAddress, TransType.CALL.getValue(),
+                    MonitorUserType.NORMAL.getValue());
+            }
             contractBin = frontInterface.getCodeV2FromFront(groupId, contractAddress, blockNumber);
             contractBin = removeBinFirstAndLast(contractBin);
 
