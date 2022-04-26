@@ -59,6 +59,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.codec.datatypes.Address;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -96,6 +97,8 @@ public class MonitorService {
     @Lazy
     private AbiService abiService;
 
+    private final static List<String> LIQUID_PRECOMPILED_ADDRESS_ARRAY = Arrays.asList("/sys/auth", "/sys/bfs", "/sys/cns", "/sys/consensus",
+        "/sys/crypto_tools", "/sys/kv_storage", "/sys/parallel_config", "/sys/status", "/sys/table_storage");
 
     /**
      * monitor every group.
@@ -388,6 +391,23 @@ public class MonitorService {
         String contractAddress, contractName, interfaceName = "", contractBin;
         int transType = TransType.DEPLOY.getValue();
         int transUnusualType = TransUnusualType.NORMAL.getValue();
+        // liquid时to在部署和调用时均不为空，需要获取回执判断contractAddress
+        if (transTo.startsWith("/")) {
+            TransactionReceipt receipt = frontInterface.getTransReceipt(groupId, transHash);
+            contractAddress = receipt.getContractAddress();
+            // 部署失败的时候，或者调用交易的时候，address为空
+            if (StringUtils.isBlank(contractAddress)) {
+                if (!receipt.isStatusOK()) {
+                    // 部署失败
+                    return new ContractMonitorResult("0x", "0x", TransType.DEPLOY.getValue(),
+                        MonitorUserType.NORMAL.getValue());
+                } // else 发交易，执行下文根据transTo判断
+                // continue
+            } else {
+                //部署成功，手动设置transTo为空，适配solidity中的to为空，contractAddress非空的特点
+                transTo = "";
+            }
+        }
         // deploy contract tx
         if (StringUtils.isBlank(transTo) || "0x".equalsIgnoreCase(transTo)) {
             contractAddress = frontInterface.getAddressByHash(groupId, transHash);
@@ -397,7 +417,8 @@ public class MonitorService {
                 return new ContractMonitorResult("0x", "0x", TransType.DEPLOY.getValue(),
                     MonitorUserType.NORMAL.getValue());
             }
-            if (contractAddress.startsWith("0x0000000000000000000000000000000000") || contractAddress.startsWith("/sys")) {
+            if (contractAddress.startsWith("0x0000000000000000000000000000000000")
+                || isPrecompiledLiquidAddress(contractAddress)) {
                 log.info("contractAddress is precompiled contract, skip");
                 return new ContractMonitorResult(contractAddress, contractAddress, TransType.DEPLOY.getValue(),
                     MonitorUserType.NORMAL.getValue());
@@ -424,7 +445,8 @@ public class MonitorService {
             transType = TransType.CALL.getValue();
             String methodId = transInput.substring(0, 10);
             contractAddress = transTo;
-            if (contractAddress.startsWith("0x0000000000000000000000000000000000") || contractAddress.startsWith("/sys")) {
+            if (contractAddress.startsWith("0x0000000000000000000000000000000000")
+                || isPrecompiledLiquidAddress(contractAddress) ) {
                 log.info("contractAddress is precompiled contract, skip");
                 return new ContractMonitorResult(contractAddress, contractAddress, TransType.CALL.getValue(),
                     MonitorUserType.NORMAL.getValue());
@@ -559,5 +581,12 @@ public class MonitorService {
             contractName = contractBin.substring(contractBin.length() - 10);
         }
         return contractName;
+    }
+
+    private static boolean isPrecompiledLiquidAddress(String liquidAddress) {
+        if (StringUtils.isBlank(liquidAddress)) {
+            return false;
+        }
+        return LIQUID_PRECOMPILED_ADDRESS_ARRAY.stream().anyMatch(liquidAddress::equalsIgnoreCase);
     }
 }
