@@ -80,7 +80,6 @@ public class CnsService {
         params.put("contractAddress", inputParam.getContractAddress());
         params.put("abiInfo", abiArray);
 
-        // register by front
         frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_REGISTER_CNS, params,
                 Object.class);
         // save cns

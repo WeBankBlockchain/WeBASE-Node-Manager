@@ -17,7 +17,7 @@ package com.webank.webase.node.mgr.precntauth.authmanager.committee;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.precntauth.authmanager.base.BaseService;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqDeployAuthTypeInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqResetAdminInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqRevokeProposalInfo;
@@ -38,7 +38,6 @@ import org.fisco.bcos.sdk.codec.ABICodecException;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.transaction.model.exception.TransactionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,9 +54,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommitteeController extends BaseController {
 
     @Autowired
-    private CommitteeService chainGovernService;
-    @Autowired
     private CommitteeService committeeService;
+    @Autowired
+    private BaseService baseService;
 
     /**
      * 更新(新增、删除)治理委员信息(weight设置为0表示删除)
@@ -66,10 +65,12 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqUpdateGovernorInfo", value = "governor info", required = true
         , dataType = "ReqUpdateGovernorInfo")
     @PostMapping("governor")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse updateGovernor(
+    public Object updateGovernor(
         @Valid @RequestBody ReqUpdateGovernorInfo reqUpdateGovernorInfo, BindingResult result)
         throws ContractException, ABICodecException, TransactionException, IOException {
+        if (baseService.queryExecEnvIsWasm(reqUpdateGovernorInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
         checkBindResult(result);
         Instant startTime = Instant.now();
         log.info("start updateGovernor startTime:{} reqUpdateGovernorInfo:{}",
@@ -78,7 +79,7 @@ public class CommitteeController extends BaseController {
         Object res = committeeService.updateGovernor(reqUpdateGovernorInfo);
         log.info("end grantCommittee useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
-        return new BaseResponse(ConstantCode.SUCCESS, res);
+        return res;
     }
 
     /**
@@ -90,6 +91,9 @@ public class CommitteeController extends BaseController {
     @PostMapping("rate")
     public Object setRate(@Valid @RequestBody ReqSetRateInfo reqSetRateInfo)
         throws ContractException, ABICodecException, TransactionException, IOException {
+        if (baseService.queryExecEnvIsWasm(reqSetRateInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
         return committeeService.setRate(reqSetRateInfo);
     }
 
@@ -102,6 +106,9 @@ public class CommitteeController extends BaseController {
     @PostMapping("deploy/type")
     public Object setDeployAuthType(
         @Valid @RequestBody ReqDeployAuthTypeInfo reqDeployAuthTypeInfo) {
+        if (baseService.queryExecEnvIsWasm(reqDeployAuthTypeInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
         return committeeService.setDeployAuthType(reqDeployAuthTypeInfo);
     }
 
@@ -113,6 +120,9 @@ public class CommitteeController extends BaseController {
         dataType = "ReqUsrDeployInfo")
     @PostMapping("usr/deploy")
     public Object modifyDeployUsrAuth(@Valid @RequestBody ReqUsrDeployInfo reqUsrDeployInfo) {
+        if (baseService.queryExecEnvIsWasm(reqUsrDeployInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
         return committeeService.modifyDeployUsrAuth(reqUsrDeployInfo);
     }
 
@@ -125,6 +135,9 @@ public class CommitteeController extends BaseController {
     @PostMapping("contract/admin")
     public Object resetAdmin(@Valid @RequestBody ReqResetAdminInfo reqResetAdminInfo)
         throws ABICodecException, TransactionException, ContractException, IOException {
+        if (baseService.queryExecEnvIsWasm(reqResetAdminInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
         return committeeService.resetAdmin(reqResetAdminInfo);
     }
 
@@ -137,6 +150,9 @@ public class CommitteeController extends BaseController {
     @PostMapping("proposal/revoke")
     public Object revokeProposal(@Valid @RequestBody ReqRevokeProposalInfo reqRevokeProposalInfo)
         throws ABICodecException, TransactionException, ContractException, IOException {
+        if (baseService.queryExecEnvIsWasm(reqRevokeProposalInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
         return committeeService.revokeProposal(reqRevokeProposalInfo);
     }
 
@@ -149,6 +165,9 @@ public class CommitteeController extends BaseController {
     @PostMapping("proposal/vote")
     public Object voteProposal(@Valid @RequestBody ReqVoteProposalInfo reqVoteProposalInfo)
         throws ABICodecException, TransactionException, ContractException, IOException {
+        if (baseService.queryExecEnvIsWasm(reqVoteProposalInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
         return committeeService.voteProposal(reqVoteProposalInfo);
     }
 }

@@ -14,9 +14,12 @@
 
 package com.webank.webase.node.mgr.precntauth.authmanager.admin;
 
+import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
+import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclAuthTypeInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclUsrInfo;
+import com.webank.webase.node.mgr.precntauth.authmanager.base.BaseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -44,6 +47,8 @@ public class AdminController extends BaseController {
 
     @Autowired
     private AdminService adminService;
+    @Autowired
+    private BaseService baseService;
 
     /**
      * 合约接口权限控制(目前只能对写方法进行控制)
@@ -52,19 +57,25 @@ public class AdminController extends BaseController {
     @ApiImplicitParam(name = "reqAclAuthTypeInfo", value = "aclType info", required = true, dataType = "ReqAclAuthTypeInfo")
     @PostMapping("method/auth/type")
     public Object setMethodAuthType(@Valid @RequestBody ReqAclAuthTypeInfo reqAclAuthTypeInfo) {
+        if (baseService.queryExecEnvIsWasm(reqAclAuthTypeInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
         Object res = adminService.setMethodAuthType(reqAclAuthTypeInfo);
         return res;
     }
 
     /**
-     * 设置合约函数用户访问控制
-     * contractAddress(0xCcEeF68C9b4811b32c75df284a1396C7C5509561) set(string) accountAddress(0x7fb008862ff69353a02ddabbc6cb7dc31683d0f6)
+     * 设置合约函数用户访问控制 contractAddress(0xCcEeF68C9b4811b32c75df284a1396C7C5509561) set(string)
+     * accountAddress(0x7fb008862ff69353a02ddabbc6cb7dc31683d0f6)
      */
     @ApiOperation(value = "set contract func usr acl")
     @ApiImplicitParam(name = "reqAclUsrInfo", value = "aclUsr info", required = true, dataType = "ReqAclUsrInfo")
     @PostMapping("method/auth/set")
     public Object setMethodAuth(@Valid @RequestBody ReqAclUsrInfo reqAclUsrInfo)
         throws ContractException {
+        if (baseService.queryExecEnvIsWasm(reqAclUsrInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
         Object res = adminService.setMethodAuth(reqAclUsrInfo);
         return res;
     }
