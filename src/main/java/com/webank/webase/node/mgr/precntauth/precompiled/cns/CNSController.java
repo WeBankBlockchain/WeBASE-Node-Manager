@@ -31,7 +31,7 @@ public class CNSController {
   @PostMapping("register")
   public Object registerCNS(@Valid @RequestBody ReqRegisterCnsInfo reqCnsInfo)
       throws ContractException {
-    return new BaseResponse(ConstantCode.SUCCESS, cnsServiceInWebase.registerCNS(reqCnsInfo));
+    return cnsServiceInWebase.registerCNS(reqCnsInfo);
   }
 
   @ApiOperation(value = "query the cns info by name")
