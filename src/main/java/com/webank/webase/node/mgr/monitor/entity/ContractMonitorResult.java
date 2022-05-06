@@ -30,9 +30,10 @@ public class ContractMonitorResult {
     private Integer transType;
     private Integer transUnusualType;
 
-    public ContractMonitorResult(String contractName, String contractAddress, Integer transUnusualType) {
+    public ContractMonitorResult(String contractName, String contractAddress, Integer transType, Integer transUnusualType) {
         this.contractName = contractName;
         this.contractAddress = contractAddress;
+        this.transType = transType;
         this.transUnusualType = transUnusualType;
     }
 }
