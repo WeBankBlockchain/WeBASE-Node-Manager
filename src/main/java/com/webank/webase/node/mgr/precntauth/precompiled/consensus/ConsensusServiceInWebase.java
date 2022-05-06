@@ -46,13 +46,11 @@ public class ConsensusServiceInWebase {
 
   public Object getNodeListService(String groupId, int pageSize, int pageNumber) {
         log.debug("start getNodeListService. groupId:{}", groupId);
-        String uri;
-        Map<String, String> map = new HashMap<>();
-        map.put("groupId", String.valueOf(groupId));
-        map.put("pageSize", String.valueOf(pageSize));
-        map.put("pageNumber", String.valueOf(pageNumber));
-        uri = HttpRequestTools.getQueryUri(FrontRestTools.RPC_PRECOM_CONSENSUS_LIST, map);
-        Object frontRsp = frontRestTools.getForEntity(groupId, uri, Object.class);
+        ReqNodeListInfo reqNodeListInfo = new ReqNodeListInfo();
+        reqNodeListInfo.setGroupId(groupId);
+        reqNodeListInfo.setPageNumber(pageNumber);
+        reqNodeListInfo.setPageSize(pageSize);
+        Object frontRsp = this.getNodeList(reqNodeListInfo);
         log.debug("end getNodeListService. frontRsp:{}", JsonTools.toJSONString(frontRsp));
         return frontRsp;
     }
