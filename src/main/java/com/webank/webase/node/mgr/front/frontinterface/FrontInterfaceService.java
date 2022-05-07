@@ -435,10 +435,19 @@ public class FrontInterfaceService {
         map.put("address", contractAddress);
         map.put("blockNumber", blockNumber.toString(10));
         String uri = HttpRequestTools.getQueryUri(FrontRestTools.URI_CODE_V2, map);
-        String code = frontRestTools.getForEntity(groupId, uri, String.class);
+        try {
+            String code = frontRestTools.getForEntity(groupId, uri, String.class);
+            log.debug("end getCodeV2FromFront:{}", code);
+            return code;
+        } catch (NodeMgrException ex) {
+            String attachment = ex.getRetCode().getAttachment();
+            if (StringUtils.isNotBlank(attachment) && attachment.contains("null")) {
+                log.error("getCode return null, contract not exist on chain!");
+                return null;
+            }
+            throw ex;
+        }
 
-        log.debug("end getCodeV2FromFront:{}", code);
-        return code;
     }
 
     /**
