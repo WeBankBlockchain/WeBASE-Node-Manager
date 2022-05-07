@@ -17,6 +17,7 @@ import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.precntauth.precompiled.bfs.entity.ReqCreateBFSInfo;
 import com.webank.webase.node.mgr.precntauth.precompiled.bfs.entity.ReqQueryBFSInfo;
 import com.webank.webase.node.mgr.user.UserService;
+import java.util.List;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,9 +52,9 @@ public class BFSServiceInWebase {
    */
   public Object queryPath(ReqQueryBFSInfo reqQueryBFSInfoh)
       throws ContractException {
-    String frontRsp = frontRestTools.postForEntity(
+    List frontRsp = frontRestTools.postForEntity(
         reqQueryBFSInfoh.getGroupId(), FrontRestTools.RPC_PRECOM_BFS_QUERY,
-        reqQueryBFSInfoh, String.class);
+        reqQueryBFSInfoh, List.class);
     return frontRsp;
   }
 

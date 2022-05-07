@@ -424,6 +424,11 @@ public class MonitorService {
                     MonitorUserType.NORMAL.getValue());
             }
             contractBin = frontInterface.getCodeV2FromFront(groupId, contractAddress, blockNumber);
+            if (StringUtils.isBlank(contractBin)) {
+                log.warn("contractAddress:[{}] not exist on chain, required audit", contractAddress);
+                return new ContractMonitorResult(contractAddress, contractAddress, TransType.CALL.getValue(),
+                    MonitorUserType.ABNORMAL.getValue());
+            }
             contractBin = removeBinFirstAndLast(contractBin);
 
             List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
@@ -451,7 +456,13 @@ public class MonitorService {
                 return new ContractMonitorResult(contractAddress, contractAddress, TransType.CALL.getValue(),
                     MonitorUserType.NORMAL.getValue());
             }
-            contractBin = frontInterface.getCodeV2FromFront(groupId, contractAddress, blockNumber);
+            contractBin = frontInterface
+                .getCodeV2FromFront(groupId, contractAddress, blockNumber);
+            if (StringUtils.isBlank(contractBin)) {
+                log.warn("contractAddress:[{}] not exist on chain, required audit", contractAddress);
+                return new ContractMonitorResult(contractAddress, contractAddress, TransType.CALL.getValue(),
+                    MonitorUserType.ABNORMAL.getValue());
+            }
             contractBin = removeBinFirstAndLast(contractBin);
 
             List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
@@ -565,6 +576,9 @@ public class MonitorService {
      * get contractName from contractBin.
      */
     private String getNameFromContractBin(String groupId, String contractBin) {
+        if (StringUtils.isBlank(contractBin)) {
+            return null;
+        }
         List<TbContract> contractList = contractService.queryContractByBin(groupId, contractBin);
         if (contractList != null && contractList.size() > 0) {
             return contractList.get(0).getContractName();
