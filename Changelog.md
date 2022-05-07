@@ -11,7 +11,7 @@
 - WeBASE-Front lab-rc2
 - WeBASE-Sign lab-rc1
 
-详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab-dev/)。
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
 
 ### lab-rc1(2021-12-09)
 
