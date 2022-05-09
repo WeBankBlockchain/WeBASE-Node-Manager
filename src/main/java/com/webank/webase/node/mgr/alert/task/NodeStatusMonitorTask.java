@@ -180,7 +180,7 @@ public class NodeStatusMonitorTask {
                 100, 1);
         try {
             // get data from response
-            LinkedHashMap<String, Object> responseMap = (LinkedHashMap<String, Object>) responseFromFront;
+            LinkedHashMap<String, Object> responseMap = JsonTools.stringToObj(JsonTools.objToString(responseFromFront), LinkedHashMap.class);
             log.debug("end getNodeListWithType result: {}", responseMap.get("data"));
             return (List<LinkedHashMap<String, String>>) responseMap.get("data");
         }catch (Exception e) {
