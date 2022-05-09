@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   deploy_address varchar(64) DEFAULT NULL COMMENT '合约部署者地址',
   deploy_user_name varchar(64) DEFAULT NULL COMMENT '合约部署者用戶名',
+  is_wasm tinyint(4) DEFAULT '0' COMMENT '是否为liquid合约(0-solidity合约，1-liquid合约)',
   PRIMARY KEY (contract_id),
   UNIQUE KEY uk_group_path_name (group_id,contract_path,contract_name,account)
 ) ENGINE=InnoDB AUTO_INCREMENT=200001 DEFAULT CHARSET=utf8 COMMENT='合约表';
@@ -329,6 +330,7 @@ CREATE TABLE IF NOT EXISTS tb_abi (
   contract_bin mediumtext NOT NULL COMMENT '合约ABI的runtime-bin',
   create_time datetime DEFAULT NULL COMMENT '合约ABI的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '合约ABI的修改时间',
+  is_wasm tinyint(4) DEFAULT '0' COMMENT '是否为liquid合约(0-solidity合约，1-liquid合约)',
   PRIMARY KEY (abi_id),
   UNIQUE KEY unique_address (group_id,account,contract_address)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约ABI表';

@@ -40,4 +40,5 @@ public class TransactionParam {
     private boolean useCns = false;
     private String cnsName;
     private String version;
+    private Boolean isWasm = false;
 }

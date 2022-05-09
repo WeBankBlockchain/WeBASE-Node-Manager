@@ -13,24 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.node.mgr.precompiled.entity;
+package com.webank.webase.node.mgr.precntauth.authmanager.base;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 
-
 @Data
-public class ConsensusHandle {
-    private String groupId;
-    /**
-     * sealer, observer, remove
-     */
-    private String nodeType;
-    @NotBlank
-    private String fromAddress;
-    private String signUserId;
-    @NotBlank
-    private String nodeId;
-    private Integer weight;
+public class PermissionState {
+    private int deployAndCreate;
+    private int cns;
+    private int sysConfig;
+    private int node;
 }

@@ -23,31 +23,17 @@ import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.contract.entity.*;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.contract.entity.Contract;
-import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
-import com.webank.webase.node.mgr.contract.entity.QueryCnsParam;
-import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
-import com.webank.webase.node.mgr.contract.entity.ReqCopyContracts;
-import com.webank.webase.node.mgr.contract.entity.ReqListContract;
-import com.webank.webase.node.mgr.contract.entity.ReqQueryCns;
-import com.webank.webase.node.mgr.contract.entity.ReqQueryCnsList;
-import com.webank.webase.node.mgr.contract.entity.ReqRegisterCns;
-import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
-import com.webank.webase.node.mgr.contract.entity.TbCns;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.contract.entity.TbContractPath;
-import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
+
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.codec.datatypes.Address;
@@ -217,7 +203,7 @@ public class ContractController extends BaseController {
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(param));
         // 0x0000000000000000000000000000000000000000 address is invalid
-        if (Address.DEFAULT.toString().equals(param.getContractAddress())) {
+        if (!param.getIsWasm() && Address.DEFAULT.toString().equals(param.getContractAddress())) {
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
         // check version
@@ -378,78 +364,78 @@ public class ContractController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis(), contractList.size());
         return pageResponse;
     }
-//
-//    /**
-//     * registerCns.
-//     */
-//    @PostMapping(value = "/registerCns")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-//    public BaseResponse registerCns(@RequestBody @Valid ReqRegisterCns reqRegisterCns,
-//            BindingResult result) throws NodeMgrException {
-//        checkBindResult(result);
-//        Instant startTime = Instant.now();
-//        log.info("start registerCns startTime:{} reqRegisterCns:{}", startTime.toEpochMilli(),
-//                JsonTools.toJSONString(reqRegisterCns));
-//
-//        cnsService.registerCns(reqRegisterCns);
-//
-//        log.info("end registerCns useTime:{}",
-//                Duration.between(startTime, Instant.now()).toMillis());
-//
-//        return new BaseResponse(ConstantCode.SUCCESS);
-//    }
 
-//    /**
-//     * query cns info
-//     */
-//    @PostMapping(value = "/findCns")
-//    public BaseResponse findCnsByAddress(@RequestBody @Valid ReqQueryCns reqQueryCns,
-//            BindingResult result) throws NodeMgrException {
-//        checkBindResult(result);
-//        BaseResponse pageResponse = new BaseResponse(ConstantCode.SUCCESS);
-//        Instant startTime = Instant.now();
-//        log.info("start findCnsByAddress startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
-//                JsonTools.toJSONString(reqQueryCns));
-//        TbCns tbCns = cnsService.getCnsByAddress(
-//                new QueryCnsParam(reqQueryCns.getGroupId(), reqQueryCns.getContractAddress()));
-//        pageResponse.setData(tbCns);
-//        log.info("end findCnsByAddress. useTime:{}",
-//                Duration.between(startTime, Instant.now()).toMillis());
-//        return pageResponse;
-//    }
-//
-//    /**
-//     * query cns info list
-//     */
-//    @PostMapping(value = "/findCnsList")
-//    public BasePageResponse findCnsList(@RequestBody @Valid ReqQueryCnsList inputParam,
-//            BindingResult result) throws NodeMgrException {
-//        checkBindResult(result);
-//        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
-//        Instant startTime = Instant.now();
-//        log.info("start findCnsList startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
-//                JsonTools.toJSONString(inputParam));
-//
-//        // param
-//        QueryCnsParam queryParam = new QueryCnsParam();
-//        BeanUtils.copyProperties(inputParam, queryParam);
-//
-//        int count = cnsService.countOfCns(queryParam);
-//        if (count > 0) {
-//            Integer start = Optional.ofNullable(inputParam.getPageNumber())
-//                    .map(page -> (page - 1) * inputParam.getPageSize()).orElse(0);
-//            queryParam.setStart(start);
-//            queryParam.setFlagSortedByTime(SqlSortType.DESC.getValue());
-//            // query list
-//            List<TbCns> listOfCns = cnsService.getList(queryParam);
-//            pageResponse.setData(listOfCns);
-//            pageResponse.setTotalCount(count);
-//        }
-//
-//        log.info("end findCnsList. useTime:{}",
-//                Duration.between(startTime, Instant.now()).toMillis());
-//        return pageResponse;
-//    }
+    /**
+     * registerCns.
+     */
+    @PostMapping(value = "/registerCns")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse registerCns(@RequestBody @Valid ReqRegisterCns reqRegisterCns,
+            BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start registerCns startTime:{} reqRegisterCns:{}", startTime.toEpochMilli(),
+                JsonTools.toJSONString(reqRegisterCns));
+
+        cnsService.registerCns(reqRegisterCns);
+
+        log.info("end registerCns useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     * query cns info
+     */
+    @PostMapping(value = "/findCns")
+    public BaseResponse findCnsByAddress(@RequestBody @Valid ReqQueryCns reqQueryCns,
+            BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        BaseResponse pageResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start findCnsByAddress startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
+                JsonTools.toJSONString(reqQueryCns));
+        TbCns tbCns = cnsService.getCnsByAddress(
+                new QueryCnsParam(reqQueryCns.getGroupId(), reqQueryCns.getContractAddress()));
+        pageResponse.setData(tbCns);
+        log.info("end findCnsByAddress. useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return pageResponse;
+    }
+
+    /**
+     * query cns info list
+     */
+    @PostMapping(value = "/findCnsList")
+    public BasePageResponse findCnsList(@RequestBody @Valid ReqQueryCnsList inputParam,
+            BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start findCnsList startTime:{} reqQueryCns:{}", startTime.toEpochMilli(),
+                JsonTools.toJSONString(inputParam));
+
+        // param
+        QueryCnsParam queryParam = new QueryCnsParam();
+        BeanUtils.copyProperties(inputParam, queryParam);
+
+        int count = cnsService.countOfCns(queryParam);
+        if (count > 0) {
+            Integer start = Optional.ofNullable(inputParam.getPageNumber())
+                    .map(page -> (page - 1) * inputParam.getPageSize()).orElse(0);
+            queryParam.setStart(start);
+            queryParam.setFlagSortedByTime(SqlSortType.DESC.getValue());
+            // query list
+            List<TbCns> listOfCns = cnsService.getList(queryParam);
+            pageResponse.setData(listOfCns);
+            pageResponse.setTotalCount(count);
+        }
+
+        log.info("end findCnsList. useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return pageResponse;
+    }
 
     @PostMapping(value = "/copy")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
@@ -486,5 +472,66 @@ public class ContractController extends BaseController {
         log.info("end queryDeployAddress. useTime:{} managerList:{}",
             Duration.between(startTime, Instant.now()).toMillis(), managerList);
         return new BaseResponse(ConstantCode.SUCCESS, managerList);
+    }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "check", notes = "check cargo liquid env")
+    @GetMapping(value = "/liquid/check/{frontId}")
+    public BaseResponse checkLiquidEnv(@PathVariable("frontId") Integer frontId) {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start checkLiquidEnv startTime:{} frontId:{}", startTime.toEpochMilli(),
+            frontId);
+        contractService.checkFrontLiquidEnv(frontId);
+        log.info("end checkLiquidEnv useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+
+    /**
+     * compile liquid
+     */
+    @PostMapping(value = "/liquid/compile")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse compileLiquid(@RequestBody @Valid ReqCompileLiquid param,
+                                       BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start compileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(param));
+        RspCompileTask rspCompileTask = contractService.compileLiquidContract(param);
+        baseResponse.setData(rspCompileTask);
+        log.info("end compileLiquid useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+
+        return baseResponse;
+    }
+
+
+    /**
+     * compile liquid
+     */
+    @PostMapping(value = "/liquid/compile/check")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse checkCompileLiquid(@RequestBody @Valid ReqCompileLiquid param,
+                                      BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start checkCompileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(param));
+        RspCompileTask rspCompileTask = contractService.checkCompileLiquid(param);
+        baseResponse.setData(rspCompileTask);
+        log.info("end checkCompileLiquid useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+
+        return baseResponse;
     }
 }

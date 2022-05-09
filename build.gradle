@@ -21,7 +21,7 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.1.18.RELEASE"
+def springboot_version="2.3.12.RELEASE"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
@@ -31,7 +31,7 @@ List springboot = [
 ]
 
 // cover old version
-def spring_version="5.2.15.RELEASE"
+def spring_version="5.2.20.RELEASE"
 List spring = [
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-aop:$spring_version",
@@ -64,7 +64,7 @@ List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
 
-def jackson_version = "2.11.4"
+def jackson_version = "2.13.2"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
@@ -78,7 +78,7 @@ List test = [
     "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
-def log4j_version="2.15.0"
+def log4j_version="2.17.1"
 List log4j = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -105,21 +105,25 @@ List swagger = [
 
 dependencies {
     compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc1')
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc2-bugfix-SNAPSHOT')
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile 'org.apache.commons:commons-collections4:4.4'
+    compile 'org.apache.commons:commons-compress:1.21'
     compile "mysql:mysql-connector-java:8.0.22"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.67'
+    compile 'javax.validation:validation-api:2.0.1.Final'
+    compile 'org.hibernate.validator:hibernate-validator:6.0.21.Final'
     // cover old version
     compile 'com.google.guava:guava:28.2-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
+    compile 'org.yaml:snakeyaml:1.30'
 
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
-    compile ('com.github.docker-java:docker-java:3.2.1') {
+    compile ('com.github.docker-java:docker-java:3.2.13') {
         exclude group: 'io.netty'
         exclude group: 'org.bouncycastle'
     }
