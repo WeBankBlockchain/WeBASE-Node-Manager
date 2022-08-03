@@ -31,7 +31,7 @@ List springboot = [
 ]
 
 // cover old version
-def spring_version="5.2.20.RELEASE"
+def spring_version="5.2.22.RELEASE"
 List spring = [
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-aop:$spring_version",
@@ -64,7 +64,7 @@ List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
 
-def jackson_version = "2.13.2"
+def jackson_version = "2.13.3"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
@@ -78,7 +78,7 @@ List test = [
     "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
-def log4j_version="2.17.1"
+def log4j_version="2.18.0"
 List log4j = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -105,7 +105,7 @@ List swagger = [
 
 dependencies {
     compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc2-bugfix-SNAPSHOT')
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc4')
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile 'org.apache.commons:commons-collections4:4.4'

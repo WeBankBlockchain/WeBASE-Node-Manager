@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.precntauth.authmanager.admin;
 import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclAuthTypeInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclUsrInfo;
+import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqContractStatus;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.vote.GovernVoteService;
 import com.webank.webase.node.mgr.user.UserService;
 import lombok.extern.log4j.Log4j2;
@@ -103,13 +104,28 @@ public class AdminService {
   /**
    * open  or close the method permission of contract
    */
-  public Object setMethodAuth(ReqAclUsrInfo reqAclUsrInfo) throws ContractException {
+  public Object setMethodAuth(ReqAclUsrInfo reqAclUsrInfo) {
     String signUserId = userService.getSignUserIdByAddress(reqAclUsrInfo.getGroupId(),
         reqAclUsrInfo.getFromAddress());
     reqAclUsrInfo.setSignUserId(signUserId);
     String frontRsp = frontRestTools.postForEntity(
         reqAclUsrInfo.getGroupId(), FrontRestTools.RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET,
         reqAclUsrInfo, String.class);
+    return frontRsp;
+  }
+
+
+
+  /**
+   * open  or close the method permission of contract
+   */
+  public Object setContractStatus(ReqContractStatus reqContractStatus) {
+    String signUserId = userService.getSignUserIdByAddress(reqContractStatus.getGroupId(),
+        reqContractStatus.getFromAddress());
+    reqContractStatus.setSignUserId(signUserId);
+    String frontRsp = frontRestTools.postForEntity(
+        reqContractStatus.getGroupId(), FrontRestTools.RPC_AUTHMANAGER_ADMIN_CONTRACT_STATUS_SET,
+        reqContractStatus, String.class);
     return frontRsp;
   }
 
