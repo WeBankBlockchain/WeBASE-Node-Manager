@@ -26,7 +26,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.junit.Test;
 import org.springframework.util.Assert;
 import sun.security.ec.ECPublicKeyImpl;

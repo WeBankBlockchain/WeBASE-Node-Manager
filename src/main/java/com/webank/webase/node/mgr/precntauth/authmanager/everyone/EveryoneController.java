@@ -26,11 +26,8 @@ import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqUsrD
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.model.RetCode;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -152,6 +149,19 @@ public class EveryoneController extends BaseController {
     }
     return new BaseResponse(ConstantCode.SUCCESS, everyoneService.queryAdmin(reqContractAdminInfo));
   }
+  /**
+   * 查询合约是否可用（被冻结）
+   */
+  @ApiOperation(value = "query the contract status")
+  @ApiImplicitParam(name = "reqContractStatus", value = "contractAdmin info", required = true,
+      dataType = "ReqContractAdminInfo")
+  @PostMapping("contract/status")
+  public Object isContractAvailable(@Valid @RequestBody ReqContractAdminInfo reqContractStatus) {
+    if (baseService.queryExecEnvIsWasm(reqContractStatus.getGroupId())) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
+    return new BaseResponse(ConstantCode.SUCCESS, everyoneService.isContractAvailable(reqContractStatus));
+  }
 
   /**
    * 查询某用户地址对合约函数的访问是否有权限
@@ -163,6 +173,9 @@ public class EveryoneController extends BaseController {
   public Object checkMethodAuth(@Valid @RequestBody ReqCheckMethodAuthInfo reqCheckMethodAuthInfo) {
     if (baseService.queryExecEnvIsWasm(reqCheckMethodAuthInfo.getGroupId())) {
       return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
+    if (!baseService.queryChainHasAuth(reqCheckMethodAuthInfo.getGroupId())) {
+      return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
     }
     return new BaseResponse(ConstantCode.SUCCESS,
         everyoneService.checkMethodAuth(reqCheckMethodAuthInfo));

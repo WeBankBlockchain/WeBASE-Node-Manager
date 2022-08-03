@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

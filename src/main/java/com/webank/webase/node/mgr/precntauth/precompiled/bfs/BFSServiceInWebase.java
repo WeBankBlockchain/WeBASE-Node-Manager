@@ -18,7 +18,7 @@ import com.webank.webase.node.mgr.precntauth.precompiled.bfs.entity.ReqCreateBFS
 import com.webank.webase.node.mgr.precntauth.precompiled.bfs.entity.ReqQueryBFSInfo;
 import com.webank.webase.node.mgr.user.UserService;
 import java.util.List;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +37,7 @@ public class BFSServiceInWebase {
    * BFS创建某个目录
    */
   public Object createPath(ReqCreateBFSInfo reqCreateBFSInfo)
-      throws ContractException {
+      {
     String signUserId = userService.getSignUserIdByAddress(reqCreateBFSInfo.getGroupId(),
         reqCreateBFSInfo.getFromAddress());
     reqCreateBFSInfo.setSignUserId(signUserId);
@@ -51,7 +51,7 @@ public class BFSServiceInWebase {
    * BFS获取某个目录信息
    */
   public Object queryPath(ReqQueryBFSInfo reqQueryBFSInfoh)
-      throws ContractException {
+      {
     List frontRsp = frontRestTools.postForEntity(
         reqQueryBFSInfoh.getGroupId(), FrontRestTools.RPC_PRECOM_BFS_QUERY,
         reqQueryBFSInfoh, List.class);

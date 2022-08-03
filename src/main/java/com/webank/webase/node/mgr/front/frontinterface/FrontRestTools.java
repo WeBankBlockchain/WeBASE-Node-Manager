@@ -38,10 +38,10 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -368,7 +368,7 @@ public class FrontRestTools {
      */
     public static HttpEntity buildHttpEntity(Object param) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         String paramStr = null;
         if (Objects.nonNull(param)) {
             paramStr = JsonTools.toJSONString(param);

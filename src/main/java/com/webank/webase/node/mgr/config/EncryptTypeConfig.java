@@ -18,7 +18,7 @@ package com.webank.webase.node.mgr.config;
 
 
 import lombok.Data;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

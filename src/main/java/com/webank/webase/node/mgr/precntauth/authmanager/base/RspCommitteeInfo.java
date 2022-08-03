@@ -18,7 +18,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.fisco.bcos.sdk.contract.auth.po.CommitteeInfo;
+import org.fisco.bcos.sdk.v3.contract.auth.po.CommitteeInfo;
 
 @Data
 @NoArgsConstructor

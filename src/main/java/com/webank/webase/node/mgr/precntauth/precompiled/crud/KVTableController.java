@@ -10,7 +10,7 @@
 //import io.swagger.annotations.ApiOperation;
 //import javax.validation.Valid;
 //import lombok.extern.slf4j.Slf4j;
-//import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+//import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.web.bind.annotation.PostMapping;
 //import org.springframework.web.bind.annotation.RequestBody;
@@ -30,7 +30,7 @@
 //  @ApiImplicitParam(name = "reqCreateTableInfo", value = "create table info", required = true, dataType = "ReqCreateTableInfo")
 //  @PostMapping("reqCreateTable")
 //  public Object createTable(@Valid @RequestBody ReqCreateTableInfo reqCreateTableInfo)
-//      throws ContractException {
+//      {
 //    Object res = kvTableService.createTable(reqCreateTableInfo);
 //    return new BaseResponse(ConstantCode.SUCCESS, res);
 //  }
@@ -38,7 +38,7 @@
 //  @ApiOperation(value = "set the table")
 //  @ApiImplicitParam(name = "reqSetTableInfo", value = "set table info", required = true, dataType = "ReqSetTableInfo")
 //  @PostMapping("reqSetTable")
-//  public Object set(@Valid @RequestBody ReqSetTableInfo reqSetTableInfo) throws ContractException {
+//  public Object set(@Valid @RequestBody ReqSetTableInfo reqSetTableInfo) {
 //    Object res = kvTableService.set(reqSetTableInfo);
 //    return new BaseResponse(ConstantCode.SUCCESS, res);
 //  }
@@ -46,7 +46,7 @@
 //  @ApiOperation(value = "get the table")
 //  @ApiImplicitParam(name = "reqGetTableInfo", value = "get table info", required = true, dataType = "ReqGetTableInfo")
 //  @PostMapping("reqGetTable")
-//  public Object get(@Valid @RequestBody ReqGetTableInfo reqGetTableInfo) throws ContractException {
+//  public Object get(@Valid @RequestBody ReqGetTableInfo reqGetTableInfo) {
 //    Object res = kvTableService.get(reqGetTableInfo);
 //    return new BaseResponse(ConstantCode.SUCCESS, res);
 //  }

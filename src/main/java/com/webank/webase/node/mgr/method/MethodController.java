@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;

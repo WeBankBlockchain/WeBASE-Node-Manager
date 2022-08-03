@@ -27,7 +27,9 @@ List springboot = [
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
      "org.springframework.boot:spring-boot-starter-mail:$springboot_version",
      "org.springframework.boot:spring-boot-starter-thymeleaf:$springboot_version",
-     "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
+     "org.springframework.boot:spring-boot-starter-aop:$springboot_version",
+     "org.springframework.boot:spring-boot-starter-validation:$springboot_version"
+
 ]
 
 // cover old version
@@ -115,9 +117,8 @@ dependencies {
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.67'
     compile 'javax.validation:validation-api:2.0.1.Final'
-    compile 'org.hibernate.validator:hibernate-validator:6.0.21.Final'
     // cover old version
-    compile 'com.google.guava:guava:28.2-jre'
+    compile 'com.google.guava:guava:29.0-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
     compile 'org.yaml:snakeyaml:1.30'
 

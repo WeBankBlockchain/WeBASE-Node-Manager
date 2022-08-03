@@ -14,8 +14,6 @@
 
 package com.webank.webase.node.mgr.precntauth.authmanager.everyone;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqCheckMethodAuthInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqContractAdminInfo;
@@ -125,7 +123,7 @@ public class EveryoneService {
   /**
    * 从front服务获取特定合约的管理员地址
    */
-  public Object queryAdmin(ReqContractAdminInfo reqContractStatus) {
+  public Object isContractAvailable(ReqContractAdminInfo reqContractStatus) {
     String frontRsp = frontRestTools.postForEntity(reqContractStatus.getGroupId(),
         FrontRestTools.RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET, reqContractStatus,
         String.class);
