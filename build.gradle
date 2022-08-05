@@ -47,7 +47,7 @@ List spring = [
     "org.springframework:spring-web:$spring_version"
 ]
 // cover old version
-def spring_security_version="5.4.4"
+def spring_security_version="5.6.4"
 List spring_security = [
     "org.springframework.security:spring-security-core:$spring_security_version",
     "org.springframework.security:spring-security-web:$spring_security_version",
@@ -105,13 +105,17 @@ List swagger = [
     'io.springfox:springfox-swagger-ui:2.8.0'
 ]
 
+List commons = [
+    "org.apache.commons:commons-lang3:3.8.1",
+    'org.apache.commons:commons-collections4:4.4',
+    'org.apache.commons:commons-configuration2:2.8.0',
+    'org.apache.commons:commons-compress:1.21'
+]
+
 dependencies {
-    compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger
+    compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger,commons
     compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc4')
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
-    compile "org.apache.commons:commons-lang3:3.8.1"
-    compile 'org.apache.commons:commons-collections4:4.4'
-    compile 'org.apache.commons:commons-compress:1.21'
     compile "mysql:mysql-connector-java:8.0.22"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile "com.github.sgroschupf:zkclient:0.1"
