@@ -21,6 +21,8 @@ import com.webank.webase.node.mgr.base.enums.TransType;
 import com.webank.webase.node.mgr.base.enums.TransUnusualType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.tools.Web3Tools;
@@ -92,7 +94,9 @@ public class MonitorService {
     @Autowired
     private ConstantProperties cProperties;
     @Autowired
-    private CryptoSuite cryptoSuite;
+    private Map<Integer, CryptoSuite> cryptoSuiteMap;
+    @Autowired
+    private GroupService groupService;
     @Autowired
     @Lazy
     private AbiService abiService;
@@ -388,6 +392,8 @@ public class MonitorService {
      */
     private ContractMonitorResult monitorContract(String groupId, String transHash, String transTo,
         String transInput, BigInteger blockNumber) {
+        TbGroup tbGroup = groupService.checkGroupId(groupId);
+        CryptoSuite cryptoSuite = cryptoSuiteMap.get(tbGroup.getEncryptType());
         String contractAddress, contractName, interfaceName = "", contractBin;
         int transType = TransType.DEPLOY.getValue();
         int transUnusualType = TransUnusualType.NORMAL.getValue();
@@ -468,7 +474,7 @@ public class MonitorService {
             List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
             if (contractRow != null && contractRow.size() > 0) {
                 contractName = contractRow.get(0).getContractName();
-                interfaceName = getInterfaceName(methodId, contractRow.get(0).getContractAbi());
+                interfaceName = getInterfaceName(methodId, contractRow.get(0).getContractAbi(), cryptoSuite);
                 if (StringUtils.isBlank(interfaceName)) {
                     interfaceName = transInput.substring(0, 10);
                     transUnusualType = TransUnusualType.FUNCTION.getValue();
@@ -478,7 +484,7 @@ public class MonitorService {
                 contractName = getNameFromContractBin(groupId, contractBin);
                 TbMethod tbMethod = methodService.getByMethodId(methodId, groupId);
                 if (Objects.nonNull(tbMethod)) {
-                    interfaceName = getInterfaceName(methodId, "[" + tbMethod.getAbiInfo() + "]");
+                    interfaceName = getInterfaceName(methodId, "[" + tbMethod.getAbiInfo() + "]", cryptoSuite);
                     log.info("monitor methodId:{} interfaceName:{}", methodId, interfaceName);
                 }
                 // no method id, deploy tx
@@ -531,7 +537,7 @@ public class MonitorService {
     /**
      * get interface name.
      */
-    private String getInterfaceName(String methodId, String contractAbi) {
+    private String getInterfaceName(String methodId, String contractAbi, CryptoSuite cryptoSuite) {
         if (StringUtils.isAnyBlank(methodId, contractAbi)) {
             log.warn("fail getInterfaceName. methodId:{} contractAbi:{}", methodId, contractAbi);
             return null;

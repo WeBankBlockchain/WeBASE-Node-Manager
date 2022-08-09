@@ -44,7 +44,7 @@ public class MethodService {
     @Autowired
     private MethodMapper methodMapper;
     @Autowired
-    private CryptoSuite cryptoSuite;
+    private Map<Integer, CryptoSuite> cryptoSuiteMap;
 
     /**
      * save method by abi string
@@ -53,7 +53,8 @@ public class MethodService {
      * @param abiStr
      * @param type
      */
-    public void saveMethod(String groupId, String abiStr, int type) {
+    public void saveMethod(String groupId, String abiStr, int type,
+        CryptoSuite cryptoSuite) {
         List<Method> methodList;
         try {
             methodList = new ArrayList<>(Web3Tools.getMethodFromAbi(abiStr, cryptoSuite));
@@ -128,64 +129,4 @@ public class MethodService {
         methodMapper.removeByGroupId(groupId);
     }
 
-    /**
-     * compute MethodId
-     */
-    public ArrayList<Map<String, String>> computeMethodId(List<ABIDefinition> abiDefinitionList,
-        Integer integer) throws JsonProcessingException {
-        ArrayList<Map<String, String>> mapList = new ArrayList<>();
-        String buildMethodId = "";
-        for (ABIDefinition abiDefinition : abiDefinitionList) {
-            if ("function".equals(abiDefinition.getType())) {
-                Map<String, String> stringMap = new HashMap<>();
-                // support guomi sm3
-                if (integer == 1) {
-                    CryptoSuite c1 = new CryptoSuite(1);
-                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c1);
-                } else {
-                    CryptoSuite c2 = new CryptoSuite(0);
-                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c2);
-                }
-                ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-                String abiStr = objectMapper.writeValueAsString(abiDefinition);
-                System.out.println(
-                    buildMethodId + ": " + abiDefinition.getName() + ": " + abiStr);
-                stringMap.put(buildMethodId, abiStr);
-                mapList.add(stringMap);
-            }
-        }
-        return mapList;
-    }
-
-    /**
-     * get MethodId DmlSql
-     */
-    public ArrayList<String> getMethodIdDmlSql(List<ABIDefinition> abiDefinitionList,
-        Integer integer) throws JsonProcessingException {
-        ArrayList<String> stringArrayList = new ArrayList<>();
-        String buildMethodId = "";
-        for (ABIDefinition abiDefinition : abiDefinitionList) {
-            if ("function".equals(abiDefinition.getType())) {
-                String sql = "";
-                // support guomi sm3
-                if (integer == 1) {
-                    CryptoSuite c1 = new CryptoSuite(1);
-                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c1);
-                } else {
-                    CryptoSuite c2 = new CryptoSuite(0);
-                    buildMethodId = Web3Tools.buildMethodId(abiDefinition, c2);
-                }
-                ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-                String abiStr = objectMapper.writeValueAsString(abiDefinition);
-                System.out.println(
-                    buildMethodId + ": " + abiDefinition.getName() + ": " + abiStr);
-                sql = "INSERT INTO `tb_method`(`method_id`, `group_id`, `abi_info`, `method_type`, "
-                    + "`contract_type`, `create_time`, `modify_time`) VALUES (" + "'"
-                    + buildMethodId + "'" + ", 'group'," + "'"
-                    + abiStr + "'" + ", 'function', 1, now(), now());";
-                stringArrayList.add(sql);
-            }
-        }
-        return stringArrayList;
-    }
 }

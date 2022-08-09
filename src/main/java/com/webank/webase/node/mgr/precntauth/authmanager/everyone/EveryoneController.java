@@ -20,6 +20,7 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.precntauth.authmanager.base.BaseService;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqCheckMethodAuthInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqContractAdminInfo;
+import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqContractStatusList;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqProposalInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqProposalListInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqUsrDeployAuthInfo;
@@ -149,6 +150,7 @@ public class EveryoneController extends BaseController {
     }
     return new BaseResponse(ConstantCode.SUCCESS, everyoneService.queryAdmin(reqContractAdminInfo));
   }
+
   /**
    * 查询合约是否可用（被冻结）
    */
@@ -161,6 +163,20 @@ public class EveryoneController extends BaseController {
       return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
     }
     return new BaseResponse(ConstantCode.SUCCESS, everyoneService.isContractAvailable(reqContractStatus));
+  }
+
+  /**
+   * 查询合约是否可用（被冻结）
+   */
+  @ApiOperation(value = "query the contract status")
+  @ApiImplicitParam(name = "reqContractStatus", value = "contractAdmin info", required = true,
+      dataType = "ReqContractAdminInfo")
+  @PostMapping("contract/status/list")
+  public Object isContractAvailable(@Valid @RequestBody ReqContractStatusList reqContractStatus) {
+    if (baseService.queryExecEnvIsWasm(reqContractStatus.getGroupId())) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+    }
+    return new BaseResponse(ConstantCode.SUCCESS, everyoneService.listContractStatus(reqContractStatus));
   }
 
   /**

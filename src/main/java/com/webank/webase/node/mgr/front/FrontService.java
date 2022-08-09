@@ -155,7 +155,7 @@ public class FrontService {
     private ChainService chainService;
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
-    @Autowired private CryptoSuite cryptoSuite;
+    @Autowired private Map<Integer, CryptoSuite> cryptoSuiteMap;
     // version to check
     @Autowired
     private VersionProperties versionProperties;

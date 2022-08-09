@@ -190,7 +190,7 @@ public class GroupService {
      *
      * @throws NodeMgrException INVALID_GROUP_ID
      */
-    public void checkGroupId(String groupId) throws NodeMgrException {
+    public TbGroup checkGroupId(String groupId) throws NodeMgrException {
         log.debug("start checkGroupId groupId:{}", groupId);
 
         if (groupId == null) {
@@ -204,6 +204,7 @@ public class GroupService {
             throw new NodeMgrException(ConstantCode.INVALID_GROUP_ID);
         }
         log.debug("end checkGroupId");
+        return getGroupById(groupId);
     }
 
     /**

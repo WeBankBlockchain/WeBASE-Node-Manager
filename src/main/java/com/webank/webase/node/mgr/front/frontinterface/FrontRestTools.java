@@ -148,6 +148,7 @@ public class FrontRestTools {
     public static final String RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN = "/precntauth/authmanager/everyone/contract/admin";
     public static final String RPC_AUTHMANAGER_EVERYONE_CNT_METHOD_AUTH = "/precntauth/authmanager/everyone/contract/method/auth";
     public static final String RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET = "/precntauth/authmanager/everyone/contract/status";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET_LIST = "/precntauth/authmanager/everyone/contract/status/list";
     // 2) committee
     public static final String RPC_AUTHMANAGER_COMMITTEE_GOVERNOR = "/precntauth/authmanager/committee/governor";
     public static final String RPC_AUTHMANAGER_COMMITTEE_RATE = "/precntauth/authmanager/committee/rate";
@@ -193,7 +194,7 @@ public class FrontRestTools {
             RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY, RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN,
             RPC_AUTHMANAGER_EVERYONE_DEPLOY_TYPE,
             RPC_AUTHMANAGER_EVERYONE_CNT_METHOD_AUTH, RPC_AUTHMANAGER_COMMITTEE_GOVERNOR,
-            RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET,
+            RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET, RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET_LIST,
             RPC_AUTHMANAGER_COMMITTEE_RATE,
             RPC_AUTHMANAGER_COMMITTEE_PRO_VOTE, RPC_AUTHMANAGER_COMMITTEE_PRO_REVOKE,
             RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE,
