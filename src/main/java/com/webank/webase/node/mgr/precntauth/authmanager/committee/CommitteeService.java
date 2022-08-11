@@ -25,7 +25,6 @@ import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqVot
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.vote.GovernVoteService;
 import com.webank.webase.node.mgr.user.UserService;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +58,7 @@ public class CommitteeService {
     /**
      * 设置提案阈值，提案阈值分为参与阈值和权重阈值。
      */
-    public Object setRate(ReqSetRateInfo reqSetRateInfo) throws ContractException {
+    public Object setRate(ReqSetRateInfo reqSetRateInfo) {
         String signUserId = userService.getSignUserIdByAddress(reqSetRateInfo.getGroupId(),
             reqSetRateInfo.getFromAddress());
         reqSetRateInfo.setSignUserId(signUserId);

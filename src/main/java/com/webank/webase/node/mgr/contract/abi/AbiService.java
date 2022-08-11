@@ -19,6 +19,8 @@ package com.webank.webase.node.mgr.contract.abi;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.contract.ContractService;
@@ -35,9 +37,11 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -59,6 +63,10 @@ public class AbiService {
     @Autowired
     @Lazy
     MonitorService monitorService;
+    @Autowired
+    private GroupService groupService;
+    @Autowired
+    private Map<Integer, CryptoSuite> cryptoSuiteMap;
 
     public List<AbiInfo> getListByGroupId(ReqAbiListParam param) {
         List<AbiInfo> abiList = abiMapper.listOfAbi(param);
@@ -98,9 +106,12 @@ public class AbiService {
         checkAbiExist(groupId, account, contractAddress);
         // add
         addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, contractBin, isWasm);
-//        addAbiToDb(groupId, param.getContractName(), account, contractAddress, contractAbiStr, "0x0");
+        // check group id
+        TbGroup tbGroup = groupService.checkGroupId(groupId);
+
         // save and update method
-        methodService.saveMethod(groupId, contractAbiStr, ContractType.GENERALCONTRACT.getValue());
+        methodService.saveMethod(groupId, contractAbiStr,
+            ContractType.GENERALCONTRACT.getValue(), cryptoSuiteMap.get(tbGroup.getEncryptType()));
         if (StringUtils.isNotBlank(contractBin)) {
             // update monitor unusual deployInputParam's info
             monitorService.updateUnusualContract(groupId, param.getContractName(), contractBin);
@@ -110,6 +121,7 @@ public class AbiService {
     @Transactional
     public void updateAbiInfo(ReqImportAbi param) {
         Integer abiId = param.getAbiId();
+        String groupId = param.getGroupId();
         // check id exists
         checkAbiIdExist(abiId);
         // update
@@ -128,8 +140,11 @@ public class AbiService {
         updateAbi.setContractBin(contractBin);
         updateAbi.setModifyTime(LocalDateTime.now());
         abiMapper.update(updateAbi);
+        // check group id
+        TbGroup tbGroup = groupService.checkGroupId(groupId);
         // update method
-        methodService.saveMethod(param.getGroupId(), contractAbiStr, ContractType.GENERALCONTRACT.getValue());
+        methodService.saveMethod(param.getGroupId(), contractAbiStr,
+            ContractType.GENERALCONTRACT.getValue(), cryptoSuiteMap.get(tbGroup.getEncryptType()));
         if (StringUtils.isNotBlank(contractBin)) {
             // update monitor unusual deployInputParam's info
             monitorService.updateUnusualContract(param.getGroupId(), param.getContractName(), contractBin);

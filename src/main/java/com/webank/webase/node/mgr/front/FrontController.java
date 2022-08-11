@@ -33,7 +33,7 @@ import java.time.Instant;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;

@@ -25,6 +25,7 @@ import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
@@ -52,13 +53,14 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.exceptions.LoadKeyStoreException;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
-import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
-import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.exceptions.LoadKeyStoreException;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.v3.crypto.keystore.P12KeyStore;
+import org.fisco.bcos.sdk.v3.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -84,7 +86,7 @@ public class UserService {
     @Autowired
     private MonitorService monitorService;
     @Autowired
-    private CryptoSuite cryptoSuite;
+    private Map<Integer, CryptoSuite> cryptoSuiteMap;
     private final static String PEM_FILE_FORMAT = ".pem";
     private final static String P12_FILE_FORMAT = ".p12";
 
@@ -111,7 +113,7 @@ public class UserService {
         log.debug("start addUserInfo groupId:{},userName:{},description:{},userType:{},", groupId,
                 userName, description, userType);
         // check group id
-        groupService.checkGroupId(groupId);
+        TbGroup tbGroup = groupService.checkGroupId(groupId);
         // check account
         accountService.accountExist(account);
 
@@ -144,7 +146,7 @@ public class UserService {
         if (StringUtils.isNotBlank(privateKeyEncoded)) {
             // check user address if import private key
             TbUser checkAddressRow = queryUser(null, groupId, null,
-                getAddressFromPrivateKeyEncoded(privateKeyEncoded), null);
+                getAddressFromPrivateKeyEncoded(privateKeyEncoded, cryptoSuiteMap.get(tbGroup.getEncryptType())), null);
             if (Objects.nonNull(checkAddressRow)) {
                 if (!isCheckExist) {
                     return checkAddressRow;
@@ -236,7 +238,7 @@ public class UserService {
         }
 
         // check group id
-        groupService.checkGroupId(user.getGroupId());
+        TbGroup tbGroup = groupService.checkGroupId(user.getGroupId());
         // check account
         accountService.accountExist(account);
 
@@ -251,7 +253,7 @@ public class UserService {
         }
         String address = publicKey;
         if (publicKey.length() == ConstantProperties.PUBLICKEY_LENGTH) {
-            address = cryptoSuite.getCryptoKeyPair().getAddress(publicKey);
+            address = cryptoSuiteMap.get(tbGroup.getEncryptType()).getCryptoKeyPair().getAddress(publicKey);
         }
 
         // check address
@@ -468,6 +470,9 @@ public class UserService {
             log.error("updateUser userId invalid:{}", userId);
             throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
         }
+        // check group id
+        TbGroup tbGroup = groupService.checkGroupId(bindPrivateKey.getGroupId());
+
         // if developer and user not belong to this user(this developer), error
         if (RoleType.DEVELOPER.getValue().equals(currentAccountInfo.getRoleId())
             && !tbUser.getAccount().equals(currentAccountInfo.getAccount())) {
@@ -480,7 +485,7 @@ public class UserService {
         }
         // check user address same with private key's address
         String rawPrivateKey = Numeric.cleanHexPrefix(new String(Base64.getDecoder().decode(privateKeyEncoded)));
-        String privateKeyAddress = cryptoSuite.loadKeyPair(rawPrivateKey).getAddress();
+        String privateKeyAddress = cryptoSuiteMap.get(tbGroup.getEncryptType()).loadKeyPair(rawPrivateKey).getAddress();
         if (!tbUser.getAddress().equals(privateKeyAddress)) {
             log.error("bind private key address :{} not match user's address!", privateKeyAddress);
             throw new NodeMgrException(ConstantCode.BIND_PRIVATE_KEY_NOT_MATCH);
@@ -645,6 +650,9 @@ public class UserService {
         if (user == null) {
             throw new NodeMgrException(ConstantCode.USER_SIGN_USER_ID_NOT_EXIST);
         }
+        // check group id
+        TbGroup tbGroup = groupService.checkGroupId(groupId);
+
         // if developer and user not belong to this user(this developer), error
         if (roleId.equals(RoleType.DEVELOPER.getValue()) && !account.equals(user.getAccount())) {
             throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_BELONG_TO);
@@ -654,7 +662,7 @@ public class UserService {
         String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
         keyPair.setPrivateKey(decodedPrivateKey);
         String filePath = NodeMgrTools.writePrivateKeyPem(keyPair.getPrivateKey(),
-            keyPair.getAddress(), keyPair.getUserName(), cryptoSuite);
+            keyPair.getAddress(), keyPair.getUserName(), cryptoSuiteMap.get(tbGroup.getEncryptType()));
         try {
             log.debug("end getExportPemFromSign, filePath:{}", filePath);
             return new FileContentHandle(keyPair.getAddress() + PEM_FILE_FORMAT,
@@ -687,6 +695,9 @@ public class UserService {
         if (user == null) {
             throw new NodeMgrException(ConstantCode.USER_SIGN_USER_ID_NOT_EXIST);
         }
+        // check group id
+        TbGroup tbGroup = groupService.checkGroupId(groupId);
+
         // if developer and user not belong to this user(this developer), error
         if (roleId.equals(RoleType.DEVELOPER.getValue()) && !account.equals(user.getAccount())) {
             throw new NodeMgrException(ConstantCode.PRIVATE_KEY_NOT_BELONG_TO);
@@ -696,7 +707,7 @@ public class UserService {
         String decodedPrivateKey = new String(Base64.getDecoder().decode(keyPair.getPrivateKey()));
         keyPair.setPrivateKey(decodedPrivateKey);
         String filePath = NodeMgrTools.writePrivateKeyP12(p12Password, keyPair.getPrivateKey(),
-            keyPair.getAddress(), keyPair.getUserName(), cryptoSuite);
+            keyPair.getAddress(), keyPair.getUserName(), cryptoSuiteMap.get(tbGroup.getEncryptType()));
         try {
             log.debug("end getExportP12FromSign, filePath:{}", filePath);
             return new FileContentHandle(keyPair.getAddress() + P12_FILE_FORMAT,
@@ -707,7 +718,7 @@ public class UserService {
         }
     }
 
-    private String getAddressFromPrivateKeyEncoded(String privateKeyEncoded) {
+    private String getAddressFromPrivateKeyEncoded(String privateKeyEncoded, CryptoSuite cryptoSuite) {
         String hexPrivateKey = Numeric.cleanHexPrefix(new String(Base64.getDecoder().decode(privateKeyEncoded.getBytes())));
         CryptoKeyPair cryptoKeyPair = cryptoSuite.loadKeyPair(hexPrivateKey);
         return cryptoKeyPair.getAddress();

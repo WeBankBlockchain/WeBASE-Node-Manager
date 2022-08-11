@@ -18,7 +18,7 @@ import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqCnsInfoBy
 import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqInfoByNameVersion;
 import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqRegisterCnsInfo;
 import com.webank.webase.node.mgr.user.UserService;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class CNSServiceInWebase {
   private UserService userService;
 
   public Object registerCNS(ReqRegisterCnsInfo reqCnsInfo)
-      throws ContractException {
+      {
     String signUserId = userService.getSignUserIdByAddress(reqCnsInfo.getGroupId(),
         reqCnsInfo.getFromAddress());
     reqCnsInfo.setSignUserId(signUserId);

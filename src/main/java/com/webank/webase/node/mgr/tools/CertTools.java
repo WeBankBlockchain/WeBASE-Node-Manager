@@ -24,7 +24,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 
 /**
  * load and get cert content

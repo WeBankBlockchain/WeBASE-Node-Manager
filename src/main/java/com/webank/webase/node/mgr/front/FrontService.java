@@ -91,11 +91,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
-import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
-import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
-import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupInfo.GroupInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.PeersInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,7 +155,7 @@ public class FrontService {
     private ChainService chainService;
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
-    @Autowired private CryptoSuite cryptoSuite;
+    @Autowired private Map<Integer, CryptoSuite> cryptoSuiteMap;
     // version to check
     @Autowired
     private VersionProperties versionProperties;

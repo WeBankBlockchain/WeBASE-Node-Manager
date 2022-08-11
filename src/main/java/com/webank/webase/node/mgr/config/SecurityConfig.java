@@ -103,7 +103,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean("bCryptPasswordEncoder")
-    @DependsOn("encryptType")
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }

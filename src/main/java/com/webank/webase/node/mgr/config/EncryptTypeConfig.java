@@ -17,9 +17,11 @@
 package com.webank.webase.node.mgr.config;
 
 
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Data;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,19 +31,13 @@ import org.springframework.context.annotation.Configuration;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "sdk")
 public class EncryptTypeConfig {
-    /**
-     *  0:standard, 1:guomi
-     */
-    private int encryptType;
 
-    /**
-     * 覆盖EncryptType构造函数
-     * @return
-     */
-    @Bean(name = "encryptType")
-    public CryptoSuite getCryptoSuite() {
-        return new CryptoSuite(encryptType);
+    @Bean
+    public Map<Integer, CryptoSuite> getCryptoSuite() {
+        Map<Integer, CryptoSuite> cryptoSuiteMap = new HashMap<>();
+        cryptoSuiteMap.put(CryptoType.ECDSA_TYPE, new CryptoSuite(CryptoType.ECDSA_TYPE));
+        cryptoSuiteMap.put(CryptoType.SM_TYPE, new CryptoSuite(CryptoType.SM_TYPE));
+        return cryptoSuiteMap;
     }
 }

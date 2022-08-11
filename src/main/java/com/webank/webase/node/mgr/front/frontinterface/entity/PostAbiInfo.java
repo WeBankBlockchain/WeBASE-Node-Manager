@@ -15,7 +15,7 @@ package com.webank.webase.node.mgr.front.frontinterface.entity;
 
 import java.util.List;
 import lombok.Data;
-import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
 
 
 /**

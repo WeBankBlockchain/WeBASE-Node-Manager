@@ -32,7 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.ini4j.Ini;
 import org.ini4j.Profile;
 

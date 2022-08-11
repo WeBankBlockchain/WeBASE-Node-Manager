@@ -34,9 +34,9 @@ package com.webank.webase.node.mgr.precntauth.precompiled.crud;///*
 //import net.sf.jsqlparser.util.TablesNamesFinder;
 //
 //import java.util.*;
-//import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
-//import org.fisco.bcos.sdk.contract.precompiled.crud.common.ConditionOperator;
-//import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
+//import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.Condition;
+//import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.ConditionOperator;
+//import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.Entry;
 //
 ///**
 // * Handle CRUD operation on chain's table

@@ -20,17 +20,17 @@ import java.math.BigInteger;
 import java.util.List;
 import node.mgr.test.base.TestBase;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
-import org.fisco.bcos.sdk.client.protocol.response.Peers.PeersInfo;
-import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
-import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.Peers.PeersInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-//import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
+//import org.fisco.bcos.sdk.v3.client.protocol.response.ConsensusStatus.ConsensusInfo;
 
 public class FrontServiceTest extends TestBase {
 

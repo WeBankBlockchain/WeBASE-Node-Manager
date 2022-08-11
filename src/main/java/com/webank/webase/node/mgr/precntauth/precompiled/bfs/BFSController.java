@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +32,7 @@ public class BFSController {
   @ApiImplicitParam(name = "reqCreateBFSInfo", value = "create bfs path info", required = true, dataType = "ReqCreateBFSInfo")
   @PostMapping("create")
   public Object createBfsPath(@Valid @RequestBody ReqCreateBFSInfo reqCreateBFSInfo)
-      throws ContractException {
+      {
     return bfsServiceInWebase.createPath(reqCreateBFSInfo);
   }
 
@@ -43,7 +43,7 @@ public class BFSController {
   @ApiImplicitParam(name = "reqQueryBFSInfo", value = "query bfs path info", required = true, dataType = "ReqQueryBFSInfo")
   @PostMapping("query")
   public Object queryBfsPath(@Valid @RequestBody ReqQueryBFSInfo reqQueryBFSInfo)
-      throws ContractException {
+      {
     return new BaseResponse(ConstantCode.SUCCESS, bfsServiceInWebase.queryPath(reqQueryBFSInfo));
   }
 

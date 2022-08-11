@@ -19,7 +19,7 @@ import com.webank.webase.node.mgr.precntauth.precompiled.crud.entity.ReqGetTable
 import com.webank.webase.node.mgr.precntauth.precompiled.crud.entity.ReqSetTableInfo;
 import com.webank.webase.node.mgr.user.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +51,7 @@ public class KVTableServiceInWebase {
    * set data
    */
   public Object set(ReqSetTableInfo reqSetTableInfo)
-      throws ContractException {
+      {
     String signUserId = userService.getSignUserIdByAddress(reqSetTableInfo.getGroupId(),
         reqSetTableInfo.getFromAddress());
     reqSetTableInfo.setSignUserId(signUserId);
@@ -66,7 +66,7 @@ public class KVTableServiceInWebase {
    * read data
    */
   public Object get(ReqGetTableInfo reqGetTableInfo)
-      throws ContractException {
+      {
     String frontRsp = frontRestTools.postForEntity(
         reqGetTableInfo.getGroupId(), FrontRestTools.RPC_PRECOM_CRUD_GET,
         reqGetTableInfo, String.class);

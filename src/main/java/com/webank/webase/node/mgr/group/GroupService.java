@@ -74,8 +74,8 @@ import java.util.Objects;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -190,7 +190,7 @@ public class GroupService {
      *
      * @throws NodeMgrException INVALID_GROUP_ID
      */
-    public void checkGroupId(String groupId) throws NodeMgrException {
+    public TbGroup checkGroupId(String groupId) throws NodeMgrException {
         log.debug("start checkGroupId groupId:{}", groupId);
 
         if (groupId == null) {
@@ -204,6 +204,7 @@ public class GroupService {
             throw new NodeMgrException(ConstantCode.INVALID_GROUP_ID);
         }
         log.debug("end checkGroupId");
+        return getGroupById(groupId);
     }
 
     /**
