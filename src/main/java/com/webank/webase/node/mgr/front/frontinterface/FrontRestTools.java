@@ -115,52 +115,52 @@ public class FrontRestTools {
      * rpc precompiled
      */
     // 1)sys config
-    public static final String RPC_PRECOM_SYS_CONFIG_LIST = "/precntauth/precompiled/sys/config/list";
-    public static final String RPC_PRECOM_SYS_CONFIG = "/precntauth/precompiled/sys/config";
+    public static final String RPC_PRECOM_SYS_CONFIG_LIST = "precntauth/precompiled/sys/config/list";
+    public static final String RPC_PRECOM_SYS_CONFIG = "precntauth/precompiled/sys/config";
     // 2)CNS
-    public static final String RPC_PRECOM_CNS_ADDRESS_BY_NAME_VERSION = "/precntauth/precompiled/cns/reqAddressInfoByNameVersion";
-    public static final String RPC_PRECOM_CNS_REGISTER = "/precntauth/precompiled/cns/register";
-    public static final String RPC_PRECOM_CNS_CNSINFO_BY_NAME_VERSION = "/precntauth/precompiled/cns/queryCnsByNameVersion";
-    public static final String RPC_PRECOM_CNS_CNSINFO_BY_NAME = "/precntauth/precompiled/cns/queryCnsByName";
+    public static final String RPC_PRECOM_CNS_ADDRESS_BY_NAME_VERSION = "precntauth/precompiled/cns/reqAddressInfoByNameVersion";
+    public static final String RPC_PRECOM_CNS_REGISTER = "precntauth/precompiled/cns/register";
+    public static final String RPC_PRECOM_CNS_CNSINFO_BY_NAME_VERSION = "precntauth/precompiled/cns/queryCnsByNameVersion";
+    public static final String RPC_PRECOM_CNS_CNSINFO_BY_NAME = "precntauth/precompiled/cns/queryCnsByName";
     // 3)conseensus
-    public static final String RPC_PRECOM_CONSENSUS_LIST = "/precntauth/precompiled/consensus/list";
-    public static final String RPC_PRECOM_CONSENSUS_MGR = "/precntauth/precompiled/consensus/manage";
+    public static final String RPC_PRECOM_CONSENSUS_LIST = "precntauth/precompiled/consensus/list";
+    public static final String RPC_PRECOM_CONSENSUS_MGR = "precntauth/precompiled/consensus/manage";
     // 4)CRUD
-    public static final String RPC_PRECOM_CRUD_SET = "/precntauth/precompiled/kvtable/reqSetTable";
-    public static final String RPC_PRECOM_CRUD_GET = "/precntauth/precompiled/kvtable/reqGetTable";
-    public static final String RPC_PRECOM_CRUD_CREATE = "/precntauth/precompiled/kvtable/reqCreateTable";
+    public static final String RPC_PRECOM_CRUD_SET = "precntauth/precompiled/kvtable/reqSetTable";
+    public static final String RPC_PRECOM_CRUD_GET = "precntauth/precompiled/kvtable/reqGetTable";
+    public static final String RPC_PRECOM_CRUD_CREATE = "precntauth/precompiled/kvtable/reqCreateTable";
     // 5)bfs
-    public static final String RPC_PRECOM_BFS_QUERY = "/precntauth/precompiled/bfs/query";
-    public static final String RPC_PRECOM_BFS_CREATE = "/precntauth/precompiled/bfs/create";
+    public static final String RPC_PRECOM_BFS_QUERY = "precntauth/precompiled/bfs/query";
+    public static final String RPC_PRECOM_BFS_CREATE = "precntauth/precompiled/bfs/create";
 
     /**
      * rpc authmanager
      */
-    public static final String RPC_AUTHMANAGER_BASE_ENV = "/precntauth/authmanager/base/queryExecEnvIsWasm";
-    public static final String RPC_AUTHMANAGER_BASE_AUTH = "/precntauth/authmanager/base/queryChainHasAuth";
+    public static final String RPC_AUTHMANAGER_BASE_ENV = "precntauth/authmanager/base/queryExecEnvIsWasm";
+    public static final String RPC_AUTHMANAGER_BASE_AUTH = "precntauth/authmanager/base/queryChainHasAuth";
     // 1) everyone
-    public static final String RPC_AUTHMANAGER_EVERYONE_CMTINFO = "/precntauth/authmanager/everyone/cmtInfo";
-    public static final String RPC_AUTHMANAGER_EVERYONE_PROINFO = "/precntauth/authmanager/everyone/proposalInfo";
-    public static final String RPC_AUTHMANAGER_EVERYONE_PROINFOLIST = "/precntauth/authmanager/everyone/proposalInfoList";
-    public static final String RPC_AUTHMANAGER_EVERYONE_PROINFOCOUNT = "/precntauth/authmanager/everyone/proposalInfoCount";
-    public static final String RPC_AUTHMANAGER_EVERYONE_DEPLOY_TYPE = "/precntauth/authmanager/everyone/deploy/type";
-    public static final String RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY = "/precntauth/authmanager/everyone/usr/deploy";
-    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN = "/precntauth/authmanager/everyone/contract/admin";
-    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_METHOD_AUTH = "/precntauth/authmanager/everyone/contract/method/auth";
-    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET = "/precntauth/authmanager/everyone/contract/status";
-    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET_LIST = "/precntauth/authmanager/everyone/contract/status/list";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CMTINFO = "precntauth/authmanager/everyone/cmtInfo";
+    public static final String RPC_AUTHMANAGER_EVERYONE_PROINFO = "precntauth/authmanager/everyone/proposalInfo";
+    public static final String RPC_AUTHMANAGER_EVERYONE_PROINFOLIST = "precntauth/authmanager/everyone/proposalInfoList";
+    public static final String RPC_AUTHMANAGER_EVERYONE_PROINFOCOUNT = "precntauth/authmanager/everyone/proposalInfoCount";
+    public static final String RPC_AUTHMANAGER_EVERYONE_DEPLOY_TYPE = "precntauth/authmanager/everyone/deploy/type";
+    public static final String RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY = "precntauth/authmanager/everyone/usr/deploy";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN = "precntauth/authmanager/everyone/contract/admin";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_METHOD_AUTH = "precntauth/authmanager/everyone/contract/method/auth";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET = "precntauth/authmanager/everyone/contract/status";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET_LIST = "precntauth/authmanager/everyone/contract/status/list";
     // 2) committee
-    public static final String RPC_AUTHMANAGER_COMMITTEE_GOVERNOR = "/precntauth/authmanager/committee/governor";
-    public static final String RPC_AUTHMANAGER_COMMITTEE_RATE = "/precntauth/authmanager/committee/rate";
-    public static final String RPC_AUTHMANAGER_COMMITTEE_PRO_VOTE = "/precntauth/authmanager/committee/proposal/vote";
-    public static final String RPC_AUTHMANAGER_COMMITTEE_PRO_REVOKE = "/precntauth/authmanager/committee/proposal/revoke";
-    public static final String RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE = "/precntauth/authmanager/committee/deploy/type";
-    public static final String RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN = "/precntauth/authmanager/committee/contract/admin";
-    public static final String RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY = "/precntauth/authmanager/committee/usr/deploy";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_GOVERNOR = "precntauth/authmanager/committee/governor";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_RATE = "precntauth/authmanager/committee/rate";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_PRO_VOTE = "precntauth/authmanager/committee/proposal/vote";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_PRO_REVOKE = "precntauth/authmanager/committee/proposal/revoke";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE = "precntauth/authmanager/committee/deploy/type";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN = "precntauth/authmanager/committee/contract/admin";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY = "precntauth/authmanager/committee/usr/deploy";
     // 3) admin
-    public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET = "/precntauth/authmanager/admin/method/auth/set";
-    public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE = "/precntauth/authmanager/admin/method/auth/type";
-    public static final String RPC_AUTHMANAGER_ADMIN_CONTRACT_STATUS_SET = "/precntauth/authmanager/admin/contract/status/set";
+    public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET = "precntauth/authmanager/admin/method/auth/set";
+    public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE = "precntauth/authmanager/admin/method/auth/type";
+    public static final String RPC_AUTHMANAGER_ADMIN_CONTRACT_STATUS_SET = "precntauth/authmanager/admin/contract/status/set";
 
 
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
