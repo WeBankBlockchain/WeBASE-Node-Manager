@@ -398,6 +398,10 @@ public class MonitorService {
         int transType = TransType.DEPLOY.getValue();
         int transUnusualType = TransUnusualType.NORMAL.getValue();
         // liquid时to在部署和调用时均不为空，需要获取回执判断contractAddress
+        // todo 3.0此处为null
+        if (transTo == null) {
+            transTo = "";
+        }
         if (transTo.startsWith("/")) {
             TransactionReceipt receipt = frontInterface.getTransReceipt(groupId, transHash);
             contractAddress = receipt.getContractAddress();

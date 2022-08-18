@@ -67,7 +67,13 @@ public class ExtContractService {
         TransactionReceipt txReceipt = frontInterfaceService.getTransReceipt(groupId, txHash);
         // if send transaction to call contract, receipt's contract address is all zero,
         // receipt's to is contract address
-        String contractAddress = txReceipt.getTo();
+        // todo 3.0 is null
+        String contractAddress;
+        if (txReceipt.getTo() == null) {
+            contractAddress = "";
+        } else {
+            contractAddress = txReceipt.getTo();
+        }
 
         // if receipt's to is all zero, deploy transaction
         if (StringUtils.isNotBlank(txReceipt.getContractAddress())) {

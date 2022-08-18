@@ -85,11 +85,12 @@ public class TableService {
             log.warn("fail dropTableByName. not fount this table, tableName:{}", tableName);
             return;
         }
-        int affectedRow = 1;
-        while (affectedRow > 0) {
-            affectedRow = tableMapper.deleteByTableName(tableName);
-            log.debug("delete table:{} affectedRow:{}", tableName, affectedRow);
-        }
+//        int affectedRow = 1;
+//        while (affectedRow > 0) {
+//            // todo 一次删除1000条，若交易几百万，会导致请求超时  考虑分批删除
+//            affectedRow = tableMapper.deleteByTableName(tableName);
+//            log.debug("delete table:{} affectedRow:{}", tableName, affectedRow);
+//        }
 
         // drop table
         tableMapper.dropTable(getDbName(), tableName);
