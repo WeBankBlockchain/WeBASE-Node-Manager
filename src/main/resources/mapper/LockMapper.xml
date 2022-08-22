@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.webase.node.mgr.lock.LockMapper">
+    <resultMap id="lockMap"
+               type="com.webank.webase.node.mgr.lock.entity.TbLock">
+        <id column="lock_key" javaType="java.lang.String" jdbcType="VARCHAR"
+            property="lockKey"/>
+        <result column="request_id" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="requestId"/>
+        <result column="request_id" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="requestId"/>
+        <result column="lock_count" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="lockCount"/>
+        <result column="time_out" javaType="java.lang.Long" jdbcType="BIGINT"
+                property="timeOut"/>
+        <result column="version" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="version"/>
+    </resultMap>
+    <insert id="add">
+
+    </insert>
+
+    <update id="update">
+
+    </update>
+    <delete id="delete">
+
+    </delete>
+    <select id="getLock" resultMap="lockMap">
+
+    </select>
+
+
+</mapper>
