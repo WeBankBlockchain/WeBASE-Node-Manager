@@ -12,7 +12,7 @@ import lombok.Data;
 @Builder
 public class TbLock {
     private String lockKey;
-    private String requestId;
+    private String threadId;
     private Integer lockCount;
     private Long timeout;
     private Integer version;

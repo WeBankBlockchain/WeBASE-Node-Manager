@@ -6,10 +6,8 @@
                type="com.webank.webase.node.mgr.lock.entity.TbLock">
         <id column="lock_key" javaType="java.lang.String" jdbcType="VARCHAR"
             property="lockKey"/>
-        <result column="request_id" javaType="java.lang.String" jdbcType="VARCHAR"
-                property="requestId"/>
-        <result column="request_id" javaType="java.lang.String" jdbcType="VARCHAR"
-                property="requestId"/>
+        <result column="thread_id" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="threadId"/>
         <result column="lock_count" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="lockCount"/>
         <result column="time_out" javaType="java.lang.Long" jdbcType="BIGINT"
@@ -18,17 +16,17 @@
                 property="version"/>
     </resultMap>
     <insert id="add" parameterType="com.webank.webase.node.mgr.lock.entity.TbLock">
-        INSERT INTO tb_lock VALUES (#{lockKey}, #{requestId}, #{lockCount}, #{timeout}, #{version});
+        INSERT INTO tb_lock VALUES (#{lockKey}, #{threadId}, #{lockCount}, #{timeout}, #{version});
     </insert>
 
     <update id="update">
-        UPDATE tb_lock SET lock_count=#{lockCount},timeout=#{timeout} WHERE lock_key=#{lockKey}
+        UPDATE tb_lock SET lock_count=#{lockCount},timeout=#{timeout},thread_id=#{threadId} WHERE lock_key=#{lockKey} AND version=#{version}
     </update>
     <delete id="delete">
         DELETE FROM tb_lock WHERE lock_key=#{lockKey}
     </delete>
     <select id="getLock" resultMap="lockMap">
-        SELECT * FROM tb_lock WHERE lock_key=#{lockKey} AND version=#{version}
+        SELECT * FROM tb_lock WHERE lock_key=#{lockKey}
     </select>
 
 
