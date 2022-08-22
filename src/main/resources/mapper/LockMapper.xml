@@ -13,22 +13,22 @@
         <result column="lock_count" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="lockCount"/>
         <result column="time_out" javaType="java.lang.Long" jdbcType="BIGINT"
-                property="timeOut"/>
+                property="timeout"/>
         <result column="version" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="version"/>
     </resultMap>
-    <insert id="add">
-
+    <insert id="add" parameterType="com.webank.webase.node.mgr.lock.entity.TbLock">
+        INSERT INTO tb_lock VALUES (#{lockKey}, #{requestId}, #{lockCount}, #{timeout}, #{version});
     </insert>
 
     <update id="update">
-
+        UPDATE tb_lock SET lock_count=#{lockCount},timeout=#{timeout} WHERE lock_key=#{lockKey}
     </update>
     <delete id="delete">
-
+        DELETE FROM tb_lock WHERE lock_key=#{lockKey}
     </delete>
     <select id="getLock" resultMap="lockMap">
-
+        SELECT * FROM tb_lock WHERE lock_key=#{lockKey} AND version=#{version}
     </select>
 
 

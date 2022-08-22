@@ -14,6 +14,6 @@ public class TbLock {
     private String lockKey;
     private String requestId;
     private Integer lockCount;
-    private Long timeOut;
+    private Long timeout;
     private Integer version;
 }
