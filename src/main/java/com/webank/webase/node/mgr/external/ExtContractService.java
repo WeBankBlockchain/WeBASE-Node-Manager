@@ -67,7 +67,13 @@ public class ExtContractService {
         TransactionReceipt txReceipt = frontInterfaceService.getTransReceipt(groupId, txHash);
         // if send transaction to call contract, receipt's contract address is all zero,
         // receipt's to is contract address
-        String contractAddress = txReceipt.getTo();
+        // todo 3.0 is null
+        String contractAddress;
+        if (txReceipt.getTo() == null) {
+            contractAddress = "";
+        } else {
+            contractAddress = txReceipt.getTo();
+        }
 
         // if receipt's to is all zero, deploy transaction
         if (StringUtils.isNotBlank(txReceipt.getContractAddress())) {
@@ -123,13 +129,14 @@ public class ExtContractService {
         tbContract.setContractAddress(contractAddress);
         tbContract.setDeployTxHash(txHash);
         tbContract.setDeployTime(NodeMgrTools.timestamp2Date(Long.parseLong(timestamp)));
-        tbContract.setDeployAddress(deployAddress);
+        // todo 链上的回执没返回from
+        tbContract.setDeployAddress(StringUtils.isBlank(deployAddress) ? "" : deployAddress);
         Date now = new Date();
         tbContract.setCreateTime(now);
         tbContract.setModifyTime(now);
         int insertRes = extContractMapper.insertSelective(tbContract);
-        log.info("saveContractOnChain groupId:{} contractAddress:{}, insertRes:{}",
-            groupId, contractAddress, insertRes);
+        log.info("saveContractOnChain groupId:{} contractAddress:{},deployAddress:{} insertRes:{}",
+            groupId, contractAddress, deployAddress, insertRes);
         return insertRes;
     }
 

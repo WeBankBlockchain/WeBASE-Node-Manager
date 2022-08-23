@@ -34,6 +34,8 @@ import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * services for block data.
@@ -97,7 +99,6 @@ public class TransHashService {
 
     /**
      * query count of trans by minus max and min trans_number
-     * todo 数据正在删除时，读取数目不准确
      */
     public Integer queryCountOfTranByMinus(String groupId)
             throws NodeMgrException {

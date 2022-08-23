@@ -114,28 +114,20 @@ List commons = [
 
 dependencies {
     compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger,commons
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc4')
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-SNAPSHOT')
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
-    compile "mysql:mysql-connector-java:8.0.22"
+    runtime "mysql:mysql-connector-java:8.0.28"
     compile "com.zaxxer:HikariCP:3.2.0"
-    compile "com.github.sgroschupf:zkclient:0.1"
-    compile 'org.bouncycastle:bcprov-jdk15on:1.67'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.69'
     compile 'javax.validation:validation-api:2.0.1.Final'
     // cover old version
-    compile 'com.google.guava:guava:29.0-jre'
+    compile 'com.google.guava:guava:30.0-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
     compile 'org.yaml:snakeyaml:1.30'
 
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
-    compile ('com.github.docker-java:docker-java:3.2.13') {
-        exclude group: 'io.netty'
-        exclude group: 'org.bouncycastle'
-    }
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
-    compile 'ognl:ognl:3.2.14'
-    compile 'javax.servlet:javax.servlet-api:4.0.1'
-
     testCompile test,mbg
 
     compileOnly lombok

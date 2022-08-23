@@ -69,7 +69,9 @@ public class TransHashController extends BaseController {
         Integer count;
         // if param's empty, getCount by minus between max and min
         if (StringUtils.isEmpty(transHash) && blockNumber == null) {
-            count = transHashService.queryCountOfTranByMinus(groupId);
+//            count = transHashService.queryCountOfTranByMinus(groupId);
+            // 接口select准确的分页，但是delete task使用minmax的值进行删除
+            count = transHashService.queryCountOfTran(groupId, queryParam);
         } else {
             // select count(1) in InnoDb is slow when data gets large, instead use tx_id to record count
             count = transHashService.queryCountOfTran(groupId, queryParam);

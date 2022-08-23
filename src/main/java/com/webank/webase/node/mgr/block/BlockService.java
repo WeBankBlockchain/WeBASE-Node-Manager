@@ -41,6 +41,7 @@ import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlockHeader.BlockHeade
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -95,7 +96,7 @@ public class BlockService {
             }
         } catch (Exception ex) {
             log.error("fail pullBlockByGroupId. groupId:{} ", groupId, ex);
-        }finally {
+        } finally {
             // finish one group, count down
             latch.countDown();
         }
