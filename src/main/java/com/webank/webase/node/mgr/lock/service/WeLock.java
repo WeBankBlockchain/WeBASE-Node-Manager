@@ -8,14 +8,25 @@ package com.webank.webase.node.mgr.lock.service;
 public interface WeLock {
 
     /**
-     * Returns Lock instance by name.
-     * <p>
-     * Implements a <b>non-fair</b> locking so doesn't guarantees an acquire order by threads.
-     * <p>
-     * To increase reliability during failover, all operations wait for propagation to all Redis slaves.
+     * Acquire lock by lockKey
      *
-     * @param name - name of object
-     * @return Lock object
+     * @param lockKey - lockKey of object
+     * @throws Exception
      */
-    boolean getLock(String name) throws Exception;
+    boolean getLock(String lockKey) throws Exception;
+
+    /**
+     * Acquire lock by lockKey Set timeout in lockTimeOut milliseconds
+     *
+     * @param lockKey - lockKey of object
+     * @throws Exception
+     */
+    boolean getLock(String lockKey, long lockTimeOut) throws Exception;
+
+    /**
+     * Release the lock according to the key
+     * @param lockKey
+     * @throws Exception
+     */
+    void unlock(String lockKey) throws Exception;
 }

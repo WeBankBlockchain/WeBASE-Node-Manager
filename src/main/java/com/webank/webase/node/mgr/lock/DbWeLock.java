@@ -50,6 +50,7 @@ public class DbWeLock implements WeLock {
      * @param lockTimeOut(毫秒) 持有锁的有效时间，防止死锁
      * @return
      **/
+    @Override
     public boolean getLock(String lockKey, long lockTimeOut) throws Exception {
         boolean lockResult = false;
         String requestId = getRequestId();
@@ -108,6 +109,7 @@ public class DbWeLock implements WeLock {
      * @param lockKey
      * @throws Exception
      **/
+    @Override
     public void unlock(String lockKey) throws Exception {
         //获取当前线程requestId
         String requestId = this.getRequestId();
