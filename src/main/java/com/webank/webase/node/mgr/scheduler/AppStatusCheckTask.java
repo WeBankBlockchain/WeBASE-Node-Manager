@@ -15,6 +15,7 @@ package com.webank.webase.node.mgr.scheduler;
 
 
 import com.webank.webase.node.mgr.appintegration.AppIntegrationService;
+import com.webank.webase.node.mgr.lock.service.WeLock;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,10 +30,28 @@ public class AppStatusCheckTask {
 
     @Autowired
     private AppIntegrationService appIntegrationService;
+    @Autowired
+    private WeLock weLock;
+    private final static String APP_STATUS_CHECK_TASK_LOCK_KEY = "lock:app_status_check_task";
 
     @Scheduled(fixedDelayString = "${constant.appStatusCheckCycle}")
     public void taskStart() {
-        appStatusCheck();
+        try {
+            boolean lock = weLock.getLock(APP_STATUS_CHECK_TASK_LOCK_KEY);
+            if (lock){
+                appStatusCheck();
+            }
+        } catch (Exception e) {
+            log.error("获取锁失败{}", e);
+        } finally {
+            if (weLock != null) {
+                try {
+                    weLock.unlock(APP_STATUS_CHECK_TASK_LOCK_KEY);
+                } catch (Exception e) {
+                    log.error("释放锁失败{}", e);
+                }
+            }
+        }
     }
 
     /**
