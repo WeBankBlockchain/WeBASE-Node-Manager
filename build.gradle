@@ -114,7 +114,7 @@ List commons = [
 
 dependencies {
     compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger,commons
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-SNAPSHOT')
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0')
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     runtime "mysql:mysql-connector-java:8.0.28"
     compile "com.zaxxer:HikariCP:3.2.0"
