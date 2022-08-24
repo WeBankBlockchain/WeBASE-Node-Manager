@@ -2,10 +2,9 @@ package com.webank.webase.node.mgr.lock;
 
 import com.webank.webase.node.mgr.lock.entity.TbLock;
 import com.webank.webase.node.mgr.lock.service.LockService;
-import com.webank.webase.node.mgr.lock.service.WeLock;
-import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -18,7 +17,6 @@ import java.util.concurrent.TimeUnit;
  * @date 2022/8/22 10:17 上午
  */
 @Component
-@AllArgsConstructor
 @Log4j2
 public class DbWeLock implements WeLock {
     /**
@@ -28,8 +26,9 @@ public class DbWeLock implements WeLock {
     /**
      * 获取锁的超时时间，这个时间内获取不到将重试
      */
-    private final static int GET_LOCK_TIME_OUT = 300;
-    private final LockService lockService;
+    private final static int GET_LOCK_TIME_OUT = 3000;
+    @Autowired
+    private LockService lockService;
 
 
     /**
@@ -40,7 +39,7 @@ public class DbWeLock implements WeLock {
      **/
     @Override
     public boolean getLock(String lockKey) throws Exception {
-        return getLock(lockKey, 300);
+        return getLock(lockKey, GET_LOCK_TIME_OUT);
     }
 
     /**

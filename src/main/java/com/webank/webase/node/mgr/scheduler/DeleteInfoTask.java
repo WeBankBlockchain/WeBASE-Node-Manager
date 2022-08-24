@@ -19,7 +19,8 @@ import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
-import com.webank.webase.node.mgr.lock.service.WeLock;
+import com.webank.webase.node.mgr.lock.DbWeLock;
+import com.webank.webase.node.mgr.lock.WeLock;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.statistic.StatService;
 import com.webank.webase.node.mgr.transaction.TransHashService;
@@ -54,8 +55,7 @@ public class DeleteInfoTask {
     private MonitorService monitorService;
     @Autowired
     private StatService statService;
-    @Autowired
-    private WeLock weLock;
+    @Autowired private DbWeLock weLock;
     private final static String DELETE_INFO_TASK_LOCK_KEY = "lock:delete_info_task";
 
     @Scheduled(cron = "${constant.deleteInfoCron}")

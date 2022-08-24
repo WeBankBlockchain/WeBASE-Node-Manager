@@ -22,7 +22,8 @@ import com.webank.webase.node.mgr.block.entity.BlockListParam;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo;
-import com.webank.webase.node.mgr.lock.service.WeLock;
+import com.webank.webase.node.mgr.lock.DbWeLock;
+import com.webank.webase.node.mgr.lock.WeLock;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +51,7 @@ public class StatisticsTransdailyTask {
     private BlockService blockService;
     @Autowired
     private TransDailyService transDailyService;
-    @Autowired
-    private WeLock weLock;
+    @Autowired private DbWeLock weLock;
     private final static String STATISTICS_TRANSDAILY_TASK_LOCK_KEY = "lock:statistics_transdaily_task";
 
     @Scheduled(cron = "${constant.statisticsTransDailyCron}")

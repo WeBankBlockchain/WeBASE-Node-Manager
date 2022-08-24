@@ -18,7 +18,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * mapper for table tb_group.
+ * mapper for table tb_lock.
  */
 @Repository
 public interface LockMapper {

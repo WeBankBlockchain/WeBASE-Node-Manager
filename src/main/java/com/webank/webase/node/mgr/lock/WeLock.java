@@ -1,4 +1,4 @@
-package com.webank.webase.node.mgr.lock.service;
+package com.webank.webase.node.mgr.lock;
 
 /**
  * @author mawla

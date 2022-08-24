@@ -16,7 +16,8 @@ package com.webank.webase.node.mgr.scheduler;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
-import com.webank.webase.node.mgr.lock.service.WeLock;
+import com.webank.webase.node.mgr.lock.DbWeLock;
+import com.webank.webase.node.mgr.lock.WeLock;
 import com.webank.webase.node.mgr.monitor.MonitorService;
 import com.webank.webase.node.mgr.statistic.StatService;
 import java.time.Duration;
@@ -42,8 +43,7 @@ public class TransMonitorTask {
     private GroupService groupService;
     @Autowired
     private StatService statService;
-    @Autowired
-    private WeLock weLock;
+    @Autowired private DbWeLock weLock;
     private final static String TRANS_MONITOR_TASK_FIXED_RATE_LOCK_KEY = "lock:trans_monitor_task_fixed_rate";
     private final static String STAT_BLOCK_FIXED_DELAY_LOCK_KEY = "lock:stat_block_fixed_delay";
     @Scheduled(fixedRateString = "${constant.transMonitorTaskFixedRate}")

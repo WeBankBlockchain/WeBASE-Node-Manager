@@ -22,7 +22,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import com.webank.webase.node.mgr.lock.service.WeLock;
+import com.webank.webase.node.mgr.lock.DbWeLock;
+import com.webank.webase.node.mgr.lock.WeLock;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,8 +41,7 @@ public class PullBlockTransTask {
     private BlockService blockService;
     @Autowired
     private GroupService groupService;
-    @Autowired
-    private WeLock weLock;
+    @Autowired private DbWeLock weLock;
     private final static String PULL_BLOCK_TRANS_TASK_LOCK_KEY = "lock:pull_block_trans_task";
     @Scheduled(fixedDelayString = "${constant.pullBlockTaskFixedDelay}")
     public void taskStart() {

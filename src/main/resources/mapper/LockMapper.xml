@@ -16,7 +16,7 @@
                 property="version"/>
     </resultMap>
     <insert id="add" parameterType="com.webank.webase.node.mgr.lock.entity.TbLock">
-        INSERT INTO tb_lock VALUES (#{lockKey}, #{threadId}, #{lockCount}, #{timeout}, #{version});
+        INSERT INTO tb_lock VALUES (#{lockKey}, #{threadId}, #{lockCount}, #{timeout}, #{version})
     </insert>
 
     <update id="update">

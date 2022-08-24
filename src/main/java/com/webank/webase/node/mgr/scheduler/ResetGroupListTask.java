@@ -16,7 +16,8 @@ package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.group.GroupService;
-import com.webank.webase.node.mgr.lock.service.WeLock;
+import com.webank.webase.node.mgr.lock.DbWeLock;
+import com.webank.webase.node.mgr.lock.WeLock;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -38,8 +39,7 @@ public class ResetGroupListTask {
     private ConstantProperties constants;
     // interval of check node status
     private static LongAdder LAST_TIME_CHECK_GROUP = new LongAdder();
-    @Autowired
-    private WeLock weLock;
+    @Autowired private DbWeLock weLock;
     private final static String RESET_GROUP_LIST_TASK_LOCK_KEY = "lock:reset_group_list_task";
 
     @Scheduled(fixedDelayString = "${constant.resetGroupListCycle}")
