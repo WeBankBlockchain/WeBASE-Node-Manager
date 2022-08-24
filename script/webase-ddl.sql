@@ -2,6 +2,20 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
+-- Table structure for tb_lock
+-- ----------------------------
+
+CREATE TABLE IF NOT EXISTS tb_lock(
+    lock_key   varchar(32) default '' not null comment '锁key'
+        primary key,
+    thread_id  varchar(64) default '' not null comment '线程id',
+    lock_count int         default 0  not null comment '加锁次数',
+    timeout    bigint      default 0  not null comment '锁超时时间',
+    version    int         default 0  not null comment '版本号'
+)COMMENT='分布式锁表' ENGINE=InnoDB CHARSET=utf8;
+
+
+-- ----------------------------
 -- Table structure for tb_group
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_group (
