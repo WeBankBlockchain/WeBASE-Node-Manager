@@ -13,14 +13,7 @@
  */
 package com.webank.webase.node.mgr.config.properties;
 
-import static java.io.File.separator;
 import com.webank.webase.node.mgr.tools.CleanPathUtil;
-import java.io.File;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +22,15 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.io.File.separator;
 
 /**
  * constants in yml and static constants
@@ -48,7 +50,7 @@ public class ConstantProperties {
     public static final int ADDRESS_LENGTH = 42;
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
     public static final String HAS_ROLE_ADMIN_OR_DEVELOPER = "hasRole('admin') or hasRole('developer')";
-    
+
     public static final String PARAM_APP_KEY = "appKey";
     public static final String PARAM_APP_SECRET = "appSecret";
     public static final String PARAM_TIMESTAMP = "timestamp";
@@ -167,7 +169,7 @@ public class ConstantProperties {
     private String ansibleContainerCheckShell = "./script/deploy/check_container_exist.sh";
     private String hostCheckIpShell = "./script/deploy/host_check_ifconfig.sh";
 
-    private String fiscoBcosBinary =  "";
+    private String fiscoBcosBinary = "";
 
     // default port
     private int defaultChainId = 1;
@@ -194,13 +196,20 @@ public class ConstantProperties {
     // add node concurrent await time
     private long execAddNodeTimeout = 40 * 1000L;
 
-    private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login","/user/privateKey/**", "/encrypt", "/version"};
-    private String dockerRepository= "fiscoorg/fisco-webase";
-   // private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
+    private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode", "/login", "/user/privateKey/**", "/encrypt", "/version"};
+    private String dockerRepository = "fiscoorg/fisco-webase";
+    // private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
     private String nodesRootTmpDir = "NODES_ROOT_TMP";
-
+    /**
+     * The timeout time for acquiring the lock. If the lock is not acquired within this time, it will be retried
+     */
+    private int getLockTimeOut = 3000;
+    /**
+     * Lock timeout
+     */
+    private int LockTimeOut = 3000;
     /**
      * Docker client connect daemon ip with proxy ip.
      */
@@ -211,7 +220,7 @@ public class ConstantProperties {
         log.info("Init constant properties,isUseSecurity: [{}]", isUseSecurity);
         log.info("Init constant properties,deploy type: [{}]", deployType);
 
-        log.info("Init constant properties, permitUrlArray: [{}]", StringUtils.join(permitUrlArray,","));
+        log.info("Init constant properties, permitUrlArray: [{}]", StringUtils.join(permitUrlArray, ","));
 
         nodesRootDir = initDirectory(nodesRootDir, "NODES_ROOT/");
         nodesRootTmpDir = initDirectory(nodesRootTmpDir, "NODES_ROOT_TMP/");
@@ -231,12 +240,11 @@ public class ConstantProperties {
     }
 
     /**
-     *
      * @param injectedValue
      * @param defaultValue
      * @return
      */
-    private static String initDirectory(String injectedValue, String defaultValue){
+    private static String initDirectory(String injectedValue, String defaultValue) {
         String newDirectory = injectedValue;
 
         if (StringUtils.isBlank(newDirectory)) {
@@ -251,9 +259,9 @@ public class ConstantProperties {
             newDirectory = String.format("%s%s", newDirectory.trim(), separator);
         }
 
-        if (! newDirectory.startsWith("/")){
+        if (!newDirectory.startsWith("/")) {
             // not an absolute path
-            return String.format("%s/%s",new File(".").toPath().toAbsolutePath().toString(), newDirectory);
+            return String.format("%s/%s", new File(".").toPath().toAbsolutePath().toString(), newDirectory);
         }
         return newDirectory;
     }
