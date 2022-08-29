@@ -21,15 +21,21 @@ import java.io.IOException;
 import java.util.List;
 import node.mgr.test.base.TestBase;
 import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSPrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.crud.KVTablePrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TableManagerPrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TablePrecompiled;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 配置sdk的encryptType，配置为国密或标密
  */
-public class MethodIdGmTest extends TestBase {
-    @Autowired private CryptoSuite cryptoSuite;
+public class MethodIdGmTest {
+    CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
+    CryptoSuite cryptoSuiteGm = new CryptoSuite(CryptoType.SM_TYPE);
 
     /**
      * 设置不同的encryptType 1 或者 0， 查看同一个method出来的methodId是否符合
@@ -73,7 +79,6 @@ public class MethodIdGmTest extends TestBase {
 
     @Test
     public void testMethodId() throws IOException {
-
         // load abi
         List<ABIDefinition> abiList = Web3Tools.loadContractDefinition(crud_Abi);
 
@@ -114,7 +119,6 @@ public class MethodIdGmTest extends TestBase {
         getAllPreMethodId();
     }
 
-    String a = "{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"queryManager\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}";
     public void getAllPreMethodId() throws IOException {
         // load abi
         List<ABIDefinition> sys_config = Web3Tools.loadContractDefinition(sys_config_Abi);
@@ -216,4 +220,41 @@ public class MethodIdGmTest extends TestBase {
         queryByName: 0xbbec3f91
         remove: 0x85d23afc
      */
+
+    @Test
+    public void testRc4NewTable() throws IOException {
+
+        System.out.println("table");
+        printContractMethod(TablePrecompiled.ABI, cryptoSuite);
+        printContractMethod(TablePrecompiled.ABI, cryptoSuiteGm);
+        System.out.println(TablePrecompiled.ABI);
+
+        System.out.println("kvTable");
+        printContractMethod(KVTablePrecompiled.ABI, cryptoSuite);
+        printContractMethod(KVTablePrecompiled.ABI, cryptoSuiteGm);
+        System.out.println(KVTablePrecompiled.ABI);
+
+        System.out.println("tableManager");
+        printContractMethod(TableManagerPrecompiled.ABI, cryptoSuite);
+        printContractMethod(TableManagerPrecompiled.ABI, cryptoSuiteGm);
+        System.out.println(TableManagerPrecompiled.ABI);
+
+        System.out.println("bfs");
+        printContractMethod(BFSPrecompiled.ABI, cryptoSuite);
+        printContractMethod(BFSPrecompiled.ABI, cryptoSuiteGm);
+        System.out.println(BFSPrecompiled.ABI);
+    }
+
+    private static void printContractMethod(String abi, CryptoSuite cryptoSuite) throws IOException {
+        List<ABIDefinition> table = Web3Tools.loadContractDefinition(abi);
+        for (ABIDefinition abiDefinition : table) {
+            if ("function".equals(abiDefinition.getType())) {
+                // support guomi sm3
+                String buildMethodId = Web3Tools.buildMethodId(abiDefinition, cryptoSuite);
+                System.out.println(abiDefinition.getName() + ": " + buildMethodId);
+            }
+        }
+        System.out.println();
+
+    }
 }
