@@ -34,7 +34,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

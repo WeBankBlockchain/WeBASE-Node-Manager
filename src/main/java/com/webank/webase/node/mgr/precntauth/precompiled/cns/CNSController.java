@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,8 +30,8 @@ public class CNSController {
   @ApiImplicitParam(name = "reqCnsInfo", value = "register info", required = true, dataType = "ReqRegisterCnsInfo")
   @PostMapping("register")
   public Object registerCNS(@Valid @RequestBody ReqRegisterCnsInfo reqCnsInfo)
-      throws ContractException {
-    return cnsServiceInWebase.registerCNS(reqCnsInfo);
+      {
+    return new BaseResponse(ConstantCode.SUCCESS, cnsServiceInWebase.registerCNS(reqCnsInfo));
   }
 
   @ApiOperation(value = "query the cns info by name")
@@ -56,7 +56,7 @@ public class CNSController {
   @PostMapping("reqAddressInfoByNameVersion")
   public Object queryAddressByNameVersion(
       @Valid @RequestBody ReqInfoByNameVersion reqAddressInfoByNameVersion)
-      throws ContractException {
+      {
     return new BaseResponse(ConstantCode.SUCCESS,
         cnsServiceInWebase.getAddressByContractNameAndVersion(reqAddressInfoByNameVersion));
   }

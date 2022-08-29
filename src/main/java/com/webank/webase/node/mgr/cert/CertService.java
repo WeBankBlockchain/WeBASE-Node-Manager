@@ -48,7 +48,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +64,7 @@ public class CertService {
     @Autowired
     private FrontService frontService;
     @Autowired
-    private CryptoSuite cryptoSuite;
+    private Map<Integer, CryptoSuite> cryptoSuiteMap;
     private final static String TEMP_SDK_DIR = "sdk";
     private final static String TEMP_ZIP_DIR = "tempZip";
     private final static String TEMP_ZIP_FILE_NAME = "conf.zip";
@@ -106,7 +107,7 @@ public class CertService {
             if (CertTools.TYPE_SM2_EN_SDK.equals(certType) || CertTools.TYPE_SM2_SDK.equals(certType)) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
-                address = cryptoSuite.getCryptoKeyPair().getAddress(publicKeyString);
+                address = cryptoSuiteMap.get(CryptoType.SM_TYPE).getCryptoKeyPair().getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
             } else if (CertTools.TYPE_SDK.equals(certType)) { // 2021/12/07 sdk now is rsa
                 // not support ecc public key yet, and sdk cert is agency cert, no need to get public key

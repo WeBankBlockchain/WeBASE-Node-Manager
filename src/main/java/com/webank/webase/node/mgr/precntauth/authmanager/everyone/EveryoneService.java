@@ -14,11 +14,10 @@
 
 package com.webank.webase.node.mgr.precntauth.authmanager.everyone;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqCheckMethodAuthInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqContractAdminInfo;
+import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqContractStatusList;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqProposalInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqProposalListInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.everyone.entity.ReqUsrDeployAuthInfo;
@@ -119,6 +118,26 @@ public class EveryoneService {
     String frontRsp = frontRestTools.postForEntity(reqContractAdminInfo.getGroupId(),
         FrontRestTools.RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN, reqContractAdminInfo,
         String.class);
+    return frontRsp;
+  }
+
+  /**
+   * 从front服务获取特定合约的可用状态
+   */
+  public Object isContractAvailable(ReqContractAdminInfo reqContractStatus) {
+    Boolean frontRsp = frontRestTools.postForEntity(reqContractStatus.getGroupId(),
+        FrontRestTools.RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET, reqContractStatus,
+        Boolean.class);
+    return frontRsp;
+  }
+
+  /**
+   * 从front服务批量获取特定合约的可用状态
+   */
+  public Object listContractStatus(ReqContractStatusList reqContractStatus) {
+    Map frontRsp = frontRestTools.postForEntity(reqContractStatus.getGroupId(),
+        FrontRestTools.RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET_LIST, reqContractStatus,
+        Map.class);
     return frontRsp;
   }
 

@@ -65,7 +65,7 @@
 //import java.util.Optional;
 //import javax.validation.Valid;
 //import lombok.extern.log4j.Log4j2;
-//import org.fisco.bcos.sdk.crypto.CryptoSuite;
+//import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.validation.BindingResult;
 //import org.springframework.web.bind.annotation.GetMapping;

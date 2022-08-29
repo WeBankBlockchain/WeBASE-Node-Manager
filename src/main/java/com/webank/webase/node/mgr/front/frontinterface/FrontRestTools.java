@@ -38,10 +38,10 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -147,6 +147,8 @@ public class FrontRestTools {
     public static final String RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY = "precntauth/authmanager/everyone/usr/deploy";
     public static final String RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN = "precntauth/authmanager/everyone/contract/admin";
     public static final String RPC_AUTHMANAGER_EVERYONE_CNT_METHOD_AUTH = "precntauth/authmanager/everyone/contract/method/auth";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET = "precntauth/authmanager/everyone/contract/status";
+    public static final String RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET_LIST = "precntauth/authmanager/everyone/contract/status/list";
     // 2) committee
     public static final String RPC_AUTHMANAGER_COMMITTEE_GOVERNOR = "precntauth/authmanager/committee/governor";
     public static final String RPC_AUTHMANAGER_COMMITTEE_RATE = "precntauth/authmanager/committee/rate";
@@ -158,6 +160,7 @@ public class FrontRestTools {
     // 3) admin
     public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET = "precntauth/authmanager/admin/method/auth/set";
     public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE = "precntauth/authmanager/admin/method/auth/type";
+    public static final String RPC_AUTHMANAGER_ADMIN_CONTRACT_STATUS_SET = "precntauth/authmanager/admin/contract/status/set";
 
 
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
@@ -191,11 +194,12 @@ public class FrontRestTools {
             RPC_AUTHMANAGER_EVERYONE_USR_DEPLOY, RPC_AUTHMANAGER_EVERYONE_CNT_ADMIN,
             RPC_AUTHMANAGER_EVERYONE_DEPLOY_TYPE,
             RPC_AUTHMANAGER_EVERYONE_CNT_METHOD_AUTH, RPC_AUTHMANAGER_COMMITTEE_GOVERNOR,
+            RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET, RPC_AUTHMANAGER_EVERYONE_CNT_STATUS_GET_LIST,
             RPC_AUTHMANAGER_COMMITTEE_RATE,
             RPC_AUTHMANAGER_COMMITTEE_PRO_VOTE, RPC_AUTHMANAGER_COMMITTEE_PRO_REVOKE,
             RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE,
             RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN, RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY,
-            RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET,
+            RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET, RPC_AUTHMANAGER_ADMIN_CONTRACT_STATUS_SET,
             RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE, RPC_PRECOM_SYS_CONFIG_LIST,
             RPC_PRECOM_SYS_CONFIG,
             RPC_PRECOM_CNS_ADDRESS_BY_NAME_VERSION, RPC_PRECOM_CNS_REGISTER,
@@ -365,7 +369,7 @@ public class FrontRestTools {
      */
     public static HttpEntity buildHttpEntity(Object param) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         String paramStr = null;
         if (Objects.nonNull(param)) {
             paramStr = JsonTools.toJSONString(param);

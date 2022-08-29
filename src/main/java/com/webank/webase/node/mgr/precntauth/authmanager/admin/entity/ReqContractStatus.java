@@ -12,19 +12,17 @@
  * the License.
  */
 
-package com.webank.webase.node.mgr.precntauth.authmanager.base;
+package com.webank.webase.node.mgr.precntauth.authmanager.admin.entity;
 
+import javax.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.fisco.bcos.sdk.v3.contract.auth.po.CommitteeInfo;
 
 @Data
-@NoArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class RspCommitteeInfo extends CommitteeInfo {
-    private int participatesRate;
-    private int winRate;
+public class ReqContractStatus {
+    private String groupId;
+    private String signUserId;
+    @NotBlank
+    private String fromAddress;
+    private String contractAddr;
+    private Boolean isFreeze;
 }

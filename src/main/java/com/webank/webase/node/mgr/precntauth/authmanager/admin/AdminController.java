@@ -19,13 +19,13 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclAuthTypeInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclUsrInfo;
+import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqContractStatus;
 import com.webank.webase.node.mgr.precntauth.authmanager.base.BaseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,6 +60,9 @@ public class AdminController extends BaseController {
         if (baseService.queryExecEnvIsWasm(reqAclAuthTypeInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
         }
+        if (!baseService.queryChainHasAuth(reqAclAuthTypeInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+        }
         Object res = adminService.setMethodAuthType(reqAclAuthTypeInfo);
         return res;
     }
@@ -71,12 +74,31 @@ public class AdminController extends BaseController {
     @ApiOperation(value = "set contract func usr acl")
     @ApiImplicitParam(name = "reqAclUsrInfo", value = "aclUsr info", required = true, dataType = "ReqAclUsrInfo")
     @PostMapping("method/auth/set")
-    public Object setMethodAuth(@Valid @RequestBody ReqAclUsrInfo reqAclUsrInfo)
-        throws ContractException {
+    public Object setMethodAuth(@Valid @RequestBody ReqAclUsrInfo reqAclUsrInfo) {
         if (baseService.queryExecEnvIsWasm(reqAclUsrInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
         }
+        if (!baseService.queryChainHasAuth(reqAclUsrInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+        }
         Object res = adminService.setMethodAuth(reqAclUsrInfo);
+        return res;
+    }
+
+    /**
+     * 设置合约状态
+     */
+    @ApiOperation(value = "set contract func usr acl")
+    @ApiImplicitParam(name = "reqContractStatus", value = "status info", required = true, dataType = "ReqContractStatus")
+    @PostMapping("contract/status/set")
+    public Object setContractStatus(@Valid @RequestBody ReqContractStatus reqContractStatus) {
+        if (baseService.queryExecEnvIsWasm(reqContractStatus.getGroupId())) {
+            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
+        if (!baseService.queryChainHasAuth(reqContractStatus.getGroupId())) {
+            return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+        }
+        Object res = adminService.setContractStatus(reqContractStatus);
         return res;
     }
 

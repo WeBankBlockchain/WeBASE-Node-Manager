@@ -5,11 +5,11 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.model.PrecompiledConstant;
-import org.fisco.bcos.sdk.model.RetCode;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.model.PrecompiledConstant;
+import org.fisco.bcos.sdk.v3.model.RetCode;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.transaction.codec.decode.ReceiptParser;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 
 @Slf4j
 public class PrecompiledUtil {
@@ -39,8 +39,6 @@ public class PrecompiledUtil {
 
     if (StringUtils.isBlank(version)) {
       return false;
-    }else if (version.length() > PrecompiledConstant.CNS_MAX_VERSION_LENGTH) { // length exceeds
-      return false;
     }else if (!version.matches("^[A-Za-z0-9.]+$")) { // check version's character
       return false;
     }else {
@@ -56,21 +54,5 @@ public class PrecompiledUtil {
     }
   }
 
-  public static String handleTransactionReceipt(TransactionReceipt receipt) {
-    log.debug("handle tx receipt of precompiled");
-    try {
-      RetCode sdkRetCode = ReceiptParser.parseTransactionReceipt(receipt);
-      log.info("handleTransactionReceipt sdkRetCode:{}", sdkRetCode);
-      if (sdkRetCode.getCode() >= 0) {
-        return new BaseResponse(ConstantCode.SUCCESS,
-            sdkRetCode.getMessage()).toString();
-      } else {
-        throw new NodeMgrException(sdkRetCode.getCode(), sdkRetCode.getMessage());
-      }
-    } catch (ContractException e) {
-      log.error("handleTransactionReceipt e:[]", e);
-      throw new NodeMgrException(e.getErrorCode(), e.getMessage());
-    }
-  }
 
 }

@@ -19,7 +19,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import node.mgr.test.base.TestBase;
 import org.apache.commons.codec.binary.Hex;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

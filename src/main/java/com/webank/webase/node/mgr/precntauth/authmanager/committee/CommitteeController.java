@@ -29,14 +29,10 @@ import com.webank.webase.node.mgr.tools.JsonTools;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.codec.ABICodecException;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
-import org.fisco.bcos.sdk.transaction.model.exception.TransactionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,10 +62,12 @@ public class CommitteeController extends BaseController {
         , dataType = "ReqUpdateGovernorInfo")
     @PostMapping("governor")
     public Object updateGovernor(
-        @Valid @RequestBody ReqUpdateGovernorInfo reqUpdateGovernorInfo, BindingResult result)
-        throws ContractException, ABICodecException, TransactionException, IOException {
+        @Valid @RequestBody ReqUpdateGovernorInfo reqUpdateGovernorInfo, BindingResult result) {
         if (baseService.queryExecEnvIsWasm(reqUpdateGovernorInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
+        if (!baseService.queryChainHasAuth(reqUpdateGovernorInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
         }
         checkBindResult(result);
         Instant startTime = Instant.now();
@@ -89,10 +87,12 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqSetRateInfo", value = "rate info", required = true,
         dataType = "ReqSetRateInfo")
     @PostMapping("rate")
-    public Object setRate(@Valid @RequestBody ReqSetRateInfo reqSetRateInfo)
-        throws ContractException, ABICodecException, TransactionException, IOException {
+    public Object setRate(@Valid @RequestBody ReqSetRateInfo reqSetRateInfo) {
         if (baseService.queryExecEnvIsWasm(reqSetRateInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
+        if (!baseService.queryChainHasAuth(reqSetRateInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
         }
         return committeeService.setRate(reqSetRateInfo);
     }
@@ -109,6 +109,9 @@ public class CommitteeController extends BaseController {
         if (baseService.queryExecEnvIsWasm(reqDeployAuthTypeInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
         }
+        if (!baseService.queryChainHasAuth(reqDeployAuthTypeInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+        }
         return committeeService.setDeployAuthType(reqDeployAuthTypeInfo);
     }
 
@@ -123,6 +126,9 @@ public class CommitteeController extends BaseController {
         if (baseService.queryExecEnvIsWasm(reqUsrDeployInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
         }
+        if (!baseService.queryChainHasAuth(reqUsrDeployInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+        }
         return committeeService.modifyDeployUsrAuth(reqUsrDeployInfo);
     }
 
@@ -133,11 +139,13 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqResetAdminInfo", value = "resetAdmin info", required = true,
         dataType = "ReqResetAdminInfo")
     @PostMapping("contract/admin")
-    public Object resetAdmin(@Valid @RequestBody ReqResetAdminInfo reqResetAdminInfo)
-        throws ABICodecException, TransactionException, ContractException, IOException {
+    public Object resetAdmin(@Valid @RequestBody ReqResetAdminInfo reqResetAdminInfo) {
         if (baseService.queryExecEnvIsWasm(reqResetAdminInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
         }
+            if (!baseService.queryChainHasAuth(reqResetAdminInfo.getGroupId())) {
+                return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+            }
         return committeeService.resetAdmin(reqResetAdminInfo);
     }
 
@@ -148,10 +156,12 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqRevokeProposalInfo", value = "revokeProposal info", required = true,
         dataType = "ReqRevokeProposalInfo")
     @PostMapping("proposal/revoke")
-    public Object revokeProposal(@Valid @RequestBody ReqRevokeProposalInfo reqRevokeProposalInfo)
-        throws ABICodecException, TransactionException, ContractException, IOException {
+    public Object revokeProposal(@Valid @RequestBody ReqRevokeProposalInfo reqRevokeProposalInfo) {
         if (baseService.queryExecEnvIsWasm(reqRevokeProposalInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
+        if (!baseService.queryChainHasAuth(reqRevokeProposalInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
         }
         return committeeService.revokeProposal(reqRevokeProposalInfo);
     }
@@ -163,10 +173,12 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqVoteProposalInfo", value = "voteProposal info", required = true,
         dataType = "ReqVoteProposalInfo")
     @PostMapping("proposal/vote")
-    public Object voteProposal(@Valid @RequestBody ReqVoteProposalInfo reqVoteProposalInfo)
-        throws ABICodecException, TransactionException, ContractException, IOException {
+    public Object voteProposal(@Valid @RequestBody ReqVoteProposalInfo reqVoteProposalInfo) {
         if (baseService.queryExecEnvIsWasm(reqVoteProposalInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
+        }
+        if (!baseService.queryChainHasAuth(reqVoteProposalInfo.getGroupId())) {
+            return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
         }
         return committeeService.voteProposal(reqVoteProposalInfo);
     }

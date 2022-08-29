@@ -38,6 +38,7 @@ import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
 import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.method.MethodService;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.monitor.MonitorService;
@@ -47,9 +48,9 @@ import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.codec.datatypes.Address;
-import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Address;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -97,7 +98,7 @@ public class  ContractService {
     @Autowired
     private ConstantProperties constantProperties;
     @Autowired
-    private CryptoSuite cryptoSuite;
+    private Map<Integer, CryptoSuite> cryptoSuiteMap;
     @Autowired
     private GroupService groupService;
     @Autowired
@@ -166,7 +167,7 @@ public class  ContractService {
         log.info("appContractSave appKey:{},reqContractAddressSave:{}", appKey, reqContractAddressSave);
         String groupId = reqContractAddressSave.getGroupId();
         // check group id
-        groupService.checkGroupId(groupId);
+        TbGroup tbGroup = groupService.checkGroupId(groupId);
         // get runtimeBin
         String runtimeBin = abiService.getAddressRuntimeBin(groupId, reqContractAddressSave.getContractAddress());
         String contractName = reqContractAddressSave.getContractName();
@@ -217,7 +218,7 @@ public class  ContractService {
             NewMethodInputParam newMethodInputParam = new NewMethodInputParam();
             newMethodInputParam.setGroupId(groupId);
             newMethodInputParam.setMethodList(
-                Web3Tools.getMethodFromAbi(tbContractStore.getContractAbi(), cryptoSuite));
+                Web3Tools.getMethodFromAbi(tbContractStore.getContractAbi(), cryptoSuiteMap.get(tbGroup.getEncryptType())));
             methodService.saveMethod(newMethodInputParam, ContractType.APPIMPORT.getValue());
         }
         // if exist, auto not save (ignore)

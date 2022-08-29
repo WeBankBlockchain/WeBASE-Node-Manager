@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -69,7 +69,9 @@ public class TransHashController extends BaseController {
         Integer count;
         // if param's empty, getCount by minus between max and min
         if (StringUtils.isEmpty(transHash) && blockNumber == null) {
-            count = transHashService.queryCountOfTranByMinus(groupId);
+//            count = transHashService.queryCountOfTranByMinus(groupId);
+            // 接口select准确的分页，但是delete task使用minmax的值进行删除
+            count = transHashService.queryCountOfTran(groupId, queryParam);
         } else {
             // select count(1) in InnoDb is slow when data gets large, instead use tx_id to record count
             count = transHashService.queryCountOfTran(groupId, queryParam);

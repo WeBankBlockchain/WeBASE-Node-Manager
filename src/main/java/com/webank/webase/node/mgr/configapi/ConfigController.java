@@ -25,7 +25,7 @@ import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.service.ConfigService;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
