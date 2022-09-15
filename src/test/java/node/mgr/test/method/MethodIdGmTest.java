@@ -25,6 +25,7 @@ import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSPrecompiled;
 import org.fisco.bcos.sdk.v3.contract.precompiled.crud.KVTablePrecompiled;
 import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TableManagerPrecompiled;
 import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TablePrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.sysconfig.SystemConfigPrecompiled;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.junit.Test;
@@ -224,25 +225,30 @@ public class MethodIdGmTest {
     @Test
     public void testRc4NewTable() throws IOException {
 
-        System.out.println("table");
-        printContractMethod(TablePrecompiled.ABI, cryptoSuite);
-        printContractMethod(TablePrecompiled.ABI, cryptoSuiteGm);
-        System.out.println(TablePrecompiled.ABI);
-
-        System.out.println("kvTable");
-        printContractMethod(KVTablePrecompiled.ABI, cryptoSuite);
-        printContractMethod(KVTablePrecompiled.ABI, cryptoSuiteGm);
-        System.out.println(KVTablePrecompiled.ABI);
-
-        System.out.println("tableManager");
-        printContractMethod(TableManagerPrecompiled.ABI, cryptoSuite);
-        printContractMethod(TableManagerPrecompiled.ABI, cryptoSuiteGm);
-        System.out.println(TableManagerPrecompiled.ABI);
-
+//        System.out.println("table");
+//        printContractMethod(TablePrecompiled.ABI, cryptoSuite);
+//        printContractMethod(TablePrecompiled.ABI, cryptoSuiteGm);
+//        System.out.println(TablePrecompiled.ABI);
+//
+//        System.out.println("kvTable");
+//        printContractMethod(KVTablePrecompiled.ABI, cryptoSuite);
+//        printContractMethod(KVTablePrecompiled.ABI, cryptoSuiteGm);
+//        System.out.println(KVTablePrecompiled.ABI);
+//
+//        System.out.println("tableManager");
+//        printContractMethod(TableManagerPrecompiled.ABI, cryptoSuite);
+//        printContractMethod(TableManagerPrecompiled.ABI, cryptoSuiteGm);
+//        System.out.println(TableManagerPrecompiled.ABI);
+//
         System.out.println("bfs");
         printContractMethod(BFSPrecompiled.ABI, cryptoSuite);
         printContractMethod(BFSPrecompiled.ABI, cryptoSuiteGm);
         System.out.println(BFSPrecompiled.ABI);
+//
+//        System.out.println("sys config");
+//        printContractMethod(SystemConfigPrecompiled.ABI, cryptoSuite);
+//        printContractMethod(SystemConfigPrecompiled.ABI, cryptoSuiteGm);
+//        System.out.println(SystemConfigPrecompiled.ABI);
     }
 
     private static void printContractMethod(String abi, CryptoSuite cryptoSuite) throws IOException {
