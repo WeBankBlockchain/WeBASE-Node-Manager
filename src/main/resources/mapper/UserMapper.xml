@@ -58,8 +58,8 @@
       and user_name like CONCAT(#{userName},'%')
     </if>
     <if test="commParam != null and commParam != ''">
-      and user_name like CONCAT(#{commParam},'%')
-      or address like CONCAT(#{commParam},'%')
+      and (user_name like CONCAT(#{commParam},'%')
+      or address like CONCAT(#{commParam},'%'))
     </if>
     <if test="hasPk != null and hasPk != ''">
       and has_pk = #{hasPk}

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.webase.node.mgr.lock.LockMapper">
+    <resultMap id="lockMap"
+               type="com.webank.webase.node.mgr.lock.entity.TbLock">
+        <id column="lock_key" javaType="java.lang.String" jdbcType="VARCHAR"
+            property="lockKey"/>
+        <result column="thread_id" javaType="java.lang.String" jdbcType="VARCHAR"
+                property="threadId"/>
+        <result column="lock_count" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="lockCount"/>
+        <result column="time_out" javaType="java.lang.Long" jdbcType="BIGINT"
+                property="timeout"/>
+        <result column="version" javaType="java.lang.Integer" jdbcType="INTEGER"
+                property="version"/>
+    </resultMap>
+    <insert id="add" parameterType="com.webank.webase.node.mgr.lock.entity.TbLock">
+        INSERT   INTO tb_lock VALUES (#{lockKey}, #{threadId}, #{lockCount}, #{timeout}, #{version})
+    </insert>
+
+    <update id="update">
+        UPDATE tb_lock SET lock_count=#{lockCount},timeout=#{timeout},thread_id=#{threadId} WHERE lock_key=#{lockKey} AND version=#{version}
+    </update>
+    <delete id="delete">
+        DELETE FROM tb_lock WHERE lock_key=#{lockKey}
+    </delete>
+    <select id="getLock" resultMap="lockMap">
+        SELECT * FROM tb_lock WHERE lock_key=#{lockKey}
+    </select>
+
+
+</mapper>
