@@ -18,6 +18,9 @@ import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.ImageToken;
 import com.webank.webase.node.mgr.account.entity.PasswordInfo;
+import com.webank.webase.node.mgr.account.entity.ReqDeveloperRegister;
+import com.webank.webase.node.mgr.account.entity.ReqFreeze;
+import com.webank.webase.node.mgr.account.entity.RspDeveloper;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.account.token.TokenService;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -43,6 +46,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -223,5 +227,75 @@ public class AccountController extends BaseController {
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
-    
+
+
+    /**
+     * developer register
+     * todo 未登录也可以调用
+     * @param param
+     * @param result
+     * @return
+     */
+    @PostMapping(value = "/register")
+    public BaseResponse register(@RequestBody @Valid ReqDeveloperRegister param, BindingResult result) {
+        log.info("start exec method [register]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+        RspDeveloper rspDeveloperVO = accountService.register(param);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(rspDeveloperVO);
+        log.info("success exec method [register]. result:{}", JsonTools.objToString(baseResponse));
+        return baseResponse;
+    }
+
+
+
+    @PatchMapping(value = "freeze")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse freeze(@RequestBody @Valid ReqFreeze param, HttpServletRequest request, BindingResult result) {
+        log.info("start exec method [freeze]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+
+        // current
+        String currentAccount = accountService.getCurrentAccount(request);
+
+        accountService.freeze(currentAccount, param.getAccount(), param.getDescription());
+        log.info("success exec method [freeze]");
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+
+    @PatchMapping(value = "unFreeze")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse unfreeze(@RequestBody @Valid ReqFreeze param, HttpServletRequest request, BindingResult result) {
+        log.info("start exec method [unfreeze]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+
+        // current
+        String currentAccount = accountService.getCurrentAccount(request);
+
+        accountService.unfreeze(currentAccount, param.getAccount(), param.getDescription());
+        log.info("success exec method [unfreeze]");
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    /**
+     * 注销用户
+     * @param param
+     * @param request
+     * @param result
+     * @return
+     */
+    @DeleteMapping(value = "cancel")
+    public BaseResponse cancel(@RequestBody @Valid AccountInfo param, HttpServletRequest request, BindingResult result) {
+        log.info("start exec method [cancel]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+
+        // current
+        String currentAccount = accountService.getCurrentAccount(request);
+
+        accountService.cancel(currentAccount, param.getAccount());
+        log.info("success exec method [cancel]");
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
 }

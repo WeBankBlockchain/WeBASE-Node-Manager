@@ -18,10 +18,14 @@
       property="accountStatus"/>
     <result column="description" javaType="java.lang.String" jdbcType="INTEGER"
       property="description"/>
-    <result column="email" javaType="java.lang.String" jdbcType="VARCHAR"
-      property="email"/>
-    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
-      property="createTime"/>
+    <result column="email" javaType="java.lang.String" jdbcType="VARCHAR" property="email"/>
+    <result column="real_name" javaType="java.lang.String" jdbcType="VARCHAR" property="realName"/>
+    <result column="id_card_number" javaType="java.lang.String" jdbcType="VARCHAR" property="idCardNumber"/>
+    <result column="mobile" javaType="java.lang.String" jdbcType="VARCHAR" property="mobile"/>
+    <result column="contact_address" javaType="java.lang.String" jdbcType="VARCHAR" property="contactAddress"/>
+    <result column="company_name" javaType="java.lang.String" jdbcType="VARCHAR" property="companyName"/>
+    <result column="expire_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP" property="expireTime"/>
+    <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP" property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
   </resultMap>
@@ -30,16 +34,29 @@
   <sql id="NEW_ROW_COLUMN">
 		(account,account_pwd,role_id,description,email,create_time,modify_time)
 	</sql>
+  <sql id="REGISTER_ROW_COLUMN">
+		(account,account_pwd,role_id,description,email,create_time,modify_time,
+    account_status,description,real_name,id_card_number,mobile,contact_address,company_name,expire_time)
+	</sql>
   <sql id="QUERY_ROW_COLUMN">
 		a.account,a.account_pwd accountPwd,a.role_id roleId,a.login_fail_time loginFailTime,
 		b.role_name roleName,b.role_name_zh roleNameZh,a.account_status accountStatus,
-		a.description,a.email,a.create_time createTime,a.modify_time modifyTime
+		a.description,a.email,a.create_time createTime,a.modify_time modifyTime,
+    a.real_name as realName,a.id_card_number as idCardNumber,a.mobile as mobile,
+    a.contact_address as contactAddress,a.company_name as companyName,a.expire_time as expireTime
 	</sql>
 
   <insert id="addAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
     insert into tb_account_info
     <include refid="NEW_ROW_COLUMN"/>
     values(#{account},#{accountPwd},#{roleId},#{description},#{email},NOW(),NOW())
+  </insert>
+
+  <insert id="addAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+    insert into tb_account_info
+    <include refid="REGISTER_ROW_COLUMN"/>
+    values(#{account},#{accountPwd},#{roleId},#{description},#{email},NOW(),NOW(),
+    #{accountStatus},#{description},#{realName},#{idCardNumber},#{mobile},#{contactAddress},#{companyName},#{expireTime})
   </insert>
 
   <update id="updateAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
@@ -61,6 +78,24 @@
     </if>
     <if test="email != null and email != ''">
       ,email = #{email}
+    </if>
+    <if test="real_name != null and real_name != ''">
+      ,real_name = #{realName}
+    </if>
+    <if test="id_card_number != null and id_card_number != ''">
+      ,id_card_number = #{idCardNumber}
+    </if>
+    <if test="mobile != null and mobile != ''">
+      ,mobile = #{mobile}
+    </if>
+    <if test="contact_address != null and contact_address != ''">
+      ,contact_address = #{contactAddress}
+    </if>
+    <if test="company_name != null and company_name != ''">
+      ,company_name = #{companyName}
+    </if>
+    <if test="expire_time != null">
+      ,expire_time = #{expireTime}
     </if>
 		where account=#{account}
 	</update>

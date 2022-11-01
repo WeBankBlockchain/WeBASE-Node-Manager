@@ -15,6 +15,9 @@
  */
 package com.webank.webase.node.mgr.account;
 
+import com.webank.webase.node.mgr.account.entity.ReqDeveloperRegister;
+import com.webank.webase.node.mgr.account.entity.RspDeveloper;
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
@@ -27,14 +30,20 @@ import com.webank.webase.node.mgr.base.enums.AccountStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.account.role.RoleService;
 import com.webank.webase.node.mgr.account.token.TokenService;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * services for account data.
@@ -55,6 +64,8 @@ public class AccountService {
     @Autowired
     private ConstantProperties constants;
     private static final String ADMIN_TOKEN_VALUE = "admin";
+    @Autowired
+    private MessageService messageService;
 
     /**
      * login.
@@ -282,6 +293,115 @@ public class AccountService {
         }
         String token = NodeMgrTools.getToken(request);
         return tokenService.getValueFromToken(token);
+    }
+
+    /**
+     * register.
+     */
+    @Transactional
+    public RspDeveloper register(ReqDeveloperRegister param) throws NodeMgrException {
+        log.info("start exec method [register]. param:{}", JsonTools.objToString(param));
+
+        String accountStr = param.getAccount();
+        Integer roleId = param.getRoleId();
+        String email = param.getEmail();
+        // check account
+        accountNotExist(accountStr);
+        // check role id
+        if (!roleId.equals(RoleType.DEVELOPER.getValue())) {
+            log.error("only support developer register");
+            throw new NodeMgrException(ConstantCode.INVALID_ROLE_ID);
+        }
+        roleService.roleIdExist(roleId);
+        // encode password
+        String encryptStr = passwordEncoder.encode(param.getAccountPwd());
+
+        TbAccountInfo tbDeveloper = new TbAccountInfo(accountStr, encryptStr, roleId, "new user", email);
+        tbDeveloper.setRoleId(RoleType.DEVELOPER.getValue());
+        tbDeveloper.setAccountStatus(AccountStatus.FROZEN.getValue());
+        tbDeveloper.setExpireTime(LocalDateTime.now().plusYears(1L));
+
+        tbDeveloper.setEmail(param.getEmail());
+        tbDeveloper.setCompanyName(param.getCompanyName());
+        tbDeveloper.setContactAddress(param.getContactAddress());
+        tbDeveloper.setIdCardNumber(param.getIdCardNumber());
+        tbDeveloper.setRealName(param.getRealName());
+        tbDeveloper.setMobile(param.getMobile());
+
+        //save developer
+        Integer affectRow = accountMapper.addAccountRow(tbDeveloper);
+
+        // todo send email or mobile message
+        messageService.sendMail();
+
+        log.info("success exec method [register]");
+        TbAccountInfo tbAccountInfo = queryByAccount(tbDeveloper.getAccount());
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
+        return rspDeveloper;
+    }
+
+
+    /**
+     * @param accountStr
+     */
+    public void freeze(String currentAccount, String accountStr, String description) {
+        log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
+        TbAccountInfo developer = queryByAccount(accountStr);
+        if (Objects.isNull(developer)) {
+            log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
+            throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
+        }
+        developer.setAccountStatus(AccountStatus.FROZEN.getValue());
+        developer.setDescription(description);
+        updateAccountInfo(currentAccount, developer);
+    }
+
+    /**
+     * @param accountStr
+     */
+    public void unfreeze(String currentAccount, String accountStr, String description) {
+        log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
+        TbAccountInfo developer = queryByAccount(accountStr);
+        if (Objects.isNull(developer)) {
+            log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
+            throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
+        }
+        developer.setAccountStatus(AccountStatus.NORMAL.getValue());
+        developer.setDescription(description);
+        updateAccountInfo(currentAccount, developer);
+    }
+
+    /**
+     * 注销用户
+     * @param accountStr
+     */
+    public void cancel(String currentAccount, String accountStr) {
+        log.info("start exec method [freeze]. accountStr:{}", accountStr);
+        TbAccountInfo developer = queryByAccount(accountStr);
+        if (Objects.isNull(developer)) {
+            log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
+            throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
+        }
+        developer.setAccountStatus(AccountStatus.FROZEN.getValue());
+        updateAccountInfo(currentAccount, developer);
+    }
+
+    /**
+     * update account info. 更新详细信息、状态等
+     */
+    private void updateAccountInfo(String currentAccount, TbAccountInfo accountInfo)
+        throws NodeMgrException {
+
+        // todo check currentAccount is self or manager
+
+        // update account info
+        Integer affectRow = accountMapper.updateAccountRow(accountInfo);
+
+        // check result
+        checkDbAffectRow(affectRow);
+
+        log.debug("end updateAccountRow. affectRow:{}", affectRow);
     }
 
 }
