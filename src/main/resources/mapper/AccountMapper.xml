@@ -52,7 +52,7 @@
     values(#{account},#{accountPwd},#{roleId},#{description},#{email},NOW(),NOW())
   </insert>
 
-  <insert id="addAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
+  <insert id="registerAccount" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
     insert into tb_account_info
     <include refid="REGISTER_ROW_COLUMN"/>
     values(#{account},#{accountPwd},#{roleId},#{description},#{email},NOW(),NOW(),
@@ -79,22 +79,22 @@
     <if test="email != null and email != ''">
       ,email = #{email}
     </if>
-    <if test="real_name != null and real_name != ''">
+    <if test="realName != null and realName != ''">
       ,real_name = #{realName}
     </if>
-    <if test="id_card_number != null and id_card_number != ''">
+    <if test="idCardNumber != null and idCardNumber != ''">
       ,id_card_number = #{idCardNumber}
     </if>
     <if test="mobile != null and mobile != ''">
       ,mobile = #{mobile}
     </if>
-    <if test="contact_address != null and contact_address != ''">
+    <if test="contactAddress != null and contactAddress != ''">
       ,contact_address = #{contactAddress}
     </if>
-    <if test="company_name != null and company_name != ''">
+    <if test="companyName != null and companyName != ''">
       ,company_name = #{companyName}
     </if>
-    <if test="expire_time != null">
+    <if test="expireTime != null">
       ,expire_time = #{expireTime}
     </if>
 		where account=#{account}

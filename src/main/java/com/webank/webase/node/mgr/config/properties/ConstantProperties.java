@@ -48,7 +48,7 @@ public class ConstantProperties {
     public static final int ADDRESS_LENGTH = 42;
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
     public static final String HAS_ROLE_ADMIN_OR_DEVELOPER = "hasRole('admin') or hasRole('developer')";
-    
+
     public static final String PARAM_APP_KEY = "appKey";
     public static final String PARAM_APP_SECRET = "appSecret";
     public static final String PARAM_TIMESTAMP = "timestamp";
@@ -137,6 +137,14 @@ public class ConstantProperties {
      * enable pull external account(user address) and contract from block
      */
     private Boolean enableExternalFromBlock = true;
+    /**
+     * register mail check code, if enable is true, require mail
+     */
+    private Boolean enableRegisterMailCheck = false;
+    private String smtpHost = "smtp.qq.com";
+    private Integer smtpPort = 25;
+    private String smtpUsername = "yourmail@qq.com";
+    private String smtpPassword = "yourMailPassword";
 
     //******************* Add in v1.4.0 start. *******************
     public static final int LEAST_SEALER_TWO = 2;
@@ -195,7 +203,7 @@ public class ConstantProperties {
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode",
         "/login","/user/privateKey/**", "/encrypt", "/version" };
     private String dockerRepository= "fiscoorg/fisco-webase";
-   // private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
+    // private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
     private String nodesRootTmpDir = "NODES_ROOT_TMP";

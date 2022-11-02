@@ -316,7 +316,7 @@ public class AccountService {
         // encode password
         String encryptStr = passwordEncoder.encode(param.getAccountPwd());
 
-        TbAccountInfo tbDeveloper = new TbAccountInfo(accountStr, encryptStr, roleId, "new user", email);
+        TbAccountInfo tbDeveloper = new TbAccountInfo(accountStr, encryptStr, roleId, "new register user", email);
         tbDeveloper.setRoleId(RoleType.DEVELOPER.getValue());
         tbDeveloper.setAccountStatus(AccountStatus.FROZEN.getValue());
         tbDeveloper.setExpireTime(LocalDateTime.now().plusYears(1L));
@@ -329,12 +329,13 @@ public class AccountService {
         tbDeveloper.setMobile(param.getMobile());
 
         //save developer
-        Integer affectRow = accountMapper.addAccountRow(tbDeveloper);
+        Integer affectRow = accountMapper.registerAccount(tbDeveloper);
+
 
         // todo send email or mobile message
-        messageService.sendMail();
+//        messageService.sendMail();
 
-        log.info("success exec method [register]");
+        log.info("success exec method [register] row:{}", affectRow);
         TbAccountInfo tbAccountInfo = queryByAccount(tbDeveloper.getAccount());
         RspDeveloper rspDeveloper = new RspDeveloper();
         BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);

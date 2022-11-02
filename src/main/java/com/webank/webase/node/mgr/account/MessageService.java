@@ -14,7 +14,14 @@
 
 package com.webank.webase.node.mgr.account;
 
+import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
+import com.webank.webase.node.mgr.base.enums.EnableStatus;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import java.util.Properties;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,7 +31,32 @@ import org.springframework.stereotype.Service;
 @Service
 public class MessageService {
 
-    public void sendMail() {
+    @Autowired
+    @Qualifier("checkCode")
+    private JavaMailSenderImpl mailSender;
+    @Autowired
+    private ConstantProperties constantProperties;
+
+    public void initJavaMailSenderConfig(TbMailServerConfig latestMailServerConfig) {
+        log.debug("start initJavaMailSenderConfig. latestMailServerConfig:{}", latestMailServerConfig);
+        mailSender.setHost(latestMailServerConfig.getHost());
+        mailSender.setPort(latestMailServerConfig.getPort());
+        Boolean isAuthEnable = latestMailServerConfig.getAuthentication() == EnableStatus.ON.getValue();
+        if(isAuthEnable) {
+            mailSender.setUsername(latestMailServerConfig.getUsername());
+            mailSender.setPassword(latestMailServerConfig.getPassword());
+        }
+        mailSender.setDefaultEncoding(latestMailServerConfig.getDefaultEncoding());
+        mailSender.setProtocol(latestMailServerConfig.getProtocol());
+        // init properties
+//        Properties sslProperties = initJavaMailProperties(latestMailServerConfig);
+//        log.debug("end initJavaMailSenderConfig. sslProperties:{}", sslProperties);
+//        mailSender.setJavaMailProperties(sslProperties);
+    }
+
+
+    public void sendMail(String mailAddress) {
+        log.info("sendMail of checkCode {}", mailAddress);
         String mailContent = "";
 
     }

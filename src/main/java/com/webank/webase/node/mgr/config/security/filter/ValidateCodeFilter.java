@@ -69,6 +69,7 @@ public class ValidateCodeFilter implements Filter {
                 tokenService.deleteToken(req.getHeader("token"), null);
             }
         }
+        // todo register接口，查验邮箱的验证码
         chain.doFilter(request, response);
     }
 

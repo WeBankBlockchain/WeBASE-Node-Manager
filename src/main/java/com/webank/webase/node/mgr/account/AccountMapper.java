@@ -27,6 +27,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccountMapper {
 
+    Integer registerAccount(TbAccountInfo tbAccount);
+
     Integer addAccountRow(TbAccountInfo tbAccount);
 
     Integer updateAccountRow(TbAccountInfo tbAccount);

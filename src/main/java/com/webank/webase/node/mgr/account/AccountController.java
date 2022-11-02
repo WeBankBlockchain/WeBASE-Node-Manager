@@ -20,6 +20,7 @@ import com.webank.webase.node.mgr.account.entity.ImageToken;
 import com.webank.webase.node.mgr.account.entity.PasswordInfo;
 import com.webank.webase.node.mgr.account.entity.ReqDeveloperRegister;
 import com.webank.webase.node.mgr.account.entity.ReqFreeze;
+import com.webank.webase.node.mgr.account.entity.ReqSendMail;
 import com.webank.webase.node.mgr.account.entity.RspDeveloper;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.account.token.TokenService;
@@ -66,6 +67,8 @@ public class AccountController extends BaseController {
     private TokenService tokenService;
     @Autowired
     private ConstantProperties constants;
+    @Autowired
+    private MessageService messageService;
 
     private static final int PICTURE_CHECK_CODE_CHAR_NUMBER = 4;
 
@@ -229,9 +232,30 @@ public class AccountController extends BaseController {
     }
 
 
+    @GetMapping(value = "/mail/enable")
+    public BaseResponse ifEnableMailCheckCode() {
+        log.info("start exec method [ifEnableMailCheckCode]. ");
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(constants.getEnableRegisterMailCheck());
+
+        log.info("success exec method [ifEnableMailCheckCode]. result:{}", JsonTools.objToString(baseResponse));
+        return baseResponse;
+    }
+
+    @PostMapping(value = "/mail")
+    public BaseResponse sendCheckCodeMail(@RequestBody @Valid ReqSendMail param, BindingResult result) {
+        log.info("start exec method [sendCheckCodeMail]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        messageService.sendMail(param.getMailAddress());
+        log.info("success exec method [sendCheckCodeMail]. result:{}", JsonTools.objToString(baseResponse));
+        return baseResponse;
+    }
+
+
     /**
      * developer register
-     * todo 未登录也可以调用
+     * 未登录也可以调用
      * @param param
      * @param result
      * @return
@@ -294,6 +318,7 @@ public class AccountController extends BaseController {
         String currentAccount = accountService.getCurrentAccount(request);
 
         accountService.cancel(currentAccount, param.getAccount());
+        // todo 获取链上管理员地址，发起冻结操作
         log.info("success exec method [cancel]");
         return new BaseResponse(ConstantCode.SUCCESS);
     }
