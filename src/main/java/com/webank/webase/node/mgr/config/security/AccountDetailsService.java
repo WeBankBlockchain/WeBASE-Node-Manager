@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.config.security;
 
+import com.webank.webase.node.mgr.account.AccountMapper;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.account.AccountService;

@@ -86,6 +86,8 @@ public class AccountService {
         }
         // encode by bCryptPasswordEncoder
         TbAccountInfo accountRow = this.queryByAccount(accountStr);
+        validateAccount(accountRow);
+
         if (!passwordEncoder.matches(passwordStr, accountRow.getAccountPwd())) {
             // reset login fail time
             int loginFailTime = accountRow.getLoginFailTime() + 1;
@@ -132,7 +134,7 @@ public class AccountService {
 
         // query by account
         // skip valid
-        TbAccountInfo accountRow = accountMapper.queryByAccount(accountStr);
+        TbAccountInfo accountRow = this.queryByAccount(accountStr);
 
         // encode password
         if (StringUtils.isNoneBlank(accountInfo.getAccountPwd())) {
@@ -182,6 +184,7 @@ public class AccountService {
                 targetAccount);
             throw new NodeMgrException(ConstantCode.ACCOUNT_NOT_EXISTS);
         }
+        validateAccount(targetRow);
 
         if (StringUtils.equals(oldAccountPwd, newAccountPwd)) {
             log.warn("fail updatePassword. the new pwd cannot be same as old ");
@@ -211,9 +214,6 @@ public class AccountService {
     public TbAccountInfo queryByAccount(String accountStr) {
         log.debug("start queryByAccount. accountStr:{} ", accountStr);
         TbAccountInfo accountRow = accountMapper.queryByAccount(accountStr);
-        if (accountRow != null) {
-            validateAccount(accountRow);
-        }
         log.debug("end queryByAccount. accountRow:{} ", JsonTools.toJSONString(accountRow));
         return accountRow;
     }
@@ -364,7 +364,7 @@ public class AccountService {
 
 
         log.info("success exec method [register] row:{}", affectRow);
-        TbAccountInfo tbAccountInfo = accountMapper.queryByAccount(tbDeveloper.getAccount());
+        TbAccountInfo tbAccountInfo = this.queryByAccount(tbDeveloper.getAccount());
         RspDeveloper rspDeveloper = new RspDeveloper();
         BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
         return rspDeveloper;
@@ -376,7 +376,7 @@ public class AccountService {
      */
     public RspDeveloper freeze(String currentAccount, String accountStr, String description) {
         log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
-        TbAccountInfo developer = accountMapper.queryByAccount(accountStr);
+        TbAccountInfo developer = this.queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
             log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
             throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
@@ -395,7 +395,7 @@ public class AccountService {
      */
     public RspDeveloper unfreeze(String currentAccount, String accountStr, String description) {
         log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
-        TbAccountInfo developer = accountMapper.queryByAccount(accountStr);
+        TbAccountInfo developer = this.queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
             log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
             throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
@@ -415,7 +415,7 @@ public class AccountService {
      */
     public void cancel(String currentAccount, String accountStr) {
         log.info("start exec method [freeze]. accountStr:{}", accountStr);
-        TbAccountInfo developer = accountMapper.queryByAccount(accountStr);
+        TbAccountInfo developer = this.queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
             log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
             throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
@@ -435,7 +435,7 @@ public class AccountService {
         throws NodeMgrException {
 
         // todo check currentAccount is self or manager
-        TbAccountInfo checkAdmin = accountMapper.queryByAccount(currentAccount);
+        TbAccountInfo checkAdmin = this.queryByAccount(currentAccount);
         if (currentAccount.equals(accountInfo.getAccount())
             || checkAdmin.getRoleId().equals(RoleType.ADMIN.getValue())) {
             // update account info

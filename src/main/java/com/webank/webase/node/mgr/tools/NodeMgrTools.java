@@ -458,7 +458,7 @@ public class NodeMgrTools {
     public static synchronized String getToken(HttpServletRequest request) {
         String header = request.getHeader(TOKEN_HEADER_NAME);
         if (StringUtils.isBlank(header)) {
-            log.error("not found token");
+            log.error("not found AuthorizationToken token");
             throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
         }
 

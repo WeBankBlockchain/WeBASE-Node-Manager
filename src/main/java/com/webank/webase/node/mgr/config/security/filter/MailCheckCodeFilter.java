@@ -41,8 +41,8 @@ import org.springframework.stereotype.Component;
  */
 @Log4j2
 @Component
-@Order(-1001)
-@WebFilter(filterName = "mailCheckCodeFilter", urlPatterns = "/account/register") // todo check
+@Order(-999)
+@WebFilter(filterName = "mailCheckCodeFilter", urlPatterns = "/account/register")
 public class MailCheckCodeFilter implements Filter {
     @Autowired
     private TokenService tokenService;
@@ -61,11 +61,16 @@ public class MailCheckCodeFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse rsp = (HttpServletResponse) response;
         String uri = HttpRequestTools.getUri(req);
+
+        String tokenInHeard = req.getHeader("token");
+        String codeInRequest = req.getParameter("checkCode");
+        log.info("validateMailCode 00. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
+
         // register接口，查验邮箱的验证码；如果启用了邮箱确认码
         if (constantProperties.getEnableRegisterMailCheck() &&
             REGISTER_URI.equalsIgnoreCase(uri) && POST_METHOD.equalsIgnoreCase(req.getMethod())) {
             try {
-                validateCode(req);
+                validateMailCode(req);
             } catch (NodeMgrException ex) {
                 NodeMgrTools.responseRetCodeException(rsp, ex.getRetCode());
                 return;
@@ -81,10 +86,10 @@ public class MailCheckCodeFilter implements Filter {
     /**
      * verify code.
      */
-    private void validateCode(HttpServletRequest request) {
+    private void validateMailCode(HttpServletRequest request) {
         String tokenInHeard = request.getHeader("token");
         String codeInRequest = request.getParameter("checkCode");
-        log.info("validateCode. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
+        log.info("validateMailCode. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
 
         if (StringUtils.isBlank(codeInRequest)) {
             throw new NodeMgrException(ConstantCode.CHECK_CODE_NULL);
@@ -94,7 +99,7 @@ public class MailCheckCodeFilter implements Filter {
         }
         String code = tokenService.getValueFromToken(tokenInHeard);
         if (!codeInRequest.equalsIgnoreCase(code)) {
-            log.warn("fail validateCode. realCheckCode:{} codeInRequest:{}", code,
+            log.warn("fail validateMailCode. realCheckCode:{} codeInRequest:{}", code,
                 codeInRequest);
             throw new NodeMgrException(ConstantCode.INVALID_CHECK_CODE);
         }
