@@ -199,12 +199,15 @@ public class AccountController extends BaseController {
      */
     @DeleteMapping(value = "/{account}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse deleteAccount(@PathVariable("account") String account)
+    public BaseResponse deleteAccount(HttpServletRequest request, @PathVariable("account") String account)
         throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
-        accountService.deleteAccountRow(account);
+//        accountService.deleteAccountRow(account);
+        String currentAccount = accountService.getCurrentAccount(request);
+
+        accountService.cancel(currentAccount, account);
 
         log.info("end deleteAccount. useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));

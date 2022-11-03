@@ -65,7 +65,6 @@ public class MailCheckCodeFilter implements Filter {
         if (constantProperties.getEnableRegisterMailCheck() &&
             REGISTER_URI.equalsIgnoreCase(uri) && POST_METHOD.equalsIgnoreCase(req.getMethod())) {
             try {
-                log.info("verify register checkCode from mail {}", JsonTools.objToString(req));
                 validateCode(req);
             } catch (NodeMgrException ex) {
                 NodeMgrTools.responseRetCodeException(rsp, ex.getRetCode());

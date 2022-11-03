@@ -21,7 +21,8 @@ public class ReqUpdateInfo {
     @NotNull
     private Integer roleId;
     /**
-     * email not support update
+     * db's email not blank, not support update; else fill in email
+     * 管理员直接add的account没有详细信息
      */
     @Length(max = 50)
     private String email;

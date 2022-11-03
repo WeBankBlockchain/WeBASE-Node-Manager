@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.config.security;
 
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
@@ -46,7 +47,11 @@ public class AccountDetailsService implements UserDetailsService {
         try {
             accountRow = accountService.queryByAccount(account);
         } catch (Exception e) {
-            throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.DB_EXCEPTION));
+            if (e instanceof NodeMgrException) {
+                throw e;
+            } else {
+                throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.DB_EXCEPTION));
+            }
         }
         if (null == accountRow) {
             throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.INVALID_ACCOUNT_NAME));

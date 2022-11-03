@@ -85,7 +85,7 @@ public class AccountService {
             throw new NodeMgrException(ConstantCode.PASSWORD_ERROR);
         }
         // encode by bCryptPasswordEncoder
-        TbAccountInfo accountRow = accountMapper.queryByAccount(accountStr);
+        TbAccountInfo accountRow = this.queryByAccount(accountStr);
         if (!passwordEncoder.matches(passwordStr, accountRow.getAccountPwd())) {
             // reset login fail time
             int loginFailTime = accountRow.getLoginFailTime() + 1;
@@ -131,6 +131,7 @@ public class AccountService {
         accountExist(accountStr);
 
         // query by account
+        // skip valid
         TbAccountInfo accountRow = accountMapper.queryByAccount(accountStr);
 
         // encode password
@@ -143,7 +144,10 @@ public class AccountService {
             }
         }
         accountRow.setRoleId(accountInfo.getRoleId());
-//        accountRow.setEmail(accountInfo.getEmail()); 暂不支持修改邮箱
+        // 非空邮箱不可修改
+        if (StringUtils.isNotBlank(accountRow.getEmail())) {
+            accountRow.setEmail(accountInfo.getEmail());
+        }
         accountRow.setContactAddress(accountInfo.getContactAddress());
         accountRow.setCompanyName(accountInfo.getCompanyName());
 //        accountRow.setAccountStatus(accountInfo.getContactAddress()); 只能在freeze或者cancel修改
@@ -172,7 +176,7 @@ public class AccountService {
             targetAccount, oldAccountPwd, newAccountPwd);
 
         // query target account info
-        TbAccountInfo targetRow = accountMapper.queryByAccount(targetAccount);
+        TbAccountInfo targetRow = this.queryByAccount(targetAccount);
         if (targetRow == null) {
             log.warn("fail updatePassword. not found target row. targetAccount:{}",
                 targetAccount);
@@ -207,8 +211,24 @@ public class AccountService {
     public TbAccountInfo queryByAccount(String accountStr) {
         log.debug("start queryByAccount. accountStr:{} ", accountStr);
         TbAccountInfo accountRow = accountMapper.queryByAccount(accountStr);
+        if (accountRow != null) {
+            validateAccount(accountRow);
+        }
         log.debug("end queryByAccount. accountRow:{} ", JsonTools.toJSONString(accountRow));
         return accountRow;
+    }
+
+    private void validateAccount(TbAccountInfo tbAccountInfo) {
+        if (AccountStatus.FROZEN.getValue() == tbAccountInfo.getAccountStatus()
+            || AccountStatus.CANCEL.getValue() == tbAccountInfo.getAccountStatus()) {
+            log.error("account is invalid status {}|{}", tbAccountInfo.getAccountStatus(),
+                tbAccountInfo.getAccount());
+            throw new NodeMgrException(ConstantCode.ACCOUNT_DISABLED);
+        }
+        if (LocalDateTime.now().isAfter(tbAccountInfo.getExpireTime())) {
+            log.error("account is beyond expired time {}", tbAccountInfo.getAccount());
+            throw new NodeMgrException(ConstantCode.ACCOUNT_DISABLED);
+        }
     }
 
     /**
@@ -344,7 +364,7 @@ public class AccountService {
 
 
         log.info("success exec method [register] row:{}", affectRow);
-        TbAccountInfo tbAccountInfo = queryByAccount(tbDeveloper.getAccount());
+        TbAccountInfo tbAccountInfo = accountMapper.queryByAccount(tbDeveloper.getAccount());
         RspDeveloper rspDeveloper = new RspDeveloper();
         BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
         return rspDeveloper;
@@ -356,7 +376,7 @@ public class AccountService {
      */
     public RspDeveloper freeze(String currentAccount, String accountStr, String description) {
         log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
-        TbAccountInfo developer = queryByAccount(accountStr);
+        TbAccountInfo developer = accountMapper.queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
             log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
             throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
@@ -375,7 +395,7 @@ public class AccountService {
      */
     public RspDeveloper unfreeze(String currentAccount, String accountStr, String description) {
         log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
-        TbAccountInfo developer = queryByAccount(accountStr);
+        TbAccountInfo developer = accountMapper.queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
             log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
             throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
@@ -395,7 +415,7 @@ public class AccountService {
      */
     public void cancel(String currentAccount, String accountStr) {
         log.info("start exec method [freeze]. accountStr:{}", accountStr);
-        TbAccountInfo developer = queryByAccount(accountStr);
+        TbAccountInfo developer = accountMapper.queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
             log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
             throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
@@ -415,7 +435,7 @@ public class AccountService {
         throws NodeMgrException {
 
         // todo check currentAccount is self or manager
-        TbAccountInfo checkAdmin = queryByAccount(currentAccount);
+        TbAccountInfo checkAdmin = accountMapper.queryByAccount(currentAccount);
         if (currentAccount.equals(accountInfo.getAccount())
             || checkAdmin.getRoleId().equals(RoleType.ADMIN.getValue())) {
             // update account info
@@ -426,9 +446,10 @@ public class AccountService {
 
             log.debug("end updateAccountRow. affectRow:{}", affectRow);
         } else {
-            log.error("end updateAccountRow. denied update status:{}", currentAccount, accountInfo.getAccount());
+            log.error("end updateAccountRow. denied update status:{}|{}", currentAccount, accountInfo.getAccount());
             throw new NodeMgrException(ConstantCode.UPDATE_ACCOUNT_STATUS_DENIED);
         }
     }
+
 
 }

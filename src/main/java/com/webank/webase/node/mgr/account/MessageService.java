@@ -41,8 +41,8 @@ public class MessageService {
     private ConstantProperties constantProperties;
 
     public void sendMail(String to, String verifyCode) {
-        log.info("sendMail of checkCode {}|{}", to, verifyCode);
         String from = constantProperties.getSmtpUsername();
+        log.info("sendMail of checkCode from:{},to:{},{}", from, to, verifyCode);
         String mailContent = "注册验证码：" + verifyCode + "\n\n （验证码五分钟内有效，请勿告知他人）";
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = null;
@@ -56,7 +56,7 @@ public class MessageService {
             log.error("sendMailBare error:[]", e);
             e.printStackTrace();
         }
-        log.debug("end sendMailBare MimeMessage:{}", message);
+        log.info("end sendMailBare MimeMessage:{}", message);
         mailSender.send(message);
     }
 }
