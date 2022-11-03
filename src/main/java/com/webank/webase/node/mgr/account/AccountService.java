@@ -318,7 +318,7 @@ public class AccountService {
         // check account
         accountNotExist(accountStr);
         // check role id
-        if (!roleId.equals(RoleType.DEVELOPER.getValue()) ||
+        if (!roleId.equals(RoleType.DEVELOPER.getValue()) &&
             !roleId.equals(RoleType.VISITOR.getValue())) {
             log.error("only support developer/visitor register");
             throw new NodeMgrException(ConstantCode.INVALID_ROLE_ID_REGISTER);
@@ -354,7 +354,7 @@ public class AccountService {
     /**
      * @param accountStr
      */
-    public void freeze(String currentAccount, String accountStr, String description) {
+    public RspDeveloper freeze(String currentAccount, String accountStr, String description) {
         log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
         TbAccountInfo developer = queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
@@ -364,12 +364,16 @@ public class AccountService {
         developer.setAccountStatus(AccountStatus.FROZEN.getValue());
         developer.setDescription(description);
         updateAccountStatus(currentAccount, developer);
+
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(developer, rspDeveloper);
+        return rspDeveloper;
     }
 
     /**
      * @param accountStr
      */
-    public void unfreeze(String currentAccount, String accountStr, String description) {
+    public RspDeveloper unfreeze(String currentAccount, String accountStr, String description) {
         log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
         TbAccountInfo developer = queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
@@ -379,6 +383,10 @@ public class AccountService {
         developer.setAccountStatus(AccountStatus.NORMAL.getValue());
         developer.setDescription(description);
         updateAccountStatus(currentAccount, developer);
+
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(developer, rspDeveloper);
+        return rspDeveloper;
     }
 
     /**
@@ -394,6 +402,9 @@ public class AccountService {
         }
         developer.setAccountStatus(AccountStatus.CANCEL.getValue());
         updateAccountStatus(currentAccount, developer);
+
+        // todo 获取链上管理员地址，发起冻结操作
+
     }
 
     /**

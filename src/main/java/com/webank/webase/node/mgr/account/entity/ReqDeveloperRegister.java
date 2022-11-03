@@ -46,4 +46,9 @@ public class ReqDeveloperRegister {
     private String contactAddress;
     @Length(max = 250)
     private String companyName;
+
+    /**
+     * 有效时间，单位：年
+     */
+    private Integer expandTime = 1;
 }

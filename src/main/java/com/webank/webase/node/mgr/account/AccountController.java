@@ -247,8 +247,28 @@ public class AccountController extends BaseController {
     public BaseResponse sendCheckCodeMail(@RequestBody @Valid ReqSendMail param, BindingResult result) {
         log.info("start exec method [sendCheckCodeMail]. param:{}", JsonTools.objToString(param));
         checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start getPictureCheckCode startTime:{}", startTime);
+        // random code
+        String checkCode;
+        if (constants.getEnableVerificationCode()) {
+            checkCode = NodeMgrTools.randomString(PICTURE_CHECK_CODE_CHAR_NUMBER);
+        } else {
+            checkCode = constants.getVerificationCodeValue();
+            log.info("getPictureCheckCode: already disabled check code, and default value is {}", checkCode);
+        }
+
+        String token = tokenService.createToken(checkCode, 2);
+        log.info("new checkCode:" + checkCode);
+
+        messageService.sendMail(param.getMailAddress(), checkCode);
+
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        messageService.sendMail(param.getMailAddress());
+        ImageToken tokenData = new ImageToken();
+        tokenData.setToken(token);
+        baseResponse.setData(tokenData);
+        log.info("end getPictureCheckCode useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         log.info("success exec method [sendCheckCodeMail]. result:{}", JsonTools.objToString(baseResponse));
         return baseResponse;
     }
@@ -283,9 +303,9 @@ public class AccountController extends BaseController {
         // current
         String currentAccount = accountService.getCurrentAccount(request);
 
-        accountService.freeze(currentAccount, param.getAccount(), param.getDescription());
-        log.info("success exec method [freeze]");
-        return new BaseResponse(ConstantCode.SUCCESS);
+        RspDeveloper rspDeveloper = accountService.freeze(currentAccount, param.getAccount(), param.getDescription());
+        log.info("success exec method [freeze] rspDeveloper:{}", rspDeveloper);
+        return new BaseResponse(ConstantCode.SUCCESS, rspDeveloper);
     }
 
 
@@ -298,9 +318,9 @@ public class AccountController extends BaseController {
         // current
         String currentAccount = accountService.getCurrentAccount(request);
 
-        accountService.unfreeze(currentAccount, param.getAccount(), param.getDescription());
-        log.info("success exec method [unfreeze]");
-        return new BaseResponse(ConstantCode.SUCCESS);
+        RspDeveloper rspDeveloper = accountService.unfreeze(currentAccount, param.getAccount(), param.getDescription());
+        log.info("success exec method [unfreeze] rspDeveloper{}", rspDeveloper);
+        return new BaseResponse(ConstantCode.SUCCESS, rspDeveloper);
     }
 
     /**
@@ -319,7 +339,6 @@ public class AccountController extends BaseController {
         String currentAccount = accountService.getCurrentAccount(request);
 
         accountService.cancel(currentAccount, param.getAccount());
-        // todo 获取链上管理员地址，发起冻结操作
         log.info("success exec method [cancel]");
         return new BaseResponse(ConstantCode.SUCCESS);
     }
