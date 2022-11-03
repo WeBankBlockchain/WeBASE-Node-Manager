@@ -16,6 +16,7 @@
 package com.webank.webase.node.mgr.account;
 
 import com.webank.webase.node.mgr.account.entity.ReqDeveloperRegister;
+import com.webank.webase.node.mgr.account.entity.ReqUpdateInfo;
 import com.webank.webase.node.mgr.account.entity.RspDeveloper;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
@@ -123,7 +124,7 @@ public class AccountService {
     /**
      * update account info.
      */
-    public void updateAccountRow(String currentAccount, AccountInfo accountInfo)
+    public void updateAccountRow(String currentAccount, ReqUpdateInfo accountInfo)
         throws NodeMgrException {
         String accountStr = accountInfo.getAccount();
         // check account
@@ -142,7 +143,16 @@ public class AccountService {
             }
         }
         accountRow.setRoleId(accountInfo.getRoleId());
-        accountRow.setEmail(accountInfo.getEmail());
+//        accountRow.setEmail(accountInfo.getEmail()); 暂不支持修改邮箱
+        accountRow.setContactAddress(accountInfo.getContactAddress());
+        accountRow.setCompanyName(accountInfo.getCompanyName());
+//        accountRow.setAccountStatus(accountInfo.getContactAddress()); 只能在freeze或者cancel修改
+        accountRow.setMobile(accountInfo.getMobile());
+        accountRow.setRealName(accountInfo.getRealName());
+        accountRow.setIdCardNumber(accountInfo.getIdCardNumber());
+        accountRow.setDescription(accountInfo.getDescription());
+
+        accountRow.setExpireTime(accountRow.getExpireTime().plusYears(accountInfo.getExpandTime()));
 
         // update account info
         Integer affectRow = accountMapper.updateAccountRow(accountRow);
@@ -308,9 +318,10 @@ public class AccountService {
         // check account
         accountNotExist(accountStr);
         // check role id
-        if (!roleId.equals(RoleType.DEVELOPER.getValue())) {
-            log.error("only support developer register");
-            throw new NodeMgrException(ConstantCode.INVALID_ROLE_ID);
+        if (!roleId.equals(RoleType.DEVELOPER.getValue()) ||
+            !roleId.equals(RoleType.VISITOR.getValue())) {
+            log.error("only support developer/visitor register");
+            throw new NodeMgrException(ConstantCode.INVALID_ROLE_ID_REGISTER);
         }
         roleService.roleIdExist(roleId);
         // encode password
@@ -332,9 +343,6 @@ public class AccountService {
         Integer affectRow = accountMapper.registerAccount(tbDeveloper);
 
 
-        // todo send email or mobile message
-//        messageService.sendMail();
-
         log.info("success exec method [register] row:{}", affectRow);
         TbAccountInfo tbAccountInfo = queryByAccount(tbDeveloper.getAccount());
         RspDeveloper rspDeveloper = new RspDeveloper();
@@ -355,7 +363,7 @@ public class AccountService {
         }
         developer.setAccountStatus(AccountStatus.FROZEN.getValue());
         developer.setDescription(description);
-        updateAccountInfo(currentAccount, developer);
+        updateAccountStatus(currentAccount, developer);
     }
 
     /**
@@ -370,7 +378,7 @@ public class AccountService {
         }
         developer.setAccountStatus(AccountStatus.NORMAL.getValue());
         developer.setDescription(description);
-        updateAccountInfo(currentAccount, developer);
+        updateAccountStatus(currentAccount, developer);
     }
 
     /**
@@ -384,25 +392,32 @@ public class AccountService {
             log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
             throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
         }
-        developer.setAccountStatus(AccountStatus.FROZEN.getValue());
-        updateAccountInfo(currentAccount, developer);
+        developer.setAccountStatus(AccountStatus.CANCEL.getValue());
+        updateAccountStatus(currentAccount, developer);
     }
 
     /**
      * update account info. 更新详细信息、状态等
+     * 自己修改或者管理员修改
      */
-    private void updateAccountInfo(String currentAccount, TbAccountInfo accountInfo)
+    private void updateAccountStatus(String currentAccount, TbAccountInfo accountInfo)
         throws NodeMgrException {
 
         // todo check currentAccount is self or manager
+        TbAccountInfo checkAdmin = queryByAccount(currentAccount);
+        if (currentAccount.equals(accountInfo.getAccount())
+            || checkAdmin.getRoleId().equals(RoleType.ADMIN.getValue())) {
+            // update account info
+            Integer affectRow = accountMapper.updateAccountRow(accountInfo);
 
-        // update account info
-        Integer affectRow = accountMapper.updateAccountRow(accountInfo);
+            // check result
+            checkDbAffectRow(affectRow);
 
-        // check result
-        checkDbAffectRow(affectRow);
-
-        log.debug("end updateAccountRow. affectRow:{}", affectRow);
+            log.debug("end updateAccountRow. affectRow:{}", affectRow);
+        } else {
+            log.error("end updateAccountRow. denied update status:{}", currentAccount, accountInfo.getAccount());
+            throw new NodeMgrException(ConstantCode.UPDATE_ACCOUNT_STATUS_DENIED);
+        }
     }
 
 }

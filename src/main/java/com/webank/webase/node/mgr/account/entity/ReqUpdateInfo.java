@@ -1,6 +1,7 @@
 package com.webank.webase.node.mgr.account.entity;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -16,18 +17,27 @@ public class ReqUpdateInfo {
     @NotBlank
     @Length(max = 250)
     private String account;
-
-    private String companyName;
-
-    private String realName;
+    private String accountPwd;
+    @NotNull
+    private Integer roleId;
+    /**
+     * email not support update
+     */
     @Length(max = 50)
     private String email;
+    private String description;
+
+    private String companyName;
+    private String realName;
     private Long mobile;
-    private String address;
 
     /**
      * 身份证号
      */
-    private String idNumber;
+    private String idCardNumber;
     private String contactAddress;
+    /**
+     * 延长有效时间，单位：年
+     */
+    private Integer expandTime;
 }

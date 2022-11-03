@@ -36,7 +36,7 @@
 	</sql>
   <sql id="REGISTER_ROW_COLUMN">
 		(account,account_pwd,role_id,description,email,create_time,modify_time,
-    account_status,description,real_name,id_card_number,mobile,contact_address,company_name,expire_time)
+    account_status,real_name,id_card_number,mobile,contact_address,company_name,expire_time)
 	</sql>
   <sql id="QUERY_ROW_COLUMN">
 		a.account,a.account_pwd accountPwd,a.role_id roleId,a.login_fail_time loginFailTime,
@@ -56,7 +56,7 @@
     insert into tb_account_info
     <include refid="REGISTER_ROW_COLUMN"/>
     values(#{account},#{accountPwd},#{roleId},#{description},#{email},NOW(),NOW(),
-    #{accountStatus},#{description},#{realName},#{idCardNumber},#{mobile},#{contactAddress},#{companyName},#{expireTime})
+    #{accountStatus},#{realName},#{idCardNumber},#{mobile},#{contactAddress},#{companyName},#{expireTime})
   </insert>
 
   <update id="updateAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
@@ -103,13 +103,14 @@
   <select id="queryByAccount" resultType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
     select
     <include refid="QUERY_ROW_COLUMN"/>
-    from tb_account_info a left join tb_role b on(a.role_id=b.role_id) where BINARY a.account =
-    #{account}
+    from tb_account_info a left join tb_role b on(a.role_id=b.role_id)
+    where BINARY a.account = #{account}
+    and a.account_status != 4
     limit 1
   </select>
 
   <select id="countOfAccount" resultType="java.lang.Integer">
-    select count(1) from tb_account_info where 1=1
+    select count(1) from tb_account_info where 1=1 and account_status != 4
     <if test="account != null and account != ''">
       and BINARY account = #{account}
     </if>
@@ -120,7 +121,7 @@
     resultMap="accountMap">
     select a.*,b.role_name,b.role_name_zh from tb_account_info a
     left join tb_role b on(a.role_id=b.role_id)
-    where 1=1
+    where 1=1 and a.account_status != 4
     <if test="param.account != null and param.account != ''">
       and a.account = #{param.account}
     </if>

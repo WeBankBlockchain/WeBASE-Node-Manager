@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.account.entity.PasswordInfo;
 import com.webank.webase.node.mgr.account.entity.ReqDeveloperRegister;
 import com.webank.webase.node.mgr.account.entity.ReqFreeze;
 import com.webank.webase.node.mgr.account.entity.ReqSendMail;
+import com.webank.webase.node.mgr.account.entity.ReqUpdateInfo;
 import com.webank.webase.node.mgr.account.entity.RspDeveloper;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.account.token.TokenService;
@@ -139,7 +140,7 @@ public class AccountController extends BaseController {
      */
     @PutMapping(value = "/accountInfo")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse updateAccountInfo(@RequestBody @Valid AccountInfo info, HttpServletRequest request,
+    public BaseResponse updateAccountInfo(@RequestBody @Valid ReqUpdateInfo info, HttpServletRequest request,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);

@@ -333,6 +333,8 @@ public class ConstantCode {
     // lab
     public static final RetCode LIQUID_COMPILE_FAILED = RetCode.mark(202550,"Liquid compile error");
     public static final RetCode DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY = RetCode.mark(202551, "When deploying liquid, contract address must not be empty");
+    public static final RetCode INVALID_ROLE_ID_REGISTER = RetCode.mark(202560, "Only support developer or visitor register");
+    public static final RetCode UPDATE_ACCOUNT_STATUS_DENIED = RetCode.mark(202561, "Only admin or self could update account status");
 
 
 
