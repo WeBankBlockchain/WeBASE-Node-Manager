@@ -136,6 +136,27 @@ public class AccountController extends BaseController {
     }
 
     /**
+     * query account info.
+     */
+    @GetMapping(value = "/accountInfo")
+    public BaseResponse queryAccountDetail(HttpServletRequest request) throws NodeMgrException {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start queryAccountDetail. startTime:{}", startTime.toEpochMilli());
+
+        // current
+        String currentAccount = accountService.getCurrentAccount(request);
+        // add account row
+        RspDeveloper rspDeveloper = accountService.queryAccountDetail(currentAccount);
+
+        baseResponse.setData(rspDeveloper);
+
+        log.info("end queryAccountDetail useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
      * update account info.
      */
     @PutMapping(value = "/accountInfo")

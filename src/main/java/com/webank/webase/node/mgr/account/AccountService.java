@@ -145,20 +145,26 @@ public class AccountService {
                 accountRow.setAccountStatus(AccountStatus.UNMODIFIEDPWD.getValue());
             }
         }
-        accountRow.setRoleId(accountInfo.getRoleId());
+        if (accountInfo.getRoleId() != null) {
+            accountRow.setRoleId(accountInfo.getRoleId());
+        }
         // 非空邮箱不可修改
         if (StringUtils.isNotBlank(accountRow.getEmail())) {
             accountRow.setEmail(accountInfo.getEmail());
         }
         accountRow.setContactAddress(accountInfo.getContactAddress());
         accountRow.setCompanyName(accountInfo.getCompanyName());
-//        accountRow.setAccountStatus(accountInfo.getContactAddress()); 只能在freeze或者cancel修改
+//        accountRow.setAccountStatus(accountInfo.gettAccountStatus()); 只能在freeze或者cancel修改
         accountRow.setMobile(accountInfo.getMobile());
         accountRow.setRealName(accountInfo.getRealName());
         accountRow.setIdCardNumber(accountInfo.getIdCardNumber());
         accountRow.setDescription(accountInfo.getDescription());
 
-        accountRow.setExpireTime(accountRow.getExpireTime().plusYears(accountInfo.getExpandTime()));
+        if (accountInfo.getExpandTime() != null) {
+            LocalDateTime newExpiredTime = accountRow.getExpireTime().plusYears(accountInfo.getExpandTime());
+            log.info("updateAccountRow newExpiredTime {}", newExpiredTime);
+            accountRow.setExpireTime(newExpiredTime);
+        }
 
         // update account info
         Integer affectRow = accountMapper.updateAccountRow(accountRow);
@@ -166,7 +172,7 @@ public class AccountService {
         // check result
         checkDbAffectRow(affectRow);
 
-        log.debug("end updateAccountRow. affectRow:{}", affectRow);
+        log.info("end updateAccountRow. affectRow:{}", affectRow);
     }
 
     /**
@@ -208,6 +214,18 @@ public class AccountService {
 
     }
 
+    public RspDeveloper queryAccountDetail(String accountStr) {
+        TbAccountInfo tbAccountInfo = queryByAccount(accountStr);
+        if (tbAccountInfo == null) {
+            throw new NodeMgrException(ConstantCode.ACCOUNT_NOT_EXISTS);
+        }
+        validateAccount(tbAccountInfo);
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
+        log.debug("end queryAccountDetail. accountRow:{} ", JsonTools.toJSONString(rspDeveloper));
+        return rspDeveloper;
+    }
+
     /**
      * query account info by accountName.
      */
@@ -225,7 +243,7 @@ public class AccountService {
                 tbAccountInfo.getAccount());
             throw new NodeMgrException(ConstantCode.ACCOUNT_DISABLED);
         }
-        if (LocalDateTime.now().isAfter(tbAccountInfo.getExpireTime())) {
+        if (tbAccountInfo.getExpireTime() != null && LocalDateTime.now().isAfter(tbAccountInfo.getExpireTime())) {
             log.error("account is beyond expired time {}", tbAccountInfo.getAccount());
             throw new NodeMgrException(ConstantCode.ACCOUNT_DISABLED);
         }

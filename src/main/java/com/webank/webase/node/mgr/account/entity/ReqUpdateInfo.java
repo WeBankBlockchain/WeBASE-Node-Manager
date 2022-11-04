@@ -18,7 +18,6 @@ public class ReqUpdateInfo {
     @Length(max = 250)
     private String account;
     private String accountPwd;
-    @NotNull
     private Integer roleId;
     /**
      * db's email not blank, not support update; else fill in email
