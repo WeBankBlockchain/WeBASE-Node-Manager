@@ -70,7 +70,7 @@ public interface UserMapper {
      */
     void deleteUser(@Param("groupId") String groupId);
 
-    void deleteByAddress(@Param("address") String address);
+    void suspendByAddress(@Param("groupId") String groupId, @Param("address") String address);
 
     TbUser getBySignUserId(@Param("signUserId") String signUserId);
 }

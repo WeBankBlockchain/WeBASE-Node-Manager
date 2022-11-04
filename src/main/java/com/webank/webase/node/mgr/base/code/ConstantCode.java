@@ -66,6 +66,7 @@ public class ConstantCode {
     public static final RetCode USER_ID_NULL = RetCode.mark(202012, "user id cannot be empty");
 
     public static final RetCode USER_NOT_EXIST = RetCode.mark(202013, "invalid user(NOT EXIST)");
+    public static final RetCode USER_SUSPENDED = RetCode.mark(202013, "invalid user(DELETED/SUSPENDED)");
 
     public static final RetCode USER_EXISTS = RetCode.mark(202014, "user already exists");
 

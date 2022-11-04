@@ -105,12 +105,11 @@
     <include refid="QUERY_ROW_COLUMN"/>
     from tb_account_info a left join tb_role b on(a.role_id=b.role_id)
     where BINARY a.account = #{account}
-    and a.account_status != 4
     limit 1
   </select>
 
   <select id="countOfAccount" resultType="java.lang.Integer">
-    select count(1) from tb_account_info where 1=1 and account_status != 4
+    select count(1) from tb_account_info where 1=1
     <if test="account != null and account != ''">
       and BINARY account = #{account}
     </if>

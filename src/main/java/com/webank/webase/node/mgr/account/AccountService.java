@@ -254,7 +254,7 @@ public class AccountService {
      */
     public int countOfAccount(String account) {
         Integer accountCount = accountMapper.countOfAccount(account);
-        int count = accountCount == null ? 0 : accountCount.intValue();
+        int count = accountCount == null ? 0 : accountCount;
         return count;
     }
 
