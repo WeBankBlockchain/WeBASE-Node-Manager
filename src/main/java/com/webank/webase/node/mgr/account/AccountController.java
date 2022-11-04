@@ -18,6 +18,7 @@ import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.ImageToken;
 import com.webank.webase.node.mgr.account.entity.PasswordInfo;
+import com.webank.webase.node.mgr.account.entity.ReqCancel;
 import com.webank.webase.node.mgr.account.entity.ReqDeveloperRegister;
 import com.webank.webase.node.mgr.account.entity.ReqFreeze;
 import com.webank.webase.node.mgr.account.entity.ReqSendMail;
@@ -43,6 +44,7 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -198,7 +200,7 @@ public class AccountController extends BaseController {
         log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{}",
             startTime.toEpochMilli(), pageNumber, pageSize);
 
-        int count = accountService.countOfAccount(account);
+        int count = accountService.countOfAccountAvailable(account);
         if (count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(0);
@@ -355,7 +357,7 @@ public class AccountController extends BaseController {
      * @return
      */
     @DeleteMapping(value = "cancel")
-    public BaseResponse cancel(@RequestBody @Valid AccountInfo param, HttpServletRequest request, BindingResult result) {
+    public BaseResponse cancel(@RequestBody @Valid ReqCancel param, HttpServletRequest request, BindingResult result) {
         log.info("start exec method [cancel]. param:{}", JsonTools.objToString(param));
         checkBindResult(result);
 
@@ -365,6 +367,18 @@ public class AccountController extends BaseController {
         accountService.cancel(currentAccount, param.getAccount());
         log.info("success exec method [cancel]");
         return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    @GetMapping(value = "/privacy")
+    public BaseResponse getPrivacyDoc() {
+        log.info("start exec method [getPrivacyDoc]. ");
+
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        String doc = accountService.loadPrivacyDoc();
+        baseResponse.setData(doc);
+
+        log.info("success exec method [getPrivacyDoc]. result:{}", JsonTools.objToString(baseResponse));
+        return baseResponse;
     }
 
 }

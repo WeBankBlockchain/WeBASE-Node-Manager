@@ -257,6 +257,14 @@ public class AccountService {
         int count = accountCount == null ? 0 : accountCount;
         return count;
     }
+    /**
+     * query count of account.
+     */
+    public int countOfAccountAvailable(String account) {
+        Integer accountCount = accountMapper.countOfAccountAvailable(account);
+        int count = accountCount == null ? 0 : accountCount;
+        return count;
+    }
 
     /**
      * query account list.
@@ -469,5 +477,14 @@ public class AccountService {
         }
     }
 
+    public String loadPrivacyDoc() {
+        String privacyFilePath = "templates/privacy_doc.txt";
+        String privacyDoc = NodeMgrTools.loadFileContent(privacyFilePath);
+        if (StringUtils.isBlank(privacyDoc)) {
+            throw new NodeMgrException(ConstantCode.GET_PRIVACY_DOC_FAILED);
+        }
+        String result = NodeMgrTools.encodedBase64Str(privacyDoc);
+        return result;
+    }
 
 }

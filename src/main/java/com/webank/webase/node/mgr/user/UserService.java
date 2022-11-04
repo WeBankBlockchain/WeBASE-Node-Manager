@@ -561,10 +561,11 @@ public class UserService {
     }
 
 
-    public void suspendUserByAddress(String groupId, String address) throws NodeMgrException {
+    public int suspendUserByAddress(String groupId, String address) throws NodeMgrException {
         log.info("suspendUserByAddress address:{}|{}", address, groupId);
-        userMapper.suspendByAddress(groupId, address);
-        log.debug("end suspendUserByAddress");
+        int res = userMapper.suspendByAddress(groupId, address);
+        log.info("end suspendUserByAddress {}|{}|{}", address, groupId, res);
+        return res;
     }
 
     /**

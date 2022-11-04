@@ -338,6 +338,7 @@ public class ConstantCode {
     public static final RetCode INVALID_ROLE_ID_REGISTER = RetCode.mark(202560, "Only support developer or visitor register");
     public static final RetCode UPDATE_ACCOUNT_STATUS_DENIED = RetCode.mark(202561, "Only admin or self could update account status");
     public static final RetCode ACCOUNT_DISABLED = RetCode.mark(202562, "Account is invalid, please check if frozen or canceld or beyond expiredTime");
+    public static final RetCode GET_PRIVACY_DOC_FAILED = RetCode.mark(202563, "Loading privacy doc of template failed");
 
 
 

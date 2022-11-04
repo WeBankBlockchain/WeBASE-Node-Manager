@@ -37,6 +37,8 @@ public interface AccountMapper {
 
     Integer countOfAccount(@Param("account") String account);
 
+    Integer countOfAccountAvailable(@Param("account") String account);
+
     List<TbAccountInfo> listOfAccount(@Param("param") AccountListParam param);
 
     Integer deleteAccountRow(@Param("account") String account);
