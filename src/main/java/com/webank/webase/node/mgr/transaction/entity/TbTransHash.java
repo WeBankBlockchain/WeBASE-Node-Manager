@@ -33,6 +33,7 @@ public class TbTransHash {
     private Integer statisticsFlag;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    private String appId;
 
     /**
      * init by transaction、blockNumber、blockTimestamp.

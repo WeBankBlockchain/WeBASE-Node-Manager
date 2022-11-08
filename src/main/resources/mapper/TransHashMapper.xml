@@ -19,12 +19,13 @@
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
+    <result column="app_id" javaType="java.lang.String" jdbcType="VARCHAR" property="appId"/>
   </resultMap>
 
 
   <insert id="add">
-    insert ignore into ${tableName}(trans_hash,trans_from,trans_to,block_number,block_timestamp,create_time,modify_time)
-    values(#{trans.transHash},#{trans.transFrom},#{trans.transTo},#{trans.blockNumber},#{trans.blockTimestamp},NOW(),NOW())
+    insert ignore into ${tableName}(trans_hash,trans_from,trans_to,block_number,block_timestamp,create_time,modify_time,app_id)
+    values(#{trans.transHash},#{trans.transFrom},#{trans.transTo},#{trans.blockNumber},#{trans.blockTimestamp},NOW(),NOW(),#{trans.appId})
   </insert>
 
 
