@@ -157,7 +157,7 @@ public class BlockService {
 
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
-            transSize, sealerIndex);
+            transSize, sealerIndex,blockInfo.getGasUsed());
         return tbBlock;
     }
 
