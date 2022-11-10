@@ -18,6 +18,12 @@ import com.webank.webase.node.mgr.account.entity.AccountInfo;
 import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.ImageToken;
 import com.webank.webase.node.mgr.account.entity.PasswordInfo;
+import com.webank.webase.node.mgr.account.entity.ReqCancel;
+import com.webank.webase.node.mgr.account.entity.ReqDeveloperRegister;
+import com.webank.webase.node.mgr.account.entity.ReqFreeze;
+import com.webank.webase.node.mgr.account.entity.ReqSendMail;
+import com.webank.webase.node.mgr.account.entity.ReqUpdateInfo;
+import com.webank.webase.node.mgr.account.entity.RspDeveloper;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.account.token.TokenService;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -38,11 +44,13 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -62,6 +70,8 @@ public class AccountController extends BaseController {
     private TokenService tokenService;
     @Autowired
     private ConstantProperties constants;
+    @Autowired
+    private MessageService messageService;
 
     private static final int PICTURE_CHECK_CODE_CHAR_NUMBER = 4;
 
@@ -128,11 +138,32 @@ public class AccountController extends BaseController {
     }
 
     /**
+     * query account info.
+     */
+    @GetMapping(value = "/accountInfo")
+    public BaseResponse queryAccountDetail(HttpServletRequest request) throws NodeMgrException {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start queryAccountDetail. startTime:{}", startTime.toEpochMilli());
+
+        // current
+        String currentAccount = accountService.getCurrentAccount(request);
+        // add account row
+        RspDeveloper rspDeveloper = accountService.queryAccountDetail(currentAccount);
+
+        baseResponse.setData(rspDeveloper);
+
+        log.info("end queryAccountDetail useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
      * update account info.
      */
     @PutMapping(value = "/accountInfo")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse updateAccountInfo(@RequestBody @Valid AccountInfo info, HttpServletRequest request,
+    public BaseResponse updateAccountInfo(@RequestBody @Valid ReqUpdateInfo info, HttpServletRequest request,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -169,7 +200,7 @@ public class AccountController extends BaseController {
         log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{}",
             startTime.toEpochMilli(), pageNumber, pageSize);
 
-        int count = accountService.countOfAccount(account);
+        int count = accountService.countOfAccountAvailable(account);
         if (count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(0);
@@ -191,12 +222,15 @@ public class AccountController extends BaseController {
      */
     @DeleteMapping(value = "/{account}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse deleteAccount(@PathVariable("account") String account)
+    public BaseResponse deleteAccount(HttpServletRequest request, @PathVariable("account") String account)
         throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
 
-        accountService.deleteAccountRow(account);
+//        accountService.deleteAccountRow(account);
+        String currentAccount = accountService.getCurrentAccount(request);
+
+        accountService.cancel(currentAccount, account);
 
         log.info("end deleteAccount. useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
@@ -223,5 +257,128 @@ public class AccountController extends BaseController {
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
-    
+
+
+    @GetMapping(value = "/mail/enable")
+    public BaseResponse ifEnableMailCheckCode() {
+        log.info("start exec method [ifEnableMailCheckCode]. ");
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(constants.getEnableRegisterMailCheck());
+
+        log.info("success exec method [ifEnableMailCheckCode]. result:{}", JsonTools.objToString(baseResponse));
+        return baseResponse;
+    }
+
+    @PostMapping(value = "/mail")
+    public BaseResponse sendCheckCodeMail(@RequestBody @Valid ReqSendMail param, BindingResult result) {
+        log.info("start exec method [sendCheckCodeMail]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start getPictureCheckCode startTime:{}", startTime);
+        // random code
+        String checkCode;
+        if (constants.getEnableVerificationCode()) {
+            checkCode = NodeMgrTools.randomString(PICTURE_CHECK_CODE_CHAR_NUMBER);
+        } else {
+            checkCode = constants.getVerificationCodeValue();
+            log.info("getPictureCheckCode: already disabled check code, and default value is {}", checkCode);
+        }
+
+        String token = tokenService.createToken(checkCode, 2);
+        log.info("new checkCode:" + checkCode);
+
+        messageService.sendMail(param.getMailAddress(), checkCode);
+
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        ImageToken tokenData = new ImageToken();
+        tokenData.setToken(token);
+        baseResponse.setData(tokenData);
+        log.info("end getPictureCheckCode useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        log.info("success exec method [sendCheckCodeMail]. result:{}", JsonTools.objToString(baseResponse));
+        return baseResponse;
+    }
+
+
+    /**
+     * developer register
+     * 未登录也可以调用
+     * @param param
+     * @param result
+     * @return
+     */
+    @PostMapping(value = "/register")
+    public BaseResponse register(@RequestBody @Valid ReqDeveloperRegister param, BindingResult result) {
+        log.info("start exec method [register]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+        RspDeveloper rspDeveloperVO = accountService.register(param);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(rspDeveloperVO);
+        log.info("success exec method [register]. result:{}", JsonTools.objToString(baseResponse));
+        return baseResponse;
+    }
+
+
+
+    @PatchMapping(value = "freeze")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse freeze(@RequestBody @Valid ReqFreeze param, HttpServletRequest request, BindingResult result) {
+        log.info("start exec method [freeze]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+
+        // current
+        String currentAccount = accountService.getCurrentAccount(request);
+
+        RspDeveloper rspDeveloper = accountService.freeze(currentAccount, param.getAccount(), param.getDescription());
+        log.info("success exec method [freeze] rspDeveloper:{}", rspDeveloper);
+        return new BaseResponse(ConstantCode.SUCCESS, rspDeveloper);
+    }
+
+
+    @PatchMapping(value = "unFreeze")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    public BaseResponse unfreeze(@RequestBody @Valid ReqFreeze param, HttpServletRequest request, BindingResult result) {
+        log.info("start exec method [unfreeze]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+
+        // current
+        String currentAccount = accountService.getCurrentAccount(request);
+
+        RspDeveloper rspDeveloper = accountService.unfreeze(currentAccount, param.getAccount(), param.getDescription());
+        log.info("success exec method [unfreeze] rspDeveloper{}", rspDeveloper);
+        return new BaseResponse(ConstantCode.SUCCESS, rspDeveloper);
+    }
+
+    /**
+     * 注销用户
+     * @param param
+     * @param request
+     * @param result
+     * @return
+     */
+    @DeleteMapping(value = "cancel")
+    public BaseResponse cancel(@RequestBody @Valid ReqCancel param, HttpServletRequest request, BindingResult result) {
+        log.info("start exec method [cancel]. param:{}", JsonTools.objToString(param));
+        checkBindResult(result);
+
+        // current
+        String currentAccount = accountService.getCurrentAccount(request);
+
+        accountService.cancel(currentAccount, param.getAccount());
+        log.info("success exec method [cancel]");
+        return new BaseResponse(ConstantCode.SUCCESS);
+    }
+
+    @GetMapping(value = "/privacy")
+    public BaseResponse getPrivacyDoc() {
+        log.info("start exec method [getPrivacyDoc]. ");
+
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        String doc = accountService.loadPrivacyDoc();
+        baseResponse.setData(doc);
+
+        log.info("success exec method [getPrivacyDoc]. result:{}", JsonTools.objToString(baseResponse));
+        return baseResponse;
+    }
+
 }

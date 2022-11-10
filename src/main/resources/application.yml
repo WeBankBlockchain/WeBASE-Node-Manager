@@ -53,7 +53,7 @@ constant:
   verificationCodeValue: "8888"
   # auth token code expire time (s)
   authTokenMaxAge: 3600
-  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/refresh,/front/find,/config/version,/group/all/invalidIncluded,/swagger-ui.html
+  ignoreCheckFront: /account/login,/account/pictureCheckCode,/login,/user/privateKey,/front/new,/front/refresh,/front/find,/config/version,/group/all/invalidIncluded,/swagger-ui.html,/account/register,/account/mail,/account/mail/*,/account//privacy
   ###front http request
   frontUrl: http://%1s:%2d/WeBASE-Front/%3s
   httpTimeOut: 15000
@@ -95,7 +95,7 @@ constant:
   auditMonitorTaskFixedDelay: 300000
   nodeStatusMonitorTaskFixedDelay: 60000  #must larger than @pullBlockTaskFixedDelay
   certMonitorTaskFixedDelay: 300000
-  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/config/encrypt,/config/auth,/config/version,/front/refresh,/api/*,/auth/base/available
+  permitUrlArray: /account/login,/account/pictureCheckCode,/login,/user/privateKey/**,/config/encrypt,/config/auth,/config/version,/front/refresh,/api/*,/auth/base/available,/account/register,/account/mail,/account/mail/*,/account//privacy
   ###interval to async refresh group list locally
   resetGroupListInterval: 15000
   ###interval block statistic, unit: ms
@@ -103,6 +103,14 @@ constant:
   statBlockFixedDelay: 10000
   statBlockPageSize: 20 # block stat data to pull in one time
   enableExternalFromBlock: true # enable record account and contract from block
+  ###enable user register and mail second check
+  enableRegisterMailCheck: true
+  # SMTP服务用于发送验证码，默认端口为25，暂未支持SSL/TLS（若启用SMTP SSL或TLS则465或587端口）
+  smtpHost: smtp.qq.com
+  smtpPort: 25
+  smtpUsername: "yourmail@qq.com"
+  smtpPassword: "yourMailPassword"
+
 
 # executor config for async pulling data from chain
 executor:

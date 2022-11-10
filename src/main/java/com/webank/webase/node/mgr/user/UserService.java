@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.enums.CheckUserExist;
 import com.webank.webase.node.mgr.base.enums.HasPk;
 import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.base.enums.RoleType;
+import com.webank.webase.node.mgr.base.enums.UserStatus;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
@@ -243,10 +244,10 @@ public class UserService {
         accountService.accountExist(account);
 
         // check userName
-        TbUser userRow = queryByName(user.getGroupId(), user.getUserName(), account);
-        if (Objects.nonNull(userRow)) {
+        TbUser checkUserRow = queryByName(user.getGroupId(), user.getUserName(), account);
+        if (Objects.nonNull(checkUserRow)) {
             if (!isCheckExist) {
-                return userRow;
+                return checkUserRow;
             }
             log.warn("fail bindUserInfo. userName is already exists");
             throw new NodeMgrException(ConstantCode.USER_EXISTS);
@@ -322,6 +323,9 @@ public class UserService {
         if (user == null) {
             throw new NodeMgrException(ConstantCode.USER_NOT_EXIST);
         }
+        if (user.getUserStatus() == UserStatus.SUSPENDED.getValue()) {
+            throw new NodeMgrException(ConstantCode.USER_SUSPENDED);
+        }
         KeyPair keyPair = this.getUserKeyPairFromSign(user.getGroupId(), user.getSignUserId());
         // encode privateKey
         user.setPrivateKey(keyPair.getPrivateKey());
@@ -373,12 +377,6 @@ public class UserService {
         }
     }
 
-    /**
-     * query by groupId、userName.
-     */
-    public TbUser queryUser(String groupId, String userName) throws NodeMgrException {
-        return queryUser(null, groupId, userName, null, null);
-    }
 
     /**
      * query by userName.
@@ -562,10 +560,12 @@ public class UserService {
         return userName;
     }
 
-    public void deleteByAddress(String address) throws NodeMgrException {
-        log.debug("deleteByAddress address:{} ", address);
-        userMapper.deleteByAddress(address);
-        log.debug("end deleteByAddress");
+
+    public int suspendUserByAddress(String groupId, String address) throws NodeMgrException {
+        log.info("suspendUserByAddress address:{}|{}", address, groupId);
+        int res = userMapper.suspendByAddress(groupId, address);
+        log.info("end suspendUserByAddress {}|{}|{}", address, groupId, res);
+        return res;
     }
 
     /**

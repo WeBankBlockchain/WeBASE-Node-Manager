@@ -27,6 +27,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccountMapper {
 
+    Integer registerAccount(TbAccountInfo tbAccount);
+
     Integer addAccountRow(TbAccountInfo tbAccount);
 
     Integer updateAccountRow(TbAccountInfo tbAccount);
@@ -34,6 +36,8 @@ public interface AccountMapper {
     TbAccountInfo queryByAccount(@Param("account") String account);
 
     Integer countOfAccount(@Param("account") String account);
+
+    Integer countOfAccountAvailable(@Param("account") String account);
 
     List<TbAccountInfo> listOfAccount(@Param("param") AccountListParam param);
 

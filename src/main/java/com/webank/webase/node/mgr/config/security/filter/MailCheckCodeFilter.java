@@ -18,6 +18,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import java.io.IOException;
 import javax.servlet.Filter;
@@ -40,14 +41,16 @@ import org.springframework.stereotype.Component;
  */
 @Log4j2
 @Component
-@Order(-1001)
-@WebFilter(filterName = "validateCodeFilter", urlPatterns = "/*")
-public class ValidateCodeFilter implements Filter {
+@Order(-999)
+@WebFilter(filterName = "mailCheckCodeFilter", urlPatterns = "/account/register")
+public class MailCheckCodeFilter implements Filter {
     @Autowired
     private TokenService tokenService;
-    
-    private static final String LOGIN_URI = "/account/login";
-    private static final String LOGIN_METHOD = "post";
+    @Autowired
+    private ConstantProperties constantProperties;
+
+    private static final String REGISTER_URI = "/account/register";
+    private static final String POST_METHOD = "post";
 
     /**
      * do filter.
@@ -58,10 +61,16 @@ public class ValidateCodeFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse rsp = (HttpServletResponse) response;
         String uri = HttpRequestTools.getUri(req);
-        //is login
-        if (LOGIN_URI.equalsIgnoreCase(uri) && LOGIN_METHOD.equalsIgnoreCase(req.getMethod())) {
+
+        String tokenInHeard = req.getHeader("token");
+        String codeInRequest = req.getParameter("checkCode");
+        log.info("validateMailCode 00. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
+
+        // register接口，查验邮箱的验证码；如果启用了邮箱确认码
+        if (constantProperties.getEnableRegisterMailCheck() &&
+            REGISTER_URI.equalsIgnoreCase(uri) && POST_METHOD.equalsIgnoreCase(req.getMethod())) {
             try {
-                validateCode(req);
+                validateMailCode(req);
             } catch (NodeMgrException ex) {
                 NodeMgrTools.responseRetCodeException(rsp, ex.getRetCode());
                 return;
@@ -77,10 +86,10 @@ public class ValidateCodeFilter implements Filter {
     /**
      * verify code.
      */
-    private void validateCode(HttpServletRequest request) {
+    private void validateMailCode(HttpServletRequest request) {
         String tokenInHeard = request.getHeader("token");
         String codeInRequest = request.getParameter("checkCode");
-        log.info("validateCode. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
+        log.info("validateMailCode. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
 
         if (StringUtils.isBlank(codeInRequest)) {
             throw new NodeMgrException(ConstantCode.CHECK_CODE_NULL);
@@ -90,7 +99,7 @@ public class ValidateCodeFilter implements Filter {
         }
         String code = tokenService.getValueFromToken(tokenInHeard);
         if (!codeInRequest.equalsIgnoreCase(code)) {
-            log.warn("fail validateCode. realCheckCode:{} codeInRequest:{}", code,
+            log.warn("fail validateMailCode. realCheckCode:{} codeInRequest:{}", code,
                 codeInRequest);
             throw new NodeMgrException(ConstantCode.INVALID_CHECK_CODE);
         }

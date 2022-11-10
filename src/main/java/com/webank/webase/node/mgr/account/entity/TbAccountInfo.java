@@ -38,6 +38,15 @@ public class TbAccountInfo {
      * 邮件告警的邮箱
       */
     private String email;
+    /**
+     * 支持注册
+     */
+    private String realName;
+    private String idCardNumber;
+    private Long mobile;
+    private String contactAddress;
+    private String companyName;
+    private LocalDateTime expireTime;
 
     public TbAccountInfo() {
         super();
@@ -70,5 +79,25 @@ public class TbAccountInfo {
         this.roleId = roleId;
         this.description = description;
         this.email = email;
+    }
+
+    public TbAccountInfo(String account, String accountPwd, Integer roleId, String roleName,
+        String roleNameZh, Integer accountStatus, String description, String email,
+        String realName, String idCardNumber, Long mobile, String contactAddress,
+        String companyName, LocalDateTime expireTime) {
+        this.account = account;
+        this.accountPwd = accountPwd;
+        this.roleId = roleId;
+        this.roleName = roleName;
+        this.roleNameZh = roleNameZh;
+        this.accountStatus = accountStatus;
+        this.description = description;
+        this.email = email;
+        this.realName = realName;
+        this.idCardNumber = idCardNumber;
+        this.mobile = mobile;
+        this.contactAddress = contactAddress;
+        this.companyName = companyName;
+        this.expireTime = expireTime;
     }
 }

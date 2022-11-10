@@ -66,9 +66,9 @@ List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
 
-def jackson_version = "2.13.3"
+def jackson_version = "2.13.4"
 List jackson = [
-    "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
+    "com.fasterxml.jackson.core:jackson-databind:2.13.4.2",
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
     "com.fasterxml.jackson.core:jackson-core:$jackson_version",
     "com.fasterxml.jackson.module:jackson-module-parameter-names:$jackson_version",
@@ -123,7 +123,8 @@ dependencies {
     // cover old version
     compile 'com.google.guava:guava:30.0-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
-    compile 'org.yaml:snakeyaml:1.30'
+    compile 'org.yaml:snakeyaml:1.31'
+    compile 'org.apache.commons:commons-text:1.10.0'
 
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'

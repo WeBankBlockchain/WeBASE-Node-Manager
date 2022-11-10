@@ -69,7 +69,7 @@
 
   <select id="listOfUser" parameterType="com.webank.webase.node.mgr.user.entity.UserParam"
     resultMap="userMap">
-    select * from tb_user where 1=1
+    select * from tb_user where 1=1 and user_status != 2
     <if test="groupId != null and groupId != ''">
       and group_id = #{groupId}
     </if>
@@ -145,9 +145,9 @@
     delete from tb_user where group_id = #{groupId}
   </delete>
 
-  <delete id="deleteByAddress" parameterType="java.lang.String">
-    delete from tb_user where address = #{address}
-  </delete>
+  <update id="suspendByAddress">
+    update tb_user set user_status=2 where group_id = #{groupId} and address = #{address}
+  </update>
 
   <select id="getBySignUserId" parameterType="java.lang.String"  resultMap="userMap">
     select * from tb_user where sign_user_id = #{signUserId}

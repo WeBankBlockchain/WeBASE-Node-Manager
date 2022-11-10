@@ -15,6 +15,10 @@
  */
 package com.webank.webase.node.mgr.account;
 
+import com.webank.webase.node.mgr.account.entity.ReqDeveloperRegister;
+import com.webank.webase.node.mgr.account.entity.ReqUpdateInfo;
+import com.webank.webase.node.mgr.account.entity.RspDeveloper;
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
@@ -27,14 +31,20 @@ import com.webank.webase.node.mgr.base.enums.AccountStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.account.role.RoleService;
 import com.webank.webase.node.mgr.account.token.TokenService;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * services for account data.
@@ -55,6 +65,8 @@ public class AccountService {
     @Autowired
     private ConstantProperties constants;
     private static final String ADMIN_TOKEN_VALUE = "admin";
+    @Autowired
+    private MessageService messageService;
 
     /**
      * login.
@@ -73,7 +85,9 @@ public class AccountService {
             throw new NodeMgrException(ConstantCode.PASSWORD_ERROR);
         }
         // encode by bCryptPasswordEncoder
-        TbAccountInfo accountRow = accountMapper.queryByAccount(accountStr);
+        TbAccountInfo accountRow = this.queryByAccount(accountStr);
+        validateAccount(accountRow);
+
         if (!passwordEncoder.matches(passwordStr, accountRow.getAccountPwd())) {
             // reset login fail time
             int loginFailTime = accountRow.getLoginFailTime() + 1;
@@ -112,14 +126,15 @@ public class AccountService {
     /**
      * update account info.
      */
-    public void updateAccountRow(String currentAccount, AccountInfo accountInfo)
+    public void updateAccountRow(String currentAccount, ReqUpdateInfo accountInfo)
         throws NodeMgrException {
         String accountStr = accountInfo.getAccount();
         // check account
         accountExist(accountStr);
 
         // query by account
-        TbAccountInfo accountRow = accountMapper.queryByAccount(accountStr);
+        // skip valid
+        TbAccountInfo accountRow = this.queryByAccount(accountStr);
 
         // encode password
         if (StringUtils.isNoneBlank(accountInfo.getAccountPwd())) {
@@ -130,8 +145,26 @@ public class AccountService {
                 accountRow.setAccountStatus(AccountStatus.UNMODIFIEDPWD.getValue());
             }
         }
-        accountRow.setRoleId(accountInfo.getRoleId());
-        accountRow.setEmail(accountInfo.getEmail());
+        if (accountInfo.getRoleId() != null) {
+            accountRow.setRoleId(accountInfo.getRoleId());
+        }
+        // 非空邮箱不可修改
+        if (StringUtils.isNotBlank(accountRow.getEmail())) {
+            accountRow.setEmail(accountInfo.getEmail());
+        }
+        accountRow.setContactAddress(accountInfo.getContactAddress());
+        accountRow.setCompanyName(accountInfo.getCompanyName());
+//        accountRow.setAccountStatus(accountInfo.gettAccountStatus()); 只能在freeze或者cancel修改
+        accountRow.setMobile(accountInfo.getMobile());
+        accountRow.setRealName(accountInfo.getRealName());
+        accountRow.setIdCardNumber(accountInfo.getIdCardNumber());
+        accountRow.setDescription(accountInfo.getDescription());
+
+        if (accountInfo.getExpandTime() != null) {
+            LocalDateTime newExpiredTime = accountRow.getExpireTime().plusYears(accountInfo.getExpandTime());
+            log.info("updateAccountRow newExpiredTime {}", newExpiredTime);
+            accountRow.setExpireTime(newExpiredTime);
+        }
 
         // update account info
         Integer affectRow = accountMapper.updateAccountRow(accountRow);
@@ -139,7 +172,7 @@ public class AccountService {
         // check result
         checkDbAffectRow(affectRow);
 
-        log.debug("end updateAccountRow. affectRow:{}", affectRow);
+        log.info("end updateAccountRow. affectRow:{}", affectRow);
     }
 
     /**
@@ -151,12 +184,13 @@ public class AccountService {
             targetAccount, oldAccountPwd, newAccountPwd);
 
         // query target account info
-        TbAccountInfo targetRow = accountMapper.queryByAccount(targetAccount);
+        TbAccountInfo targetRow = this.queryByAccount(targetAccount);
         if (targetRow == null) {
             log.warn("fail updatePassword. not found target row. targetAccount:{}",
                 targetAccount);
             throw new NodeMgrException(ConstantCode.ACCOUNT_NOT_EXISTS);
         }
+        validateAccount(targetRow);
 
         if (StringUtils.equals(oldAccountPwd, newAccountPwd)) {
             log.warn("fail updatePassword. the new pwd cannot be same as old ");
@@ -180,6 +214,18 @@ public class AccountService {
 
     }
 
+    public RspDeveloper queryAccountDetail(String accountStr) {
+        TbAccountInfo tbAccountInfo = queryByAccount(accountStr);
+        if (tbAccountInfo == null) {
+            throw new NodeMgrException(ConstantCode.ACCOUNT_NOT_EXISTS);
+        }
+        validateAccount(tbAccountInfo);
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
+        log.debug("end queryAccountDetail. accountRow:{} ", JsonTools.toJSONString(rspDeveloper));
+        return rspDeveloper;
+    }
+
     /**
      * query account info by accountName.
      */
@@ -190,12 +236,33 @@ public class AccountService {
         return accountRow;
     }
 
+    private void validateAccount(TbAccountInfo tbAccountInfo) {
+        if (AccountStatus.FROZEN.getValue() == tbAccountInfo.getAccountStatus()
+            || AccountStatus.CANCEL.getValue() == tbAccountInfo.getAccountStatus()) {
+            log.error("account is invalid status {}|{}", tbAccountInfo.getAccountStatus(),
+                tbAccountInfo.getAccount());
+            throw new NodeMgrException(ConstantCode.ACCOUNT_DISABLED);
+        }
+        if (tbAccountInfo.getExpireTime() != null && LocalDateTime.now().isAfter(tbAccountInfo.getExpireTime())) {
+            log.error("account is beyond expired time {}", tbAccountInfo.getAccount());
+            throw new NodeMgrException(ConstantCode.ACCOUNT_DISABLED);
+        }
+    }
+
     /**
      * query count of account.
      */
     public int countOfAccount(String account) {
         Integer accountCount = accountMapper.countOfAccount(account);
-        int count = accountCount == null ? 0 : accountCount.intValue();
+        int count = accountCount == null ? 0 : accountCount;
+        return count;
+    }
+    /**
+     * query count of account.
+     */
+    public int countOfAccountAvailable(String account) {
+        Integer accountCount = accountMapper.countOfAccountAvailable(account);
+        int count = accountCount == null ? 0 : accountCount;
         return count;
     }
 
@@ -282,6 +349,142 @@ public class AccountService {
         }
         String token = NodeMgrTools.getToken(request);
         return tokenService.getValueFromToken(token);
+    }
+
+    /**
+     * register.
+     */
+    @Transactional
+    public RspDeveloper register(ReqDeveloperRegister param) throws NodeMgrException {
+        log.info("start exec method [register]. param:{}", JsonTools.objToString(param));
+
+        String accountStr = param.getAccount();
+        Integer roleId = param.getRoleId();
+        String email = param.getEmail();
+        // check account
+        accountNotExist(accountStr);
+        // check role id
+        if (!roleId.equals(RoleType.DEVELOPER.getValue()) &&
+            !roleId.equals(RoleType.VISITOR.getValue())) {
+            log.error("only support developer/visitor register");
+            throw new NodeMgrException(ConstantCode.INVALID_ROLE_ID_REGISTER);
+        }
+        roleService.roleIdExist(roleId);
+        // encode password
+        String encryptStr = passwordEncoder.encode(param.getAccountPwd());
+
+        TbAccountInfo tbDeveloper = new TbAccountInfo(accountStr, encryptStr, roleId, "new register user", email);
+        tbDeveloper.setRoleId(RoleType.DEVELOPER.getValue());
+        tbDeveloper.setAccountStatus(AccountStatus.FROZEN.getValue());
+        tbDeveloper.setExpireTime(LocalDateTime.now().plusYears(1L));
+
+        tbDeveloper.setEmail(param.getEmail());
+        tbDeveloper.setCompanyName(param.getCompanyName());
+        tbDeveloper.setContactAddress(param.getContactAddress());
+        tbDeveloper.setIdCardNumber(param.getIdCardNumber());
+        tbDeveloper.setRealName(param.getRealName());
+        tbDeveloper.setMobile(param.getMobile());
+
+        //save developer
+        Integer affectRow = accountMapper.registerAccount(tbDeveloper);
+
+
+        log.info("success exec method [register] row:{}", affectRow);
+        TbAccountInfo tbAccountInfo = this.queryByAccount(tbDeveloper.getAccount());
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
+        return rspDeveloper;
+    }
+
+
+    /**
+     * @param accountStr
+     */
+    public RspDeveloper freeze(String currentAccount, String accountStr, String description) {
+        log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
+        TbAccountInfo developer = this.queryByAccount(accountStr);
+        if (Objects.isNull(developer)) {
+            log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
+            throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
+        }
+        developer.setAccountStatus(AccountStatus.FROZEN.getValue());
+        developer.setDescription(description);
+        updateAccountStatus(currentAccount, developer);
+
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(developer, rspDeveloper);
+        return rspDeveloper;
+    }
+
+    /**
+     * @param accountStr
+     */
+    public RspDeveloper unfreeze(String currentAccount, String accountStr, String description) {
+        log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
+        TbAccountInfo developer = this.queryByAccount(accountStr);
+        if (Objects.isNull(developer)) {
+            log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
+            throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
+        }
+        developer.setAccountStatus(AccountStatus.NORMAL.getValue());
+        developer.setDescription(description);
+        updateAccountStatus(currentAccount, developer);
+
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(developer, rspDeveloper);
+        return rspDeveloper;
+    }
+
+    /**
+     * 注销用户
+     * @param accountStr
+     */
+    public void cancel(String currentAccount, String accountStr) {
+        log.info("start exec method [freeze]. accountStr:{}", accountStr);
+        TbAccountInfo developer = this.queryByAccount(accountStr);
+        if (Objects.isNull(developer)) {
+            log.warn("start exec method [freeze]. not found record by id:{}", accountStr);
+            throw new NodeMgrException(ConstantCode.INVALID_ACCOUNT_NAME);
+        }
+        developer.setAccountStatus(AccountStatus.CANCEL.getValue());
+        updateAccountStatus(currentAccount, developer);
+
+        // todo 获取链上管理员地址，发起冻结操作
+
+    }
+
+    /**
+     * update account info. 更新详细信息、状态等
+     * 自己修改或者管理员修改
+     */
+    private void updateAccountStatus(String currentAccount, TbAccountInfo accountInfo)
+        throws NodeMgrException {
+
+        // todo check currentAccount is self or manager
+        TbAccountInfo checkAdmin = this.queryByAccount(currentAccount);
+        if (currentAccount.equals(accountInfo.getAccount())
+            || checkAdmin.getRoleId().equals(RoleType.ADMIN.getValue())) {
+            // update account info
+            Integer affectRow = accountMapper.updateAccountRow(accountInfo);
+
+            // check result
+            checkDbAffectRow(affectRow);
+
+            log.debug("end updateAccountRow. affectRow:{}", affectRow);
+        } else {
+            log.error("end updateAccountRow. denied update status:{}|{}", currentAccount, accountInfo.getAccount());
+            throw new NodeMgrException(ConstantCode.UPDATE_ACCOUNT_STATUS_DENIED);
+        }
+    }
+
+    public String loadPrivacyDoc() {
+        String privacyFilePath = "templates/privacy_doc.txt";
+        String privacyDoc = NodeMgrTools.loadFileContent(privacyFilePath);
+        if (StringUtils.isBlank(privacyDoc)) {
+            throw new NodeMgrException(ConstantCode.GET_PRIVACY_DOC_FAILED);
+        }
+        String result = NodeMgrTools.encodedBase64Str(privacyDoc);
+        return result;
     }
 
 }

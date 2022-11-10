@@ -352,7 +352,6 @@ public class  ContractService {
                 return null;
             }
             List<TbContract> contractRow = contractMapper.queryContractByBin(groupId, contractBin);
-            log.debug("start queryContractByBin:{}", contractBin, JsonTools.toJSONString(contractRow));
             return contractRow;
         } catch (RuntimeException ex) {
             log.error("fail queryContractByBin", ex);

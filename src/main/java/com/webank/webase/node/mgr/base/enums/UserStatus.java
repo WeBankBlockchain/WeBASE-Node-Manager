@@ -34,12 +34,12 @@ package com.webank.webase.node.mgr.base.enums;
  * node manager account status
  * different from address's account status to freeze in precompiled
  */
-public enum AccountStatus {
-    UNMODIFIEDPWD(1), NORMAL(2), FROZEN(3), CANCEL(4);
+public enum UserStatus {
+    NORMAL(1), SUSPENDED(2);
 
     private int value;
 
-    private AccountStatus(Integer dataStatus) {
+    private UserStatus(Integer dataStatus) {
         this.value = dataStatus;
     }
 
