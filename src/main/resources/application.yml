@@ -7,6 +7,14 @@ server:
   servlet:
     context-path: /WeBASE-Node-Manager
 
+# https
+  ssl:
+    key-store-type: pkcs12
+    key-store: classpath:server.pkcs12
+    # by default this is 123456
+    key-store-password: 123456
+    enabled: true
+
 
 #mybatis config
 mybatis:
