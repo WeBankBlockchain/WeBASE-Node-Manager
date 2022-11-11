@@ -5,7 +5,7 @@ version: v3.0.0
 server:
   port: 5001
   servlet:
-    context-path: /WeBASE-Node-Manager
+    context-path:  /mgr/WeBASE-Node-Manager
 
 # https
   ssl:
