@@ -36,6 +36,7 @@ public class TbTransHash {
     private String gasUsed;
     private String status;
     private String extraData;
+    private String appId;
 
     /**
      * init by transaction、blockNumber、blockTimestamp.

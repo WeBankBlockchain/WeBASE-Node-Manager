@@ -44,6 +44,7 @@
         gas_used varchar(64) DEFAULT NULL COMMENT 'gas消耗',
         status varchar(10) DEFAULT NULL COMMENT '状态',
         extra_data varchar(1024) DEFAULT NULL COMMENT '额外数据',
+        app_id varchar(64) DEFAULT NULL COMMENT 'app_id',
         PRIMARY KEY (trans_hash),
         KEY index_flag (statistics_flag),
         KEY index_number (block_number),
