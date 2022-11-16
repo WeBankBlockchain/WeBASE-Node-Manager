@@ -26,6 +26,8 @@ import com.webank.webase.node.mgr.external.ExtContractService;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +39,7 @@ import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -170,14 +173,19 @@ public class BlockService {
 
         // save block info
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
-        addBlockInfo(tbBlock, groupId);
 
+
+        BigDecimal sumBlockGasUsed = null;
         // save trans hash
         for (TransactionResult t : transList) {
             JsonTransactionResponse trans = (JsonTransactionResponse) t;
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
+            // get transReceipt
+            TransactionReceipt transReceipt = frontInterface.getTransReceipt(groupId, trans.getHash());
+            // sum trans gasUsed
+            sumBlockGasUsed.add(new BigDecimal(transReceipt.getGasUsed()));
             // save user or contract from block's transaction
             this.saveExternalInfo(groupId, trans, blockInfo.getTimestamp());
             try {
@@ -187,6 +195,8 @@ public class BlockService {
                 Thread.currentThread().interrupt();
             }
         }
+        tbBlock.setGasUsed(sumBlockGasUsed.toString());
+        addBlockInfo(tbBlock, groupId);
     }
 
     /**
