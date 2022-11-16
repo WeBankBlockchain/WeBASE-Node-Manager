@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -129,7 +130,7 @@ public class AccountController extends BaseController {
 
         // query row
         TbAccountInfo tbAccount = accountService.queryByAccount(info.getAccount());
-        tbAccount.setAccountPwd(null);
+        AccountService.hideAccountInfo(tbAccount);
         baseResponse.setData(tbAccount);
 
         log.info("end addAccountInfo useTime:{} result:{}",
@@ -149,8 +150,11 @@ public class AccountController extends BaseController {
         // current
         String currentAccount = accountService.getCurrentAccount(request);
         // add account row
-        RspDeveloper rspDeveloper = accountService.queryAccountDetail(currentAccount);
+        TbAccountInfo tbAccount = accountService.queryAccountDetail(currentAccount);
+        AccountService.hideAccountInfo(tbAccount);
 
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(tbAccount, rspDeveloper);
         baseResponse.setData(rspDeveloper);
 
         log.info("end queryAccountDetail useTime:{} result:{}",
@@ -178,7 +182,8 @@ public class AccountController extends BaseController {
 
         // query row
         TbAccountInfo tbAccount = accountService.queryByAccount(info.getAccount());
-        tbAccount.setAccountPwd(null);
+        AccountService.hideAccountInfo(tbAccount);
+
         baseResponse.setData(tbAccount);
 
         log.info("end updateAccountInfo useTime:{} result:{}",
@@ -207,7 +212,7 @@ public class AccountController extends BaseController {
             AccountListParam param = new AccountListParam(start, pageSize, account,
                 SqlSortType.DESC.getValue());
             List<TbAccountInfo> listOfAccount = accountService.listOfAccount(param);
-            listOfAccount.stream().forEach(accountData -> accountData.setAccountPwd(null));
+            listOfAccount.forEach(AccountService::hideAccountInfo);
             pageResponse.setData(listOfAccount);
             pageResponse.setTotalCount(count);
         }
@@ -311,9 +316,14 @@ public class AccountController extends BaseController {
     public BaseResponse register(@RequestBody @Valid ReqDeveloperRegister param, BindingResult result) {
         log.info("start exec method [register]. param:{}", JsonTools.objToString(param));
         checkBindResult(result);
-        RspDeveloper rspDeveloperVO = accountService.register(param);
+        TbAccountInfo tbAccountInfo = accountService.register(param);
+
+        AccountService.hideAccountInfo(tbAccountInfo);
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
+
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        baseResponse.setData(rspDeveloperVO);
+        baseResponse.setData(rspDeveloper);
         log.info("success exec method [register]. result:{}", JsonTools.objToString(baseResponse));
         return baseResponse;
     }
@@ -329,7 +339,11 @@ public class AccountController extends BaseController {
         // current
         String currentAccount = accountService.getCurrentAccount(request);
 
-        RspDeveloper rspDeveloper = accountService.freeze(currentAccount, param.getAccount(), param.getDescription());
+        TbAccountInfo tbAccountInfo = accountService.freeze(currentAccount, param.getAccount(), param.getDescription());
+
+        AccountService.hideAccountInfo(tbAccountInfo);
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
         log.info("success exec method [freeze] rspDeveloper:{}", rspDeveloper);
         return new BaseResponse(ConstantCode.SUCCESS, rspDeveloper);
     }
@@ -344,7 +358,12 @@ public class AccountController extends BaseController {
         // current
         String currentAccount = accountService.getCurrentAccount(request);
 
-        RspDeveloper rspDeveloper = accountService.unfreeze(currentAccount, param.getAccount(), param.getDescription());
+        TbAccountInfo tbAccountInfo = accountService.unfreeze(currentAccount, param.getAccount(), param.getDescription());
+
+        AccountService.hideAccountInfo(tbAccountInfo);
+        RspDeveloper rspDeveloper = new RspDeveloper();
+        BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
+
         log.info("success exec method [unfreeze] rspDeveloper{}", rspDeveloper);
         return new BaseResponse(ConstantCode.SUCCESS, rspDeveloper);
     }

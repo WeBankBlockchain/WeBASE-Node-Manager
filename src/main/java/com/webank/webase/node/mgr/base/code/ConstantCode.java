@@ -339,8 +339,9 @@ public class ConstantCode {
     public static final RetCode UPDATE_ACCOUNT_STATUS_DENIED = RetCode.mark(202561, "Only admin or self could update account status");
     public static final RetCode ACCOUNT_DISABLED = RetCode.mark(202562, "Account is invalid, please check if frozen or canceld or beyond expiredTime");
     public static final RetCode GET_PRIVACY_DOC_FAILED = RetCode.mark(202563, "Loading privacy doc of template failed");
-
-
+    public static final RetCode SEND_MAIL_FAILED = RetCode.mark(202564, "Send mail failed, please check receiver address or check mail server config");
+    public static final RetCode ACCOUNT_MOBILE_IS_EMPTY = RetCode.mark(202565, "Account's mobile is empty");
+    public static final RetCode ACCOUNT_MOBILE_EXISTS = RetCode.mark(202566, "Account's mobile already exist!");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");

@@ -43,7 +43,7 @@ public class TbAccountInfo {
      */
     private String realName;
     private String idCardNumber;
-    private Long mobile;
+    private String mobile;
     private String contactAddress;
     private String companyName;
     private LocalDateTime expireTime;
@@ -83,7 +83,7 @@ public class TbAccountInfo {
 
     public TbAccountInfo(String account, String accountPwd, Integer roleId, String roleName,
         String roleNameZh, Integer accountStatus, String description, String email,
-        String realName, String idCardNumber, Long mobile, String contactAddress,
+        String realName, String idCardNumber, String mobile, String contactAddress,
         String companyName, LocalDateTime expireTime) {
         this.account = account;
         this.accountPwd = accountPwd;

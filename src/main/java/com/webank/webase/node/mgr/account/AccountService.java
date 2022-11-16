@@ -20,6 +20,7 @@ import com.webank.webase.node.mgr.account.entity.ReqUpdateInfo;
 import com.webank.webase.node.mgr.account.entity.RspDeveloper;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.AesUtils;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.account.entity.AccountInfo;
@@ -70,6 +71,8 @@ public class AccountService {
 
     /**
      * login.
+     * 检测密码、检测账号状态（非冻结）
+     * login逻辑在AccountDetailService中
      */
     public TbAccountInfo login(LoginInfo loginInfo) throws NodeMgrException {
         log.info("start login. loginInfo:{}", JsonTools.toJSONString(loginInfo));
@@ -155,7 +158,7 @@ public class AccountService {
         accountRow.setContactAddress(accountInfo.getContactAddress());
         accountRow.setCompanyName(accountInfo.getCompanyName());
 //        accountRow.setAccountStatus(accountInfo.gettAccountStatus()); 只能在freeze或者cancel修改
-        accountRow.setMobile(accountInfo.getMobile());
+        accountRow.setMobile(String.valueOf(accountInfo.getMobile()));
         accountRow.setRealName(accountInfo.getRealName());
         accountRow.setIdCardNumber(accountInfo.getIdCardNumber());
         accountRow.setDescription(accountInfo.getDescription());
@@ -214,29 +217,30 @@ public class AccountService {
 
     }
 
-    public RspDeveloper queryAccountDetail(String accountStr) {
+    public TbAccountInfo queryAccountDetail(String accountStr) {
         TbAccountInfo tbAccountInfo = queryByAccount(accountStr);
         if (tbAccountInfo == null) {
             throw new NodeMgrException(ConstantCode.ACCOUNT_NOT_EXISTS);
         }
         validateAccount(tbAccountInfo);
-        RspDeveloper rspDeveloper = new RspDeveloper();
-        BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
-        log.debug("end queryAccountDetail. accountRow:{} ", JsonTools.toJSONString(rspDeveloper));
-        return rspDeveloper;
+        log.debug("end queryAccountDetail. accountRow:{} ", JsonTools.toJSONString(tbAccountInfo));
+        return tbAccountInfo;
     }
 
     /**
      * query account info by accountName.
+     * 返回解密后的所有信息
      */
     public TbAccountInfo queryByAccount(String accountStr) {
         log.debug("start queryByAccount. accountStr:{} ", accountStr);
         TbAccountInfo accountRow = accountMapper.queryByAccount(accountStr);
+        this.decryptAccountInfo(accountRow);
         log.debug("end queryByAccount. accountRow:{} ", JsonTools.toJSONString(accountRow));
         return accountRow;
     }
 
-    private void validateAccount(TbAccountInfo tbAccountInfo) {
+    public void validateAccount(TbAccountInfo tbAccountInfo) {
+        log.info("validateAccount {}", tbAccountInfo);
         if (AccountStatus.FROZEN.getValue() == tbAccountInfo.getAccountStatus()
             || AccountStatus.CANCEL.getValue() == tbAccountInfo.getAccountStatus()) {
             log.error("account is invalid status {}|{}", tbAccountInfo.getAccountStatus(),
@@ -257,6 +261,16 @@ public class AccountService {
         int count = accountCount == null ? 0 : accountCount;
         return count;
     }
+
+    /**
+     * query count of account.
+     */
+    public int countOfMobile(String mobile) {
+        Integer accountCount = accountMapper.countOfMobile(mobile);
+        int count = accountCount == null ? 0 : accountCount;
+        return count;
+    }
+
     /**
      * query count of account.
      */
@@ -272,6 +286,7 @@ public class AccountService {
     public List<TbAccountInfo> listOfAccount(AccountListParam param) {
         log.debug("start listOfAccount. param:{} ", JsonTools.toJSONString(param));
         List<TbAccountInfo> list = accountMapper.listOfAccount(param);
+        list.forEach(this::decryptAccountInfo);
         log.debug("end listOfAccount. list:{} ", JsonTools.toJSONString(list));
         return list;
     }
@@ -355,14 +370,25 @@ public class AccountService {
      * register.
      */
     @Transactional
-    public RspDeveloper register(ReqDeveloperRegister param) throws NodeMgrException {
+    public TbAccountInfo register(ReqDeveloperRegister param) throws NodeMgrException {
         log.info("start exec method [register]. param:{}", JsonTools.objToString(param));
 
         String accountStr = param.getAccount();
         Integer roleId = param.getRoleId();
         String email = param.getEmail();
+        String mobile = String.valueOf(param.getMobile());
         // check account
         accountNotExist(accountStr);
+        // check mobile unique
+        if (StringUtils.isNotBlank(mobile)) {
+            int count = this.countOfMobile(mobile);
+            if (count > 0) {
+                throw new NodeMgrException(ConstantCode.ACCOUNT_MOBILE_EXISTS);
+            }
+        } else {
+            throw new NodeMgrException(ConstantCode.ACCOUNT_MOBILE_IS_EMPTY);
+        }
+
         // check role id
         if (!roleId.equals(RoleType.DEVELOPER.getValue()) &&
             !roleId.equals(RoleType.VISITOR.getValue())) {
@@ -374,7 +400,7 @@ public class AccountService {
         String encryptStr = passwordEncoder.encode(param.getAccountPwd());
 
         TbAccountInfo tbDeveloper = new TbAccountInfo(accountStr, encryptStr, roleId, "new register user", email);
-        tbDeveloper.setRoleId(RoleType.DEVELOPER.getValue());
+        tbDeveloper.setRoleId(roleId);
         tbDeveloper.setAccountStatus(AccountStatus.FROZEN.getValue());
         tbDeveloper.setExpireTime(LocalDateTime.now().plusYears(1L));
 
@@ -383,7 +409,10 @@ public class AccountService {
         tbDeveloper.setContactAddress(param.getContactAddress());
         tbDeveloper.setIdCardNumber(param.getIdCardNumber());
         tbDeveloper.setRealName(param.getRealName());
-        tbDeveloper.setMobile(param.getMobile());
+        tbDeveloper.setMobile(String.valueOf(param.getMobile()));
+
+        // 加密身份证和电话
+        this.encryptAccountInfo(tbDeveloper);
 
         //save developer
         Integer affectRow = accountMapper.registerAccount(tbDeveloper);
@@ -391,16 +420,16 @@ public class AccountService {
 
         log.info("success exec method [register] row:{}", affectRow);
         TbAccountInfo tbAccountInfo = this.queryByAccount(tbDeveloper.getAccount());
-        RspDeveloper rspDeveloper = new RspDeveloper();
-        BeanUtils.copyProperties(tbAccountInfo, rspDeveloper);
-        return rspDeveloper;
+        AccountService.hideAccountInfo(tbAccountInfo);
+
+        return tbAccountInfo;
     }
 
 
     /**
      * @param accountStr
      */
-    public RspDeveloper freeze(String currentAccount, String accountStr, String description) {
+    public TbAccountInfo freeze(String currentAccount, String accountStr, String description) {
         log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
         TbAccountInfo developer = this.queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
@@ -411,15 +440,14 @@ public class AccountService {
         developer.setDescription(description);
         updateAccountStatus(currentAccount, developer);
 
-        RspDeveloper rspDeveloper = new RspDeveloper();
-        BeanUtils.copyProperties(developer, rspDeveloper);
-        return rspDeveloper;
+
+        return developer;
     }
 
     /**
      * @param accountStr
      */
-    public RspDeveloper unfreeze(String currentAccount, String accountStr, String description) {
+    public TbAccountInfo unfreeze(String currentAccount, String accountStr, String description) {
         log.info("start exec method [freeze]. accountStr:{} description:{}", accountStr, description);
         TbAccountInfo developer = this.queryByAccount(accountStr);
         if (Objects.isNull(developer)) {
@@ -430,9 +458,8 @@ public class AccountService {
         developer.setDescription(description);
         updateAccountStatus(currentAccount, developer);
 
-        RspDeveloper rspDeveloper = new RspDeveloper();
-        BeanUtils.copyProperties(developer, rspDeveloper);
-        return rspDeveloper;
+
+        return developer;
     }
 
     /**
@@ -485,6 +512,54 @@ public class AccountService {
         }
         String result = NodeMgrTools.encodedBase64Str(privacyDoc);
         return result;
+    }
+
+    private void encryptAccountInfo(TbAccountInfo tbAccountInfo) {
+        if (StringUtils.isNotBlank(tbAccountInfo.getIdCardNumber())) {
+            String encrypted = AesUtils.encrypt(tbAccountInfo.getIdCardNumber(), constants.getAccountInfoAesKey());
+            log.debug("getIdCardNumber:{}, encrypted {}", tbAccountInfo.getIdCardNumber(), encrypted);
+        }
+        if (StringUtils.isNotBlank(tbAccountInfo.getRealName())) {
+            String encrypted = AesUtils.encrypt(tbAccountInfo.getRealName(), constants.getAccountInfoAesKey());
+            log.debug("getRealName:{}, encrypted {}", tbAccountInfo.getRealName(), encrypted);
+        }
+    }
+
+    private void decryptAccountInfo(TbAccountInfo tbAccountInfo) {
+        if (StringUtils.isNotBlank(tbAccountInfo.getIdCardNumber())) {
+            String rawContent = AesUtils.decrypt(tbAccountInfo.getIdCardNumber(), constants.getAccountInfoAesKey());
+            log.debug("getIdCardNumber:{}, encrypted {}", tbAccountInfo.getIdCardNumber(), rawContent);
+            tbAccountInfo.setIdCardNumber(rawContent);
+        }
+        if (StringUtils.isNotBlank(tbAccountInfo.getRealName())) {
+            String rawContent = AesUtils.decrypt(tbAccountInfo.getRealName(), constants.getAccountInfoAesKey());
+            log.debug("getRealName:{}, rawContent {}", tbAccountInfo.getRealName(), rawContent);
+            tbAccountInfo.setRealName(rawContent);
+        }
+    }
+
+    public static void hideAccountInfo(TbAccountInfo tbAccountInfo) {
+        if (StringUtils.isNotBlank(tbAccountInfo.getIdCardNumber())) {
+            String hided = tbAccountInfo.getIdCardNumber().replaceAll("(\\d{4})\\d{10}(\\w{4})", "$1*****$2");
+            log.info("hideAccountInfo id card hided {}", hided);
+            tbAccountInfo.setIdCardNumber(hided);
+        }
+        if (StringUtils.isNotBlank(tbAccountInfo.getMobile())) {
+            String hided = tbAccountInfo.getMobile().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2");
+            log.info("hideAccountInfo mobile hided {}", hided);
+            tbAccountInfo.setMobile(hided);
+        }
+        if (StringUtils.isNotBlank(tbAccountInfo.getRealName())) {
+            String hided;
+            if (NodeMgrTools.isLetterDigit(tbAccountInfo.getRealName())) {
+                hided = tbAccountInfo.getRealName().substring(0,2) + "*";
+            } else {
+                hided = tbAccountInfo.getRealName().substring(0,1) + "*";
+            }
+            log.info("hideAccountInfo real name hided {}", hided);
+            tbAccountInfo.setRealName(hided);
+        }
+        tbAccountInfo.setAccountPwd(null);
     }
 
 }
