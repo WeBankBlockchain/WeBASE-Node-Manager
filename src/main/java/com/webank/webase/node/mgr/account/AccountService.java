@@ -135,11 +135,30 @@ public class AccountService {
 
     /**
      * update account info.
+     * 检查curentAccount
      */
     public void updateAccountVo(String currentAccount, ReqUpdateInfo accountInfo)
         throws NodeMgrException {
         String accountStr = accountInfo.getAccount();
-        String mobile = accountInfo.getMobile() == null ? "" : String.valueOf(accountInfo.getMobile());
+
+        // check currentAccount is self or manager
+        if (!haveAccess2Update(currentAccount, accountStr)) {
+            log.error("end updateAccountVo. denied update status:{}|{}", currentAccount, accountStr);
+            throw new NodeMgrException(ConstantCode.UPDATE_ACCOUNT_STATUS_DENIED);
+        }
+
+        // 需要校验是否修改了，否则不修改
+        // 电话和身份证号前端传来包含*号，意味着未修改
+        String mobile = null;
+        String idCardNumber = null;
+        if (accountInfo.getMobile() != null && !accountInfo.getMobile().contains("*")) {
+            mobile = accountInfo.getMobile();
+        }
+        if (accountInfo.getIdCardNumber() != null && !accountInfo.getIdCardNumber().contains("*")) {
+            idCardNumber = accountInfo.getIdCardNumber();
+        }
+        log.info("updateAccountVo mobile:{}, idCardNumber:{}", mobile, idCardNumber);
+
         // check account
         accountExist(accountStr);
 
@@ -159,24 +178,25 @@ public class AccountService {
         if (accountInfo.getRoleId() != null) {
             accountRow.setRoleId(accountInfo.getRoleId());
         }
-        // 非空邮箱不可修改
+        // db的非空邮箱不可修改
         if (StringUtils.isNotBlank(accountRow.getEmail())) {
             accountRow.setEmail(accountInfo.getEmail());
         }
         accountRow.setContactAddress(accountInfo.getContactAddress());
         accountRow.setCompanyName(accountInfo.getCompanyName());
-//        accountRow.setAccountStatus(accountInfo.gettAccountStatus()); 只能在freeze或者cancel修改
+
+        // status 只能在freeze或者cancel修改
         accountRow.setMobile(mobile);
         accountRow.setRealName(accountInfo.getRealName());
-        accountRow.setIdCardNumber(accountInfo.getIdCardNumber());
+        accountRow.setIdCardNumber(idCardNumber);
         accountRow.setDescription(accountInfo.getDescription());
 
-        if (accountInfo.getExpandTime() != null) {
+        if (accountInfo.getExpandYear() != null) {
             LocalDateTime newExpiredTime;
             if (accountRow.getExpireTime() == null) {
-                newExpiredTime = LocalDateTime.now().plusYears(accountInfo.getExpandTime());
+                newExpiredTime = LocalDateTime.now().plusYears(accountInfo.getExpandYear());
             } else {
-                newExpiredTime = accountRow.getExpireTime().plusYears(accountInfo.getExpandTime());
+                newExpiredTime = accountRow.getExpireTime().plusYears(accountInfo.getExpandYear());
             }
             log.info("updateAccountVo newExpiredTime {}", newExpiredTime);
             accountRow.setExpireTime(newExpiredTime);
@@ -196,7 +216,7 @@ public class AccountService {
      * @param tbAccountInfo
      * @return
      */
-    public Integer updateAccountRowEncrypted(TbAccountInfo tbAccountInfo) {
+    private Integer updateAccountRowEncrypted(TbAccountInfo tbAccountInfo) {
         // 加密身份证和电话
         this.encryptAccountInfo(tbAccountInfo);
         // update account info
@@ -518,20 +538,16 @@ public class AccountService {
         throws NodeMgrException {
 
         // check currentAccount is self or manager
-        TbAccountInfo checkAdmin = this.queryByAccount(currentAccount);
-        if (currentAccount.equals(accountInfo.getAccount())
-            || checkAdmin.getRoleId().equals(RoleType.ADMIN.getValue())) {
-            // update account info
-            Integer affectRow = this.updateAccountRowEncrypted(accountInfo);
-
-            // check result
-            checkDbAffectRow(affectRow);
-
-            log.info("end updateAccountStatus. affectRow:{}", affectRow);
-        } else {
+        if (!haveAccess2Update(currentAccount, accountInfo.getAccount())) {
             log.error("end updateAccountStatus. denied update status:{}|{}", currentAccount, accountInfo.getAccount());
             throw new NodeMgrException(ConstantCode.UPDATE_ACCOUNT_STATUS_DENIED);
         }
+        // update account info
+        Integer affectRow = this.updateAccountRowEncrypted(accountInfo);
+        // check result
+        checkDbAffectRow(affectRow);
+
+        log.info("end updateAccountStatus. affectRow:{}", affectRow);
     }
 
     public String loadPrivacyDoc() {
@@ -594,4 +610,9 @@ public class AccountService {
         tbAccountInfo.setAccountPwd(null);
     }
 
+    private boolean haveAccess2Update(String currentAccount, String accountTarget) {
+        // check currentAccount is self or manager
+        TbAccountInfo checkAdmin = this.queryByAccount(currentAccount);
+        return currentAccount.equals(accountTarget) || checkAdmin.getRoleId().equals(RoleType.ADMIN.getValue());
+    }
 }

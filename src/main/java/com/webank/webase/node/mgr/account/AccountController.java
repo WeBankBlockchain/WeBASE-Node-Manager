@@ -166,7 +166,6 @@ public class AccountController extends BaseController {
      * update account info.
      */
     @PutMapping(value = "/accountInfo")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateAccountInfo(@RequestBody @Valid ReqUpdateInfo info, HttpServletRequest request,
         BindingResult result) throws NodeMgrException {
         checkBindResult(result);
