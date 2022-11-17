@@ -132,6 +132,7 @@ public class AccountService {
     public void updateAccountRow(String currentAccount, ReqUpdateInfo accountInfo)
         throws NodeMgrException {
         String accountStr = accountInfo.getAccount();
+        String mobile = accountInfo.getMobile() == null ? "" : String.valueOf(accountInfo.getMobile());
         // check account
         accountExist(accountStr);
 
@@ -158,7 +159,7 @@ public class AccountService {
         accountRow.setContactAddress(accountInfo.getContactAddress());
         accountRow.setCompanyName(accountInfo.getCompanyName());
 //        accountRow.setAccountStatus(accountInfo.gettAccountStatus()); 只能在freeze或者cancel修改
-        accountRow.setMobile(String.valueOf(accountInfo.getMobile()));
+        accountRow.setMobile(mobile);
         accountRow.setRealName(accountInfo.getRealName());
         accountRow.setIdCardNumber(accountInfo.getIdCardNumber());
         accountRow.setDescription(accountInfo.getDescription());
@@ -376,7 +377,8 @@ public class AccountService {
         String accountStr = param.getAccount();
         Integer roleId = param.getRoleId();
         String email = param.getEmail();
-        String mobile = String.valueOf(param.getMobile());
+        String mobile = param.getMobile() == null ? "" : String.valueOf(param.getMobile());
+
         // check account
         accountNotExist(accountStr);
         // check mobile unique
@@ -409,7 +411,7 @@ public class AccountService {
         tbDeveloper.setContactAddress(param.getContactAddress());
         tbDeveloper.setIdCardNumber(param.getIdCardNumber());
         tbDeveloper.setRealName(param.getRealName());
-        tbDeveloper.setMobile(String.valueOf(param.getMobile()));
+        tbDeveloper.setMobile(mobile);
 
         // 加密身份证和电话
         this.encryptAccountInfo(tbDeveloper);
@@ -420,7 +422,6 @@ public class AccountService {
 
         log.info("success exec method [register] row:{}", affectRow);
         TbAccountInfo tbAccountInfo = this.queryByAccount(tbDeveloper.getAccount());
-        AccountService.hideAccountInfo(tbAccountInfo);
 
         return tbAccountInfo;
     }
@@ -518,10 +519,12 @@ public class AccountService {
         if (StringUtils.isNotBlank(tbAccountInfo.getIdCardNumber())) {
             String encrypted = AesUtils.encrypt(tbAccountInfo.getIdCardNumber(), constants.getAccountInfoAesKey());
             log.debug("getIdCardNumber:{}, encrypted {}", tbAccountInfo.getIdCardNumber(), encrypted);
+            tbAccountInfo.setIdCardNumber(encrypted);
         }
         if (StringUtils.isNotBlank(tbAccountInfo.getRealName())) {
             String encrypted = AesUtils.encrypt(tbAccountInfo.getRealName(), constants.getAccountInfoAesKey());
             log.debug("getRealName:{}, encrypted {}", tbAccountInfo.getRealName(), encrypted);
+            tbAccountInfo.setRealName(encrypted);
         }
     }
 
