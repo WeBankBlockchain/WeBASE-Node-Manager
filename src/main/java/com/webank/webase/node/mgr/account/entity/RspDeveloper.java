@@ -41,7 +41,7 @@ public class RspDeveloper {
      */
     private String realName;
     private String idCardNumber;
-    private Long mobile;
+    private String mobile;
     private String contactAddress;
     private String companyName;
     private LocalDateTime expireTime;

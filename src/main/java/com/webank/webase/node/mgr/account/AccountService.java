@@ -32,6 +32,7 @@ import com.webank.webase.node.mgr.base.enums.AccountStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.account.role.RoleService;
 import com.webank.webase.node.mgr.account.token.TokenService;
+import com.webank.webase.node.mgr.user.UserService;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -68,6 +69,8 @@ public class AccountService {
     private static final String ADMIN_TOKEN_VALUE = "admin";
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private UserService userService;
 
     /**
      * login.
@@ -96,7 +99,7 @@ public class AccountService {
             int loginFailTime = accountRow.getLoginFailTime() + 1;
             log.info("fail login. pwd error,loginFailTime:{}", loginFailTime);
             accountRow.setLoginFailTime(loginFailTime);
-            accountMapper.updateAccountRow(accountRow);
+            this.updateAccountRowEncrypted(accountRow);
             throw new NodeMgrException(ConstantCode.PASSWORD_ERROR);
         }
 
@@ -118,6 +121,10 @@ public class AccountService {
         String encryptStr = passwordEncoder.encode(accountInfo.getAccountPwd());
         // add account row
         TbAccountInfo rowInfo = new TbAccountInfo(accountStr, encryptStr, roleId, null, email);
+
+        // 加密身份证和电话
+        this.encryptAccountInfo(rowInfo);
+
         Integer affectRow = accountMapper.addAccountRow(rowInfo);
 
         // check result
@@ -129,7 +136,7 @@ public class AccountService {
     /**
      * update account info.
      */
-    public void updateAccountRow(String currentAccount, ReqUpdateInfo accountInfo)
+    public void updateAccountVo(String currentAccount, ReqUpdateInfo accountInfo)
         throws NodeMgrException {
         String accountStr = accountInfo.getAccount();
         String mobile = accountInfo.getMobile() == null ? "" : String.valueOf(accountInfo.getMobile());
@@ -165,18 +172,37 @@ public class AccountService {
         accountRow.setDescription(accountInfo.getDescription());
 
         if (accountInfo.getExpandTime() != null) {
-            LocalDateTime newExpiredTime = accountRow.getExpireTime().plusYears(accountInfo.getExpandTime());
-            log.info("updateAccountRow newExpiredTime {}", newExpiredTime);
+            LocalDateTime newExpiredTime;
+            if (accountRow.getExpireTime() == null) {
+                newExpiredTime = LocalDateTime.now().plusYears(accountInfo.getExpandTime());
+            } else {
+                newExpiredTime = accountRow.getExpireTime().plusYears(accountInfo.getExpandTime());
+            }
+            log.info("updateAccountVo newExpiredTime {}", newExpiredTime);
             accountRow.setExpireTime(newExpiredTime);
         }
 
         // update account info
-        Integer affectRow = accountMapper.updateAccountRow(accountRow);
+        Integer affectRow = this.updateAccountRowEncrypted(accountRow);
 
         // check result
         checkDbAffectRow(affectRow);
 
+        log.info("end updateAccountVo. affectRow:{}", affectRow);
+    }
+
+    /**
+     * 包含加密
+     * @param tbAccountInfo
+     * @return
+     */
+    public Integer updateAccountRowEncrypted(TbAccountInfo tbAccountInfo) {
+        // 加密身份证和电话
+        this.encryptAccountInfo(tbAccountInfo);
+        // update account info
+        Integer affectRow = accountMapper.updateAccountRow(tbAccountInfo);
         log.info("end updateAccountRow. affectRow:{}", affectRow);
+        return affectRow;
     }
 
     /**
@@ -209,7 +235,7 @@ public class AccountService {
         // update password
         targetRow.setAccountPwd(passwordEncoder.encode(newAccountPwd));
         targetRow.setAccountStatus(AccountStatus.NORMAL.getValue());
-        Integer affectRow = accountMapper.updateAccountRow(targetRow);
+        Integer affectRow = this.updateAccountRowEncrypted(targetRow);
 
         // check result
         checkDbAffectRow(affectRow);
@@ -478,6 +504,9 @@ public class AccountService {
         updateAccountStatus(currentAccount, developer);
 
         // todo 获取链上管理员地址，发起冻结操作
+        // 直接在本地db suspend这个私钥
+        int result = userService.suspendUserByAccountInfo(accountStr);
+        log.info("suspend user private key in local, result:{}", result);
 
     }
 
@@ -488,19 +517,19 @@ public class AccountService {
     private void updateAccountStatus(String currentAccount, TbAccountInfo accountInfo)
         throws NodeMgrException {
 
-        // todo check currentAccount is self or manager
+        // check currentAccount is self or manager
         TbAccountInfo checkAdmin = this.queryByAccount(currentAccount);
         if (currentAccount.equals(accountInfo.getAccount())
             || checkAdmin.getRoleId().equals(RoleType.ADMIN.getValue())) {
             // update account info
-            Integer affectRow = accountMapper.updateAccountRow(accountInfo);
+            Integer affectRow = this.updateAccountRowEncrypted(accountInfo);
 
             // check result
             checkDbAffectRow(affectRow);
 
-            log.debug("end updateAccountRow. affectRow:{}", affectRow);
+            log.info("end updateAccountStatus. affectRow:{}", affectRow);
         } else {
-            log.error("end updateAccountRow. denied update status:{}|{}", currentAccount, accountInfo.getAccount());
+            log.error("end updateAccountStatus. denied update status:{}|{}", currentAccount, accountInfo.getAccount());
             throw new NodeMgrException(ConstantCode.UPDATE_ACCOUNT_STATUS_DENIED);
         }
     }

@@ -172,13 +172,13 @@ public class AccountController extends BaseController {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
-        log.info("start updateAccountInfo startTime:{}", startTime.toEpochMilli());
+        log.info("start updateAccountInfo startTime:{}, info:{}", startTime.toEpochMilli(), info);
 
         // current
         String currentAccount = accountService.getCurrentAccount(request);
 
         // update account row
-        accountService.updateAccountRow(currentAccount, info);
+        accountService.updateAccountVo(currentAccount, info);
 
         // query row
         TbAccountInfo tbAccount = accountService.queryByAccount(info.getAccount());
