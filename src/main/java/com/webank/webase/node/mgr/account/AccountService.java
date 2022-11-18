@@ -161,6 +161,10 @@ public class AccountService {
 
         // check account
         accountExist(accountStr);
+        // check mobile exist
+        if (StringUtils.isNotBlank(mobile)) {
+            mobileExist(mobile);
+        }
 
         // query by account
         // skip valid
@@ -382,6 +386,31 @@ public class AccountService {
         }
     }
 
+    private void mobileExist(String mobile){
+        if (StringUtils.isNotBlank(mobile)) {
+            int count = this.countOfMobile(mobile);
+            if (count == 0) {
+                throw new NodeMgrException(ConstantCode.ACCOUNT_MOBILE_NOT_EXISTS);
+            }
+        } else {
+            throw new NodeMgrException(ConstantCode.ACCOUNT_MOBILE_IS_EMPTY);
+        }
+    }
+
+
+    private void mobileNotExist(String mobile){
+        if (StringUtils.isNotBlank(mobile)) {
+            int count = this.countOfMobile(mobile);
+            if (count > 0) {
+                throw new NodeMgrException(ConstantCode.ACCOUNT_MOBILE_EXISTS);
+            }
+        } else {
+            throw new NodeMgrException(ConstantCode.ACCOUNT_MOBILE_IS_EMPTY);
+        }
+    }
+
+
+
     /**
      * check db affect row.
      */
@@ -427,15 +456,8 @@ public class AccountService {
 
         // check account
         accountNotExist(accountStr);
-        // check mobile unique
-        if (StringUtils.isNotBlank(mobile)) {
-            int count = this.countOfMobile(mobile);
-            if (count > 0) {
-                throw new NodeMgrException(ConstantCode.ACCOUNT_MOBILE_EXISTS);
-            }
-        } else {
-            throw new NodeMgrException(ConstantCode.ACCOUNT_MOBILE_IS_EMPTY);
-        }
+        // check mobile unique and must not empty
+        mobileNotExist(mobile);
 
         // check role id
         if (!roleId.equals(RoleType.DEVELOPER.getValue()) &&
