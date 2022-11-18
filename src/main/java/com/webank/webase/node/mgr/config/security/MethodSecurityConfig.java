@@ -27,7 +27,6 @@ public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
     protected MethodSecurityMetadataSource customMethodSecurityMetadataSource() {
         boolean enablePreAuthorize = constants.getIsUseSecurity();
         log.info("customMethodSecurityMetadataSource enablePreAuthorize:{}", enablePreAuthorize);
-//        return enablePreAuthorize ? new SecuredAnnotationSecurityMetadataSource() : null;
         return enablePreAuthorize ? new PrePostAnnotationSecurityMetadataSource(
             new ExpressionBasedAnnotationAttributeFactory(getExpressionHandler())) : null;
     }

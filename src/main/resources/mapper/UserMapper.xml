@@ -149,7 +149,12 @@
     update tb_user set user_status=2 where group_id = #{groupId} and address = #{address}
   </update>
 
+  <update id="suspendByAccount">
+    update tb_user set user_status=2 where account = #{account}
+  </update>
+
   <select id="getBySignUserId" parameterType="java.lang.String"  resultMap="userMap">
     select * from tb_user where sign_user_id = #{signUserId}
   </select>
+
 </mapper>

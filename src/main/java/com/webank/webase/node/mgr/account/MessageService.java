@@ -14,15 +14,15 @@
 
 package com.webank.webase.node.mgr.account;
 
-import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
-import com.webank.webase.node.mgr.base.enums.EnableStatus;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -57,6 +57,11 @@ public class MessageService {
             e.printStackTrace();
         }
         log.info("end sendMailBare MimeMessage:{}", message);
-        mailSender.send(message);
+        try {
+            mailSender.send(message);
+        } catch (MailSendException ex) {
+            log.error("sendMail send failed:{}", ex.getMessage(), ex);
+            throw new NodeMgrException(ConstantCode.SEND_MAIL_FAILED);
+        }
     }
 }

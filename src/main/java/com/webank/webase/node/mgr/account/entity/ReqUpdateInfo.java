@@ -29,15 +29,16 @@ public class ReqUpdateInfo {
 
     private String companyName;
     private String realName;
-    private Long mobile;
+
+    private String mobile;
 
     /**
-     * 身份证号
+     * 身份证号，
      */
     private String idCardNumber;
     private String contactAddress;
     /**
      * 延长有效时间，单位：年
      */
-    private Integer expandTime;
+    private Integer expandYear;
 }

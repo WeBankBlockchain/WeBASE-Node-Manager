@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.account.entity;
 
+import com.webank.webase.node.mgr.base.enums.RoleType;
 import java.time.LocalDateTime;
 import lombok.Data;
 
@@ -43,7 +44,7 @@ public class TbAccountInfo {
      */
     private String realName;
     private String idCardNumber;
-    private Long mobile;
+    private String mobile;
     private String contactAddress;
     private String companyName;
     private LocalDateTime expireTime;
@@ -79,11 +80,15 @@ public class TbAccountInfo {
         this.roleId = roleId;
         this.description = description;
         this.email = email;
+        // 开发者默认是3年有效期
+        if (RoleType.DEVELOPER.getValue().equals(roleId) ||RoleType.VISITOR.getValue().equals(roleId)) {
+            this.expireTime = LocalDateTime.now().plusYears(3L);
+        }
     }
 
     public TbAccountInfo(String account, String accountPwd, Integer roleId, String roleName,
         String roleNameZh, Integer accountStatus, String description, String email,
-        String realName, String idCardNumber, Long mobile, String contactAddress,
+        String realName, String idCardNumber, String mobile, String contactAddress,
         String companyName, LocalDateTime expireTime) {
         this.account = account;
         this.accountPwd = accountPwd;
