@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * config acccount and role.
+ * /login
  */
 @Service
 public class AccountDetailsService implements UserDetailsService {
@@ -47,9 +48,15 @@ public class AccountDetailsService implements UserDetailsService {
         TbAccountInfo accountRow = null;
         try {
             accountRow = accountService.queryByAccount(account);
+            // todo 记录登录失败次数  是否在这里调用login函数
+//            int loginFailTime = accountRow.getLoginFailTime() + 1;
+//            log.info("fail login. pwd error,loginFailTime:{}", loginFailTime);
+//            accountRow.setLoginFailTime(loginFailTime);
+//            accountMapper.updateAccountRow(accountRow);
+            accountService.validateAccount(accountRow);
         } catch (Exception e) {
             if (e instanceof NodeMgrException) {
-                throw e;
+                throw new UsernameNotFoundException(JsonTools.toJSONString(((NodeMgrException) e).getRetCode()));
             } else {
                 throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.DB_EXCEPTION));
             }
