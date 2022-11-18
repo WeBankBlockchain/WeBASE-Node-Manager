@@ -163,7 +163,7 @@ public class AccountService {
         accountExist(accountStr);
         // check mobile exist
         if (StringUtils.isNotBlank(mobile)) {
-            mobileExist(mobile);
+            mobileNotExist(mobile);
         }
 
         // query by account
@@ -268,7 +268,13 @@ public class AccountService {
 
     }
 
-    public TbAccountInfo queryAccountDetail(String accountStr) {
+    public TbAccountInfo queryAccountDetail(String currentAccount, String accountStr) {
+        // check currentAccount is self or manager
+        if (!haveAccess2Update(currentAccount, accountStr)) {
+            log.error("end queryAccountDetail. denied update status:{}|{}", currentAccount, accountStr);
+            throw new NodeMgrException(ConstantCode.UPDATE_ACCOUNT_STATUS_DENIED);
+        }
+
         TbAccountInfo tbAccountInfo = queryByAccount(accountStr);
         if (tbAccountInfo == null) {
             throw new NodeMgrException(ConstantCode.ACCOUNT_NOT_EXISTS);

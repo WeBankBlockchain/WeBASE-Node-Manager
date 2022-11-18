@@ -142,16 +142,21 @@ public class AccountController extends BaseController {
      * query account info.
      */
     @GetMapping(value = "/accountInfo")
-    public BaseResponse queryAccountDetail(HttpServletRequest request) throws NodeMgrException {
+    public BaseResponse queryAccountDetail(HttpServletRequest request,
+        @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryAccountDetail. startTime:{}", startTime.toEpochMilli());
 
         // current
         String currentAccount = accountService.getCurrentAccount(request);
+        if (StringUtils.isBlank(account)) {
+            account = currentAccount;
+        }
         // add account row
-        TbAccountInfo tbAccount = accountService.queryAccountDetail(currentAccount);
-        AccountService.hideAccountInfo(tbAccount);
+        TbAccountInfo tbAccount = accountService.queryAccountDetail(currentAccount, account);
+
+//        AccountService.hideAccountInfo(tbAccount);  获取单个，不做隐藏
 
         RspDeveloper rspDeveloper = new RspDeveloper();
         BeanUtils.copyProperties(tbAccount, rspDeveloper);
