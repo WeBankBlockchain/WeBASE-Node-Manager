@@ -161,10 +161,6 @@ public class AccountService {
 
         // check account
         accountExist(accountStr);
-        // check mobile exist
-        if (StringUtils.isNotBlank(mobile)) {
-            mobileNotExist(mobile);
-        }
 
         // query by account
         // skip valid
@@ -190,7 +186,13 @@ public class AccountService {
         accountRow.setCompanyName(accountInfo.getCompanyName());
 
         // status 只能在freeze或者cancel修改
-        accountRow.setMobile(mobile);
+
+        // check mobile if exist
+        if (StringUtils.isNotBlank(mobile) && !accountRow.getMobile().equals(mobile)) {
+            mobileNotExist(mobile);
+            accountRow.setMobile(mobile);
+        }
+
         accountRow.setRealName(accountInfo.getRealName());
         accountRow.setIdCardNumber(idCardNumber);
         accountRow.setDescription(accountInfo.getDescription());
