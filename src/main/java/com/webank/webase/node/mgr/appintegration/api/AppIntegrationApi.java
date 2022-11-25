@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.v3.BcosSDK;
 import org.fisco.bcos.sdk.v3.client.Client;
 import org.fisco.bcos.sdk.v3.config.ConfigOption;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
@@ -90,8 +89,6 @@ public class AppIntegrationApi extends BaseController {
 
 //    @Autowired
 //    private CryptoSuite cryptoSuite;
-    @Autowired
-    private BcosSDK bcosSDK;
     @Autowired
     private AppIntegrationService appIntegrationService;
     @Autowired
@@ -233,10 +230,9 @@ public class AppIntegrationApi extends BaseController {
      * get base info.
      */
     @GetMapping("basicInfo")
-    public BaseResponse getBasicInfo(String groupId) {
+    public BaseResponse getBasicInfo(@RequestParam(required = true) String groupId) {
         BasicInfo basicInfo = new BasicInfo();
-        Client client = bcosSDK.getClient(groupId);
-        basicInfo.setEncryptType(client.getCryptoSuite().cryptoTypeConfig);
+        basicInfo.setEncryptType(frontInterfaceService.getCryptoType(groupId));
         basicInfo.setSslCryptoType(frontInterfaceService.getSSLCryptoType());
         basicInfo.setFiscoBcosVersion(frontInterfaceService.getClientVersion().getVersion());
         basicInfo.setWebaseVersion(versionProperties.getVersion());
@@ -249,9 +245,8 @@ public class AppIntegrationApi extends BaseController {
      */
     @Deprecated
     @GetMapping("encrypt")
-    public BaseResponse getEncryptType(String groupId) {
-        Client client = bcosSDK.getClient(groupId);
-        int encrypt = client.getCryptoSuite().cryptoTypeConfig;
+    public BaseResponse getEncryptType(@RequestParam(required = true) String groupId) {
+        int encrypt = frontInterfaceService.getCryptoType(groupId);
         log.info("getEncryptType:{}", encrypt);
         return new BaseResponse(ConstantCode.SUCCESS, encrypt);
     }
