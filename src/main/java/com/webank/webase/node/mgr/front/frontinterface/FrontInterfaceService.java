@@ -739,6 +739,20 @@ public class FrontInterfaceService {
     }
 
     /**
+     * get sdk's Cert Content from specific front.
+     */
+    public List<SdkCertInfo> getSdkCertInfo() {
+        List<SdkCertInfo> sdkCertList = new ArrayList<>();
+        Map<String, String> certMap =
+                frontRestTools.getForEntity("1", FrontRestTools.URI_CERT_SDK_FILES, Map.class);
+        for (Map.Entry<String, String> entry : certMap.entrySet()) {
+            SdkCertInfo sdkCertInfo = new SdkCertInfo(entry.getKey(), entry.getValue());
+            sdkCertList.add(sdkCertInfo);
+        }
+        return sdkCertList;
+    }
+
+    /**
      * get front's sslCryptoType
      */
     public Integer getSSLCryptoType() {
