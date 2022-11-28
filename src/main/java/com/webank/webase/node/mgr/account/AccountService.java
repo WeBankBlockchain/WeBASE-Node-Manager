@@ -188,7 +188,7 @@ public class AccountService {
         // status 只能在freeze或者cancel修改
 
         // check mobile if exist
-        if (StringUtils.isNotBlank(mobile) && !accountRow.getMobile().equals(mobile)) {
+        if (StringUtils.isNotBlank(mobile) && !mobile.equals(accountRow.getMobile())) {
             mobileNotExist(mobile);
             accountRow.setMobile(mobile);
         }
