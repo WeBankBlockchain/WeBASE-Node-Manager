@@ -160,7 +160,7 @@ public class BlockService {
 
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
-            transSize, sealerIndex,blockInfo.getGasUsed());
+            transSize, sealerIndex);
         return tbBlock;
     }
 
@@ -175,7 +175,7 @@ public class BlockService {
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
 
 
-        BigDecimal sumBlockGasUsed = null;
+        BigDecimal sumBlockGasUsed = new BigDecimal("0");
         // save trans hash
         for (TransactionResult t : transList) {
             JsonTransactionResponse trans = (JsonTransactionResponse) t;
