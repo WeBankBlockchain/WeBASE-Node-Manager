@@ -179,8 +179,15 @@ public class BlockService {
         // save trans hash
         for (TransactionResult t : transList) {
             JsonTransactionResponse trans = (JsonTransactionResponse) t;
+
+
+            // 获取交易交易回执TransactionReceipt
+            TransactionReceipt transactionReceipt = frontInterface.getTransReceipt(groupId, trans.getHash());
+
+
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
-                trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
+                trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp(),
+                    transactionReceipt.getGasUsed(),transactionReceipt.getStatus(),trans.getExtraData());
             transHashService.addTransInfo(groupId, tbTransHash);
             // get transReceipt
             TransactionReceipt transReceipt = frontInterface.getTransReceipt(groupId, trans.getHash());
