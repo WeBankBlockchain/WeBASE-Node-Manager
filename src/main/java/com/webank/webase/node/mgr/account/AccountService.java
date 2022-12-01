@@ -121,6 +121,8 @@ public class AccountService {
         String encryptStr = passwordEncoder.encode(accountInfo.getAccountPwd());
         // add account row
         TbAccountInfo rowInfo = new TbAccountInfo(accountStr, encryptStr, roleId, null, email);
+        // 默认一年后过期
+        rowInfo.setExpireTime(LocalDateTime.now().plusYears(1L));
 
         // 加密身份证和电话
         this.encryptAccountInfo(rowInfo);
@@ -179,7 +181,8 @@ public class AccountService {
             accountRow.setRoleId(accountInfo.getRoleId());
         }
         // db的非空邮箱不可修改
-        if (StringUtils.isNotBlank(accountRow.getEmail())) {
+        if (StringUtils.isNotBlank(accountInfo.getEmail())) {
+            log.warn("db's email is not empty, not modify as:{}|{}", accountRow.getEmail(), accountInfo.getEmail());
             accountRow.setEmail(accountInfo.getEmail());
         }
         accountRow.setContactAddress(accountInfo.getContactAddress());
