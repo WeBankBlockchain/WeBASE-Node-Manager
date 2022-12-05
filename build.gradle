@@ -46,8 +46,9 @@ List spring = [
     "org.springframework:spring-test:$spring_version",
     "org.springframework:spring-web:$spring_version"
 ]
+
 // cover old version
-def spring_security_version="5.6.4"
+def spring_security_version="5.6.9"
 List spring_security = [
     "org.springframework.security:spring-security-core:$spring_security_version",
     "org.springframework.security:spring-security-web:$spring_security_version",
