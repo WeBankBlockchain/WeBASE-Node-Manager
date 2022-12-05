@@ -25,6 +25,7 @@ import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
@@ -48,7 +49,7 @@ public class ConstantProperties {
     public static final int ADDRESS_LENGTH = 42;
     public static final String HAS_ROLE_ADMIN = "hasRole('admin')";
     public static final String HAS_ROLE_ADMIN_OR_DEVELOPER = "hasRole('admin') or hasRole('developer')";
-    
+
     public static final String PARAM_APP_KEY = "appKey";
     public static final String PARAM_APP_SECRET = "appSecret";
     public static final String PARAM_TIMESTAMP = "timestamp";
@@ -137,6 +138,15 @@ public class ConstantProperties {
      * enable pull external account(user address) and contract from block
      */
     private Boolean enableExternalFromBlock = true;
+    /**
+     * register mail check code, if enable is true, require mail
+     */
+    private Boolean enableRegisterMailCheck = false;
+    private String smtpHost = "smtp.qq.com";
+    private Integer smtpPort = 25;
+    private String smtpUsername = "yourmail@qq.com";
+    private String smtpPassword = "yourMailPassword";
+    private String accountInfoAesKey = "b1eab1c216de9746";
 
     //******************* Add in v1.4.0 start. *******************
     public static final int LEAST_SEALER_TWO = 2;
@@ -169,6 +179,8 @@ public class ConstantProperties {
 
     // default port
     private int defaultChainId = 1;
+    // encrypt type
+    private int cryptoTypeConfig = CryptoType.ECDSA_TYPE;
 
     // timeout config (ms)
     // check docker installed and active 1min
@@ -195,7 +207,7 @@ public class ConstantProperties {
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode",
         "/login","/user/privateKey/**", "/encrypt", "/version" };
     private String dockerRepository= "fiscoorg/fisco-webase";
-   // private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
+    // private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";
     private String nodesRootDir = "NODES_ROOT";
     private String nodesRootTmpDir = "NODES_ROOT_TMP";

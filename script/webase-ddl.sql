@@ -192,14 +192,21 @@ CREATE TABLE IF NOT EXISTS tb_account_info (
   account_pwd varchar(250) NOT NULL COMMENT '登录密码',
   role_id int(11) NOT NULL COMMENT '所属角色编号',
   login_fail_time int(2) NOT NULL DEFAULT '0' COMMENT '登录失败次数,默认0，登录成功归0',
-  account_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-未更新密码 2-正常） 默认1',
+  account_status int(1) NOT NULL DEFAULT '1' COMMENT '状态（1-未更新密码 2-正常 3-冻结 4-已注销） 默认1，注册默认3',
   description text COMMENT '备注',
-  email varchar(40) DEFAULT NULL COMMENT '用户邮箱',
+  email varchar(40) DEFAULT NULL COMMENT '用户邮箱，用于接收验证码',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (account)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统账号信息表';
 
+-- email需要用来接收注册验证码
+ALTER TABLE tb_account_info ADD COLUMN expire_time datetime DEFAULT NULL COMMENT '失效时间';
+ALTER TABLE tb_account_info ADD COLUMN company_name varchar(255) DEFAULT NULL COMMENT '用户公司';
+ALTER TABLE tb_account_info ADD COLUMN real_name varchar(50) DEFAULT NULL COMMENT '真实名字';
+ALTER TABLE tb_account_info ADD COLUMN id_card_number varchar(255) DEFAULT NULL COMMENT '身份证号';
+ALTER TABLE tb_account_info ADD COLUMN mobile varchar(255) DEFAULT NULL COMMENT '联系号码';
+ALTER TABLE tb_account_info ADD COLUMN contact_address text DEFAULT NULL COMMENT '联系地址';
 
 
 -- ----------------------------

@@ -87,8 +87,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(value = "api")
 public class AppIntegrationApi extends BaseController {
 
-//    @Autowired
-//    private CryptoSuite cryptoSuite;
     @Autowired
     private AppIntegrationService appIntegrationService;
     @Autowired
@@ -250,7 +248,6 @@ public class AppIntegrationApi extends BaseController {
         log.info("getEncryptType:{}", encrypt);
         return new BaseResponse(ConstantCode.SUCCESS, encrypt);
     }
-
 
     /**
      * query group list.
