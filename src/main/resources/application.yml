@@ -118,7 +118,6 @@ constant:
   smtpPort: 25
   smtpUsername: "yourmail@qq.com"
   smtpPassword: "yourMailPassword"
-  # user info encrypt aes key
   accountInfoAesKey: b1eab1c216de9746
 
 

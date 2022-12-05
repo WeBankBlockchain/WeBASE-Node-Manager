@@ -25,6 +25,7 @@ import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
@@ -178,6 +179,8 @@ public class ConstantProperties {
 
     // default port
     private int defaultChainId = 1;
+    // encrypt type
+    private int cryptoTypeConfig = CryptoType.ECDSA_TYPE;
 
     // timeout config (ms)
     // check docker installed and active 1min
