@@ -96,17 +96,15 @@ public class BeanConfig {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
         log.info("SMTP config:{}", constantProperties.getEnableRegisterMailCheck());
         if (constantProperties.getEnableRegisterMailCheck()) {
-            log.info("SMTP {}|{}|{}|{}",
+            log.info("SMTP {}|{}|{}, password hid",
                 constantProperties.getSmtpHost(),
                 constantProperties.getSmtpPort(),
-                constantProperties.getSmtpUsername(),
-                constantProperties.getSmtpPassword());
+                constantProperties.getSmtpUsername());
             javaMailSender.setHost(constantProperties.getSmtpHost());
             javaMailSender.setPort(constantProperties.getSmtpPort());
             // 启用auth
             javaMailSender.setUsername(constantProperties.getSmtpUsername());
             javaMailSender.setPassword(constantProperties.getSmtpPassword());
-//            javaMailSender.setDefaultEncoding();
             javaMailSender.setProtocol("smtp");
         }
         return javaMailSender;

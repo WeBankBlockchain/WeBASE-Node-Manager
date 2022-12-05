@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.config.security;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;

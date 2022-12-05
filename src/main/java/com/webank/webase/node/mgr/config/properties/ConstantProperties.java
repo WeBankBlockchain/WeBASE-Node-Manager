@@ -146,6 +146,7 @@ public class ConstantProperties {
     private Integer smtpPort = 25;
     private String smtpUsername = "yourmail@qq.com";
     private String smtpPassword = "yourMailPassword";
+    private String accountInfoAesKey = "b1eab1c216de9746";
 
     //******************* Add in v1.4.0 start. *******************
     public static final int LEAST_SEALER_TWO = 2;

@@ -97,32 +97,6 @@ public class TransHashService {
         }
     }
 
-    /**
-     * query count of trans by minus max and min trans_number
-     */
-    public Integer queryCountOfTranByMinus(String groupId)
-            throws NodeMgrException {
-        log.debug("start queryCountOfTranByMinus.");
-        String tableName = TableName.TRANS.getTableName(groupId);
-        try {
-            Integer count = transHashMapper.getCountByMinMax(tableName);
-            log.info("end queryCountOfTranByMinus. count:{}",  count);
-            if (count == null) {
-                return 0;
-            }
-            return count;
-        } catch (BadSqlGrammarException ex) {
-            // v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
-            log.error("fail queryCountOfTranByMinus. ", ex);
-            log.info("restart from queryCountOfTranByMinus to queryCountOfTran: []", ex.getCause());
-            TransListParam queryParam = new TransListParam(null, null);
-            Integer count = queryCountOfTran(groupId, queryParam);
-            return count;
-        } catch (RuntimeException ex) {
-            log.error("fail queryCountOfTranByMinus. ", ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-    }
 
     /**
      * get transaction in highest block

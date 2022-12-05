@@ -42,7 +42,7 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @Order(-999)
-@WebFilter(filterName = "mailCheckCodeFilter", urlPatterns = "/account/register")
+@WebFilter(filterName = "mailCheckCodeFilter", urlPatterns = "/*")
 public class MailCheckCodeFilter implements Filter {
     @Autowired
     private TokenService tokenService;
@@ -64,7 +64,7 @@ public class MailCheckCodeFilter implements Filter {
 
         String tokenInHeard = req.getHeader("token");
         String codeInRequest = req.getParameter("checkCode");
-        log.info("validateMailCode 00. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
+        log.debug("validateMailCode. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
 
         // register接口，查验邮箱的验证码；如果启用了邮箱确认码
         if (constantProperties.getEnableRegisterMailCheck() &&
@@ -89,7 +89,7 @@ public class MailCheckCodeFilter implements Filter {
     private void validateMailCode(HttpServletRequest request) {
         String tokenInHeard = request.getHeader("token");
         String codeInRequest = request.getParameter("checkCode");
-        log.info("validateMailCode. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
+        log.debug("validateMailCode. tokenInHeard:{} codeInRequest:{}", tokenInHeard, codeInRequest);
 
         if (StringUtils.isBlank(codeInRequest)) {
             throw new NodeMgrException(ConstantCode.CHECK_CODE_NULL);
