@@ -249,6 +249,11 @@ public class FrontInterfaceService {
         return encryptType;
     }
 
+    public Integer getCryptoType(String groupId) {
+        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_ENCRYPT_TYPE,
+                Integer.class);
+    }
+
     public Boolean getIsWasmFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
         Boolean encryptType = getFromSpecificFront(groupId, frontIp, frontPort,  FrontRestTools.URI_IS_WASM, Boolean.class);
         return encryptType;
