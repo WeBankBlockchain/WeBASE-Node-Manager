@@ -112,7 +112,7 @@ constant:
   statBlockPageSize: 20 # block stat data to pull in one time
   enableExternalFromBlock: true # enable record account and contract from block
   ###enable user register and mail second check
-  enableRegisterMailCheck: true
+  enableRegisterMailCheck: false
   # SMTP服务用于发送验证码，默认端口为25，暂未支持SSL/TLS（若启用SMTP SSL或TLS则465或587端口）
   smtpHost: smtp.qq.com
   smtpPort: 25
