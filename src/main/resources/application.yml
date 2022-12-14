@@ -1,5 +1,5 @@
 # server version
-version: v3.0.0
+version: v3.0.1
 
 #server config
 server:
@@ -12,7 +12,7 @@ server:
     key-store: classpath:server.pkcs12
     # by default this is 123456
     key-store-password: 123456
-    enabled: true
+    enabled: false
 
 
 #mybatis config
