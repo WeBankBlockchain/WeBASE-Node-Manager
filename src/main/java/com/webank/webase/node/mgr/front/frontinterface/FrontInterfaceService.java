@@ -249,6 +249,11 @@ public class FrontInterfaceService {
         return encryptType;
     }
 
+    public Integer getCryptoType(String groupId) {
+        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_ENCRYPT_TYPE,
+                Integer.class);
+    }
+
     public Boolean getIsWasmFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
         Boolean encryptType = getFromSpecificFront(groupId, frontIp, frontPort,  FrontRestTools.URI_IS_WASM, Boolean.class);
         return encryptType;
@@ -736,6 +741,20 @@ public class FrontInterfaceService {
         Object blockOrTx = frontRestTools.getForEntity(groupId, uri, Object.class);
         log.debug("end searchByBlockNumOrTxHash, blockOrTx:{}", blockOrTx);
         return blockOrTx;
+    }
+
+    /**
+     * get sdk's Cert Content from specific front.
+     */
+    public List<SdkCertInfo> getSdkCertInfo() {
+        List<SdkCertInfo> sdkCertList = new ArrayList<>();
+        Map<String, String> certMap =
+                frontRestTools.getForEntity(GROUPID, FrontRestTools.URI_CERT_SDK_FILES, Map.class);
+        for (Map.Entry<String, String> entry : certMap.entrySet()) {
+            SdkCertInfo sdkCertInfo = new SdkCertInfo(entry.getKey(), entry.getValue());
+            sdkCertList.add(sdkCertInfo);
+        }
+        return sdkCertList;
     }
 
     /**

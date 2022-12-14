@@ -82,7 +82,7 @@ public class StatisticsTransdailyTask {
      */
     private void traverseNetList(List<StatisticalGroupTransInfo> groupStatisticalList)
         throws NodeMgrException {
-        if (groupStatisticalList == null | groupStatisticalList.size() == 0) {
+        if (groupStatisticalList == null || groupStatisticalList.size() == 0) {
             log.warn("updateTransdailyData jump over: no group information exists");
             return;
         }

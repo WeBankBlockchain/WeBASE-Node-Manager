@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.config;
 
+import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -84,6 +85,28 @@ public class BeanConfig {
     @Bean(name = "mailSender")
     public JavaMailSenderImpl getMailSender() {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+        return javaMailSender;
+    }
+
+    /**
+     * mail sender for alert mail in node\mgr\alert\mail\MailService.java
+     */
+    @Bean(name = "checkCode")
+    public JavaMailSenderImpl getCheckCodeMailSender() {
+        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+        log.info("SMTP config:{}", constantProperties.getEnableRegisterMailCheck());
+        if (constantProperties.getEnableRegisterMailCheck()) {
+            log.info("SMTP {}|{}|{}, password hid",
+                constantProperties.getSmtpHost(),
+                constantProperties.getSmtpPort(),
+                constantProperties.getSmtpUsername());
+            javaMailSender.setHost(constantProperties.getSmtpHost());
+            javaMailSender.setPort(constantProperties.getSmtpPort());
+            // 启用auth
+            javaMailSender.setUsername(constantProperties.getSmtpUsername());
+            javaMailSender.setPassword(constantProperties.getSmtpPassword());
+            javaMailSender.setProtocol("smtp");
+        }
         return javaMailSender;
     }
 }

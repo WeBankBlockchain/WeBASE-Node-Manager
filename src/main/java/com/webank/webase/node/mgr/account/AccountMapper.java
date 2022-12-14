@@ -19,6 +19,7 @@ import com.webank.webase.node.mgr.account.entity.AccountListParam;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -27,13 +28,20 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccountMapper {
 
+    Integer registerAccount(TbAccountInfo tbAccount);
+
     Integer addAccountRow(TbAccountInfo tbAccount);
 
     Integer updateAccountRow(TbAccountInfo tbAccount);
 
     TbAccountInfo queryByAccount(@Param("account") String account);
 
+    @Select("select count(1) from tb_account_info where mobile=#{mobile}")
+    Integer countOfMobile(@Param("mobile") String mobile);
+
     Integer countOfAccount(@Param("account") String account);
+
+    Integer countOfAccountAvailable(@Param("account") String account);
 
     List<TbAccountInfo> listOfAccount(@Param("param") AccountListParam param);
 
