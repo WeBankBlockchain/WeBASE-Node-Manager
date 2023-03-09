@@ -28,7 +28,8 @@ List springboot = [
      "org.springframework.boot:spring-boot-starter-mail:$springboot_version",
      "org.springframework.boot:spring-boot-starter-thymeleaf:$springboot_version",
      "org.springframework.boot:spring-boot-starter-aop:$springboot_version",
-     "org.springframework.boot:spring-boot-starter-validation:$springboot_version"
+     "org.springframework.boot:spring-boot-starter-validation:$springboot_version",
+     "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4"
 ]
 
 List jaxb = [
@@ -84,7 +85,6 @@ List swagger = [
 dependencies {
     compile springboot,jaxb,jackson,log4j,scaffold,swagger
     compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.2"
-    compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile 'org.apache.commons:commons-collections4:4.4'
     compile "mysql:mysql-connector-java:8.0.22"
