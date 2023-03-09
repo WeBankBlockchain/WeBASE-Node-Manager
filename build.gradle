@@ -21,37 +21,15 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.1.18.RELEASE"
+def springboot_version="2.5.12"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
      "org.springframework.boot:spring-boot-starter-mail:$springboot_version",
      "org.springframework.boot:spring-boot-starter-thymeleaf:$springboot_version",
-     "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
+     "org.springframework.boot:spring-boot-starter-aop:$springboot_version",
+     "org.springframework.boot:spring-boot-starter-validation:$springboot_version"
 ]
-
-// cover old version
-def spring_version="5.2.15.RELEASE"
-List spring = [
-    "org.springframework:spring-core:$spring_version",
-    "org.springframework:spring-aop:$spring_version",
-    "org.springframework:spring-beans:$spring_version",
-    "org.springframework:spring-context:$spring_version",
-    "org.springframework:spring-expression:$spring_version",
-    "org.springframework:spring-jcl:$spring_version",
-    "org.springframework:spring-jdbc:$spring_version",
-    "org.springframework:spring-tx:$spring_version",
-    "org.springframework:spring-test:$spring_version",
-    "org.springframework:spring-web:$spring_version"
-]
-// cover old version
-def spring_security_version="5.4.4"
-List spring_security = [
-    "org.springframework.security:spring-security-core:$spring_security_version",
-    "org.springframework.security:spring-security-web:$spring_security_version",
-    "org.springframework.security:spring-security-config:$spring_security_version",
-]
-
 
 List jaxb = [
      "javax.xml.bind:jaxb-api:2.3.0",
@@ -64,7 +42,7 @@ List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
 
-def jackson_version = "2.11.4"
+def jackson_version = "2.14.2"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
@@ -78,7 +56,7 @@ List test = [
     "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
-def log4j_version="2.15.0"
+def log4j_version="2.18.0"
 List log4j = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -104,8 +82,8 @@ List swagger = [
 ]
 
 dependencies {
-    compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger
-    compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2"
+    compile springboot,jaxb,jackson,log4j,scaffold,swagger
+    compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.2"
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile 'org.apache.commons:commons-collections4:4.4'

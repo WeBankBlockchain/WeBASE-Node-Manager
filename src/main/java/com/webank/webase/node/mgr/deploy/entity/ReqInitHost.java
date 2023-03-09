@@ -27,7 +27,7 @@ public class ReqInitHost {
      * manually load, pull from dockerhub, pull from cdn&load
      */
     @PositiveOrZero
-    private byte dockerImageType;
+    private int dockerImageType;
     /**
      * force download new image tar and delete old one
      * @default: false
