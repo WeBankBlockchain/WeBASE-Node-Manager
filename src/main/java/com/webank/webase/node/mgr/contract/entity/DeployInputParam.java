@@ -48,7 +48,7 @@ public class DeployInputParam {
     private String contractBin;
     @NotBlank
     private String bytecodeBin;
-    private List<Object> constructorParams;
+    private List<String> constructorParams;
     /**
      * if isWasm = true, address must not null
      */

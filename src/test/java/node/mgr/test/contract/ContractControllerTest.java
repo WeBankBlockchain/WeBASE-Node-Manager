@@ -179,7 +179,7 @@ public class ContractControllerTest extends TestBase {
         param.setUser("");
         param.setContractName("Ok");
         param.setFuncName("trans");
-        param.setFuncParam(Arrays.asList(3));
+        param.setFuncParam(Arrays.asList("3"));
 
 
         //if make exception
