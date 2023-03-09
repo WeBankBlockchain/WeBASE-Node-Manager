@@ -53,10 +53,6 @@ List jackson = [
     "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version",
 ]
 
-List test = [
-    "org.springframework.boot:spring-boot-starter-test:$springboot_version"
-]
-
 def log4j_version="2.18.0"
 List log4j = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
@@ -108,13 +104,17 @@ dependencies {
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
-    testCompile test,mbg
 
     compileOnly lombok
     annotationProcessor lombok
 
+    testCompile mbg
     testCompileOnly lombok
     testAnnotationProcessor lombok
+    testCompile('org.springframework.boot:spring-boot-starter-test:$spring_boot_version') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testCompile 'junit:junit:4.13.1'
 }
 
 configurations {

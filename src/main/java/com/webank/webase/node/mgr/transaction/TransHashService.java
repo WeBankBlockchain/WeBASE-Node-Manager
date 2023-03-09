@@ -219,11 +219,11 @@ public class TransHashService {
         log.info("start getTransFromFrontByHash. groupId:{}  transaction:{}", groupId,
                 transHash);
         TransactionReceipt trans = frontInterface.getTransReceipt(groupId, transHash);
-        BcosBlock.Block block = frontInterface.getBlockByNumber(groupId, new BigInteger(trans.getBlockNumber()));
+        BcosBlock.Block block = frontInterface.getBlockByNumber(groupId, trans.getBlockNumber());
         TbTransHash tbTransHash = null;
         if (trans != null) {
             tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
-                new BigInteger(trans.getBlockNumber()),
+                trans.getBlockNumber(),
                 NodeMgrTools.timestamp2LocalDateTime(block.getTimestamp()));
         }
         log.info("end getTransFromFrontByHash. tbTransHash:{}", JsonTools.toJSONString(tbTransHash));

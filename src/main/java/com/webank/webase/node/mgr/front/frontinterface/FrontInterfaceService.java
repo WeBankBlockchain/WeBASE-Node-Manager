@@ -396,7 +396,7 @@ public class FrontInterfaceService {
             return null;
         }
         ChainTransInfo chainTransInfo = new ChainTransInfo(receipt.getFrom(), receipt.getTo(),
-            receipt.getInput(), new BigInteger(receipt.getBlockNumber()));
+            receipt.getInput(), receipt.getBlockNumber());
         log.debug("end getTransInfoByHash:{}", JsonTools.toJSONString(chainTransInfo));
         return chainTransInfo;
     }
