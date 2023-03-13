@@ -75,6 +75,7 @@ import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -394,6 +395,7 @@ public class GroupService {
                 List<String> nodeInGroup;
                 try {
                     // if observer set removed, it still return itself as observer
+                    // checkSealerAndObserverListContains
                     nodeInGroup = frontInterface.getSealerObserverFromSpecificFront(frontIp, frontPort, groupId);
                 } catch (Exception e) {
                     // case: if front1 group1 stopped, getGroupPeers error, update front1_group1_map invalid fail
@@ -420,6 +422,7 @@ public class GroupService {
         }
         //remove node that's not in groupPeerList and not in sealer/observer list
         // 1.4.3 if observer is removed, observer's nodeId still in groupPeerList
+        // 3.0 fisco, light node does not have a node type, todo treated like removed node
         localNodes.stream()
                 .filter(n -> !DataStatus.starting(n.getNodeActive()))
                 .forEach(node -> {
@@ -433,25 +436,99 @@ public class GroupService {
                 });
     }
 
+//    /** 3.0.2 弃用
+//     * save new peers that not in group peers
+//     */
+//    private void savePeerList(String groupId, List<String> groupPeerList) {
+//        //get all local nodes
+//        List<TbNode> localNodeList = nodeService.queryByGroupId(groupId);
+//        //save new nodes
+//        for (String nodeId : groupPeerList) {
+//            // if local has this node, count = 1
+//            long count = localNodeList.stream()
+//                .filter(ln -> nodeId.equals(ln.getNodeId()) && groupId.equals(ln.getGroupId()))
+//                .count();
+//            // local node not contains this one:
+//            if (count != 1) {
+//                nodeService.addNodeInfo(groupId, nodeId);
+//            }
+//        }
+//    }
 
     /**
-     * save new peers that not in group peers
+     * save new peers
+     * 2023/03/13 v3.0.2
      */
     private void savePeerList(String groupId, List<String> groupPeerList) {
-        //get all local nodes
+        // get all local nodes
         List<TbNode> localNodeList = nodeService.queryByGroupId(groupId);
-        //save new nodes
+        log.debug("updatePeerList groupId:{},localNodeList{}", groupId, localNodeList);
+        // get peers on chain
+        // todo 只有单个front的话，一直拿到的peers都是固定的（peers不包含自己的ip）
+        Peers.PeersInfo selfAndPeerList = frontInterface.getPeers(groupId);
+        log.debug("updatePeerList groupId:{},selfAndPeerList {}", groupId, selfAndPeerList);
+        // save new nodes
         for (String nodeId : groupPeerList) {
-            // if local has this node, count = 1
             long count = localNodeList.stream()
-                .filter(ln -> nodeId.equals(ln.getNodeId()) && groupId.equals(ln.getGroupId()))
+                .filter(ln -> groupId.equals(ln.getGroupId()) && nodeId.equalsIgnoreCase(ln.getNodeId()))
                 .count();
-            // local node not contains this one:
-            if (count != 1) {
-                nodeService.addNodeInfo(groupId, nodeId);
+            log.debug("updatePeerList count:{},nodeId {}", count, nodeId);
+            // db没有，找到endpoint并保存
+            if (count == 0) {
+                Peers.PeerInfo newPeer = null;
+                // check self
+                for (Peers.NodeIDInfo nodeIDInfo: selfAndPeerList.getGroupNodeIDInfo()) {
+                    log.info("updatePeerList nodeIDInfo:{}", nodeIDInfo);
+                    // 根据groupId找到对应的groupNodeId
+                    if (nodeIDInfo.getGroup().equalsIgnoreCase(groupId)) {
+                        long countNodeId = nodeIDInfo.getNodeIDList().stream()
+                            .filter(nodeId::equalsIgnoreCase)
+                            .count();
+                        if (countNodeId != 0) {
+                            newPeer = new Peers.PeerInfo();
+                            newPeer.setP2pNodeID(nodeId);
+                            // 此处保存空白的ip，因为self拿到的是0.0.0.0
+                            // newPeer.setEndPoint(selfAndPeerList.getEndPoint());
+                            break;
+                        }
+                    }
+                }
+                if (newPeer != null) {
+                    log.info("updatePeerList found in self {}", newPeer);
+                    nodeService.addNodeInfo(groupId, newPeer);
+                    continue; // 下一个node
+                }
+                // self没找到，遍历peers
+                log.info("updatePeerList find in peers");
+                for (Peers.PeerInfo peerInfo: selfAndPeerList.getPeers()) {
+                    // 此时newPeer为null
+                    for (Peers.NodeIDInfo nodeIDInfo: peerInfo.getGroupNodeIDInfo()) {
+                        log.info("updatePeerList peers nodeIDInfo:{}", nodeIDInfo);
+                        // 根据groupId找到对应的groupNodeId
+                        if (nodeIDInfo.getGroup().equalsIgnoreCase(groupId)) {
+                            long countNodeId = nodeIDInfo.getNodeIDList().stream()
+                                .filter(nodeId::equalsIgnoreCase)
+                                .count();
+                            // 找到了对应的p2pEndpoint
+                            if (countNodeId != 0) {
+                                newPeer = new Peers.PeerInfo();
+                                newPeer.setP2pNodeID(nodeId);
+                                newPeer.setEndPoint(peerInfo.getEndPoint());
+                                break;
+                            }
+                        }
+                    }
+                    if (newPeer != null) {
+                        log.info("updatePeerList found in peers {}", newPeer);
+                        nodeService.addNodeInfo(groupId, newPeer);
+                        break;
+                    }
+                }
             }
         }
+        // delete invalid peers not in here, but in removeInvalidPeer in resetGroupList
     }
+
 
 
     /**
