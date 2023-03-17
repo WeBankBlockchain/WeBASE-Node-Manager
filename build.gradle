@@ -122,7 +122,9 @@ configurations {
     all*.exclude group: 'jline', module: 'jline'
     all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
     all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
-    all*.exclude group: 'io.netty', module: 'netty-all'
+    // scaffold imported, not using ssl connect with fisco node, exclude it
+    all*.exclude group: "org.fisco-bcos", module: 'netty-sm-ssl-context'
+
 }
 
 sourceSets {
