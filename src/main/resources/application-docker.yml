@@ -63,7 +63,8 @@ constant:
   deployedModifyEnable: true
   isDeleteInfo: true
   transRetainMax: 10000
-  deleteInfoCron: "0 0/1 * * * ?"
+  # per 15 seconds
+  deleteInfoCron: "*/15 * * * * ?"
   statisticsTransDailyCron: "0 0/1 * * * ?"
   resetGroupListCycle: 600000
   groupInvalidGrayscaleValue: 1M    # y:year, M:month, d:day of month, h:hour, m:minute, n:forever valid
