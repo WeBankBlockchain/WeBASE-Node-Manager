@@ -35,7 +35,7 @@
     insert ignore into ${tableName}
     (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time,gas_used)
     values
-    (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW().#{block.gasUsed})
+    (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW(),#{block.gasUsed})
   </insert>
 
   <update id="update">
