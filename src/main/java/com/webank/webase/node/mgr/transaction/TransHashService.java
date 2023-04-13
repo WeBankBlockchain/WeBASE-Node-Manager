@@ -99,31 +99,6 @@ public class TransHashService {
 
 
     /**
-     * get transaction in highest block
-     * @param groupId
-     * @return number of block height
-     * @throws NodeMgrException
-     */
-//    public Integer queryLatestTransBlockNum(String groupId, TransListParam param)
-//            throws NodeMgrException {
-//        log.debug("start queryApproximateCount. groupId:{}", groupId);
-//        String tableName = TableName.TRANS.getTableName(groupId);
-//        try {
-//            List<TbTransHash> latestBlockTrans = transHashMapper.getLatestBlockTrans(tableName, param);
-//            if(latestBlockTrans.size() == 0) {
-//                return 0;
-//            }
-//            Integer highestBlockNum = latestBlockTrans.get(0).getBlockNumber().intValue();
-//            log.info("end queryApproximateCount. groupId:{} latestBlockTrans:{}",
-//                    groupId, latestBlockTrans);
-//            return highestBlockNum;
-//        } catch (RuntimeException ex) {
-//            log.error("fail queryApproximateCount. groupId:{}", groupId, ex);
-//            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-//        }
-//    }
-
-    /**
      * query min and max block number.
      */
     public List<MinMaxBlock> queryMinMaxBlock(String groupId) throws NodeMgrException {
@@ -219,11 +194,11 @@ public class TransHashService {
         log.info("start getTransFromFrontByHash. groupId:{}  transaction:{}", groupId,
                 transHash);
         TransactionReceipt trans = frontInterface.getTransReceipt(groupId, transHash);
-        BcosBlock.Block block = frontInterface.getBlockByNumber(groupId, new BigInteger(trans.getBlockNumber()));
+        BcosBlock.Block block = frontInterface.getBlockByNumber(groupId, trans.getBlockNumber());
         TbTransHash tbTransHash = null;
         if (trans != null) {
             tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
-                new BigInteger(trans.getBlockNumber()),
+                trans.getBlockNumber(),
                 NodeMgrTools.timestamp2LocalDateTime(block.getTimestamp()));
         }
         log.info("end getTransFromFrontByHash. tbTransHash:{}", JsonTools.toJSONString(tbTransHash));

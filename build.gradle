@@ -1,6 +1,22 @@
 group = 'com.webank.webase.node.mgr'
 version = '1.0.0-SNAPSHOT'
 
+println "======Gradle version:" + gradle.gradleVersion
+if (gradle.gradleVersion.startsWith("7")) {
+    println "Gradle 7.x not support yet!\n ====== please use Gradle version from 4.6.x to 6.9.x "
+} else if (gradle.gradleVersion.startsWith("6")
+        || gradle.gradleVersion.startsWith("5")
+        || gradle.gradleVersion.startsWith("4.10")
+        || gradle.gradleVersion.startsWith("4.9")
+        || gradle.gradleVersion.startsWith("4.8")
+        || gradle.gradleVersion.startsWith("4.7")
+) {
+    println "Gradle with version >= 4.6 detected"
+} else {
+    println "Gradle with version < 4.6 detected"
+}
+
+
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -21,40 +37,16 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.3.12.RELEASE"
+def springboot_version="2.5.12"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
      "org.springframework.boot:spring-boot-starter-mail:$springboot_version",
      "org.springframework.boot:spring-boot-starter-thymeleaf:$springboot_version",
      "org.springframework.boot:spring-boot-starter-aop:$springboot_version",
-     "org.springframework.boot:spring-boot-starter-validation:$springboot_version"
-
+     "org.springframework.boot:spring-boot-starter-validation:$springboot_version",
+     "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4"
 ]
-
-// cover old version
-def spring_version="5.2.22.RELEASE"
-List spring = [
-    "org.springframework:spring-core:$spring_version",
-    "org.springframework:spring-aop:$spring_version",
-    "org.springframework:spring-beans:$spring_version",
-    "org.springframework:spring-context:$spring_version",
-    "org.springframework:spring-expression:$spring_version",
-    "org.springframework:spring-jcl:$spring_version",
-    "org.springframework:spring-jdbc:$spring_version",
-    "org.springframework:spring-tx:$spring_version",
-    "org.springframework:spring-test:$spring_version",
-    "org.springframework:spring-web:$spring_version"
-]
-
-// cover old version
-def spring_security_version="5.6.9"
-List spring_security = [
-    "org.springframework.security:spring-security-core:$spring_security_version",
-    "org.springframework.security:spring-security-web:$spring_security_version",
-    "org.springframework.security:spring-security-config:$spring_security_version",
-]
-
 
 List jaxb = [
      "javax.xml.bind:jaxb-api:2.3.0",
@@ -67,18 +59,14 @@ List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
 
-def jackson_version = "2.13.4"
+def jackson_version = "2.14.2"
 List jackson = [
-    "com.fasterxml.jackson.core:jackson-databind:2.13.4.2",
+    "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
     "com.fasterxml.jackson.core:jackson-core:$jackson_version",
     "com.fasterxml.jackson.module:jackson-module-parameter-names:$jackson_version",
     "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version",
     "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version",
-]
-
-List test = [
-    "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
 def log4j_version="2.18.0"
@@ -114,9 +102,11 @@ List commons = [
 ]
 
 dependencies {
-    compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger,commons
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0')
-    compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
+    compile springboot,jaxb,jackson,log4j,scaffold,swagger,commons
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0-SNAPSHOT') {
+        exclude group: "org.fisco-bcos.java-sdk"
+        exclude group: "org.slf4j"
+    }
     runtime "mysql:mysql-connector-java:8.0.28"
     compile "com.zaxxer:HikariCP:3.2.0"
     compile 'org.bouncycastle:bcprov-jdk15on:1.69'
@@ -130,13 +120,17 @@ dependencies {
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
-    testCompile test,mbg
 
     compileOnly lombok
     annotationProcessor lombok
 
+    testCompile mbg
     testCompileOnly lombok
     testAnnotationProcessor lombok
+    testCompile('org.springframework.boot:spring-boot-starter-test:$spring_boot_version') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testCompile 'junit:junit:4.13.1'
 }
 
 configurations {

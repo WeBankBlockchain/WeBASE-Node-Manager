@@ -66,7 +66,7 @@ public class ContractServiceTest extends TestBase {
         param.setContractName("Ok");
         param.setContractAddress("0x821bd01b8aa7f14b53bc62da33c9882bbe045459");
         param.setFuncName("trans");
-        param.setFuncParam(Arrays.asList(3));
+        param.setFuncParam(Arrays.asList("3"));
 
         //trans
         Object transRsp = contractService.sendTransaction(param);

@@ -16,7 +16,6 @@ package com.webank.webase.node.mgr.node;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ConsensusType;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.deploy.chain.ChainService;
@@ -33,7 +32,6 @@ import com.webank.webase.node.mgr.node.entity.TbNode;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.ValidateUtil;
 import java.math.BigInteger;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +39,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.v3.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +93,48 @@ public class NodeService {
         nodeMapper.add(tbNode);
     }
 
+    /**
+     * add new node data.
+     *
+     * @param peerInfo 已经用group的nodeId覆盖peerInfo自带的nodeId
+     */
+    public void addNodeInfo(String groupId, Peers.PeerInfo peerInfo) {
+        log.info("start exec method[addNodeInfo]. peerInfo:{} group:{}", peerInfo, groupId);
+        String groupNodeId = peerInfo.getP2pNodeID();
+        //add db
+        TbNode tbNode = nodeMapper.getByNodeIdAndGroupId(groupNodeId, groupId);
+        if (Objects.nonNull(tbNode)) {
+            log.debug("finish exec method[addNodeInfo]. jump over, found record by node:{} group:{}",
+                groupNodeId, groupId);
+            return;
+        }
+
+        String nodeIp = null;
+        Integer nodeP2PPort = null;
+
+        if (StringUtils.isNotBlank(peerInfo.getEndPoint())) {
+            String[] ipPort = peerInfo.getEndPoint().split(":");
+            nodeIp = ipPort[0];
+            nodeP2PPort = Integer.valueOf(ipPort[1]);
+        }
+        String nodeName = groupId + "_" + groupNodeId;
+
+        // add row
+        tbNode = new TbNode();
+        tbNode.setAgency("fisco");
+        tbNode.setNodeId(peerInfo.getP2pNodeID());
+        tbNode.setGroupId(groupId);
+        tbNode.setNodeIp(nodeIp);
+        tbNode.setNodeName(nodeName);
+        tbNode.setP2pPort(nodeP2PPort);
+        tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+        LocalDateTime now = LocalDateTime.now();
+        tbNode.setCreateTime(now);
+        tbNode.setModifyTime(now);
+        log.info("end exec method[addNodeInfo]. tbNode:{} group:{}", tbNode, groupId);
+
+        nodeMapper.add(tbNode);
+    }
 
     /**
      * query count of node.
@@ -197,6 +238,56 @@ public class NodeService {
     public void checkAndUpdateNodeStatus(String groupId) {
         //get local node list
         List<TbNode> nodeList = queryByGroupId(groupId);
+        // 如果ip和机构为空，则补齐
+        nodeList.stream().filter(n -> StringUtils.isBlank(n.getNodeIp()))
+            .forEach(tbNode -> {
+                log.info("ip is empty, now complete:{}", tbNode);
+                try {
+                    // 只有单个front的话，一直拿到的peers都是固定的
+                    Peers.PeersInfo selfAndPeer = frontInterface.getPeers(groupId);
+                    log.info("complete selfAndPeer:{}", selfAndPeer);
+                    // 被访问的节点的groupNodeIDInfo找
+                    String selfNodeId = "";
+                    for (Peers.NodeIDInfo nodeIDInfo : selfAndPeer.getGroupNodeIDInfo()) {
+                        if (nodeIDInfo.getGroup().equalsIgnoreCase(groupId)) {
+                            selfNodeId = nodeIDInfo.getNodeIDList().get(0); // todo 用群组的第一个nodeId代表这个节点
+                            break;
+                        }
+                    }
+                    log.info("selfNodeId :{}|{}", selfNodeId, tbNode.getNodeId());
+                    // 被访问的节点不会返回节点ip，因此不进行updateip的操作
+
+                    // 不等于self，没找到
+                    if (!tbNode.getNodeId().equalsIgnoreCase(selfNodeId)) {
+                        // 则在peer里找ip
+                        selfAndPeer.getPeers().forEach(peerInfo -> {
+                            String peerNodeId = "";
+                            for (Peers.NodeIDInfo nodeIDInfo : peerInfo.getGroupNodeIDInfo()) {
+                                if (nodeIDInfo.getGroup().equalsIgnoreCase(groupId)) {
+                                    peerNodeId = nodeIDInfo.getNodeIDList().get(0); // todo 用群组的第一个nodeId代表这个节点
+                                    break;
+                                }
+                            }
+                            log.info("peerNodeId :{}|{}", peerNodeId, tbNode.getNodeId());
+                            // 找到了peer中对应的groupNodeId 和db的nodeId相等
+                            if (peerNodeId.equalsIgnoreCase(tbNode.getNodeId())) {
+                                log.info("peerInfo {}|{}", peerInfo.getP2pNodeID(), peerInfo.getEndPoint());
+                                if (StringUtils.isNotBlank(peerInfo.getEndPoint())) {
+                                    String[] ipPort = peerInfo.getEndPoint().split(":");
+                                    String nodeIp = ipPort[0];
+                                    Integer nodeP2PPort = Integer.valueOf(ipPort[1]);
+                                    tbNode.setNodeIp(nodeIp);
+                                    tbNode.setP2pPort(nodeP2PPort);
+                                }
+                                this.updateNode(tbNode);
+                            }
+                        });
+                    }
+                } catch (Exception ex) {
+                    log.warn("error get peer error to update ip and agency {}", ex.getMessage());
+                }
+            });
+
         List<NodeStatusInfo> nodeStatusInfoList = frontInterface.getNodeStatusList(groupId);
         for (TbNode tbNode : nodeList) {
             String nodeId = tbNode.getNodeId();
@@ -209,7 +300,6 @@ public class NodeService {
                 continue;
             }
             tbNode.setBlockNumber(new BigInteger(String.valueOf(nodeStatusInfo.getBlockNumber())));
-//            tbNode.setPbftView(new BigInteger(String.valueOf(nodeStatusInfo.getPbftView())));
             tbNode.setNodeActive(nodeStatusInfo.getStatus() == 1 ? DataStatus.NORMAL.getValue() : DataStatus.INVALID.getValue());
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
