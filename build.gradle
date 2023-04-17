@@ -37,7 +37,7 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.5.12"
+def springboot_version="2.7.10"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
@@ -104,7 +104,6 @@ List commons = [
 dependencies {
     compile springboot,jaxb,jackson,log4j,scaffold,swagger,commons
     compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0-SNAPSHOT') {
-        exclude group: "org.fisco-bcos.java-sdk"
         exclude group: "org.slf4j"
     }
     runtime "mysql:mysql-connector-java:8.0.28"
@@ -114,7 +113,7 @@ dependencies {
     // cover old version
     compile 'com.google.guava:guava:30.0-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
-    compile 'org.yaml:snakeyaml:1.31'
+    compile 'org.yaml:snakeyaml:2.0'
     compile 'org.apache.commons:commons-text:1.10.0'
 
     compile 'com.jcraft:jsch:0.1.55'
@@ -127,7 +126,7 @@ dependencies {
     testCompile mbg
     testCompileOnly lombok
     testAnnotationProcessor lombok
-    testCompile('org.springframework.boot:spring-boot-starter-test:$spring_boot_version') {
+    testCompile("org.springframework.boot:spring-boot-starter-test:$springboot_version") {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testCompile 'junit:junit:4.13.1'

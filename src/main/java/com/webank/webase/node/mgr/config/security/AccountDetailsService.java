@@ -15,15 +15,15 @@
  */
 package com.webank.webase.node.mgr.config.security;
 
-import com.webank.webase.node.mgr.account.AccountMapper;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -40,6 +40,7 @@ import org.springframework.stereotype.Service;
 public class AccountDetailsService implements UserDetailsService {
 
     @Autowired
+    @Lazy
     private AccountService accountService;
 
     @Override

@@ -100,6 +100,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -126,14 +127,19 @@ public class FrontService {
     @Autowired
     private NodeService nodeService;
     @Autowired
+    @Lazy
     private GroupService groupService;
     @Autowired
+    @Lazy
     private FrontGroupMapService frontGroupMapService;
     @Autowired
+    @Lazy
     private FrontInterfaceService frontInterface;
     @Autowired
+    @Lazy
     private FrontGroupMapCache frontGroupMapCache;
     @Autowired
+    @Lazy
     private ResetGroupListTask resetGroupListTask;
     @Autowired
     private ConstantProperties constants;
@@ -150,8 +156,10 @@ public class FrontService {
     @Autowired
     private AnsibleService ansibleService;
     @Autowired
+    @Lazy
     private HostService hostService;
     @Autowired
+    @Lazy
     private ChainService chainService;
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
