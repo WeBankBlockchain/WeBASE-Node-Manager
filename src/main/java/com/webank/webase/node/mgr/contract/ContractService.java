@@ -89,6 +89,7 @@ public class  ContractService {
     @Autowired
     private UserService userService;
     @Autowired
+    @Lazy
     private AbiService abiService;
     @Autowired
     private PermissionManageService permissionManageService;
@@ -103,8 +104,10 @@ public class  ContractService {
     @Autowired
     private CryptoSuite cryptoSuite;
     @Autowired
+    @Lazy
     private GroupService groupService;
     @Autowired
+    @Lazy
     private ExtContractService extContractService;
 
     /**
