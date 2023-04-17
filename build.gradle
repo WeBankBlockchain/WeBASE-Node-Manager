@@ -37,7 +37,7 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.5.12"
+def springboot_version="2.7.10"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
@@ -100,7 +100,10 @@ List swagger = [
 
 dependencies {
     compile springboot,jaxb,jackson,log4j,scaffold,swagger
-    compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.2"
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.2') {
+        // 不需要连接节点，因此去除
+        exclude group: "org.fisco-bcos", module: 'netty-sm-ssl-context'
+    }
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile 'org.apache.commons:commons-collections4:4.4'
     compile "mysql:mysql-connector-java:8.0.22"
@@ -108,9 +111,9 @@ dependencies {
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.67'
     // cover old version
-    compile 'com.google.guava:guava:28.2-jre'
+    compile 'com.google.guava:guava:29.0-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
-    compile 'org.yaml:snakeyaml:1.31'
+    compile 'org.yaml:snakeyaml:2.0'
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
     compile ('com.github.docker-java:docker-java:3.2.1') {

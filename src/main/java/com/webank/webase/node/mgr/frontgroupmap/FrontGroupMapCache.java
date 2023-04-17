@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FrontGroupMapCache {
 
     @Autowired
+    @Lazy
     private FrontGroupMapService mapService;
 
     private static List<FrontGroup> mapList;

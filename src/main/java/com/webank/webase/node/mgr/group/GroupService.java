@@ -95,6 +95,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -128,12 +129,15 @@ public class GroupService {
     @Autowired
     private NodeService nodeService;
     @Autowired
+    @Lazy
     private ContractService contractService;
     @Autowired
     private MethodService methodService;
     @Autowired
+    @Lazy
     private TransDailyService transDailyService;
     @Autowired
+    @Lazy
     private BlockService blockService;
     @Autowired
     private DeployShellService deployShellService;
@@ -142,6 +146,7 @@ public class GroupService {
     @Autowired
     private ConstantProperties constantProperties;
     @Autowired
+    @Lazy
     private AbiService abiService;
     @Autowired
     private GovernVoteService governVoteService;
@@ -155,7 +160,9 @@ public class GroupService {
     private StatService statService;
 
 
-    @Autowired private ChainService chainService;
+    @Autowired
+    @Lazy
+    private ChainService chainService;
     @Autowired private AnsibleService ansibleService;
 
     public static final String RUNNING_GROUP = "RUNNING";

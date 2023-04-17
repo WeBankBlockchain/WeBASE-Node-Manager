@@ -13,7 +13,6 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import com.webank.scaffold.util.CommonUtil;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
@@ -24,19 +23,18 @@ import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.UserType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.tools.HttpRequestTools;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.monitor.MonitorService;
+import com.webank.webase.node.mgr.tools.HttpRequestTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.KeyPair;
 import com.webank.webase.node.mgr.user.entity.ReqBindPrivateKey;
 import com.webank.webase.node.mgr.user.entity.ReqImportPem;
-import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UserParam;
@@ -77,6 +75,7 @@ public class UserService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
+    @Lazy
     private GroupService groupService;
     @Autowired
     private FrontRestTools frontRestTools;

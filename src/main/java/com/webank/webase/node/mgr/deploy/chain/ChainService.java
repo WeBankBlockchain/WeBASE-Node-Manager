@@ -70,6 +70,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,10 +93,13 @@ public class ChainService {
     @Autowired
     private ConstantProperties cproperties;
     @Autowired
+    @Lazy
     private FrontService frontService;
     @Autowired
+    @Lazy
     private AgencyService agencyService;
     @Autowired
+    @Lazy
     private GroupService groupService;
     @Autowired
     private RestTemplate genericRestTemplate;
@@ -104,14 +108,17 @@ public class ChainService {
     @Autowired
     private DeployShellService deployShellService;
     @Autowired
+    @Lazy
     private HostService hostService;
     @Autowired
+    @Lazy
     private NodeService nodeService;
     @Autowired
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private ConstantProperties constant;
     @Autowired
+    @Lazy
     private NodeAsyncService nodeAsyncService;
     @Autowired
     private CertService certService;
