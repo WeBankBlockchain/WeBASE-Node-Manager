@@ -80,6 +80,7 @@ public class UserService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
+    @Lazy
     private GroupService groupService;
     @Autowired
     private FrontRestTools frontRestTools;

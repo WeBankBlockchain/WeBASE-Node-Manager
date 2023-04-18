@@ -86,8 +86,10 @@ public class  ContractService {
     @Autowired
     private FrontInterfaceService frontInterface;
     @Autowired
+    @Lazy
     private UserService userService;
     @Autowired
+    @Lazy
     private AbiService abiService;
     @Autowired
     private ContractPathService contractPathService;
@@ -100,10 +102,13 @@ public class  ContractService {
     @Autowired
     private Map<Integer, CryptoSuite> cryptoSuiteMap;
     @Autowired
+    @Lazy
     private GroupService groupService;
     @Autowired
+    @Lazy
     private ExtContractService extContractService;
     @Autowired
+    @Lazy
     private FrontService frontService;
 
     /**
