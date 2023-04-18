@@ -37,6 +37,7 @@ import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -157,7 +158,7 @@ public class BlockService {
 
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
-            transSize, sealerIndex);
+            transSize, sealerIndex,blockInfo.getGasUsed());
         return tbBlock;
     }
 
@@ -175,8 +176,15 @@ public class BlockService {
         // save trans hash
         for (TransactionResult t : transList) {
             JsonTransactionResponse trans = (JsonTransactionResponse) t;
+
+
+            // 获取交易交易回执TransactionReceipt
+            TransactionReceipt transactionReceipt = frontInterface.getTransReceipt(groupId, trans.getHash());
+
+
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
-                trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
+                trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp(),
+                    transactionReceipt.getGasUsed(),transactionReceipt.getStatus(),trans.getExtraData());
             transHashService.addTransInfo(groupId, tbTransHash);
             // save user or contract from block's transaction
             this.saveExternalInfo(groupId, trans, blockInfo.getTimestamp());

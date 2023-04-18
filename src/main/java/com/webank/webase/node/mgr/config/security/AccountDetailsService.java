@@ -22,6 +22,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Service;
 public class AccountDetailsService implements UserDetailsService {
 
     @Autowired
+    @Lazy
     private AccountService accountService;
 
     @Override

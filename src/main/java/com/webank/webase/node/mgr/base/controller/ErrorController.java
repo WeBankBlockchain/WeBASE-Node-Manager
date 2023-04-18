@@ -35,7 +35,7 @@ public class ErrorController extends BasicErrorController {
     @Override
     public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
         Map<String, Object> body = getErrorAttributes(request,
-            isIncludeStackTrace(request, MediaType.ALL));
+            getErrorAttributeOptions(request, MediaType.ALL));
         String mesage = body.get("message").toString();
         if (StringUtils.isBlank(mesage)) {
             throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);

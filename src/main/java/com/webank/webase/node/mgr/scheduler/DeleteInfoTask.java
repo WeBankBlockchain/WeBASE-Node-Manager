@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.statistic.StatService;
+import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -115,9 +116,8 @@ public class DeleteInfoTask {
     private void deleteTransHash(int groupId) {
         log.debug("start deleteTransHash. groupId:{}", groupId);
         try {
-//            TransListParam queryParam = new TransListParam(null, null);
-//            Integer count = transHashService.queryCountOfTran(groupId, queryParam);
-            Integer count = transHashService.queryCountOfTranByMinus(groupId);
+            TransListParam queryParam = new TransListParam(null, null);
+            Integer count = transHashService.queryCountOfTran(groupId, queryParam);
             Integer removeCount = 0;
             if (count > cProperties.getTransRetainMax().intValue()) {
                 Integer subTransNum = count - cProperties.getTransRetainMax().intValue();
