@@ -1111,7 +1111,7 @@ public class GroupService {
 
     @Transactional
     public void updateTimestampNodeIdList(int groupId, long timestamp,List<String> nodeIdList) {
-        log.debug("start updateTimestampNodeIdList groupId:{} nodeCount:{}", groupId, timestamp, nodeIdList);
+        log.info("start updateTimestampNodeIdList groupId:{} nodeCount:{}|{}", groupId, timestamp, nodeIdList);
         this.groupMapper.updateTimestampNodeList(groupId, timestamp,JsonTools.toJSONString(nodeIdList));
     }
 
@@ -1120,6 +1120,8 @@ public class GroupService {
     public TbGroup insertIfNew(int groupId, int nodeCount, String groupDesc,
                                GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName) {
 
+        log.info("insertIfNew insert group {}|{}|{}|{}|{}|{}|{}",
+            groupId, nodeCount, groupDesc, groupType, groupStatus, chainId, chainName);
         TbGroup group = this.groupMapper.getGroupByChainIdAndGroupId(chainId,groupId);
         if (group != null) {
             return group;
