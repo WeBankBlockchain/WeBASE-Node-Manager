@@ -118,6 +118,7 @@ public class DockerCommandService {
             log.info("pullImage from cdn");
             ansibleService.execPullDockerCdnShell(ip, downloadPath + "/download", imageTag, webaseVersion);
         }
+        // todo 加上一个check image，确保拉取成功
     }
 
 
