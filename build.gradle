@@ -122,7 +122,8 @@ dependencies {
         exclude group: 'org.apache.commons'
     }
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
-    compile 'ognl:ognl:3.2.14'
+    // 使用3.1.26才能确保Thymeleaf正常
+//    compile 'ognl:ognl:3.2.14'
 
     testCompile test,mbg
 
