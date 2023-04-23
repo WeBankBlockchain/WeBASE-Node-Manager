@@ -95,10 +95,12 @@ public class FrontGroupMapService {
      */
     @Transactional
     public TbFrontGroupMap newFrontGroup(Integer frontId, Integer groupId, GroupStatus groupStatus) {
+        log.info("start newFrontGroup {}|{}|{}", frontId, groupId, groupStatus);
         TbFrontGroupMap tbFrontGroupMap = new TbFrontGroupMap(frontId, groupId, groupStatus.getValue());
 
         //add db
         frontGroupMapMapper.insertSelective(tbFrontGroupMap);
+        log.info("end newFrontGroup {}|{}|{}", frontId, groupId, groupStatus);
 
         return tbFrontGroupMap;
     }
