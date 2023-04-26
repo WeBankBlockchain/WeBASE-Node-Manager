@@ -37,6 +37,7 @@ import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -157,7 +158,7 @@ public class BlockService {
 
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
-            transSize, sealerIndex);
+            transSize, sealerIndex, Numeric.toBigInt(blockInfo.getGasUsed()).toString(10));
         return tbBlock;
     }
 
@@ -168,13 +169,14 @@ public class BlockService {
     public void saveBLockInfo(BcosBlock.Block blockInfo, Integer groupId) throws NodeMgrException {
         List<TransactionResult> transList = blockInfo.getTransactions();
 
-        // save block info
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
-        addBlockInfo(tbBlock, groupId);
+        BigInteger tbGasUsed = BigInteger.ZERO;
 
         // save trans hash
         for (TransactionResult t : transList) {
             JsonTransactionResponse trans = (JsonTransactionResponse) t;
+            // add all transaction use gas
+            tbGasUsed.add( Numeric.toBigInt(trans.getGas()) );
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp());
             transHashService.addTransInfo(groupId, tbTransHash);
@@ -187,6 +189,11 @@ public class BlockService {
                 Thread.currentThread().interrupt();
             }
         }
+        
+        // sum by all transaction's gas 
+        tbBlock.setGasUsed(tbGasUsed.toString(10));
+        // save block info
+        addBlockInfo(tbBlock, groupId);
     }
 
     /**
