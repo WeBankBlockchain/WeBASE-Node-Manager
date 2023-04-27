@@ -44,6 +44,7 @@ import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -167,6 +168,7 @@ public class FrontRestTools {
     @Autowired
     private ConstantProperties cproperties;
     @Autowired
+    @Lazy
     private FrontGroupMapCache frontGroupMapCache;
     /**
      * update front status

@@ -92,57 +92,6 @@ public class TransHashService {
         }
     }
 
-    /**
-     * query count of trans by minus max and min trans_number
-     */
-    public Integer queryCountOfTranByMinus(int groupId)
-            throws NodeMgrException {
-        log.debug("start queryCountOfTranByMinus.");
-        String tableName = TableName.TRANS.getTableName(groupId);
-        try {
-            Integer count = transHashMapper.getCountByMinMax(tableName);
-            log.info("end queryCountOfTranByMinus. count:{}",  count);
-            if (count == null) {
-                return 0;
-            }
-            return count;
-        } catch (BadSqlGrammarException ex) {
-            // v1.2.2+: if trans_number not exists, use queryCountOfTran() instead
-            log.error("fail queryCountOfTranByMinus. ", ex);
-            log.info("restart from queryCountOfTranByMinus to queryCountOfTran: []", ex.getCause());
-            TransListParam queryParam = new TransListParam(null, null);
-            Integer count = queryCountOfTran(groupId, queryParam);
-            return count;
-        } catch (RuntimeException ex) {
-            log.error("fail queryCountOfTranByMinus. ", ex);
-            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-        }
-    }
-
-    /**
-     * get transaction in highest block
-     * @param groupId
-     * @return number of block height
-     * @throws NodeMgrException
-     */
-//    public Integer queryLatestTransBlockNum(int groupId, TransListParam param)
-//            throws NodeMgrException {
-//        log.debug("start queryApproximateCount. groupId:{}", groupId);
-//        String tableName = TableName.TRANS.getTableName(groupId);
-//        try {
-//            List<TbTransHash> latestBlockTrans = transHashMapper.getLatestBlockTrans(tableName, param);
-//            if(latestBlockTrans.size() == 0) {
-//                return 0;
-//            }
-//            Integer highestBlockNum = latestBlockTrans.get(0).getBlockNumber().intValue();
-//            log.info("end queryApproximateCount. groupId:{} latestBlockTrans:{}",
-//                    groupId, latestBlockTrans);
-//            return highestBlockNum;
-//        } catch (RuntimeException ex) {
-//            log.error("fail queryApproximateCount. groupId:{}", groupId, ex);
-//            throw new NodeMgrException(ConstantCode.DB_EXCEPTION);
-//        }
-//    }
 
     /**
      * query min and max block number.

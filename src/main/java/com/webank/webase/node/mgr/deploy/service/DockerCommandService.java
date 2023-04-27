@@ -25,6 +25,7 @@ import java.io.File;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -35,6 +36,7 @@ public class DockerCommandService {
     @Autowired
     private VersionProperties versionProperties;
     @Autowired
+    @Lazy
     private AnsibleService ansibleService;
 
     /**
@@ -116,6 +118,7 @@ public class DockerCommandService {
             log.info("pullImage from cdn");
             ansibleService.execPullDockerCdnShell(ip, downloadPath + "/download", imageTag, webaseVersion);
         }
+        // todo 加上一个check image，确保拉取成功
     }
 
 
