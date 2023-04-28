@@ -25,7 +25,6 @@
         trans_count bigint(20) DEFAULT '0' COMMENT '块包含的交易数',
         create_time datetime DEFAULT NULL COMMENT '创建时间',
         modify_time datetime DEFAULT NULL COMMENT '修改时间',
-        gas_used varchar(25) DEFAULT '0'  COMMENT '区块使用的gas',
         PRIMARY KEY (pk_hash),
         KEY index_number (block_number)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区块信息表';

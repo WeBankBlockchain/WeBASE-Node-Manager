@@ -19,7 +19,6 @@
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
-    <result column="gas_used" javaType="java.lang.String" jdbcType="VARCHAR" property="gasUsed"/>   
   </resultMap>
 
   <select id="getLatestBlockNumber" resultType="java.math.BigInteger">
@@ -32,9 +31,9 @@
 
   <insert id="add">
     insert ignore into ${tableName}
-    (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time,gas_used)
+    (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time)
     values
-    (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW(),#{block.gasUsed})
+    (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW())
   </insert>
 
   <update id="update">
