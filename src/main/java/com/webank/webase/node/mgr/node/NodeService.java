@@ -47,6 +47,7 @@ import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +64,7 @@ public class NodeService {
     @Autowired
     private FrontInterfaceService frontInterface;
     @Autowired
+    @Lazy
     private ChainService chainService;
     @Autowired
     private ConstantProperties constantProperties;

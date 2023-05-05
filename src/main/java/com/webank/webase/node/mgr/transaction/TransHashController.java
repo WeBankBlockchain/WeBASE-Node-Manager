@@ -66,14 +66,7 @@ public class TransHashController extends BaseController {
                 + "transaction:{}",
             startTime.toEpochMilli(), groupId, pageNumber, pageSize, transHash);
         TransListParam queryParam = new TransListParam(transHash, blockNumber);
-        Integer count;
-        // if param's empty, getCount by minus between max and min
-        if(StringUtils.isEmpty(transHash) && blockNumber == null) {
-            count = transHashService.queryCountOfTranByMinus(groupId);
-        } else {
-            // select count(1) in InnoDb is slow when data gets large, instead use tx_id to record count
-            count = transHashService.queryCountOfTran(groupId, queryParam);
-        }
+        Integer count = transHashService.queryCountOfTran(groupId, queryParam);
         if (count != null && count > 0) {
             Integer start = Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize)
                 .orElse(null);

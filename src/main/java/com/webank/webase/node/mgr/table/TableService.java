@@ -82,14 +82,14 @@ public class TableService {
         }
         List<String> tableNameList = tableMapper.queryTables(getDbName(), tableName);
         if (tableNameList == null || tableNameList.isEmpty()) {
-            log.warn("fail dropTableByName. not fount this table, tableName:{}", tableName);
+            log.warn("fail dropTableByName. not found this table, tableName:{}", tableName);
             return;
         }
-        int affectedRow = 1;
-        while (affectedRow > 0) {
-            affectedRow = tableMapper.deleteByTableName(tableName);
-            log.debug("delete table:{} affectedRow:{}", tableName, affectedRow);
-        }
+//        int affectedRow = 1;
+//        while (affectedRow > 0) {
+//            affectedRow = tableMapper.deleteByTableName(tableName);
+//            log.debug("delete table:{} affectedRow:{}", tableName, affectedRow);
+//        }
 
         // drop table
         tableMapper.dropTable(getDbName(), tableName);

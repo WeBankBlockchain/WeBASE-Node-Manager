@@ -44,6 +44,7 @@ import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -167,6 +168,7 @@ public class FrontRestTools {
     @Autowired
     private ConstantProperties cproperties;
     @Autowired
+    @Lazy
     private FrontGroupMapCache frontGroupMapCache;
     /**
      * update front status
@@ -451,11 +453,18 @@ public class FrontRestTools {
             return;
         }
         String gasLimit = block.getGasLimit();
+        if ( Numeric.containsHexPrefix(gasLimit) ) {
+            block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        }
+
         String gasUsed = block.getGasUsed();
+        if ( Numeric.containsHexPrefix(gasUsed) ) {
+            block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        }
         String timestamp = block.getTimestamp();
-        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
-        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
-        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+        if ( Numeric.containsHexPrefix(timestamp) ) {
+            block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+        }
         log.info("processBlockHexNumber :{}", block);
     }
 
@@ -468,11 +477,17 @@ public class FrontRestTools {
             return;
         }
         String gas = trans.getGas();
+        if ( Numeric.containsHexPrefix(gas) ) {
+            trans.setGas(Numeric.toBigInt(gas).toString(10));
+        }
         String gasPrice = trans.getGasPrice();
+        if ( Numeric.containsHexPrefix(gasPrice) ) {
+            trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
+        } 
         String groupId = trans.getGroupId();
-        trans.setGas(Numeric.toBigInt(gas).toString(10));
-        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
-        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+        if ( Numeric.containsHexPrefix(groupId) ) {
+            trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+        } 
         log.info("processTransHexNumber :{}", trans);
     }
 
@@ -485,9 +500,13 @@ public class FrontRestTools {
             return;
         }
         String gasUsed = receipt.getGasUsed();
+        if ( Numeric.containsHexPrefix(gasUsed) ) {
+            receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        }
         String blockNumber = receipt.getBlockNumber();
-        receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
-        receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
+        if ( Numeric.containsHexPrefix(blockNumber) ) {
+            receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
+        }
         log.info("processTransHexNumber :{}", receipt);
     }
 }

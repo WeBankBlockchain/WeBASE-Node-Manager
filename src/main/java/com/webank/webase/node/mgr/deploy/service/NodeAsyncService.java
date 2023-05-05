@@ -46,6 +46,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -58,10 +59,17 @@ public class NodeAsyncService {
     @Autowired private TbHostMapper tbHostMapper;
     @Autowired private TbChainMapper tbChainMapper;
 
-    @Autowired private FrontService frontService;
-    @Autowired private NodeService nodeService;
-    @Autowired private ChainService chainService;
-    @Autowired private HostService hostService;
+    @Autowired
+    @Lazy
+    private FrontService frontService;
+    @Autowired
+    @Lazy
+    private NodeService nodeService;
+    @Autowired
+    @Lazy
+    private ChainService chainService;
+    @Autowired
+    private HostService hostService;
     @Autowired private ConstantProperties constant;
     @Autowired private GroupService groupService;
 

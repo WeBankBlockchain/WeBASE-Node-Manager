@@ -1,6 +1,22 @@
 group = 'com.webank.webase.node.mgr'
 version = '1.0.0-SNAPSHOT'
 
+
+println "======Gradle version:" + gradle.gradleVersion
+if (gradle.gradleVersion.startsWith("7")) {
+    println "Gradle 7.x not support yet!\n ====== please use Gradle version from 4.6.x to 6.9.x "
+} else if (gradle.gradleVersion.startsWith("6")
+        || gradle.gradleVersion.startsWith("5")
+        || gradle.gradleVersion.startsWith("4.10")
+        || gradle.gradleVersion.startsWith("4.9")
+        || gradle.gradleVersion.startsWith("4.8")
+        || gradle.gradleVersion.startsWith("4.7")
+) {
+    println "Gradle with version >= 4.6 detected"
+} else {
+    println "Gradle with version < 4.6 detected"
+}
+
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -21,37 +37,16 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.1.18.RELEASE"
+def springboot_version="2.7.10"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
      "org.springframework.boot:spring-boot-starter-mail:$springboot_version",
      "org.springframework.boot:spring-boot-starter-thymeleaf:$springboot_version",
-     "org.springframework.boot:spring-boot-starter-aop:$springboot_version"
+     "org.springframework.boot:spring-boot-starter-aop:$springboot_version",
+     "org.springframework.boot:spring-boot-starter-validation:$springboot_version",
+     "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4"
 ]
-
-// cover old version
-def spring_version="5.2.15.RELEASE"
-List spring = [
-    "org.springframework:spring-core:$spring_version",
-    "org.springframework:spring-aop:$spring_version",
-    "org.springframework:spring-beans:$spring_version",
-    "org.springframework:spring-context:$spring_version",
-    "org.springframework:spring-expression:$spring_version",
-    "org.springframework:spring-jcl:$spring_version",
-    "org.springframework:spring-jdbc:$spring_version",
-    "org.springframework:spring-tx:$spring_version",
-    "org.springframework:spring-test:$spring_version",
-    "org.springframework:spring-web:$spring_version"
-]
-// cover old version
-def spring_security_version="5.4.4"
-List spring_security = [
-    "org.springframework.security:spring-security-core:$spring_security_version",
-    "org.springframework.security:spring-security-web:$spring_security_version",
-    "org.springframework.security:spring-security-config:$spring_security_version",
-]
-
 
 List jaxb = [
      "javax.xml.bind:jaxb-api:2.3.0",
@@ -64,7 +59,7 @@ List lombok = [
     "org.projectlombok:lombok:1.18.12"
 ]
 
-def jackson_version = "2.11.4"
+def jackson_version = "2.14.2"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
@@ -78,7 +73,7 @@ List test = [
     "org.springframework.boot:spring-boot-starter-test:$springboot_version"
 ]
 
-def log4j_version="2.15.0"
+def log4j_version="2.18.0"
 List log4j = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -104,9 +99,11 @@ List swagger = [
 ]
 
 dependencies {
-    compile springboot,spring,spring_security,jaxb,jackson,log4j,scaffold,swagger
-    compile "org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2"
-    compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0"
+    compile springboot,jaxb,jackson,log4j,scaffold,swagger
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.2') {
+        // 不需要连接节点，因此去除
+        exclude group: "org.fisco-bcos", module: 'netty-sm-ssl-context'
+    }
     compile "org.apache.commons:commons-lang3:3.8.1"
     compile 'org.apache.commons:commons-collections4:4.4'
     compile "mysql:mysql-connector-java:8.0.22"
@@ -114,17 +111,19 @@ dependencies {
     compile "com.github.sgroschupf:zkclient:0.1"
     compile 'org.bouncycastle:bcprov-jdk15on:1.67'
     // cover old version
-    compile 'com.google.guava:guava:28.2-jre'
+    compile 'com.google.guava:guava:29.0-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
-
+    compile 'org.yaml:snakeyaml:2.0'
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
     compile ('com.github.docker-java:docker-java:3.2.1') {
         exclude group: 'io.netty'
         exclude group: 'org.bouncycastle'
+        exclude group: 'org.apache.commons'
     }
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
-    compile 'ognl:ognl:3.2.14'
+    // 使用3.1.26才能确保Thymeleaf正常
+//    compile 'ognl:ognl:3.2.14'
 
     testCompile test,mbg
 
@@ -143,6 +142,9 @@ configurations {
     all*.exclude group: 'jline', module: 'jline'
     all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
     all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
+    // scaffold imported, not using ssl connect with fisco node, exclude it
+    all*.exclude group: "org.fisco-bcos", module: 'netty-sm-ssl-context'
+
 }
 
 sourceSets {

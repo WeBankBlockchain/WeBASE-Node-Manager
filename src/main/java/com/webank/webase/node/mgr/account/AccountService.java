@@ -33,6 +33,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +50,7 @@ public class AccountService {
     private RoleService roleService;
     @Qualifier(value = "bCryptPasswordEncoder")
     @Autowired
+    @Lazy
     private PasswordEncoder passwordEncoder;
     @Autowired
     private TokenService tokenService;
