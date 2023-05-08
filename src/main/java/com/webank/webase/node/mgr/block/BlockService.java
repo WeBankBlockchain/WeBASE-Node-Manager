@@ -24,6 +24,7 @@ import com.webank.webase.node.mgr.block.entity.TbBlock;
 import com.webank.webase.node.mgr.external.ExtAccountService;
 import com.webank.webase.node.mgr.external.ExtContractService;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.FrontRestTools;
 import com.webank.webase.node.mgr.transaction.TransHashService;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import java.math.BigInteger;
@@ -38,6 +39,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -155,10 +157,11 @@ public class BlockService {
         int sealerIndex = Integer.parseInt(blockInfo.getSealer().substring(2), 16);
 
         int transSize = blockInfo.getTransactions().size();
-
+        // Hexadecimal to decimal conversion
+        FrontRestTools.processBlockHexNumber(blockInfo); 
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
-            transSize, sealerIndex,blockInfo.getGasUsed());
+            transSize, sealerIndex, blockInfo.getGasUsed());
         return tbBlock;
     }
 
@@ -171,20 +174,23 @@ public class BlockService {
 
         // save block info
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
-        addBlockInfo(tbBlock, groupId);
+        BigInteger tbGasUsed = BigInteger.ZERO;
 
         // save trans hash
         for (TransactionResult t : transList) {
             JsonTransactionResponse trans = (JsonTransactionResponse) t;
+            // Hexadecimal to decimal conversion
+            FrontRestTools.processTransHexNumber(trans);
 
-
+            // add all transaction use gas
+            tbGasUsed.add( Numeric.toBigInt(trans.getGas()) );
             // 获取交易交易回执TransactionReceipt
             TransactionReceipt transactionReceipt = frontInterface.getTransReceipt(groupId, trans.getHash());
-
+            FrontRestTools.processReceiptHexNumber(transactionReceipt);
 
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp(),
-                    transactionReceipt.getGasUsed(),transactionReceipt.getStatus(),trans.getExtraData());
+                transactionReceipt.getGasUsed(),transactionReceipt.getStatus(),trans.getExtraData());
             transHashService.addTransInfo(groupId, tbTransHash);
             // save user or contract from block's transaction
             this.saveExternalInfo(groupId, trans, blockInfo.getTimestamp());
@@ -195,6 +201,11 @@ public class BlockService {
                 Thread.currentThread().interrupt();
             }
         }
+        
+        // sum by all transaction's gas 
+        tbBlock.setGasUsed(tbGasUsed.toString(10));
+        // save block info
+        addBlockInfo(tbBlock, groupId);
     }
 
     /**
