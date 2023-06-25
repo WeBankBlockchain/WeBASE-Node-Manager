@@ -51,7 +51,7 @@ public class EventService {
 	private static final String TYPE_CONTRACT = "contract";
 	private static final String TYPE_ABI_INFO = "abi";
 
-	public List<NewBlockEventInfo> getNewBlockEventInfoList(int groupId) {
+	public List<NewBlockEventInfo> getNewBlockEventInfoList(String groupId) {
 		//get all front
 		List<TbFront> frontList = frontService.getFrontList(new FrontParam());
 		List<NewBlockEventInfo> eventList = new ArrayList<>();
@@ -62,7 +62,7 @@ public class EventService {
 	}
 
 
-	public List<ContractEventInfo> getContractEventInfoList(int groupId) {
+	public List<ContractEventInfo> getContractEventInfoList(String groupId) {
 		//get all front
 		List<TbFront> frontList = frontService.getFrontList(new FrontParam());
 		List<ContractEventInfo> eventList = new ArrayList<>();
@@ -81,25 +81,25 @@ public class EventService {
 
 	/**
 	 * list contract info from contract & abi
-	 * 2021/10/25 重复合约地址问题：tb_abi中保存了所有的合约，因此去除contract表的数据
 	 */
-	public List<RspContractInfo> listContractInfoBoth(int groupId) {
+	public List<RspContractInfo> listContractInfoBoth(String groupId) {
 		// find contract list
-//		ContractParam contractParam = new ContractParam();
-//		contractParam.setGroupId(groupId);
-//		contractParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
+		ContractParam contractParam = new ContractParam();
+		contractParam.setGroupId(groupId);
+		contractParam.setContractStatus(ContractStatus.DEPLOYED.getValue());
 //		List<RspContractNoAbi> contractList = contractService.queryContractListNoAbi(contractParam);
 		// find abi list
 		List<RspContractNoAbi> abiInfoList = abiService.listByGroupIdNoAbi(groupId);
 		// add abi info and contract info in result list
 		List<RspContractInfo> resultList = new ArrayList<>();
-		abiInfoList.forEach(c -> resultList.add(new RspContractInfo(TYPE_ABI_INFO, c.getContractAddress(), c.getContractName())));
 //		contractList.forEach(c -> resultList.add(new RspContractInfo(TYPE_CONTRACT, c.getContractAddress(), c.getContractName())));
+		abiInfoList.forEach(c -> resultList.add(new RspContractInfo(TYPE_ABI_INFO, c.getContractAddress(), c.getContractName())));
+
 		return resultList;
 	}
 
 
-	public Object getAbiByAddressFromBoth(int groupId, String type, String contractAddress) {
+	public Object getAbiByAddressFromBoth(String groupId, String type, String contractAddress) {
 		if (TYPE_CONTRACT.equals(type)) {
 			ContractParam param = new ContractParam();
 			param.setGroupId(groupId);

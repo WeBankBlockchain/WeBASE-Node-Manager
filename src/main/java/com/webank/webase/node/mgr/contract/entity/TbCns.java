@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 public class TbCns {
 
     private Integer id;
-    private Integer groupId;
+    private String groupId;
     private String contractPath;
     private String contractName;
     private String cnsName;
@@ -35,7 +35,7 @@ public class TbCns {
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
-    public TbCns(Integer groupId, String contractName, String version, String contractAddress) {
+    public TbCns(String groupId, String contractName, String version, String contractAddress) {
         this.groupId = groupId;
         this.contractName = contractName;
         this.version = version;

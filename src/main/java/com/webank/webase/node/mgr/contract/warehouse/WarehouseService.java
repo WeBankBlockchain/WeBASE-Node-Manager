@@ -87,5 +87,4 @@ public class WarehouseService {
         return contractFolderItemList;
     }
 
-
 }

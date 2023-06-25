@@ -56,7 +56,7 @@ public class ExternalController extends BaseController {
      * query external account info list.
      */
     @GetMapping(value = "account/list/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse extAccountList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse extAccountList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize)
         throws NodeMgrException {
@@ -91,7 +91,7 @@ public class ExternalController extends BaseController {
      * query contract info list by groupId without abi/bin
      */
     @GetMapping(value = "/contract/list/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse extContractList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse extContractList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
@@ -125,7 +125,7 @@ public class ExternalController extends BaseController {
      * left join tb_user的接口
      */
     @GetMapping(value = "account/list/all/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse listExtUserListJoin(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse listExtUserListJoin(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "type", defaultValue = "1") Integer type,
@@ -170,7 +170,7 @@ public class ExternalController extends BaseController {
      * left join tb_abi的接口（本地全量）
      */
     @GetMapping(value = "/contract/list/all/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse listExtContractListJoin(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse listExtContractListJoin(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "type", defaultValue = "1") Integer type,
@@ -215,7 +215,7 @@ public class ExternalController extends BaseController {
      * get deploy address
      */
     @GetMapping("deployAddress/{groupId}/{contractAddress}")
-    public BaseResponse queryDeployAddress(@PathVariable("groupId") Integer groupId,
+    public BaseResponse queryDeployAddress(@PathVariable("groupId") String groupId,
         @PathVariable("contractAddress") String contractAddress) {
         Instant startTime = Instant.now();
         log.info("start queryDeployAddress. startTime:{} groupId:{},contractAddress:{}",

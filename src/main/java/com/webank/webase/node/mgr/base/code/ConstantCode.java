@@ -66,6 +66,7 @@ public class ConstantCode {
     public static final RetCode USER_ID_NULL = RetCode.mark(202012, "user id cannot be empty");
 
     public static final RetCode USER_NOT_EXIST = RetCode.mark(202013, "invalid user(NOT EXIST)");
+    public static final RetCode USER_SUSPENDED = RetCode.mark(202013, "invalid user(DELETED/SUSPENDED)");
 
     public static final RetCode USER_EXISTS = RetCode.mark(202014, "user already exists");
 
@@ -330,6 +331,18 @@ public class ConstantCode {
     public static final RetCode BIND_PRIVATE_KEY_NOT_MATCH = RetCode.mark(202543,"Binding private key not match this user's address");
     public static final RetCode BIND_PRIVATE_ALREADY_HAS_PK = RetCode.mark(202544,"This user already contain private key");
 
+    // lab
+    public static final RetCode LIQUID_COMPILE_FAILED = RetCode.mark(202550,"Liquid compile error");
+    public static final RetCode DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY = RetCode.mark(202551, "When deploying liquid, contract address must not be empty");
+    // account
+    public static final RetCode INVALID_ROLE_ID_REGISTER = RetCode.mark(202560, "Only support developer or visitor register");
+    public static final RetCode UPDATE_ACCOUNT_STATUS_DENIED = RetCode.mark(202561, "Only admin or self could update account status");
+    public static final RetCode ACCOUNT_DISABLED = RetCode.mark(202562, "Account is invalid, please check if frozen or canceld or beyond expiredTime");
+    public static final RetCode GET_PRIVACY_DOC_FAILED = RetCode.mark(202563, "Loading privacy doc of template failed");
+    public static final RetCode SEND_MAIL_FAILED = RetCode.mark(202564, "Send mail failed, please check receiver address or check mail server config");
+    public static final RetCode ACCOUNT_MOBILE_IS_EMPTY = RetCode.mark(202565, "Account's mobile is empty");
+    public static final RetCode ACCOUNT_MOBILE_EXISTS = RetCode.mark(202566, "Account's mobile already exist!");
+    public static final RetCode ACCOUNT_MOBILE_NOT_EXISTS = RetCode.mark(202566, "Account's mobile already exist!");
 
     /* auth */
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
@@ -337,5 +350,15 @@ public class ConstantCode {
 
     /* param exception */
     public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
+
+    // consensus (node manager)
+    public static final RetCode INVALID_NODE_ID = RetCode.mark(202216,"node id is invalid");
+    public static final RetCode INVALID_NODE_TYPE = RetCode.mark(202217,"invalid node type: sealer, observer, remove ");
+    public static final RetCode FAIL_CHANGE_NODE_TYPE = RetCode.mark(202218,"set node consensus type fail, check permission or node's group config file");
+    public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(202621, "Sealer's weight cannot be null");
+
+    public static final RetCode EXEC_ENV_IS_WASM = RetCode.mark(202670, "exec env is wasm, don't support");
+    public static final RetCode CHAIN_AUTH_NOT_ENABLE = RetCode.mark(202671, "auth of the chain not enable");
+
 
 }

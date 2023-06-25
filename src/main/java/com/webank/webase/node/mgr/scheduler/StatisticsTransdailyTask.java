@@ -82,7 +82,7 @@ public class StatisticsTransdailyTask {
      */
     private void traverseNetList(List<StatisticalGroupTransInfo> groupStatisticalList)
         throws NodeMgrException {
-        if (groupStatisticalList == null | groupStatisticalList.size() == 0) {
+        if (groupStatisticalList == null || groupStatisticalList.size() == 0) {
             log.warn("updateTransdailyData jump over: no group information exists");
             return;
         }
@@ -95,7 +95,7 @@ public class StatisticsTransdailyTask {
             BigInteger netTransCount = Optional.ofNullable(statisticalInfo.getTransCount())
                 .orElse(BigInteger.ZERO);
             BigInteger maxBlockNumber = latestSaveBlockNumber;
-            Integer groupId = statisticalInfo.getGroupId();
+            String groupId = statisticalInfo.getGroupId();
 
             // query block list
             BlockListParam queryParam = new BlockListParam(maxBlockNumber, latestSaveDay,

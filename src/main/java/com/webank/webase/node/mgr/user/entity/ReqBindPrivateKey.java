@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReqBindPrivateKey {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     /**
      * encoded in base64
      */
@@ -44,7 +44,7 @@ public class ReqBindPrivateKey {
      * @param userId
      * @param privateKeyEncoded base64
      */
-    public ReqBindPrivateKey(int groupId, int userId, String privateKeyEncoded) {
+    public ReqBindPrivateKey(String groupId, int userId, String privateKeyEncoded) {
         this.groupId = groupId;
         this.userId = userId;
         this.privateKey = privateKeyEncoded;

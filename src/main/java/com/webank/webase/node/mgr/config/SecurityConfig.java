@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -48,7 +47,6 @@ import com.webank.webase.node.mgr.config.security.JsonAuthenticationEntryPoint;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    @Lazy
     private AccountDetailsService userDetailService;
     @Qualifier(value = "loginSuccessHandler")
     @Autowired
@@ -70,7 +68,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 无权访问 JSON 格式的数据
         http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler);
 
-        // login page
+//        // login page
         http.formLogin().loginPage("/login")
             .loginProcessingUrl("/account/login") // login request uri
             .usernameParameter("account").passwordParameter("accountPwd").permitAll()
@@ -105,7 +103,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean("bCryptPasswordEncoder")
-    @DependsOn("encryptType")
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }

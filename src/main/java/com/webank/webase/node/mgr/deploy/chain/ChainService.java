@@ -108,7 +108,6 @@ public class ChainService {
     @Autowired
     private DeployShellService deployShellService;
     @Autowired
-    @Lazy
     private HostService hostService;
     @Autowired
     @Lazy
@@ -118,7 +117,6 @@ public class ChainService {
     @Autowired
     private ConstantProperties constant;
     @Autowired
-    @Lazy
     private NodeAsyncService nodeAsyncService;
     @Autowired
     private CertService certService;
@@ -134,7 +132,7 @@ public class ChainService {
      */
     public Object getChainMonitorInfo(Integer frontId, LocalDateTime beginDate,
         LocalDateTime endDate, LocalDateTime contrastBeginDate,
-        LocalDateTime contrastEndDate, int gap, int groupId) {
+        LocalDateTime contrastEndDate, int gap, String groupId) {
         log.debug(
             "start getChainMonitorInfo.  frontId:{} beginDate:{} endDate:{}"
                 + " contrastBeginDate:{} contrastEndDate:{} gap:{} groupId:{}",
@@ -367,14 +365,13 @@ public class ChainService {
     @Transactional
     public void initChainDbData(String chainName,  List<DeployNodeInfo> deployNodeInfoList, List<IpConfigParse> ipConfigParseList,
                                 String webaseSignAddr, String imageTag, byte encryptType, String agencyName){
-        log.info("start initChainDbData chainName:{}, deployNodeInfoList:{},ipConfigParseList:{}",
-            chainName, deployNodeInfoList, ipConfigParseList);
+        log.info("start initChainDbData chainName:{}, ipConfigParseList:{}",
+            chainName, ipConfigParseList);
         ProgressTools.setInitChainData();
         // insert chain
         final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
             imageTag, encryptType, ChainStatusEnum.INITIALIZED,
                 RunTypeEnum.DOCKER, webaseSignAddr);
-        log.info("initChainDbData insert newChain {}", newChain);
 
         // all host ips
         Map<String, TbHost> newIpHostMap = new HashMap<>();
@@ -396,7 +393,6 @@ public class ChainService {
             newIpHostMap.putIfAbsent(config.getIp(), host);
         });
 
-        log.info("initChainDbData temp newIpHostMap {}", newIpHostMap);
         // insert nodes for all hosts. there may be multiple nodes on a host.
         newIpHostMap.keySet().forEach((ip) -> {
             List<Path> nodePathList = null;
@@ -406,15 +402,12 @@ public class ChainService {
                 throw new NodeMgrException(ConstantCode.LIST_HOST_NODE_DIR_ERROR.attach(ip));
             }
 
-            log.info("initChainDbData temp nodePathList {}", nodePathList);
             for (Path nodeRoot : CollectionUtils.emptyIfNull(nodePathList)) {
                 // get node properties
                 NodeConfig nodeConfig = NodeConfig.read(nodeRoot, encryptType);
-                log.info("initChainDbData temp nodeConfig {}", nodeConfig);
 
                 // get frontPort
                 DeployNodeInfo targetNode = this.getFrontPort(deployNodeInfoList, ip, nodeConfig.getChannelPort());
-                log.info("initChainDbData temp targetNode {}", targetNode);
                 if (targetNode == null) {
                     throw new NodeMgrException(ConstantCode.DEPLOY_INFO_NOT_MATCH_IP_CONF);
                 }
@@ -431,7 +424,6 @@ public class ChainService {
                         DockerCommandService.getContainerName(host.getRootDir(), chainName,
                         nodeConfig.getHostIndex()), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
                         nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
-                log.info("initChainDbData insert front {}", front);
                 this.frontService.insert(front);
 
                 // insert node and front group mapping
@@ -450,7 +442,6 @@ public class ChainService {
 
                     // update group timestamp and node list
                     Pair<Long, List<String>> longListPair = nodeConfig.getGroupIdToTimestampNodeListMap().get(groupId);
-                    log.info("initChainDbData temp longListPair {}", longListPair);
                     if (longListPair != null) {
                         this.groupService.updateTimestampNodeIdList(groupId,longListPair.getKey(),longListPair.getValue());
                     }

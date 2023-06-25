@@ -50,6 +50,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -145,7 +146,7 @@ public class UserController extends BaseController {
      * query user info list.
      */
     @GetMapping(value = "/userList/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse userList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse userList(@PathVariable("groupId") String groupId,
             @PathVariable("pageNumber") Integer pageNumber,
             @PathVariable("pageSize") Integer pageSize,
             @RequestParam(value = "userParam", required = false) String commParam,
@@ -233,7 +234,7 @@ public class UserController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
             @RequestParam(required = false, defaultValue = "") String p12Password,
-            @RequestParam Integer groupId, @RequestParam String userName,
+            @RequestParam String groupId, @RequestParam String userName,
             @RequestParam(required = false) String description,
             @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -263,7 +264,7 @@ public class UserController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start exportPemUserFromSign startTime:{} param:{},currentAccount:{}",
             startTime.toEpochMilli(), param, currentAccount);
-        Integer groupId = param.getGroupId();
+        String groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
         String account = currentAccount.getAccount();
         Integer roleId = currentAccount.getRoleId();
@@ -283,7 +284,7 @@ public class UserController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start exportP12UserFromSign startTime:{} param:{},currentAccount:{}",
             startTime.toEpochMilli(), param, currentAccount);
-        Integer groupId = param.getGroupId();
+        String groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
         String p12PasswordEncoded = param.getP12Password();
         if (!NodeMgrTools.notContainsChinese(p12PasswordEncoded)) {
@@ -377,7 +378,7 @@ public class UserController extends BaseController {
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse bindPrivateKeyByP12(@RequestParam MultipartFile p12File,
         @RequestParam(required = false, defaultValue = "") String p12Password,
-        @RequestParam Integer groupId,
+        @RequestParam String groupId,
         @RequestParam Integer userId,
         @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -396,6 +397,28 @@ public class UserController extends BaseController {
         baseResponse.setData(tbUser);
 
         log.info("end bindPrivateKey useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
+     * update user info of description
+     */
+    @DeleteMapping(value = "/{groupId}/{address}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse suspendUser(@PathVariable("groupId") String groupId,
+        @PathVariable("address") String address) throws NodeMgrException {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start suspendUser startTime:{} User:{}|{}", startTime.toEpochMilli(),
+            groupId, address);
+
+        // update user row
+        int res = userService.suspendUserByAddress(groupId, address);
+        baseResponse.setData(res);
+
+        log.info("end suspendUser useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
             JsonTools.toJSONString(baseResponse));
         return baseResponse;

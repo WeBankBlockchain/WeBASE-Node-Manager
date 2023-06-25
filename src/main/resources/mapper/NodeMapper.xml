@@ -6,7 +6,7 @@
 <mapper namespace="com.webank.webase.node.mgr.node.NodeMapper">
   <resultMap id="nodeMap" type="com.webank.webase.node.mgr.node.entity.TbNode">
     <id column="node_id" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeId"/>
-    <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
+    <id column="group_id" javaType="java.lang.String" jdbcType="VARCHAR" property="groupId"/>
     <result column="node_name" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeName"/>
     <result column="node_ip" javaType="java.lang.String" jdbcType="VARCHAR" property="nodeIp"/>
     <result column="p2p_port" javaType="java.lang.Integer" jdbcType="INTEGER" property="p2pPort"/>

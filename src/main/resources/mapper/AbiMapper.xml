@@ -6,7 +6,7 @@
                type="com.webank.webase.node.mgr.contract.abi.entity.AbiInfo">
         <id column="abi_id" javaType="java.lang.Integer" jdbcType="INTEGER"
             property="abiId" />
-        <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+        <result column="group_id" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="groupId" />
         <result column="account" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="account" />
@@ -18,6 +18,8 @@
                 property="contractAbi" />
         <result column="contract_bin" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="contractBin" />
+        <result column="is_wasm" javaType="java.lang.Integer" jdbcType="INTEGER"
+            property="isWasm" />
         <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
                 property="createTime" />
         <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
@@ -26,9 +28,9 @@
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.contract.abi.entity.AbiInfo">
-        REPLACE INTO tb_abi(group_id,account,contract_name,contract_address,contract_abi,contract_bin,
+        REPLACE INTO tb_abi(group_id,account,contract_name,contract_address,contract_abi,contract_bin,is_wasm,
         create_time,modify_time)
-        VALUES (#{groupId},#{account},#{contractName},#{contractAddress},#{contractAbi},#{contractBin}, now(), now())
+        VALUES (#{groupId},#{account},#{contractName},#{contractAddress},#{contractAbi},#{contractBin}, #{isWasm}, now(), now())
     </insert>
 
     <delete id="deleteByAbiId" parameterType="java.lang.Integer">
@@ -36,7 +38,7 @@
         where abi_id = #{abiId}
     </delete>
 
-    <delete id="deleteByGroupId" parameterType="java.lang.Integer">
+    <delete id="deleteByGroupId" parameterType="java.lang.String">
         delete from tb_abi
         where group_id = #{groupId}
     </delete>

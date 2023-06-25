@@ -29,5 +29,5 @@ public class ReqExport {
      */
     private String p12Password;
     @NotNull
-    private Integer groupId;
+    private String groupId;
 }

@@ -68,7 +68,7 @@ public class StatService {
      * @param groupId
      */
     @Async(value = "mgrAsyncExecutor")
-    public void pullBlockStatistic(CountDownLatch latch, Integer groupId) {
+    public void pullBlockStatistic(CountDownLatch latch, String groupId) {
         try {
             Instant startTime = Instant.now();
             log.debug("pullBlockStatistic startTime:{}, groupId:{}", startTime, groupId);
@@ -146,7 +146,7 @@ public class StatService {
 
     }
 
-    public void saveStat(int groupId, int blockNum, int blockSize, int tps, double blockCycle, String timestamp) {
+    public void saveStat(String groupId, int blockNum, int blockSize, int tps, double blockCycle, String timestamp) {
         if (this.checkStatExist(groupId, blockNum)) {
             log.warn("saveStat skip for block num already exist!" +
                     " groupId:{},blockNum:{}", groupId, blockNum);
@@ -167,7 +167,7 @@ public class StatService {
     }
 
 
-    public List<PerformanceData> findContrastDataByTime(int groupId, Long startTimestamp, Long endTimestamp,
+    public List<PerformanceData> findContrastDataByTime(String groupId, Long startTimestamp, Long endTimestamp,
         Long contrastStartTimestamp, Long contrastEndTimestamp, int gap) {
 
         List<TbStat> statList;
@@ -321,19 +321,19 @@ public class StatService {
     /**
      * remove block stat info.
      */
-    public Integer remove(Integer groupId, BigInteger blockRetainMax) {
+    public Integer remove(String groupId, BigInteger blockRetainMax) {
         log.info("remove groupId:{}, blockRetainMax:{}", groupId, blockRetainMax);
         Integer affectRow = tbStatMapper.remove(groupId, blockRetainMax);
         log.info("remove affectRow{}", affectRow);
         return affectRow;
     }
 
-    public void deleteByGroupId(int groupId) {
+    public void deleteByGroupId(String groupId) {
         int affected = tbStatMapper.deleteByGroupId(groupId);
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
     }
 
-    public boolean checkStatExist(int groupId, int blockNum) {
+    public boolean checkStatExist(String groupId, int blockNum) {
         TbStat maxStat = tbStatMapper.findByGroupAndBlockNum(groupId, blockNum);
         return maxStat != null;
     }

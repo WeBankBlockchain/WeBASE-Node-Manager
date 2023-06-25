@@ -102,7 +102,7 @@ public class AppIntegrationController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis());
         return pageResponse;
     }
-    
+
     /**
      * delete by frontId
      */

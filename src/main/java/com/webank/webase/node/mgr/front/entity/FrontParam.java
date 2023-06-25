@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 public class FrontParam {
     private Integer frontId;
     private String nodeId;
-    private Integer groupId;
+    private String groupId;
     private String frontIp;
     private Integer frontPort;
     private Integer frontStatus;

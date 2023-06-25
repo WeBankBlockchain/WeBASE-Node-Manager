@@ -1,7 +1,6 @@
 group = 'com.webank.webase.node.mgr'
 version = '1.0.0-SNAPSHOT'
 
-
 println "======Gradle version:" + gradle.gradleVersion
 if (gradle.gradleVersion.startsWith("7")) {
     println "Gradle 7.x not support yet!\n ====== please use Gradle version from 4.6.x to 6.9.x "
@@ -16,6 +15,7 @@ if (gradle.gradleVersion.startsWith("7")) {
 } else {
     println "Gradle with version < 4.6 detected"
 }
+
 
 apply plugin: 'maven'
 apply plugin: 'java'
@@ -69,10 +69,6 @@ List jackson = [
     "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version",
 ]
 
-List test = [
-    "org.springframework.boot:spring-boot-starter-test:$springboot_version"
-]
-
 def log4j_version="2.18.0"
 List log4j = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
@@ -98,40 +94,42 @@ List swagger = [
     'io.springfox:springfox-swagger-ui:2.8.0'
 ]
 
+List commons = [
+    "org.apache.commons:commons-lang3:3.8.1",
+    'org.apache.commons:commons-collections4:4.4',
+    'org.apache.commons:commons-configuration2:2.8.0',
+    'org.apache.commons:commons-compress:1.21'
+]
+
 dependencies {
-    compile springboot,jaxb,jackson,log4j,scaffold,swagger
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.2') {
-        // 不需要连接节点，因此去除
-        exclude group: "org.fisco-bcos", module: 'netty-sm-ssl-context'
+    compile springboot,jaxb,jackson,log4j,scaffold,swagger,commons
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0-SNAPSHOT') {
+        exclude group: "org.slf4j"
     }
-    compile "org.apache.commons:commons-lang3:3.8.1"
-    compile 'org.apache.commons:commons-collections4:4.4'
-    compile "mysql:mysql-connector-java:8.0.22"
+    runtime "mysql:mysql-connector-java:8.0.28"
     compile "com.zaxxer:HikariCP:3.2.0"
-    compile "com.github.sgroschupf:zkclient:0.1"
-    compile 'org.bouncycastle:bcprov-jdk15on:1.67'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.69'
+    compile 'javax.validation:validation-api:2.0.1.Final'
     // cover old version
-    compile 'com.google.guava:guava:29.0-jre'
+    compile 'com.google.guava:guava:30.0-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
     compile 'org.yaml:snakeyaml:2.0'
+    compile 'org.apache.commons:commons-text:1.10.0'
+
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
-    compile ('com.github.docker-java:docker-java:3.2.1') {
-        exclude group: 'io.netty'
-        exclude group: 'org.bouncycastle'
-        exclude group: 'org.apache.commons'
-    }
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
-    // 使用3.1.26才能确保Thymeleaf正常
-//    compile 'ognl:ognl:3.2.14'
-
-    testCompile test,mbg
 
     compileOnly lombok
     annotationProcessor lombok
 
+    testCompile mbg
     testCompileOnly lombok
     testAnnotationProcessor lombok
+    testCompile("org.springframework.boot:spring-boot-starter-test:$springboot_version") {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testCompile 'junit:junit:4.13.1'
 }
 
 configurations {
@@ -142,9 +140,6 @@ configurations {
     all*.exclude group: 'jline', module: 'jline'
     all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
     all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
-    // scaffold imported, not using ssl connect with fisco node, exclude it
-    all*.exclude group: "org.fisco-bcos", module: 'netty-sm-ssl-context'
-
 }
 
 sourceSets {

@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TbGroup {
 
-    private Integer groupId;
+    private String groupId;
     private String groupName;
     /**
      * 1-normal, 2-invalid
@@ -45,6 +45,7 @@ public class TbGroup {
     private LocalDateTime modifyTime;
     private String description;
     private Integer groupType;
+    private Integer encryptType;
     /**
      * group.x.genesis timestamp
      */
@@ -58,8 +59,8 @@ public class TbGroup {
     private String chainName;
 
 
-    public TbGroup(Integer groupId, String groupName, Integer nodeCount, String description,
-                   GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName){
+    public TbGroup(String groupId, String groupName, Integer nodeCount, String description,
+        GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName, Integer encryptType){
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
@@ -67,7 +68,7 @@ public class TbGroup {
         this.groupType = groupType.getValue();
         this.groupStatus = groupStatus.getValue();
         this.chainId = chainId;
-        this.chainName = chainName;
+        this.encryptType = encryptType;
     }
 
 }

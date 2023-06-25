@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +54,7 @@ public class TransHashController extends BaseController {
      * query trans list.
      */
     @GetMapping(value = "/transList/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse queryTransList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse queryTransList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "transactionHash", required = false) String transHash,
@@ -73,13 +73,13 @@ public class TransHashController extends BaseController {
             queryParam.setStart(start);
             queryParam.setPageSize(pageSize);
             queryParam.setFlagSortedByBlock(SqlSortType.DESC.getValue());
-            List<TbTransHash> transList = transHashService.queryTransList(groupId,queryParam);
+            List<TbTransHash> transList = transHashService.queryTransList(groupId, queryParam);
             pageResponse.setData(transList);
             // on chain tx count
             pageResponse.setTotalCount(count);
         } else {
             List<TbTransHash> transList = new ArrayList<>();
-            transList = transHashService.getTransListFromChain(groupId,transHash,blockNumber);
+            transList = transHashService.getTransListFromChain(groupId, transHash, blockNumber);
             //result
             if (transList.size() > 0) {
                 pageResponse.setData(transList);
@@ -88,7 +88,8 @@ public class TransHashController extends BaseController {
         }
 
         log.info("end queryBlockList useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(pageResponse));
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(pageResponse));
         return pageResponse;
     }
 
@@ -96,7 +97,7 @@ public class TransHashController extends BaseController {
      * get transaction receipt.
      */
     @GetMapping("/transactionReceipt/{groupId}/{transHash}")
-    public BaseResponse getTransReceipt(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getTransReceipt(@PathVariable("groupId") String groupId,
         @PathVariable("transHash") String transHash)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -106,7 +107,8 @@ public class TransHashController extends BaseController {
         TransactionReceipt transReceipt = transHashService.getTransReceipt(groupId, transHash);
         baseResponse.setData(transReceipt);
         log.info("end getTransReceipt useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -114,7 +116,7 @@ public class TransHashController extends BaseController {
      * get transaction by hash.
      */
     @GetMapping("/transInfo/{groupId}/{transHash}")
-    public BaseResponse getTransaction(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getTransaction(@PathVariable("groupId") String groupId,
         @PathVariable("transHash") String transHash)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -124,7 +126,8 @@ public class TransHashController extends BaseController {
         JsonTransactionResponse transInfo = transHashService.getTransaction(groupId, transHash);
         baseResponse.setData(transInfo);
         log.info("end getTransaction useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -133,15 +136,17 @@ public class TransHashController extends BaseController {
      */
     @PostMapping("/signMessageHash")
     public Object signMessageHash(@RequestBody @Valid ReqSignMessage reqSignMessage,
-                                        BindingResult result)
-            throws NodeMgrException {
+        BindingResult result)
+        throws NodeMgrException {
         checkBindResult(result);
         Instant startTime = Instant.now();
-        log.info("start getTransaction startTime:{} hash:{} signUserId:{}",
-                startTime.toEpochMilli(), reqSignMessage.getHash(), reqSignMessage.getSignUserId());
-        Object object = transHashService.getSignMessageHash(reqSignMessage.getHash(), reqSignMessage.getSignUserId());
+        log.info("start getTransaction startTime:{} hash:{} signUserId:{} groupId:{} ",
+            startTime.toEpochMilli(), reqSignMessage.getHash(), reqSignMessage.getSignUserId(),
+            reqSignMessage.getGroupId());
+        Object object = transHashService.getSignMessageHash(reqSignMessage.getGroupId(),
+            reqSignMessage.getHash(), reqSignMessage.getSignUserId());
         log.info("end signMessageHash useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(object));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(object));
         return object;
     }
 }

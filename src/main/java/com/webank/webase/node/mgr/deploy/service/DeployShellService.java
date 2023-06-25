@@ -29,7 +29,7 @@ import java.util.Arrays;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,8 +49,6 @@ public class DeployShellService {
 
     /**
      * build_chain.sh
-     * 重要！！！build_chain脚本中, main()的output_dir去掉了$pwd/的前缀，采用了相对路径
-     * 即：output_dir="${output_dir}"
      * @param encryptType
      * @param ipLines
      * @param chainName

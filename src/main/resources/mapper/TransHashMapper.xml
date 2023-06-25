@@ -19,19 +19,12 @@
       property="createTime"/>
     <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
       property="modifyTime"/>
-    <result column="gas_used" javaType="java.lang.String" jdbcType="VARCHAR"
-            property="gasUsed"/>
-    <result column="status" javaType="java.lang.String" jdbcType="VARCHAR"
-            property="status"/>
-    <result column="extra_data" javaType="java.lang.String" jdbcType="VARCHAR"
-            property="extraData"/>
-    <result column="app_id" javaType="java.lang.String" jdbcType="VARCHAR" property="appId"/>
   </resultMap>
 
 
   <insert id="add">
-    insert ignore into ${tableName}(trans_hash,trans_from,trans_to,block_number,block_timestamp,create_time,modify_time,gas_used,status,extra_data,app_id)
-    values(#{trans.transHash},#{trans.transFrom},#{trans.transTo},#{trans.blockNumber},#{trans.blockTimestamp},NOW(),NOW(),#{trans.gasUsed},#{trans.status},#{trans.extraData},#{trans.appId})
+    insert ignore into ${tableName}(trans_hash,trans_from,trans_to,block_number,block_timestamp,create_time,modify_time)
+    values(#{trans.transHash},#{trans.transFrom},#{trans.transTo},#{trans.blockNumber},#{trans.blockTimestamp},NOW(),NOW())
   </insert>
 
 

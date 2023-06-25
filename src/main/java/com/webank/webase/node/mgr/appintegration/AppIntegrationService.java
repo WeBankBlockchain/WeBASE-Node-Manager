@@ -46,7 +46,7 @@ public class AppIntegrationService {
 
     /**
      * save app info.
-     * 
+     *
      * @param appAddInfo
      * @return
      */
@@ -66,7 +66,7 @@ public class AppIntegrationService {
 
     /**
      * newApp.
-     * 
+     *
      * @param appAddInfo
      * @return
      */
@@ -95,7 +95,7 @@ public class AppIntegrationService {
 
     /**
      * newApp.
-     * 
+     *
      * @param appAddInfo
      * @return
      */
@@ -118,7 +118,7 @@ public class AppIntegrationService {
 
     /**
      * appRegister.
-     * 
+     *
      * @param appKey
      * @param appRegisterInfo
      */
@@ -148,7 +148,7 @@ public class AppIntegrationService {
     /**
      * appStatusCheck.
      */
-    @Async(value = "mgrAsyncExecutor")
+//    @Async(value = "mgrAsyncExecutor")
     public void appStatusCheck() {
         AppInfoParam param = new AppInfoParam();
         param.setAppType(AppType.NEW.getValue());
@@ -170,7 +170,7 @@ public class AppIntegrationService {
 
     /**
      * get count.
-     * 
+     *
      * @param appInfoParam
      * @return
      */
@@ -180,7 +180,7 @@ public class AppIntegrationService {
 
     /**
      * get List.
-     * 
+     *
      * @param appInfoParam
      * @return
      */
@@ -190,7 +190,7 @@ public class AppIntegrationService {
 
     /**
      * updateAppInfo.
-     * 
+     *
      * @param tbAppInfo
      * @return
      */
@@ -200,7 +200,7 @@ public class AppIntegrationService {
 
     /**
      * deleteAppInfo.
-     * 
+     *
      * @param id
      * @return
      */
@@ -214,7 +214,7 @@ public class AppIntegrationService {
 
     /**
      * check by id.
-     * 
+     *
      * @param id
      * @return
      */
@@ -228,7 +228,7 @@ public class AppIntegrationService {
 
     /**
      * check by appName.
-     * 
+     *
      * @param appName
      * @return
      */
@@ -242,7 +242,7 @@ public class AppIntegrationService {
 
     /**
      * queryAppInfo by id.
-     * 
+     *
      * @return
      */
     public TbAppInfo queryAppInfoById(Integer id) {
@@ -253,7 +253,7 @@ public class AppIntegrationService {
 
     /**
      * queryAppInfo by appName.
-     * 
+     *
      * @return
      */
     public TbAppInfo queryAppInfoByAppName(String appName) {
@@ -264,7 +264,7 @@ public class AppIntegrationService {
 
     /**
      * queryAppInfo by appKey.
-     * 
+     *
      * @return
      */
     public TbAppInfo queryAppInfoByAppKey(String appKey) {
@@ -275,7 +275,7 @@ public class AppIntegrationService {
 
     /**
      * queryAppInfo.
-     * 
+     *
      * @param appInfoParam
      * @return
      */
@@ -285,7 +285,7 @@ public class AppIntegrationService {
 
     /**
      * getAppKey.
-     * 
+     *
      * @return
      */
     private String getAppKey() {

@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContractPathParam {
-    private Integer groupId;
+    private String groupId;
     private String contractPath;
     private String account;
 }

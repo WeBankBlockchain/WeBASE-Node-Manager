@@ -45,8 +45,8 @@ public class TableService {
     /**
      * create table by groupId
      */
-    public void newTableByGroupId(int groupId) {
-        if (groupId == 0) {
+    public void newTableByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return;
         }
 
@@ -61,10 +61,10 @@ public class TableService {
     /**
      * deop table.
      */
-    public void dropTableByGroupId(int groupId) {
+    public void dropTableByGroupId(String groupId) {
         Instant startTime = Instant.now();
         log.info("start dropTableByGroupId. startTime:{}", startTime.toEpochMilli());
-        if (groupId == 0) {
+        if (groupId.isEmpty()) {
             return;
         }
         for (TableName enumName : TableName.values()) {
@@ -87,6 +87,7 @@ public class TableService {
         }
 //        int affectedRow = 1;
 //        while (affectedRow > 0) {
+//            // todo 一次删除1000条，若交易几百万，会导致请求超时  考虑分批删除
 //            affectedRow = tableMapper.deleteByTableName(tableName);
 //            log.debug("delete table:{} affectedRow:{}", tableName, affectedRow);
 //        }

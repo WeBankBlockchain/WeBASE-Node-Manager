@@ -37,11 +37,11 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
-import org.fisco.bcos.sdk.model.CryptoType;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.Assert;
@@ -75,8 +75,8 @@ public class ImportCertTest {
         byte[] pubBytes = pub.getEncodedPublicValue();
         String publicKey = Numeric.toHexStringNoPrefix(pubBytes);
         CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
-        String address = cryptoSuite.createKeyPair().getAddress(publicKey);
-        byte[] addByteArray = cryptoSuite.createKeyPair().getAddress(pubBytes);
+        String address = cryptoSuite.getCryptoKeyPair().getAddress(publicKey);
+        byte[] addByteArray = cryptoSuite.getCryptoKeyPair().getAddress(pubBytes);
         System.out.println("byte[] : pub ");
         System.out.println(pubBytes);
         System.out.println("====================================");
@@ -95,7 +95,7 @@ public class ImportCertTest {
     public void testAddress() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
 
-        CryptoKeyPair key = cryptoSuite.createKeyPair();
+        CryptoKeyPair key = cryptoSuite.getCryptoKeyPair();
         // 用byte[]穿进去获取公钥，就会可能多出一位0
         System.out.println("=============原生的==============");
         System.out.println(key.getHexPublicKey()); //64bytes BigInteger

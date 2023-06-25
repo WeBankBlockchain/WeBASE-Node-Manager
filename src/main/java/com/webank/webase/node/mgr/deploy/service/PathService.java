@@ -34,7 +34,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -248,7 +248,7 @@ public class PathService {
      * @param nodePath
      * @return
      */
-    public static Path getGroupGenesisPath(Path nodePath,int groupId) {
+    public static Path getGroupGenesisPath(Path nodePath,String groupId) {
         return nodePath.resolve("conf").resolve(String.format("group.%s.genesis",groupId));
     }
     /**
@@ -340,13 +340,17 @@ public class PathService {
      * @return
      * @throws IOException
      */
-    public static Set<Integer> getNodeGroupIdSet(Path nodePath) {
-        Set<Integer> result = null;
+    public static Set<String> getNodeGroupIdSet(Path nodePath) {
+        Set<String> result = null;
         try (Stream<Path> walk = Files.walk(nodePath.resolve("conf"), 1)) {
+//            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
+//                    .map((path) -> Integer.parseInt(path.getFileName().toString()
+//                            .replaceAll("group\\.", "").replaceAll("\\.genesis", "")))
+//                    .collect(Collectors.toSet());
             result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
-                    .map((path) -> Integer.parseInt(path.getFileName().toString()
-                            .replaceAll("group\\.", "").replaceAll("\\.genesis", "")))
-                    .collect(Collectors.toSet());
+                .map((path) -> path.getFileName().toString().replaceAll("group\\.", "")
+                    .replaceAll("\\.genesis", ""))
+                .collect(Collectors.toSet());
         } catch (IOException e) {
             log.error("getNodeGroupIdSet error:{}", e);
         }

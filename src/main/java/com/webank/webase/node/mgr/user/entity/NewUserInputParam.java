@@ -34,7 +34,7 @@ public class NewUserInputParam {
     private String userName;
     private String account;
     @NotNull
-    private Integer groupId;
+    private String groupId;
     private String description;
     private Integer userType = UserType.GENERALUSER.getValue();
 }

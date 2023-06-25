@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 public class TransactionParam {
 
     @NotNull
-    private Integer groupId;
+    private String groupId;
     private String signUserId;
     @NotBlank
     private String contractName;
@@ -40,4 +40,5 @@ public class TransactionParam {
     private boolean useCns = false;
     private String cnsName;
     private String version;
+    private Boolean isWasm = false;
 }

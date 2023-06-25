@@ -32,7 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.ini4j.Ini;
 import org.ini4j.Profile;
 
@@ -44,8 +44,8 @@ public class NodeConfig {
     private int jsonrpcPort;
     private int p2pPort;
     private int channelPort;
-    private Set<Integer> groupIdSet;
-    private Map<Integer,Pair<Long, List<String>>> groupIdToTimestampNodeListMap = new HashMap<>();
+    private Set<String> groupIdSet;
+    private Map<String,Pair<Long, List<String>>> groupIdToTimestampNodeListMap = new HashMap<>();
 
     /**
      * Read config value from node config files.
@@ -128,7 +128,7 @@ public class NodeConfig {
      * @param oldNode
      * @param newNode
      */
-    public static void copyGroupConfigFiles(Path oldNode, Path newNode, int groupId) {
+    public static void copyGroupConfigFiles(Path oldNode, Path newNode, String groupId) {
         if (Files.exists(oldNode)) {
             String groupGenesisFileName =String.format("conf/group.%s.genesis", groupId);
             String groupIniFileName =String.format("conf/group.%s.ini", groupId);
@@ -169,7 +169,7 @@ public class NodeConfig {
      * @return order : <jsonrpcPort, channelPort, p2pPort>
      * @throws IOException
      */
-    public static Pair<Long, List<String>> getGroupConfig(Path nodePath, Integer groupId) throws IOException {
+    public static Pair<Long, List<String>> getGroupConfig(Path nodePath, String groupId) throws IOException {
         Path groupGenesisIni = PathService.getGroupGenesisPath(nodePath,groupId);
         if (Files.exists(groupGenesisIni)){
             Ini ini = new Ini(groupGenesisIni.toFile());
@@ -189,7 +189,7 @@ public class NodeConfig {
      * @param nodePath
      * @return
      */
-    public static Set<Integer> getGroupIdSet(Path nodePath,byte  encryptType ){
+    public static Set<String> getGroupIdSet(Path nodePath,byte  encryptType ){
         return NodeConfig.read(nodePath,encryptType).getGroupIdSet();
     }
 }

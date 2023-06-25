@@ -15,18 +15,14 @@ package com.webank.webase.node.mgr.frontgroupmap;
 
 
 import com.webank.webase.node.mgr.base.enums.ConsensusType;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
-
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class FrontGroupMapCache {
 
     @Autowired
-    @Lazy
     private FrontGroupMapService mapService;
 
     private static List<FrontGroup> mapList;
@@ -53,6 +48,7 @@ public class FrontGroupMapCache {
      * filter by block height
      * @return
      */
+    @Deprecated
     @Transactional(isolation= Isolation.READ_COMMITTED)
     public List<FrontGroup> getSealerOrObserverMap() {
         MapListParam param = new MapListParam();
@@ -60,6 +56,7 @@ public class FrontGroupMapCache {
         List<FrontGroup> targetMap = null;
         targetMap = mapService.getList(param);
         log.debug("get sealer map:{} param:{}", targetMap, param);
+        //todo 一个front连接多个群组，群组如果连的不是sealer，就会导致此处获取sealer的时候，非空，跳过了observer的逻辑
         if (targetMap == null || targetMap.isEmpty()) {
             param.setType(ConsensusType.OBSERVER.getValue());
             targetMap = mapService.getList(param);
@@ -75,7 +72,7 @@ public class FrontGroupMapCache {
      */
     @Transactional
     public List<FrontGroup> resetMapList() {
-        mapList = this.getSealerOrObserverMap();
+        mapList = mapService.getList(new MapListParam());
         return mapList;
     }
 
@@ -94,15 +91,15 @@ public class FrontGroupMapCache {
      * filter by group status
      */
     @Transactional
-    public List<FrontGroup> getMapListByGroupId(int groupId) {
+    public List<FrontGroup> getMapListByGroupId(String groupId) {
         List<FrontGroup> list = getAllMap();
-        if (list == null) {
-            log.warn("getMapListByGroupId getAllMap is null.");
+        if (list == null || list.isEmpty()) {
+            log.warn("getMapListByGroupId getAllMap groupId:{} is null.", groupId);
             return null;
         }
         // filter all FrontGroup which groupStatus is normal
         List<FrontGroup> map = list.stream()
-            .filter(m -> groupId == m.getGroupId()
+            .filter(m -> groupId.equals(m.getGroupId())
                     && m.getStatus() == GroupStatus.NORMAL.getValue())
             .collect(Collectors.toList());
         log.debug("getMapListByGroupId map size:{}", map.size());

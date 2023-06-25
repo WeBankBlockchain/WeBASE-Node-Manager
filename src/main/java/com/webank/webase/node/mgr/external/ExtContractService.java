@@ -31,7 +31,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -59,22 +60,30 @@ public class ExtContractService {
      */
     @Async(value = "mgrAsyncExecutor")
     @Transactional
-    public void asyncSaveContract(int groupId, String txHash, String timestampStr) {
+    public void asyncSaveContract(String groupId, String txHash, String timestampStr) {
         log.debug("start asyncSaveContract groupId:{}, txHash:{}, timestampStr:{}",
             groupId, txHash, timestampStr);
 
         TransactionReceipt txReceipt = frontInterfaceService.getTransReceipt(groupId, txHash);
         // if send transaction to call contract, receipt's contract address is all zero,
         // receipt's to is contract address
-        String contractAddress = txReceipt.getTo();
+        // todo 3.0 is null
+        String contractAddress;
+        if (txReceipt.getTo() == null) {
+            contractAddress = "";
+        } else {
+            contractAddress = txReceipt.getTo();
+        }
 
         // if receipt's to is all zero, deploy transaction
-        if (ConstantProperties.ADDRESS_DEPLOY.equalsIgnoreCase(txReceipt.getTo())) {
+        if (StringUtils.isNotBlank(txReceipt.getContractAddress())) {
             log.debug("deploy contract tx :{}", txReceipt.getContractAddress());
             contractAddress = txReceipt.getContractAddress();
         }
         // ignore precompiled contract address
-        if (contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED)) {
+        if (contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED)
+        || contractAddress.startsWith(ConstantProperties.ADDRESS_PRECOMPILED_NO_PREFIX)
+        || StringUtils.isBlank(contractAddress)) {
             log.debug("ignore precompiled contract:{}", contractAddress);
             return;
         }
@@ -87,7 +96,7 @@ public class ExtContractService {
      * save contract on chain
      */
     @Transactional
-    public int saveContractOnChain(int groupId, String contractAddress, String txHash,
+    public int saveContractOnChain(String groupId, String contractAddress, String txHash,
         String deployAddress, String timestamp) {
         log.debug("saveContractOnChain groupId:{} contractAddress:{}", groupId, contractAddress);
         if (checkAddressExist(groupId, contractAddress)) {
@@ -120,17 +129,18 @@ public class ExtContractService {
         tbContract.setContractAddress(contractAddress);
         tbContract.setDeployTxHash(txHash);
         tbContract.setDeployTime(NodeMgrTools.timestamp2Date(Long.parseLong(timestamp)));
-        tbContract.setDeployAddress(deployAddress);
+        // todo 链上的回执没返回from
+        tbContract.setDeployAddress(StringUtils.isBlank(deployAddress) ? "" : deployAddress);
         Date now = new Date();
         tbContract.setCreateTime(now);
         tbContract.setModifyTime(now);
         int insertRes = extContractMapper.insertSelective(tbContract);
-        log.info("saveContractOnChain groupId:{} contractAddress:{}, insertRes:{}",
-            groupId, contractAddress, insertRes);
+        log.info("saveContractOnChain groupId:{} contractAddress:{},deployAddress:{} insertRes:{}",
+            groupId, contractAddress, deployAddress, insertRes);
         return insertRes;
     }
 
-    private boolean checkAddressExist(int groupId, String contractAddress) {
+    private boolean checkAddressExist(String groupId, String contractAddress) {
         int count = extContractMapper.countOfExtContract(groupId, contractAddress);
         if (count > 0) {
             log.info("saveContractOnChain exists tb_external_contract"
@@ -161,7 +171,7 @@ public class ExtContractService {
         return extContractMapper.updateByPrimaryKeySelective(update);
     }
 
-    public void deleteByGroupId(int groupId) {
+    public void deleteByGroupId(String groupId) {
         int affected = extContractMapper.deleteByGroupId(groupId);
         log.warn("deleteByGroupId:{} affected:{}", groupId, affected);
     }
@@ -176,7 +186,7 @@ public class ExtContractService {
         return contractList;
     }
 
-    public TbExternalContract getByAddress(int groupId, String contractAddress) {
+    public TbExternalContract getByAddress(String groupId, String contractAddress) {
         log.debug("getByAddress groupId:{}, contractAddress:{}", groupId, contractAddress);
         TbExternalContract externalContract = extContractMapper.getByGroupIdAndAddress(groupId, contractAddress);
         log.debug("getByAddress externalContract:{}", externalContract);

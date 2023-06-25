@@ -1,7 +1,6 @@
 package com.webank.webase.node.mgr.contract.warehouse.mapper;
 
 import com.webank.webase.node.mgr.contract.warehouse.entity.TbContractItem;
-import com.webank.webase.node.mgr.contract.warehouse.entity.TbWarehouse;
 import java.util.List;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -16,9 +15,6 @@ import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
 
 public interface TbContractItemMapper {
-
-    @Select({ "select", TbContractItemSqlProvider.ALL_COLUMN_FIELDS, "from tb_contract_item" })
-    List<TbContractItem> findAll();
 
     @Select({ "select", TbContractItemSqlProvider.ALL_COLUMN_FIELDS, "from tb_contract_item",
         "where contract_folder_id = #{contractFolderId}  order by id asc" })
@@ -68,7 +64,7 @@ public interface TbContractItemMapper {
      *
      * @mbg.generated
      */
-    @Options(useGeneratedKeys = false, keyProperty = "id", keyColumn = "id")
-    @Insert({ "<script>", "insert into tb_contract_item (id, contract_name, ", "create_time, modify_time, ", "warehouse_id, contract_folder_id, ", "contract_source, description, ", "description_en)", "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.id,jdbcType=INTEGER}, #{detail.contractName,jdbcType=VARCHAR}, ", "#{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP}, ", "#{detail.warehouseId,jdbcType=INTEGER}, #{detail.contractFolderId,jdbcType=INTEGER}, ", "#{detail.contractSource,jdbcType=LONGVARCHAR}, #{detail.description,jdbcType=LONGVARCHAR}, ", "#{detail.descriptionEn,jdbcType=LONGVARCHAR})</foreach></script>" })
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    @Insert({ "<script>", "insert into tb_contract_item (contract_name, ", "create_time, modify_time, ", "warehouse_id, contract_folder_id, ", "contract_source, description, ", "description_en)", "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.contractName,jdbcType=VARCHAR}, ", "#{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP}, ", "#{detail.warehouseId,jdbcType=INTEGER}, #{detail.contractFolderId,jdbcType=INTEGER}, ", "#{detail.contractSource,jdbcType=LONGVARCHAR}, #{detail.description,jdbcType=LONGVARCHAR}, ", "#{detail.descriptionEn,jdbcType=LONGVARCHAR})</foreach></script>" })
     int batchInsert(java.util.List<TbContractItem> list);
 }

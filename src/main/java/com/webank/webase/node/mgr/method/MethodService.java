@@ -13,6 +13,8 @@
  */
 package com.webank.webase.node.mgr.method;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -22,11 +24,15 @@ import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.utils.ObjectMapperFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,15 +44,17 @@ public class MethodService {
     @Autowired
     private MethodMapper methodMapper;
     @Autowired
-    private CryptoSuite cryptoSuite;
+    private Map<Integer, CryptoSuite> cryptoSuiteMap;
 
     /**
      * save method by abi string
+     *
      * @param groupId
      * @param abiStr
      * @param type
      */
-    public void saveMethod(int groupId, String abiStr, int type) {
+    public void saveMethod(String groupId, String abiStr, int type,
+        CryptoSuite cryptoSuite) {
         List<Method> methodList;
         try {
             methodList = new ArrayList<>(Web3Tools.getMethodFromAbi(abiStr, cryptoSuite));
@@ -64,7 +72,7 @@ public class MethodService {
      * save method info
      */
     public void saveMethod(NewMethodInputParam newMethodInputParam, Integer type) {
-        int groupId = newMethodInputParam.getGroupId();
+        String groupId = newMethodInputParam.getGroupId();
         List<Method> methodList = newMethodInputParam.getMethodList();
         TbMethod tbMethod = new TbMethod();
         tbMethod.setGroupId(groupId);
@@ -72,7 +80,8 @@ public class MethodService {
         //save each method
         for (Method method : methodList) {
             if (checkMethodExist(method.getMethodId(), groupId)) {
-                log.info("methodId of [{}] in group [{}] exist, jump over", method.getMethodId(), groupId);
+                log.info("methodId of [{}] in group [{}] exist, jump over", method.getMethodId(),
+                    groupId);
                 continue;
             }
             BeanUtils.copyProperties(method, tbMethod);
@@ -82,11 +91,12 @@ public class MethodService {
 
     /**
      * checkMethod whether exist
+     *
      * @param methodId
      * @param groupId
      * @return
      */
-    private boolean checkMethodExist(String methodId, int groupId) {
+    private boolean checkMethodExist(String methodId, String groupId) {
         TbMethod check = methodMapper.getMethodById(methodId, groupId);
         if (Objects.nonNull(check)) {
             return true;
@@ -97,7 +107,7 @@ public class MethodService {
     /**
      * query by methodId.
      */
-    public TbMethod getByMethodId(String methodId, Integer groupId) {
+    public TbMethod getByMethodId(String methodId, String groupId) {
         TbMethod tbMethod = methodMapper.getMethodById(methodId, null);
         if (Objects.nonNull(tbMethod)) {
             if (ContractType.SYSTEMCONTRACT.getValue() == tbMethod.getContractType().intValue()) {
@@ -112,8 +122,8 @@ public class MethodService {
     /**
      * delete by groupId.
      */
-    public void deleteByGroupId(int groupId){
-        if (groupId == 0) {
+    public void deleteByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return;
         }
         methodMapper.removeByGroupId(groupId);

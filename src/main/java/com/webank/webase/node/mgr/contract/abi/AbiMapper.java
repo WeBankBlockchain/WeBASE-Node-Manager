@@ -33,11 +33,11 @@ public interface AbiMapper {
 
 	AbiInfo queryByAbiId(@Param("abiId") int abiId);
 
-	AbiInfo queryByGroupIdAndAddress(@Param("groupId") int groupId,
+	AbiInfo queryByGroupIdAndAddress(@Param("groupId") String groupId,
 			 @Param("account") String account,
 			 @Param("contractAddress") String contractAddress);
 
-	AbiInfo queryByGroupIdAndContractName(@Param("groupId") int groupId,
+	AbiInfo queryByGroupIdAndContractName(@Param("groupId") String groupId,
 			 @Param("account") String account,
 			 @Param("contractName") String contractName);
 
@@ -47,7 +47,7 @@ public interface AbiMapper {
 
 	void deleteByAbiId(@Param("abiId") int abiId);
 
-	void deleteByGroupId(@Param("groupId") int groupId);
+	void deleteByGroupId(@Param("groupId") String groupId);
 
 	List<RspAllContract> listAllContract(ReqAbiListParam param);
 

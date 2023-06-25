@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TransHashServiceTest extends TestBase {
     @Autowired
     private TransHashService transHashService;
-    private Integer groupId = 300001;
+    private String groupId = "300001";
     @Autowired
     private TransHashMapper transHashMapper;
 

@@ -29,7 +29,7 @@ public class TbExternalContract implements Serializable {
      *
      * @mbg.generated
      */
-    private Integer groupId;
+    private String groupId;
 
     /**
      *

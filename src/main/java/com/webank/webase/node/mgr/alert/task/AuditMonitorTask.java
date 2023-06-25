@@ -87,7 +87,7 @@ public class AuditMonitorTask {
                 Duration.between(startTime, Instant.now()).toMillis());
     }
 
-    private void checkUserAndContractByGroup(int groupId) {
+    private void checkUserAndContractByGroup(String groupId) {
         log.debug("start checkUserAndContractByGroup groupId:{}", groupId);
         int unusualUserCount = monitorService.countOfUnusualUser(groupId, null);
         int unusualContractCount = monitorService.countOfUnusualContract(groupId, null);

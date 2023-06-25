@@ -21,6 +21,8 @@ import com.webank.webase.node.mgr.base.enums.TransType;
 import com.webank.webase.node.mgr.base.enums.TransUnusualType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.tools.Web3Tools;
@@ -56,8 +58,10 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Address;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -90,17 +94,21 @@ public class MonitorService {
     @Autowired
     private ConstantProperties cProperties;
     @Autowired
-    private CryptoSuite cryptoSuite;
+    private Map<Integer, CryptoSuite> cryptoSuiteMap;
+    @Autowired
+    private GroupService groupService;
     @Autowired
     @Lazy
     private AbiService abiService;
 
+    private final static List<String> LIQUID_PRECOMPILED_ADDRESS_ARRAY = Arrays.asList("/sys/auth", "/sys/bfs", "/sys/cns", "/sys/consensus",
+        "/sys/crypto_tools", "/sys/kv_storage", "/sys/parallel_config", "/sys/status", "/sys/table_storage");
 
     /**
      * monitor every group.
      */
     @Async(value = "mgrAsyncExecutor")
-    public void transMonitorByGroupId(CountDownLatch latch, int groupId) {
+    public void transMonitorByGroupId(CountDownLatch latch, String groupId) {
         try {
             Instant startTimem = Instant.now();//start time
             Long useTimeSum = 0L;
@@ -155,7 +163,7 @@ public class MonitorService {
     /**
      * check unusualUserCount or unusualContractCount is max.
      */
-    private boolean checkUnusualMax(int groupId) {
+    private boolean checkUnusualMax(String groupId) {
         int unusualUserCount = this.countOfUnusualUser(groupId, null);
         int unusualContractCount = this.countOfUnusualContract(groupId, null);
         int unusualMaxCount = cProperties.getMonitorUnusualMaxCount();
@@ -170,7 +178,7 @@ public class MonitorService {
     }
 
 
-    public void updateUnusualUser(Integer groupId, String userName, String address) {
+    public void updateUnusualUser(String groupId, String userName, String address) {
         log.info("start updateUnusualUser address:{}", address);
         monitorMapper.updateUnusualUser(TableName.MONITOR.getTableName(groupId), userName, address);
     }
@@ -178,7 +186,7 @@ public class MonitorService {
     /**
      * Remove trans monitor info.
      */
-    public Integer delete(Integer groupId, Integer monitorInfoRetainMax) {
+    public Integer delete(String groupId, Integer monitorInfoRetainMax) {
         String tableName = TableName.MONITOR.getTableName(groupId);
         Integer affectRow = monitorMapper.deleteAndRetainMax(tableName, monitorInfoRetainMax);
         return affectRow;
@@ -187,7 +195,7 @@ public class MonitorService {
     /**
      * update unusual contract.
      */
-    public void updateUnusualContract(Integer groupId, String contractName, String contractBin)
+    public void updateUnusualContract(String groupId, String contractName, String contractBin)
         throws NodeMgrException {
         try {
             log.info("start updateUnusualContract groupId:{} contractName:{} contractBin:{}",
@@ -200,6 +208,7 @@ public class MonitorService {
                 return;
             }
             ChainTransInfo trans = frontInterface.getTransInfoByHash(groupId, txHash);
+            log.info("updateUnusualContract trans from front:{}", trans);
             if (trans == null) {
                 return;
             }
@@ -218,7 +227,7 @@ public class MonitorService {
     /**
      * query monitor user list.
      */
-    public List<TbMonitor> queryMonitorUserList(Integer groupId) throws NodeMgrException {
+    public List<TbMonitor> queryMonitorUserList(String groupId) throws NodeMgrException {
 
         List<TbMonitor> monitorUserList = monitorMapper
             .monitorUserList(TableName.MONITOR.getTableName(groupId));
@@ -231,7 +240,7 @@ public class MonitorService {
     /**
      * query monitor interface list.
      */
-    public List<TbMonitor> queryMonitorInterfaceList(Integer groupId, String userName)
+    public List<TbMonitor> queryMonitorInterfaceList(String groupId, String userName)
         throws NodeMgrException {
 
         List<TbMonitor> monitorInterfaceList = monitorMapper
@@ -245,7 +254,7 @@ public class MonitorService {
     /**
      * query monitor trans list.
      */
-    public BaseResponse queryMonitorTransList(Integer groupId, String userName, String startDate,
+    public BaseResponse queryMonitorTransList(String groupId, String userName, String startDate,
         String endDate, String interfaceName)
         throws NodeMgrException {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
@@ -270,14 +279,14 @@ public class MonitorService {
     /**
      * query count of unusual user.
      */
-    public Integer countOfUnusualUser(Integer groupId, String userName) {
+    public Integer countOfUnusualUser(String groupId, String userName) {
         return monitorMapper.countOfUnusualUser(TableName.MONITOR.getTableName(groupId), userName);
     }
 
     /**
      * query unusual user list.
      */
-    public List<UnusualUserInfo> queryUnusualUserList(Integer groupId, String userName,
+    public List<UnusualUserInfo> queryUnusualUserList(String groupId, String userName,
         Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
         log.debug("start queryUnusualUserList groupId:{} userName:{} pageNumber:{} pageSize:{}",
@@ -302,7 +311,7 @@ public class MonitorService {
     /**
      * query count of unusual contract.
      */
-    public Integer countOfUnusualContract(Integer groupId, String contractAddress) {
+    public Integer countOfUnusualContract(String groupId, String contractAddress) {
         return monitorMapper
             .countOfUnusualContract(TableName.MONITOR.getTableName(groupId), contractAddress);
     }
@@ -310,7 +319,7 @@ public class MonitorService {
     /**
      * query unusual contract list.
      */
-    public List<UnusualContractInfo> queryUnusualContractList(Integer groupId,
+    public List<UnusualContractInfo> queryUnusualContractList(String groupId,
         String contractAddress, Integer pageNumber, Integer pageSize)
         throws NodeMgrException {
         log.debug(
@@ -338,11 +347,10 @@ public class MonitorService {
     /**
      * monitor TransHash.
      */
-    public void monitorTransHash(int groupId, TbTransHash trans, LocalDateTime createTime) {
+    public void monitorTransHash(String groupId, TbTransHash trans, LocalDateTime createTime) {
 
         try {
-            ChainTransInfo chanTrans = frontInterface
-                .getTransInfoByHash(groupId, trans.getTransHash());
+            ChainTransInfo chanTrans = frontInterface.getTransInfoByHash(groupId, trans.getTransHash());
             if (Objects.isNull(chanTrans)) {
                 log.error("monitor jump over,invalid hash. groupId:{} hash:{}", groupId,
                     trans.getTransHash());
@@ -382,65 +390,95 @@ public class MonitorService {
     /**
      * monitor contract.
      */
-    private ContractMonitorResult monitorContract(int groupId, String transHash, String transTo,
+    private ContractMonitorResult monitorContract(String groupId, String transHash, String transTo,
         String transInput, BigInteger blockNumber) {
+        TbGroup tbGroup = groupService.checkGroupId(groupId);
+        CryptoSuite cryptoSuite = cryptoSuiteMap.get(tbGroup.getEncryptType());
         String contractAddress, contractName, interfaceName = "", contractBin;
         int transType = TransType.DEPLOY.getValue();
         int transUnusualType = TransUnusualType.NORMAL.getValue();
-        // deploy contract tx
-        if (isDeploy(transTo)) {
-            contractAddress = frontInterface.getAddressByHash(groupId, transHash);
-            if (ConstantProperties.ADDRESS_DEPLOY.equals(contractAddress)) {
-                contractBin = StringUtils.removeStart(transInput, "0x");
-                
-                ContractParam param = new ContractParam();
-                param.setGroupId(groupId);
-                param.setPartOfBytecodeBin(contractBin);
-                TbContract tbContract = contractService.queryContract(param);
-                // add abi query
-                ReqAbiListParam paramTbAbi = new ReqAbiListParam();
-                paramTbAbi.setGroupId(groupId);
-                paramTbAbi.setPartOfContractBin(contractBin);
-                AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
-                if (Objects.nonNull(tbContract)) {
-                    contractName = tbContract.getContractName();
-                } else if (Objects.nonNull(abiInfo)) {
-                    contractName = abiInfo.getContractName();
-                } else {
-                    contractName = getNameFromContractBin(groupId, contractBin);
-                    transUnusualType = TransUnusualType.CONTRACT.getValue();
-                }
+        // liquid时to在部署和调用时均不为空，需要获取回执判断contractAddress
+        // todo 3.0此处为null
+        if (transTo == null) {
+            transTo = "";
+        }
+        if (transTo.startsWith("/")) {
+            TransactionReceipt receipt = frontInterface.getTransReceipt(groupId, transHash);
+            contractAddress = receipt.getContractAddress();
+            // 部署失败的时候，或者调用交易的时候，address为空
+            if (StringUtils.isBlank(contractAddress)) {
+                if (!receipt.isStatusOK()) {
+                    // 部署失败
+                    return new ContractMonitorResult("0x", "0x", TransType.DEPLOY.getValue(),
+                        MonitorUserType.NORMAL.getValue());
+                } // else 发交易，执行下文根据transTo判断
+                // continue
             } else {
-                contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
-                contractBin = removeBinFirstAndLast(contractBin);
+                //部署成功，手动设置transTo为空，适配solidity中的to为空，contractAddress非空的特点
+                transTo = "";
+            }
+        }
+        // deploy contract tx
+        if (StringUtils.isBlank(transTo) || "0x".equalsIgnoreCase(transTo)) {
+            contractAddress = frontInterface.getAddressByHash(groupId, transHash);
+            // if contract deploy error, contract address is null and transTo is null
+            if (StringUtils.isBlank(contractAddress) || Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress) ) {
+                log.warn("transTo is empty, and contract address is empty because deploy error");
+                return new ContractMonitorResult("0x", "0x", TransType.DEPLOY.getValue(),
+                    MonitorUserType.NORMAL.getValue());
+            }
+            if (contractAddress.startsWith("0x0000000000000000000000000000000000")
+                || isPrecompiledLiquidAddress(contractAddress)) {
+                log.info("contractAddress is precompiled contract, skip");
+                return new ContractMonitorResult(contractAddress, contractAddress, TransType.DEPLOY.getValue(),
+                    MonitorUserType.NORMAL.getValue());
+            }
+            contractBin = frontInterface.getCodeV2FromFront(groupId, contractAddress, blockNumber);
+            if (StringUtils.isBlank(contractBin)) {
+                log.warn("contractAddress:[{}] not exist on chain, required audit", contractAddress);
+                return new ContractMonitorResult(contractAddress, contractAddress, TransType.CALL.getValue(),
+                    MonitorUserType.ABNORMAL.getValue());
+            }
+            contractBin = removeBinFirstAndLast(contractBin);
 
-                List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
-                // add abi query
-                ReqAbiListParam paramTbAbi = new ReqAbiListParam();
-                paramTbAbi.setGroupId(groupId);
-                paramTbAbi.setPartOfContractBin(contractBin);
-                AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
-                if (contractRow != null && contractRow.size() > 0) {
-                    contractName = contractRow.get(0).getContractName();
-                } else if (Objects.nonNull(abiInfo)) {
-                    contractName = abiInfo.getContractName();
-                } else {
-                    contractName = getNameFromContractBin(groupId, contractBin);
-                    transUnusualType = TransUnusualType.CONTRACT.getValue();
-                }
+            List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
+            // add abi query
+            ReqAbiListParam paramTbAbi = new ReqAbiListParam();
+            paramTbAbi.setGroupId(groupId);
+            paramTbAbi.setPartOfContractBin(contractBin);
+            AbiInfo abiInfo = abiService.getAbiInfoByBin(paramTbAbi);
+            if (contractRow != null && contractRow.size() > 0) {
+                contractName = contractRow.get(0).getContractName();
+            } else if (Objects.nonNull(abiInfo)) {
+                contractName = abiInfo.getContractName();
+            } else {
+                contractName = getNameFromContractBin(groupId, contractBin);
+                transUnusualType = TransUnusualType.CONTRACT.getValue();
             }
             interfaceName = contractName;
-        } else {    // function call
+        } else {    // function call transaction
             transType = TransType.CALL.getValue();
             String methodId = transInput.substring(0, 10);
             contractAddress = transTo;
-            contractBin = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
+            if (contractAddress.startsWith("0x0000000000000000000000000000000000")
+                || isPrecompiledLiquidAddress(contractAddress) ) {
+                log.info("contractAddress is precompiled contract, skip");
+                return new ContractMonitorResult(contractAddress, contractAddress, TransType.CALL.getValue(),
+                    MonitorUserType.NORMAL.getValue());
+            }
+            contractBin = frontInterface
+                .getCodeV2FromFront(groupId, contractAddress, blockNumber);
+            if (StringUtils.isBlank(contractBin)) {
+                log.warn("contractAddress:[{}] not exist on chain, required audit", contractAddress);
+                return new ContractMonitorResult(contractAddress, contractAddress, TransType.CALL.getValue(),
+                    MonitorUserType.ABNORMAL.getValue());
+            }
             contractBin = removeBinFirstAndLast(contractBin);
 
             List<TbContract> contractRow = contractService.queryContractByBin(groupId, contractBin);
             if (contractRow != null && contractRow.size() > 0) {
                 contractName = contractRow.get(0).getContractName();
-                interfaceName = getInterfaceName(methodId, contractRow.get(0).getContractAbi());
+                interfaceName = getInterfaceName(methodId, contractRow.get(0).getContractAbi(), cryptoSuite);
                 if (StringUtils.isBlank(interfaceName)) {
                     interfaceName = transInput.substring(0, 10);
                     transUnusualType = TransUnusualType.FUNCTION.getValue();
@@ -450,7 +488,7 @@ public class MonitorService {
                 contractName = getNameFromContractBin(groupId, contractBin);
                 TbMethod tbMethod = methodService.getByMethodId(methodId, groupId);
                 if (Objects.nonNull(tbMethod)) {
-                    interfaceName = getInterfaceName(methodId, "[" + tbMethod.getAbiInfo() + "]");
+                    interfaceName = getInterfaceName(methodId, "[" + tbMethod.getAbiInfo() + "]", cryptoSuite);
                     log.info("monitor methodId:{} interfaceName:{}", methodId, interfaceName);
                 }
                 // no method id, deploy tx
@@ -477,7 +515,11 @@ public class MonitorService {
     /**
      * monitor user.
      */
-    private UserMonitorResult monitorUser(int groupId, String userAddress) {
+    private UserMonitorResult monitorUser(String groupId, String userAddress) {
+        if (StringUtils.isBlank(userAddress) || "0x".equalsIgnoreCase(userAddress)) {
+            log.debug("monitorUser ignore empty user:{}", userAddress);
+            return new UserMonitorResult("0x", MonitorUserType.NORMAL.getValue());
+        }
         String userName = userService.queryUserNameByAddress(groupId, userAddress);
 
         int userType = MonitorUserType.NORMAL.getValue();
@@ -499,7 +541,7 @@ public class MonitorService {
     /**
      * get interface name.
      */
-    private String getInterfaceName(String methodId, String contractAbi) {
+    private String getInterfaceName(String methodId, String contractAbi, CryptoSuite cryptoSuite) {
         if (StringUtils.isAnyBlank(methodId, contractAbi)) {
             log.warn("fail getInterfaceName. methodId:{} contractAbi:{}", methodId, contractAbi);
             return null;
@@ -541,19 +583,12 @@ public class MonitorService {
     }
 
     /**
-     * check the address is deploy.
-     */
-    private boolean isDeploy(String address) {
-        if (StringUtils.isBlank(address)) {
-            return false;
-        }
-        return ConstantProperties.ADDRESS_DEPLOY.equals(address);
-    }
-
-    /**
      * get contractName from contractBin.
      */
-    private String getNameFromContractBin(int groupId, String contractBin) {
+    private String getNameFromContractBin(String groupId, String contractBin) {
+        if (StringUtils.isBlank(contractBin)) {
+            return null;
+        }
         List<TbContract> contractList = contractService.queryContractByBin(groupId, contractBin);
         if (contractList != null && contractList.size() > 0) {
             return contractList.get(0).getContractName();
@@ -570,5 +605,12 @@ public class MonitorService {
             contractName = contractBin.substring(contractBin.length() - 10);
         }
         return contractName;
+    }
+
+    private static boolean isPrecompiledLiquidAddress(String liquidAddress) {
+        if (StringUtils.isBlank(liquidAddress)) {
+            return false;
+        }
+        return LIQUID_PRECOMPILED_ADDRESS_ARRAY.stream().anyMatch(liquidAddress::equalsIgnoreCase);
     }
 }

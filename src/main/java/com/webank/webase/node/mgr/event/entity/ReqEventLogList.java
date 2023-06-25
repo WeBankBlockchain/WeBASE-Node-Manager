@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 public class ReqEventLogList {
-    private Integer groupId;
+    private String groupId;
     private List<Object> contractAbi;
     private Integer fromBlock;
     private Integer toBlock;

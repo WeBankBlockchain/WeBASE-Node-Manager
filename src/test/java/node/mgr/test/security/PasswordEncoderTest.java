@@ -18,8 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import node.mgr.test.base.TestBase;
-import org.apache.commons.codec.binary.Hex;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.utils.Hex;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,7 +45,7 @@ public class PasswordEncoderTest extends TestBase {
         try {
             messageDigest = MessageDigest.getInstance("SHA-256");
             byte[] hash = messageDigest.digest(str.getBytes("UTF-8"));
-            encdeStr = Hex.encodeHexString(hash);
+            encdeStr = Hex.toHexString(hash);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }

@@ -22,10 +22,16 @@ import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.method.entity.NewMethodInputParam;
 import com.webank.webase.node.mgr.method.entity.TbMethod;
+import com.webank.webase.node.mgr.tools.Web3Tools;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -60,7 +66,8 @@ public class MethodController extends BaseController {
         methodService.saveMethod(newMethodInputParam, ContractType.GENERALCONTRACT.getValue());
 
         log.info("end addMethod. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -68,7 +75,7 @@ public class MethodController extends BaseController {
      * query by methodId.
      */
     @GetMapping(value = "findById/{groupId}/{methodId}")
-    public BaseResponse getBymethodId(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getBymethodId(@PathVariable("groupId") String groupId,
         @PathVariable("methodId") String methodId) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -79,7 +86,51 @@ public class MethodController extends BaseController {
         baseResponse.setData(tbMethod);
 
         log.info("end addMethodInfo. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
+
+    /**Below API For Developer**/
+//    /**
+//     * compute methodId.
+//     */
+//    @GetMapping(value = "computeMethodId")
+//    public BaseResponse computeMethodId(String abiInfoStr, Integer integer)
+//        throws IOException {
+//        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//        log.info("start computeMethodId. startTime:{}",
+//            startTime.toEpochMilli());
+//        List<ABIDefinition> abiDefinitionList = Web3Tools.loadContractDefinition(abiInfoStr);
+//        List<Map<String, String>> resMethod = methodService.computeMethodId(abiDefinitionList,
+//            integer);
+//        baseResponse.setData(resMethod);
+//
+//        log.info("end computeMethodId. useTime:{} result:{}",
+//            Duration.between(startTime, Instant.now()).toMillis(),
+//            JsonTools.toJSONString(baseResponse));
+//        return baseResponse;
+//    }
+//
+//    /**
+//     * get methodId dmlSql.
+//     */
+//    @GetMapping(value = "getMethodIdDmlSql")
+//    public BaseResponse getMethodIdDmlSql(String abiInfoStr, Integer integer)
+//        throws IOException {
+//        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//        log.info("start getMethodIdDmlSql. startTime:{}",
+//            startTime.toEpochMilli());
+//        List<ABIDefinition> abiDefinitionList = Web3Tools.loadContractDefinition(abiInfoStr);
+//        ArrayList<String> resMethod = methodService.getMethodIdDmlSql(abiDefinitionList,
+//            integer);
+//        baseResponse.setData(resMethod);
+//
+//        log.info("end getMethodIdDmlSql. useTime:{} result:{}",
+//            Duration.between(startTime, Instant.now()).toMillis(),
+//            JsonTools.toJSONString(baseResponse));
+//        return baseResponse;
+//    }
 }

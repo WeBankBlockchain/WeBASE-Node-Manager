@@ -19,18 +19,23 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.block.entity.MinMaxBlock;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.transaction.entity.TbTransHash;
 import com.webank.webase.node.mgr.transaction.entity.TransListParam;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * services for block data.
@@ -47,7 +52,7 @@ public class TransHashService {
     /**
      * add trans hash info.
      */
-    public void addTransInfo(int groupId, TbTransHash tbTransHash) throws NodeMgrException {
+    public void addTransInfo(String groupId, TbTransHash tbTransHash) throws NodeMgrException {
         log.debug("start addTransInfo groupId:{} tbTransHash:{}", groupId,
                 JsonTools.toJSONString(tbTransHash));
         String tableName = TableName.TRANS.getTableName(groupId);
@@ -58,7 +63,7 @@ public class TransHashService {
     /**
      * query trans list.
      */
-    public List<TbTransHash> queryTransList(int groupId, TransListParam param)
+    public List<TbTransHash> queryTransList(String groupId, TransListParam param)
             throws NodeMgrException {
         log.debug("start queryTransList. TransListParam:{}", JsonTools.toJSONString(param));
         String tableName = TableName.TRANS.getTableName(groupId);
@@ -77,7 +82,7 @@ public class TransHashService {
     /**
      * query count of trans hash.
      */
-    public Integer queryCountOfTran(int groupId, TransListParam queryParam)
+    public Integer queryCountOfTran(String groupId, TransListParam queryParam)
             throws NodeMgrException {
         log.debug("start queryCountOfTran. queryParam:{}", JsonTools.toJSONString(queryParam));
         String tableName = TableName.TRANS.getTableName(groupId);
@@ -96,7 +101,7 @@ public class TransHashService {
     /**
      * query min and max block number.
      */
-    public List<MinMaxBlock> queryMinMaxBlock(int groupId) throws NodeMgrException {
+    public List<MinMaxBlock> queryMinMaxBlock(String groupId) throws NodeMgrException {
         log.debug("start queryMinMaxBlock");
         String tableName = TableName.TRANS.getTableName(groupId);
         try {
@@ -113,7 +118,7 @@ public class TransHashService {
     /**
      * Remove trans info.
      */
-    public Integer remove(Integer groupId, Integer subTransNum) {
+    public Integer remove(String groupId, Integer subTransNum) {
         String tableName = TableName.TRANS.getTableName(groupId);
         Integer affectRow = transHashMapper.remove(tableName, subTransNum, groupId);
         return affectRow;
@@ -123,7 +128,7 @@ public class TransHashService {
     /**
      * query un statistics transaction list.
      */
-    public List<TbTransHash> queryUnStatTransHashList(int groupId) {
+    public List<TbTransHash> queryUnStatTransHashList(String groupId) {
         List<TbTransHash> list = transHashMapper
                 .listOfUnStatTransHash(TableName.TRANS.getTableName(groupId));
         return list;
@@ -132,7 +137,7 @@ public class TransHashService {
     /**
      * query un statistic transaction list by job.
      */
-    public List<TbTransHash> queryUnStatTransHashListByJob(int groupId, Integer shardingTotalCount,
+    public List<TbTransHash> queryUnStatTransHashListByJob(String groupId, Integer shardingTotalCount,
                                                            Integer shardingItem) {
         String tableName = TableName.TRANS.getTableName(groupId);
         List<TbTransHash> list = transHashMapper
@@ -143,7 +148,7 @@ public class TransHashService {
     /**
      * update trans statistic flag.
      */
-    public void updateTransStatFlag(int groupId, String transHash) {
+    public void updateTransStatFlag(String groupId, String transHash) {
         String tableName = TableName.TRANS.getTableName(groupId);
         transHashMapper.updateTransStatFlag(tableName, transHash);
     }
@@ -151,7 +156,7 @@ public class TransHashService {
     /**
      * get tbTransInfo from chain
      */
-    public List<TbTransHash> getTransListFromChain(Integer groupId, String transHash,
+    public List<TbTransHash> getTransListFromChain(String groupId, String transHash,
                                                    BigInteger blockNumber) {
         log.debug("start getTransListFromChain.");
         List<TbTransHash> transList = new ArrayList<>();
@@ -166,11 +171,12 @@ public class TransHashService {
         if (transList.size() == 0 && blockNumber != null) {
             List<JsonTransactionResponse> transInBlock = frontInterface
                 .getTransByBlockNumber(groupId, blockNumber);
+            BcosBlock.Block blockOnChain = frontInterface.getBlockByNumber(groupId, blockNumber);//todo fix blockLimit
             if (transInBlock != null && transInBlock.size() != 0) {
                 transInBlock.forEach(tran -> {
                     TbTransHash tbTransHash = new TbTransHash(tran.getHash(), tran.getFrom(),
-                            tran.getTo(), tran.getBlockNumber(),
-                            null);
+                            tran.getTo(), blockNumber,
+                        NodeMgrTools.timestamp2LocalDateTime(blockOnChain.getTimestamp()));
                     transList.add(tbTransHash);
                 });
             }
@@ -183,15 +189,17 @@ public class TransHashService {
     /**
      * request front for transaction by hash.
      */
-    public TbTransHash getTbTransFromFrontByHash(Integer groupId, String transHash)
+    public TbTransHash getTbTransFromFrontByHash(String groupId, String transHash)
             throws NodeMgrException {
         log.info("start getTransFromFrontByHash. groupId:{}  transaction:{}", groupId,
                 transHash);
-        JsonTransactionResponse trans = frontInterface.getTransaction(groupId, transHash);
+        TransactionReceipt trans = frontInterface.getTransReceipt(groupId, transHash);
+        BcosBlock.Block block = frontInterface.getBlockByNumber(groupId, trans.getBlockNumber());
         TbTransHash tbTransHash = null;
         if (trans != null) {
             tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
-                    trans.getBlockNumber(), null);
+                trans.getBlockNumber(),
+                NodeMgrTools.timestamp2LocalDateTime(block.getTimestamp()));
         }
         log.info("end getTransFromFrontByHash. tbTransHash:{}", JsonTools.toJSONString(tbTransHash));
         return tbTransHash;
@@ -200,7 +208,7 @@ public class TransHashService {
     /**
      * get transaction receipt
      */
-    public TransactionReceipt getTransReceipt(int groupId, String transHash) {
+    public TransactionReceipt getTransReceipt(String groupId, String transHash) {
         return frontInterface.getTransReceipt(groupId, transHash);
     }
 
@@ -208,12 +216,12 @@ public class TransHashService {
     /**
      * get transaction info
      */
-    public JsonTransactionResponse getTransaction(int groupId, String transHash) {
+    public JsonTransactionResponse getTransaction(String groupId, String transHash) {
         return frontInterface.getTransaction(groupId, transHash);
     }
 
 
-    public Object getSignMessageHash(String hash, String signUserId) {
-        return frontInterface.getSignMessageHash(hash,signUserId);
+    public Object getSignMessageHash(String groupId,String hash, String signUserId) {
+        return frontInterface.getSignMessageHash(groupId,hash,signUserId);
     }
 }

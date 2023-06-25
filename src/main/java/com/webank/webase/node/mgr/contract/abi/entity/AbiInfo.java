@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AbiInfo {
 	private Integer abiId;
-	private Integer groupId;
+	private String groupId;
 	private String account;
 	private String contractName;
 	private String contractAddress;
@@ -43,6 +43,10 @@ public class AbiInfo {
 	// private Integer contractStatus;
 	private LocalDateTime createTime;
 	private LocalDateTime modifyTime;
+	/**
+	 * 0-solidity, 1-liquid
+	 */
+	private Integer isWasm;
 
 }
 

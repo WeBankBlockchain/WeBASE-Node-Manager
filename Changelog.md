@@ -1,39 +1,74 @@
-### v1.5.5(2023-03-31)
+### v3.0.2(2023-03-31)
 
 **Fix**
 - 优化合约IDE交易的参数编码失败问题：发起交易与部署合约的地方参数`funcParam`从`List<Object>`改为`List<String>`
-- 修复管理台鉴权的token越权问题
-- 优化删除群组数据的逻辑
-- 修复交易列表分页不准确问题
 
 **兼容性**
-- 支持FISCO-BCOS v2.4.x 及以上版本
-- WeBASE-Front v1.5.5+
-- WeBASE-Web v1.5.5+
-- WeBASE-Sign v1.5.0+
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Web v3.0.2
+- WeBASE-Front v3.0.2
 
-详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
 
-
-### v1.5.4(2022-02-22)
+### v3.0.1(2022-12-14)
 
 **Add**
-- 增加查询是否开启鉴权接口
-
-**Fix**
-- 优化合约仓库加载方式，通过`conf/warehouse`目录中的.json文件加载合约模板
-- 修复可视化部署中检测localhost的误判
-- 更新可视化部署的build_chain脚本
-- 修复查询event获取合约时重复的问题
-- 修复根据nodeId获取节点信息接口入参
+- 新增登录账户注册、冻结、有效期与删除等功能
+- 应用管理适配FISCO BCOS 3.0, 可使用webase-app-sdk进行应用管理
+- 支持SSL，与WeBASE-Web管理台使用HTTPS
 
 **兼容性**
-- 支持FISCO-BCOS v2.4.x 及以上版本
-- WeBASE-Web v1.5.4+
-- WeBASE-Front v1.5.1+
-- WeBASE-Sign v1.5.0+
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Web v3.0.1
+- WeBASE-Front v3.0.0
 
-详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
+
+### v3.0.0(2022-08-24)
+
+**Add**
+- 支持FISCO BCOS v3.0.0
+
+**Fix**
+- 支持基于BFS的CNS
+
+**兼容性**
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Front v3.0.0
+- WeBASE-Web v3.0.0
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
+
+
+### lab-rc2(2022-05-07)
+
+**Add**
+- 支持Liquid合约功能
+- 支持BFS、CNS、权限管理、Event查看与事件订阅等功能
+
+**兼容性**
+- 支持FISCO-BCOS v3.0.0-rc2 及以上版本
+- WeBASE-Web lab-rc2
+- WeBASE-Front lab-rc2
+- WeBASE-Sign lab-rc1
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
+
+### lab-rc1(2021-12-09)
+
+**Add**
+- 适配兼容FISCO BCOS v3.0.0
+
+
+**兼容性**
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Web lab-rc1
+- WeBASE-Front lab-rc1
+- WeBASE-Sign lab-rc1
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
+
+
 
 ### v1.5.3(2021-09-27)
 

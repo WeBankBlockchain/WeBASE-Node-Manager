@@ -8,7 +8,7 @@
     <id column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="userId"/>
     <result column="user_name" javaType="java.lang.String" jdbcType="VARCHAR" property="userName"/>
     <result column="account" javaType="java.lang.String" jdbcType="VARCHAR" property="account"/>
-    <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+    <result column="group_id" javaType="java.lang.String" jdbcType="VARCHAR"
       property="groupId"/>
     <result column="user_status" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="userStatus"/>
@@ -59,7 +59,7 @@
     </if>
     <if test="commParam != null and commParam != ''">
       and (user_name like CONCAT(#{commParam},'%')
-      or address like CONCAT(#{commParam},'%'))
+      or address like CONCAT(#{commParam},'%') )
     </if>
     <if test="hasPk != null and hasPk != ''">
       and has_pk = #{hasPk}
@@ -69,7 +69,7 @@
 
   <select id="listOfUser" parameterType="com.webank.webase.node.mgr.user.entity.UserParam"
     resultMap="userMap">
-    select * from tb_user where 1=1
+    select * from tb_user where 1=1 and user_status != 2
     <if test="groupId != null and groupId != ''">
       and group_id = #{groupId}
     </if>
@@ -83,8 +83,8 @@
       and account = #{account}
     </if>
     <if test="commParam != null and commParam != ''">
-      and user_name like CONCAT(#{commParam},'%')
-      or address like CONCAT(#{commParam},'%')
+      and (user_name like CONCAT(#{commParam},'%')
+      or address like CONCAT(#{commParam},'%'))
     </if>
     <if test="hasPk != null and hasPk != ''">
       and has_pk = #{hasPk}
@@ -145,11 +145,16 @@
     delete from tb_user where group_id = #{groupId}
   </delete>
 
-  <delete id="deleteByAddress" parameterType="java.lang.String">
-    delete from tb_user where address = #{address}
-  </delete>
+  <update id="suspendByAddress">
+    update tb_user set user_status=2 where group_id = #{groupId} and address = #{address}
+  </update>
+
+  <update id="suspendByAccount">
+    update tb_user set user_status=2 where account = #{account}
+  </update>
 
   <select id="getBySignUserId" parameterType="java.lang.String"  resultMap="userMap">
     select * from tb_user where sign_user_id = #{signUserId}
   </select>
+
 </mapper>

@@ -33,7 +33,7 @@ public class DeployInputParam {
     @NotBlank
     private String user;
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotNull
     private Integer contractId;
     @NotBlank
@@ -49,5 +49,10 @@ public class DeployInputParam {
     @NotBlank
     private String bytecodeBin;
     private List<String> constructorParams;
+    /**
+     * if isWasm = true, address must not null
+     */
+    private Boolean isWasm = false;
+    private String contractAddress;
 }
 

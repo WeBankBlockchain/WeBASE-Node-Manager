@@ -15,10 +15,11 @@
  */
 package com.webank.webase.node.mgr.config.security;
 
-import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * config acccount and role.
+ * /login
  */
 @Service
 public class AccountDetailsService implements UserDetailsService {
@@ -47,8 +49,18 @@ public class AccountDetailsService implements UserDetailsService {
         TbAccountInfo accountRow = null;
         try {
             accountRow = accountService.queryByAccount(account);
+            // todo 记录登录失败次数  是否在这里调用login函数
+//            int loginFailTime = accountRow.getLoginFailTime() + 1;
+//            log.info("fail login. pwd error,loginFailTime:{}", loginFailTime);
+//            accountRow.setLoginFailTime(loginFailTime);
+//            accountMapper.updateAccountRow(accountRow);
+            accountService.validateAccount(accountRow);
         } catch (Exception e) {
-            throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.DB_EXCEPTION));
+            if (e instanceof NodeMgrException) {
+                throw new UsernameNotFoundException(JsonTools.toJSONString(((NodeMgrException) e).getRetCode()));
+            } else {
+                throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.DB_EXCEPTION));
+            }
         }
         if (null == accountRow) {
             throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.INVALID_ACCOUNT_NAME));

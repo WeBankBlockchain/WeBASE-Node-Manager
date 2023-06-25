@@ -33,32 +33,17 @@ public class TbTransHash {
     private Integer statisticsFlag;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
-    private String gasUsed;
-    private String status;
-    private String extraData;
-    private String appId;
 
     /**
      * init by transaction、blockNumber、blockTimestamp.
      */
-    public TbTransHash(String transHash,String transFrom,String transTo, BigInteger blockNumber, LocalDateTime blockTimestamp) {
+    public TbTransHash(String transHash, String transFrom,
+        String transTo, BigInteger blockNumber, LocalDateTime blockTimestamp) {
         this.transHash = transHash;
         this.transFrom = transFrom;
         this.transTo = transTo;
         this.blockNumber = blockNumber;
         this.blockTimestamp = blockTimestamp;
     }
-    public TbTransHash(String transHash,String transFrom,String transTo, BigInteger blockNumber, LocalDateTime blockTimestamp,
-                       String gasUsed,String status,String extraData) {
-        this.transHash = transHash;
-        this.transFrom = transFrom;
-        this.transTo = transTo;
-        this.blockNumber = blockNumber;
-        this.blockTimestamp = blockTimestamp;
-        this.gasUsed = gasUsed;
-        this.status = status;
-        this.extraData = extraData;
-    }
-
 
 }

@@ -21,13 +21,7 @@ import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.group.entity.GroupGeneral;
-import com.webank.webase.node.mgr.group.entity.ReqBatchStartGroup;
-import com.webank.webase.node.mgr.group.entity.ReqGenerateGroup;
-import com.webank.webase.node.mgr.group.entity.ReqGroupStatus;
-import com.webank.webase.node.mgr.group.entity.ReqOperateGroup;
 import com.webank.webase.node.mgr.group.entity.ReqUpdateDesc;
-import com.webank.webase.node.mgr.group.entity.RspGroupStatus;
-import com.webank.webase.node.mgr.group.entity.RspOperateResult;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.scheduler.StatisticsTransdailyTask;
@@ -47,7 +41,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,13 +62,29 @@ public class GroupController extends BaseController {
     private StatisticsTransdailyTask statisticsTask;
     @Autowired
     private ResetGroupListTask resetGroupListTask;
-    
+
+    /**
+     * return encrypt type to web 0 is standard, 1 is guomi.
+     */
+    @GetMapping("/encrypt/{groupId}")
+    public BaseResponse getEncryptType(@PathVariable("groupId") String groupId) {
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.info("start getEncryptType startTime:{} groupId:{}", startTime.toEpochMilli(),
+            groupId);
+        int encrypt = groupService.getEncryptTypeByGroupId(groupId);
+        baseResponse.setData(encrypt);
+        log.info("end getEncryptType useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
 
     /**
      * get group general.
      */
     @GetMapping("/general/{groupId}")
-    public BaseResponse getGroupGeneral(@PathVariable("groupId") Integer groupId)
+    public BaseResponse getGroupGeneral(@PathVariable("groupId") String groupId)
             throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -130,14 +139,14 @@ public class GroupController extends BaseController {
         return pageResponse;
     }
 
-    /**
+     /**
      * get all group include invalid group status
      * @param pageNumber
      * @param pageSize
      * @return
      * @throws NodeMgrException
-     */
-    @GetMapping({"/all/invalidIncluded/{pageNumber}/{pageSize}",
+     **/
+   @GetMapping({"/all/invalidIncluded/{pageNumber}/{pageSize}",
             "/all/invalidIncluded"})
     public BasePageResponse getAllGroupIncludeInvalidGroup(@PathVariable(value = "pageNumber",required = false) Integer pageNumber,
                                                            @PathVariable(value = "pageSize", required = false) Integer pageSize) throws NodeMgrException {
@@ -166,6 +175,7 @@ public class GroupController extends BaseController {
                 JsonTools.toJSONString(pageResponse));
         return pageResponse;
     }
+
 
     @GetMapping("/all/{groupStatus}")
     public BaseResponse getAllGroupOfStatus(@PathVariable("groupStatus") Integer groupStatus) throws NodeMgrException {
@@ -197,7 +207,7 @@ public class GroupController extends BaseController {
      * get trans daily.
      */
     @GetMapping("/transDaily/{groupId}")
-    public BaseResponse getTransDaily(@PathVariable("groupId") Integer groupId) throws Exception {
+    public BaseResponse getTransDaily(@PathVariable("groupId") String groupId) throws Exception {
         BaseResponse pageResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start getTransDaily startTime:{} groupId:{}", startTime.toEpochMilli(), groupId);
@@ -210,106 +220,6 @@ public class GroupController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JsonTools.toJSONString(pageResponse));
         return pageResponse;
-    }
-
-    /**
-     * generate group to single node(single front)
-     */
-    @PostMapping("/generate/{nodeId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse generateToSingleNode(@PathVariable("nodeId") String nodeId,
-                                             @RequestBody @Valid ReqGenerateGroup req,
-                                             BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        Instant startTime = Instant.now();
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        log.info("start generateToSingleNode startTime:{} nodeId:{}", startTime.toEpochMilli(),
-                nodeId);
-        TbGroup tbGroup = groupService.generateToSingleNode(nodeId, req);
-        baseResponse.setData(tbGroup);
-        log.info("end generateToSingleNode useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        return baseResponse;
-    }
-
-    /**
-     * generate group to all front(all node)
-     */
-    @PostMapping("/generate")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse generateGroup(@RequestBody @Valid ReqGenerateGroup req,
-                                      BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        Instant startTime = Instant.now();
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        log.info("start generateGroup startTime:{} groupId:{}", startTime.toEpochMilli(),
-                req.getGenerateGroupId());
-        List<RspOperateResult> generateResultList = groupService.generateGroup(req);
-        baseResponse.setData(generateResultList);
-        log.info("end generateGroup useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        return baseResponse;
-    }
-
-    /**
-     * operate group to single front.
-     * (start, stop, remove, recover, getStatus)
-     */
-    @PostMapping("/operate/{nodeId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public Object operateGroup(@PathVariable("nodeId") String nodeId, @RequestBody @Valid ReqOperateGroup req,
-                               BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        Instant startTime = Instant.now();
-        Integer groupId = req.getGenerateGroupId();
-        String type = req.getType();
-        log.info("start operateGroup startTime:{} groupId:{}", startTime.toEpochMilli(), groupId);
-
-        Object groupHandleResult = groupService.operateGroup(nodeId, groupId, type);
-        log.info("end operateGroup useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(groupHandleResult));
-        return groupHandleResult;
-    }
-
-    /**
-     * query group status list
-     * @return map of <nodeId,<groupId, status>>
-     */
-    @PostMapping("/queryGroupStatus/list")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse getGroupStatusList(@Valid @RequestBody ReqGroupStatus reqGroupStatus) throws NodeMgrException {
-        Instant startTime = Instant.now();
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        log.info("start getGroupStatusMap startTime:{}", startTime.toEpochMilli());
-        List<String> nodeIdList = reqGroupStatus.getNodeIdList();
-        List<RspGroupStatus> resList = groupService.listGroupStatus(nodeIdList,
-                reqGroupStatus.getGroupIdList());
-        baseResponse.setData(resList);
-        log.info("end getGroupStatusMap useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
-    /**
-     * batch start group.(start group to all front
-     */
-    @PostMapping("/batchStart")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
-    public BaseResponse batchStartGroup(@RequestBody @Valid ReqBatchStartGroup req, BindingResult result)
-            throws NodeMgrException {
-        checkBindResult(result);
-        Instant startTime = Instant.now();
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        log.info("start batchStartGroup startTime:{} groupId:{}", startTime.toEpochMilli(),
-                req.getGenerateGroupId());
-        List<RspOperateResult> operateResultList = groupService.batchStartGroup(req);
-        baseResponse.setData(operateResultList);
-        log.info("end batchStartGroup useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(baseResponse));
-        return baseResponse;
     }
 
     /**
@@ -331,7 +241,7 @@ public class GroupController extends BaseController {
      * delete all group's data(trans, contract, node etc.)
      */
     @DeleteMapping("/{groupId}")
-    public BaseResponse deleteGroupData(@PathVariable("groupId") Integer groupId) {
+    public BaseResponse deleteGroupData(@PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         log.warn("start deleteGroupData startTime:{}", startTime.toEpochMilli());
@@ -343,7 +253,7 @@ public class GroupController extends BaseController {
     }
 
     @GetMapping("/detail/{groupId}")
-    public BaseResponse getGroupDetail(@PathVariable("groupId") Integer groupId)
+    public BaseResponse getGroupDetail(@PathVariable("groupId") String groupId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);

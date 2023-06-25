@@ -26,7 +26,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class ContractParam extends BaseQueryParam {
-    private Integer groupId;
+    private String groupId;
     private Integer contractId;
     private String contractName;
     /**
@@ -44,7 +44,7 @@ public class ContractParam extends BaseQueryParam {
     /**
      * init by contractId.
      */
-    public ContractParam(int contractId, int groupId) {
+    public ContractParam(int contractId, String groupId) {
         super();
         this.contractId = contractId;
         this.groupId = groupId;
@@ -53,7 +53,7 @@ public class ContractParam extends BaseQueryParam {
     /**
      * init by contractName、contractPath.
      */
-    public ContractParam(int groupId, String contractPath, String contractName, String account) {
+    public ContractParam(String groupId, String contractPath, String contractName, String account) {
         super();
         this.groupId = groupId;
         this.contractName = contractName;
@@ -65,7 +65,7 @@ public class ContractParam extends BaseQueryParam {
     /**
      * init by groupId, account, contractPath.
      */
-    public ContractParam(int groupId, String account, String contractPath) {
+    public ContractParam(String groupId, String account, String contractPath) {
         super();
         this.groupId = groupId;
         this.account = account;

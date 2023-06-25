@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReqUpdateDesc {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotNull
     private String description;
 }

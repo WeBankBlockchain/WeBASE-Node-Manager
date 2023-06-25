@@ -9,12 +9,12 @@ import org.springframework.security.access.annotation.SecuredAnnotationSecurityM
 import org.springframework.security.access.expression.method.ExpressionBasedAnnotationAttributeFactory;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
 import org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource;
+import org.springframework.security.access.prepost.PrePostInvocationAttributeFactory;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
 /**
  * if useSecurity is false, disabled @PreAuthorize annotation
- * @related: SecurityConfig-configure(HttpRequest), also disabled web.intercept
  */
 @Log4j2
 @ConditionalOnProperty(name = "constant.isUseSecurity", havingValue = "true")

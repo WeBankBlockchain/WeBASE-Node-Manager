@@ -24,7 +24,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 
 /**
  * load and get cert content
@@ -34,18 +34,24 @@ public class CertTools {
     public static final String crtContentTail = "-----END CERTIFICATE-----\n" ;
     public static final String crtTailForConcat = "\n-----END CERTIFICATE-----\n" ;
 
-    // all is sdk cert
-    public static final String TYPE_CHAIN = "chain";
-    public static final String TYPE_AGENCY = "agency";
-    public static final String TYPE_NODE = "node";
-    // 2019/12: support guomi, double cert mechanism
-    public static final String TYPE_ENCRYPT_NODE = "ennode";
-    public static final String TYPE_SDK_CHAIN = "sdkca";
-    public static final String TYPE_SDK_AGENCY = "sdkagency";
-    // cert name: sdk ,type: node or sdk
-    public static final String TYPE_SDK_NODE = "sdknode";
+    // ecdsa sdk cert
+    public static final String TYPE_SDK_CHAIN = "chain";
+    public static final String TYPE_SDK = "agency";
+    // sm2 sdk cert
+    public static final String TYPE_SM2_SDK = "sdk";
+    public static final String TYPE_SM2_EN_SDK = "ensdk";
     // pull flag: 首次启动时需要拉取Front与节点的证书
     public static boolean isPullFrontCertsDone = false;
+
+    // deprecated in 3.0
+//    public static final String TYPE_CHAIN = "chain";
+//    public static final String TYPE_AGENCY = "agency";
+//    public static final String TYPE_NODE = "node";
+//    public static final String TYPE_ENCRYPT_NODE = "ensdk";
+//    public static final String TYPE_SDK_CHAIN = "sdkca";
+//    public static final String TYPE_SDK_AGENCY = "sdkagency";
+//    // cert name: sdk ,type: node or sdk
+//    public static final String TYPE_SDK_NODE = "sdknode";
 
     // public key in hex length
     public static final int PUBLIC_KEY_IN_HEX_LENGTH = 128;
@@ -54,12 +60,13 @@ public class CertTools {
      * @return
      * @throws IOException
      * //standard:
-     * //gm: CN=node0,O=fiscobcos,OU=agency
+     * // gm: CN=node0,O=fiscobcos,OU=agency
+     * // gm: SubjectDN: CN=FISCO-BCOS,O=fisco-bcos,OU=ensdk
      */
-    public static String  getCertName(Principal subjectDN) {
+    public static String getCertName(Principal subjectDN) {
         return subjectDN.toString().split(",")[0].split("=")[1];
     }
-    public static String  getCertType(Principal subjectDN) {
+    public static String getCertType(Principal subjectDN) {
         return subjectDN.toString().split(",")[2].split("=")[1];
     }
 

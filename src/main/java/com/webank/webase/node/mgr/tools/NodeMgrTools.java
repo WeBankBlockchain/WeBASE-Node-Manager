@@ -22,11 +22,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -47,10 +51,12 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * common method in node manager
@@ -458,7 +464,7 @@ public class NodeMgrTools {
     public static synchronized String getToken(HttpServletRequest request) {
         String header = request.getHeader(TOKEN_HEADER_NAME);
         if (StringUtils.isBlank(header)) {
-            log.error("not found token");
+            log.error("not found AuthorizationToken token");
             throw new NodeMgrException(ConstantCode.INVALID_TOKEN);
         }
 
@@ -657,7 +663,7 @@ public class NodeMgrTools {
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + PEM_FILE_FORMAT;
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.loadKeyPair(rawPrivateKey);
         cryptoKeyPair.storeKeyPairWithPem(exportedKeyPath);
         return exportedKeyPath;
     }
@@ -684,7 +690,7 @@ public class NodeMgrTools {
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + P12_FILE_FORMAT;
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.loadKeyPair(rawPrivateKey);
         cryptoKeyPair.storeKeyPairWithP12(exportedKeyPath, p12Password);
 
         return exportedKeyPath;
@@ -770,5 +776,14 @@ public class NodeMgrTools {
         }
         String regex = "^[a-zA-Z]+$";
         return (input.charAt(0)+"").matches(regex);
+    }
+
+    public static String loadFileContent(String filePath) {
+        try(InputStream inputStream = new ClassPathResource(filePath).getInputStream()) {
+            return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            log.error("loadFileContent error:", ex);
+            return "";
+        }
     }
 }

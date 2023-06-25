@@ -13,29 +13,30 @@
  */
 package node.mgr.test.frontInterface;
 
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.front.entity.TotalTransCountInfo;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import java.math.BigInteger;
 import java.util.List;
 import node.mgr.test.base.TestBase;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
-import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.Peers.PeersInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+//import org.fisco.bcos.sdk.v3.client.protocol.response.ConsensusStatus.ConsensusInfo;
 
 public class FrontServiceTest extends TestBase {
 
     @Autowired
     private FrontInterfaceService frontInterface;
-    private Integer groupId = 1;
+    private String groupId = "1";
     private Integer userId = 700001;
     private BigInteger blockNumber = new BigInteger("12");
     private String transHash = "0x1d99fdfa84b90d9478f09b722bb85b7d804e6b4d0273ec94fa4418c56a415211";
@@ -43,13 +44,6 @@ public class FrontServiceTest extends TestBase {
     private String frontIp = "localhost";
     private Integer frontPort = 5002;
 
-    @Test
-    public void getContractCodeTest() {
-        String contractAddress = "0xb68b0ca60cc4d8b207875c9a0ab6c3a782db9318";
-        String str = frontInterface.getContractCode(groupId, contractAddress, blockNumber);
-        assert (str != null);
-        System.out.println(str);
-    }
 
     @Test
     public void getTransReceiptTest() {
@@ -97,7 +91,7 @@ public class FrontServiceTest extends TestBase {
     @Test
     public void getCodeFromFronthTest() {
         String contractAddress = "0xb68b0ca60cc4d8b207875c9a0ab6c3a782db9318";
-        String code = frontInterface.getCodeFromFront(groupId, contractAddress, blockNumber);
+        String code = frontInterface.getCodeV2FromFront(groupId, contractAddress, blockNumber);
         assert (code != null);
         System.out.println(code);
     }
@@ -106,7 +100,7 @@ public class FrontServiceTest extends TestBase {
 
     @Test
     public void getTotalTransactionCountTest() {
-        TotalTransCountInfo totalTransCount = frontInterface.getTotalTransactionCount(groupId);
+        TransactionCountInfo totalTransCount = frontInterface.getTotalTransactionCount(groupId);
         assert (totalTransCount != null);
         System.out.println(JsonTools.toJSONString(totalTransCount));
     }
@@ -135,17 +129,19 @@ public class FrontServiceTest extends TestBase {
 
     @Test
     public void getPeersTest() {
-        PeerInfo[] list = frontInterface.getPeers(groupId);
-        assert (list != null && list.length > 0);
+        PeersInfo list = frontInterface.getPeers(groupId);
+        assert (list != null );
         System.out.println("=====================list:" + JsonTools.toJSONString(list));
     }
 
     @Test
     public void getConsensusStatusTest() {
-        ConsensusInfo consensunsStatus = frontInterface.getConsensusStatus(groupId);
+        ConsensusStatusInfo consensunsStatus = frontInterface.getConsensusStatus(groupId);
         assert (consensunsStatus != null);
         System.out.println("=====================consensunsStatus:" + consensunsStatus);
     }
+
+    // todo add ut of group info, node status list
 
     @Test
     public void syncStatusTest() {
@@ -163,11 +159,11 @@ public class FrontServiceTest extends TestBase {
         System.out.println(config);
     }
 
-    @Test
-    public void getClientVersion() {
-        ClientVersion clientVersion = frontInterface.getClientVersionFromSpecificFront(frontIp, frontPort, groupId);
-        System.out.println(clientVersion);
-    }
+//    @Test
+//    public void getClientVersion() {
+//        ClientVersion clientVersion = frontInterface.getClientVersionFromSpecificFront(frontIp, frontPort, groupId);
+//        System.out.println(clientVersion);
+//    }
 
     @Test
     public void getFrontVersion() {

@@ -15,9 +15,6 @@
  */
 package com.webank.webase.node.mgr.deploy.service;
 
-import static com.webank.webase.node.mgr.tools.IPUtil.LOCAL_IP_127;
-import static com.webank.webase.node.mgr.tools.IPUtil.LOCAL_IP_host;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
@@ -864,7 +861,7 @@ public class HostService {
             }
         } else {
             // check whether 127.0.0.1 in tb_host
-            TbHost hostOfLocalIp = tbHostMapper.getByIp(LOCAL_IP_127);
+            TbHost hostOfLocalIp = tbHostMapper.getByIp(IPUtil.LOCAL_IP_127);
             if (hostOfLocalIp == null) {
                 log.info("host of 127.0.0.1 not in tb_host, skip check local");
                 return;
@@ -883,7 +880,7 @@ public class HostService {
      */
     private void validateAllLocalhostOrNot(String ip) {
         log.info("check validateAllLocalhostOrNot ip:{}",ip);
-        if (LOCAL_IP_127.equals(ip) || LOCAL_IP_host.equalsIgnoreCase(ip)) {
+        if (IPUtil.isLocal(ip)) {
             // if ip is 127.0.0.1, check all other host ip
             List<TbHost> hostList = tbHostMapper.selectAll();
             // 127.0.0.1 is the first host, pass
@@ -897,7 +894,7 @@ public class HostService {
             }
         } else {
             // check whether 127.0.0.1 in tb_host
-            TbHost hostOfLocalIp = tbHostMapper.getByIp(LOCAL_IP_127);
+            TbHost hostOfLocalIp = tbHostMapper.getByIp(IPUtil.LOCAL_IP_127);
             if (hostOfLocalIp == null) {
                 log.info("host of 127.0.0.1 not in tb_host, skip check local");
                 return;

@@ -16,24 +16,22 @@ package com.webank.webase.node.mgr.node;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ConsensusType;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.node.entity.ReqUpdate;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.ValidateUtil;
 import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.front.frontinterface.entity.NodeStatusInfo;
 import com.webank.webase.node.mgr.front.frontinterface.entity.PeerOfConsensusStatus;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
-import com.webank.webase.node.mgr.node.entity.PeerInfo;
+import com.webank.webase.node.mgr.node.entity.ReqUpdate;
 import com.webank.webase.node.mgr.node.entity.TbNode;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.ValidateUtil;
 import java.math.BigInteger;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +40,11 @@ import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
-import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
-import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
-import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.PeersInfo;
+import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,7 +61,6 @@ public class NodeService {
     @Autowired
     private FrontInterfaceService frontInterface;
     @Autowired
-    @Lazy
     private ChainService chainService;
     @Autowired
     private ConstantProperties constantProperties;
@@ -83,20 +79,13 @@ public class NodeService {
      * add new node data.
      */
     @Transactional
-    public void addNodeInfo(Integer groupId, PeerInfo peerInfo) throws NodeMgrException {
+    public void addNodeInfo(String groupId, String nodeId) throws NodeMgrException {
         String nodeIp = null;
         Integer nodeP2PPort = null;
-
-        if (StringUtils.isNotBlank(peerInfo.getIPAndPort())) {
-            String[] ipPort = peerInfo.getIPAndPort().split(":");
-            nodeIp = ipPort[0];
-            nodeP2PPort = Integer.valueOf(ipPort[1]);
-        }
-        String nodeName = getNodeName(groupId, peerInfo.getNodeId());
-
+        String nodeName = getNodeName(groupId, nodeId);
         // add row
         TbNode tbNode = new TbNode();
-        tbNode.setNodeId(peerInfo.getNodeId());
+        tbNode.setNodeId(nodeId);
         tbNode.setGroupId(groupId);
         tbNode.setNodeIp(nodeIp);
         tbNode.setNodeName(nodeName);
@@ -104,6 +93,48 @@ public class NodeService {
         nodeMapper.add(tbNode);
     }
 
+    /**
+     * add new node data.
+     *
+     * @param peerInfo 已经用group的nodeId覆盖peerInfo自带的nodeId
+     */
+    public void addNodeInfo(String groupId, Peers.PeerInfo peerInfo) {
+        log.info("start exec method[addNodeInfo]. peerInfo:{} group:{}", peerInfo, groupId);
+        String groupNodeId = peerInfo.getP2pNodeID();
+        //add db
+        TbNode tbNode = nodeMapper.getByNodeIdAndGroupId(groupNodeId, groupId);
+        if (Objects.nonNull(tbNode)) {
+            log.debug("finish exec method[addNodeInfo]. jump over, found record by node:{} group:{}",
+                groupNodeId, groupId);
+            return;
+        }
+
+        String nodeIp = null;
+        Integer nodeP2PPort = null;
+
+        if (StringUtils.isNotBlank(peerInfo.getEndPoint())) {
+            String[] ipPort = peerInfo.getEndPoint().split(":");
+            nodeIp = ipPort[0];
+            nodeP2PPort = Integer.valueOf(ipPort[1]);
+        }
+        String nodeName = groupId + "_" + groupNodeId;
+
+        // add row
+        tbNode = new TbNode();
+        tbNode.setAgency("fisco");
+        tbNode.setNodeId(peerInfo.getP2pNodeID());
+        tbNode.setGroupId(groupId);
+        tbNode.setNodeIp(nodeIp);
+        tbNode.setNodeName(nodeName);
+        tbNode.setP2pPort(nodeP2PPort);
+        tbNode.setNodeActive(DataStatus.NORMAL.getValue());
+        LocalDateTime now = LocalDateTime.now();
+        tbNode.setCreateTime(now);
+        tbNode.setModifyTime(now);
+        log.info("end exec method[addNodeInfo]. tbNode:{} group:{}", tbNode, groupId);
+
+        nodeMapper.add(tbNode);
+    }
 
     /**
      * query count of node.
@@ -138,7 +169,7 @@ public class NodeService {
     /**
      * query node by groupId
      */
-    public List<TbNode> queryByGroupId(int groupId) {
+    public List<TbNode> queryByGroupId(String groupId) {
         NodeParam nodeParam = new NodeParam();
         nodeParam.setGroupId(groupId);
         return queryNodeList(nodeParam);
@@ -184,7 +215,7 @@ public class NodeService {
     /**
      * delete by node and group.
      */
-    public void deleteByNodeAndGroupId(String nodeId, int groupId) throws NodeMgrException {
+    public void deleteByNodeAndGroupId(String nodeId, String groupId) throws NodeMgrException {
         log.info("start deleteByNodeAndGroupId nodeId:{} groupId:{}", nodeId, groupId);
         nodeMapper.deleteByNodeAndGroup(nodeId, groupId);
         log.info("end deleteByNodeAndGroupId");
@@ -193,8 +224,8 @@ public class NodeService {
     /**
      * delete by groupId.
      */
-    public void deleteByGroupId(int groupId) {
-        if (groupId == 0) {
+    public void deleteByGroupId(String groupId) {
+        if (groupId.isEmpty()) {
             return;
         }
         nodeMapper.deleteByGroupId(groupId);
@@ -202,103 +233,77 @@ public class NodeService {
 
 
     /**
-     * check node status, if pbftView or blockNumber not changing, invalid consensus
-     * @case: observer(no pbftView), if observer's blockNumber not equal consensus blockNumber
-     * @1.4.3: if request consensus status but return -1, node is down
-     *
+     * check status by if node timeout
      */
-    public void checkAndUpdateNodeStatus(int groupId) {
+    public void checkAndUpdateNodeStatus(String groupId) {
         //get local node list
         List<TbNode> nodeList = queryByGroupId(groupId);
+        // 如果ip和机构为空，则补齐
+        nodeList.stream().filter(n -> StringUtils.isBlank(n.getNodeIp()))
+            .forEach(tbNode -> {
+                log.info("ip is empty, now complete:{}", tbNode);
+                try {
+                    // 只有单个front的话，一直拿到的peers都是固定的
+                    Peers.PeersInfo selfAndPeer = frontInterface.getPeers(groupId);
+                    log.info("complete selfAndPeer:{}", selfAndPeer);
+                    // 被访问的节点的groupNodeIDInfo找
+                    String selfNodeId = "";
+                    for (Peers.NodeIDInfo nodeIDInfo : selfAndPeer.getGroupNodeIDInfo()) {
+                        if (nodeIDInfo.getGroup().equalsIgnoreCase(groupId)) {
+                            selfNodeId = nodeIDInfo.getNodeIDList().get(0); // todo 用群组的第一个nodeId代表这个节点
+                            break;
+                        }
+                    }
+                    log.info("selfNodeId :{}|{}", selfNodeId, tbNode.getNodeId());
+                    // 被访问的节点不会返回节点ip，因此不进行updateip的操作
 
-        //getPeerOfConsensusStatus
-        List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
-        if (Objects.isNull(consensusList)){
-            log.error("fail checkNodeStatus, consensusList is null");
-            return;
-        }
-        
-        // getObserverList
-        List<String> observerList = frontInterface.getObserverList(groupId);
+                    // 不等于self，没找到
+                    if (!tbNode.getNodeId().equalsIgnoreCase(selfNodeId)) {
+                        // 则在peer里找ip
+                        selfAndPeer.getPeers().forEach(peerInfo -> {
+                            String peerNodeId = "";
+                            for (Peers.NodeIDInfo nodeIDInfo : peerInfo.getGroupNodeIDInfo()) {
+                                if (nodeIDInfo.getGroup().equalsIgnoreCase(groupId)) {
+                                    peerNodeId = nodeIDInfo.getNodeIDList().get(0); // todo 用群组的第一个nodeId代表这个节点
+                                    break;
+                                }
+                            }
+                            log.info("peerNodeId :{}|{}", peerNodeId, tbNode.getNodeId());
+                            // 找到了peer中对应的groupNodeId 和db的nodeId相等
+                            if (peerNodeId.equalsIgnoreCase(tbNode.getNodeId())) {
+                                log.info("peerInfo {}|{}", peerInfo.getP2pNodeID(), peerInfo.getEndPoint());
+                                if (StringUtils.isNotBlank(peerInfo.getEndPoint())) {
+                                    String[] ipPort = peerInfo.getEndPoint().split(":");
+                                    String nodeIp = ipPort[0];
+                                    Integer nodeP2PPort = Integer.valueOf(ipPort[1]);
+                                    tbNode.setNodeIp(nodeIp);
+                                    tbNode.setP2pPort(nodeP2PPort);
+                                }
+                                this.updateNode(tbNode);
+                            }
+                        });
+                    }
+                } catch (Exception ex) {
+                    log.warn("error get peer error to update ip and agency {}", ex.getMessage());
+                }
+            });
 
-        int nodeCount = CollectionUtils.size(consensusList) + CollectionUtils.size(observerList);
-
+        List<NodeStatusInfo> nodeStatusInfoList = frontInterface.getNodeStatusList(groupId);
         for (TbNode tbNode : nodeList) {
             String nodeId = tbNode.getNodeId();
-            BigInteger localBlockNumber = tbNode.getBlockNumber();
-            BigInteger localPbftView = tbNode.getPbftView();
-            LocalDateTime modifyTime = tbNode.getModifyTime();
-            LocalDateTime createTime = tbNode.getCreateTime();
 
-            Duration duration = Duration.between(modifyTime, LocalDateTime.now());
-            Long subTime = duration.toMillis();
-            if (subTime < (nodeCount * 1000 + EXT_CHECK_NODE_WAIT_MIN_MILLIS) && createTime.isBefore(modifyTime)) {
-                log.warn("checkNodeStatus jump over. for time internal subTime:{}", subTime);
-                return;
+            NodeStatusInfo nodeStatusInfo = nodeStatusInfoList.stream()
+                .filter(status -> status.getNodeId().equalsIgnoreCase(nodeId))
+                .findFirst().orElse(null);
+            if (nodeStatusInfo == null) {
+                log.info("checkAndUpdateNodeStatus not found status of :{}", nodeId);
+                continue;
             }
-
-
-            int nodeType = 0;   //0-consensus;1-observer
-            if (observerList != null) {
-                nodeType = observerList.stream()
-                        .filter(observer -> observer.equals(tbNode.getNodeId())).map(c -> 1).findFirst()
-                        .orElse(0);
-            }
-
-            BigInteger latestNumber = getBlockNumberOfNodeOnChain(groupId, nodeId);//blockNumber
-            BigInteger latestView = consensusList.stream()
-                .filter(cl -> nodeId.equals(cl.getNodeId())).map(PeerOfConsensusStatus::getView).findFirst()
-                .orElse(BigInteger.ZERO);//pbftView
-            
-            if (nodeType == 0) {    //0-consensus;1-observer
-                // if local block number and pbftView equals chain's, invalid
-                if (localBlockNumber.equals(latestNumber) && localPbftView.equals(latestView)) {
-                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
-                        nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
-                    tbNode.setNodeActive(DataStatus.INVALID.getValue());
-                } else {
-                    tbNode.setBlockNumber(latestNumber);
-                    tbNode.setPbftView(latestView);
-                    tbNode.setNodeActive(DataStatus.NORMAL.getValue());
-                }
-            } else { //observer
-                // if latest block number not equal block number of consensus network
-                if (!latestNumber.equals(frontInterface.getLatestBlockNumber(groupId))) {
-                    // if node's block number is not changing, invalid
-                    if (localBlockNumber.equals(latestNumber)) {
-                        log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
-                            nodeId, localBlockNumber, latestNumber, localPbftView, latestView);
-                        tbNode.setNodeActive(DataStatus.INVALID.getValue());
-                    } else {
-                        // if latest block number not equal network's, but is changing, normal
-                        tbNode.setBlockNumber(latestNumber);
-                        tbNode.setPbftView(latestView);
-                        tbNode.setNodeActive(DataStatus.NORMAL.getValue());
-                    }
-                } else {
-                    tbNode.setBlockNumber(latestNumber);
-                    tbNode.setPbftView(latestView);
-                    tbNode.setNodeActive(DataStatus.NORMAL.getValue());
-                }
-            }
+            tbNode.setBlockNumber(new BigInteger(String.valueOf(nodeStatusInfo.getBlockNumber())));
+            tbNode.setNodeActive(nodeStatusInfo.getStatus() == 1 ? DataStatus.NORMAL.getValue() : DataStatus.INVALID.getValue());
             tbNode.setModifyTime(LocalDateTime.now());
             //update node
             updateNode(tbNode);
-            // only update front status if deploy manually
-            if (chainService.runTask()) {
-                TbFront updateFront = frontService.getByNodeId(nodeId);
-                if (updateFront != null) {
-                    // update front status as long as update node (7.5s internal)
-                    log.debug("update front with node update nodeStatus:{}", tbNode.getNodeActive());
-                    // update as 2, same as FrontStatuaEnum
-                    if (tbNode.getNodeActive() == DataStatus.NORMAL.getValue()) {
-                        updateFront.setStatus(FrontStatusEnum.RUNNING.getId());
-                    } else if (tbNode.getNodeActive() == DataStatus.INVALID.getValue()) {
-                        updateFront.setStatus(FrontStatusEnum.STOPPED.getId());
-                    }
-                    frontService.updateFront(updateFront);
-                }
-            }
         }
 
     }
@@ -307,15 +312,15 @@ public class NodeService {
     /**
      * get latest number of peer on chain.
      */
-    private BigInteger getBlockNumberOfNodeOnChain(int groupId, String nodeId) {
+    private BigInteger getBlockNumberOfNodeOnChain(String groupId, String nodeId) {
         SyncStatusInfo syncStatus = frontInterface.getSyncStatus(groupId);
         if (nodeId.equals(syncStatus.getNodeId())) {
-            return new BigInteger(syncStatus.getBlockNumber());
+            return new BigInteger(String.valueOf(syncStatus.getBlockNumber()));
         }
         List<PeersInfo> peerList = syncStatus.getPeers();
         // blockNumber
         BigInteger latestNumber = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
-            .map(p -> new BigInteger(p.getBlockNumber())).findFirst().orElse(BigInteger.ZERO);
+            .map(p -> new BigInteger(String.valueOf(p.getBlockNumber()))).findFirst().orElse(BigInteger.ZERO);
         return latestNumber;
     }
 
@@ -323,48 +328,27 @@ public class NodeService {
     /**
      * get peer of consensusStatus
      */
-    private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
-        ConsensusInfo consensusInfo = frontInterface.getConsensusStatus(groupId);
+    private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(String groupId) {
+        ConsensusStatusInfo consensusInfo = frontInterface.getConsensusStatus(groupId);
         if (consensusInfo == null) {
             log.debug("getPeerOfConsensusStatus is null");
             return null;
         }
+        //todo  check bug
         List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
-        List<ViewInfo> viewInfos = consensusInfo.getViewInfos();
-        for (ViewInfo viewInfo : viewInfos) {
-            dataIsList.add(
-                new PeerOfConsensusStatus(viewInfo.getNodeId(), new BigInteger(viewInfo.getView())));
-        }
         return dataIsList;
     }
 
-    /**
-     * add sealer and observer in NodeList
-     * return: List<String> nodeIdList
-     */
-    public List<PeerInfo> getSealerAndObserverList(int groupId) {
-        log.debug("start getSealerAndObserverList groupId:{}", groupId);
-        List<String> sealerList = frontInterface.getSealerList(groupId);
-        List<String> observerList = frontInterface.getObserverList(groupId);
-        List<PeerInfo> resList = new ArrayList<>();
-        sealerList.forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
-        observerList.forEach(nodeId -> resList.add(new PeerInfo(nodeId)));
-        log.debug("end getSealerAndObserverList resList:{}", resList);
+
+    public List<String> getSealerAndObserverListBySyncStatus(String groupId) {
+        log.debug("start getSealerAndObserverListBySyncStatus groupId:{}", groupId);
+        List<String> resList = new ArrayList<>();
+        SyncStatusInfo syncStatusInfo = frontInterface.getSyncStatus(groupId);
+        resList.add(syncStatusInfo.getNodeId());
+        resList.addAll(syncStatusInfo.getPeers().stream().map(PeersInfo::getNodeId).collect(
+            Collectors.toList()));
+        log.debug("end getSealerAndObserverListBySyncStatus resList:{}", resList);
         return resList;
-    }
-
-
-    public List<String> getNodeIdListService(int groupId) {
-        log.debug("start getSealerAndObserverList groupId:{}", groupId);
-        try {
-            List<String> nodeIdList = frontInterface.getNodeIdList(groupId);
-            log.debug("end getSealerAndObserverList nodeIdList:{}", nodeIdList);
-            return nodeIdList;
-        } catch (Exception e) {
-            log.error("getNodeIdList error groupId:{}, exception:{}", groupId, e.getMessage());
-            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL.getCode(), e.getMessage());
-        }
-
     }
 
 
@@ -373,7 +357,7 @@ public class NodeService {
     public TbNode insert(
             String nodeId,
             String nodeName,
-            int groupId,
+            String groupId,
             String ip,
             int p2pPort,
             String description,
@@ -401,7 +385,7 @@ public class NodeService {
      * @param nodeId
      * @return
      */
-    public static String getNodeName(int groupId, String nodeId) {
+    public static String getNodeName(String groupId, String nodeId) {
         return String.format("%s_%s", groupId, nodeId);
     }
 
@@ -411,7 +395,7 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId, final int groupId){
+    public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId, final String groupId){
         // select all fronts by all agencies
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
         log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}", tbFrontList);
@@ -437,7 +421,7 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public List<TbNode> selectNodeListByChainIdAndGroupId(List<Integer> newFrontIdList, int chainId, final int groupId){
+    public List<TbNode> selectNodeListByChainIdAndGroupId(List<Integer> newFrontIdList, int chainId, final String groupId){
         log.info("selectNodeListByChainIdAndGroupId frontIdList:{}", newFrontIdList);
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
 
@@ -467,7 +451,7 @@ public class NodeService {
      * @param groupId
      * @return
      */
-    public TbNode getOldestNodeByChainIdAndGroupId(int chainId, int groupId) {
+    public TbNode getOldestNodeByChainIdAndGroupId(int chainId, String groupId) {
         List<TbNode> tbNodeList = this.selectNodeListByChainIdAndGroupId(chainId, groupId);
         if (CollectionUtils.isEmpty(tbNodeList)) {
             return null;
@@ -527,38 +511,12 @@ public class NodeService {
     }
 
     /**
-     * check sealer list contain
-     * return: true: is sealer
-     */
-    @Deprecated
-    public boolean checkSealerListContains(int groupId, String nodeId, String ip, int port) {
-        log.debug("start checkSealerListContains groupId:{},nodeId:{}", groupId, nodeId);
-        List<String> sealerList = frontInterface.getSealerListFromSpecificFront(ip, port, groupId);
-        boolean isSealer = sealerList.stream().anyMatch(n -> n.equals(nodeId));
-        log.debug("end checkSealerListContains isSealer:{}", isSealer);
-        return isSealer;
-    }
-
-    /**
-     * check observer list contain
-     * return: true: is sealer
-     */
-    @Deprecated
-    public boolean checkObserverListContains(int groupId, String nodeId, String ip, int port) {
-        log.debug("start checkObserverListContains groupId:{},nodeId:{}", groupId, nodeId);
-        List<String> sealerList = frontInterface.getObserverListFromSpecificFront(ip, port, groupId);
-        boolean isObserver = sealerList.stream().anyMatch(n -> n.equals(nodeId));
-        log.debug("end checkObserverListContains isObserver:{}", isObserver);
-        return isObserver;
-    }
-
-    /**
      * get local highest block height, if node equal, return 1, else return 2
      * @param groupId
      * @param nodeId
      * @return
      */
-    public int checkNodeType(int groupId, String nodeId) {
+    public int checkNodeType(String groupId, String nodeId) {
         int localHighestHeight = nodeMapper.getHighestBlockHeight(groupId);
         TbNode node = nodeMapper.getByNodeIdAndGroupId(nodeId, groupId);
         int nodeBlockHeight = node != null ? node.getBlockNumber().intValue() : 0;
@@ -571,12 +529,7 @@ public class NodeService {
         } else {
             return 0;
         }
-//        if (checkObserverListContains(groupId, nodeId, ip, port)) {
-//            return ConsensusType.OBSERVER.getValue();
-//        } else if (checkSealerListContains(groupId, nodeId, ip, port)) {
-//            return ConsensusType.SEALER.getValue();
-//        }
-//        return 0;
+
     }
 
     /**

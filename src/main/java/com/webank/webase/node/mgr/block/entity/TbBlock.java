@@ -34,21 +34,19 @@ public class TbBlock {
     private String sealer;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
-    private String gasUsed;
 
 
     /**
      * init by  pkHash、blockNumber、blockTimestamp、transCount.
      */
     public TbBlock(String pkHash, BigInteger blockNumber,
-        LocalDateTime blockTimestamp, Integer transCount,int sealerIndex,String gasUsed) {
+        LocalDateTime blockTimestamp, Integer transCount,int sealerIndex) {
         super();
         this.pkHash = pkHash;
         this.blockNumber = blockNumber;
         this.blockTimestamp = blockTimestamp;
         this.transCount = transCount;
         this.sealerIndex = sealerIndex;
-        this.gasUsed = gasUsed;
     }
 
 }

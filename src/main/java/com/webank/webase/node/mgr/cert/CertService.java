@@ -48,7 +48,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +64,7 @@ public class CertService {
     @Autowired
     private FrontService frontService;
     @Autowired
-    private CryptoSuite cryptoSuite;
+    private Map<Integer, CryptoSuite> cryptoSuiteMap;
     private final static String TEMP_SDK_DIR = "sdk";
     private final static String TEMP_ZIP_DIR = "tempZip";
     private final static String TEMP_ZIP_FILE_NAME = "conf.zip";
@@ -102,17 +103,16 @@ public class CertService {
             String address = "";
             String fatherCertContent = "";
             // node cert has PublicKey and Address:
-            // standard: type=node;  guomi: type = node || type=encrypt_node || type=sdk&&name=sdk
-            if (CertTools.TYPE_NODE.equals(certType) || CertTools.TYPE_ENCRYPT_NODE.equals(certType) ||
-                    ("sdk".equals(certType) && "sdk".equals(certName))) {
+            // standard: type=chain,type=agency;  guomi: type = chain,type=en_sdk || type=sdk&&name=sdk
+            if (CertTools.TYPE_SM2_EN_SDK.equals(certType) || CertTools.TYPE_SM2_SDK.equals(certType)) {
                 // ECC 才有符合的public key, pub => address
                 publicKeyString = CertTools.getPublicKeyString(certImpl.getPublicKey());
-                address = cryptoSuite.getCryptoKeyPair().getAddress(publicKeyString);
+                address = cryptoSuiteMap.get(CryptoType.SM_TYPE).getCryptoKeyPair().getAddress(publicKeyString);
                 fatherCertContent = findFatherCert(certImpl);
-            }else if (CertTools.TYPE_AGENCY.equals(certType)) {
+            } else if (CertTools.TYPE_SDK.equals(certType)) { // 2021/12/07 sdk now is rsa
+                // not support ecc public key yet, and sdk cert is agency cert, no need to get public key
                 fatherCertContent = findFatherCert(certImpl);
-                setSonCert(certImpl);
-            }else if (CertTools.TYPE_CHAIN.equals(certType)) {
+            } else if (CertTools.TYPE_SDK_CHAIN.equals(certType)) {
                 setSonCert(certImpl);
             }
 
@@ -249,11 +249,12 @@ public class CertService {
         log.debug("start setSonCert. Father FingerPrint:{}", NodeMgrTools.getCertFingerPrint(fatherCert.getEncoded()));
         List<X509Certificate> x509CertList = new ArrayList<>();
         String fatherType = CertTools.getCertType(fatherCert.getSubjectDN());
-        if(CertTools.TYPE_CHAIN.equals(fatherType)){
-            x509CertList = loadAllX509CertsByType(CertTools.TYPE_AGENCY);
-        }else if(CertTools.TYPE_AGENCY.equals(fatherType)){
-            x509CertList = loadAllX509CertsByType(CertTools.TYPE_NODE);
+        if(CertTools.TYPE_SDK_CHAIN.equals(fatherType)){
+            x509CertList = loadAllX509CertsByType(CertTools.TYPE_SDK);
         }
+//        else if(CertTools.TYPE_AGENCY.equals(fatherType)){ //3.0链是二级证书的SDK
+//            x509CertList = loadAllX509CertsByType(CertTools.TYPE_NODE);
+//        }
 
         for(int i = 0; i < x509CertList.size(); i++) {
             X509Certificate temp = x509CertList.get(i);
@@ -347,7 +348,7 @@ public class CertService {
             String frontIp = tbFront.getFrontIp();
             Integer frontPort = tbFront.getFrontPort();
             log.debug("start getCertMapFromSpecificFront. frontIp:{} , frontPort: {} ", frontIp, frontPort);
-            Map<String, String> certs = frontInterfaceService.getCertMapFromSpecificFront(frontIp, frontPort);
+            Map<String, String> certs = frontInterfaceService.getSdkFilesFromSpecificFront(frontIp, frontPort);
             log.debug("end getCertMapFromSpecificFront certs size:{}", certs.size());
             try{
                 saveFrontCert(certs);
@@ -361,40 +362,23 @@ public class CertService {
         return count;
     }
 
-    private void saveFrontCert(Map<String, String> certContents) throws CertificateException {
-        log.debug("start saveFrontCert. certContents:{} ", certContents);
-        String chainCertContent = certContents.get(CertTools.TYPE_CHAIN);
-        String agencyCertContent = certContents.get(CertTools.TYPE_AGENCY);
-        String nodeCertContent = certContents.get(CertTools.TYPE_NODE);
-        // guomi encrypt node cert
-        String encryptNodeCertContent = certContents.get(CertTools.TYPE_ENCRYPT_NODE);
-        String sdkChainCertContent = certContents.get(CertTools.TYPE_SDK_CHAIN);
-        String sdkAgencyCertContent = certContents.get(CertTools.TYPE_SDK_AGENCY);
-        String sdkNodeCertContent = certContents.get(CertTools.TYPE_SDK_NODE);
-        // fisco's cert
-        handleSaveFrontCertStr(chainCertContent);
-        handleSaveFrontCertStr(agencyCertContent);
-        handleSaveFrontCertStr(nodeCertContent);
-        handleSaveFrontCertStr(encryptNodeCertContent);
-        //sdk's cert
-        handleSaveFrontCertStr(sdkChainCertContent);
-        handleSaveFrontCertStr(sdkAgencyCertContent);
-        handleSaveFrontCertStr(sdkNodeCertContent);
-        log.debug("end saveFrontCert. certContents. ");
-    }
-
-    /**
-     * handle saving Cert bare string
-     * @param certStr
-     * @throws CertificateException
-     */
-    public void handleSaveFrontCertStr(String certStr) throws CertificateException {
-        if(StringUtils.isNotEmpty(certStr)) {
-            certStr = CertTools.addCertHeadAndTail(certStr);
-            log.debug("start handleSaveFrontCertStr:{} ", certStr);
-            saveCerts(certStr);
-            log.debug("end handleSaveFrontCertStr:{} ", certStr);
+    private void saveFrontCert(Map<String, String> certMap) throws CertificateException {
+        log.debug("start saveFrontCert. certMap:{} ", certMap);
+        // 优先保存chain链ca证书
+        String caCert = certMap.get("ca.crt");
+        if (StringUtils.isBlank(caCert)) {
+            caCert = certMap.get("sm_ca.crt");
         }
+        saveCerts(caCert);
+        // sdk's cert
+        for (String key : certMap.keySet()) {
+            String cert = certMap.get(key);
+            if (StringUtils.isNotBlank(cert) && key.endsWith("crt")) {
+                log.debug("saveFrontCert of key:{},crt:{}", key, cert);
+                saveCerts(cert);
+            }
+        }
+        log.debug("end saveFrontCert. certContents. ");
     }
 
     /**
@@ -430,8 +414,6 @@ public class CertService {
                     new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
             factory.engineGenerateCertificates(is).stream()
                     .forEach(c-> certs.add((X509Certificate)c));
-//            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-//            certs = (List<X509Certificate>) cf.generateCertificates(is);
         }catch (CertificateException | IOException e) {
             log.error("loadCertListFromCrtContent exception:[]", e);
             throw new NodeMgrException(ConstantCode.CERT_ERROR.getCode(), e.getMessage());

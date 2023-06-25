@@ -44,20 +44,20 @@ public interface GroupMapper {
     /**
      * remove by id.
      */
-    int remove(@Param("groupId") Integer groupId);
+    int remove(@Param("groupId") String groupId);
 
     /**
      * update status.
      */
-    int updateStatus(@Param("groupId") Integer groupId, @Param("groupStatus") Integer groupStatus);
+    int updateStatus(@Param("groupId") String groupId, @Param("groupStatus") Integer groupStatus);
 
-    int updateDescription(@Param("groupId") Integer groupId, @Param("description") String description);
+    int updateDescription(@Param("groupId") String groupId, @Param("description") String description);
 
 
     /**
      * query group count.
      */
-    int getCount(@Param("groupId") Integer groupId, @Param("groupStatus") Integer groupStatus);
+    int getCount(@Param("groupId") String groupId, @Param("groupStatus") Integer groupStatus);
 
     /**
      * get all group.
@@ -67,7 +67,7 @@ public interface GroupMapper {
     /**
      * get group by group id
      */
-    TbGroup getGroupById(@Param("groupId") Integer groupId);
+    TbGroup getGroupById(@Param("groupId") String groupId);
 
     /**
      * query the latest statistics trans on all groups.
@@ -77,10 +77,10 @@ public interface GroupMapper {
     /**
      * query general info.
      */
-    GroupGeneral getGeneral(@Param("groupId") Integer groupId);
+    GroupGeneral getGeneral(@Param("groupId") String groupId);
 
 
-    int updateNodeCount(@Param("groupId") int groupId, @Param("nodeCount") int nodeCount);
+    int updateNodeCount(@Param("groupId") String groupId, @Param("nodeCount") int nodeCount);
 
     int deleteByChainId(@Param("chainId") int chainId);
 
@@ -92,10 +92,13 @@ public interface GroupMapper {
     @Select({
             "select * from tb_group where chain_id=#{chainId} and group_id=#{groupId}"
     })
-    TbGroup getGroupByChainIdAndGroupId(@Param("chainId") int chainId, @Param("groupId") int groupId);
+    TbGroup getGroupByChainIdAndGroupId(@Param("chainId") int chainId, @Param("groupId") String groupId);
 
     @Update({
        "update tb_group set group_timestamp=#{timestamp}, node_id_list=#{nodeIdList},modify_time=NOW() where group_id=#{groupId}"
     })
-    int updateTimestampNodeList(@Param("groupId") int groupId, @Param("timestamp") long timestamp, @Param("nodeIdList") String nodeIdList);
+    int updateTimestampNodeList(@Param("groupId") String groupId, @Param("timestamp") long timestamp, @Param("nodeIdList") String nodeIdList);
+
+    @Select("select encrypt_type from tb_group where group_id = #{groupId}")
+    int getEncryptType(@Param("groupId") String groupId);
 }

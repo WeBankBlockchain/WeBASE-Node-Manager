@@ -22,7 +22,7 @@ import lombok.Data;
 @Data
 public class QueryByBinParam {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotBlank
     private String partOfBytecodeBin;
 }

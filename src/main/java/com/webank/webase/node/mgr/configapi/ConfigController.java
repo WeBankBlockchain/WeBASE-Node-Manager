@@ -25,7 +25,7 @@ import com.webank.webase.node.mgr.deploy.entity.TbConfig;
 import com.webank.webase.node.mgr.deploy.service.ConfigService;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,8 +41,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConfigController {
 
     @Autowired
-    private CryptoSuite cryptoSuite;
-    @Autowired
     private WebMvcConfig webMvcConfig;
     @Autowired
     private ConstantProperties constantProperties;
@@ -51,15 +49,7 @@ public class ConfigController {
     @Autowired
     private ConfigService configService;
 
-    /**
-     * return encrypt type to web 0 is standard, 1 is guomi.
-     */
-    @GetMapping("/encrypt")
-    public Object getEncryptType() {
-        int encrypt = cryptoSuite.cryptoTypeConfig;
-        log.info("getEncryptType:{}", encrypt);
-        return new BaseResponse(ConstantCode.SUCCESS, encrypt);
-    }
+
 
     /**
      * webase-web: when add first front, return version and tips.
@@ -111,8 +101,8 @@ public class ConfigController {
      */
     @GetMapping(value = "/auth")
     public BaseResponse getWhetherAuth() {
+        log.info("getWhetherAuth");
         boolean isUseSecurity = constantProperties.getIsUseSecurity();
-        log.info("getWhetherAuth isUseSecurity:{}", isUseSecurity);
         return new BaseResponse(ConstantCode.SUCCESS, isUseSecurity);
     }
 

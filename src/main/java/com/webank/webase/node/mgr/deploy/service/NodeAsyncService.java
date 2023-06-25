@@ -46,7 +46,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -59,17 +58,10 @@ public class NodeAsyncService {
     @Autowired private TbHostMapper tbHostMapper;
     @Autowired private TbChainMapper tbChainMapper;
 
-    @Autowired
-    @Lazy
-    private FrontService frontService;
-    @Autowired
-    @Lazy
-    private NodeService nodeService;
-    @Autowired
-    @Lazy
-    private ChainService chainService;
-    @Autowired
-    private HostService hostService;
+    @Autowired private FrontService frontService;
+    @Autowired private NodeService nodeService;
+    @Autowired private ChainService chainService;
+    @Autowired private HostService hostService;
     @Autowired private ConstantProperties constant;
     @Autowired private GroupService groupService;
 
@@ -103,7 +95,7 @@ public class NodeAsyncService {
      * @param optionType
      */
     @Async("deployAsyncScheduler")
-    public void asyncRestartRelatedFront(int chainId, Set<Integer> groupIdSet, OptionType optionType,
+    public void asyncRestartRelatedFront(int chainId, Set<String> groupIdSet, OptionType optionType,
                          FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess, FrontStatusEnum frontFailed ) {
         log.info("start asyncRestartRelatedFront chainName:{}", chainId);
         ProgressTools.setStarting();
@@ -128,7 +120,7 @@ public class NodeAsyncService {
      * @param newFrontIdList
      */
     @Async("deployAsyncScheduler")
-    public void asyncRestartNode(TbChain chain, int groupId, OptionType optionType, List<Integer> newFrontIdList) {
+    public void asyncRestartNode(TbChain chain, String groupId, OptionType optionType, List<Integer> newFrontIdList) {
         try {
             log.info("start asyncRestartNode newFrontIdList:{}", newFrontIdList);
             // start front and  related front
@@ -183,7 +175,7 @@ public class NodeAsyncService {
      * @param groupIdSet
      * @param optionType
      */
-    private boolean restartFrontOfGroupSet(int chainId, Set<Integer> groupIdSet, OptionType optionType,
+    private boolean restartFrontOfGroupSet(int chainId, Set<String> groupIdSet, OptionType optionType,
                                 FrontStatusEnum frontBefore, FrontStatusEnum frontSuccess, FrontStatusEnum frontFailed ){
         List<TbFront> frontList = this.frontService.selectFrontListByGroupIdSet(groupIdSet);
         if (CollectionUtils.isEmpty(frontList)){

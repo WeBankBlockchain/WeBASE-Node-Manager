@@ -23,35 +23,21 @@ import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.contract.entity.*;
 import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.contract.entity.Contract;
-import com.webank.webase.node.mgr.contract.entity.ContractParam;
-import com.webank.webase.node.mgr.contract.entity.ContractPathParam;
-import com.webank.webase.node.mgr.contract.entity.DeployInputParam;
-import com.webank.webase.node.mgr.contract.entity.QueryByBinParam;
-import com.webank.webase.node.mgr.contract.entity.QueryCnsParam;
-import com.webank.webase.node.mgr.contract.entity.QueryContractParam;
-import com.webank.webase.node.mgr.contract.entity.ReqCopyContracts;
-import com.webank.webase.node.mgr.contract.entity.ReqListContract;
-import com.webank.webase.node.mgr.contract.entity.ReqQueryCns;
-import com.webank.webase.node.mgr.contract.entity.ReqQueryCnsList;
-import com.webank.webase.node.mgr.contract.entity.ReqRegisterCns;
-import com.webank.webase.node.mgr.contract.entity.RspContractNoAbi;
-import com.webank.webase.node.mgr.contract.entity.TbCns;
-import com.webank.webase.node.mgr.contract.entity.TbContract;
-import com.webank.webase.node.mgr.contract.entity.TbContractPath;
-import com.webank.webase.node.mgr.contract.entity.TransactionInputParam;
 import com.webank.webase.node.mgr.user.entity.TbUser;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
+
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.datatypes.Address;
-import org.fisco.bcos.sdk.utils.AddressUtils;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Address;
+import org.fisco.bcos.sdk.v3.utils.AddressUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -111,7 +97,7 @@ public class ContractController extends BaseController {
      */
     @DeleteMapping(value = "/{groupId}/{contractId}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse deleteContract(@PathVariable("groupId") Integer groupId,
+    public BaseResponse deleteContract(@PathVariable("groupId") String groupId,
             @PathVariable("contractId") Integer contractId) throws NodeMgrException, Exception {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -217,7 +203,7 @@ public class ContractController extends BaseController {
         log.info("start sendTransaction startTime:{} param:{}", startTime.toEpochMilli(),
             JsonTools.toJSONString(param));
         // 0x0000000000000000000000000000000000000000 address is invalid
-        if (Address.DEFAULT.toString().equals(param.getContractAddress())) {
+        if (!param.getIsWasm() && Address.DEFAULT.toString().equals(param.getContractAddress())) {
             throw new NodeMgrException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
         // check version
@@ -265,7 +251,7 @@ public class ContractController extends BaseController {
      * query contract info list by groupId without abi/bin
      */
     @GetMapping(value = "/contractList/all/light")
-    public BasePageResponse queryContractListNoAbi(@RequestParam Integer groupId,
+    public BasePageResponse queryContractListNoAbi(@RequestParam String groupId,
             @RequestParam Integer contractStatus) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -320,7 +306,7 @@ public class ContractController extends BaseController {
      * query contract info list.
      */
     @PostMapping(value = "/contractPath/list/{groupId}")
-    public BasePageResponse queryContractPathList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse queryContractPathList(@PathVariable("groupId") String groupId,
             @CurrentAccount CurrentAccountInfo currentAccountInfo) {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -474,7 +460,7 @@ public class ContractController extends BaseController {
      */
     @GetMapping("listManager/{groupId}/{contractAddress}")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse queryContractManagerList(@PathVariable("groupId") Integer groupId,
+    public BaseResponse queryContractManagerList(@PathVariable("groupId") String groupId,
         @PathVariable("contractAddress") String contractAddress) {
         Instant startTime = Instant.now();
         log.info("start queryDeployAddress. startTime:{} groupId:{},contractAddress:{}",
@@ -486,5 +472,66 @@ public class ContractController extends BaseController {
         log.info("end queryDeployAddress. useTime:{} managerList:{}",
             Duration.between(startTime, Instant.now()).toMillis(), managerList);
         return new BaseResponse(ConstantCode.SUCCESS, managerList);
+    }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "check", notes = "check cargo liquid env")
+    @GetMapping(value = "/liquid/check/{frontId}")
+    public BaseResponse checkLiquidEnv(@PathVariable("frontId") Integer frontId) {
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start checkLiquidEnv startTime:{} frontId:{}", startTime.toEpochMilli(),
+            frontId);
+        contractService.checkFrontLiquidEnv(frontId);
+        log.info("end checkLiquidEnv useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+
+    /**
+     * compile liquid
+     */
+    @PostMapping(value = "/liquid/compile")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse compileLiquid(@RequestBody @Valid ReqCompileLiquid param,
+                                       BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start compileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(param));
+        RspCompileTask rspCompileTask = contractService.compileLiquidContract(param);
+        baseResponse.setData(rspCompileTask);
+        log.info("end compileLiquid useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+
+        return baseResponse;
+    }
+
+
+    /**
+     * compile liquid
+     */
+    @PostMapping(value = "/liquid/compile/check")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse checkCompileLiquid(@RequestBody @Valid ReqCompileLiquid param,
+                                      BindingResult result) throws NodeMgrException {
+        checkBindResult(result);
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start checkCompileLiquid startTime:{} param:{}", startTime.toEpochMilli(),
+            JsonTools.toJSONString(param));
+        RspCompileTask rspCompileTask = contractService.checkCompileLiquid(param);
+        baseResponse.setData(rspCompileTask);
+        log.info("end checkCompileLiquid useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            JsonTools.toJSONString(baseResponse));
+
+        return baseResponse;
     }
 }

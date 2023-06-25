@@ -37,7 +37,7 @@ public class AbiServiceTest extends TestBase {
 	public void testInsert() {
 		int count = abiService.countOfAbi(new ReqAbiListParam());
 		ReqImportAbi abiInsert = new ReqImportAbi();
-		abiInsert.setGroupId(1);
+		abiInsert.setGroupId("1");
 		abiInsert.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
 		abiInsert.setContractName("Hello");
 		String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
@@ -51,7 +51,7 @@ public class AbiServiceTest extends TestBase {
 	public void testListAbi() {
 		ReqAbiListParam param = new ReqAbiListParam(0, 5,
 				SqlSortType.DESC.getValue());
-		param.setGroupId(1);
+		param.setGroupId("1");
 		List<AbiInfo> resList = abiService.getListByGroupId(param);
 		System.out.println(resList);
 		Assert.assertTrue("res is empty", !resList.isEmpty());

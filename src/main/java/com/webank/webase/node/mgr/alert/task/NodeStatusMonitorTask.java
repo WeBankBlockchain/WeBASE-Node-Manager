@@ -16,12 +16,12 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
+import com.webank.webase.node.mgr.precntauth.precompiled.consensus.ConsensusServiceInWebase;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -38,7 +38,6 @@ import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.Node;
 import com.webank.webase.node.mgr.node.entity.TbNode;
-import com.webank.webase.node.mgr.precompiled.PrecompiledService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -54,7 +53,7 @@ public class NodeStatusMonitorTask {
     @Autowired
     private GroupService groupService;
     @Autowired
-    private PrecompiledService precompiledService;
+    private ConsensusServiceInWebase consensusServiceInWebase;
     @Autowired
     private MailService alertMailService;
     @Autowired
@@ -95,10 +94,10 @@ public class NodeStatusMonitorTask {
      * get node list by groupId to check node if abnormal
      * @param groupId
      */
-    public void checkNodeStatusByGroup(int groupId) {
+    public void checkNodeStatusByGroup(String groupId) {
         log.debug("start checkNodeStatusByGroup groupId:{}", groupId);
         try{
-            nodeService.checkAndUpdateNodeStatus(groupId);
+           // nodeService.checkAndUpdateNodeStatus(groupId);
         }catch (Exception e) {
             log.error("in checkNodeStatusByGroup checkAndUpdateNodeStatus error: []", e);
         }
@@ -130,7 +129,7 @@ public class NodeStatusMonitorTask {
      */
     public boolean isNodeInvalid(TbNode node) {
         log.debug(" isNodeInvalid TbNode:{}", node);
-        int groupId = node.getGroupId();
+        String groupId = node.getGroupId();
         String nodeId = node.getNodeId();
         // if node is invalid and nodeType isn't remove
         if(node.getNodeActive() == DataStatus.INVALID.getValue()) {
@@ -153,7 +152,7 @@ public class NodeStatusMonitorTask {
      * @param nodeId
      * @return nodeId is unique, change list to single nodeId using list.get(0)
      */
-    public Node checkAbnormalNodeIsNotRemove(int groupId, String nodeId) {
+    public Node checkAbnormalNodeIsNotRemove(String groupId, String nodeId) {
         log.debug("start checkAbnormalNodeIsNotRemove groupId:{}, nodeId:{}", groupId, nodeId);
         for(LinkedHashMap<String, String> entry: getNodeListWithType(groupId)) {
             Node node = new Node();
@@ -176,12 +175,12 @@ public class NodeStatusMonitorTask {
      * @param groupId
      * @return [{nodeId=xxx,nodeType=xxx}, {..}]
      */
-    public List<LinkedHashMap<String, String>> getNodeListWithType(int groupId) {
-        Object responseFromFront = precompiledService.getNodeListService(groupId,
+    public List<LinkedHashMap<String, String>> getNodeListWithType(String groupId) {
+        Object responseFromFront = consensusServiceInWebase.getNodeListService(groupId,
                 100, 1);
         try {
             // get data from response
-            LinkedHashMap<String, Object> responseMap = (LinkedHashMap<String, Object>) responseFromFront;
+            LinkedHashMap<String, Object> responseMap = JsonTools.stringToObj(JsonTools.objToString(responseFromFront), LinkedHashMap.class);
             log.debug("end getNodeListWithType result: {}", responseMap.get("data"));
             return (List<LinkedHashMap<String, String>>) responseMap.get("data");
         }catch (Exception e) {

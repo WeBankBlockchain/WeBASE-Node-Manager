@@ -5,7 +5,7 @@
 <!--对应mapper接口 -->
 <mapper namespace="com.webank.webase.node.mgr.group.GroupMapper">
     <resultMap id="groupMap" type="com.webank.webase.node.mgr.group.entity.TbGroup">
-        <id column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER" property="groupId"/>
+        <id column="group_id" javaType="java.lang.String" jdbcType="VARCHAR" property="groupId"/>
         <result column="group_name" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="groupName"/>
         <result column="group_status" javaType="java.lang.Integer" jdbcType="INTEGER"
@@ -26,12 +26,13 @@
                 property="modifyTime"/>
         <result column="chain_id" jdbcType="INTEGER" property="chainId" />
         <result column="chain_name" jdbcType="VARCHAR" property="chainName" />
+        <result column="encrypt_type" jdbcType="INTEGER" property="encryptType" />
     </resultMap>
 
 
     <resultMap id="statisticalTransMap"
                type="com.webank.webase.node.mgr.group.entity.StatisticalGroupTransInfo">
-        <result column="group_id" javaType="java.lang.Integer" jdbcType="INTEGER"
+        <result column="group_id" javaType="java.lang.String" jdbcType="VARCHAR"
                 property="groupId"/>
         <result column="maxDay" javaType="java.time.LocalDate" jdbcType="TIMESTAMP" property="maxDay"/>
         <result column="block_number" javaType="java.math.BigInteger" jdbcType="INTEGER"
@@ -46,9 +47,9 @@
 
     <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
         insert into tb_group
-        (group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time,chain_id,chain_name)
-        values(#{groupId},#{groupName},#{nodeCount},#{description},#{groupType},#{groupStatus},
-        #{groupTimestamp},#{nodeIdList},NOW(),NOW(),#{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR})
+        (group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time,chain_id,chain_name,encrypt_type)
+        values(#{groupId},#{groupName},#{nodeCount},#{description},#{groupType},#{groupStatus},p
+        #{groupTimestamp},#{nodeIdList},NOW(),NOW(),#{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR}, #{encryptType,jdbcType=INTEGER})
         ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
     </insert>
 
@@ -85,6 +86,9 @@
             <if test="chainName != null" >
                 chain_name,
             </if>
+            <if test="encryptType != null" >
+                encrypt_type,
+            </if>
             create_time,modify_time,
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides="," >
@@ -118,12 +122,15 @@
             <if test="chainName != null" >
                 #{chainName},
             </if>
+            <if test="encryptType != null" >
+                #{encryptType},
+            </if>
             NOW(),NOW(),
         </trim>
         ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
     </insert>
 
-    <delete id="remove" parameterType="java.lang.Integer">
+    <delete id="remove" parameterType="java.lang.String">
         delete from tb_group where group_id=#{groupId}
     </delete>
 
@@ -139,7 +146,7 @@
         update tb_group set node_count=#{nodeCount},modify_time=NOW() where group_id=#{groupId}
     </update>
 
-    <select id="getCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+    <select id="getCount" parameterType="java.lang.String" resultType="java.lang.Integer">
         select count(1) from tb_group where 1 = 1
         <if test="groupId != null and groupId !=''">
             and group_id = #{groupId}

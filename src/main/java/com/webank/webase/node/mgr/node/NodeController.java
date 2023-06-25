@@ -52,7 +52,7 @@ public class NodeController {
      * query node info list.
      */
     @GetMapping(value = "/nodeList/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse queryNodeList(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse queryNodeList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "nodeName", required = false) String nodeName)
@@ -94,10 +94,36 @@ public class NodeController {
     }
 
     /**
+     * get node info.
+     */
+    @GetMapping(value = "/nodeInfo/{groupId}")
+    public BaseResponse getNodeInfo(@PathVariable("groupId") String groupId)
+        throws NodeMgrException {
+
+        Instant startTime = Instant.now();
+        log.info("start addNodeInfo startTime:{} groupId:{}",
+            startTime.toEpochMilli(), groupId);
+
+        // param
+        NodeParam param = new NodeParam();
+        param.setGroupId(groupId);
+
+        // query node row
+        TbNode tbNode = nodeService.queryNodeInfo(param);
+
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(tbNode);
+
+        log.info("end addNodeInfo useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    /**
      * get node info detail
      */
     @GetMapping(value = "/nodeInfo/{groupId}/{nodeId}")
-    public BaseResponse getNodeInfo(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getNodeInfo(@PathVariable("groupId") String groupId,
         @PathVariable("nodeId") String nodeId)
         throws NodeMgrException {
 
@@ -122,24 +148,6 @@ public class NodeController {
     }
 
     /**
-     * get node id list
-     */
-    @GetMapping("/nodeIdList/{groupId}")
-    public BaseResponse getNodeIdList(@PathVariable("groupId") Integer groupId) {
-        Instant startTime = Instant.now();
-        log.info("start getNodeIdList startTime:{} groupId:{}",
-                startTime.toEpochMilli(), groupId);
-        List<String> res = nodeService.getNodeIdListService(groupId);
-
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        baseResponse.setData(res);
-
-        log.info("end getNodeIdList useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
-    /**
      * update tb_node info of city, agency, ip etc.
      */
     @PutMapping("/description")
@@ -154,7 +162,7 @@ public class NodeController {
         baseResponse.setData(res);
 
         log.info("end updateDesc useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }
 

@@ -37,6 +37,7 @@ public class AppIntegrationFilter implements HandlerInterceptor {
 
     @Autowired
     private AppIntegrationService appIntegrationService;
+
     @Autowired
     private ConstantProperties cproperties;
 

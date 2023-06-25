@@ -30,7 +30,7 @@ public class FrontGroupMapServiceTest extends TestBase {
     @Test
     public void getListTest() {
         MapListParam param = new MapListParam();
-        param.setGroupId(2);
+        param.setGroupId("2");
         List<FrontGroup> list = frontGroupMapService.getList(param);
         assert (list != null);
         System.out.println(JsonTools.toJSONString(list));
@@ -38,7 +38,7 @@ public class FrontGroupMapServiceTest extends TestBase {
 
     @Test
     public void listByGroupIdTest() {
-        List<FrontGroup> list = frontGroupMapService.listByGroupId(2);
+        List<FrontGroup> list = frontGroupMapService.listByGroupId("2");
         assert (list != null);
         System.out.println(JsonTools.toJSONString(list));
     }

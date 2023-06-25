@@ -31,14 +31,18 @@ import java.util.List;
 public class ReqImportAbi {
 	private Integer abiId;
 	@NotBlank
-    private String account;
+	private String account;
 	@NotNull
-	private Integer groupId;
+	private String groupId;
 	@NotBlank
 	private String contractName;
 	@NotBlank
 	private String contractAddress;
 	@NotNull
 	private List<Object> contractAbi;
-//	private String deployAddress;
+
+	/**
+	 * 0-solidity, 1-liquid
+	 */
+	private Boolean isWasm = false;
 }

@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ContractServiceTest extends TestBase {
     @Autowired
     private ContractService contractService;
-    private Integer groupId = 1;
+    private String groupId = "1";
     private Integer userId = 700001;
 
 

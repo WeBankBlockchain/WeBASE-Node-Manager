@@ -65,8 +65,11 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.config.ConfigOption;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -84,8 +87,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(value = "api")
 public class AppIntegrationApi extends BaseController {
 
-    @Autowired
-    private CryptoSuite cryptoSuite;
     @Autowired
     private AppIntegrationService appIntegrationService;
     @Autowired
@@ -227,9 +228,9 @@ public class AppIntegrationApi extends BaseController {
      * get base info.
      */
     @GetMapping("basicInfo")
-    public BaseResponse getBasicInfo() {
+    public BaseResponse getBasicInfo(@RequestParam(required = true) String groupId) {
         BasicInfo basicInfo = new BasicInfo();
-        basicInfo.setEncryptType(cryptoSuite.cryptoTypeConfig);
+        basicInfo.setEncryptType(frontInterfaceService.getCryptoType(groupId));
         basicInfo.setSslCryptoType(frontInterfaceService.getSSLCryptoType());
         basicInfo.setFiscoBcosVersion(frontInterfaceService.getClientVersion().getVersion());
         basicInfo.setWebaseVersion(versionProperties.getVersion());
@@ -242,8 +243,8 @@ public class AppIntegrationApi extends BaseController {
      */
     @Deprecated
     @GetMapping("encrypt")
-    public BaseResponse getEncryptType() {
-        int encrypt = cryptoSuite.cryptoTypeConfig;
+    public BaseResponse getEncryptType(@RequestParam(required = true) String groupId) {
+        int encrypt = frontInterfaceService.getCryptoType(groupId);
         log.info("getEncryptType:{}", encrypt);
         return new BaseResponse(ConstantCode.SUCCESS, encrypt);
     }
@@ -284,7 +285,7 @@ public class AppIntegrationApi extends BaseController {
     @GetMapping(value = "/nodeList")
     public BasePageResponse queryNodeList(@RequestParam(required = true) Integer pageNumber,
             @RequestParam(required = true) Integer pageSize,
-            @RequestParam(required = false, defaultValue = "") Integer groupId,
+            @RequestParam(required = false, defaultValue = "") String groupId,
             @RequestParam(required = false) String nodeId) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -298,7 +299,7 @@ public class AppIntegrationApi extends BaseController {
 
         // check node status before query
         try {
-            nodeService.checkAndUpdateNodeStatus(groupId);
+            //nodeService.checkAndUpdateNodeStatus(groupId);
         } catch (Exception e) {
             log.error("queryNodeList checkAndUpdateNodeStatus groupId:{}, error: []", groupId, e);
         }
@@ -324,7 +325,7 @@ public class AppIntegrationApi extends BaseController {
      * get node info
      */
     @GetMapping(value = "/nodeInfo")
-    public BaseResponse getNodeInfo(@RequestParam(required = true) Integer groupId,
+    public BaseResponse getNodeInfo(@RequestParam(required = true) String groupId,
             @RequestParam(required = true) String nodeId) throws NodeMgrException {
 
         Instant startTime = Instant.now();
@@ -351,7 +352,7 @@ public class AppIntegrationApi extends BaseController {
      * get front and node info list
      */
     @GetMapping(value = "/frontNodeList")
-    public BasePageResponse queryFrontList(@RequestParam(required = false) Integer groupId,
+    public BasePageResponse queryFrontList(@RequestParam(required = false) String groupId,
             @RequestParam(required = false) String nodeId) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -443,7 +444,7 @@ public class AppIntegrationApi extends BaseController {
      * query user info list.
      */
     @GetMapping(value = "/userList")
-    public BasePageResponse userList(@RequestParam(required = true) Integer groupId,
+    public BasePageResponse userList(@RequestParam(required = true) String groupId,
             @RequestParam(required = true) Integer pageNumber,
             @RequestParam(required = true) Integer pageSize,
             @RequestParam(required = false) String account,
@@ -545,7 +546,7 @@ public class AppIntegrationApi extends BaseController {
     @PostMapping("/importP12")
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
             @RequestParam(required = false, defaultValue = "") String p12Password,
-            @RequestParam Integer groupId, @RequestParam String userName,
+            @RequestParam String groupId, @RequestParam String userName,
             @RequestParam String account, @RequestParam(required = false) String description) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();

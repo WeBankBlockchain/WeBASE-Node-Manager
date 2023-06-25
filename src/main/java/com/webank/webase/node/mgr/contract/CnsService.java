@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,7 +50,7 @@ public class CnsService {
      */
     public void registerCns(ReqRegisterCns inputParam) throws NodeMgrException {
         log.info("start registerCns. inputParam:{}", JsonTools.toJSONString(inputParam));
-        int groupId = inputParam.getGroupId();
+        String groupId = inputParam.getGroupId();
         String contractName = inputParam.getContractName();
         List<ABIDefinition> abiArray =
                 JsonTools.toJavaObjectList(inputParam.getContractAbi(), ABIDefinition.class);
@@ -80,7 +80,6 @@ public class CnsService {
         params.put("contractAddress", inputParam.getContractAddress());
         params.put("abiInfo", abiArray);
 
-        // register
         frontRestTools.postForEntity(groupId, FrontRestTools.URI_CONTRACT_REGISTER_CNS, params,
                 Object.class);
         // save cns
@@ -122,7 +121,7 @@ public class CnsService {
     /**
      * delete by groupId
      */
-    public void deleteByGroupId(int groupId) {
+    public void deleteByGroupId(String groupId) {
         cnsMapper.deleteByGroupId(groupId);
     }
 }

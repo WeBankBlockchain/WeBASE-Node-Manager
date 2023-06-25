@@ -19,8 +19,8 @@ import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
 import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
 import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
 import node.mgr.test.base.TestBase;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ public class UserControllerTest extends TestBase {
     public void testNewUser() throws Exception {
         NewUserInputParam newUser = new NewUserInputParam();
         newUser.setUserName("cnsUser");
-        newUser.setGroupId(1);
+        newUser.setGroupId("1");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/user/userInfo").
             content(JsonTools.toJSONString(newUser)).
@@ -88,7 +88,7 @@ public class UserControllerTest extends TestBase {
     public void testBindUser() throws Exception {
         BindUserInputParam newUser = new BindUserInputParam();
         newUser.setUserName("testPublic");
-        newUser.setGroupId(1);
+        newUser.setGroupId("1");
         newUser.setPublicKey(
             "tettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweewtettewetrweew");
 
@@ -130,7 +130,7 @@ public class UserControllerTest extends TestBase {
     @Test
     public void testGenerateKey() throws Exception {
         // guomi use GenCredential
-        CryptoKeyPair credentials = cryptoSuite.createKeyPair("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+        CryptoKeyPair credentials = cryptoSuite.loadKeyPair("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
         System.out.println( credentials.getAddress());
         System.out.println( credentials.getHexPrivateKey());
         System.out.println(  credentials.getHexPublicKey());
