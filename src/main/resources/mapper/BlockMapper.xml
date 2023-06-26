@@ -30,10 +30,21 @@
   </select>
 
   <insert id="add">
-    insert ignore into ${tableName}
-    (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time)
-    values
-    (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW())
+    <choose>
+      <when test="${isDm8}">
+        insert  /*+IGNORE_ROW_ON_DUPKEY_INDEX(${tableName}(pk_hash)) */ into ${tableName}
+        (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time)
+        values
+        (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW())
+      </when>
+      <otherwise>
+        insert ignore into ${tableName}
+        (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time)
+        values
+        (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW())
+      </otherwise>
+    </choose>
+
   </insert>
 
   <update id="update">
@@ -80,8 +91,8 @@
   </select>
 
   <delete id="remove">
-    DELETE tb from ${tableName} as tb,(SELECT max(block_number) maxBlock FROM ${tableName}) AS tmp
-    where tb.block_number &lt;= tmp.maxBlock - ${blockRetainMax}
+    DELETE  from ${tableName} as tb
+    where tb.block_number &lt;= (SELECT max(block_number) maxBlock FROM ${tableName}) - ${blockRetainMax}
   </delete>
 
   <select id="getBlockByBlockNumber" resultMap="blockMap">

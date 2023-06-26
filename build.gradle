@@ -103,7 +103,7 @@ List commons = [
 
 dependencies {
     compile springboot,jaxb,jackson,log4j,scaffold,swagger,commons
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0-SNAPSHOT') {
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0') {
         exclude group: "org.slf4j"
     }
     runtime "mysql:mysql-connector-java:8.0.28"
@@ -119,6 +119,7 @@ dependencies {
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
+    compile 'com.dameng:DmJdbcDriver18:8.1.1.193'
 
     compileOnly lombok
     annotationProcessor lombok
