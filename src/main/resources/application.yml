@@ -28,10 +28,10 @@ mybatis:
 # database connection configuration
 spring:
   datasource:
-    driver-class-name: dm.jdbc.driver.DmDriver
-    url: jdbc:mysql://127.0.0.1:5236/webasenodemanager?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
-    username: defaultAccount
-    password: defaultPassword
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/webasenodemanager?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+    username: "defaultAccount"
+    password: "defaultPassword"
     initialSize: 10
     minIdle: 5
     maxActive: 30
@@ -54,12 +54,10 @@ logging:
 constant:
   ###http request
   # login's authorization whether enable, if false, default login as `admin` account
-  # WARN!! disabled authorization is unsafe in public internet
   isUseSecurity: true
   # verification code expire time (s)
   verificationCodeMaxAge: 300
   # if disabled as false, code would be constant value
-  # WARN!! disabled random verification code is unsafe in public internet
   enableVerificationCode: true
   # verification code constant value, only when enableVerificationCode is false works
   verificationCodeValue: "8888"
@@ -115,14 +113,6 @@ constant:
   statBlockFixedDelay: 10000
   statBlockPageSize: 20 # block stat data to pull in one time
   enableExternalFromBlock: true # enable record account and contract from block
-  ###enable user register and mail second check
-  enableRegisterMailCheck: false
-  # SMTP服务用于发送验证码，默认端口为25，暂未支持SSL/TLS（若启用SMTP SSL或TLS则465或587端口）
-  smtpHost: smtp.qq.com
-  smtpPort: 25
-  smtpUsername: "yourmail@qq.com"
-  smtpPassword: "yourMailPassword"
-  accountInfoAesKey: b1eab1c216de9746
 
 
 # executor config for async pulling data from chain
