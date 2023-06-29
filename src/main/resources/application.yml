@@ -19,6 +19,8 @@ server:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+    variables:
+      isDm8: true
   typeAliasesPackage: com.webank.webase.node.mgr
   mapperLocations: classpath:mapper/*.xml
 
@@ -26,8 +28,8 @@ mybatis:
 # database connection configuration
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/webasenodemanager?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+    driver-class-name: dm.jdbc.driver.DmDriver
+    url: jdbc:mysql://127.0.0.1:5236/webasenodemanager?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
     username: defaultAccount
     password: defaultPassword
     initialSize: 10

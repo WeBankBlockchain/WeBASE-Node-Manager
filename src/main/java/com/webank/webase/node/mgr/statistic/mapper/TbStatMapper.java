@@ -24,10 +24,9 @@ public interface TbStatMapper {
      * Delete block height.
      */
     @Delete({
-        "delete tb from tb_stat as tb,",
-        "(SELECT max(block_number) maxBlock FROM tb_stat where group_id = #{groupId}) AS tmp",
+        "delete from tb_stat as tb ",
         "where tb.group_id = #{groupId}",
-        " and tb.block_number <= tmp.maxBlock - ${blockRetainMax}"})
+        " and tb.block_number <= (SELECT max(block_number) maxBlock FROM tb_stat where group_id = #{groupId}) - ${blockRetainMax}"})
     Integer remove(@Param("groupId") String groupId, @Param("blockRetainMax") BigInteger blockRetainMax);
 
     @Select({"select ", TbStatSqlProvider.ALL_COLUMN_FIELDS,
@@ -92,5 +91,5 @@ public interface TbStatMapper {
      */
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     @Insert({ "<script>", "insert into tb_stat (group_id, ", "block_cycle, tps, ", "block_number, block_size, ", "stat_timestamp, create_time, ", "modify_time)", "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.groupId,jdbcType=INTEGER}, ", "#{detail.blockCycle,jdbcType=DOUBLE}, #{detail.tps,jdbcType=INTEGER}, ", "#{detail.blockNumber,jdbcType=INTEGER}, #{detail.blockSize,jdbcType=INTEGER}, ", "#{detail.statTimestamp,jdbcType=VARCHAR}, #{detail.createTime,jdbcType=TIMESTAMP}, ", "#{detail.modifyTime,jdbcType=TIMESTAMP})</foreach></script>" })
-    int batchInsert(java.util.List<TbStat> list);
+    int batchInsert(List<TbStat> list);
 }
