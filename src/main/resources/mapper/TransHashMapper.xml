@@ -23,8 +23,17 @@
 
 
   <insert id="add">
-    insert ignore into ${tableName}(trans_hash,trans_from,trans_to,block_number,block_timestamp,create_time,modify_time)
-    values(#{trans.transHash},#{trans.transFrom},#{trans.transTo},#{trans.blockNumber},#{trans.blockTimestamp},NOW(),NOW())
+    <choose>
+      <when test="${isDm8}">
+        insert /*+IGNORE_ROW_ON_DUPKEY_INDEX(${tableName}(trans_hash)) */ into ${tableName}(trans_hash,trans_from,trans_to,block_number,block_timestamp,create_time,modify_time)
+        values(#{trans.transHash},#{trans.transFrom},#{trans.transTo},#{trans.blockNumber},#{trans.blockTimestamp},NOW(),NOW())
+      </when>
+      <otherwise>
+        insert ignore into ${tableName}(trans_hash,trans_from,trans_to,block_number,block_timestamp,create_time,modify_time)
+        values(#{trans.transHash},#{trans.transFrom},#{trans.transTo},#{trans.blockNumber},#{trans.blockTimestamp},NOW(),NOW())
+      </otherwise>
+    </choose>
+
   </insert>
 
 

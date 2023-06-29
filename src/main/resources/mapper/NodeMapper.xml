@@ -30,9 +30,18 @@
 	</sql>
 
   <insert id="add" parameterType="com.webank.webase.node.mgr.node.entity.TbNode">
-    insert ignore into tb_node
-    (node_id,node_name,group_id,node_ip,p2p_port,description,create_time,modify_time)
-    values(#{nodeId},#{nodeName},#{groupId},#{nodeIp},#{p2pPort},#{description},NOW(),NOW())
+    <choose>
+      <when test="${isDm8}">
+        insert /*+IGNORE_ROW_ON_DUPKEY_INDEX(tb_node(node_id)) */ into tb_node
+        (node_id,node_name,group_id,node_ip,p2p_port,description,create_time,modify_time)
+        values(#{nodeId},#{nodeName},#{groupId},#{nodeIp},#{p2pPort},#{description},NOW(),NOW())
+      </when>
+      <otherwise>
+        insert ignore into tb_node
+        (node_id,node_name,group_id,node_ip,p2p_port,description,create_time,modify_time)
+        values(#{nodeId},#{nodeName},#{groupId},#{nodeIp},#{p2pPort},#{description},NOW(),NOW())
+      </otherwise>
+    </choose>
   </insert>
 
 

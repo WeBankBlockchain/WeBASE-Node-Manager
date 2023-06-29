@@ -12,7 +12,7 @@
   </resultMap>
 
   <select id="listSeventDayOfTransDaily" resultMap="seventDayOfTransMap">
-		select group_id,trans_day,trans_count from tb_trans_daily where group_id = #{groupId} and trans_day &gt;= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+		select group_id,trans_day,trans_count from tb_trans_daily where group_id = #{groupId} and trans_day &gt;= DATE_SUB(CURDATE(), INTERVAL '7' DAY)
 	</select>
 
   <update id="updateTransDaily">
@@ -21,8 +21,17 @@
 	</update>
 
   <insert id="addTransDailyRow" parameterType="com.webank.webase.node.mgr.transdaily.TbTransDaily">
-		insert ignore into tb_trans_daily(group_id,trans_day,trans_count,block_number,create_time,modify_time)
-		values(#{groupId},#{transDay},#{transCount},#{blockNumber},NOW(),NOW())
+	  <choose>
+		  <when test="${isDm8}">
+			  insert  /*+IGNORE_ROW_ON_DUPKEY_INDEX(tb_trans_daily(group_id)) */ into tb_trans_daily(group_id,trans_day,trans_count,block_number,create_time,modify_time)
+			  values(#{groupId},#{transDay},#{transCount},#{blockNumber},NOW(),NOW())
+		  </when>
+		  <otherwise>
+			  insert ignore into tb_trans_daily(group_id,trans_day,trans_count,block_number,create_time,modify_time)
+			  values(#{groupId},#{transDay},#{transCount},#{blockNumber},NOW(),NOW())
+		  </otherwise>
+	  </choose>
+
 	</insert>
 
   <select id="queryMaxBlockByGroup" parameterType="java.lang.Integer"
