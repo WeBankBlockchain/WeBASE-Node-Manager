@@ -17,12 +17,6 @@ import lombok.Data;
 
 @Data
 public class FrontNodeConfig {
-    private String orgName;
     private String p2pip;
-    private String listenip;
-    private Integer rpcport;
-    private Integer p2pport;
     private Integer channelPort;
-    private String groupDataPath;
-    private boolean enableStatistic;
 }

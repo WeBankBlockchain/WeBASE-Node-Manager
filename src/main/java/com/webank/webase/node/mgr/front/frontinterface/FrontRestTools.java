@@ -84,7 +84,7 @@ public class FrontRestTools {
     public static final String URI_GET_CLIENT_VERSION = "web3/clientVersion";
     public static final String URI_REFRESH_FRONT = "web3/refresh";
     public static final String URI_SEARCH_BLOCK_OR_TX = "web3/search";
-    public static final String URI_NODE_CONFIG = "web3/peerConfig";
+    public static final String URI_NODE_CONFIG = "web3/peersConfig";
     public static final String URI_GROUP_INFO = "web3/groupInfo";
     public static final String URI_GROUP_NODE_INFO = "web3/groupNodeInfo";
     public static final String URI_NODE_STATUS_LIST = "web3/nodeStatusList";
