@@ -140,6 +140,8 @@ configurations {
     all*.exclude group: 'jline', module: 'jline'
     all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
     all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
+    all*.exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+
 }
 
 sourceSets {
