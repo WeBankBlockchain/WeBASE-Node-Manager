@@ -34,11 +34,21 @@ public class TbBlock {
     private String sealer;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    // add block total gas used
+    // 十进制的string
     private String gasUsed;
 
 
     /**
      * init by  pkHash、blockNumber、blockTimestamp、transCount.
+     */
+    public TbBlock(String pkHash, BigInteger blockNumber,
+        LocalDateTime blockTimestamp, Integer transCount,int sealerIndex) {
+        this(pkHash,blockNumber,blockTimestamp,transCount,sealerIndex, null);
+    }
+
+        /**
+     * init by  pkHash、blockNumber、blockTimestamp、transCount、useGas
      */
     public TbBlock(String pkHash, BigInteger blockNumber,
         LocalDateTime blockTimestamp, Integer transCount,int sealerIndex,String gasUsed) {
@@ -48,7 +58,6 @@ public class TbBlock {
         this.blockTimestamp = blockTimestamp;
         this.transCount = transCount;
         this.sealerIndex = sealerIndex;
-        this.gasUsed = gasUsed;
+        this.gasUsed = gasUsed ;
     }
-
 }

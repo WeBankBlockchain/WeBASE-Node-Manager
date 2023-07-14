@@ -16,12 +16,15 @@ package com.webank.webase.node.mgr.scheduler;
 
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.group.GroupService;
-import java.util.concurrent.atomic.LongAdder;
+import com.webank.webase.node.mgr.lock.DbWeLock;
+import com.webank.webase.node.mgr.lock.WeLock;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * refresh group list
@@ -30,14 +33,33 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResetGroupListTask {
 
-    @Autowired private GroupService groupService;
-    @Autowired private ConstantProperties constants;
+    @Autowired
+    private GroupService groupService;
+    @Autowired
+    private ConstantProperties constants;
     // interval of check node status
     private static LongAdder LAST_TIME_CHECK_GROUP = new LongAdder();
+    @Autowired private DbWeLock weLock;
+    private final static String RESET_GROUP_LIST_TASK_LOCK_KEY = "lock:reset_group_list_task";
 
     @Scheduled(fixedDelayString = "${constant.resetGroupListCycle}")
     public void taskStart() {
-        resetGroupList();
+        try {
+            boolean lock = weLock.getLock(RESET_GROUP_LIST_TASK_LOCK_KEY);
+            if (lock) {
+                resetGroupList();
+            }
+        } catch (Exception e) {
+            log.error("获取锁失败{}", e);
+        } finally {
+            if (weLock != null) {
+                try {
+                    weLock.unlock(RESET_GROUP_LIST_TASK_LOCK_KEY);
+                } catch (Exception e) {
+                    log.error("释放锁失败{}", e);
+                }
+            }
+        }
     }
 
     /**
