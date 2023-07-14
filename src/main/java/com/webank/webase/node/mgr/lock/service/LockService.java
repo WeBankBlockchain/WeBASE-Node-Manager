@@ -2,6 +2,7 @@ package com.webank.webase.node.mgr.lock.service;
 
 import com.webank.webase.node.mgr.lock.LockMapper;
 import com.webank.webase.node.mgr.lock.entity.TbLock;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ public class LockService {
      * @return
      */
     public int update(TbLock lockEntity) {
+        lockEntity.setModifyTime(LocalDateTime.now());
         log.debug("update lock req:{}", lockEntity);
         int update = lockMapper.update(lockEntity);
         log.debug("update lock res:{}", update);

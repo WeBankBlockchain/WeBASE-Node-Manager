@@ -209,7 +209,7 @@ public class ConstantProperties {
     /**
      * Lock timeout
      */
-    private int LockTimeOut = 3000;
+    private int lockTimeOut = 3000;
     /**
      * Docker client connect daemon ip with proxy ip.
      */

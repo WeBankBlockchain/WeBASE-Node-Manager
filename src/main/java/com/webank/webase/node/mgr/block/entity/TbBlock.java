@@ -35,7 +35,8 @@ public class TbBlock {
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
     // add block total gas used
-    private String gasUsed ;
+    // 十进制的string
+    private String gasUsed;
 
 
     /**
@@ -43,7 +44,7 @@ public class TbBlock {
      */
     public TbBlock(String pkHash, BigInteger blockNumber,
         LocalDateTime blockTimestamp, Integer transCount,int sealerIndex) {
-        this(pkHash,blockNumber,blockTimestamp,transCount,sealerIndex, "");
+        this(pkHash,blockNumber,blockTimestamp,transCount,sealerIndex, null);
     }
 
         /**

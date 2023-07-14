@@ -41,9 +41,9 @@ logging:
 #constants
 constant:
   # The timeout time for acquiring the lock. If the lock is not acquired within this time, it will be retried
-  getLockTimeOut: 3000
-  # Lock timeout
-  lockTimeOut: 3000
+  getLockTimeOut: 5000
+  # holding lock timeout
+  lockTimeOut: 5000
   ###http request
   # login's authorization whether enable, if false, default login as `admin` account
   isUseSecurity: true

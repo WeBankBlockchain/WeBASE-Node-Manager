@@ -14,13 +14,19 @@
                 property="timeout"/>
         <result column="version" javaType="java.lang.Integer" jdbcType="INTEGER"
                 property="version"/>
+        <result column="create_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+          property="createTime"/>
+        <result column="modify_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"
+          property="modifyTime"/>
     </resultMap>
+
     <insert id="add" parameterType="com.webank.webase.node.mgr.lock.entity.TbLock">
-        INSERT   INTO tb_lock VALUES (#{lockKey}, #{threadId}, #{lockCount}, #{timeout}, #{version})
+        INSERT INTO tb_lock VALUES (#{lockKey}, #{threadId}, #{lockCount}, #{timeout}, #{version}, NOW(), NOW())
     </insert>
 
     <update id="update">
-        UPDATE tb_lock SET lock_count=#{lockCount},timeout=#{timeout},thread_id=#{threadId} WHERE lock_key=#{lockKey} AND version=#{version}
+        UPDATE tb_lock SET lock_count=#{lockCount},timeout=#{timeout},thread_id=#{threadId},modify_time=NOW()
+        WHERE lock_key=#{lockKey} AND version=#{version}
     </update>
     <delete id="delete">
         DELETE FROM tb_lock WHERE lock_key=#{lockKey}

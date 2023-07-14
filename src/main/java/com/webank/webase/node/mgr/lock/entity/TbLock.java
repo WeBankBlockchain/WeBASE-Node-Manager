@@ -1,5 +1,6 @@
 package com.webank.webase.node.mgr.lock.entity;
 
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 
@@ -16,4 +17,6 @@ public class TbLock {
     private Integer lockCount;
     private Long timeout;
     private Integer version;
+    private LocalDateTime createTime;
+    private LocalDateTime modifyTime;
 }

@@ -161,7 +161,7 @@ public class BlockService {
         FrontRestTools.processBlockHexNumber(blockInfo); 
         // save block info
         TbBlock tbBlock = new TbBlock(blockInfo.getHash(), bigIntegerNumber, blockTimestamp,
-            transSize, sealerIndex, blockInfo.getGasUsed());
+            transSize, sealerIndex);
         return tbBlock;
     }
 
@@ -174,7 +174,7 @@ public class BlockService {
 
         // save block info
         TbBlock tbBlock = chainBlock2TbBlock(blockInfo);
-        BigInteger tbGasUsed = BigInteger.ZERO;
+        BigInteger blockGasUsed = BigInteger.ZERO;
 
         // save trans hash
         for (TransactionResult t : transList) {
@@ -182,28 +182,36 @@ public class BlockService {
             // Hexadecimal to decimal conversion
             FrontRestTools.processTransHexNumber(trans);
 
-            // add all transaction use gas
-            tbGasUsed.add( Numeric.toBigInt(trans.getGas()) );
             // 获取交易交易回执TransactionReceipt
-            TransactionReceipt transactionReceipt = frontInterface.getTransReceipt(groupId, trans.getHash());
-            FrontRestTools.processReceiptHexNumber(transactionReceipt);
+            TransactionReceipt transactionReceipt = new TransactionReceipt();
+            try {
+                transactionReceipt = frontInterface.getTransReceipt(groupId, trans.getHash());
+                // 将gas从十六进制string转为十进制string
+                FrontRestTools.processReceiptHexNumber(transactionReceipt);
+                // add all transaction use gas
+                blockGasUsed = blockGasUsed.add(Numeric.decodeQuantity(transactionReceipt.getGasUsed()));
+            } catch (Exception ex) {
+                log.error("get gasUsed in transReceipt failed:", ex);
+            }
 
             TbTransHash tbTransHash = new TbTransHash(trans.getHash(), trans.getFrom(),
                 trans.getTo(), tbBlock.getBlockNumber(), tbBlock.getBlockTimestamp(),
-                transactionReceipt.getGasUsed(),transactionReceipt.getStatus(),trans.getExtraData());
+                transactionReceipt.getGasUsed(), transactionReceipt.getStatus(), // 可为空
+                trans.getExtraData());
+
             transHashService.addTransInfo(groupId, tbTransHash);
             // save user or contract from block's transaction
             this.saveExternalInfo(groupId, trans, blockInfo.getTimestamp());
             try {
                 Thread.sleep(SAVE_TRANS_SLEEP_TIME);
             } catch (InterruptedException ex) {
-                log.error("saveBLockInfo", ex);
+                log.error("saveBLockInfo sleep error:", ex);
                 Thread.currentThread().interrupt();
             }
         }
         
         // sum by all transaction's gas 
-        tbBlock.setGasUsed(tbGasUsed.toString(10));
+        tbBlock.setGasUsed(blockGasUsed.toString(10));
         // save block info
         addBlockInfo(tbBlock, groupId);
     }

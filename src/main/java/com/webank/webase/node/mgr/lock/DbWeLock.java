@@ -3,6 +3,7 @@ package com.webank.webase.node.mgr.lock;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.lock.entity.TbLock;
 import com.webank.webase.node.mgr.lock.service.LockService;
+import java.time.LocalDateTime;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,10 @@ public class DbWeLock implements WeLock {
      **/
     @Override
     public boolean getLock(String lockKey) throws Exception {
-        return getLock(lockKey, constantProperties.getLockTimeOut());
+        log.info("start getLock :{}", lockKey);
+        boolean result = getLock(lockKey, constantProperties.getLockTimeOut());
+        log.info("end getLock :{},result:{}", lockKey, result);
+        return result;
     }
 
     /**
@@ -55,9 +59,18 @@ public class DbWeLock implements WeLock {
         while (true) {
             TbLock lockEntity = lockService.getLock(lockKey);
             if (Objects.isNull(lockEntity)) {
+                log.debug("getLock key:{} is null", lockKey);
                 String reqId = this.getThreadId();
-                int add = lockService.add(TbLock.builder().lockKey(lockKey).threadId(reqId).lockCount(1)
-                        .timeout(System.currentTimeMillis() + lockTimeOut).version(0).build());
+                LocalDateTime now = LocalDateTime.now();
+                int add = lockService.add(TbLock.builder()
+                    .lockKey(lockKey)
+                    .threadId(reqId)
+                    .lockCount(1)
+                    .timeout(System.currentTimeMillis() + lockTimeOut)
+                    .version(0)
+                    .createTime(now)
+                    .modifyTime(now)
+                    .build());
                 if (add == 1) {
                     lockResult = true;
                     break;
@@ -66,6 +79,7 @@ public class DbWeLock implements WeLock {
                 String threadId = lockEntity.getThreadId();
                 //If ThreadID is empty, it indicates that the lock is not occupied
                 if ("".equals(threadId)) {
+                    log.debug("getLock key:{}, threadId is null", lockKey);
                     lockEntity.setThreadId(requestId);
                     lockEntity.setLockCount(1);
                     lockEntity.setTimeout(System.currentTimeMillis() + lockTimeOut);
@@ -74,6 +88,7 @@ public class DbWeLock implements WeLock {
                         break;
                     }
                 } else if (requestId.equals(threadId)) {
+                    log.debug("getLock key:{}, threadId is {}", lockKey, requestId);
                     //If request_ ID and request in the table_ The same as ID indicates that the
                     // lock is held by the current thread, and the lock needs to be added
                     lockEntity.setTimeout(System.currentTimeMillis() + lockTimeOut);
@@ -83,13 +98,14 @@ public class DbWeLock implements WeLock {
                         break;
                     }
                 } else {
+                    log.debug("getLock key:{}, threadId is {}, but not own lock, sleep and wait...", lockKey, requestId);
                     //If the lock is not own and has timed out, reset the lock and continue to try again
                     if (lockEntity.getTimeout() < System.currentTimeMillis()) {
                         this.resetLock(lockEntity);
                     } else {
                         //If it does not time out, sleep for 100 milliseconds and continue to try again
                         if (startTime + constantProperties.getGetLockTimeOut() > System.currentTimeMillis()) {
-                            TimeUnit.MILLISECONDS.sleep(100);
+                            TimeUnit.MILLISECONDS.sleep(300);
                         } else {
                             break;
                         }
@@ -108,6 +124,7 @@ public class DbWeLock implements WeLock {
      **/
     @Override
     public void unlock(String lockKey) throws Exception {
+        log.debug("start unlock key:{}", lockKey);
         //获取当前线程requestId
         String requestId = this.getThreadId();
         TbLock lockEntity = lockService.getLock(lockKey);
@@ -134,6 +151,7 @@ public class DbWeLock implements WeLock {
             threadId = UUID.randomUUID().toString();
             threadIdTL.set(threadId);
         }
+        log.info("getThreadId threadId:{}", threadId);
         return threadId;
     }
 
@@ -145,6 +163,7 @@ public class DbWeLock implements WeLock {
      * @throws Exception
      **/
     private int resetLock(TbLock lockEntity) {
+        log.debug("start resetLock key:{}, threadId is {}", lockEntity.getLockKey(), lockEntity.getThreadId());
         lockEntity.setThreadId("");
         lockEntity.setLockCount(0);
         lockEntity.setTimeout(0L);

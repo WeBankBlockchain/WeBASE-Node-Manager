@@ -454,16 +454,16 @@ public class FrontRestTools {
         }
         String gasLimit = block.getGasLimit();
         if ( Numeric.containsHexPrefix(gasLimit) ) {
-            block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+            block.setGasLimit(Numeric.decodeQuantity(gasLimit).toString(10));
         }
 
         String gasUsed = block.getGasUsed();
         if ( Numeric.containsHexPrefix(gasUsed) ) {
-            block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+            block.setGasUsed(Numeric.decodeQuantity(gasUsed).toString(10));
         }
         String timestamp = block.getTimestamp();
         if ( Numeric.containsHexPrefix(timestamp) ) {
-            block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+            block.setTimestamp(Numeric.decodeQuantity(timestamp).toString(10));
         }
         log.info("processBlockHexNumber :{}", block);
     }
@@ -478,15 +478,15 @@ public class FrontRestTools {
         }
         String gas = trans.getGas();
         if ( Numeric.containsHexPrefix(gas) ) {
-            trans.setGas(Numeric.toBigInt(gas).toString(10));
+            trans.setGas(Numeric.decodeQuantity(gas).toString(10));
         }
         String gasPrice = trans.getGasPrice();
         if ( Numeric.containsHexPrefix(gasPrice) ) {
-            trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
+            trans.setGasPrice(Numeric.decodeQuantity(gasPrice).toString(10));
         } 
         String groupId = trans.getGroupId();
         if ( Numeric.containsHexPrefix(groupId) ) {
-            trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+            trans.setGroupId(Numeric.decodeQuantity(groupId).toString(10));
         } 
         log.info("processTransHexNumber :{}", trans);
     }
@@ -501,11 +501,11 @@ public class FrontRestTools {
         }
         String gasUsed = receipt.getGasUsed();
         if ( Numeric.containsHexPrefix(gasUsed) ) {
-            receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+            receipt.setGasUsed(Numeric.decodeQuantity(gasUsed).toString(10));
         }
         String blockNumber = receipt.getBlockNumber();
         if ( Numeric.containsHexPrefix(blockNumber) ) {
-            receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
+            receipt.setBlockNumber(Numeric.decodeQuantity(blockNumber).toString(10));
         }
         log.info("processTransHexNumber :{}", receipt);
     }

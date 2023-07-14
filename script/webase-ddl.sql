@@ -2,20 +2,6 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for tb_lock
--- ----------------------------
-
-CREATE TABLE IF NOT EXISTS tb_lock(
-    lock_key   varchar(32) default '' not null comment '锁key'
-        primary key,
-    thread_id  varchar(64) default '' not null comment '线程id',
-    lock_count int         default 0  not null comment '加锁次数',
-    timeout    bigint      default 0  not null comment '锁超时时间',
-    version    int         default 0  not null comment '版本号'
-)COMMENT='分布式锁表' ENGINE=InnoDB CHARSET=utf8;
-
-
--- ----------------------------
 -- Table structure for tb_group
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_group (
@@ -607,6 +593,22 @@ CREATE TABLE IF NOT EXISTS tb_contract_item (
   PRIMARY KEY (id),
   UNIQUE KEY uk_name(warehouse_id,contract_folder_id,contract_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库合约信息';
+
+
+-- ----------------------------
+-- Table structure for tb_lock 多实例情况下需要加上分布式锁进行控制
+-- ----------------------------
+
+CREATE TABLE IF NOT EXISTS tb_lock (
+    lock_key   varchar(180) default '' not null comment '锁key',
+    thread_id  varchar(255) default '' not null comment '线程id',
+    lock_count int         default 0  not null comment '加锁次数',
+    timeout    bigint      default 0  not null comment '锁超时时间',
+    version    int         default 0  not null comment '版本号',
+    create_time datetime DEFAULT NULL COMMENT '创建时间',
+    modify_time datetime DEFAULT NULL COMMENT '修改时间',
+    PRIMARY KEY (lock_key)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_bin  COMMENT='分布式锁表' ;
 
 
 SET FOREIGN_KEY_CHECKS = 1;
