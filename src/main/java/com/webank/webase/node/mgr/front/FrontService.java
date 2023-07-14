@@ -14,7 +14,6 @@
 package com.webank.webase.node.mgr.front;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
@@ -58,7 +57,6 @@ import com.webank.webase.node.mgr.node.entity.TbNode;
 import com.webank.webase.node.mgr.scheduler.ResetGroupListTask;
 import com.webank.webase.node.mgr.tools.CertTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.NetUtils;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.tools.NumberUtil;
 import com.webank.webase.node.mgr.tools.ProgressTools;
@@ -91,8 +89,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupInfo.GroupInfo;
-import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.v3.model.CryptoType;
@@ -1209,19 +1205,26 @@ public class FrontService {
         }
     }
 
-//    public FrontNodeConfig getFrontNodeConfig(int frontId) {
-//        TbFront front = this.getById(frontId);
-//        if (front == null) {
-//            log.error("");
-//            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
-//        }
-//        String frontIp = front.getFrontIp();
-//        int frontPort = front.getFrontPort();
-//        FrontNodeConfig nodeConfig = frontInterface.getNodeConfigFromSpecificFront(frontIp, frontPort);
-//        return nodeConfig;
-//    }
+    public FrontNodeConfig getFrontNodeConfig(int frontId) {
+        TbFront front = this.getById(frontId);
+        if (front == null) {
+            log.error("");
+            throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
+        }
+        String frontIp = front.getFrontIp();
+        int frontPort = front.getFrontPort();
+        FrontNodeConfig nodeConfig = new FrontNodeConfig();
+        List<String> peers = frontInterface.getPeersConfigFromSpecificFront(frontIp, frontPort);
+        log.info("getFrontNodeConfig peers:{}", peers);
+        if (peers != null && !peers.isEmpty()) {
+            String[] ipPort = peers.get(0).split(":");
+            nodeConfig.setP2pip(ipPort[0]);
+            nodeConfig.setChannelPort(Integer.parseInt(ipPort[1]));
+        }
+        log.info("getFrontNodeConfig peers:{},nodeConfig:{}", peers, nodeConfig);
+        return nodeConfig;
+    }
 
-//    public GroupInfo getGroupInfo(int frontId, String groupId) {
     public Object getGroupInfo(int frontId, String groupId) {
             TbFront front = this.getById(frontId);
         if (front == null) {

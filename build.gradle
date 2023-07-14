@@ -84,9 +84,9 @@ List mbg = [
 ]
 
 List scaffold = [
-    'com.webank.webase:solscaffold:1.0.2',
-    'com.webank:SmartDev-Scaffold:1.0.0.1',
-    'com.webank:solc-gradle-plugin:1.0.1'
+    'com.webank.webase:solscaffold:3.3.0-SNAPSHOT',
+    'com.webank:WeBankBlockchain-SmartDev-Scaffold:3.3.0-SNAPSHOT',
+    'com.webank:solc-gradle-plugin:3.3.0-SNAPSHOT'
 ]
 
 List swagger = [
@@ -103,7 +103,7 @@ List commons = [
 
 dependencies {
     compile springboot,jaxb,jackson,log4j,scaffold,swagger,commons
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0-SNAPSHOT') {
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0') {
         exclude group: "org.slf4j"
     }
     runtime "mysql:mysql-connector-java:8.0.28"
@@ -140,6 +140,8 @@ configurations {
     all*.exclude group: 'jline', module: 'jline'
     all*.exclude group: 'com.google.protobuf', module: 'protobuf-java'
     all*.exclude group: 'javax.annotation', module: 'javax.annotation-api'
+    all*.exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+
 }
 
 sourceSets {

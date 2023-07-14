@@ -620,12 +620,12 @@ public class FrontInterfaceService {
     /**
      * get front node info
      */
-//    public FrontNodeConfig getNodeConfigFromSpecificFront(String frontIp, Integer frontPort) {
-//        String groupId = "1";
-//        FrontNodeConfig nodeConfig = getFromSpecificFront(groupId, frontIp, frontPort,
-//            FrontRestTools.URI_NODE_CONFIG, FrontNodeConfig.class);
-//        return nodeConfig;
-//    }
+    public List<String> getPeersConfigFromSpecificFront(String frontIp, Integer frontPort) {
+        String groupId = "1";
+        List<String> nodeConfig = getFromSpecificFront(groupId, frontIp, frontPort,
+            FrontRestTools.URI_NODE_CONFIG, List.class);
+        return nodeConfig;
+    }
 
     /**
      * include node name list

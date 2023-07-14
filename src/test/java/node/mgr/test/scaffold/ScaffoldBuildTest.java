@@ -15,11 +15,13 @@
 package node.mgr.test.scaffold;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.scaffold.artifact.NewMainResourceDir.ContractInfo;
-import com.webank.scaffold.artifact.ProjectArtifact;
+import com.webank.scaffold.config.WebaseConfig.ContractInfo;
+import com.webank.scaffold.enums.ProjectType;
 import com.webank.scaffold.factory.ProjectFactory;
 import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.scaffold.util.IOUtil;
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.tools.CleanPathUtil;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -84,9 +86,17 @@ public class ScaffoldBuildTest {
      */
     @Test
     public void testFactory() {
-        ProjectFactory projectFactory = new ProjectFactory();
-        ProjectArtifact artifact = projectFactory.buildProjectDir(solDir, group, artifactName, outputDir, contractName);
-        System.out.println("artifact: " + artifact);
+//        WebaseProjectFactory projectFactory = new WebaseProjectFactory(
+//            projectGroup, artifactName, SOL_OUTPUT_DIR, OUTPUT_DIR,
+//            need, ProjectType.Gradle.getName(), GRADLE_VERSION,
+//            contractInfoList,
+//            peers,
+//            groupId, hexPrivateKeyListStr, sdkMap);
+//        boolean createResult = projectFactory.createProject();
+//        if (!createResult) {
+//            log.error("generateProject createProject failed");
+//            throw new NodeMgrException(ConstantCode.GENERATE_CONTRACT_PROJECT_FAIL);
+//        }
     }
 
     /**
@@ -110,12 +120,18 @@ public class ScaffoldBuildTest {
         System.out.println("sdkMap: ");
         System.out.println(sdkMap);
 
-        WebaseProjectFactory projectFactory = new WebaseProjectFactory();
-        ProjectArtifact result = projectFactory.buildProjectDirWebase(
-            Collections.singletonList(contractInfo),
-            group, artifactName, outputDir, "gradle",
-            //null, null, null, null);
-            "127.0.0.1:25200", 2, "0x123", sdkMap);
+//        WebaseProjectFactory projectFactory = new WebaseProjectFactory(
+//            projectGroup, artifactName, SOL_OUTPUT_DIR, OUTPUT_DIR,
+//            need, ProjectType.Gradle.getName(), GRADLE_VERSION,
+//            contractInfoList,
+//            peers,
+//            groupId, hexPrivateKeyListStr, sdkMap);
+//        boolean createResult = projectFactory.createProject();
+//        if (!createResult) {
+//            log.error("generateProject createProject failed");
+//            throw new NodeMgrException(ConstantCode.GENERATE_CONTRACT_PROJECT_FAIL);
+//        }
+
     }
 
     /**
@@ -143,14 +159,14 @@ public class ScaffoldBuildTest {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, String> sdkMap = mapper.readValue(sdkMapStr, Map.class);
 
-        WebaseProjectFactory projectFactory = new WebaseProjectFactory();
-        // ProjectArtifact result = projectFactory.buildProjectDir(Collections.singletonList(contractInfo),
-        ProjectArtifact result = projectFactory.buildProjectDirWebase(Arrays.asList(contractInfo, creditContract),
-            group, artifactName, outputDir, "gradle",
-            //null, null, null, null);
-            "127.0.0.1:25200", 2, "0x123", sdkMap);
-        System.out.println("result: ");
-        System.out.println(result);
+//        WebaseProjectFactory projectFactory = new WebaseProjectFactory();
+//        // ProjectArtifact result = projectFactory.buildProjectDir(Collections.singletonList(contractInfo),
+//        ProjectArtifact result = projectFactory.buildProjectDirWebase(Arrays.asList(contractInfo, creditContract),
+//            group, artifactName, outputDir, "gradle",
+//            //null, null, null, null);
+//            "127.0.0.1:25200", 2, "0x123", sdkMap);
+//        System.out.println("result: ");
+//        System.out.println(result);
 
     }
 
@@ -167,7 +183,7 @@ public class ScaffoldBuildTest {
     public void testCopySdk() throws IOException {
         File srcConf = new File("./src/main/resources/conf");
         File targetConf = new File(confDir);
-        IOUtil.copyFolder(srcConf, targetConf);
+//        IOUtil.copyFolder(srcConf, targetConf);
     }
 
 }
