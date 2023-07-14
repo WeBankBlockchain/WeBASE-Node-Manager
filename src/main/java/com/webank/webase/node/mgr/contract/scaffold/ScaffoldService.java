@@ -88,9 +88,13 @@ public class ScaffoldService {
         List<TbContract> tbContractList = new ArrayList<>();
         for (Integer id : contractIdList) {
             TbContract contract = contractService.queryByContractId(id);
-            if (contract == null || contract.getContractAbi() == null) {
+            if (contract == null) {
                 log.error("exportProject contract not exist or not compiled, id:{}", id);
                 throw new NodeMgrException(ConstantCode.INVALID_CONTRACT_ID);
+            }
+            if (StringUtils.isBlank(contract.getContractAbi())) {
+                log.error("contract abi is empty, of name:{}, not support lib contract", contract.getContractName());
+                throw new NodeMgrException(ConstantCode.CONTRACT_ABI_EMPTY.getCode(), "library contract not support export project, please exclude this contract:" + contract.getContractName());
             }
             tbContractList.add(contract);
         }
@@ -101,8 +105,7 @@ public class ScaffoldService {
             throw new NodeMgrException(ConstantCode.INVALID_FRONT_ID);
         }
         // get front's p2p ip and channel port
-        List<String> peers = frontInterfaceService.getPeersConfigFromSpecificFront(front.getFrontIp(), front.getFrontPort());
-        String peersIpPort = String.join(",", peers);
+        String peersIpPort = reqProject.getChannelIp() + ":" + reqProject.getChannelPort();
 
         log.info("exportProject get frontNodeConfig:{}", peersIpPort);
         // get front's sdk key cert
@@ -146,7 +149,7 @@ public class ScaffoldService {
      * @param sdkMap
      * @return path string of project
      */
-    public String generateProject(String peers, String projectGroup, String artifactName,
+    private String generateProject(String peers, String projectGroup, String artifactName,
         List<TbContract> tbContractList, String groupId, String hexPrivateKeyListStr, Map<String, String> sdkMap) {
         log.info("generateProject sdkMap size:{}", sdkMap.size());
         List<ContractInfo> contractInfoList = this.handleContractList(groupId, tbContractList);
@@ -155,8 +158,8 @@ public class ScaffoldService {
         log.info("generateProject need:{}", need);
 
         WebaseProjectFactory projectFactory = new WebaseProjectFactory(
-            projectGroup, artifactName, SOL_OUTPUT_DIR, OUTPUT_DIR,
-            need, ProjectType.Gradle.getName(), GRADLE_VERSION,
+            projectGroup, artifactName,
+            OUTPUT_DIR, GRADLE_VERSION,
             contractInfoList,
             peers,
             groupId, hexPrivateKeyListStr, sdkMap);
