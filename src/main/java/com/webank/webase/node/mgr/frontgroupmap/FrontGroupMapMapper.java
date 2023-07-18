@@ -33,7 +33,7 @@ public interface FrontGroupMapMapper {
 
     int update(TbFrontGroupMap tbFrontGroupMap);
     
-    List<Integer> getGroupIdListByFrontId(@Param("frontId") Integer frontId);
+    List<String> getGroupIdListByFrontId(@Param("frontId") Integer frontId);
 
     FrontGroup queryFrontGroup(MapListParam mapListParam);
 

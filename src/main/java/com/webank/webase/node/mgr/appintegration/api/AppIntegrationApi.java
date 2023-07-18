@@ -65,7 +65,10 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.v3.config.ConfigOption;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -231,8 +234,10 @@ public class AppIntegrationApi extends BaseController {
     public BaseResponse getBasicInfo(@RequestParam(required = true) String groupId) {
         BasicInfo basicInfo = new BasicInfo();
         basicInfo.setEncryptType(frontInterfaceService.getCryptoType(groupId));
-        basicInfo.setSslCryptoType(frontInterfaceService.getSSLCryptoType());
-        basicInfo.setFiscoBcosVersion(frontInterfaceService.getClientVersion().getVersion());
+        // 此处每个front的 useSmssl 可能不一致，但是由于获取basicInfo，不指定front的Ip，随机取一个front获取
+        basicInfo.setSslCryptoType(frontInterfaceService.getUseSmSsl(groupId) ? 1 : 0);
+        // 此处每个节点的binaryVersion可能不一致，但是由于获取basicInfo，默认取第一个
+        basicInfo.setFiscoBcosVersion(frontInterfaceService.getOneNodeBinaryVersion(groupId));
         basicInfo.setWebaseVersion(versionProperties.getVersion());
         log.info("getBasicInfo:{}", JsonTools.toJSONString(basicInfo));
         return new BaseResponse(ConstantCode.SUCCESS, basicInfo);
@@ -241,7 +246,6 @@ public class AppIntegrationApi extends BaseController {
     /**
      * get encrypt type.
      */
-    @Deprecated
     @GetMapping("encrypt")
     public BaseResponse getEncryptType(@RequestParam(required = true) String groupId) {
         int encrypt = frontInterfaceService.getCryptoType(groupId);
@@ -329,7 +333,7 @@ public class AppIntegrationApi extends BaseController {
             @RequestParam(required = true) String nodeId) throws NodeMgrException {
 
         Instant startTime = Instant.now();
-        log.info("start addNodeInfo startTime:{} groupId:{}", startTime.toEpochMilli(), groupId);
+        log.info("start getNodeInfo startTime:{} groupId:{}", startTime.toEpochMilli(), groupId);
 
         // param
         NodeParam param = new NodeParam();
@@ -342,7 +346,7 @@ public class AppIntegrationApi extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         baseResponse.setData(tbNode);
 
-        log.info("end addNodeInfo useTime:{} result:{}",
+        log.info("end getNodeInfo useTime:{} result:{}",
                 Duration.between(startTime, Instant.now()).toMillis(),
                 JsonTools.toJSONString(baseResponse));
         return baseResponse;

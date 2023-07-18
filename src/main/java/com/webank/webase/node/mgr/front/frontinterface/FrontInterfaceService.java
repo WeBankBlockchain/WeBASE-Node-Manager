@@ -27,8 +27,11 @@ import com.webank.webase.node.mgr.contract.entity.RspCompileTask;
 import com.webank.webase.node.mgr.event.entity.ContractEventInfo;
 import com.webank.webase.node.mgr.event.entity.NewBlockEventInfo;
 import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
-import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
-import com.webank.webase.node.mgr.front.frontinterface.entity.*;
+import com.webank.webase.node.mgr.front.frontinterface.entity.NodeStatusInfo;
+import com.webank.webase.node.mgr.front.frontinterface.entity.PostAbiInfo;
+import com.webank.webase.node.mgr.front.frontinterface.entity.ReqCompileTask;
+import com.webank.webase.node.mgr.front.frontinterface.entity.ReqSdkConfig;
+import com.webank.webase.node.mgr.front.frontinterface.entity.RspStatBlock;
 import com.webank.webase.node.mgr.monitor.entity.ChainTransInfo;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
@@ -44,8 +47,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.TransactionResult;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlockHeader.BlockHeader;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
@@ -252,6 +253,11 @@ public class FrontInterfaceService {
     public Integer getCryptoType(String groupId) {
         return frontRestTools.getForEntity(groupId, FrontRestTools.URI_ENCRYPT_TYPE,
                 Integer.class);
+    }
+
+    public Boolean getUseSmSsl(String groupId) {
+        return frontRestTools.getForEntity(groupId, FrontRestTools.URI_USE_SM_SSL,
+                Boolean.class);
     }
 
     public Boolean getIsWasmFromSpecificFront(String frontIp, Integer frontPort, String groupId) {
@@ -640,13 +646,10 @@ public class FrontInterfaceService {
     /**
      * include node name list
      */
-    public List<GroupNodeInfo> getGroupNodeInfoFromSpecificFront(String frontIp, Integer frontPort,
-        String groupId) {
-        List data = getFromSpecificFront(groupId, frontIp, frontPort,
-            FrontRestTools.URI_GROUP_NODE_INFO, List.class);
-        List<GroupNodeInfo> resList = JsonTools.toJavaObjectList(JsonTools.toJSONString(data),
-            GroupNodeInfo.class);
-        return resList;
+    public String getOneNodeBinaryVersion(String groupId) {
+        String data = frontRestTools.getForEntity(groupId, FrontRestTools.URI_BINARY_VERSION, String.class);
+        log.info("getOneNodeBinaryVersion {}", data);
+        return data;
     }
 
     /**
@@ -755,14 +758,6 @@ public class FrontInterfaceService {
             sdkCertList.add(sdkCertInfo);
         }
         return sdkCertList;
-    }
-
-    /**
-     * get front's sslCryptoType
-     */
-    public Integer getSSLCryptoType() {
-        return frontRestTools.getForEntity(GROUPID, FrontRestTools.URI_SSL_CRYPTO_TYPE,
-            Integer.class);
     }
 
     /**

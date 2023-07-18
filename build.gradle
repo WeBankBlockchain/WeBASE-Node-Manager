@@ -123,6 +123,7 @@ dependencies {
     compileOnly lombok
     annotationProcessor lombok
 
+    testCompile ("com.webank:webase-app-sdk:1.5.5")
     testCompile mbg
     testCompileOnly lombok
     testAnnotationProcessor lombok

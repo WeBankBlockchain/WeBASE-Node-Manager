@@ -19,13 +19,13 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.front.frontinterface.entity.FrontUrlInfo;
-import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.front.FrontService;
+import com.webank.webase.node.mgr.front.frontinterface.entity.FailInfo;
+import com.webank.webase.node.mgr.front.frontinterface.entity.FrontUrlInfo;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapCache;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
-import com.webank.webase.node.mgr.front.frontinterface.entity.FailInfo;
 import com.webank.webase.node.mgr.node.NodeService;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -38,10 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
-import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -87,9 +83,11 @@ public class FrontRestTools {
     public static final String URI_NODE_CONFIG = "web3/peersConfig";
     public static final String URI_GROUP_INFO = "web3/groupInfo";
     public static final String URI_GROUP_NODE_INFO = "web3/groupNodeInfo";
+    public static final String URI_BINARY_VERSION = "web3/binaryVersion";
     public static final String URI_NODE_STATUS_LIST = "web3/nodeStatusList";
     public static final String URI_ENCRYPT_TYPE = "web3/encrypt";
     public static final String URI_IS_WASM = "web3/isWasm";
+    public static final String URI_USE_SM_SSL = "web3/useSmSsl";
 
     // config sdk
     public static final String URI_CONFIG_SDK = "config/bcosSDK";
@@ -164,7 +162,6 @@ public class FrontRestTools {
 
 
     public static final String URI_CERT_SDK_FILES = "cert/sdk";
-    public static final String URI_SSL_CRYPTO_TYPE = "sslCryptoType";
 
     public static final String URI_CONTRACT_EVENT_INFO_LIST = "event/contractEvent/list";
     public static final String URI_NEW_BLOCK_EVENT_INFO_LIST = "event/newBlockEvent/list";
@@ -181,7 +178,7 @@ public class FrontRestTools {
     private static final List<String> URI_NOT_PREPEND_GROUP_ID = Arrays
         .asList(URI_CONTRACT_DEPLOY_WITH_SIGN, URI_SEND_TRANSACTION_WITH_SIGN, URI_KEY_PAIR,
             URI_KEY_PAIR_LOCAL_KEYSTORE,
-            URI_CONTRACT_SENDABI, URI_CERT_SDK_FILES, URI_SSL_CRYPTO_TYPE,
+            URI_CONTRACT_SENDABI, URI_CERT_SDK_FILES,
             URI_KEY_PAIR_IMPORT_WITH_SIGN, URI_KEY_PAIR_USERINFO_WITH_SIGN,
             URI_CONTRACT_REGISTER_CNS,
             URI_FRONT_VERSION, URI_SIGN_VERSION, URI_KEY_PAIR_EXPORT_PEM_WITH_SIGN,
