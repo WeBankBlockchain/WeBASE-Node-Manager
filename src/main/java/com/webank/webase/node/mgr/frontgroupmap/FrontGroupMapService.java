@@ -145,7 +145,7 @@ public class FrontGroupMapService {
     /**
      * get group list by frontId
      */
-    public List<Integer> getGroupIdListByFrontId(int frontId) {
+    public List<String> getGroupIdListByFrontId(int frontId) {
         if (frontId == 0) {
             return null;
         }

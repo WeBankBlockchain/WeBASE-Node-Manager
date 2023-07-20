@@ -1,11 +1,13 @@
 package com.webank.webase.node.mgr.config;
 
 import com.webank.webase.node.mgr.base.annotation.CurrentAccountMethodArgumentResolver;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.config.security.filter.AccountFilter;
 import com.webank.webase.node.mgr.config.security.filter.AppIntegrationFilter;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import java.util.List;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +20,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * web configuration.
  *
  */
+@Log4j2
 @Data
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -29,11 +32,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private AppIntegrationFilter appIntegrationFilter;
     @Autowired
     private ConstantProperties constants;
-
-    @Bean
-    public AccountFilter setAccountFilter() {
-        return new AccountFilter();
-    }
+    @Autowired
+    private AccountFilter accountFilter;
 
     /**
      * 注册拦截器
@@ -41,8 +41,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(appIntegrationFilter).addPathPatterns("/api/**");// 自定义拦截的url路径
-        registry.addInterceptor(setAccountFilter()).addPathPatterns("/**")
+        log.info("addInterceptors for /api/**");
+        registry.addInterceptor(accountFilter).addPathPatterns("/**")
                 .excludePathPatterns(constants.getPermitUrlArray());
+        log.info("addInterceptors for {}", JsonTools.toJSONString(constants.getPermitUrlArray()));
     }
 
     @Override

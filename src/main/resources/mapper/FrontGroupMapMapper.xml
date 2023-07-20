@@ -138,7 +138,7 @@
         </if>
     </select>
     
-    <select id="getGroupIdListByFrontId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+    <select id="getGroupIdListByFrontId" parameterType="java.lang.Integer" resultType="java.lang.String">
         select group_id from tb_front_group_map
         where front_id = #{frontId}
     </select>
