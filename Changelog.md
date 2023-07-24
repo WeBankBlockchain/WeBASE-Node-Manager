@@ -1,3 +1,19 @@
+### v3.1.0(2023-07-20)
+
+**Add**
+- 支持合约IDE的Java项目导出功能，并支持struct格式参数，需要使用3.1.0及以上的WeBASE-Web
+
+**Fix**
+- 修复WeBASE-APP-SDK应用管理接入时无法通过健全问题；需要对应使用`webase-app-sdk` 1.5.6及以上版本
+
+**兼容性**
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Web v3.0.2及以上版本
+- WeBASE-Front v3.1.0
+- WeBASE-APP-SDK v1.5.6级以上版本
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
+
 ### v3.0.2(2023-03-31)
 
 **Fix**
