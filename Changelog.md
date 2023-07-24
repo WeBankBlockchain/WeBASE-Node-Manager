@@ -4,7 +4,7 @@
 - 支持合约IDE的Java项目导出功能，并支持struct格式参数，需要使用3.1.0及以上的WeBASE-Web
 
 **Fix**
-- 修复WeBASE-APP-SDK应用管理接入时无法通过健全问题；需要对应使用`webase-app-sdk` 1.5.6及以上版本
+- 修复WeBASE-APP-SDK应用管理接入时无法通过鉴权问题；需要对应使用`webase-app-sdk` 1.5.6及以上版本
 
 **兼容性**
 - 支持FISCO-BCOS v3.0.0 及以上版本
