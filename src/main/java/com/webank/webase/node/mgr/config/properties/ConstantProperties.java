@@ -205,7 +205,7 @@ public class ConstantProperties {
     private long execAddNodeTimeout = 40 * 1000L;
 
     private String[] permitUrlArray = new String[]{"/account/login", "/account/pictureCheckCode",
-        "/login","/user/privateKey/**", "/encrypt", "/version" };
+        "/login","/user/privateKey/**", "/encrypt", "/version", "/api/**" };
     private String dockerRepository= "fiscoorg/fisco-webase";
     // private String imageTagUpdateUrl = "https://registry.hub.docker.com/v1/repositories/%s/tags";
     private String dockerRegistryMirror = "";

@@ -101,7 +101,7 @@ public class NodeController {
         throws NodeMgrException {
 
         Instant startTime = Instant.now();
-        log.info("start addNodeInfo startTime:{} groupId:{}",
+        log.info("start getNodeInfo startTime:{} groupId:{}",
             startTime.toEpochMilli(), groupId);
 
         // param
@@ -114,7 +114,7 @@ public class NodeController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         baseResponse.setData(tbNode);
 
-        log.info("end addNodeInfo useTime:{} result:{}",
+        log.info("end getNodeInfo useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
         return baseResponse;
     }

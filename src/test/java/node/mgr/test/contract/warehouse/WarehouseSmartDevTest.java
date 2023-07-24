@@ -44,7 +44,7 @@ public class WarehouseSmartDevTest {
                 }
             } else {
                 System.out.println("subFile name: " + subFile.getName());
-                String content = IOUtil.readAsString(subFile);
+                String content = org.apache.commons.io.FileUtils.readFileToString(subFile);
 //                System.out.println(solFile.getName() + " content: " + content);
                 System.out.println(subFile.getName() + " content base64: " + NodeMgrTools
                     .encodedBase64Str(content));

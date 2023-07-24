@@ -160,16 +160,16 @@ public class FrontController extends BaseController {
     /**
      * get front's node config
      */
-//    @GetMapping(value = "/nodeConfig")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-//    public BaseResponse getFrontNodeConfig(@RequestParam("frontId") int frontId) {
-//        Instant startTime = Instant.now();
-//        log.info("start getFrontNodeConfig startTime:{} ", startTime.toEpochMilli());
-//        FrontNodeConfig nodeConfig = frontService.getFrontNodeConfig(frontId);
-//
-//        log.info("end getFrontNodeConfig useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
-//        return new BaseResponse(ConstantCode.SUCCESS, nodeConfig);
-//    }
+    @GetMapping(value = "/nodeConfig")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    public BaseResponse getFrontNodeConfig(@RequestParam("frontId") int frontId) {
+        Instant startTime = Instant.now();
+        log.info("start getFrontNodeConfig startTime:{} ", startTime.toEpochMilli());
+        FrontNodeConfig nodeConfig = frontService.getFrontNodeConfig(frontId);
+
+        log.info("end getFrontNodeConfig useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return new BaseResponse(ConstantCode.SUCCESS, nodeConfig);
+    }
 
     @GetMapping(value = "/groupInfo")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
