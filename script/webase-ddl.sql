@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS tb_group (
     chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
     PRIMARY KEY (group_id),
   UNIQUE KEY `unique_chain_id_group_id` (`chain_id`,`group_id`)
-) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8;
+) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 
 -- ----------------------------
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS tb_front (
   UNIQUE KEY `unique_node_id` (`node_id`),
   UNIQUE KEY `unique_ip_port` (`front_ip`,`front_port`),
   UNIQUE KEY `unique_agency_id_host_id_front_port` (`agency_id`,`front_ip`,`front_port`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='前置服务信息表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='前置服务信息表';
 
 
 -- ----------------------------
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map (
   type tinyint(4) DEFAULT 1 COMMENT '节点的共识类型：1-共识节点（默认），2-观察节点',
   PRIMARY KEY (map_id),
   unique  unique_front_group (front_id,group_id)
-) ENGINE=InnoDB AUTO_INCREMENT=600001 DEFAULT CHARSET=utf8 COMMENT='前置群组映射表';
+) ENGINE=InnoDB AUTO_INCREMENT=600001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='前置群组映射表';
 
 
 
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS tb_node (
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (node_id,group_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='节点表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='节点表';
 
 
 
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS tb_contract (
   deploy_user_name varchar(64) DEFAULT NULL COMMENT '合约部署者用戶名',
   PRIMARY KEY (contract_id),
   UNIQUE KEY uk_group_path_name (group_id,contract_path,contract_name,account)
-) ENGINE=InnoDB AUTO_INCREMENT=200001 DEFAULT CHARSET=utf8 COMMENT='合约表';
+) ENGINE=InnoDB AUTO_INCREMENT=200001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='合约表';
 
 
 
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS tb_method(
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (method_id,group_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='方法解析信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='方法解析信息表';
 
 
 
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS tb_trans_daily (
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (group_id,trans_day)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='每日交易数据表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='每日交易数据表';
 
 
 
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
   UNIQUE KEY unique_address (group_id,address),
   KEY index_address (address),
   UNIQUE KEY unique_uuid (sign_user_id)
-) ENGINE=InnoDB AUTO_INCREMENT=700001 DEFAULT CHARSET=utf8 COMMENT='用户信息表';
+) ENGINE=InnoDB AUTO_INCREMENT=700001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户信息表';
 
 -- ----------------------------
 -- Table structure for tb_account_info
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS tb_account_info (
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (account)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统账号信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='系统账号信息表';
 
 
 
@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS tb_role (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (role_id),
   UNIQUE KEY UK_role_Name (role_name)
-) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8 COMMENT='角色信息表';
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='角色信息表';
 
 
 
@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS tb_token (
   value varchar(50) NOT NULL COMMENT '与token相关的值（如：用户编号，图形验证码值）',
   expire_time datetime DEFAULT NULL COMMENT '失效时间',
   create_time datetime DEFAULT NULL COMMENT '创建时间'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='token信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='token信息表';
 
 
 -- ----------------------------
@@ -244,7 +244,7 @@ CREATE TABLE IF NOT EXISTS tb_cert (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   create_time datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (finger_print)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='证书信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='证书信息表';
 
 -- ----------------------------
 -- Table structure for tb_alert_rule
@@ -270,7 +270,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_rule (
   equal varchar(40) DEFAULT NULL COMMENT '告警规则：等于某个值',
   last_alert_time datetime DEFAULT NULL COMMENT '上次告警的时间，与Interval间隔共同作用',
   PRIMARY KEY (rule_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='告警规则表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='告警规则表';
 
 -- ----------------------------
 -- Table structure for tb_mail_server_config
@@ -297,7 +297,7 @@ CREATE TABLE IF NOT EXISTS tb_mail_server_config (
   timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的通用超时值',
   write_timeout int(10) DEFAULT 5000 NOT NULL COMMENT '邮件服务器的写超时值',
   PRIMARY KEY (server_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件服务器配置表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='邮件服务器配置表';
 
 
 -- ----------------------------
@@ -313,7 +313,7 @@ CREATE TABLE IF NOT EXISTS tb_alert_log (
   create_time datetime DEFAULT NULL COMMENT '告警日志的创建时间',
   modify_time datetime DEFAULT NULL COMMENT '告警日志的修改时间',
   PRIMARY KEY (log_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='告警日志表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='告警日志表';
 
 -- ----------------------------
 -- Table structure for tb_abi, unrelated with tb_contract
@@ -330,7 +330,7 @@ CREATE TABLE IF NOT EXISTS tb_abi (
   modify_time datetime DEFAULT NULL COMMENT '合约ABI的修改时间',
   PRIMARY KEY (abi_id),
   UNIQUE KEY unique_address (group_id,account,contract_address)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约ABI表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='合约ABI表';
 
 
 -- ----------------------------
@@ -346,7 +346,7 @@ CREATE TABLE IF NOT EXISTS `tb_agency` (
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_chain_id_agency_name` (`chain_id`,`agency_name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='机构信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='机构信息表';
 
 
 
@@ -366,7 +366,7 @@ CREATE TABLE IF NOT EXISTS `tb_chain` (
   `run_type` tinyint(8) unsigned DEFAULT '0' COMMENT '运行方式：0，命令行；1，Docker',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_chain_name` (`chain_name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='链信息表';
 
 -- ----------------------------
 -- Table structure for tb_config
@@ -379,7 +379,7 @@ CREATE TABLE IF NOT EXISTS `tb_config` (
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统配置信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='系统配置信息表';
 
 
 
@@ -396,7 +396,7 @@ CREATE TABLE IF NOT EXISTS `tb_host` (
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_ip` (`ip`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物理主机信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='物理主机信息';
 
 -- ----------------------------
 -- Table structure for tb_govern_vote
@@ -412,7 +412,7 @@ CREATE TABLE IF NOT EXISTS tb_govern_vote (
   create_time datetime NOT NULL COMMENT '创建时间',
   modify_time datetime NOT NULL COMMENT '最近一次更新时间',
   PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链治理委员投票信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='链治理委员投票信息';
 
 CREATE TABLE IF NOT EXISTS tb_contract_path (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '合约路径编号',
@@ -423,7 +423,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_path (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (id),
   UNIQUE KEY uk_group_path_name (group_id,contract_path)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约路径表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='合约路径表';
 
 CREATE TABLE IF NOT EXISTS tb_cns (
   id int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
@@ -438,7 +438,7 @@ CREATE TABLE IF NOT EXISTS tb_cns (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (id),
   UNIQUE KEY uk_version (group_id,cns_name,version)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='cns信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='cns信息表';
 
 
 CREATE TABLE IF NOT EXISTS tb_stat (
@@ -454,7 +454,7 @@ CREATE TABLE IF NOT EXISTS tb_stat (
   PRIMARY KEY (id),
   UNIQUE KEY uk_block (group_id,block_number),
   KEY index_group (group_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区块统计数据表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='区块统计数据表';
 
 -- ----------------------------
 -- Table structure for tb_external_account 链上外部账户
@@ -477,7 +477,7 @@ CREATE TABLE IF NOT EXISTS tb_external_account (
   UNIQUE KEY unique_address (group_id,address),
   KEY index_address (address),
   UNIQUE KEY unique_uuid (sign_user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='外部账户信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='外部账户信息表';
 
 
 -- ----------------------------
@@ -502,7 +502,7 @@ CREATE TABLE IF NOT EXISTS tb_external_contract (
   description text COMMENT '描述',
   PRIMARY KEY (id),
   UNIQUE KEY uk_group_path_name (group_id,contract_address)
-) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8 COMMENT='外部合约表';
+) ENGINE=InnoDB AUTO_INCREMENT=800001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='外部合约表';
 
 -- ----------------------------
 -- Table structure for tb_app_info
@@ -526,7 +526,7 @@ CREATE TABLE IF NOT EXISTS tb_app_info (
   PRIMARY KEY (id),
   UNIQUE KEY uk_key (app_key),
   KEY uk_name (app_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='应用信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='应用信息表';
 
 -- ----------------------------
 -- Table structure for tb_contract_store
@@ -545,7 +545,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_store (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (id),
   UNIQUE KEY uk_version (app_key,contract_name,contract_version)
-) ENGINE=InnoDB AUTO_INCREMENT=300001 DEFAULT CHARSET=utf8 COMMENT='应用合约信息';
+) ENGINE=InnoDB AUTO_INCREMENT=300001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='应用合约信息';
 
 -- ----------------------------
 -- Table structure for tb_contract_store
@@ -564,7 +564,7 @@ CREATE TABLE IF NOT EXISTS tb_warehouse (
   modify_time datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (id),
   UNIQUE KEY uk_name(warehouse_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='合约仓库';
 
 CREATE TABLE IF NOT EXISTS tb_contract_folder (
   id int(11) NOT NULL COMMENT '自增编号',
@@ -578,7 +578,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_folder (
   warehouse_id  int(11) NOT NULL COMMENT '合约仓库编号',
   PRIMARY KEY (id),
   UNIQUE KEY uk_name(warehouse_id,folder_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库目录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='合约仓库目录';
 
 CREATE TABLE IF NOT EXISTS tb_contract_item (
   id int(11) NOT NULL COMMENT '自增编号',
@@ -592,7 +592,7 @@ CREATE TABLE IF NOT EXISTS tb_contract_item (
   contract_folder_id  int(11) NOT NULL COMMENT '合约目录编号',
   PRIMARY KEY (id),
   UNIQUE KEY uk_name(warehouse_id,contract_folder_id,contract_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='合约仓库合约信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='合约仓库合约信息';
 
 
 SET FOREIGN_KEY_CHECKS = 1;
