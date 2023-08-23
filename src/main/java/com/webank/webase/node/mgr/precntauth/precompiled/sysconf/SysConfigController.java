@@ -84,7 +84,7 @@ public class SysConfigController extends BaseController {
         Object res = SysConfigServiceInWebase.setSysConfigByKeyService(reqSetSysConfigInfo);
         log.info("end setSysConfigByKeyService useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
-        return new BaseResponse(ConstantCode.SUCCESS, res);
+        return res;
     }
 
 }
