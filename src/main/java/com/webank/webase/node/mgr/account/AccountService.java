@@ -283,8 +283,13 @@ public class AccountService {
                 return ADMIN_TOKEN_VALUE;
             }
         }
-        String token = NodeMgrTools.getToken(request);
-        return tokenService.getValueFromToken(token);
+        try {
+            String token = NodeMgrTools.getToken(request);
+            return tokenService.getValueFromToken(token);
+        } catch (NodeMgrException ex) {
+            log.error("Failed to getCurrentAccount:"+ex);
+            return null;
+        }
     }
 
 }

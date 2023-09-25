@@ -70,7 +70,7 @@ public class CertMonitorTask {
         log.info("start checkCertValidityForAlert startTime:{}", startTime.toEpochMilli());
         //check last alert time, if within interval, not send
         TbAlertRule alertRule = alertRuleService.queryByRuleId(AlertRuleType.CERT_ALERT.getValue());
-        if(AlertRuleTools.isWithinAlertIntervalByNow(alertRule)) {
+        if((alertRule==null)||(AlertRuleTools.isWithinAlertIntervalByNow(alertRule))) {
             log.debug("end checkCertValidityForAlert non-sending mail" +
                     " for beyond alert interval:{}", alertRule);
             return;
