@@ -6,13 +6,14 @@
 -- 其默认值为十六进制。“十六进制”格式将二进制数据编码为每个字节 2 个十六进制位，最高有效位在前，整个串以序列 \x 开头（用以和转义格式区分）。
 -- 作为输入，十六进制位可以是大写也可以是小写，在位对之间可以有空白。
 
+-- TODO 瀚高文档中未说明  PRIMARY KEY 是否是自增. 所以统一替换成了  8字节自增字段 bigserial
 
 -- ----------------------------
 -- Table structure for tb_group
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_group
 (
-    group_id        int         NOT NULL,
+    group_id        bigserial   NOT NULL,
     group_name      varchar(64) NOT NULL,
     group_status    smallint      DEFAULT '1',
     node_count      int           DEFAULT '0',
@@ -91,7 +92,7 @@ CREATE UNIQUE INDEX unique_front_group ON tb_front_group_map (front_id, group_id
 CREATE TABLE IF NOT EXISTS tb_node
 (
     node_id      varchar(250) NOT NULL,
-    group_id     int          NOT NULL,
+    group_id     bigserial    NOT NULL,
     node_name    varchar(255) NOT NULL,
     node_ip      varchar(16)           DEFAULT NULL,
     p2p_port     int                   DEFAULT NULL,
@@ -145,7 +146,7 @@ CREATE UNIQUE INDEX uk_group_path_name ON tb_contract (group_id, contract_path, 
 CREATE TABLE IF NOT EXISTS tb_method
 (
     method_id     varchar(128),
-    group_id      int NOT NULL,
+    group_id      bigserial NOT NULL,
     abi_info      text,
     method_type   varchar(32),
     contract_type smallint DEFAULT '0',
@@ -161,8 +162,8 @@ CREATE TABLE IF NOT EXISTS tb_method
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_trans_daily
 (
-    group_id     int  NOT NULL,
-    trans_day    date NOT NULL,
+    group_id     bigserial NOT NULL,
+    trans_day    date      NOT NULL,
     trans_count  int  DEFAULT '0',
     block_number int  DEFAULT '0',
     create_time  time DEFAULT NULL,
@@ -617,10 +618,10 @@ CREATE TABLE IF NOT EXISTS tb_contract_store
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_warehouse
 (
-    id                  int   NOT NULL,
-    warehouse_name      bytea NOT NULL,
-    warehouse_name_en   bytea NOT NULL,
-    type                int   NOT NULL,
+    id                  bigserial NOT NULL,
+    warehouse_name      bytea     NOT NULL,
+    warehouse_name_en   bytea     NOT NULL,
+    type                int       NOT NULL,
     warehouse_icon      text,
     description         text,
     description_en      text,
@@ -636,15 +637,15 @@ CREATE TABLE IF NOT EXISTS tb_warehouse
 
 CREATE TABLE IF NOT EXISTS tb_contract_folder
 (
-    id               int   NOT NULL,
-    folder_name      bytea NOT NULL,
+    id               bigserial NOT NULL,
+    folder_name      bytea     NOT NULL,
     description      text,
     description_en   text,
     folder_detail    text,
     folder_detail_en text,
     create_time      time DEFAULT NULL,
     modify_time      time DEFAULT NULL,
-    warehouse_id     int   NOT NULL,
+    warehouse_id     int       NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_id, folder_name)
 );
@@ -653,15 +654,15 @@ CREATE TABLE IF NOT EXISTS tb_contract_folder
 
 CREATE TABLE IF NOT EXISTS tb_contract_item
 (
-    id                 int   NOT NULL,
-    contract_name      bytea NOT NULL,
+    id                 bigserial NOT NULL,
+    contract_name      bytea     NOT NULL,
     contract_source    text,
     description        text,
     description_en     text,
     create_time        time DEFAULT NULL,
     modify_time        time DEFAULT NULL,
-    warehouse_id       int   NOT NULL,
-    contract_folder_id int   NOT NULL,
+    warehouse_id       int       NOT NULL,
+    contract_folder_id int       NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_id, contract_folder_id, contract_name)
 );
