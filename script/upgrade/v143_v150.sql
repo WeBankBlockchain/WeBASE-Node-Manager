@@ -1,5 +1,7 @@
 -- SET NAMES utf8mb4;
 -- SET FOREIGN_KEY_CHECKS = 0;
+-- TODO 这里的所有数据 ddl与dml中均存在.
+
 
 CREATE TABLE IF NOT EXISTS tb_app_info
 (
@@ -123,6 +125,7 @@ CREATE TABLE IF NOT EXISTS tb_external_contract
 
 -- 插入默认数据 --
 -- if begin end, else begin end
+-- TODO 这里的数据webase-dml中都有,但是后面的v150-v153中的数据dml中没有
 INSERT INTO tb_app_info (app_name, app_key, app_type, app_doc_link, app_icon, app_desc, app_detail, create_time,
                          modify_time)
 VALUES ('WeId-temp', 'app00001', 1, 'https://weidentity.readthedocs.io/zh_CN/latest/docs/deploy-via-web.html',

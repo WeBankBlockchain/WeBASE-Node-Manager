@@ -1,6 +1,7 @@
 -- SET NAMES utf8mb4;
 -- SET FOREIGN_KEY_CHECKS = 0;
 
+-- TODO 这里的表DDL中已存在,但是插入的数据dml中不存在
 CREATE TABLE IF NOT EXISTS tb_warehouse
 (
     id                  bigserial NOT NULL,
