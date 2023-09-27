@@ -19,10 +19,10 @@ mybatis:
 # database connection configuration
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/webasenodemanager?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
-    username: "defaultAccount"
-    password: "defaultPassword"
+    driver-class-name: com.highgo.jdbc.Driver
+    url: jdbc:highgo://124.251.110.211:5866/highgo #替换对应IP和地址
+    username: "sysdba"
+    password: "Hello@1234"
     initialSize: 10
     minIdle: 5
     maxActive: 30
