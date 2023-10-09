@@ -36,7 +36,7 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -268,7 +268,7 @@ public class GroupController extends BaseController {
     }
 
     @PutMapping("/description")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateDescription(@RequestBody @Valid ReqUpdateDesc req, BindingResult result)
         throws NodeMgrException {
         checkBindResult(result);

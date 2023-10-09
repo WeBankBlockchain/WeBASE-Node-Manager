@@ -34,7 +34,7 @@
 //import javax.validation.Valid;
 //import lombok.extern.log4j.Log4j2;
 //import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.access.prepost.PreAuthorize;
+//
 //import org.springframework.validation.BindingResult;
 //import org.springframework.web.bind.annotation.DeleteMapping;
 //import org.springframework.web.bind.annotation.GetMapping;
@@ -75,7 +75,7 @@
 //     * Deploy by ipconf and tagId.
 //     */
 //    @PostMapping(value = "add")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public BaseResponse addHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
 //        checkBindResult(result);
 //
@@ -105,7 +105,7 @@
 //     * Delete host without node(front)
 //     */
 //    @DeleteMapping("/{hostId}")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public BaseResponse deleteHostWithout(@PathVariable("hostId") Integer hostId) throws NodeMgrException {
 //        Instant startTime = Instant.now();
 //        log.info("Start deleteHost hostId:[{}], start:[{}]", hostId, startTime);
@@ -121,7 +121,7 @@
 //     * Deploy by ipconf and tagId.
 //     */
 //    @PostMapping(value = "ping")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public BaseResponse pingHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
 //        checkBindResult(result);
 //
@@ -145,7 +145,7 @@
 //     * check mem/cpu and docker dependency
 //     */
 //    @PostMapping(value = "check")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public BaseResponse checkHostList(@RequestBody @Valid ReqCheckHost reqCheckHost,
 //        BindingResult result) throws NodeMgrException {
 //        checkBindResult(result);
@@ -172,7 +172,7 @@
 //     * check ansible installed
 //     */
 //    @PostMapping(value = "ansible")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public BaseResponse checkAnsibleInstalled() throws NodeMgrException {
 //        Instant startTime = Instant.now();
 //        log.info("Start checkAnsibleInstalled start:[{}]", startTime);

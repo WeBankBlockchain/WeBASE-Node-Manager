@@ -47,7 +47,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -117,7 +117,7 @@ public class AccountController extends BaseController {
      * add account info.
      */
     @PostMapping(value = "/accountInfo")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse addAccountInfo(@RequestBody @Valid AccountInfo info, BindingResult result)
         throws NodeMgrException {
         checkBindResult(result);
@@ -200,7 +200,7 @@ public class AccountController extends BaseController {
      * query account list.
      */
     @GetMapping(value = "/accountList/{pageNumber}/{pageSize}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BasePageResponse queryAccountList(@PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "account", required = false) String account) throws NodeMgrException {
@@ -230,7 +230,7 @@ public class AccountController extends BaseController {
      * delete contract by id.
      */
     @DeleteMapping(value = "/{account}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deleteAccount(HttpServletRequest request, @PathVariable("account") String account)
         throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -335,7 +335,7 @@ public class AccountController extends BaseController {
 
 
     @PatchMapping(value = "freeze")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse freeze(@RequestBody @Valid ReqFreeze param, HttpServletRequest request, BindingResult result) {
         log.info("start exec method [freeze]. param:{}", JsonTools.objToString(param));
         checkBindResult(result);
@@ -354,7 +354,7 @@ public class AccountController extends BaseController {
 
 
     @PatchMapping(value = "unFreeze")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse unfreeze(@RequestBody @Valid ReqFreeze param, HttpServletRequest request, BindingResult result) {
         log.info("start exec method [unfreeze]. param:{}", JsonTools.objToString(param));
         checkBindResult(result);

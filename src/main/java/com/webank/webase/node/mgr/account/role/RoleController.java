@@ -23,7 +23,7 @@ import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 @RestController
 @RequestMapping(value = "role")
-@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+// TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 public class RoleController {
 
     @Autowired

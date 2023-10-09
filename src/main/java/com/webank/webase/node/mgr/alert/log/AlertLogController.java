@@ -28,7 +28,7 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -74,7 +74,7 @@ public class AlertLogController {
      * @return
      */
     @PutMapping("")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateAlertLog(@RequestBody ReqLogParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertLog. startTime:{} ReqAlertLogParam:{}",

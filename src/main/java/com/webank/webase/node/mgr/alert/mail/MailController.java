@@ -26,7 +26,7 @@ import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import java.util.Base64;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.TemplateEngine;
@@ -63,7 +63,7 @@ public class MailController {
      * @return
      */
     @PostMapping("/test/{toMailAddress}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public Object sendTestMail(@PathVariable("toMailAddress")String toMailAddress,
                                   @RequestBody ReqMailServerConfigParam reqMailServerConfigParam) {
         Instant startTime = Instant.now();

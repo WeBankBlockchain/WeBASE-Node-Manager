@@ -31,7 +31,7 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,7 +54,7 @@ public class AppIntegrationController extends BaseController {
     private AppIntegrationService appIntegrationService;
 
     @PostMapping("/save")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse saveApp(@RequestBody @Valid AppAddInfo appAddInfo, BindingResult result) {
         checkBindResult(result);
         Instant startTime = Instant.now();

@@ -30,7 +30,7 @@ import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,7 +49,7 @@ public class ScaffoldController extends BaseController {
     private ScaffoldService scaffoldService;
 
     @PostMapping("/export")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse exportProjectApi(@Valid @RequestBody ReqProject param) {
         Instant startTime = Instant.now();
         log.info("start exportProjectApi param:{} groupId:{}", startTime.toEpochMilli(),

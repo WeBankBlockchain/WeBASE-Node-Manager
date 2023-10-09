@@ -27,7 +27,7 @@ import java.util.Base64;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -86,7 +86,7 @@ public class MailServerConfigController {
      * @return
      */
     @PutMapping("/config")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateMailServerConfig(@RequestBody ReqMailServerConfigParam param) {
         Instant startTime = Instant.now();
         log.info("start updateMailServerConfig. startTime:{} ReqMailServerConfigParam:{}",
@@ -125,7 +125,7 @@ public class MailServerConfigController {
      * @return
      */
 //    @PostMapping("config")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public Object saveMailServerConfig(@RequestBody ReqMailServerConfigParam param) {
 //        Instant startTime = Instant.now();
 //        log.info("start saveMailServerConfig. startTime:{} ReqMailServerConfigParam:{}",
@@ -146,7 +146,7 @@ public class MailServerConfigController {
      * @Duplicated delete mail server config, no need to delete
      */
 //    @DeleteMapping("/config/{serverId}")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public Object deleteByServerId(@PathVariable("serverId") Integer serverId) {
 //        Instant startTime = Instant.now();
 //        log.info("start deleteByServerId. startTime:{} serverId:{}",
