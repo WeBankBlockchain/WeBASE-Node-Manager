@@ -79,6 +79,7 @@ import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -114,8 +115,12 @@ public class GroupService {
     private ContractService contractService;
     @Autowired
     private MethodService methodService;
+
+    @Lazy
     @Autowired
     private TransDailyService transDailyService;
+
+    @Lazy
     @Autowired
     private BlockService blockService;
     @Autowired
@@ -124,12 +129,16 @@ public class GroupService {
     private PathService pathService;
     @Autowired
     private ConstantProperties constantProperties;
+
+    @Lazy
     @Autowired
     private AbiService abiService;
     @Autowired
     private CnsService cnsService;
     @Autowired
     private ExtAccountService extAccountService;
+
+    @Lazy
     @Autowired
     private ExtContractService extContractService;
     @Autowired

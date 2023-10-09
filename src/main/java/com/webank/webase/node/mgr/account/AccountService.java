@@ -71,6 +71,8 @@ public class AccountService {
     private static final String ADMIN_TOKEN_VALUE = "admin";
     @Autowired
     private MessageService messageService;
+
+    @Lazy
     @Autowired
     private UserService userService;
 

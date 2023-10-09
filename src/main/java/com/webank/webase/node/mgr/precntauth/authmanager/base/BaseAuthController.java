@@ -16,9 +16,6 @@ package com.webank.webase.node.mgr.precntauth.authmanager.base;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Log4j2
-@Api(value = "auth/base/", tags = "check auth controller")
+//@Api(value = "auth/base/", tags = "check auth controller")
 @RestController
 @RequestMapping("auth/base/")
 public class BaseAuthController {
@@ -36,8 +33,8 @@ public class BaseAuthController {
     /**
      * 获取提案总数
      */
-    @ApiOperation(value = "query auth available")
-    @ApiImplicitParam(name = "groupId", value = "auth available", required = true)
+//    @ApiOperation(value = "query auth available")
+//    @ApiImplicitParam(name = "groupId", value = "auth available", required = true)
     @GetMapping("available")
     public BaseResponse queryAuthAvailable(String groupId) {
 

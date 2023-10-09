@@ -19,12 +19,6 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.precntauth.precompiled.base.PrecompiledUtil;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ReqNodeListInfo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import java.time.Duration;
-import java.time.Instant;
-import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +26,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(value = "precntauth/precompiled/consensus", tags = "precntauth precompiled controller")
+import javax.validation.Valid;
+import java.time.Duration;
+import java.time.Instant;
+
+//@Api(value = "precntauth/precompiled/consensus", tags = "precntauth precompiled controller")
 @Slf4j
 @RestController
 @RequestMapping(value = "precntauth/precompiled/consensus")
@@ -44,15 +42,15 @@ public class ConsensusController {
     /**
      * Consensus
      */
-    @ApiOperation(value = "query consensus node list")
-    @ApiImplicitParam(name = "reqNodeListInfo", value = "node consensus list", required = true, dataType = "ReqNodeListInfo")
+//    @ApiOperation(value = "query consensus node list")
+//    @ApiImplicitParam(name = "reqNodeListInfo", value = "node consensus list", required = true, dataType = "ReqNodeListInfo")
     @PostMapping("list")
     public Object getNodeList(@Valid @RequestBody ReqNodeListInfo reqNodeListInfo) {
         return consensusService.getNodeList(reqNodeListInfo);
     }
 
-    @ApiOperation(value = "manage node type", notes = "addSealer addObserver removeNode")
-    @ApiImplicitParam(name = "consensusHandle", value = "node consensus info", required = true, dataType = "ConsensusHandle")
+//    @ApiOperation(value = "manage node type", notes = "addSealer addObserver removeNode")
+//    @ApiImplicitParam(name = "consensusHandle", value = "node consensus info", required = true, dataType = "ConsensusHandle")
     @PostMapping("manage")
     public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle) {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);

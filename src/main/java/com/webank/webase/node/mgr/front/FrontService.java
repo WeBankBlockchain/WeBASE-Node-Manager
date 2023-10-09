@@ -120,6 +120,8 @@ public class FrontService {
     private FrontGroupMapMapper frontGroupMapMapper;
     @Autowired
     private TbChainMapper tbChainMapper;
+
+    @Lazy
     @Autowired
     private NodeService nodeService;
     @Autowired
@@ -139,6 +141,8 @@ public class FrontService {
     private ResetGroupListTask resetGroupListTask;
     @Autowired
     private ConstantProperties constants;
+
+    @Lazy
     @Autowired
     private AgencyService agencyService;
     @Autowired

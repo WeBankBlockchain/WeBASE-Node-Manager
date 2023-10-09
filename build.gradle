@@ -89,11 +89,6 @@ List scaffold = [
     'com.webank:solc-gradle-plugin:3.3.0-SNAPSHOT'
 ]
 
-List swagger = [
-    'io.springfox:springfox-swagger2:2.8.0',
-    'io.springfox:springfox-swagger-ui:2.8.0'
-]
-
 List commons = [
     "org.apache.commons:commons-lang3:3.8.1",
     'org.apache.commons:commons-collections4:4.4',
@@ -101,8 +96,13 @@ List commons = [
     'org.apache.commons:commons-compress:1.21'
 ]
 
+List nacos = [
+        'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:2021.0.5.0',
+        'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:2021.0.5.0'
+]
+
 dependencies {
-    compile springboot,jaxb,jackson,log4j,scaffold,swagger,commons
+    compile springboot,jaxb,jackson,log4j,scaffold,commons,nacos
     compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0') {
         exclude group: "org.slf4j"
     }
@@ -120,6 +120,25 @@ dependencies {
     compile 'org.ini4j:ini4j:0.5.4'
     compile 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
 
+    /* begin: 微服务框架集成 */
+    implementation fileTree(dir:'lib', include:['*.jar'])
+
+    // Sa-Token 权限认证，在线文档：https://sa-token.cc
+    implementation 'cn.dev33:sa-token-spring-boot-starter:1.35.0.RC'
+    implementation 'cn.dev33:sa-token-jwt:1.35.0.RC'
+    implementation 'cn.dev33:sa-token-dubbo3:1.35.0.RC'
+    implementation 'cn.hutool:hutool-extra:5.8.20'
+    implementation ('org.redisson:redisson-spring-boot-starter:3.18.0') {
+        exclude group: "redisson-spring-data-30"
+    }
+    implementation 'org.redisson:redisson-spring-data-27:3.18.0'
+
+    implementation 'org.springdoc:springdoc-openapi-webmvc-core:1.6.15'
+    implementation 'org.springdoc:springdoc-openapi-javadoc:1.6.15'
+
+    implementation 'org.apache.dubbo:dubbo-spring-boot-starter:3.1.8'
+    /* end: 微服务框架集成 */
+
     compileOnly lombok
     annotationProcessor lombok
 
@@ -131,6 +150,7 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testCompile 'junit:junit:4.13.1'
+
 }
 
 configurations {

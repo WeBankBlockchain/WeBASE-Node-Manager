@@ -107,6 +107,8 @@ public class ChainService {
     private PathService pathService;
     @Autowired
     private DeployShellService deployShellService;
+
+    @Lazy
     @Autowired
     private HostService hostService;
     @Autowired
@@ -116,6 +118,8 @@ public class ChainService {
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private ConstantProperties constant;
+
+    @Lazy
     @Autowired
     private NodeAsyncService nodeAsyncService;
     @Autowired

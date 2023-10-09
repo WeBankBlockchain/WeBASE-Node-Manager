@@ -58,6 +58,7 @@ import org.fisco.bcos.sdk.v3.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -70,6 +71,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class FrontInterfaceService {
 
+    @Lazy
     @Autowired
     private FrontRestTools frontRestTools;
     @Qualifier(value = "genericRestTemplate")
