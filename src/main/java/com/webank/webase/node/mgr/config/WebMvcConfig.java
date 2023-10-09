@@ -23,37 +23,38 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Log4j2
 @Data
 @Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
+//public class WebMvcConfig implements WebMvcConfigurer {
+public class WebMvcConfig {
 
     @Value("${server.port}")
     private int port;
 
-    @Autowired
-    private AppIntegrationFilter appIntegrationFilter;
-    @Autowired
-    private ConstantProperties constants;
-    @Autowired
-    private AccountFilter accountFilter;
-
-    /**
-     * 注册拦截器
-     */
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(appIntegrationFilter).addPathPatterns("/api/**");// 自定义拦截的url路径
-        log.info("addInterceptors for /api/**");
-        registry.addInterceptor(accountFilter).addPathPatterns("/**")
-                .excludePathPatterns(constants.getPermitUrlArray());
-        log.info("addInterceptors for {}", JsonTools.toJSONString(constants.getPermitUrlArray()));
-    }
-
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        argumentResolvers.add(currentAccountMethodArgumentResolver());
-    }
-
-    @Bean
-    public CurrentAccountMethodArgumentResolver currentAccountMethodArgumentResolver() {
-        return new CurrentAccountMethodArgumentResolver();
-    }
+//    @Autowired
+//    private AppIntegrationFilter appIntegrationFilter;
+//    @Autowired
+//    private ConstantProperties constants;
+//    @Autowired
+//    private AccountFilter accountFilter;
+//
+//    /**
+//     * 注册拦截器
+//     */
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(appIntegrationFilter).addPathPatterns("/api/**");// 自定义拦截的url路径
+//        log.info("addInterceptors for /api/**");
+//        registry.addInterceptor(accountFilter).addPathPatterns("/**")
+//                .excludePathPatterns(constants.getPermitUrlArray());
+//        log.info("addInterceptors for {}", JsonTools.toJSONString(constants.getPermitUrlArray()));
+//    }
+//
+//    @Override
+//    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+//        argumentResolvers.add(currentAccountMethodArgumentResolver());
+//    }
+//
+//    @Bean
+//    public CurrentAccountMethodArgumentResolver currentAccountMethodArgumentResolver() {
+//        return new CurrentAccountMethodArgumentResolver();
+//    }
 }

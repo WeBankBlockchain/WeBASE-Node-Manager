@@ -204,7 +204,9 @@ jar {
             into 'dist/script'
         }
         copy {
-            from configurations.runtime
+            //            from configurations.runtime
+            //            into 'dist/lib'
+            from configurations.runtimeClasspath
             into 'dist/lib'
         }
         copy {
