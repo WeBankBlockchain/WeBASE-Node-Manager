@@ -162,10 +162,20 @@ public class ThymeleafUtil {
     public static void newFrontConfig(Path nodeRoot, byte encryptType, int channelPort,
                                        int frontPort, String webaseSignAddr) throws IOException {
         log.info("newFrontConfig nodeRoot:{},frontPort:{}", nodeRoot, frontPort);
+//        String applicationYml = ThymeleafUtil.generate(
+//                ThymeleafUtil.FRONT_APLLICATION_YML,
+//                Pair.of("encryptType", encryptType),
+//                Pair.of("channelPort", channelPort),
+//                Pair.of("frontPort", frontPort),
+//                Pair.of("webaseSignAddr", webaseSignAddr)
+//        );
+        String peer = "127.0.0.1:" + channelPort;
+        String[] peers = new String[]{peer};
         String applicationYml = ThymeleafUtil.generate(
                 ThymeleafUtil.FRONT_APLLICATION_YML,
                 Pair.of("encryptType", encryptType),
-                Pair.of("channelPort", channelPort),
+                Pair.of("useSmSsl", encryptType == 1),
+                Pair.of("peers", peers),
                 Pair.of("frontPort", frontPort),
                 Pair.of("webaseSignAddr", webaseSignAddr)
         );
