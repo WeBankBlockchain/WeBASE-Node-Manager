@@ -15,6 +15,8 @@ package com.webank.webase.node.mgr.group;
 
 import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
+import com.qctc.host.api.RemoteHostService;
+import com.qctc.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
@@ -74,6 +76,7 @@ import java.util.Objects;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
@@ -147,6 +150,9 @@ public class GroupService {
 
     @Autowired private ChainService chainService;
     @Autowired private AnsibleService ansibleService;
+
+    @DubboReference
+    private RemoteHostService remoteHostService;
 
     public static final String RUNNING_GROUP = "RUNNING";
     public static final String OPERATE_START_GROUP = "start";
@@ -988,7 +994,8 @@ public class GroupService {
         }
         String chainName = tbFront.getChainName();
         int nodeIndex = tbFront.getHostIndex();
-        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+//        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+        HostDTO tbHost = remoteHostService.getHostById(tbFront.getHostId());
 
         // scp group config files from remote to local
         // path pattern: /host.getRootDir/chain_name
@@ -1005,8 +1012,8 @@ public class GroupService {
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
         String localDst = String.format("%s/conf/", localNodePath, generateGroupId);
         // copy group config files to local node's conf dir
-        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupConfSource, localDst);
-        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupGenesisSource, localDst);
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost, remoteGroupConfSource, localDst);
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost, remoteGroupGenesisSource, localDst);
     }
 
 
@@ -1018,7 +1025,8 @@ public class GroupService {
         }
         String chainName = tbFront.getChainName();
         int nodeIndex = tbFront.getHostIndex();
-        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+//        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+        HostDTO tbHost = remoteHostService.getHostById(tbFront.getHostId());
         // scp group status files from remote to local
         // path pattern: /host.getRootDir/chain_name
         // ex: (in the remote host) /opt/fisco/chain1
@@ -1040,7 +1048,7 @@ public class GroupService {
             }
         }
         // copy group status file to local node's conf dir
-        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost, remoteGroupStatusSource, localDst.toAbsolutePath().toString());
     }
 
 //    private void pullGroupFile(String groupId,TbFront tbFront){
@@ -1097,13 +1105,14 @@ public class GroupService {
             // NODES_ROOT/[chainName]/[ip]/node[index] as a {@link Path}, a directory.
             String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
             // get host root dir
-            TbHost tbHost = tbHostMapper.getByIp(ip);
+//            TbHost tbHost = tbHostMapper.getByIp(ip);
+            HostDTO tbHost = remoteHostService.getHostByIp(ip);
             String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
 
             log.info("generateNewNodesGroupConfigsAndScp Send files from:[{}] to:[{}:{}].", src, ip, dst);
             ProgressTools.setScpConfig();
             try {
-                ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
+                ansibleService.scp(ScpTypeEnum.UP, tbHost, src, dst);
                 log.info("generateNewNodesGroupConfigsAndScp scp success.");
             } catch (Exception e) {
                 log.error("generateNewNodesGroupConfigsAndScp Send files from:[{}] to:[{}:{}] error.", src, ip, dst, e);

@@ -13,6 +13,8 @@
  */
 package com.webank.webase.node.mgr.front;
 
+import com.qctc.host.api.RemoteHostService;
+import com.qctc.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
@@ -88,6 +90,7 @@ import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.logging.log4j.Level;
 import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
@@ -168,7 +171,10 @@ public class FrontService {
     @Autowired
     private VersionProperties versionProperties;
     // interval of check front status
+
     private static final Long CHECK_FRONT_STATUS_WAIT_MIN_MILLIS = 3000L;
+    @DubboReference
+    private RemoteHostService remoteHostService;
 
 
     /**
@@ -511,7 +517,7 @@ public class FrontService {
      * @throws IOException
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<TbFront> initFrontAndNode(List<DeployNodeInfo> nodeInfoList, TbChain chain, TbHost host, int agencyId,
+    public List<TbFront> initFrontAndNode(List<DeployNodeInfo> nodeInfoList, TbChain chain, HostDTO host, int agencyId,
         String agencyName, String groupId, FrontStatusEnum frontStatusEnum)
         throws NodeMgrException, IOException {
         log.info("start initFrontAndNode nodeInfoList:{}, host:{}", nodeInfoList, host);
@@ -766,7 +772,8 @@ public class FrontService {
             TbFront front = this.getByNodeId(tbNode.getNodeId());
             int hostIndex = front.getHostIndex();
 
-            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+//            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+            HostDTO hostDTO = remoteHostService.getHostById(front.getHostId());
 
             // path pattern: /NODES_ROOT/chain_name/[ip]/node[index]/config.ini
             // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/config.ini
@@ -774,10 +781,10 @@ public class FrontService {
             String localScr = PathService.getConfigIniPath(localNodePath).toAbsolutePath().toString();
 
             // ex: (node-mgr local) /opt/fisco/chain1/node0/config.ini
-            String remoteDst = String.format("%s/%s/node%s/config.ini", host.getRootDir(), chain.getChainName(),hostIndex);
+            String remoteDst = String.format("%s/%s/node%s/config.ini", hostDTO, chain.getChainName(),hostIndex);
 
             // copy group config files to local node's conf dir
-            ansibleService.scp(ScpTypeEnum.UP, host.getIp(), localScr, remoteDst);
+            ansibleService.scp(ScpTypeEnum.UP, hostDTO, localScr, remoteDst);
         }
     }
 
@@ -805,7 +812,8 @@ public class FrontService {
                 log.error("batchScpNodeConfigIni cannot find front of nodeId:{}", nodeId);
                 continue;
             }
-            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+//            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+            HostDTO hostDTO = remoteHostService.getHostById(front.getHostId());
 
             // scp multi
             Future<?> task = threadPoolTaskScheduler.submit(() -> {
@@ -820,20 +828,20 @@ public class FrontService {
 
                     // ex: (node-mgr local) /opt/fisco/chain1/node0/config.ini
                     String remoteDst = String
-                        .format("%s/%s/node%s/config.ini", host.getRootDir(), chain.getChainName(),
+                        .format("%s/%s/node%s/config.ini", hostDTO.getRootDir(), chain.getChainName(),
                             hostIndex);
 
                     // copy group config files to local node's conf dir
-                    ansibleService.scp(ScpTypeEnum.UP, host.getIp(), localScr, remoteDst);
+                    ansibleService.scp(ScpTypeEnum.UP, hostDTO, localScr, remoteDst);
                     configSuccessCount.incrementAndGet();
                 } catch (Exception e) {
-                    log.error("batchScpNodeConfigIni:[{}] with unknown error", host.getIp(), e);
+                    log.error("batchScpNodeConfigIni:[{}] with unknown error", hostDTO.getIp(), e);
                     this.updateStatus(front.getFrontId(), FrontStatusEnum.ADD_FAILED);
                 } finally {
                     checkHostLatch.countDown();
                 }
             });
-            taskMap.put(host.getId(), task);
+            taskMap.put(hostDTO.getId(), task);
         }
         // task to scp
         checkHostLatch.await(constant.getExecScpTimeout(), TimeUnit.MILLISECONDS);
@@ -879,18 +887,19 @@ public class FrontService {
 
         this.frontGroupMapService.updateFrontMapStatus(front.getFrontId(), GroupStatus.MAINTAINING);
 
-        TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+//        TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+        HostDTO hostDTO = remoteHostService.getHostById(front.getHostId());
 
         log.info("Docker start container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
         try {
             this.dockerOptions.run(
-                front.getFrontIp(), front.getImageTag(), front.getContainerName(),
-                PathService.getChainRootOnHost(host.getRootDir(), front.getChainName()), front.getHostIndex());
+                    hostDTO, front.getImageTag(), front.getContainerName(),
+                PathService.getChainRootOnHost(hostDTO.getRootDir(), front.getChainName()), front.getHostIndex());
 
             threadPoolTaskScheduler.schedule(()-> {
                 // add check port is on
                 // check chain port
-                Pair<Boolean, Integer> notInUse = ansibleService.checkPorts(front.getFrontIp(),
+                Pair<Boolean, Integer> notInUse = ansibleService.checkPorts(hostDTO,
                     front.getP2pPort(), front.getFrontPort());
                 // not in use is true, then not start success
                 if (notInUse.getKey()) {
@@ -927,7 +936,7 @@ public class FrontService {
                     } else if (optionType == OptionType.MODIFY_CHAIN) {
                         // check front is in group
                         Path nodePath = this.pathService
-                            .getNodeRoot(front.getChainName(), host.getIp(), front.getHostIndex());
+                            .getNodeRoot(front.getChainName(), hostDTO.getIp(), front.getHostIndex());
                         Set<String> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
                         Optional.of(groupIdSet).ifPresent(idSet -> idSet.forEach(groupId -> {
                             List<String> list = frontInterface.getGroupPeers(groupId);
@@ -1013,8 +1022,9 @@ public class FrontService {
             }
         }
 
+        HostDTO hostDTO = remoteHostService.getHostByIp(front.getFrontIp());
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
+        this.dockerOptions.stop(hostDTO, front.getContainerName());
         try {
             Thread.sleep(constant.getDockerRestartPeriodTime());
         } catch (InterruptedException e) {
@@ -1055,8 +1065,9 @@ public class FrontService {
             return ;
         }
 
+        HostDTO hostDTO = remoteHostService.getHostByIp(front.getFrontIp());
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
+        this.dockerOptions.stop(hostDTO, front.getContainerName());
         try {
             Thread.sleep(constant.getDockerRestartPeriodTime());
         } catch (InterruptedException e) {
@@ -1079,9 +1090,10 @@ public class FrontService {
         if (front == null){
             throw new NodeMgrException(ConstantCode.NODE_ID_NOT_EXISTS_ERROR);
         }
-        TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+//        TbHost hostInDb = host != null ? host : this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+        HostDTO hostDTO = remoteHostService.getHostByIp(front.getFrontIp());
         log.info("Docker stop and remove container front id:[{}:{}].", front.getFrontId(), front.getContainerName());
-        this.dockerOptions.stop( front.getFrontIp(), front.getContainerName());
+        this.dockerOptions.stop(hostDTO, front.getContainerName());
 
         this.nodeMapper.deleteByNodeId(nodeId);
     }
@@ -1103,10 +1115,11 @@ public class FrontService {
         }
 
         for (TbFront front : frontList) {
-            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
-            log.info("rm host container by host ip:{}", host.getIp());
+//            TbHost host = this.tbHostMapper.selectByPrimaryKey(front.getHostId());
+            HostDTO hostDTO = remoteHostService.getHostById(front.getHostId());
+            log.info("rm host container by host ip:{}", hostDTO.getIp());
             // remote docker container
-            this.dockerOptions.stop(host.getIp(), front.getContainerName());
+            this.dockerOptions.stop(hostDTO, front.getContainerName());
 
             // delete in deleteAllGroupData
 //            log.info("Delete node data by node id:[{}].", front.getNodeId());

@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.deploy.service;
 
+import com.qctc.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DockerImageTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -70,10 +71,10 @@ public class DockerCommandService {
     }
 
 
-    public boolean checkImageExists(String ip, String imageTag) {
+    public boolean checkImageExists(HostDTO hostDTO, String imageTag) {
         String imageFullName = getImageRepositoryTag(constant.getDockerRepository(), constant.getDockerRegistryMirror(), imageTag);
 
-        boolean exist = ansibleService.checkImageExists(ip, imageFullName);
+        boolean exist = ansibleService.checkImageExists(hostDTO, imageFullName);
         return exist;
 
     }
@@ -87,12 +88,12 @@ public class DockerCommandService {
      * @param downloadPath temp dir to save file from cdn
      * @return
      */
-    public void pullImage(String ip, String imageTag, int imagePullType, String downloadPath) {
-        log.info("start pullImage ip:{}, imageTage:{}, pullType:{}", ip, imageTag, imagePullType);
+    public void pullImage(HostDTO hostDTO, String imageTag, int imagePullType, String downloadPath) {
+        log.info("start pullImage ip:{}, imageTage:{}, pullType:{}", hostDTO.getIp(), imageTag, imagePullType);
         String imageFullName = getImageRepositoryTag(constant.getDockerRepository(),
             constant.getDockerRegistryMirror(), imageTag);
         String webaseVersion = versionProperties.getVersion();
-        boolean isExist = ansibleService.checkImageExists(ip, imageFullName);
+        boolean isExist = ansibleService.checkImageExists(hostDTO, imageFullName);
         if (isExist) {
             log.warn("pullImage jump over for image:{} already exist.", imageFullName);
             return;
@@ -102,13 +103,13 @@ public class DockerCommandService {
             log.info("pullImage from docker hub");
             String dockerPullCommand = String.format("docker pull %s", imageFullName);
             // kill exists docker pull process
-            ExecuteResult result = ansibleService.execDocker(ip, dockerPullCommand);
+            ExecuteResult result = ansibleService.execDocker(hostDTO, dockerPullCommand);
             if (result.failed()) {
                 throw new NodeMgrException(ConstantCode.ANSIBLE_PULL_DOCKER_HUB_ERROR.attach(result.getExecuteOut()));
             }
         } else if (DockerImageTypeEnum.MANUAL.getId() == imagePullType){
             log.info("pullImage by manually load image");
-            boolean imageExist = this.checkImageExists(ip, imageTag);
+            boolean imageExist = this.checkImageExists(hostDTO, imageTag);
             if (imageExist) {
                 log.info("image of {} check exist, success", imageTag);
                 return;
@@ -118,16 +119,16 @@ public class DockerCommandService {
             }
         } else {
             log.info("pullImage from cdn");
-            ansibleService.execPullDockerCdnShell(ip, downloadPath + "/download", imageTag, webaseVersion);
+            ansibleService.execPullDockerCdnShell(hostDTO, downloadPath + "/download", imageTag, webaseVersion);
         }
     }
 
 
-    public void run(String ip, String imageTag, String containerName, String chainRootOnHost, int nodeIndex) {
+    public void run(HostDTO hostDTO, String imageTag, String containerName, String chainRootOnHost, int nodeIndex) {
         log.info("stop ip:{}, imageTag:{},containerName:{},chainRootOnHost:{},nodeIndex:{}",
-            ip, imageTag, containerName, chainRootOnHost, nodeIndex);
+                hostDTO.getIp(), imageTag, containerName, chainRootOnHost, nodeIndex);
         String fullImageName = getImageRepositoryTag(constant.getDockerRepository(), constant.getDockerRegistryMirror(), imageTag);
-        this.stop(ip, containerName);
+        this.stop(hostDTO, containerName);
 
         String nodeRootOnHost = PathService.getNodeRootOnHost(chainRootOnHost, nodeIndex);
         String yml = String.format("%s/application.yml", nodeRootOnHost);
@@ -141,20 +142,20 @@ public class DockerCommandService {
                 "-v %s:/front/log " +
                 "-e SPRING_PROFILES_ACTIVE=docker " +
                 "--network=host -w=/data %s ", containerName , nodeRootOnHost, yml, sdk, front_log, fullImageName);
-        log.info("Host:[{}] run container:[{}].", ip, containerName);
+        log.info("Host:[{}] run container:[{}].", hostDTO.getIp(), containerName);
         // SshTools.execDocker(ip,dockerCreateCommand,sshUser,sshPort,constant.getPrivateKey());
-        ansibleService.execDocker(ip, dockerCreateCommand);
+        ansibleService.execDocker(hostDTO, dockerCreateCommand);
     }
 
-    public void stop(String ip, String containerName) {
-        log.info("stop ip:{}, containerName:{}", ip, containerName);
-        boolean containerExist = ansibleService.checkContainerExists(ip, containerName);
+    public void stop(HostDTO hostDTO, String containerName) {
+        log.info("stop ip:{}, containerName:{}", hostDTO.getIp(), containerName);
+        boolean containerExist = ansibleService.checkContainerExists(hostDTO, containerName);
         if (!containerExist) {
             log.info("stop container jump over, not found container");
             return;
         }
         String dockerRmCommand = String.format("docker rm -f %s ", containerName);
-        ExecuteResult result = ansibleService.execDocker(ip, dockerRmCommand);
+        ExecuteResult result = ansibleService.execDocker(hostDTO, dockerRmCommand);
         if (result.failed()) {
             throw new NodeMgrException(ConstantCode.STOP_NODE_ERROR.attach(result.getExecuteOut()));
         }
