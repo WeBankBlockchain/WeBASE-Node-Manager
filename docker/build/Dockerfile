@@ -1,11 +1,27 @@
-#FROM openjdk:8-jdk-alpine as prod
-FROM ubuntu:18.04 as prod
+FROM ubuntu:22.04 as prod
 
-#RUN apk --no-cache add bash curl wget
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN apt-get update \
+    && apt-get install -y python3-pip \
+    && apt-get install -y ansible \
+    && apt-get install -y openssh-client \
     && apt-get -y install openjdk-8-jre \
     && apt-get -y install mysql-client \
+    && apt-get install -y rsync \
+    && apt-get install -y curl \
+    && mkdir -p /etc/ansible \
+    && chmod -R 777 /etc/ansible \
+    && mkdir -p ~/.ssh \
     && rm -rf /var/lib/apt/lists/*
+
+ADD openssl-1.1.1q.tar.gz /tmp/
+RUN cd /tmp/openssl-1.1.1q \
+    && ./config \
+    && make \
+    && make install \
+    && ldconfig
 
 COPY script                /dist/script
 COPY gradle                /dist/gradle
