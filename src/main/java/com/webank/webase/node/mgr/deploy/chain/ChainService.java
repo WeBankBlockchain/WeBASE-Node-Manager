@@ -13,62 +13,29 @@
  */
 package com.webank.webase.node.mgr.deploy.chain;
 
-import static com.webank.webase.node.mgr.front.frontinterface.FrontRestTools.URI_CHAIN;
-
+import com.qctc.host.api.RemoteHostService;
 import com.qctc.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.OptionType;
-import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
+import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.tools.CertTools;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.tools.NumberUtil;
-import com.webank.webase.node.mgr.tools.ProgressTools;
-import com.webank.webase.node.mgr.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.cert.CertService;
-import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
-import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
-import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
-import com.webank.webase.node.mgr.deploy.entity.TbAgency;
-import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.deploy.entity.*;
 import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.deploy.service.AgencyService;
-import com.webank.webase.node.mgr.deploy.service.AnsibleService;
-import com.webank.webase.node.mgr.deploy.service.ConfigService;
-import com.webank.webase.node.mgr.deploy.service.DeployShellService;
-import com.webank.webase.node.mgr.deploy.service.DockerCommandService;
-import com.webank.webase.node.mgr.deploy.service.HostService;
-import com.webank.webase.node.mgr.deploy.service.NodeAsyncService;
-import com.webank.webase.node.mgr.deploy.service.PathService;
+import com.webank.webase.node.mgr.deploy.service.*;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.webank.webase.node.mgr.tools.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -77,6 +44,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.webank.webase.node.mgr.front.frontinterface.FrontRestTools.URI_CHAIN;
 
 /**
  * chain monitor
@@ -89,7 +64,10 @@ public class ChainService {
     @Autowired private TbChainMapper tbChainMapper;
     @Autowired private TbConfigMapper tbConfigMapper;
     @Autowired private TbAgencyMapper tbAgencyMapper;
-    @Autowired private TbHostMapper tbHostMapper;
+//    @Autowired private TbHostMapper tbHostMapper;
+
+    @DubboReference
+    private RemoteHostService remoteHostService;
 
     @Autowired
     private ConstantProperties cproperties;
@@ -379,7 +357,7 @@ public class ChainService {
                 RunTypeEnum.DOCKER, webaseSignAddr);
 
         // all host ips
-        Map<String, TbHost> newIpHostMap = new HashMap<>();
+        Map<String, HostDTO> newIpHostMap = new HashMap<>();
 
         // insert agency, host , group
         ipConfigParseList.forEach((config) -> {
@@ -387,7 +365,9 @@ public class ChainService {
             TbAgency agency = this.agencyService.insertIfNew(agencyName, newChain.getId(), chainName);
 
             // insert host if new
-            TbHost host = tbHostMapper.getByIp(config.getIp());
+//            TbHost host = tbHostMapper.getByIp(config.getIp());
+
+            HostDTO hostDTO = remoteHostService.getHostByIp(config.getIp());
 
             // insert group if new
             config.getGroupIdSet().forEach((groupId) -> {
@@ -395,7 +375,7 @@ public class ChainService {
                         GroupStatus.MAINTAINING, newChain.getId(), newChain.getChainName());
             });
 
-            newIpHostMap.putIfAbsent(config.getIp(), host);
+            newIpHostMap.putIfAbsent(config.getIp(), hostDTO);
         });
 
         // insert nodes for all hosts. there may be multiple nodes on a host.
@@ -419,14 +399,15 @@ public class ChainService {
                 int frontPort = targetNode.getFrontPort();
 
                 // host
-                TbHost host = newIpHostMap.get(ip);
+//                TbHost host = newIpHostMap.get(ip);
+                HostDTO hostDTO = newIpHostMap.get(ip);
                 // agency
                 TbAgency agency = this.tbAgencyMapper.getByChainIdAndAgencyName(newChain.getId(), agencyName);
                 // insert front
                 TbFront front = TbFront.init(nodeConfig.getNodeId(), ip, frontPort,
                         agency.getId(), agency.getAgencyName(), imageTag,
-                        RunTypeEnum.DOCKER , host.getId(), nodeConfig.getHostIndex(), imageTag,
-                        DockerCommandService.getContainerName(host.getRootDir(), chainName,
+                        RunTypeEnum.DOCKER , hostDTO.getId(), nodeConfig.getHostIndex(), imageTag,
+                        DockerCommandService.getContainerName(hostDTO.getRootDir(), chainName,
                         nodeConfig.getHostIndex()), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
                         nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
                 this.frontService.insert(front);

@@ -13,17 +13,10 @@
  */
 package com.webank.webase.node.mgr.group;
 
-import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
-
 import com.qctc.host.api.RemoteHostService;
 import com.qctc.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
-import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
+import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
@@ -34,8 +27,6 @@ import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.entity.TbHost;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
@@ -62,18 +53,6 @@ import com.webank.webase.node.mgr.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.ProgressTools;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -88,6 +67,21 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
+
 /**
  * services for group data.
  */
@@ -97,8 +91,8 @@ public class GroupService {
 
     @Autowired
     private GroupMapper groupMapper;
-    @Autowired
-    private TbHostMapper tbHostMapper;
+//    @Autowired
+//    private TbHostMapper tbHostMapper;
     @Autowired
     private FrontMapper frontMapper;
 
