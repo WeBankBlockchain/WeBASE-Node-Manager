@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.front.frontinterface;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
@@ -232,6 +233,10 @@ public class FrontRestTools {
 
     private static Map<String, FailInfo> failRequestMap = new HashMap<>();
 
+    // sa-token
+    private static String tokenKey;
+    private static String tokenValue;
+
 
     /**
      * append groupId to uri.
@@ -367,6 +372,25 @@ public class FrontRestTools {
     public static HttpEntity buildHttpEntity(Object param) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+
+        try {
+            // sa-token的token鉴权字段，用于front调用sign
+            String tokenKey = StpUtil.getTokenName();
+            String tokenValue = StpUtil.getTokenValueNotCut();
+
+            if (!StringUtils.isEmpty(tokenValue)) {
+                FrontRestTools.tokenKey = tokenKey;
+                FrontRestTools.tokenValue = tokenValue;
+            }
+        } catch (Exception e) {
+            log.info("get token key or value err, ignore, err msg:{}", e.getMessage());
+        }
+
+        if (!StringUtils.isEmpty(FrontRestTools.tokenValue)) {
+            headers.add("tokenKey", FrontRestTools.tokenKey);
+            headers.add("tokenValue", FrontRestTools.tokenValue);
+        }
+
         String paramStr = null;
         if (Objects.nonNull(param)) {
             paramStr = JsonTools.toJSONString(param);
