@@ -216,24 +216,44 @@ public class HostService {
 
                         }
 
-                        // docker pull image(ansible already check exist before pull)
-                        try {
-                            log.info("initHostAndDocker pull docker ip:{}, imageTag:{}, imagePullType:{}",
-                                    tbHost.getIp(), imageTag, imagePullType);
-                            ProgressTools.setPullDocker();
-                            this.dockerOptions.pullImage(tbHost, imageTag, imagePullType, tbHost.getRootDir());
-                        } catch (NodeMgrException e) {
-                            log.error("Docker pull image on host:[{}] failed",
-                                    tbHost.getIp(), e);
-                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
-                                    e.getRetCode().getAttachment());
-                            return;
-                        } catch (Exception e) {
-                            log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
-                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
-                                    "Docker pull image failed, please check the host's network or configuration of Docker.");
-                            return;
-                        }
+//                        // docker pull image(ansible already check exist before pull)
+//                        try {
+//                            log.info("initHostAndDocker pull docker ip:{}, imageTag:{}, imagePullType:{}",
+//                                    tbHost.getIp(), imageTag, imagePullType);
+//                            ProgressTools.setPullDocker();
+//                            this.dockerOptions.pullImage(tbHost, imageTag, imagePullType, tbHost.getRootDir());
+//                        } catch (NodeMgrException e) {
+//                            log.error("Docker pull image on host:[{}] failed",
+//                                    tbHost.getIp(), e);
+//                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+//                                    e.getRetCode().getAttachment());
+//                            return;
+//                        } catch (Exception e) {
+//                            log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
+//                            this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+//                                    "Docker pull image failed, please check the host's network or configuration of Docker.");
+//                            return;
+//                        }
+                    }
+
+                    // 由于1.5和3.0版本公用主机的状态，所以当主机初始化完成后，导致原来的流程不会走拉取镜像流程，因此每次都走pullImage一次，这个函数内部会有判断镜像存在，则跳过的处理
+                    // docker pull image(ansible already check exist before pull)
+                    try {
+                        log.info("initHostAndDocker pull docker ip:{}, imageTag:{}, imagePullType:{}",
+                                tbHost.getIp(), imageTag, imagePullType);
+                        ProgressTools.setPullDocker();
+                        this.dockerOptions.pullImage(tbHost, imageTag, imagePullType, tbHost.getRootDir());
+                    } catch (NodeMgrException e) {
+                        log.error("Docker pull image on host:[{}] failed",
+                                tbHost.getIp(), e);
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                e.getRetCode().getAttachment());
+                        return;
+                    } catch (Exception e) {
+                        log.error("Docker pull image on host :[{}] failed", tbHost.getIp(), e);
+                        this.updateStatus(tbHost.getId(), HostStatusEnum.INIT_FAILED,
+                                "Docker pull image failed, please check the host's network or configuration of Docker.");
+                        return;
                     }
 
                     tbHost.setStatus(HostStatusEnum.INIT_SUCCESS.getId());

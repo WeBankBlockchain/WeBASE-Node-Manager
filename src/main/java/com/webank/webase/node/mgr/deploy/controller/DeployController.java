@@ -367,7 +367,7 @@ public class DeployController extends BaseController {
     @SaCheckPermission("bcos3:chain:front")
     @GetMapping(value = "chain/info")
     public BaseResponse getChain(
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName) {
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain_v3") String chainName) {
         Instant startTime = Instant.now();
         log.info("Start getChain info chainName:[{}], now:[{}]", chainName, startTime);
 

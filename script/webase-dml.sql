@@ -272,7 +272,7 @@ INSERT INTO `tb_mail_server_config`(`server_name`,`host`,`port`,`username`,`pass
 -- ----------------------------
 -- 7、init tb_config
 -- ----------------------------
-INSERT INTO `tb_config`(`config_name`, `config_type`, `config_value`, `create_time`, `modify_time`) VALUES ('docker 镜像版本', 1, 'v2.8.0', now(), now());
+INSERT INTO `tb_config`(`config_name`, `config_type`, `config_value`, `create_time`, `modify_time`) VALUES ('docker 镜像版本', 1, 'v3.0.2', now(), now());
 
 
 -- ----------------------------

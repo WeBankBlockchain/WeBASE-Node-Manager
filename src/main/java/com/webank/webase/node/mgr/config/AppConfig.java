@@ -15,8 +15,12 @@ import org.springframework.context.annotation.Configuration;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author zhangyang
@@ -70,11 +74,18 @@ public class AppConfig implements InitializingBean {
     }
 
     private void writeSSHKey(String sshKey) throws Exception {
+        log.info("!!!!!writeSSHKey");
         String filePath = System.getProperty("user.home") + "/.ssh/id_rsa";
         File file = new File(filePath);
         FileWriter fileWriter = new FileWriter(file);
         BufferedWriter writer = new BufferedWriter(fileWriter);
         writer.write(sshKey);
         writer.close();
+
+        // 设置文件权限为600
+        Set<PosixFilePermission> perms = new HashSet<>();
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        Files.setPosixFilePermissions(file.toPath(), perms);
     }
 }
