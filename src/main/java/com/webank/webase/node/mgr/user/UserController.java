@@ -15,54 +15,33 @@ package com.webank.webase.node.mgr.user;
 
 import com.qctc.common.satoken.utils.LoginHelper;
 import com.qctc.system.api.model.LoginUser;
-import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
-import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.CheckUserExist;
 import com.webank.webase.node.mgr.base.enums.GlobalRoleType;
-import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.tools.PemUtils;
-import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
-import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
-import com.webank.webase.node.mgr.user.entity.KeyPair;
-import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
-import com.webank.webase.node.mgr.user.entity.ReqBindPrivateKey;
-import com.webank.webase.node.mgr.user.entity.ReqExport;
-import com.webank.webase.node.mgr.user.entity.ReqImportPem;
-import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
-import com.webank.webase.node.mgr.user.entity.TbUser;
-import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
-import com.webank.webase.node.mgr.user.entity.UserParam;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import javax.validation.Valid;
+import com.webank.webase.node.mgr.user.entity.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Key pair manage
@@ -81,15 +60,16 @@ public class UserController extends BaseController {
     @PostMapping(value = "/userInfo")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse addUserInfo(@RequestBody @Valid NewUserInputParam user, 
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
+             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addUserInfo startTime:{},currentAccount:{},NewUserInputParam:{}",
-            startTime.toEpochMilli(), currentAccountInfo, user);
+            startTime.toEpochMilli(), curLoginUser, user);
         // add user row
         TbUser userRow = userService.addUserInfoLocal(user.getGroupId(), user.getUserName(),
-                currentAccountInfo.getAccount(), user.getDescription(), user.getUserType(), null);
+                curLoginUser.getUsername(), user.getDescription(), user.getUserType(), null);
         baseResponse.setData(userRow);
 
         log.info("end addUserInfo useTime:{} result:{}",
@@ -103,15 +83,15 @@ public class UserController extends BaseController {
      */
     @PostMapping(value = "/bind")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse bindUserInfo(@RequestBody @Valid BindUserInputParam user,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
+    public BaseResponse bindUserInfo(@RequestBody @Valid BindUserInputParam user, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindUserInfo startTime:{},currentAccount:{},BindUserInputParam:{}",
-            startTime.toEpochMilli(), currentAccountInfo, user);
+            startTime.toEpochMilli(), curLoginUser, user);
         // query user row
-        TbUser userRow = userService.bindUserInfo(user, currentAccountInfo.getAccount(), CheckUserExist.TURE.getValue());
+        TbUser userRow = userService.bindUserInfo(user, curLoginUser.getUsername(), CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end bindUserInfo useTime:{} result:{}",
@@ -152,14 +132,13 @@ public class UserController extends BaseController {
     public BasePageResponse userList(@PathVariable("groupId") String groupId,
             @PathVariable("pageNumber") Integer pageNumber,
             @PathVariable("pageSize") Integer pageSize,
-            @RequestParam(value = "userParam", required = false) String commParam,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo)
+            @RequestParam(value = "userParam", required = false) String commParam)
             throws NodeMgrException {
         LoginUser curLoginUser = LoginHelper.getLoginUser();
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start userList startTime:{},currentAccountInfo:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
-                startTime.toEpochMilli(), currentAccountInfo, groupId, pageNumber, pageSize, commParam);
+                startTime.toEpochMilli(), curLoginUser, groupId, pageNumber, pageSize, commParam);
 
         String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue())
                 ? curLoginUser.getUsername() : null;
@@ -189,18 +168,18 @@ public class UserController extends BaseController {
 
     @PostMapping("/import")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse importPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse importPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport, BindingResult result) {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start importPrivateKey startTime:{},currentAccount:{},reqImport:{}",
-            startTime.toEpochMilli(), currentAccountInfo, reqImport);
+            startTime.toEpochMilli(), curLoginUser, reqImport);
         // encoded by web in base64
         String privateKeyEncoded = reqImport.getPrivateKey();
         // add user row
         TbUser userRow = userService.addUserInfoLocal(reqImport.getGroupId(), reqImport.getUserName(),
-                currentAccountInfo.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
+                curLoginUser.getUsername(), reqImport.getDescription(), reqImport.getUserType(),
                 privateKeyEncoded);
         baseResponse.setData(userRow);
 
@@ -212,19 +191,19 @@ public class UserController extends BaseController {
 
     @PostMapping("/importPem")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem, BindingResult result) {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start importPemPrivateKey startTime:{},currentAccount:{}",
-            startTime.toEpochMilli(), currentAccountInfo);
+            startTime.toEpochMilli(), curLoginUser);
         String pemContent = reqImportPem.getPemContent();
         if (!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
-        reqImportPem.setAccount(currentAccountInfo.getAccount());
+        reqImportPem.setAccount(curLoginUser.getUsername());
         TbUser userRow = userService.importPem(reqImportPem, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
@@ -239,12 +218,12 @@ public class UserController extends BaseController {
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
             @RequestParam(required = false, defaultValue = "") String p12Password,
             @RequestParam String groupId, @RequestParam String userName,
-            @RequestParam(required = false) String description,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+            @RequestParam(required = false) String description) {
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start importP12PrivateKey startTime:{},currentAccount:{}",
-            startTime.toEpochMilli(), currentAccountInfo);
+            startTime.toEpochMilli(), curLoginUser);
         if (!NodeMgrTools.notContainsChinese(p12Password)) {
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
@@ -252,7 +231,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
         TbUser userRow = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
-                currentAccountInfo.getAccount(), description, CheckUserExist.TURE.getValue());
+                curLoginUser.getUsername(), description, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
@@ -263,12 +242,11 @@ public class UserController extends BaseController {
 
     @PostMapping(value = "/exportPem")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param,
-        @CurrentAccount CurrentAccountInfo currentAccount) throws NodeMgrException {
+    public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param) throws NodeMgrException {
         Instant startTime = Instant.now();
         LoginUser curLoginUser = LoginHelper.getLoginUser();
         log.info("start exportPemUserFromSign startTime:{} param:{},currentAccount:{}",
-            startTime.toEpochMilli(), param, currentAccount);
+            startTime.toEpochMilli(), param, curLoginUser);
         String groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
 //        String account = currentAccount.getAccount();
@@ -284,12 +262,11 @@ public class UserController extends BaseController {
 
     @PostMapping(value = "/exportP12")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param,
-        @CurrentAccount CurrentAccountInfo currentAccount) throws NodeMgrException {
+    public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param) throws NodeMgrException {
         LoginUser curLoginUser = LoginHelper.getLoginUser();
         Instant startTime = Instant.now();
         log.info("start exportP12UserFromSign startTime:{} param:{},currentAccount:{}",
-            startTime.toEpochMilli(), param, currentAccount);
+            startTime.toEpochMilli(), param, curLoginUser);
         String groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
         String p12PasswordEncoded = param.getP12Password();
@@ -332,14 +309,13 @@ public class UserController extends BaseController {
 
     @PostMapping("/bind/privateKey")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse bindPrivateKey(@Valid @RequestBody ReqBindPrivateKey reqBind,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse bindPrivateKey(@Valid @RequestBody ReqBindPrivateKey reqBind, BindingResult result) {
         checkBindResult(result);
         LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindPrivateKey startTime:{} userId:{},currentAccount:{}",
-            startTime.toEpochMilli(), reqBind.getUserId(), currentAccountInfo);
+            startTime.toEpochMilli(), reqBind.getUserId(), curLoginUser);
 
         if (StringUtils.isBlank(reqBind.getPrivateKey())) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
@@ -356,13 +332,13 @@ public class UserController extends BaseController {
 
     @PostMapping("/bind/privateKey/pem")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse bindPrivateKeyByPem(@Valid @RequestBody ReqBindPrivateKey reqBindPem,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse bindPrivateKeyByPem(@Valid @RequestBody ReqBindPrivateKey reqBindPem, BindingResult result) {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindPrivateKeyByPem startTime:{} userId:{},currentAccount:{}",
-            startTime.toEpochMilli(), reqBindPem.getUserId(), currentAccountInfo);
+            startTime.toEpochMilli(), reqBindPem.getUserId(), curLoginUser);
         String pemContent = reqBindPem.getPemContent();
         if (StringUtils.isBlank(pemContent)) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
@@ -372,7 +348,7 @@ public class UserController extends BaseController {
         }
         // add user row
         TbUser tbUser = userService.updateUserByPem(reqBindPem.getGroupId(), reqBindPem.getUserId(),
-            pemContent, currentAccountInfo);
+            pemContent);
         baseResponse.setData(tbUser);
 
         log.info("end bindPrivateKey useTime:{} result:{}",
@@ -386,12 +362,12 @@ public class UserController extends BaseController {
     public BaseResponse bindPrivateKeyByP12(@RequestParam MultipartFile p12File,
         @RequestParam(required = false, defaultValue = "") String p12Password,
         @RequestParam String groupId,
-        @RequestParam Integer userId,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+        @RequestParam Integer userId) {
+        LoginUser curLoginUser= LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindPrivateKeyByP12 startTime:{},currentAccount:{}",
-            startTime.toEpochMilli(), currentAccountInfo);
+            startTime.toEpochMilli(), curLoginUser);
         if (!NodeMgrTools.notContainsChinese(p12Password)) {
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
@@ -399,8 +375,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
         // add user row
-        TbUser tbUser = userService.updateUserByP12(groupId, userId, p12File, p12Password,
-            currentAccountInfo);
+        TbUser tbUser = userService.updateUserByP12(groupId, userId, p12File, p12Password);
         baseResponse.setData(tbUser);
 
         log.info("end bindPrivateKey useTime:{} result:{}",

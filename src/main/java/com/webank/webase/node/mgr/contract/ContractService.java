@@ -18,9 +18,11 @@ import com.webank.webase.node.mgr.appintegration.contractstore.ContractStoreServ
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ContractStoreParam;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContractAddressSave;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContractStore;
-import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.*;
+import com.webank.webase.node.mgr.base.enums.CompileStatus;
+import com.webank.webase.node.mgr.base.enums.ContractStatus;
+import com.webank.webase.node.mgr.base.enums.ContractType;
+import com.webank.webase.node.mgr.base.enums.GlobalRoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.contract.abi.AbiService;

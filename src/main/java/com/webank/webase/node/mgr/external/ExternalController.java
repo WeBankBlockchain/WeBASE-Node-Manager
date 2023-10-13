@@ -16,8 +16,6 @@ package com.webank.webase.node.mgr.external;
 
 import com.qctc.common.satoken.utils.LoginHelper;
 import com.qctc.system.api.model.LoginUser;
-import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
-import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -132,8 +130,7 @@ public class ExternalController extends BaseController {
         @PathVariable("pageNumber") Integer pageNumber,
         @PathVariable("pageSize") Integer pageSize,
         @RequestParam(value = "type", defaultValue = "1") Integer type,
-        @RequestParam(value = "commParam", required = false) String commParam,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
+        @RequestParam(value = "commParam", required = false) String commParam) throws NodeMgrException {
         LoginUser curLoginUser = LoginHelper.getLoginUser();
 
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
@@ -183,8 +180,7 @@ public class ExternalController extends BaseController {
         @RequestParam(value = "type", defaultValue = "1") Integer type,
         @RequestParam(value = "contractAddress", required = false) String contractAddress,
         @RequestParam(value = "contractName", required = false) String contractName,
-        @RequestParam(value = "requiredBin", defaultValue = "true", required = false) Boolean requiredBin,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
+        @RequestParam(value = "requiredBin", defaultValue = "true", required = false) Boolean requiredBin) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listExtContractListJoin. startTime:{} groupId:{}", startTime.toEpochMilli(),

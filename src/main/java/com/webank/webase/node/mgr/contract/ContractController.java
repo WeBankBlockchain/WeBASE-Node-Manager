@@ -15,17 +15,13 @@ package com.webank.webase.node.mgr.contract;
 
 import com.qctc.common.satoken.utils.LoginHelper;
 import com.qctc.system.api.model.LoginUser;
-import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
-import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GlobalRoleType;
-import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.contract.entity.*;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.user.entity.TbUser;
@@ -35,7 +31,6 @@ import org.fisco.bcos.sdk.v3.codec.datatypes.Address;
 import org.fisco.bcos.sdk.v3.utils.AddressUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,7 +58,7 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/save")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse saveContract(@RequestBody @Valid Contract contract,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
+             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -74,7 +69,7 @@ public class ContractController extends BaseController {
             contract.setContractPath("/");
         }
         // add contract row
-        contract.setAccount(currentAccountInfo.getAccount());
+        contract.setAccount(LoginHelper.getUsername());
         TbContract tbContract = contractService.saveContract(contract);
 
         baseResponse.setData(tbContract);
@@ -111,8 +106,7 @@ public class ContractController extends BaseController {
      * query contract info list.
      */
     @PostMapping(value = "/contractList")
-    public BasePageResponse queryContractList(@RequestBody QueryContractParam inputParam, 
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
+    public BasePageResponse queryContractList(@RequestBody QueryContractParam inputParam) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start contractList. startTime:{} inputParam:{}", startTime.toEpochMilli(),
@@ -281,8 +275,7 @@ public class ContractController extends BaseController {
      */
     @PostMapping(value = "/contractPath")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse addContractPath(@Valid @RequestBody ContractPathParam param,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+    public BaseResponse addContractPath(@Valid @RequestBody ContractPathParam param) {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addContractPath. startTime:{} param:{}", startTime.toEpochMilli(), param);
@@ -291,7 +284,7 @@ public class ContractController extends BaseController {
         if ("".equals(contractPath)) {
             contractPath = "/";
         }
-        int result = contractPathService.save(param.getGroupId(), contractPath, currentAccountInfo.getAccount(), false);
+        int result = contractPathService.save(param.getGroupId(), contractPath, LoginHelper.getUsername(), false);
         response.setData(result);
 
         log.info("end addContractPath. useTime:{} add result:{}",
@@ -304,8 +297,7 @@ public class ContractController extends BaseController {
      * query contract info list.
      */
     @PostMapping(value = "/contractPath/list/{groupId}")
-    public BasePageResponse queryContractPathList(@PathVariable("groupId") String groupId,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+    public BasePageResponse queryContractPathList(@PathVariable("groupId") String groupId) {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryContractPathList. startTime:{} groupId:{}", startTime.toEpochMilli(),
@@ -330,8 +322,7 @@ public class ContractController extends BaseController {
      */
     @DeleteMapping(value = "/batch/path")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+    public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start deleteContractByPath startTime:{} ContractPathParam:{}",
@@ -348,8 +339,7 @@ public class ContractController extends BaseController {
      * query contract info list by multi path
      */
     @PostMapping(value = "/contractList/multiPath")
-    public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
+    public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listContractByMultiPath. startTime:{} inputParam:{}",
@@ -442,13 +432,12 @@ public class ContractController extends BaseController {
 
     @PostMapping(value = "/copy")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req, BindingResult result) {
         Instant startTime = Instant.now();
         log.info("copyContracts start. startTime:{}  req:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(req));
         checkBindResult(result);
-        req.setAccount(currentAccountInfo.getAccount());
+        req.setAccount(LoginHelper.getUsername());
         contractService.copyContracts(req);
         log.info("end copyContracts. useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());

@@ -14,10 +14,7 @@
 package com.webank.webase.node.mgr.user;
 
 import com.qctc.common.satoken.utils.LoginHelper;
-import com.qctc.system.api.RemoteUserService;
 import com.qctc.system.api.model.LoginUser;
-import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
-import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -34,7 +31,6 @@ import com.webank.webase.node.mgr.tools.SysAccountService;
 import com.webank.webase.node.mgr.user.entity.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.dubbo.config.annotation.DubboReference;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.v3.crypto.exceptions.LoadKeyStoreException;
 import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
@@ -421,8 +417,7 @@ public class UserService {
     /**
      * bind by pem
      */
-    public TbUser updateUserByPem(String groupId, int userId, String pemContent,
-        CurrentAccountInfo currentAccountInfo) {
+    public TbUser updateUserByPem(String groupId, int userId, String pemContent) {
         PEMKeyStore pemManager = new PEMKeyStore(new ByteArrayInputStream(pemContent.getBytes()));
         String privateKey = KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate());
         // pem's privateKey encoded here
@@ -433,8 +428,7 @@ public class UserService {
     /**
      * bind by p12
      */
-    public TbUser updateUserByP12(String groupId, int userId, MultipartFile p12File, String p12PwdEncoded,
-        CurrentAccountInfo currentAccountInfo) {
+    public TbUser updateUserByP12(String groupId, int userId, MultipartFile p12File, String p12PwdEncoded) {
         String privateKey = this.getP12RawPrivateKey(p12File, p12PwdEncoded);
         // pem's privateKey encoded here
         String privateKeyEncoded = NodeMgrTools.encodedBase64Str(privateKey);
