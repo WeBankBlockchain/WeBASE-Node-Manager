@@ -14,17 +14,13 @@
 
 package com.webank.webase.node.mgr.appintegration.api;
 
-import com.webank.webase.node.mgr.account.AccountService;
-import com.webank.webase.node.mgr.account.entity.AccountInfo;
-import com.webank.webase.node.mgr.account.entity.AccountListParam;
-import com.webank.webase.node.mgr.account.entity.TbAccountInfo;
+import com.webank.webase.node.mgr.account.role.RoleService;
 import com.webank.webase.node.mgr.appintegration.AppIntegrationService;
 import com.webank.webase.node.mgr.appintegration.contractstore.ContractStoreService;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContractAddressSave;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContractSourceSave;
 import com.webank.webase.node.mgr.appintegration.entity.AppRegisterInfo;
 import com.webank.webase.node.mgr.appintegration.entity.BasicInfo;
-import com.webank.webase.node.mgr.appintegration.entity.UpdatePasswordInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -32,55 +28,37 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.CheckUserExist;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.enums.ReturnPrivateKey;
-import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.VersionProperties;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.tools.PemUtils;
 import com.webank.webase.node.mgr.contract.ContractService;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.FrontParam;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
+import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.TbNode;
-import com.webank.webase.node.mgr.account.role.RoleService;
 import com.webank.webase.node.mgr.table.TableService;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.NodeMgrTools;
+import com.webank.webase.node.mgr.tools.PemUtils;
 import com.webank.webase.node.mgr.user.UserService;
-import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
-import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
-import com.webank.webase.node.mgr.user.entity.ReqImportPem;
-import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
-import com.webank.webase.node.mgr.user.entity.TbUser;
-import com.webank.webase.node.mgr.user.entity.UserParam;
+import com.webank.webase.node.mgr.user.entity.*;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import javax.validation.Valid;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.v3.client.Client;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
-import org.fisco.bcos.sdk.v3.config.ConfigOption;
-import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * application integration api.
@@ -92,8 +70,8 @@ public class AppIntegrationApi extends BaseController {
 
     @Autowired
     private AppIntegrationService appIntegrationService;
-    @Autowired
-    private AccountService accountService;
+//    @Autowired
+//    private AccountService accountService;
     @Autowired
     private RoleService roleService;
     @Autowired
@@ -135,97 +113,97 @@ public class AppIntegrationApi extends BaseController {
         return baseResponse;
     }
 
-    /**
-     * query account list.
-     */
-    @GetMapping(value = "/accountList")
-    public BasePageResponse queryAccountList(@RequestParam(required = true) Integer pageNumber,
-            @RequestParam(required = true) Integer pageSize,
-            @RequestParam(required = false) String account) throws NodeMgrException {
-        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{}",
-                startTime.toEpochMilli(), pageNumber, pageSize);
-
-        int count = accountService.countOfAccount(account);
-        if (count > 0) {
-            Integer start =
-                    Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize).orElse(0);
-            AccountListParam param =
-                    new AccountListParam(start, pageSize, account, SqlSortType.DESC.getValue());
-            List<TbAccountInfo> listOfAccount = accountService.listOfAccount(param);
-            listOfAccount.stream().forEach(accountData -> accountData.setAccountPwd(null));
-            pageResponse.setData(listOfAccount);
-            pageResponse.setTotalCount(count);
-        }
-
-        log.info("end queryAccountList useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pageResponse));
-        return pageResponse;
-    }
-
-    /**
-     * query role list.
-     */
-    @GetMapping(value = "/roleList")
-    public BasePageResponse queryRoleList() throws NodeMgrException {
-        Instant startTime = Instant.now();
-        log.info("start queryRoleList.", startTime.toEpochMilli());
-
-        // query
-        BasePageResponse pageResponse = roleService.queryRoleList(null, null, null, null);
-
-        log.info("end queryRoleList useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(pageResponse));
-        return pageResponse;
-    }
-
-    /**
-     * add account info.
-     */
-    @PostMapping(value = "/accountAdd")
-    public BaseResponse addAccountInfo(@RequestBody @Valid AccountInfo info, BindingResult result)
-            throws NodeMgrException {
-        checkBindResult(result);
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-        log.info("start addAccountInfo. startTime:{}", startTime.toEpochMilli());
-
-        // add account row
-        accountService.addAccountRow(info);
-
-        // query row
-        TbAccountInfo tbAccount = accountService.queryByAccount(info.getAccount());
-        tbAccount.setAccountPwd(null);
-        baseResponse.setData(tbAccount);
-
-        log.info("end addAccountInfo useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(baseResponse));
-        return baseResponse;
-    }
-
-    /**
-     * update password.
-     */
-    @PostMapping(value = "/passwordUpdate")
-    public BaseResponse updatePassword(@RequestBody @Valid UpdatePasswordInfo info,
-            BindingResult result) throws NodeMgrException {
-        checkBindResult(result);
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        Instant startTime = Instant.now();
-
-        // update account row
-        accountService.updatePassword(info.getAccount(), info.getOldAccountPwd(),
-                info.getNewAccountPwd());
-
-        log.info("end updatePassword useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(),
-                JsonTools.toJSONString(baseResponse));
-        return baseResponse;
-    }
+//    /**
+//     * query account list.
+//     */
+//    @GetMapping(value = "/accountList")
+//    public BasePageResponse queryAccountList(@RequestParam(required = true) Integer pageNumber,
+//            @RequestParam(required = true) Integer pageSize,
+//            @RequestParam(required = false) String account) throws NodeMgrException {
+//        BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//        log.info("start queryAccountList.  startTime:{} pageNumber:{} pageSize:{}",
+//                startTime.toEpochMilli(), pageNumber, pageSize);
+//
+//        int count = accountService.countOfAccount(account);
+//        if (count > 0) {
+//            Integer start =
+//                    Optional.ofNullable(pageNumber).map(page -> (page - 1) * pageSize).orElse(0);
+//            AccountListParam param =
+//                    new AccountListParam(start, pageSize, account, SqlSortType.DESC.getValue());
+//            List<TbAccountInfo> listOfAccount = accountService.listOfAccount(param);
+//            listOfAccount.stream().forEach(accountData -> accountData.setAccountPwd(null));
+//            pageResponse.setData(listOfAccount);
+//            pageResponse.setTotalCount(count);
+//        }
+//
+//        log.info("end queryAccountList useTime:{} result:{}",
+//                Duration.between(startTime, Instant.now()).toMillis(),
+//                JsonTools.toJSONString(pageResponse));
+//        return pageResponse;
+//    }
+//
+//    /**
+//     * query role list.
+//     */
+//    @GetMapping(value = "/roleList")
+//    public BasePageResponse queryRoleList() throws NodeMgrException {
+//        Instant startTime = Instant.now();
+//        log.info("start queryRoleList.", startTime.toEpochMilli());
+//
+//        // query
+//        BasePageResponse pageResponse = roleService.queryRoleList(null, null, null, null);
+//
+//        log.info("end queryRoleList useTime:{} result:{}",
+//                Duration.between(startTime, Instant.now()).toMillis(),
+//                JsonTools.toJSONString(pageResponse));
+//        return pageResponse;
+//    }
+//
+//    /**
+//     * add account info.
+//     */
+//    @PostMapping(value = "/accountAdd")
+//    public BaseResponse addAccountInfo(@RequestBody @Valid AccountInfo info, BindingResult result)
+//            throws NodeMgrException {
+//        checkBindResult(result);
+//        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//        log.info("start addAccountInfo. startTime:{}", startTime.toEpochMilli());
+//
+//        // add account row
+//        accountService.addAccountRow(info);
+//
+//        // query row
+//        TbAccountInfo tbAccount = accountService.queryByAccount(info.getAccount());
+//        tbAccount.setAccountPwd(null);
+//        baseResponse.setData(tbAccount);
+//
+//        log.info("end addAccountInfo useTime:{} result:{}",
+//                Duration.between(startTime, Instant.now()).toMillis(),
+//                JsonTools.toJSONString(baseResponse));
+//        return baseResponse;
+//    }
+//
+//    /**
+//     * update password.
+//     */
+//    @PostMapping(value = "/passwordUpdate")
+//    public BaseResponse updatePassword(@RequestBody @Valid UpdatePasswordInfo info,
+//            BindingResult result) throws NodeMgrException {
+//        checkBindResult(result);
+//        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+//        Instant startTime = Instant.now();
+//
+//        // update account row
+//        accountService.updatePassword(info.getAccount(), info.getOldAccountPwd(),
+//                info.getNewAccountPwd());
+//
+//        log.info("end updatePassword useTime:{} result:{}",
+//                Duration.between(startTime, Instant.now()).toMillis(),
+//                JsonTools.toJSONString(baseResponse));
+//        return baseResponse;
+//    }
 
     /**
      * get base info.

@@ -14,16 +14,17 @@
 
 package com.webank.webase.node.mgr.appintegration.contractstore;
 
-import com.webank.webase.node.mgr.account.AccountService;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ContractSource;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ContractStoreParam;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.ReqContractSourceSave;
 import com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContractStore;
-import java.util.List;
+import com.webank.webase.node.mgr.tools.SysAccountService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * ContractStoreService.
@@ -32,8 +33,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class ContractStoreService {
 
+//    @Autowired
+//    private AccountService accountService;
     @Autowired
-    private AccountService accountService;
+    private SysAccountService sysAccountService;
     @Autowired
     private ContractStoreMapper contractStoreMapper;
 
@@ -47,7 +50,7 @@ public class ContractStoreService {
         log.debug("saveContractSource");
         // check account
         String account = reqContractSourceSave.getAccount();
-        accountService.accountExist(account);
+        sysAccountService.accountExist(account);
         for (ContractSource contractSource : reqContractSourceSave.getContractList()) {
             TbContractStore tbContractStore = new TbContractStore();
             BeanUtils.copyProperties(contractSource, tbContractStore);

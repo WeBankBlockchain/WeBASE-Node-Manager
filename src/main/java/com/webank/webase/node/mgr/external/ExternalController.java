@@ -14,12 +14,15 @@
 
 package com.webank.webase.node.mgr.external;
 
+import com.qctc.common.satoken.utils.LoginHelper;
+import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.GlobalRoleType;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -131,13 +134,17 @@ public class ExternalController extends BaseController {
         @RequestParam(value = "type", defaultValue = "1") Integer type,
         @RequestParam(value = "commParam", required = false) String commParam,
         @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listExtUserListJoin startTime:{} groupId:{} pageNumber:{} pageSize:{},type:{},commParam:{}",
             startTime.toEpochMilli(), groupId, pageNumber, pageSize, type, commParam);
 
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
-                ? currentAccountInfo.getAccount() : null;
+        //        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
+//                ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue())
+                ? curLoginUser.getUsername() : null;
         UserParam param = new UserParam();
         param.setGroupId(groupId);
         param.setPageSize(pageSize);
@@ -182,9 +189,13 @@ public class ExternalController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start listExtContractListJoin. startTime:{} groupId:{}", startTime.toEpochMilli(),
             groupId);
-        
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
-                ? currentAccountInfo.getAccount() : null;
+
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+
+//        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
+//                ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue())
+                ? curLoginUser.getUsername() : null;
         ContractParam param = new ContractParam();
         param.setGroupId(groupId);
         param.setPageSize(pageSize);

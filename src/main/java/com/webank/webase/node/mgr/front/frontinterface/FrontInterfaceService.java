@@ -603,12 +603,12 @@ public class FrontInterfaceService {
      * get front version
      */
     public String getFrontVersionFromSpecificFront(String frontIp, Integer frontPort) {
-        log.debug("start getClientVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp,
+        log.info("start getClientVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp,
             frontPort);
         String groupId = GROUPID;
         String frontVersion = getFromSpecificFront(groupId,
             frontIp, frontPort, FrontRestTools.URI_FRONT_VERSION, String.class);
-        log.debug("end getFrontVersionFromSpecificFront. frontVersion:{}", frontVersion);
+        log.info("end getFrontVersionFromSpecificFront. frontVersion:{}", frontVersion);
         return frontVersion;
     }
 
@@ -616,12 +616,12 @@ public class FrontInterfaceService {
      * get webase-sign version
      */
     public String getSignVersionFromSpecificFront(String frontIp, Integer frontPort) {
-        log.debug("start getSignVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp,
+        log.info("start getSignVersionFromSpecificFront. frontIp:{},frontPort:{}", frontIp,
             frontPort);
         String groupId = GROUPID;
         String signVersion = getFromSpecificFront(groupId,
             frontIp, frontPort, FrontRestTools.URI_SIGN_VERSION, String.class);
-        log.debug("end getSignVersionFromSpecificFront. signVersion:{}", signVersion);
+        log.info("end getSignVersionFromSpecificFront. signVersion:{}", signVersion);
         return signVersion;
     }
 

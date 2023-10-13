@@ -2,7 +2,6 @@ package com.webank.webase.node.mgr.config;
 
 import com.webank.webase.node.mgr.base.annotation.CurrentAccountMethodArgumentResolver;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.config.security.filter.AccountFilter;
 import com.webank.webase.node.mgr.config.security.filter.AppIntegrationFilter;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import java.util.List;

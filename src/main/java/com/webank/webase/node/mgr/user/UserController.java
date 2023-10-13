@@ -13,6 +13,8 @@
  */
 package com.webank.webase.node.mgr.user;
 
+import com.qctc.common.satoken.utils.LoginHelper;
+import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -20,6 +22,7 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.CheckUserExist;
+import com.webank.webase.node.mgr.base.enums.GlobalRoleType;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
@@ -152,13 +155,14 @@ public class UserController extends BaseController {
             @RequestParam(value = "userParam", required = false) String commParam,
             @CurrentAccount CurrentAccountInfo currentAccountInfo)
             throws NodeMgrException {
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start userList startTime:{},currentAccountInfo:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
                 startTime.toEpochMilli(), currentAccountInfo, groupId, pageNumber, pageSize, commParam);
 
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
-                ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue())
+                ? curLoginUser.getUsername() : null;
         UserParam param = new UserParam();
         param.setGroupId(groupId);
         param.setAccount(account);
@@ -262,13 +266,14 @@ public class UserController extends BaseController {
     public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param,
         @CurrentAccount CurrentAccountInfo currentAccount) throws NodeMgrException {
         Instant startTime = Instant.now();
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         log.info("start exportPemUserFromSign startTime:{} param:{},currentAccount:{}",
             startTime.toEpochMilli(), param, currentAccount);
         String groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
-        String account = currentAccount.getAccount();
-        Integer roleId = currentAccount.getRoleId();
-        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId, account, roleId);
+//        String account = currentAccount.getAccount();
+//        Integer roleId = currentAccount.getRoleId();
+        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId, curLoginUser);
 
         log.info("end exportPemUserFromSign useTime:{} fileContentHandle:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
@@ -281,6 +286,7 @@ public class UserController extends BaseController {
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param,
         @CurrentAccount CurrentAccountInfo currentAccount) throws NodeMgrException {
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         Instant startTime = Instant.now();
         log.info("start exportP12UserFromSign startTime:{} param:{},currentAccount:{}",
             startTime.toEpochMilli(), param, currentAccount);
@@ -291,10 +297,10 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
         // account info
-        String account = currentAccount.getAccount();
-        Integer roleId = currentAccount.getRoleId();
+//        String account = currentAccount.getAccount();
+//        Integer roleId = currentAccount.getRoleId();
         FileContentHandle fileContentHandle = userService.exportP12FromSign(groupId, signUserId,
-            p12PasswordEncoded, account, roleId);
+            p12PasswordEncoded, curLoginUser);
 
         log.info("end exportP12UserFromSign useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
@@ -329,6 +335,7 @@ public class UserController extends BaseController {
     public BaseResponse bindPrivateKey(@Valid @RequestBody ReqBindPrivateKey reqBind,
         @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindPrivateKey startTime:{} userId:{},currentAccount:{}",
@@ -338,7 +345,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
         // add user row
-        TbUser tbUser = userService.updateUser(reqBind, currentAccountInfo);
+        TbUser tbUser = userService.updateUser(reqBind, curLoginUser);
         baseResponse.setData(tbUser);
 
         log.info("end bindPrivateKey useTime:{} result:{}",

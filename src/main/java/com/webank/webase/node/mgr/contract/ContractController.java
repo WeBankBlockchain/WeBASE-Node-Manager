@@ -13,12 +13,15 @@
  */
 package com.webank.webase.node.mgr.contract;
 
+import com.qctc.common.satoken.utils.LoginHelper;
+import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
 import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.base.enums.GlobalRoleType;
 import com.webank.webase.node.mgr.base.enums.RoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -115,11 +118,15 @@ public class ContractController extends BaseController {
         log.info("start contractList. startTime:{} inputParam:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(inputParam));
 
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+
         // param
         ContractParam queryParam = new ContractParam();
         BeanUtils.copyProperties(inputParam, queryParam);
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
-                ? currentAccountInfo.getAccount() : null;
+        //        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
+//                ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue())
+                ? curLoginUser.getUsername() : null;
         queryParam.setAccount(account);
 
         int count = contractService.countOfContract(queryParam);
@@ -303,8 +310,11 @@ public class ContractController extends BaseController {
         Instant startTime = Instant.now();
         log.info("start queryContractPathList. startTime:{} groupId:{}", startTime.toEpochMilli(),
                 groupId);
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
-                ? currentAccountInfo.getAccount() : null;
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+//        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
+//                ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue())
+                ? curLoginUser.getUsername() : null;
         List<TbContractPath> result = contractService.queryContractPathList(groupId, account);
         pageResponse.setData(result);
         pageResponse.setTotalCount(result.size());
@@ -327,7 +337,7 @@ public class ContractController extends BaseController {
         log.info("start deleteContractByPath startTime:{} ContractPathParam:{}",
                 startTime.toEpochMilli(), param);
         
-        contractService.deleteByContractPath(param, currentAccountInfo);
+        contractService.deleteByContractPath(param, LoginHelper.getLoginUser());
 
         log.info("end deleteContractByPath useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
@@ -345,8 +355,10 @@ public class ContractController extends BaseController {
         log.info("start listContractByMultiPath. startTime:{} inputParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(inputParam));
 
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId()
-                .intValue() ? currentAccountInfo.getAccount() : null;
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+//        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId()
+//                .intValue() ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue()) ? curLoginUser.getUsername() : null;
         inputParam.setAccount(account);
         List<TbContract> contractList = contractService.queryContractListMultiPath(inputParam);
         pageResponse.setTotalCount(contractList.size());
