@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,7 +35,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.ini4j.Ini;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -246,6 +249,15 @@ public class PathService {
     /**
      *
      * @param nodePath
+     * @return              NODES_ROOT/[chainName]/[ip]/node[index]/config.genesis as a {@link Path}, a file.
+     */
+    public static Path getConfigGenesisPath( Path nodePath ) {
+        return nodePath.resolve("config.genesis");
+    }
+
+    /**
+     *
+     * @param nodePath
      * @return
      */
     public static Path getGroupGenesisPath(Path nodePath,String groupId) {
@@ -320,7 +332,8 @@ public class PathService {
      * @throws IOException
      */
     public static String getNodeId(Path nodePath, byte encryptType) throws IOException {
-        String nodeIdFile = encryptType == CryptoType.ECDSA_TYPE ? "node.nodeid" : "gmnode.nodeid";
+//        String nodeIdFile = encryptType == CryptoType.ECDSA_TYPE ? "node.nodeid" : "gmnode.nodeid";
+        String nodeIdFile = "node.nodeid";
 
         List<String> lines = Files.readAllLines(nodePath.resolve("conf/").resolve(nodeIdFile));
         if (CollectionUtils.isEmpty(lines)) {
@@ -340,18 +353,39 @@ public class PathService {
      * @return
      * @throws IOException
      */
+//    public static Set<String> getNodeGroupIdSet(Path nodePath) {
+//        Set<String> result = null;
+//        try (Stream<Path> walk = Files.walk(nodePath.resolve("conf"), 1)) {
+////            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
+////                    .map((path) -> Integer.parseInt(path.getFileName().toString()
+////                            .replaceAll("group\\.", "").replaceAll("\\.genesis", "")))
+////                    .collect(Collectors.toSet());
+//            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
+//                .map((path) -> path.getFileName().toString().replaceAll("group\\.", "")
+//                    .replaceAll("\\.genesis", ""))
+//                .collect(Collectors.toSet());
+//        } catch (IOException e) {
+//            log.error("getNodeGroupIdSet error:{}", e);
+//        }
+//        return result;
+//    }
+
     public static Set<String> getNodeGroupIdSet(Path nodePath) {
         Set<String> result = null;
-        try (Stream<Path> walk = Files.walk(nodePath.resolve("conf"), 1)) {
-//            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
-//                    .map((path) -> Integer.parseInt(path.getFileName().toString()
-//                            .replaceAll("group\\.", "").replaceAll("\\.genesis", "")))
-//                    .collect(Collectors.toSet());
-            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
-                .map((path) -> path.getFileName().toString().replaceAll("group\\.", "")
-                    .replaceAll("\\.genesis", ""))
-                .collect(Collectors.toSet());
-        } catch (IOException e) {
+        try {
+            Path configGenesis = PathService.getConfigGenesisPath(nodePath);
+            log.info("!!!! configGenesis:{}", configGenesis.toAbsolutePath().toString());
+            Ini ini = new Ini(configGenesis.toFile());
+            String groupId = ini.get("chain", "group_id");
+            log.info("#####groupId: {}", groupId);
+
+//            if (null != groupId && groupId.length() > 0) {
+//                result = new HashSet<>();
+//                result.add(groupId.substring("group".length()));
+//            }
+            result = new HashSet<>();
+            result.add(groupId);
+        } catch (Exception e) {
             log.error("getNodeGroupIdSet error:{}", e);
         }
         return result;

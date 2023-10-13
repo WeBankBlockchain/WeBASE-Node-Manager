@@ -49,7 +49,18 @@ public class ConfigController {
     @Autowired
     private ConfigService configService;
 
+    @Autowired
+    private CryptoSuite cryptoSuite;
 
+    /**
+     * return encrypt type to web 0 is standard, 1 is guomi.
+     */
+    @GetMapping("/encrypt")
+    public Object getEncryptType() {
+        int encrypt = cryptoSuite.cryptoTypeConfig;
+        log.info("getEncryptType:{}", encrypt);
+        return new BaseResponse(ConstantCode.SUCCESS, encrypt);
+    }
 
     /**
      * webase-web: when add first front, return version and tips.

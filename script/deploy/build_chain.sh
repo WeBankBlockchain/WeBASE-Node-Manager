@@ -1,420 +1,139 @@
 #!/bin/bash
-
 set -e
 
-##    重要！！！build_chain脚本中, main()的output_dir去掉了$pwd/的前缀，采用了相对路径。即output_dir="${output_dir}"
-
-# default value
-ca_path= #CA key
-gmca_path= #gm CA key
-node_num=1
-ip_file=
-ip_param=
+dirpath="$(cd "$(dirname "$0")" && pwd)"
+listen_ip="0.0.0.0"
+port_start=(30300 20200 3901)
+p2p_listen_port=port_start[0]
+rpc_listen_port=port_start[1]
+mtail_listen_port=3901
 use_ip_param=
-agency_array=
-group_array=
-ports_array=
+mtail_ip_param=""
 ip_array=
-output_dir=nodes
-port_start=(30300 20200 8545)
-state_type=storage
-storage_type=rocksdb
-supported_storage=(rocksdb mysql external scalable)
-conf_path="conf"
-bin_path=
-make_tar=
-binary_log="false"
-sm_crypto_channel="false"
-log_level="info"
-logfile=${PWD}/build.log
-listen_ip="127.0.0.1"
-default_listen_ip="0.0.0.0"
-bcos_bin_name=fisco-bcos
-guomi_mode=
-docker_mode=
-gm_conf_path="gmconf/"
+output_dir="./nodes"
 current_dir=$(pwd)
-consensus_type="pbft"
-supported_consensus=(pbft raft rpbft)
-TASSL_CMD="${HOME}"/.fisco/tassl
-auto_flush="true"
-enable_statistic="false"
-enable_free_storage="false"
-deploy_mode=
-root_crt=
-gmroot_crt=
-copy_cert=
-no_agency=
-days=36500 # 100 years
-# trans timestamp from seconds to milliseconds
-timestamp=$(($(date '+%s')*1000))
-chain_id=1
-compatibility_version=""
-default_version="2.8.0"
+binary_name="fisco-bcos"
+lightnode_binary_name="fisco-bcos-lightnode"
+mtail_binary_name="mtail"
+key_page_size=10240
+# for cert generation
+ca_cert_dir="${dirpath}"
+sm_cert_conf='sm_cert.cnf'
+cert_conf="${output_dir}/cert.cnf"
+days=36500
+rsa_key_length=2048
+sm_mode='false'
+enable_hsm='false'
 macOS=""
-x86_64_arch="true"
-download_timeout=240
+x86_64_arch="false"
+arm64_arch="false"
+sm2_params="sm_sm2.param"
 cdn_link_header="https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS"
-use_ipv6=
-cert_conf_path=
-help() {
-    cat << EOF
-Usage:
-    -l <IP list>                        [Required] "ip1:nodeNum1,ip2:nodeNum2" e.g:"192.168.0.1:2,192.168.0.2:3"
-    -f <IP list file>                   [Optional] split by line, every line should be "ip:nodeNum agencyName groupList p2p_port,channel_port,jsonrpc_port". eg "127.0.0.1:4 agency1 1,2 30300,20200,8545"
-    -v <FISCO-BCOS binary version>      Default is the latest v${default_version}
-    -e <FISCO-BCOS binary path>         Default download fisco-bcos from GitHub. If set -e, use the binary at the specified location
-    -o <Output Dir>                     Default ./nodes/
-    -p <Start Port>                     Default 30300,20200,8545 means p2p_port start from 30300, channel_port from 20200, jsonrpc_port from 8545
-    -q <List FISCO-BCOS releases>       List FISCO-BCOS released versions
-    -i <Host ip>                        Default 127.0.0.1. If set -i, listen 0.0.0.0
-    -s <DB type>                        Default rocksdb. Options can be rocksdb / mysql / scalable, rocksdb is recommended
-    -d <docker mode>                    Default off. If set -d, build with docker
-    -c <Consensus Algorithm>            Default PBFT. Options can be pbft / raft /rpbft, pbft is recommended
-    -C <Chain id>                       Default 1. Can set uint.
-    -g <Generate guomi nodes>           Default no
-    -z <Generate tar packet>            Default no
-    -t <Cert config file>               Default auto generate
-    -6 <Use ipv6>                       Default no. If set -6, treat IP as IPv6
-    -k <The path of ca root>            Default auto generate, the ca.crt and ca.key must in the path, if use intermediate the root.crt must in the path
-    -K <The path of sm crypto ca root>  Default auto generate, the gmca.crt and gmca.key must in the path, if use intermediate the gmroot.crt must in the path
-    -D <Use Deployment mode>            Default false, If set -D, use deploy mode directory struct and make tar
-    -G <channel use sm crypto ssl>      Default false, only works for guomi mode
-    -X <Certificate expiration time>    Default 36500 days
-    -T <Enable debug log>               Default off. If set -T, enable debug log
-    -S <Enable statistics>              Default off. If set -S, enable statistics
-    -F <Disable log auto flush>         Default on. If set -F, disable log auto flush
-    -E <Enable free_storage_evm>        Default off. If set -E, enable free_storage_evm
-    -h Help
-e.g
-    $0 -l "127.0.0.1:4"
-EOF
+OPENSSL_CMD="${HOME}/.fisco/tassl-1.1.1b"
+nodeid_list=""
+nodeid_list_from_path=""
+file_dir="./"
+p2p_connected_conf_name="nodes.json"
+command="deploy"
+ca_dir=""
+prometheus_dir=""
+config_path=""
+docker_mode=
+default_version="v3.4.0"
+compatibility_version=${default_version}
+default_mtail_version="3.0.0-rc49"
+compatibility_mtail_version=${default_mtail_version}
+auth_mode="false"
+monitor_mode="false"
+auth_admin_account=
+binary_path=""
+lightnode_binary_path=""
+download_lightnode_binary="false"
+mtail_binary_path=""
+wasm_mode="false"
+serial_mode="true"
+node_key_dir=""
+# if the config.genesis path has been set, don't generate genesis file, use the config instead
+genesis_conf_path=""
+lightnode_flag="false"
+download_timeout=240
+make_tar=
+default_group="group0"
+default_chainid="chain0"
 
-exit 0
-}
+# for modifying multipy ca node
+modify_node_path=""
+multi_ca_path=""
 
-LOG_WARN()
-{
+LOG_WARN() {
     local content=${1}
-    echo -e "\033[31m[WARN] ${content}\033[0m"
+    echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
 
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-get_value()
-{
-    local var_name="${1}"
-    var_name="${var_name//./}"
-    var_name="var_${var_name//-/}"
-    local res=$(eval echo '$'"${var_name}")
-    echo ${res}
-}
-
-set_value()
-{
-    local var_name="${1}"
-    var_name="${var_name//./}"
-    var_name="var_${var_name//-/}"
-    local var_value=${2}
-    eval "${var_name}=${var_value}"
-}
-
-exit_with_clean()
-{
+LOG_FATAL() {
     local content=${1}
-    echo -e "\033[31m[ERROR] ${content}\033[0m"
-    if [ -d "${output_dir}" ];then
-        rm -rf ${output_dir}
-    fi
+    echo -e "\033[31m[FATAL] ${content}\033[0m"
     exit 1
 }
 
-parse_params()
-{
-while getopts "f:l:o:p:e:t:v:s:C:c:k:K:X:izhgGTNFSdEDZ6q" option;do
-    case $option in
-    f) ip_file=$OPTARG
-       use_ip_param="false"
-    ;;
-    l) ip_param=$OPTARG
-       use_ip_param="true"
-    ;;
-    o) output_dir=$OPTARG;;
-    i) listen_ip="0.0.0.0" && LOG_WARN "jsonrpc_listen_ip linstens 0.0.0.0 is unsafe.";;
-    q) LOG_INFO "Show the history releases of FISCO-BCOS " && curl -sS https://gitee.com/api/v5/repos/FISCO-BCOS/FISCO-BCOS/tags | grep -oe "\"name\":\"v[2-9]*\.[0-9]*\.[0-9]*\"" | cut -d \" -f 4 | sort -V && exit 0;;
-    v) compatibility_version="${OPTARG//[vV]/}";;
-    p) port_start=(${OPTARG//,/ })
-    if [ ${#port_start[@]} -ne 3 ];then LOG_WARN "start port error. e.g: 30300,20200,8545" && exit 1;fi
-    ;;
-    e) bin_path=$OPTARG;;
-    k) ca_path="$OPTARG" && ca_key="$OPTARG/ca.key" && ca_crt="$OPTARG/ca.crt"
-        if [[ ! -f "${ca_key}" ]];then
-            LOG_WARN "${ca_key} not exist."
-            exit 1;
-        fi
-        if [[ ! -f "${ca_crt}" ]];then
-            LOG_WARN "${ca_crt} not exist."
-            exit 1;
-        fi
-    ;;
-    K) gmca_path="$OPTARG" && gmca_key="$OPTARG/gmca.key" && gmca_crt="$OPTARG/gmca.crt"
-        if [[ ! -f "${gmca_key}" ]];then
-            LOG_WARN "${gmca_key} not exist."
-            exit 1;
-        fi
-        if [[ ! -f "${gmca_crt}" ]];then
-            LOG_WARN "${gmca_crt} not exist."
-            exit 1;
-        fi
-    ;;
-    s) storage_type=$OPTARG
-        if ! echo "${supported_storage[*]}" | grep -i "${storage_type}" &>/dev/null; then
-            LOG_WARN "${storage_type} is not supported. Please set one of ${supported_storage[*]}"
-            exit 1;
-        fi
-    ;;
-    t) CertConfig=$OPTARG;;
-    c) consensus_type=$OPTARG
-        if ! echo "${supported_consensus[*]}" | grep -i "${consensus_type}" &>/dev/null; then
-            LOG_WARN "${consensus_type} is not supported. Please set one of ${supported_consensus[*]}"
-            exit 1;
-        fi
-    ;;
-    C) chain_id=$OPTARG
-        if [ -z $(grep '^[[:digit:]]*$' <<< "${chain_id}") ];then
-            LOG_WARN "${chain_id} is not a positive integer."
-            exit 1;
-        fi
-    ;;
-    X) days="$OPTARG";;
-    G) sm_crypto_channel="true";;
-    T) log_level="debug";;
-    F) auto_flush="false";;
-    N) no_agency="true";;
-    S) enable_statistic="true";;
-    E) enable_free_storage="true";;
-    D) deploy_mode="true" && make_tar="true";;
-    Z) copy_cert="true";;
-    z) make_tar="true";;
-    g) guomi_mode="true";;
-    6) use_ipv6="true" && default_listen_ip="::";;
-    d) docker_mode="true"
-        if [ "$(uname)" == "Darwin" ];then LOG_WARN "Docker desktop of macOS can't support docker mode of FISCO BCOS!" && exit 1;fi
-    ;;
-    h) help;;
-    esac
-done
-if [ "${storage_type}" == "scalable" ]; then
-    echo "use scalable storage, so turn on binary log"
-    binary_log="true"
-fi
-# sm_crypto_channel only works in guomi mode
-if [[ -n "${guomi_mode}" && "${sm_crypto_channel}" == "true" ]];then
-    sm_crypto_channel="true"
-else
-    sm_crypto_channel="false"
-fi
+dir_must_exists() {
+    if [ ! -d "$1" ]; then
+        LOG_FATAL "$1 DIR does not exist, please check!"
+    fi
 }
 
-print_result()
-{
-echo "=============================================================="
-[ -z "${docker_mode}" ] && [ -f "${bin_path}" ] && LOG_INFO "FISCO-BCOS Path : $bin_path"
-[ -n "${docker_mode}" ] && LOG_INFO "Docker tag      : latest"
-[ -n "${ip_file}" ] && LOG_INFO "IP List File    : $ip_file"
-LOG_INFO "Start Port      : ${port_start[*]}"
-LOG_INFO "Server IP       : ${ip_array[*]}"
-LOG_INFO "Output Dir      : ${output_dir}"
-LOG_INFO "CA Path         : $ca_path"
-[ -n "${guomi_mode}" ] && LOG_INFO "Guomi CA Path   : $gmca_path"
-[ -n "${guomi_mode}" ] && LOG_INFO "Guomi mode      : $guomi_mode"
-echo "=============================================================="
-LOG_INFO "Execute the download_console.sh script in directory named by IP to get FISCO-BCOS console."
-echo "e.g.  bash ${output_dir}/${ip_array[0]%:*}/download_console.sh -f"
-echo "=============================================================="
-LOG_INFO "All completed. Files in ${output_dir}"
+dir_must_not_exists() {
+    if [  -d "$1" ]; then
+        LOG_FATAL "$1 DIR already exist, please check!"
+    fi
+}
+
+file_must_not_exists() {
+    if [ -f "$1" ]; then
+        LOG_FATAL "$1 file already exist, please check!"
+    fi
+}
+
+file_must_exists() {
+    if [ ! -f "$1" ]; then
+        LOG_FATAL "$1 file does not exist, please check!"
+    fi
 }
 
 check_env() {
     if [ "$(uname)" == "Darwin" ];then
-        export PATH="/usr/local/opt/openssl/bin:$PATH"
         macOS="macOS"
+    elif [ "$(uname -m)" == "x86_64" ];then
+        x86_64_arch="true"
+    elif [ "$(uname -m)" == "arm64" ];then
+        arm64_arch="true"
+    elif [ "$(uname -m)" == "aarch64" ];then
+        arm64_arch="true"
     fi
-    [ ! -z "$(openssl version | grep 1.0.2)" ] || [ ! -z "$(openssl version | grep 1.1)" ] || {
-        echo "please install openssl!"
-        #echo "download openssl from https://www.openssl.org."
-        echo "use \"openssl version\" command to check."
-        exit 1
-    }
-
-    if [ "$(uname -m)" != "x86_64" ];then
-        x86_64_arch="false"
-    fi
-}
-
-check_and_install_tassl(){
-if [ -n "${guomi_mode}" ]; then
-    if [ ! -f "${TASSL_CMD}" ];then
-        local tassl_link_perfix="${cdn_link_header}/FISCO-BCOS/tools/tassl-1.0.2"
-        LOG_INFO "Downloading tassl binary from ${tassl_link_perfix}..."
-        if [[ -n "${macOS}" ]];then
-            curl -#LO "${tassl_link_perfix}/tassl_mac.tar.gz"
-            mv tassl_mac.tar.gz tassl.tar.gz
-            export OPENSSL_CONF=/etc/ssl/
-        else
-            if [[ "$(uname -p)" == "aarch64" ]];then
-                curl -#LO "${tassl_link_perfix}/tassl-aarch64.tar.gz"
-                mv tassl-aarch64.tar.gz tassl.tar.gz
-            elif [[ "$(uname -p)" == "x86_64" ]];then
-                curl -#LO "${tassl_link_perfix}/tassl.tar.gz"
-            else
-                LOG_WARN "Unsupported platform"
-                exit 1
-            fi
-        fi
-        tar zxvf tassl.tar.gz && rm tassl.tar.gz
-        chmod u+x tassl
-        mkdir -p "${HOME}"/.fisco
-        mv tassl "${HOME}"/.fisco/tassl
-    fi
-fi
 }
 
 check_name() {
     local name="$1"
     local value="$2"
     [[ "$value" =~ ^[a-zA-Z0-9._-]+$ ]] || {
-        exit_with_clean "$name name [$value] invalid, it should match regex: ^[a-zA-Z0-9._-]+\$"
+        LOG_FATAL "$name name [$value] invalid, it should match regex: ^[a-zA-Z0-9._-]+\$"
     }
 }
 
-file_must_exists() {
-    if [ ! -f "$1" ]; then
-        exit_with_clean "$1 file does not exist, please check!"
-    fi
+generate_random_num(){
+    num=`${OPENSSL_CMD} rand -hex 4`
+    echo $num
 }
+randNum=$(generate_random_num)
 
-dir_must_exists() {
-    if [ ! -d "$1" ]; then
-        exit_with_clean "$1 DIR does not exist, please check!"
-    fi
-}
-
-dir_must_not_exists() {
-    if [ -e "$1" ]; then
-        LOG_WARN "$1 DIR exists, please clean old DIR!"
-        exit 1
-    fi
-}
-
-gen_chain_cert() {
-    local path="${1}"
-    name=$(basename "$path")
-    echo "$path --- $name"
-    dir_must_not_exists "$path"
-    check_name chain "$name"
-
-    chaindir=$path
-    mkdir -p $chaindir
-    # openssl genrsa -out "$chaindir/ca.key" 2048
-    openssl ecparam -out "$chaindir/secp256k1.param" -name secp256k1 2> /dev/null
-    openssl genpkey -paramfile "$chaindir/secp256k1.param" -out "$chaindir/ca.key" 2> /dev/null
-    openssl req -new -x509 -days "${days}" -subj "/CN=$name/O=fisco-bcos/OU=chain" -key "$chaindir/ca.key" -config ${cert_conf_path} -out "$chaindir/ca.crt"
-    rm -f "$chaindir/secp256k1.param"
-}
-
-gen_agency_cert() {
-    local chain="${1}"
-    local agencypath="${2}"
-    name=$(basename "$agencypath")
-
-    dir_must_exists "$chain"
-    file_must_exists "$chain/ca.key"
-    check_name agency "$name"
-    agencydir=$agencypath
-    dir_must_not_exists "$agencydir"
-    mkdir -p $agencydir
-
-    # openssl genrsa -out "$agencydir/agency.key" 2048 2> /dev/null
-    openssl ecparam -out "$agencydir/secp256k1.param" -name secp256k1 2> /dev/null
-    openssl genpkey -paramfile "$agencydir/secp256k1.param" -out "$agencydir/agency.key" 2> /dev/null
-    openssl req -new -sha256 -subj "/CN=$name/O=fisco-bcos/OU=agency" -key "$agencydir/agency.key" -config ${cert_conf_path} -out "$agencydir/agency.csr" 2> /dev/null
-    openssl x509 -req -days 3650 -sha256 -CA "$chain/ca.crt" -CAkey "$chain/ca.key" -CAcreateserial\
-        -in "$agencydir/agency.csr" -out "$agencydir/agency.crt"  -extensions v4_req -extfile "$chain/cert.cnf" 2> /dev/null
-    # cat "$chain/ca.crt" >> "$agencydir/agency.crt"
-    cp $chain/ca.crt $chain/cert.cnf $agencydir/
-    rm -f "$agencydir/agency.csr" "$agencydir/secp256k1.param"
-
-    echo "build $name cert successful!"
-}
-
-gen_cert_secp256k1() {
-    agpath="$1"
-    certpath="$2"
-    name="$3"
-    type="$4"
-    openssl ecparam -out "$certpath/secp256k1.param" -name secp256k1 2> /dev/null
-    openssl genpkey -paramfile "$certpath/secp256k1.param" -out "$certpath/${type}.key" 2> /dev/null
-    openssl pkey -in "$certpath/${type}.key" -pubout -out "$certpath/${type}.pubkey" 2> /dev/null
-    openssl req -new -sha256 -subj "/CN=${name}/O=fisco-bcos/OU=${type}" -key "$certpath/${type}.key" -config ${cert_conf_path} -out "$certpath/${type}.csr" 2> /dev/null
-    if [ -n "${no_agency}" ];then
-        echo "not use $(basename $agpath) to sign $(basename $certpath) ${type}" >>"${logfile}"
-        openssl x509 -req -days "${days}" -sha256 -in "$certpath/${type}.csr" -CAkey "$agpath/../ca.key" -CA "$agpath/../ca.crt" \
-            -force_pubkey "$certpath/${type}.pubkey" -out "$certpath/${type}.crt" -CAcreateserial -extensions v3_req -extfile "$agpath/cert.cnf" 2> /dev/null
-    else
-        openssl x509 -req -days "${days}" -sha256 -in "$certpath/${type}.csr" -CAkey "$agpath/agency.key" -CA "$agpath/agency.crt" \
-            -force_pubkey "$certpath/${type}.pubkey" -out "$certpath/${type}.crt" -CAcreateserial -extensions v3_req -extfile "$agpath/cert.cnf" 2> /dev/null
-        # openssl ec -in $certpath/${type}.key -outform DER | tail -c +8 | head -c 32 | xxd -p -c 32 | cat >$certpath/${type}.private
-        cat "${agpath}/agency.crt" >> "$certpath/${type}.crt"
-    fi
-    cat "${agpath}/../ca.crt" >> "$certpath/${type}.crt"
-    if [[ -n "${root_crt}" ]];then
-        echo "Use user specified root cert as ca.crt, $certpath" >> "${logfile}"
-        cp "${root_crt}" "$certpath/ca.crt"
-    else
-        cp "${agpath}/../ca.crt" "$certpath/"
-    fi
-
-    rm -f "$certpath/${type}.csr" "$certpath/${type}.pubkey" "$certpath/secp256k1.param"
-}
-
-gen_cert() {
-    if [ "" == "$(openssl ecparam -list_curves 2>&1 | grep secp256k1)" ]; then
-        exit_with_clean "openssl don't support secp256k1, please upgrade openssl!"
-    fi
-
-    agpath="${1}"
-    agency=$(basename "$agpath")
-    ndpath="${2}"
-    local cert_name="${3}"
-    node=$(basename "$ndpath")
-    dir_must_exists "$agpath"
-    file_must_exists "$agpath/agency.key"
-    check_name agency "$agency"
-    dir_must_not_exists "$ndpath"
-    check_name node "$node"
-
-    mkdir -p $ndpath
-    gen_cert_secp256k1 "$agpath" "$ndpath" "$node" "${cert_name}"
-    #nodeid is pubkey
-    openssl ec -text -noout -in "$ndpath/${cert_name}.key" 2> /dev/null | sed -n '7,11p' | tr -d ": \n" | awk '{print substr($0,3);}' | cat >"$ndpath"/node.nodeid
-    # openssl x509 -serial -noout -in $ndpath/node.crt | awk -F= '{print $2}' | cat >$ndpath/node.serial
-    cd "$ndpath"
-    if [ "${cert_name}" == "node" ];then
-        mkdir -p "${conf_path}/"
-        mv ./*.* "${conf_path}/"
-        cd "${output_dir}"
-    fi
-}
-
-generate_gmsm2_param()
-{
+generate_sm_sm2_param() {
     local output=$1
-    cat << EOF > "${output}"
+    cat << EOF > ${output}
 -----BEGIN EC PARAMETERS-----
 BggqgRzPVQGCLQ==
 -----END EC PARAMETERS-----
@@ -422,375 +141,9 @@ BggqgRzPVQGCLQ==
 EOF
 }
 
-gen_chain_cert_gm() {
-    local path="${1}"
-    name=$(basename "$path")
-    echo "$path --- $name"
-    dir_must_not_exists "$path"
-    check_name chain "$name"
-
-    chaindir=$path
-    mkdir -p $chaindir
-
-	$TASSL_CMD genpkey -paramfile gmsm2.param -out "$chaindir/gmca.key" 2> /dev/null
-	$TASSL_CMD req -config gmcert.cnf -x509 -days "${days}" -subj "/CN=${name}/O=fisco-bcos/OU=chain" -key "$chaindir/gmca.key" -extensions v3_ca -out "$chaindir/gmca.crt" 2> /dev/null
-}
-
-gen_agency_cert_gm() {
-    local chain="${1}"
-    local agencypath="${2}"
-    name=$(basename "$agencypath")
-
-    dir_must_exists "$chain"
-    file_must_exists "$chain/gmca.key"
-    check_name agency "$name"
-    agencydir=$agencypath
-    dir_must_not_exists "$agencydir"
-    mkdir -p $agencydir
-
-    $TASSL_CMD genpkey -paramfile "$chain/gmsm2.param" -out "$agencydir/gmagency.key" 2> /dev/null
-    $TASSL_CMD req -new -subj "/CN=${name}/O=fisco-bcos/OU=agency" -key "$agencydir/gmagency.key" -config "$chain/gmcert.cnf" -out "$agencydir/gmagency.csr" 2> /dev/null
-    $TASSL_CMD x509 -sm3 -req -CA "$chain/gmca.crt" -CAkey "$chain/gmca.key" -days 3650 -CAcreateserial -in "$agencydir/gmagency.csr" -out "$agencydir/gmagency.crt" -extfile "$chain/gmcert.cnf" -extensions v3_agency_root 2> /dev/null
-    # cat "$chain/gmca.crt" >> "$agencydir/gmagency.crt"
-    cp "$chain/gmca.crt" "$chain/gmcert.cnf" "$chain/gmsm2.param" "$agencydir/"
-    rm -f "$agencydir/gmagency.csr"
-}
-
-gen_node_cert_with_extensions_gm() {
-    capath="$1"
-    certpath="$2"
-    name="$3"
-    type="$4"
-    extensions="$5"
-
-    $TASSL_CMD genpkey -paramfile "$capath/gmsm2.param" -out "$certpath/gm${type}.key" 2> /dev/null
-    $TASSL_CMD req -new -subj "/CN=$name/O=fisco-bcos/OU=${type}" -key "$certpath/gm${type}.key" -config "$capath/gmcert.cnf" -out "$certpath/gm${type}.csr" 2> /dev/null
-    if [ -n "${no_agency}" ];then
-        echo "not use $(basename $capath) to sign $(basename $certpath) ${type}" >>"${logfile}"
-        $TASSL_CMD x509 -sm3 -req -CA "$capath/../gmca.crt" -CAkey "$capath/../gmca.key" -days "${days}" -CAcreateserial -in "$certpath/gm${type}.csr" -out "$certpath/gm${type}.crt" -extfile "$capath/gmcert.cnf" -extensions "$extensions" 2> /dev/null
-    else
-        $TASSL_CMD x509 -sm3 -req -CA "$capath/gmagency.crt" -CAkey "$capath/gmagency.key" -days "${days}" -CAcreateserial -in "$certpath/gm${type}.csr" -out "$certpath/gm${type}.crt" -extfile "$capath/gmcert.cnf" -extensions "$extensions" 2> /dev/null
-    fi
-    rm -f $certpath/gm${type}.csr
-}
-
-gen_node_cert_gm() {
-
-    agpath="${1}"
-    agency=$(basename "$agpath")
-    ndpath="${2}"
-    node=$(basename "$ndpath")
-    dir_must_exists "$agpath"
-    file_must_exists "$agpath/gmagency.key"
-    check_name agency "$agency"
-
-    mkdir -p $ndpath
-    dir_must_exists "$ndpath"
-    check_name node "$node"
-
-    mkdir -p $ndpath
-    gen_node_cert_with_extensions_gm "$agpath" "$ndpath" "$node" node v3_req
-    if [ -z "${no_agency}" ];then cat "${agpath}/gmagency.crt" >> "$ndpath/gmnode.crt";fi
-    cat "${agpath}/../gmca.crt" >> "$ndpath/gmnode.crt"
-    gen_node_cert_with_extensions_gm "$agpath" "$ndpath" "$node" ennode v3enc_req
-    #nodeid is pubkey
-    $TASSL_CMD ec -in "$ndpath/gmnode.key" -text -noout 2> /dev/null | sed -n '7,11p' | sed 's/://g' | tr "\n" " " | sed 's/ //g' | awk '{print substr($0,3);}'  | cat > "$ndpath/gmnode.nodeid"
-
-    #serial
-    if [ "" != "$($TASSL_CMD version 2> /dev/null | grep 1.0.2)" ];
-    then
-        $TASSL_CMD x509 -text -in "$ndpath/gmnode.crt" 2> /dev/null | sed -n '5p' |  sed 's/://g' | tr "\n" " " | sed 's/ //g' | sed 's/[a-z]/\u&/g' | cat > "$ndpath/gmnode.serial"
-    else
-        $TASSL_CMD x509 -text -in "$ndpath/gmnode.crt" 2> /dev/null | sed -n '4p' |  sed 's/ //g' | sed 's/.*(0x//g' | sed 's/)//g' |sed 's/[a-z]/\u&/g' | cat > "$ndpath/gmnode.serial"
-    fi
-    if [[ -n "${gmroot_crt}" ]];then
-        echo "Use user specified gmroot cert as gmca.crt, $ndpath" >>"${logfile}"
-        cp "${gmroot_crt}" "$certpath/gmca.crt"
-    else
-        cp "$agpath/../gmca.crt" "$ndpath"
-    fi
-    cd "$ndpath"
-    mkdir -p "${gm_conf_path}/"
-    mv ./*.* "${gm_conf_path}/"
-    cd "${output_dir}"
-}
-
-generate_config_ini()
-{
-    local output=${1}
-    local ip=${2}
-    local offset=0
-    offset=$(get_value "${ip//[\.:]/_}_port_offset")
-    local node_groups=(${3//,/ })
-    local port_array=
-    read -r -a port_array <<< "${port_start[*]}"
-    local node_index="${5}"
-    if [[ -n "${4}" ]];then
-        read -r -a port_array <<< "${4//,/ }"
-        [ "${node_index}" == "0" ] && { offset=0 && set_value "${ip//[\.:]/_}_port_offset" 0; }
-    fi
-
-    sm_crypto="false"
-    local prefix=""
-    if [ -n "${guomi_mode}" ]; then
-        sm_crypto="true"
-        prefix="gm"
-    fi
-
-    cat << EOF > "${output}"
-[rpc]
-    channel_listen_ip=${default_listen_ip}
-    channel_listen_port=$(( offset + port_array[1] ))
-    jsonrpc_listen_ip=${listen_ip}
-    jsonrpc_listen_port=$(( offset + port_array[2] ))
-[p2p]
-    listen_ip=${default_listen_ip}
-    listen_port=$(( offset + port_array[0] ))
-    ; nodes to connect
-    $ip_list
-
-[certificate_blacklist]
-    ; crl.0 should be nodeid, nodeid's length is 128
-    ;crl.0=
-
-[certificate_whitelist]
-    ; cal.0 should be nodeid, nodeid's length is 128
-    ;cal.0=
-
-[group]
-    group_data_path=data/
-    group_config_path=${conf_path}/
-
-[network_security]
-    ; directory the certificates located in
-    data_path=${conf_path}/
-    ; the node private key file
-    key=${prefix}node.key
-    ; the node certificate file
-    cert=${prefix}node.crt
-    ; the ca certificate file
-    ca_cert=${prefix}ca.crt
-
-[storage_security]
-    enable=false
-    key_manager_ip=
-    key_manager_port=
-    cipher_data_key=
-
-[chain]
-    id=${chain_id}
-    ; use SM crypto or not, should nerver be changed
-    sm_crypto=${sm_crypto}
-    sm_crypto_channel=${sm_crypto_channel}
-
-[compatibility]
-    ; supported_version should nerver be changed
-    supported_version=${compatibility_version}
-
-[log]
-    enable=true
-    log_path=./log
-    ; enable/disable the statistics function
-    enable_statistic=${enable_statistic}
-    ; network statistics interval, unit is second, default is 60s
-    stat_flush_interval=60
-    ; info debug trace
-    level=${log_level}
-    ; MB
-    max_log_file_size=200
-    flush=${auto_flush}
-
-[flow_control]
-    ; restrict QPS of the node
-    ;limit_req=1000
-    ; restrict the outgoing bandwidth of the node
-    ; Mb, can be a decimal
-    ; when the outgoing bandwidth exceeds the limit, the block synchronization operation will not proceed
-    ;outgoing_bandwidth_limit=2
-EOF
-    printf "  [%d] p2p:%-5d  channel:%-5d  jsonrpc:%-5d\n" "${node_index}" $(( offset + port_array[0] )) $(( offset + port_array[1] )) $(( offset + port_array[2] )) >>"${logfile}"
-}
-
-generate_group_genesis()
-{
+generate_sm_cert_conf() {
     local output=$1
-    local index=$2
-    local node_list=$3
-    local sealer_size=$4
-    cat << EOF > "${output}"
-[consensus]
-    ; consensus algorithm now support PBFT(consensus_type=pbft), Raft(consensus_type=raft)
-    ; rpbft(consensus_type=rpbft)
-    consensus_type=${consensus_type}
-    ; the max number of transactions of a block
-    max_trans_num=1000
-    ; in seconds, block consensus timeout, at least 3s
-    consensus_timeout=3
-    ; rpbft related configuration
-    ; the working sealers num of each consensus epoch
-    epoch_sealer_num=${sealer_size}
-    ; the number of generated blocks each epoch
-    epoch_block_num=1000
-    ; the node id of consensusers
-    ${node_list}
-[state]
-    type=${state_type}
-[tx]
-    ; transaction gas limit
-    gas_limit=300000000
-[group]
-    id=${index}
-    timestamp=${timestamp}
-[evm]
-    enable_free_storage=${enable_free_storage}
-EOF
-}
-
-function generate_group_ini()
-{
-    local output="${1}"
-    cat << EOF > "${output}"
-[consensus]
-    ; the ttl for broadcasting pbft message
-    ttl=2
-    ; min block generation time(ms)
-    min_block_generation_time=500
-    enable_dynamic_block_size=true
-    enable_ttl_optimization=true
-    enable_prepare_with_txsHash=true
-    ; The following is the relevant configuration of rpbft
-    ; set true to enable broadcast prepare request by tree
-    broadcast_prepare_by_tree=true
-    ; percent of nodes that broadcast prepare status to, must be between 25 and 100
-    prepare_status_broadcast_percent=33
-    ; max wait time before request missed transactions, ms, must be between 5ms and 1000ms
-    max_request_missedTxs_waitTime=100
-    ; maximum wait time before requesting a prepare, ms, must be between 10ms and 1000ms
-    max_request_prepare_waitTime=100
-
-[storage]
-    ; storage db type, rocksdb / mysql / scalable, rocksdb is recommended
-    type=${storage_type}
-    ; set true to turn on binary log
-    binary_log=${binary_log}
-    ; scroll_threshold=scroll_threshold_multiple*1000, only for scalable
-    scroll_threshold_multiple=2
-    ; set fasle to disable CachedStorage
-    cached_storage=true
-    ; max cache memeory, MB
-    max_capacity=32
-    max_forward_block=10
-    ; only for external, deprecated in v2.3.0
-    max_retry=60
-    topic=DB
-    ; only for mysql
-    db_ip=127.0.0.1
-    db_port=3306
-    db_username=
-    db_passwd=
-    db_name=
-[tx_pool]
-    limit=150000
-    ; transaction pool memory size limit, MB
-    memory_limit=512
-    ; number of threads responsible for transaction notification,
-    ; default is 2, not recommended for more than 8
-    notify_worker_num=2
-[sync]
-    ; max memory size used for block sync, must >= 32MB
-    max_block_sync_memory_size=512
-    idle_wait_ms=200
-    ; send block status by tree-topology, only supported when use pbft
-    sync_block_by_tree=true
-    ; send transaction by tree-topology, only supported when use pbft
-    ; recommend to use when deploy many consensus nodes
-    send_txs_by_tree=true
-    ; must between 1000 to 3000
-    ; only enabled when sync_by_tree is true
-    gossip_interval_ms=1000
-    gossip_peers_number=3
-    ; max number of nodes that broadcast txs status to, recommended less than 5
-    txs_max_gossip_peers_num=5
-[flow_control]
-    ; restrict QPS of the group
-    ;limit_req=1000
-    ; restrict the outgoing bandwidth of the group
-    ; Mb, can be a decimal
-    ; when the outgoing bandwidth exceeds the limit, the block synchronization operation will not proceed
-    ;outgoing_bandwidth_limit=2
-
-[sdk_allowlist]
-    ; When sdk_allowlist is empty, all SDKs can connect to this node
-    ; when sdk_allowlist is not empty, only the SDK in the allowlist can connect to this node
-    ; public_key.0 should be nodeid, nodeid's length is 128
-    ;public_key.0=
-EOF
-}
-
-generate_cert_conf()
-{
-    local output=$1
-    cat << EOF > "${output}"
-[ca]
-default_ca=default_ca
-[default_ca]
-default_days = 365
-default_md = sha256
-
-[req]
-distinguished_name = req_distinguished_name
-req_extensions = v3_req
-[req_distinguished_name]
-countryName = CN
-countryName_default = CN
-stateOrProvinceName = State or Province Name (full name)
-stateOrProvinceName_default =GuangDong
-localityName = Locality Name (eg, city)
-localityName_default = ShenZhen
-organizationalUnitName = Organizational Unit Name (eg, section)
-organizationalUnitName_default = fisco-bcos
-commonName =  Organizational  commonName (eg, fisco-bcos)
-commonName_default = fisco-bcos
-commonName_max = 64
-
-[ v3_req ]
-basicConstraints = CA:FALSE
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment
-
-[ v4_req ]
-basicConstraints = CA:TRUE
-
-EOF
-}
-
-generate_script_template()
-{
-    local filepath=$1
-    mkdir -p $(dirname $filepath)
-    cat << EOF > "${filepath}"
-#!/bin/bash
-SHELL_FOLDER=\$(cd \$(dirname \$0);pwd)
-
-LOG_ERROR() {
-    content=\${1}
-    echo -e "\033[31m[ERROR] \${content}\033[0m"
-}
-
-LOG_INFO() {
-    content=\${1}
-    echo -e "\033[32m[INFO] \${content}\033[0m"
-}
-
-EOF
-    chmod +x ${filepath}
-}
-
-generate_cert_conf_gm()
-{
-    local output=$1
-    cat << EOF > "${output}"
-HOME			= .
-RANDFILE		= $ENV::HOME/.rnd
+    cat <<EOF >"${output}"
 oid_section		= new_oids
 
 [ new_oids ]
@@ -826,7 +179,7 @@ x509_extensions	= usr_cert		# The extensions to add to the cert
 name_opt 	= ca_default		# Subject Name options
 cert_opt 	= ca_default		# Certificate field options
 
-default_days	= 365			# how long to certify for
+default_days	= 36500			# how long to certify for
 default_crl_days= 30			# how long before next CRL
 default_md	= default		# use public key default MD
 preserve	= no			# keep passed DN ordering
@@ -910,33 +263,614 @@ keyUsage = cRLSign, keyCertSign
 EOF
 }
 
-generate_node_scripts()
-{
+generate_cert_conf() {
     local output=$1
-    local docker_tag="v${compatibility_version}"
+    cat <<EOF >"${output}"
+[ca]
+default_ca=default_ca
+
+[default_ca]
+default_days = 36500
+default_md = sha256
+
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+
+[req_distinguished_name]
+countryName = CN
+countryName_default = CN
+stateOrProvinceName = State or Province Name (full name)
+stateOrProvinceName_default =GuangDong
+localityName = Locality Name (eg, city)
+localityName_default = ShenZhen
+organizationalUnitName = Organizational Unit Name (eg, section)
+organizationalUnitName_default = FISCO-BCOS
+commonName =  Organizational  commonName (eg, FISCO-BCOS)
+commonName_default = FISCO-BCOS
+commonName_max = 64
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+
+[ v4_req ]
+basicConstraints = CA:FALSE
+
+EOF
+}
+
+gen_chain_cert() {
+
+    if [ ! -f "${cert_conf}" ]; then
+        generate_cert_conf "${cert_conf}"
+    fi
+
+    local chaindir="${1}"
+
+    file_must_not_exists "${chaindir}"/ca.key
+    file_must_not_exists "${chaindir}"/ca.crt
+    file_must_exists "${cert_conf}"
+
+    mkdir -p "$chaindir"
+    dir_must_exists "$chaindir"
+
+    ${OPENSSL_CMD} genrsa -out "${chaindir}"/ca.key "${rsa_key_length}" 2>/dev/null
+    ${OPENSSL_CMD} req -new -x509 -days "${days}" -subj "/CN=FISCO-BCOS-${randNum}/O=FISCO-BCOS-${randNum}/OU=chain" -key "${chaindir}"/ca.key -config "${cert_conf}" -out "${chaindir}"/ca.crt  2>/dev/null
+    if [ ! -f "${chaindir}/cert.cnf" ];then
+        mv "${cert_conf}" "${chaindir}"
+    fi
+
+    LOG_INFO "Generate ca cert successfully!"
+}
+
+gen_rsa_node_cert() {
+    local capath="${1}"
+    local ndpath="${2}"
+    local type="${3}"
+
+    file_must_exists "$capath/ca.key"
+    file_must_exists "$capath/ca.crt"
+    # check_name node "$node"
+
+    file_must_not_exists "$ndpath"/"${type}".key
+    file_must_not_exists "$ndpath"/"${type}".crt
+
+    mkdir -p "${ndpath}"
+    dir_must_exists "${ndpath}"
+
+    ${OPENSSL_CMD} genrsa -out "${ndpath}"/"${type}".key "${rsa_key_length}" 2>/dev/null
+    ${OPENSSL_CMD} req -new -sha256 -subj "/CN=FISCO-BCOS-${randNum}/O=fisco-bcos/OU=agency" -key "$ndpath"/"${type}".key -config "$capath"/cert.cnf -out "$ndpath"/"${type}".csr
+    ${OPENSSL_CMD} x509 -req -days "${days}" -sha256 -CA "${capath}"/ca.crt -CAkey "$capath"/ca.key -CAcreateserial \
+        -in "$ndpath"/"${type}".csr -out "$ndpath"/"${type}".crt -extensions v4_req -extfile "$capath"/cert.cnf 2>/dev/null
+
+    ${OPENSSL_CMD} pkcs8 -topk8 -in "$ndpath"/"${type}".key -out "$ndpath"/pkcs8_node.key -nocrypt
+    cp "$capath"/ca.crt "$capath"/cert.cnf "$ndpath"/
+
+    rm -f "$ndpath"/"$type".csr
+    rm -f "$ndpath"/"$type".key
+
+    mv "$ndpath"/pkcs8_node.key "$ndpath"/"$type".key
+
+    # extract p2p id
+    ${OPENSSL_CMD} rsa -in "$ndpath"/"$type".key -pubout -out public.pem
+    ${OPENSSL_CMD} rsa -pubin -in public.pem -text -noout 2> /dev/null | sed -n '3,20p' | sed 's/://g' | tr "\n" " " | sed 's/ //g' | awk '{print substr($0,3);}'  | cat > "${ndpath}/${type}.nodeid"
+    rm -f public.pem
+
+    LOG_INFO "Generate ${ndpath} cert successful!"
+}
+
+download_bin()
+{
+    if [ ! -z "${binary_path}" ];then
+        LOG_INFO "Use binary ${binary_path}"
+        return
+    fi
+    if [ "${x86_64_arch}" != "true" ] && [ "${arm64_arch}" != "true" ] && [ "${macOS}" != "macOS" ];then exit_with_clean "We only offer x86_64/aarch64 and macOS precompiled fisco-bcos binary, your OS architecture is not x86_64/aarch64 and macOS. Please compile from source."; fi
+    binary_path="bin/${binary_name}"
+    if [ -n "${macOS}" ];then
+        package_name="${binary_name}-macOS-x86_64.tar.gz"
+    elif [ "${arm64_arch}" == "true" ];then
+        package_name="${binary_name}-linux-aarch64.tar.gz"
+    elif [ "${x86_64_arch}" == "true" ];then
+    	package_name="${binary_name}-linux-x86_64.tar.gz"
+    fi
+
+    local Download_Link="${cdn_link_header}/FISCO-BCOS/releases/${compatibility_version}/${package_name}"
+    local github_link="https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${compatibility_version}/${package_name}"
+    # the binary can obtained from the cos
+    if [ $(curl -IL -o /dev/null -s -w %{http_code} "${Download_Link}") == 200 ];then
+        # try cdn_link
+        LOG_INFO "Downloading fisco-bcos binary from ${Download_Link} ..."
+        curl -#LO "${Download_Link}"
+    else
+        LOG_INFO "Downloading fisco-bcos binary from ${github_link} ..."
+        curl -#LO "${github_link}"
+    fi
+    if [[ "$(ls -al . | grep "fisco-bcos.*tar.gz" | awk '{print $5}')" -lt "1048576" ]];then
+        exit_with_clean "Download fisco-bcos failed, please try again. Or download and extract it manually from ${Download_Link} and use -e option."
+    fi
+    mkdir -p bin && mv ${package_name} bin && cd bin && tar -zxf ${package_name} && cd ..
+    chmod a+x ${binary_path}
+}
+
+download_lightnode_bin()
+{
+    lightnode_binary_path="bin/${lightnode_binary_name}"
+    if [ -n "${macOS}" ];then
+        light_package_name="${lightnode_binary_name}-macOS-x86_64.tar.gz"
+    elif [ "${arm64_arch}" == "true" ];then
+        light_package_name="${lightnode_binary_name}-linux-aarch64.tar.gz"
+    elif [ "${x86_64_arch}" == "true" ];then
+    	light_package_name="${lightnode_binary_name}-linux-x86_64.tar.gz"
+    fi
+
+    local Download_Link="${cdn_link_header}/FISCO-BCOS/releases/${compatibility_version}/${light_package_name}"
+    local github_link="https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${compatibility_version}/${light_package_name}"
+    echo "Download_Link is ${Download_Link}"
+    # the binary can obtained from the cos
+    if [ $(curl -IL -o /dev/null -s -w %{http_code} "${Download_Link}") == 200 ];then
+        # try cdn_link
+        echo "=============="
+        LOG_INFO "Downloading fisco-bcos lightnode binary from ${Download_Link} ..."
+        curl -#LO "${Download_Link}"
+    else
+        LOG_INFO "Downloading fisco-bcos lightnode binary from ${github_link} ..."
+        curl -#LO "${github_link}"
+    fi
+    if [[ "$(ls -al . | grep "fisco-bcos-lightnode.*tar.gz" | awk '{print $5}')" -lt "1048576" ]];then
+        exit_with_clean "Download fisco-bcos-lightnode failed, please try again. Or download and extract it manually from ${Download_Link} and use -e option."
+    fi
+    mkdir -p bin && mv ${light_package_name} bin && cd bin && tar -zxf ${light_package_name} && cd ..
+    chmod a+x ${lightnode_binary_path}
+}
+
+download_monitor_bin()
+{
+    if [ ! -z "${mtail_binary_path}" ];then
+        LOG_INFO "Use binary ${mtail_binary_path}"
+        return
+    fi
+    local platform="$(uname -m)"
+    local mtail_postfix=""
+    if [[ -n "${macOS}" ]];then
+        if [[ "${platform}" == "arm64" ]];then
+            mtail_postfix="Darwin_arm64"
+        elif [[ "${platform}" == "x86_64" ]];then
+            mtail_postfix="Darwin_x86_64"
+        else
+            LOG_FATAL "Unsupported platform ${platform} for mtail"
+            exit 1
+        fi
+    else
+        if [[ "${platform}" == "aarch64" ]];then
+            mtail_postfix="Linux_arm64"
+        elif [[ "${platform}" == "x86_64" ]];then
+            mtail_postfix="Linux_x86_64"
+        else
+            LOG_FATAL "Unsupported platform ${platform} for mtail"
+            exit 1
+        fi
+    fi
+    mtail_binary_path="bin/${mtail_binary_name}"
+    package_name="${mtail_binary_name}_${compatibility_mtail_version}_${mtail_postfix}.tar.gz"
+
+    local Download_Link="${cdn_link_header}/FISCO-BCOS/tools/mtail/${package_name}"
+    local github_link="https://github.com/google/mtail/releases/download/v${compatibility_mtail_version}/${package_name}"
+    # the binary can obtained from the cos
+    if [ $(curl -IL -o /dev/null -s -w %{http_code} "${Download_Link}") == 200 ];then
+        # try cdn_link
+        LOG_INFO "Downloading monitor binary from ${Download_Link} ..."
+        curl -#LO "${Download_Link}"
+    else
+        LOG_INFO "Downloading monitor binary from ${github_link} ..."
+        curl -#LO "${github_link}"
+    fi
+    mkdir -p bin && mv ${package_name} bin && cd bin && tar -zxf ${package_name} && cd ..
+    chmod a+x ${mtail_binary_path}
+}
+
+
+gen_sm_chain_cert() {
+    local chaindir="${1}"
+    name=$(basename "$chaindir")
+    check_name chain "$name"
+
+    if [ ! -f "${sm_cert_conf}" ]; then
+        generate_sm_cert_conf ${sm_cert_conf}
+    fi
+
+    generate_sm_sm2_param "${sm2_params}"
+
+    mkdir -p "$chaindir"
+    dir_must_exists "$chaindir"
+
+    "$OPENSSL_CMD" genpkey -paramfile "${sm2_params}" -out "$chaindir/sm_ca.key" 2>/dev/null
+    "$OPENSSL_CMD" req -config sm_cert.cnf -x509 -days "${days}" -subj "/CN=FISCO-BCOS-${randNum}/O=FISCO-BCOS-${randNum}/OU=chain" -key "$chaindir/sm_ca.key" -extensions v3_ca -out "$chaindir/sm_ca.crt" 2>/dev/null
+    if [ ! -f "${chaindir}/${sm_cert_conf}" ];then
+        cp "${sm_cert_conf}" "${chaindir}"
+    fi
+    if [ ! -f "${chaindir}/${sm2_params}" ];then
+        cp "${sm2_params}" "${chaindir}"
+    fi
+}
+
+gen_sm_node_cert_with_ext() {
+    local capath="$1"
+    local certpath="$2"
+    local type="$3"
+    local extensions="$4"
+
+    file_must_exists "$capath/sm_ca.key"
+    file_must_exists "$capath/sm_ca.crt"
+
+    file_must_not_exists "$ndpath/sm_${type}.crt"
+    file_must_not_exists "$ndpath/sm_${type}.key"
+
+    "$OPENSSL_CMD" genpkey -paramfile "$capath/${sm2_params}" -out "$certpath/sm_${type}.key" 2> /dev/null
+    "$OPENSSL_CMD" req -new -subj "/CN=FISCO-BCOS-${randNum}/O=fisco-bcos/OU=${type}" -key "$certpath/sm_${type}.key" -config "$capath/sm_cert.cnf" -out "$certpath/sm_${type}.csr" 2> /dev/null
+
+    "$OPENSSL_CMD" x509 -sm3 -req -CA "$capath/sm_ca.crt" -CAkey "$capath/sm_ca.key" -days "${days}" -CAcreateserial -in "$certpath/sm_${type}.csr" -out "$certpath/sm_${type}.crt" -extfile "$capath/sm_cert.cnf" -extensions "$extensions" 2> /dev/null
+
+    rm -f "$certpath/sm_${type}.csr"
+}
+
+gen_sm_node_cert() {
+    local capath="${1}"
+    local ndpath="${2}"
+    local type="${3}"
+
+    file_must_exists "$capath/sm_ca.key"
+    file_must_exists "$capath/sm_ca.crt"
+
+    mkdir -p "$ndpath"
+    dir_must_exists "$ndpath"
+    local node=$(basename "$ndpath")
+    check_name node "$node"
+
+    gen_sm_node_cert_with_ext "$capath" "$ndpath" "${type}" v3_req
+    gen_sm_node_cert_with_ext "$capath" "$ndpath" "en${type}" v3enc_req
+    #nodeid is pubkey
+    $OPENSSL_CMD ec -in "$ndpath/sm_${type}.key" -text -noout 2> /dev/null | sed -n '7,11p' | sed 's/://g' | tr "\n" " " | sed 's/ //g' | awk '{print substr($0,3);}'  | cat > "${ndpath}/sm_${type}.nodeid"
+    cp "$capath/sm_ca.crt" "$ndpath"
+}
+
+help() {
+    echo $1
+    cat <<EOF
+Usage:
+    -C <Command>                        [Optional] the command, support 'deploy' and 'expand' now, default is deploy
+    -g <group id>                       [Optional] set the group id, default: group0
+    -I <chain id>                       [Optional] set the chain id, default: chain0
+    -v <FISCO-BCOS binary version>      [Optional] Default is the latest ${default_version}
+    -l <IP list>                        [Required] "ip1:nodeNum1,ip2:nodeNum2" e.g:"192.168.0.1:2,192.168.0.2:3"
+    -f <IP list file>                   [Optional] split by line, every line should be "ip:nodeNum agencyName groupList p2p_port,channel_port,jsonrpc_port". eg "127.0.0.1:4 agency1 1,2 30300,20200,8545"
+    -L <fisco bcos lightnode exec>      [Optional] fisco bcos lightnode executable, input "download_binary" to download lightnode binary or assign correct lightnode binary path
+    -e <fisco-bcos exec>                [Optional] fisco-bcos binary exec
+    -t <mtail exec>                     [Optional] mtail binary exec
+    -o <output dir>                     [Optional] output directory, default ./nodes
+    -p <Start port>                     [Optional] Default 30300,20200 means p2p_port start from 30300, rpc_port from 20200
+    -s <SM model>                       [Optional] SM SSL connection or not, default is false
+    -H <HSM model>                      [Optional] Whether to use HSM(Hardware secure module), default is false
+    -c <Config Path>                    [Required when expand node] Specify the path of the expanded node config.ini, config.genesis and p2p connection file nodes.json
+    -d <CA cert path>                   [Required when expand node] When expanding the node, specify the path where the CA certificate and private key are located
+    -D <docker mode>                    Default off. If set -D, build with docker
+    -a <Auth account>                   [Optional] when Auth mode Specify the admin account address.
+    -w <WASM mode>                      [Optional] Whether to use the wasm virtual machine engine, default is false
+    -R <Serial_mode>                    [Optional] Whether to use serial execute,default is true
+    -k <key page size>                  [Optional] key page size, default is 10240
+    -m <fisco-bcos monitor>             [Optional] node monitor or not, default is false
+    -i <fisco-bcos monitor ip/port>     [Optional] When expanding the node, should specify ip and port
+    -M <fisco-bcos monitor>             [Optional] When expanding the node, specify the path where prometheus are located
+    -z <Generate tar packet>            [Optional] Pack the data on the chain to generate tar packet
+    -n <node key path>                  [Optional] set the path of the node key file to load nodeid
+    -N <node path>                      [Optional] set the path of the node modified to multi ca mode
+    -u <multi ca path>                  [Optional] set the path of another ca for multi ca mode
+    -h Help
+
+deploy nodes e.g
+    bash $0 -p 30300,20200 -l 127.0.0.1:4 -o nodes -e ./fisco-bcos
+    bash $0 -p 30300,20200 -l 127.0.0.1:4 -o nodes -e ./fisco-bcos -m
+    bash $0 -p 30300,20200 -l 127.0.0.1:4 -o nodes -e ./fisco-bcos -s
+expand node e.g
+    bash $0 -C expand -c config -d config/ca -o nodes/127.0.0.1/node5 -e ./fisco-bcos
+    bash $0 -C expand -c config -d config/ca -o nodes/127.0.0.1/node5 -e ./fisco-bcos -m -i 127.0.0.1:5 -M monitor/prometheus/prometheus.yml
+    bash $0 -C expand -c config -d config/ca -o nodes/127.0.0.1/node5 -e ./fisco-bcos -s
+    bash $0 -C expand_lightnode -c config -d config/ca -o nodes/lightnode1
+    bash $0 -C expand_lightnode -c config -d config/ca -o nodes/lightnode1 -L ./fisco-bcos-lightnode
+modify node e.g
+    bash $0 -C modify -N ./node0 -u ./ca/ca.crt
+    bash $0 -C modify -N ./node0 -u ./ca/ca.crt -s
+EOF
+    exit 0
+}
+
+parse_params() {
+    while getopts "f:l:C:c:o:e:t:p:d:g:G:L:v:i:I:M:k:zwDshHmn:R:a:N:u:" option; do
+        case $option in
+        f)  ip_file=$OPTARG
+            use_ip_param="false"
+            ;;
+        l)
+            ip_param=$OPTARG
+            use_ip_param="true"
+            ;;
+        L)
+            lightnode_flag="true"
+            lightnode_binary_path="$OPTARG"
+            if [ "${lightnode_binary_path}" == "download_binary" ]; then
+               download_lightnode_binary="true"
+            fi
+            ;;
+        o)
+            output_dir="$OPTARG"
+            ;;
+        e)
+            binary_path="$OPTARG"
+            file_must_exists "${binary_path}"
+            ;;
+        t)
+            mtail_binary_path="$OPTARG"
+            file_must_exists "${mtail_binary_path}"
+            ;;
+        C) command="${OPTARG}"
+            ;;
+        d) ca_dir="${OPTARG}"
+        ;;
+        c) config_path="${OPTARG}"
+        ;;
+        p)
+            port_start=(${OPTARG//,/ })
+            if [ ${#port_start[@]} -ne 2 ]; then LOG_WARN "p2p start port error. e.g: 30300" && exit 1; fi
+            ;;
+        s) sm_mode="true" ;;
+        H) enable_hsm="true";;
+        g) default_group="${OPTARG}"
+            check_name "group" "${default_group}"
+            ;;
+        G) genesis_conf_path="${OPTARG}"
+            ;;
+        I) default_chainid="${OPTARG}"
+            check_name "chain" "${default_chainid}"
+            ;;
+        m)
+           monitor_mode="true"
+           ;;
+        n)
+           node_key_dir="${OPTARG}"
+           dir_must_exists "${node_key_dir}"
+           ;;
+        i)
+           mtail_ip_param="${OPTARG}"
+           ;;
+        k) key_page_size="${OPTARG}";;
+        M) prometheus_dir="${OPTARG}" ;;
+        D) docker_mode="true"
+           if [ -n "${macOS}" ];then
+                LOG_FATAL "Not support docker mode for macOS now"
+           fi
+        ;;
+        w) wasm_mode="true"
+          auth_mode="false"
+          ;;
+        R) serial_mode="${OPTARG}";;
+        a)
+          auth_admin_account="${OPTARG}"
+          auth_mode="true"
+        ;;
+        v) compatibility_version="${OPTARG}";;
+        z) make_tar="true";;
+        N)
+            modify_node_path=$OPTARG
+            dir_must_exists "${modify_node_path}"
+            ;;
+        u)
+            multi_ca_path="$OPTARG"
+            local last_char=${multi_ca_path: -1}
+            if [ ${last_char} == "/" ]; then
+                multi_ca_path=${OPTARG%/*}
+            fi
+            file_must_exists "${multi_ca_path}"
+            ;;
+        h) help ;;
+        *) help ;;
+        esac
+    done
+}
+
+print_result() {
+    echo "=============================================================="
+    LOG_INFO "GroupID              : ${default_group}"
+    LOG_INFO "ChainID              : ${default_chainid}"
+    if [ -z "${docker_mode}" ];then
+        LOG_INFO "${binary_name} path      : ${binary_path}"
+    else
+        LOG_INFO "docker mode      : ${docker_mode}"
+        LOG_INFO "docker tag       : ${compatibility_version}"
+    fi
+    LOG_INFO "Auth mode            : ${auth_mode}"
+    if ${auth_mode} ; then
+        LOG_INFO "Admin account        : ${auth_admin_account}"
+    fi
+    LOG_INFO "Start port           : ${port_start[*]}"
+    LOG_INFO "Server IP            : ${ip_array[*]}"
+    LOG_INFO "SM model             : ${sm_mode}"
+    LOG_INFO "enable HSM           : ${enable_hsm}"
+    LOG_INFO "Output dir           : ${output_dir}"
+    LOG_INFO "All completed. Files in ${output_dir}"
+}
+
+generate_all_node_scripts() {
+    local output=${1}
+    mkdir -p ${output}
+
+    cat <<EOF >"${output}/start_all.sh"
+#!/bin/bash
+dirpath="\$(cd "\$(dirname "\$0")" && pwd)"
+cd "\${dirpath}"
+
+dirs=(\$(ls -l \${dirpath} | awk '/^d/ {print \$NF}'))
+for dir in \${dirs[*]}
+do
+    if [[ -f "\${dirpath}/\${dir}/config.ini" && -f "\${dirpath}/\${dir}/start.sh" ]];then
+        echo "try to start \${dir}"
+        bash \${dirpath}/\${dir}/start.sh &
+    fi
+done
+wait
+EOF
+    chmod u+x "${output}/start_all.sh"
+
+    cat <<EOF >"${output}/stop_all.sh"
+#!/bin/bash
+dirpath="\$(cd "\$(dirname "\$0")" && pwd)"
+cd "\${dirpath}"
+
+dirs=(\$(ls -l \${dirpath} | awk '/^d/ {print \$NF}'))
+for dir in \${dirs[*]}
+do
+    if [[ -f "\${dirpath}/\${dir}/config.ini" && -f "\${dirpath}/\${dir}/stop.sh" ]];then
+        echo "try to stop \${dir}"
+        bash \${dirpath}/\${dir}/stop.sh
+    fi
+done
+wait
+EOF
+    chmod u+x "${output}/stop_all.sh"
+}
+
+generate_script_template()
+{
+    local filepath=$1
+    mkdir -p $(dirname $filepath)
+    cat << EOF > "${filepath}"
+#!/bin/bash
+SHELL_FOLDER=\$(cd \$(dirname \$0);pwd)
+
+LOG_ERROR() {
+    content=\${1}
+    echo -e "\033[31m[ERROR] \${content}\033[0m"
+}
+
+LOG_INFO() {
+    content=\${1}
+    echo -e "\033[32m[INFO] \${content}\033[0m"
+}
+
+EOF
+    chmod +x ${filepath}
+}
+
+generate_lightnode_scripts() {
+    local output=${1}
+    local lightnode_binary_name=${2}
+
     generate_script_template "$output/start.sh"
+    generate_script_template "$output/stop.sh"
+    chmod u+x "${output}/stop.sh"
+
     local ps_cmd="\$(ps aux|grep \${fisco_bcos}|grep -v grep|awk '{print \$2}')"
-    local start_cmd="nohup \${fisco_bcos} -c config.ini >>nohup.out 2>&1 &"
+    local start_cmd="nohup \${fisco_bcos} -c config.ini -g config.genesis >>nohup.out 2>&1 &"
+    local stop_cmd="kill \${node_pid}"
+
+     cat <<EOF >> "${output}/start.sh"
+fisco_bcos=\${SHELL_FOLDER}/${lightnode_binary_name}
+cd \${SHELL_FOLDER}
+node=\$(basename \${SHELL_FOLDER})
+node_pid=${ps_cmd}
+ulimit -n 1024
+if [ ! -z \${node_pid} ];then
+    kill -USR1 \${node_pid}
+    kill -USR2 \${node_pid}
+    echo " \${node} is running, pid is \$node_pid."
+    exit 0
+else
+    ${start_cmd}
+    sleep 1.5
+fi
+try_times=4
+i=0
+while [ \$i -lt \${try_times} ]
+do
+    node_pid=${ps_cmd}
+    if [[ ! -z \${node_pid} ]];then
+        echo -e "\033[32m \${node} start successfully pid=\${node_pid}\033[0m"
+        exit 0
+    fi
+    sleep 0.5
+    ((i=i+1))
+done
+echo -e "\033[31m  Exceed waiting time. Please try again to start \${node} \033[0m"
+${log_cmd}
+EOF
+    chmod u+x "${output}/start.sh"
+    generate_script_template "$output/stop.sh"
+    cat <<EOF >> "${output}/stop.sh"
+fisco_bcos=\${SHELL_FOLDER}/${lightnode_binary_name}
+node=\$(basename \${SHELL_FOLDER})
+node_pid=${ps_cmd}
+try_times=10
+i=0
+if [ -z \${node_pid} ];then
+    echo " \${node} isn't running."
+    exit 0
+fi
+
+[ ! -z \${node_pid} ] && ${stop_cmd} > /dev/null
+while [ \$i -lt \${try_times} ]
+do
+    sleep 1
+    node_pid=${ps_cmd}
+    if [ -z \${node_pid} ];then
+        echo -e "\033[32m stop \${node} success.\033[0m"
+        exit 0
+    fi
+    ((i=i+1))
+done
+echo "  Exceed maximum number of retries. Please try again to stop \${node}"
+exit 1
+EOF
+    chmod u+x "${output}/stop.sh"
+}
+
+generate_node_scripts() {
+    local output=${1}
+    local docker_mode="${2}"
+    local docker_tag="${compatibility_version}"
+    local ps_cmd="\$(ps aux|grep \${fisco_bcos}|grep -v grep|awk '{print \$2}')"
+    local start_cmd="nohup \${fisco_bcos} -c config.ini -g config.genesis >>nohup.out 2>&1 &"
     local stop_cmd="kill \${node_pid}"
     local pid="pid"
     local log_cmd="tail -n20  nohup.out"
     local check_success="\$(${log_cmd} | grep running)"
-    local fisco_bin_path="../${bcos_bin_name}"
-    if [ -n "${deploy_mode}" ];then fisco_bin_path="${bcos_bin_name}"; fi
     if [ -n "${docker_mode}" ];then
         ps_cmd="\$(docker ps |grep \${SHELL_FOLDER//\//} | grep -v grep|awk '{print \$1}')"
-        start_cmd="docker run -d --rm --name \${SHELL_FOLDER//\//} -v \${SHELL_FOLDER}:/data --network=host -w=/data fiscoorg/fiscobcos:${docker_tag} -c config.ini"
+        start_cmd="docker run -d --rm --name \${SHELL_FOLDER//\//} -v \${SHELL_FOLDER}:/data --network=host -w=/data fiscoorg/fiscobcos:${docker_tag} -c config.ini -g config.genesis"
         stop_cmd="docker kill \${node_pid} 2>/dev/null"
         pid="container id"
         log_cmd="tail -n20 \$(docker inspect --format='{{.LogPath}}' \${SHELL_FOLDER//\//})"
         check_success="success"
     fi
-    cat << EOF >> "$output/start.sh"
-fisco_bcos=\${SHELL_FOLDER}/${fisco_bin_path}
+    generate_script_template "$output/start.sh"
+    cat <<EOF >> "${output}/start.sh"
+fisco_bcos=\${SHELL_FOLDER}/../${binary_name}
+export RUST_LOG=bcos_wasm=error
 cd \${SHELL_FOLDER}
 node=\$(basename \${SHELL_FOLDER})
 node_pid=${ps_cmd}
-if [ -n "\${node_pid}" ];then
+ulimit -n 1024
+#start monitor
+dirs=(\$(ls -l \${SHELL_FOLDER} | awk '/^d/ {print \$NF}'))
+for dir in \${dirs[*]}
+do
+    if [[ -f "\${SHELL_FOLDER}/\${dir}/node.mtail" && -f "\${SHELL_FOLDER}/\${dir}/start_mtail_monitor.sh" ]];then
+        echo "try to start \${dir}"
+        bash \${SHELL_FOLDER}/\${dir}/start_mtail_monitor.sh &
+    fi
+done
+
+
+if [ ! -z \${node_pid} ];then
     echo " \${node} is running, ${pid} is \$node_pid."
     exit 0
 else
@@ -949,8 +883,8 @@ while [ \$i -lt \${try_times} ]
 do
     node_pid=${ps_cmd}
     success_flag=${check_success}
-    if [[ -n "\${node_pid}" && -n "\${success_flag}" ]];then
-        echo -e "\033[32m \${node} start successfully\033[0m"
+    if [[ ! -z \${node_pid} && ! -z "\${success_flag}" ]];then
+        echo -e "\033[32m \${node} start successfully pid=\${node_pid}\033[0m"
         exit 0
     fi
     sleep 0.5
@@ -958,23 +892,34 @@ do
 done
 echo -e "\033[31m  Exceed waiting time. Please try again to start \${node} \033[0m"
 ${log_cmd}
-exit 1
 EOF
+    chmod u+x "${output}/start.sh"
     generate_script_template "$output/stop.sh"
-    cat << EOF >> "$output/stop.sh"
-fisco_bcos=\${SHELL_FOLDER}/${fisco_bin_path}
+    cat <<EOF >> "${output}/stop.sh"
+fisco_bcos=\${SHELL_FOLDER}/../${binary_name}
 node=\$(basename \${SHELL_FOLDER})
 node_pid=${ps_cmd}
-try_times=20
+try_times=10
 i=0
 if [ -z \${node_pid} ];then
     echo " \${node} isn't running."
     exit 0
 fi
-[ -n "\${node_pid}" ] && ${stop_cmd} > /dev/null
+
+#Stop monitor here
+dirs=(\$(ls -l \${SHELL_FOLDER} | awk '/^d/ {print \$NF}'))
+for dir in \${dirs[*]}
+do
+    if [[ -f "\${SHELL_FOLDER}/\${dir}/node.mtail" && -f "\${SHELL_FOLDER}/\${dir}/stop_mtail_monitor.sh" ]];then
+        echo "try to start \${dir}"
+        bash \${SHELL_FOLDER}/\${dir}/stop_mtail_monitor.sh &
+    fi
+done
+
+[ ! -z \${node_pid} ] && ${stop_cmd} > /dev/null
 while [ \$i -lt \${try_times} ]
 do
-    sleep 0.6
+    sleep 1
     node_pid=${ps_cmd}
     if [ -z \${node_pid} ];then
         echo -e "\033[32m stop \${node} success.\033[0m"
@@ -985,896 +930,1295 @@ done
 echo "  Exceed maximum number of retries. Please try again to stop \${node}"
 exit 1
 EOF
-    generate_script_template "$output/scripts/load_new_groups.sh"
-    cat << EOF >> "$output/scripts/load_new_groups.sh"
-cd \${SHELL_FOLDER}/../
-NODE_FOLDER=\$(pwd)
-fisco_bcos=\${NODE_FOLDER}/${fisco_bin_path}
-node=\$(basename \${NODE_FOLDER})
+    chmod u+x "${output}/stop.sh"
+}
+
+generate_mtail_scripts() {
+    local output=${1}
+    local ip="${2}"
+    local port="${3}"
+    local node="${4}"
+    local ps_cmd="\$(ps aux|grep \${mtail}|grep -v grep|awk '{print \$2}')"
+    local start_cmd="nohup \${mtail} -logtostderr -progs \${mtailScript} -logs '../log/*.log' -port ${port} >>nohup.out 2>&1 &"
+    local stop_cmd="kill \${node_pid}"
+    local pid="pid"
+    local log_cmd="tail -n20  nohup.out"
+    local check_success="\$(${log_cmd} | grep Listening)"
+
+    mkdir -p $(dirname $output/mtail/node.mtail)
+    cat <<EOF >> "${output}/mtail/node.mtail"
+hidden text host
+host = "${ip}"
+
+#node
+hidden text node
+node = "${node}"
+
+#chain id
+hidden text chain
+chain = "${default_chainid}"
+
+
+
+#group id
+hidden text group
+group = "${default_group}"
+
+
+gauge p2p_session_actived by host , node
+/\[P2PService\]\[Service\]\[METRIC\]heartBeat,connected count=(?P<count>\d+)/ {
+  p2p_session_actived[host][node] = \$count
+}
+
+gauge block_exec_duration_milliseconds_gauge by chain , group , host , node
+/\[CONSENSUS\]\[Core\]\[METRIC\]asyncExecuteBlock success.*?timeCost=(?P<timeCost>\d+)/ {
+   block_exec_duration_milliseconds_gauge[chain][group][host][node] = \$timeCost
+}
+
+histogram block_exec_duration_milliseconds buckets 0, 50, 100, 150 by chain , group , host , node
+/\[CONSENSUS\]\[Core\]\[METRIC\]asyncExecuteBlock success.*?timeCost=(?P<timeCost>\d+)/ {
+   block_exec_duration_milliseconds[chain][group][host][node] = \$timeCost
+}
+
+gauge block_commit_duration_milliseconds_gauge by chain , group , host , node
+/\[CONSENSUS\]\[PBFT\]\[STORAGE\]\[METRIC\]commitStableCheckPoint success.*?timeCost=(?P<timeCost>\d+)/ {
+   block_commit_duration_milliseconds_gauge[chain][group][host][node] = \$timeCost
+}
+
+
+histogram block_commit_duration_milliseconds buckets 0, 50, 100, 150 by chain , group , host , node
+/\[CONSENSUS\]\[PBFT\]\[STORAGE\]\[METRIC\]commitStableCheckPoint success.*?timeCost=(?P<timeCost>\d+)/ {
+   block_commit_duration_milliseconds[chain][group][host][node] = \$timeCost
+}
+
+gauge ledger_block_height by chain , group , host , node
+/\[LEDGER\]\[METRIC\]asyncPrewriteBlock,number=(?P<number>\d+)/ {
+  ledger_block_height[chain][group][host][node] = \$number
+}
+
+gauge txpool_pending_tx_size by chain , group , host , node
+/\[TXPOOL\]\[METRIC\]batchFetchTxs success,.*?pendingTxs=(?P<pendingTxs>\d+)/ {
+  txpool_pending_tx_size[chain][group][host][node] = \$pendingTxs
+}
+EOF
+
+    generate_script_template "$output/mtail/start_mtail_monitor.sh"
+    cat <<EOF >> "${output}/mtail/start_mtail_monitor.sh"
+mtail=\${SHELL_FOLDER}/../../mtail
+mtailScript=\${SHELL_FOLDER}/node.mtail
+export RUST_LOG=bcos_wasm=error
+cd \${SHELL_FOLDER}
+node=\$(basename \${SHELL_FOLDER})
 node_pid=${ps_cmd}
-if [ -n "\${node_pid}" ];then
-    echo "\${node} is trying to load new groups. Check log for more information."
-    DATA_FOLDER=\${NODE_FOLDER}/data
-    for dir in \$(ls \${DATA_FOLDER})
-    do
-        if [[ -d "\${DATA_FOLDER}/\${dir}" ]] && [[ -n "\$(echo \${dir} | grep -E "^group\d+$")" ]]; then
-            STATUS_FILE=\${DATA_FOLDER}/\${dir}/.group_status
-            if [ ! -f "\${STATUS_FILE}" ]; then
-                echo "STOPPED" > \${STATUS_FILE}
+if [ ! -z \${node_pid} ];then
+    echo " \${node} is Listening, ${pid} is \$node_pid."
+    exit 0
+else
+    ${start_cmd}
+    sleep 1.5
+fi
+
+try_times=4
+i=0
+while [ \$i -lt \${try_times} ]
+do
+    node_pid=${ps_cmd}
+    success_flag=${check_success}
+    if [[ ! -z \${node_pid} && ! -z "\${success_flag}" ]];then
+        echo -e "\033[32m \${node} start successfully\033[0m"
+        exit 0
+    fi
+    sleep 0.5
+    ((i=i+1))
+done
+echo -e "\033[31m  Exceed waiting time. Please try again to start \${node} \033[0m"
+${log_cmd}
+EOF
+    chmod u+x "${output}/mtail/start_mtail_monitor.sh"
+
+
+    generate_script_template "$output/mtail/stop_mtail_monitor.sh"
+    cat <<EOF >> "${output}/mtail/stop_mtail_monitor.sh"
+mtail=\${SHELL_FOLDER}/../../mtail
+node=\$(basename \${SHELL_FOLDER})
+node_pid=${ps_cmd}
+try_times=10
+i=0
+if [ -z \${node_pid} ];then
+    echo " \${node} isn't running."
+    exit 0
+fi
+[ ! -z \${node_pid} ] && ${stop_cmd} > /dev/null
+
+while [ \$i -lt \${try_times} ]
+do
+    sleep 1
+    node_pid=${ps_cmd}
+    if [ -z \${node_pid} ];then
+        echo -e "\033[32m stop \${node} success.\033[0m"
+        exit 0
+    fi
+    ((i=i+1))
+done
+echo "  Exceed maximum number of retries. Please try again to stop \${node}"
+exit 1
+EOF
+    chmod u+x "${output}/mtail/stop_mtail_monitor.sh"
+}
+
+
+generate_monitor_scripts() {
+    local output=${1}
+    local mtail_host_list=""
+    local ip_params="${2}"
+    local monitor_ip="${3}"
+    local ip_array=(${ip_params//,/ })
+    local ip_length=${#ip_array[@]}
+    local i=0
+    for (( ; i < ip_length; i++)); do
+        local ip=${ip_array[i]}
+        local delim=""
+        if [[ $i == $((ip_length - 1)) ]]; then
+            delim=""
+        else
+            delim=","
+        fi
+        mtail_host_list="${mtail_host_list}'${ip}'${delim}"
+    done
+
+
+    mkdir -p $(dirname $output/compose.yaml)
+    cat <<EOF >> "${output}/compose.yaml"
+version: '2'
+
+services:
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /etc/localtime:/etc/localtime
+    network_mode: host
+   # ports:
+   #   - \${PROMETHEUS_PORT}:9090
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana-oss:7.3.3
+    restart: unless-stopped
+    user: '0'
+    network_mode: host
+   # ports:
+   #   - \${GRAFANA_PORT}:3000
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/data:/var/lib/grafana
+      - ./grafana/logs:/var/log/grafana
+      - /etc/localtime:/etc/localtime
+    environment:
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+EOF
+
+    mkdir -p $(dirname $output/prometheus/prometheus.yml)
+    cat <<EOF >> "${output}/prometheus/prometheus.yml"
+global:
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+    monitor: 'bcos'
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label job=<job_name> to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+
+    static_configs:
+      - targets: [${mtail_host_list}]
+EOF
+
+    mkdir -p $(dirname $output/grafana/grafana.ini)
+    cat <<EOF >> "${output}/grafana/grafana.ini"
+[server]
+# The http port  to use
+http_port = 3001
+
+[security]
+# disable creation of admin user on first start of grafana
+;disable_initial_admin_creation = false
+;
+;# default admin user, created on startup
+admin_user = admin
+;
+;# default admin password, can be changed before first start of grafana,  or in profile settings
+admin_password = admin
+
+EOF
+
+    generate_script_template "$output/start_monitor.sh"
+    cat <<EOF >> "${output}/start_monitor.sh"
+
+DOCKER_FILE=\${SHELL_FOLDER}/compose.yaml
+docker-compose -f \${DOCKER_FILE} up -d prometheus grafana 2>&1
+echo "graphna web address: http://${monitor_ip}:3001/"
+echo "prometheus web address: http://${monitor_ip}:9090/"
+EOF
+    chmod u+x "${output}/start_monitor.sh"
+
+
+    generate_script_template "$output/stop_monitor.sh"
+    cat <<EOF >> "${output}/stop_monitor.sh"
+
+DOCKER_FILE=\${SHELL_FOLDER}/compose.yaml
+docker-compose -f \${DOCKER_FILE} stop
+echo -e "\033[32m stop monitor successfully\033[0m"
+EOF
+    chmod u+x "${output}/stop_monitor.sh"
+}
+
+
+generate_sdk_cert() {
+    local sm_mode="$1"
+    local ca_cert_path="${2}"
+    local sdk_cert_path="${3}"
+
+    mkdir -p ${sdk_cert_path}
+    if [[ "${sm_mode}" == "false" ]]; then
+        gen_rsa_node_cert "${ca_cert_path}" "${sdk_cert_path}" "sdk" 2>&1
+    else
+        gen_sm_node_cert "${ca_cert_path}" "${sdk_cert_path}" "sdk" 2>&1
+    fi
+}
+
+generate_node_cert() {
+    local sm_mode="$1"
+    local ca_cert_path="${2}"
+    local node_cert_path="${3}"
+
+    mkdir -p ${node_cert_path}
+    if [[ "${sm_mode}" == "false" ]]; then
+        gen_rsa_node_cert "${ca_cert_path}" "${node_cert_path}" "ssl" 2>&1
+    else
+        gen_sm_node_cert "${ca_cert_path}" "${node_cert_path}" "ssl" 2>&1
+    fi
+}
+
+generate_chain_cert() {
+    local sm_mode="$1"
+    local chain_cert_path="$2"
+    mkdir -p "${chain_cert_path}"
+    if [[ "${sm_mode}" == "false" ]]; then
+        gen_chain_cert "${chain_cert_path}" 2>&1
+    else
+        gen_sm_chain_cert "${chain_cert_path}" 2>&1
+    fi
+}
+generate_config_ini() {
+    local output="${1}"
+    local p2p_listen_ip="${2}"
+    local p2p_listen_port="${3}"
+
+    local rpc_listen_ip="${4}"
+    local rpc_listen_port="${5}"
+    local disable_ssl="${6}"
+
+    local disable_ssl_content=";disable_ssl=true"
+    if [[ "${disable_ssl}" == "true" ]]; then
+        disable_ssl_content="disable_ssl=true"
+    fi
+
+    cat <<EOF >"${output}"
+[p2p]
+    listen_ip=${p2p_listen_ip}
+    listen_port=${p2p_listen_port}
+    ; ssl or sm ssl
+    sm_ssl=false
+    nodes_path=${file_dir}
+    nodes_file=${p2p_connected_conf_name}
+    ; enable rip protocol, default: true
+    ; enable_rip_protocol=false
+    ; enable compression for p2p message, default: true
+    ; enable_compression=false
+
+[certificate_blacklist]
+    ; crl.0 should be nodeid, nodeid's length is 512
+    ;crl.0=
+
+[certificate_whitelist]
+    ; cal.0 should be nodeid, nodeid's length is 512
+    ;cal.0=
+
+[rpc]
+    listen_ip=${rpc_listen_ip}
+    listen_port=${rpc_listen_port}
+    thread_count=4
+    ; ssl or sm ssl
+    sm_ssl=false
+    ; ssl connection switch, if disable the ssl connection, default: false
+    ${disable_ssl_content}
+    ; return input params in sendTransaction() return, default: true
+    ; return_input_params=false
+
+[cert]
+    ; directory the certificates located in
+    ca_path=./conf
+    ; the ca certificate file
+    ca_cert=ca.crt
+    ; the node private key file
+    node_key=ssl.key
+    ; the node certificate file
+    node_cert=ssl.crt
+    ; directory the multiple certificates located in
+    multi_ca_path=multiCaPath
+
+EOF
+    generate_common_ini "${output}"
+}
+
+generate_common_ini() {
+    local output=${1}
+    # LOG_INFO "Begin generate uuid"
+    local uuid=$(uuidgen)
+    LOG_INFO "Generate uuid success: ${uuid}"
+    cat <<EOF >>"${output}"
+
+[security]
+    private_key_path=conf/node.pem
+    enable_hsm=${enable_hsm}
+    ; path of hsm dynamic library
+    ;hsm_lib_path=
+    ;key_index=
+    ;password=
+
+[storage_security]
+    ; enable data disk encryption or not, default is false
+    enable=false
+    ; url of the key center, in format of ip:port
+    ;key_center_url=
+    ;cipher_data_key=
+
+[consensus]
+    ; min block generation time(ms)
+    min_seal_time=500
+
+[executor]
+    enable_dag=true
+
+[storage]
+    data_path=data
+    enable_cache=true
+    ; The granularity of the storage page, in bytes, must not be less than 4096 Bytes, the default is 10240 Bytes (10KB)
+    key_page_size=${key_page_size}
+    pd_ssl_ca_path=
+    pd_ssl_cert_path=
+    pd_ssl_key_path=
+    enable_archive=false
+    archive_ip=127.0.0.1
+    archive_port=
+
+[txpool]
+    ; size of the txpool, default is 15000
+    limit=15000
+    ; txs notification threads num, default is 2
+    notify_worker_num=2
+    ; txs verification threads num, default is the number of CPU cores
+    ;verify_worker_num=2
+    ; txs expiration time, in seconds, default is 10 minutes
+    txs_expiration_time = 600
+
+[redis]
+    ; redis server ip
+    ;server_ip=127.0.0.1
+    ; redis server port
+    ;server_port=6379
+    ; redis request timeout, unit ms
+    ;request_timeout=3000
+    ; redis connection pool size
+    ;connection_pool_size=16
+    ; redis password, default empty
+    ;password=
+    ; redis db, default 0th
+    ;db=0
+
+[flow_control]
+    ; rate limiter stat reporter interval, unit: ms
+    ; stat_reporter_interval=60000
+
+    ; time window for rate limiter, default: 3s
+    ; time_window_sec=3
+
+    ; enable distributed rate limiter, redis required, default: false
+    ; enable_distributed_ratelimit=false
+    ; enable local cache for distributed rate limiter, work with enable_distributed_ratelimit, default: true
+    ; enable_distributed_ratelimit_cache=true
+    ; distributed rate limiter local cache percent, work with enable_distributed_ratelimit_cache, default: 20
+    ; distributed_ratelimit_cache_percent=20
+
+    ; the module that does not limit bandwidth
+    ; list of all modules: raft,pbft,amop,block_sync,txs_sync,light_node,cons_txs_sync
+    ;
+    ; modules_without_bw_limit=raft,pbft
+
+    ; allow the msg exceed max permit pass
+    ; outgoing_allow_exceed_max_permit=false
+
+    ; restrict the outgoing bandwidth of the node
+    ; both integer and decimal is support, unit: Mb
+    ;
+    ; total_outgoing_bw_limit=10
+
+    ; restrict the outgoing bandwidth of the the connection
+    ; both integer and decimal is support, unit: Mb
+    ;
+    ; conn_outgoing_bw_limit=2
+    ;
+    ; specify IP to limit bandwidth, format: conn_outgoing_bw_limit_x.x.x.x=n
+    ;   conn_outgoing_bw_limit_192.108.0.1=3
+    ;   conn_outgoing_bw_limit_192.108.0.2=3
+    ;   conn_outgoing_bw_limit_192.108.0.3=3
+    ;
+    ; default bandwidth limit for the group
+    ; group_outgoing_bw_limit=2
+    ;
+    ; specify group to limit bandwidth, group_outgoing_bw_limit_groupName=n
+    ;   group_outgoing_bw_limit_group0=2
+    ;   group_outgoing_bw_limit_group1=2
+    ;   group_outgoing_bw_limit_group2=2
+
+    ; should not change incoming_p2p_basic_msg_type_list if you known what you would to do
+    ; incoming_p2p_basic_msg_type_list=
+    ; the qps limit for p2p basic msg type, the msg type has been config by incoming_p2p_basic_msg_type_list, default: -1
+    ; incoming_p2p_basic_msg_type_qps_limit=-1
+    ; default qps limit for all module message, default: -1
+    ; incoming_module_msg_type_qps_limit=-1
+    ; specify module to limit qps, incoming_module_qps_limit_moduleID=n
+    ;       incoming_module_qps_limit_xxxx=1000
+    ;       incoming_module_qps_limit_xxxx=2000
+    ;       incoming_module_qps_limit_xxxx=3000
+
+[log]
+    enable=true
+    ; print the log to std::cout or not, default print to the log files
+    enable_console_output = false
+    log_path=./log
+    ; info debug trace
+    level=info
+    ; MB
+    max_log_file_size=1024
+    ; rotate the log every hour
+    ;enable_rotate_by_hour=true
+    enable_rate_collector=false
+EOF
+}
+
+generate_sm_config_ini() {
+    local output=${1}
+    local p2p_listen_ip="${2}"
+    local p2p_listen_port="${3}"
+    local rpc_listen_ip="${4}"
+    local rpc_listen_port="${5}"
+    local disable_ssl="${6}"
+
+    local disable_ssl_content=";disable_ssl=true"
+    if [[ "${disable_ssl}" == "true" ]]; then
+        disable_ssl_content="disable_ssl=true"
+    fi
+
+    cat <<EOF >"${output}"
+[p2p]
+    listen_ip=${p2p_listen_ip}
+    listen_port=${p2p_listen_port}
+    ; ssl or sm ssl
+    sm_ssl=true
+    nodes_path=${file_dir}
+    nodes_file=${p2p_connected_conf_name}
+    ; enable rip protocol, default: true
+    ; enable_rip_protocol=false
+    ; enable compression for p2p message, default: true
+    ; enable_compression=false
+
+[certificate_blacklist]
+    ; crl.0 should be nodeid, nodeid's length is 128
+    ;crl.0=
+
+[certificate_whitelist]
+    ; cal.0 should be nodeid, nodeid's length is 128
+    ;cal.0=
+
+[rpc]
+    listen_ip=${rpc_listen_ip}
+    listen_port=${rpc_listen_port}
+    thread_count=4
+    ; ssl or sm ssl
+    sm_ssl=true
+    ;ssl connection switch, if disable the ssl connection, default: false
+    ${disable_ssl_content}
+    ; return input params in sendTransaction() return, default: true
+    ; return_input_params=false
+
+[cert]
+    ; directory the certificates located in
+    ca_path=./conf
+    ; the ca certificate file
+    sm_ca_cert=sm_ca.crt
+    ; the node private key file
+    sm_node_key=sm_ssl.key
+    ; the node certificate file
+    sm_node_cert=sm_ssl.crt
+    ; the node private key file
+    sm_ennode_key=sm_enssl.key
+    ; the node certificate file
+    sm_ennode_cert=sm_enssl.crt
+    ; directory the multiple certificates located in
+    multi_ca_path=multiCaPath
+
+EOF
+    generate_common_ini "${output}"
+}
+
+generate_p2p_connected_conf() {
+    local output="${1}"
+    local ip_params="${2}"
+    local template="${3}"
+
+    local p2p_host_list=""
+    if [[ "${template}" == "true" ]]; then
+        p2p_host_list="${ip_params}"
+    else
+        local ip_array=(${ip_params//,/ })
+        local ip_length=${#ip_array[@]}
+
+        local i=0
+        for (( ; i < ip_length; i++)); do
+            local ip=${ip_array[i]}
+            local delim=""
+            if [[ $i == $((ip_length - 1)) ]]; then
+                delim=""
+            else
+                delim=","
             fi
-        fi
-    done
-    touch config.ini.append_group
-    exit 0
-else
-    echo "\${node} is not running, use start.sh to start all group directlly."
-fi
-EOF
-    generate_script_template "$output/scripts/reload_whitelist.sh"
-    cat << EOF >> "$output/scripts/reload_whitelist.sh"
-check_cal_line()
-{
-    line=\$1;
-    if [[ \$line =~ cal.[0-9]*=[0-9A-Fa-f]{128,128}\$ ]]; then
-        echo "true";
-    else
-        echo "false";
-    fi
-}
-
-check_cal_lines()
-{
-    # print Illegal line
-    config_file=\$1
-    error="false"
-    for line in \$(grep -v "^[ ]*[;]" \$config_file | grep "cal\."); do
-        if [[ "true" != \$(check_cal_line \$line) ]]; then
-            LOG_ERROR "Illigal whitelist line: \$line"
-            error="true"
-        fi
-    done
-
-    if [[ "true" == \$error ]]; then
-        LOG_ERROR "[certificate_whitelist] reload error for illigal lines"
-        exit 1
-    fi
-}
-
-check_duplicate_key()
-{
-    config_file=\$1;
-    dup_key=\$(grep -v '^[ ]*[;]' \$config_file |grep "cal\."|awk -F"=" '{print \$1}'|awk '{print \$1}' |sort |uniq -d)
-
-    if [[ "" != \$dup_key ]]; then
-        LOG_ERROR "[certificate_whitelist] has duplicate keys:"
-        LOG_ERROR "\$dup_key"
-        exit 1
-    fi
-}
-
-check_whitelist()
-{
-    config_file=\$1
-    check_cal_lines \$config_file
-    check_duplicate_key \$config_file
-}
-
-check_whitelist \${SHELL_FOLDER}/../config.ini
-
-cd \${SHELL_FOLDER}/../
-NODE_FOLDER=\$(pwd)
-fisco_bcos=\${NODE_FOLDER}/${fisco_bin_path}
-node=\$(basename \${NODE_FOLDER})
-node_pid=${ps_cmd}
-if [ -n "\${node_pid}" ];then
-    echo "\${node} is trying to reset certificate whitelist. Check log for more information."
-    touch config.ini.reset_certificate_whitelist
-    exit 0
-else
-    echo "\${node} is not running, use start.sh to start and enable whitelist directlly."
-fi
-EOF
-
-generate_script_template "$output/scripts/monitor.sh"
-    cat << EOF >> "$output/scripts/monitor.sh"
-
-# * * * * * bash monitor.sh -d /data/nodes/127.0.0.1/ > monitor.log 2>&1
-cd \$SHELL_FOLDER
-
-alarm() {
-        alert_ip=\$(/sbin/ifconfig eth0 | grep inet | awk '{print \$2}')
-        time=\$(date "+%Y-%m-%d %H:%M:%S")
-        echo "[\${time}] \$1"
-}
-
-# restart the node
-restart() {
-        local nodedir=\$1
-        bash \$nodedir/stop.sh
-        sleep 5
-        bash \$nodedir/start.sh
-}
-
-info() {
-        time=\$(date "+%Y-%m-%d %H:%M:%S")
-        echo "[\$time] \$1"
-}
-
-# check if nodeX is work well
-function check_node_work_properly() {
-        nodedir=\$1
-        # node name
-        node=\$(basename \$nodedir)
-        # fisco-bcos path
-        fiscopath=\${nodedir}/
-        config=\$1/config.ini
-        # rpc url
-        config_ip="127.0.0.1"
-        config_port=\$(cat \$config | grep 'jsonrpc_listen_port' | egrep -o "[0-9]+")
-
-        # check if process id exist
-        pid=\$(ps aux | grep "\$fiscopath" | egrep "fisco-bcos" | grep -v "grep" | awk -F " " '{print \$2}')
-        [ -z "\${pid}" ] && {
-                alarm " ERROR! \$config_ip:\$config_port \$node does not exist"
-                restart \$nodedir
-                return 1
-        }
-
-        # get group_id list
-        groups=\$(ls \${nodedir}/conf/group*genesis | grep -o "group.*.genesis" | grep -o "group.*.genesis" | cut -d \. -f 2)
-        for group in \${groups}; do
-                # get blocknumber
-                heightresult=\$(curl -s "http://\$config_ip:\$config_port" -X POST --data "{\"jsonrpc\":\"2.0\",\"method\":\"getBlockNumber\",\"params\":[\${group}],\"id\":67}")
-                echo \$heightresult
-                height=\$(echo \$heightresult | awk -F'"' '{if(\$2=="id" && \$4=="jsonrpc" && \$8=="result") {print \$10}}')
-                [[ -z "\$height" ]] && {
-                        alarm " ERROR! Cannot connect to \$config_ip:\$config_port \$node:\$group "
-                        continue
-                }
-
-                height_file="\$nodedir/\$node_\$group.height"
-                prev_height=0
-                [ -f \$height_file ] && prev_height=\$(cat \$height_file)
-                heightvalue=\$(printf "%d\n" "\$height")
-                prev_heightvalue=\$(printf "%d\n" "\$prev_height")
-
-                viewresult=\$(curl -s "http://\$config_ip:\$config_port" -X POST --data "{\"jsonrpc\":\"2.0\",\"method\":\"getPbftView\",\"params\":[\$group],\"id\":68}")
-                echo \$viewresult
-                view=\$(echo \$viewresult | awk -F'"' '{if(\$2=="id" && \$4=="jsonrpc" && \$8=="result") {print \$10}}')
-                [[ -z "\$view" ]] && {
-                        alarm " ERROR! Cannot connect to \$config_ip:\$config_port \$node:\$group "
-                        continue
-                }
-
-                view_file="\$nodedir/\$node_\$group.view"
-                prev_view=0
-                [ -f \$view_file ] && prev_view=\$(cat \$view_file)
-                viewvalue=\$(printf "%d\n" "\$view")
-                prev_viewvalue=\$(printf "%d\n" "\$prev_view")
-
-                # check if blocknumber of pbft view already change, if all of them is the same with before, the node may not work well.
-                [ \$heightvalue -eq \$prev_heightvalue ] && [ \$viewvalue -eq \$prev_viewvalue ] && {
-                        alarm " ERROR! \$config_ip:\$config_port \$node:\$group is not working properly: height \$height and view \$view no change"
-                        continue
-                }
-
-                echo \$height >\$height_file
-                echo \$view >\$view_file
-                info " OK! \$config_ip:\$config_port \$node:\$group is working properly: height \$height view \$view"
-
+            p2p_host_list="${p2p_host_list}\"${ip}\"${delim}"
         done
+    fi
 
-        return 0
-}
-
-# check all node of this server, if all node work well.
-function check_all_node_work_properly() {
-        local work_dir=\$1
-        for configfile in \$(ls \${work_dir}/node*/config.ini); do
-                check_node_work_properly \$(dirname \$configfile)
-        done
-}
-
-function help() {
-        echo "Usage:"
-        echo "Optional:"
-        echo "    -d  <path>          work dir(default: \\$SHELL_FOLDER/../). "
-        echo "    -h                  Help."
-        echo "Example:"
-        echo "    bash monitor.sh -d /data/nodes/127.0.0.1 "
-        exit 0
-}
-
-work_dir=\${SHELL_FOLDER}/../../
-
-while getopts "d:r:c:s:h" option; do
-        case \$option in
-        d) work_dir=\$OPTARG ;;
-        h) help ;;
-        esac
-done
-
-[ ! -d \${work_dir} ] && {
-        LOG_ERROR "work_dir(\$work_dir) not exist "
-        exit 0
-}
-
-check_all_node_work_properly \${work_dir}
-
-EOF
-generate_script_template "$output/scripts/reload_sdk_allowlist.sh"
-    cat << EOF >> "$output/scripts/reload_sdk_allowlist.sh"
-cd \${SHELL_FOLDER}/../
-NODE_FOLDER=\$(pwd)
-fisco_bcos=\${NODE_FOLDER}/${fisco_bin_path}
-node=\$(basename \${NODE_FOLDER})
-node_pid=${ps_cmd}
-if [ -n "\${node_pid}" ];then
-    LOG_INFO "\${node} is trying to reload sdk allowlist. Check log for more information."
-    touch config.ini.reset_allowlist
-    exit 0
-else
-    echo "\${node} is not running, use start.sh to start all group directlly."
-fi
+    cat <<EOF >"${output}"
+{"nodes":[${p2p_host_list}]}
 EOF
 }
 
-genDownloadConsole() {
-    local output=$1
-    local file="${output}/download_console.sh"
-    generate_script_template "${file}"
-    cat << EOF >> "${file}"
-sed_cmd="sed -i"
-solc_suffix=""
-supported_solc_versions=(0.4 0.5 0.6)
-package_name="console.tar.gz"
-sm_crypto=false
+generate_config() {
+    local sm_mode="${1}"
+    local node_config_path="${2}"
+    local p2p_listen_ip="${3}"
+    local p2p_listen_port="${4}"
+    local rpc_listen_ip="${5}"
+    local rpc_listen_port="${6}"
+    local disable_ssl="${7}"
 
-if [ "\$(uname)" == "Darwin" ];then
-    sed_cmd="sed -i .bkp"
-fi
-while getopts "v:V:f" option;do
-    case \$option in
-    v) solc_suffix="\${OPTARG//[vV]/}"
-        if ! echo "\${supported_solc_versions[*]}" | grep -i "\${solc_suffix}" &>/dev/null; then
-            LOG_WARN "\${solc_suffix} is not supported. Please set one of \${supported_solc_versions[*]}"
-            exit 1;
+    check_auth_account
+    if [ "${sm_mode}" == "false" ]; then
+        generate_config_ini "${node_config_path}" "${p2p_listen_ip}" "${p2p_listen_port}" "${rpc_listen_ip}" "${rpc_listen_port}" "${disable_ssl}"
+    else
+        generate_sm_config_ini "${node_config_path}" "${p2p_listen_ip}" "${p2p_listen_port}" "${rpc_listen_ip}" "${rpc_listen_port}" "${disable_ssl}"
+    fi
+}
+
+generate_secp256k1_node_account() {
+    local output_path="${1}"
+    local node_index="${2}"
+    if [ ! -d "${output_path}" ]; then
+        mkdir -p ${output_path}
+    fi
+
+    # generate nodeids from file
+    if [ ! -z "${node_key_dir}" ]; then
+        generate_nodeids_from_path "${node_key_dir}" "pem" "${node_index}" "${output_path}"
+    else
+        if [ ! -f /tmp/secp256k1.param ]; then
+            ${OPENSSL_CMD} ecparam -out /tmp/secp256k1.param -name secp256k1
         fi
-        package_name="console-\${solc_suffix}.tar.gz"
-        if [ "\${solc_suffix}" == "0.4" ]; then package_name="console.tar.gz";fi
-    ;;
-    V) download_version="\$OPTARG";;
-    f) config="true";;
-    esac
-done
+        ${OPENSSL_CMD} genpkey -paramfile /tmp/secp256k1.param -out ${output_path}/node.pem 2>/dev/null
+        # generate nodeid
+        ${OPENSSL_CMD} ec -text -noout -in "${output_path}/node.pem" 2>/dev/null | sed -n '7,11p' | tr -d ": \n" | awk '{print substr($0,3);}' | cat >"$output_path"/node.nodeid
+        local node_id=$(cat "${output_path}/node.nodeid")
+        nodeid_list=$"${nodeid_list}node.${node_index}=${node_id}: 1
+        "
+    fi
+}
 
-default_version=2.8.0
-download_version=${default_version}
-sm_crypto=\$(cat "\${SHELL_FOLDER}"/node*/config.ini | grep sm_crypto_channel= | cut -d = -f 2 | head -n 1)
-download_link=https://github.com/FISCO-BCOS/console/releases/download/v\${download_version}/\${package_name}
-cos_download_link=${cdn_link_header}/console/releases/v\${download_version}/\${package_name}
-echo "Downloading console \${version} from \${download_link}"
-if [ \$(curl -IL -o /dev/null -s -w %{http_code}  \${cos_download_link}) == 200 ];then
-    curl -#LO \${download_link} --speed-time 30 --speed-limit 102400 -m 450 || {
-        echo -e "\033[32m Download speed is too low, try \${cos_download_link} \033[0m"
-        curl -#LO \${cos_download_link}
-    }
-else
-    curl -#LO \${download_link}
-fi
-tar -zxf \${package_name} && cd console && chmod +x *.sh
+generate_sm_node_account() {
+    local output_path="${1}"
+    local node_index="${2}"
+    if [ ! -d "${output_path}" ]; then
+        mkdir -p ${output_path}
+    fi
 
-if [[ -n "\${config}" ]];then
-    channel_listen_port=\$(cat "\${SHELL_FOLDER}"/node*/config.ini | grep channel_listen_port | cut -d = -f 2 | head -n 1)
-    channel_listen_ip=\$(cat "\${SHELL_FOLDER}"/node*/config.ini | grep channel_listen_ip | cut -d = -f 2 | head -n 1)
-    if [ "\${version:0:1}" == "1" ];then
-        cp conf/applicationContext-sample.xml conf/applicationContext.xml
-        \${sed_cmd} "s/127.0.0.1:20200/127.0.0.1:\${channel_listen_port}/" conf/applicationContext.xml
-        if  [ "\${sm_crypto}" == "false" ];then
-            cp \${SHELL_FOLDER}/sdk/* conf/
-        else
-            cp \${SHELL_FOLDER}/sdk/gm/* conf/
+    if [ "${enable_hsm}" == "true" ] && [ -z "${node_key_dir}" ]; then
+        LOG_FATAL "Must input path of node key in HSM mode, eg: bash build_chain.sh -H -n node_key_dir"
+    fi
+
+    if [ ! -z "${node_key_dir}" ]; then
+        generate_nodeids_from_path "${node_key_dir}" "pem" "${node_index}" "${output_path}"
+    else
+        if [ ! -f ${sm2_params} ]; then
+            generate_sm_sm2_param ${sm2_params}
         fi
-    else
-        cp conf/config-example.toml conf/config.toml
-        \${sed_cmd} "s/127.0.0.1:20200/127.0.0.1:\${channel_listen_port}/" conf/config.toml
-        if  [ "\${sm_crypto}" == "false" ];then
-            cp \${SHELL_FOLDER}/sdk/* conf/
-        else
-            cp -r \${SHELL_FOLDER}/sdk/gm conf/
-        fi
+        ${OPENSSL_CMD} genpkey -paramfile ${sm2_params} -out ${output_path}/node.pem 2>/dev/null
+        $OPENSSL_CMD ec -in "$output_path/node.pem" -text -noout 2> /dev/null | sed -n '7,11p' | sed 's/://g' | tr "\n" " " | sed 's/ //g' | awk '{print substr($0,3);}'  | cat > "$output_path/node.nodeid"
+        local node_id=$(cat "${output_path}/node.nodeid")
+        nodeid_list=$"${nodeid_list}node.${node_index}=${node_id}:1
+        "
     fi
-    echo -e "\033[32m console configuration completed successfully. \033[0m"
-fi
+}
+
+generate_genesis_config() {
+    local output=${1}
+    local node_list=${2}
+
+    cat <<EOF >"${output}"
+[chain]
+    ; use SM crypto or not, should nerver be changed
+    sm_crypto=${sm_mode}
+    ; the group id, should nerver be changed
+    group_id=${default_group}
+    ; the chain id, should nerver be changed
+    chain_id=${default_chainid}
+
+[consensus]
+    ; consensus algorithm now support PBFT(consensus_type=pbft)
+    consensus_type=pbft
+    ; the max number of transactions of a block
+    block_tx_count_limit=1000
+    ; in millisecond, block consensus timeout, at least 3000ms
+    consensus_timeout=3000
+    ; the number of blocks generated by each leader
+    leader_period=1
+    ; the node id of consensusers
+    ${node_list}
+
+[version]
+    ; compatible version, can be dynamically upgraded through setSystemConfig
+    ; the default is 3.2.0
+    compatibility_version=3.2.0
+[tx]
+    ; transaction gas limit
+    gas_limit=3000000000
+[executor]
+    ; use the wasm virtual machine or not
+    is_wasm=${wasm_mode}
+    is_auth_check=${auth_mode}
+    auth_admin_account=${auth_admin_account}
+    is_serial_execute=${serial_mode}
 EOF
 }
 
-genTransTest()
-{
-    local output=$1
-    local file="${output}/.transTest.sh"
-    generate_script_template "${file}"
-    cat << EOF >> "${file}"
-# This script only support for block number smaller than 65535 - 256
-
-ip_port=http://127.0.0.1:$(( port_start[2] ))
-trans_num=1
-target_group=1
-version=
-if [ \$# -ge 1 ];then
-    trans_num=\$1
-fi
-if [ \$# -ge 2 ];then
-    target_group=\$2
-fi
-
-getNodeVersion()
-{
-    result="\$(curl -X POST --data '{"jsonrpc":"2.0","method":"getClientVersion","params":[],"id":1}' \${ip_port})"
-    version="\$(echo \${result} | cut -c250- | cut -d \" -f3)"
-}
-
-block_limit()
-{
-    result=\$(curl -s -X POST --data '{"jsonrpc":"2.0","method":"getBlockNumber","params":['\${target_group}'],"id":83}' \${ip_port})
-    if [ \$(echo \${result} | grep -i failed | wc -l) -gt 0 ] || [ -z \${result} ];then
-        echo "getBlockNumber error!"
-        exit 1
-    fi
-    blockNumber=\$(echo \${result}| cut -d \" -f 10)
-    printf "%04x" \$((\$blockNumber+0x100))
-}
-
-send_a_tx()
-{
-    limit=\$(block_limit)
-    random_id="\$(date +%s)\$(printf "%09d" \${RANDOM})"
-    if [ \${#limit} -gt 4 ];then echo "blockLimit exceed 0xffff, this scripts is unavailable!"; exit 0;fi
-    if [ "\${version}" == "2.0.0-rc1" ];then
-        txBytes="f8f0a02ade583745343a8f9a70b40db996fbe69c63531832858\${random_id}85174876e7ff8609184e729fff82\${limit}94d6f1a71052366dbae2f7ab2d5d5845e77965cf0d80b86448f85bce000000000000000000000000000000000000000000000000000000000000001bf5bd8a9e7ba8b936ea704292ff4aaa5797bf671fdc8526dcd159f23c1f5a05f44e9fa862834dc7cb4541558f2b4961dc39eaaf0af7f7395028658d0e01b86a371ca0e33891be86f781ebacdafd543b9f4f98243f7b52d52bac9efa24b89e257a354da07ff477eb0ba5c519293112f1704de86bd2938369fbf0db2dff3b4d9723b9a87d"
-    else
-        txBytes="f8eca003eb675ec791c2d19858c91d0046821c27d815e2e9c15\${random_id}0a8402faf08082\${limit}948c17cf316c1063ab6c89df875e96c9f0f5b2f74480b8644ed3885e0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000a464953434f2042434f53000000000000000000000000000000000000000000000101801ba09edf7c0cb63645442aff11323916d51ec5440de979950747c0189f338afdcefda02f3473184513c6a3516e066ea98b7cfb55a79481c9db98e658dd016c37f03dcf"
-    fi
-    #echo \$txBytes
-    curl -s -X POST --data '{"jsonrpc":"2.0","method":"sendRawTransaction","params":['\${target_group}', "'\$txBytes'"],"id":83}' \${ip_port}
-}
-
-send_many_tx()
-{
-    for j in \$(seq 1 \$1)
-    do
-        echo 'Send transaction: ' \$j
-        send_a_tx \${ip_port}
-    done
-}
-getNodeVersion
-echo "Use version:\${version}"
-send_many_tx \${trans_num}
-
-EOF
-}
-
-generate_server_scripts()
-{
-    local output=$1
-    genTransTest "${output}"
-    generate_script_template "$output/start_all.sh"
-    # echo "ip_array=(\$(ifconfig | grep inet | grep -v inet6 | awk '{print \$2}'))"  >> "$output/start_all.sh"
-    # echo "if echo \${ip_array[@]} | grep -w \"${ip}\" &>/dev/null; then echo \"start node_${ip}_${i}\" && bash \${SHELL_FOLDER}/node_${ip}_${i}/start.sh; fi" >> "${output_dir}/start_all.sh"
-    cat << EOF >> "$output/start_all.sh"
-dirs=(\$(ls -l \${SHELL_FOLDER} | awk '/^d/ {print \$NF}'))
-for directory in \${dirs[*]}
-do
-    if [[ -f "\${SHELL_FOLDER}/\${directory}/config.ini" && -f "\${SHELL_FOLDER}/\${directory}/start.sh" ]];then
-        echo "try to start \${directory}"
-        bash \${SHELL_FOLDER}/\${directory}/start.sh &
-    fi
-done
-wait
-EOF
-    generate_script_template "$output/stop_all.sh"
-    cat << EOF >> "$output/stop_all.sh"
-dirs=(\$(ls -l \${SHELL_FOLDER} | awk '/^d/ {print \$NF}'))
-for directory in \${dirs[*]}
-do
-    if [[ -d "\${SHELL_FOLDER}/\${directory}" && -f "\${SHELL_FOLDER}/\${directory}/stop.sh" ]];then
-        echo "try to stop \${directory}"
-        bash \${SHELL_FOLDER}/\${directory}/stop.sh &
-    fi
-done
-wait
-EOF
-    generate_script_template "$output/download_bin.sh"
-    cat << EOF >> "$output/download_bin.sh"
-#!/bin/bash
-
-project=FISCO-BCOS/FISCO-BCOS
-cdn_link_header="${cdn_link_header}"
-download_branch=
-output_dir=bin/
-download_mini=
-download_version=
-latest_version=
-download_timeout=${download_timeout}
-
-help() {
-    echo "
-Usage:
-    -v <Version>           Download binary of spectfic version, default latest
-    -b <Branch>            Download binary of spectfic branch
-    -o <Output Dir>        Default ./bin
-    -l                     List released FISCO-BCOS versions
-    -m                     Download mini binary, only works with -b option
-    -h Help
-e.g
-    \$0 -v ${default_version}
-"
-exit 0
-}
-
-parse_params(){
-while getopts "b:o:v:hml" option;do
-    case \$option in
-    o) output_dir=\$OPTARG;;
-    b) download_branch="\$OPTARG";;
-    v) download_version="\${OPTARG//[vV]/}";;
-    m) download_mini="true";;
-    l) LOG_INFO "Show the history releases of FISCO-BCOS " && curl -sS https://gitee.com/api/v5/repos/\${project}/tags | grep -oe "\"name\":\"v[2-9]*\.[0-9]*\.[0-9]*\"" | cut -d \" -f 4 | sort -V && exit 0;;
-    h) help;;
-    *) help;;
-    esac
-done
-}
-
-download_artifact_linux(){
-    local branch="\$1"
-    build_num=\$(curl https://circleci.com/api/v1.1/project/github/\${project}/tree/\${branch}\?circle-token\=\&limit\=1\&offset\=0\&filter\=successful 2>/dev/null| grep build_num | sed "s/ //g"| cut -d ":" -f 2| sed "s/,//g" | sort -u | tail -n1)
-
-    local response="\$(curl https://circleci.com/api/v1.1/project/github/\${project}/\${build_num}/artifacts?circle-token= 2>/dev/null)"
-    if [ -z "\${download_mini}" ];then
-        link="\$(echo \${response}| grep -o 'https://[^"]*' | grep -v mini)"
-    else
-        link="\$(echo \${response}| grep -o 'https://[^"]*' | grep mini)"
-    fi
-    if [ -z "\${link}" ];then
-        build_num=\$(( build_num - 1 ))
-        response="\$(curl https://circleci.com/api/v1.1/project/github/\${project}/\${build_num}/artifacts?circle-token= 2>/dev/null)"
-        if [ -z "\${download_mini}" ];then
-            link="\$(echo \${response}| grep -o 'https://[^"]*' | grep -v mini| tail -n 1)"
-        else
-            link="\$(echo \${response}| grep -o 'https://[^"]*' | grep mini| tail -n 1)"
-        fi
-    fi
-    if [ -z "\${link}" ];then
-        echo "CircleCI build_num:\${build_num} can't find artifacts."
-        exit 1
-    fi
-    LOG_INFO "Downloading binary from \${link} "
-    curl -#LO \${link} && tar -zxf fisco*.tar.gz && rm fisco*.tar.gz
-    result=\$?
-    if [[ "\${result}" != "0" ]];then LOG_ERROR "Download failed, please try again" && exit 1;fi
-
-}
-
-download_artifact_macOS(){
-    echo "unsupported for now."
-    exit 1
-    local branch="\$1"
-    # TODO: https://developer.github.com/v3/actions/artifacts/#download-an-artifact
-    local workflow_artifacts_url="\$(curl https://api.github.com/repos/\${project}/actions/runs\?branch\=\${branch}\&status\=success\&event\=push | grep artifacts_url | head -n 1 | cut -d \" -f 4)"
-    local archive_download_url="\$(curl \${workflow_artifacts_url} | grep archive_download_url | cut -d \" -f 4)"
-    if [ -z "\${archive_download_url}" ];then
-        echo "GitHub action \${workflow_artifacts_url} can't find artifact."
-        exit 1
-    fi
-    LOG_INFO "Downloading macOS binary from \${archive_download_url} "
-    # FIXME: https://github.com/actions/upload-artifact/issues/51
-    curl -#LO "\${archive_download_url}" && tar -zxf fisco-bcos-macOS.tar.gz && rm fisco-bcos-macOS.tar.gz
-}
-
-download_branch_artifact(){
-    local branch="\$1"
-    if [ "\$(uname)" == "Darwin" ];then
-        LOG_INFO "Downloading binary of \${branch} on macOS "
-        download_artifact_macOS "\${branch}"
-    else
-        LOG_INFO "Downloading binary of \${branch} on Linux "
-        download_artifact_linux "\${branch}"
-    fi
-}
-
-download_released_artifact(){
-    local version="\$1"
-    local package_name="fisco-bcos.tar.gz"
-    if [ "\$(uname)" == "Darwin" ];then
-        package_name="fisco-bcos-macOS.tar.gz"
-    fi
-    local download_link="https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/\${version}/\${package_name}"
-    local cdn_download_link="\${cdn_link_header}/FISCO-BCOS/releases/\${version}/\${package_name}"
-    LOG_INFO "Downloading binary of \${version}, from \${download_link}"
-    if [ \$(curl -IL -o /dev/null -s -w %{http_code} \${cdn_download_link}) == 200 ];then
-        curl -#LO \${download_link} --speed-time 20 --speed-limit 102400 -m \${download_timeout} || {
-            echo "Download speed is too low, try \${cdn_download_link}"
-            curl -#LO "\${cdn_download_link}"
-        }
-    else
-        curl -#LO \${download_link}
-    fi
-    tar -zxf "\${package_name}" && rm "\${package_name}"
-}
-
-main() {
-    [ -f "\${output_dir}/fisco-bcos" ] && mv "\${output_dir}/fisco-bcos" "\${output_dir}/fisco-bcos.bak"
-    mkdir -p "\${output_dir}" && cd "\${output_dir}"
-    latest_version=\$(curl -sS https://gitee.com/api/v5/repos/\${project}/tags | grep -oe "\"name\":\"v[2-9]*\.[0-9]*\.[0-9]*\"" | cut -d \" -f 4 | sort -V | tail -n 1)
-    if [ -n "\${download_version}" ];then
-        download_released_artifact "v\${download_version}"
-    elif [ -n "\${download_branch}" ];then
-        download_branch_artifact "\${download_branch}"
-    else
-        download_released_artifact "\${latest_version}"
-    fi
-    LOG_INFO "Finished. Please check \${output_dir}"
-}
-
-parse_params "\$@"
-main
-
-EOF
-}
-
-parse_ip_config()
-{
+parse_ip_config() {
     local config=$1
-    local n=0
-    while read line;do
+    n=0
+    local port_file_start=
+    while read line; do
         ip_array[n]=$(echo ${line} | awk '{print $1}')
         agency_array[n]=$(echo ${line} | awk '{print $2}')
         group_array[n]=$(echo ${line} | awk '{print $3}')
-        if [ -z "${ip_array[$n]}" -o -z "${agency_array[$n]}" -o -z "${group_array[$n]}" ];then
+        if [ -z "${ip_array[$n]}" -o -z "${agency_array[$n]}" -o -z "${group_array[$n]}" ]; then
             exit_with_clean "Please check ${config}, make sure there is no empty line!"
         fi
-        ports_array[n]=$(echo "${line}" | awk '{print $4}')
+        if [ $n -eq 0 ]; then
+            local port_array=$(echo ${line} | awk '{print $4}')
+            port_file_start=(${port_array//,/ })
+        fi
         ((++n))
-    done < ${config}
+    done <${config}
+
+    ## 第一行的端口为开始端口，在这里适配3.x的可视化
+    p2p_listen_port=${port_file_start[0]}
+    rpc_listen_port=${port_file_start[2]}
 }
 
-download_bin()
+get_value() {
+    local var_name=${1}
+    var_name=var_${var_name//./}
+    local res=$(eval echo '$'"${var_name}")
+    echo ${res}
+}
+
+set_value() {
+    local var_name=${1}
+    var_name=var_${var_name//./}
+    local var_value=${2}
+    eval "${var_name}=${var_value}"
+}
+
+exit_with_clean() {
+    local content=${1}
+    echo -e "\033[31m[ERROR] ${content}\033[0m"
+    if [ -d "${output_dir}" ]; then
+        rm -rf ${output_dir}
+    fi
+    exit 1
+}
+
+check_and_install_tassl(){
+    if [ -f "${OPENSSL_CMD}" ];then
+        return
+    fi
+    # https://en.wikipedia.org/wiki/Uname#Examples
+    local x86_64_name="x86_64"
+    local arm_name="aarch64"
+    local tassl_mid_name="linux"
+    if [[ -n "${macOS}" ]];then
+        x86_64_name="x86_64"
+        arm_name="arm64"
+        tassl_mid_name="macOS"
+    fi
+
+    local tassl_post_fix="x86_64"
+    local platform="$(uname -m)"
+    if [[ "${platform}" == "${arm_name}" ]];then
+        tassl_post_fix="aarch64"
+    elif [[ "${platform}" == "${x86_64_name}" ]];then
+        tassl_post_fix="x86_64"
+    else
+        LOG_FATAL "Unsupported platform ${platform} for ${tassl_mid_name}"
+        exit 1
+    fi
+    local tassl_package_name="tassl-1.1.1b-${tassl_mid_name}-${tassl_post_fix}"
+    local tassl_tgz_name="${tassl_package_name}.tar.gz"
+    local tassl_link_prefix="${cdn_link_header}/FISCO-BCOS/tools/tassl-1.1.1b/${tassl_tgz_name}"
+    LOG_INFO "Downloading tassl binary from ${tassl_link_prefix}..."
+    wget --no-check-certificate  "${tassl_link_prefix}"
+    tar zxvf ${tassl_tgz_name} && rm ${tassl_tgz_name}
+    chmod u+x ${tassl_package_name}
+    mkdir -p "${HOME}"/.fisco
+    mv ${tassl_package_name} "${HOME}"/.fisco/tassl-1.1.1b
+}
+
+generate_node_account()
 {
-    if [ "${x86_64_arch}" != "true" ];then exit_with_clean "We only offer x86_64 precompiled fisco-bcos binary, your OS architecture is not x86_64. Please compile from source."; fi
-    bin_path=${output_dir}/${bcos_bin_name}
-    package_name="fisco-bcos.tar.gz"
-    if [ -n "${macOS}" ];then
-        package_name="fisco-bcos-macOS.tar.gz"
-    fi
-
-    Download_Link="https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v${compatibility_version}/${package_name}"
-    local cdn_download_link="${cdn_link_header}/FISCO-BCOS/releases/v${compatibility_version}/${package_name}"
-    LOG_INFO "Downloading fisco-bcos binary from ${Download_Link} ..."
-    if [ $(curl -IL -o /dev/null -s -w %{http_code} "${cdn_download_link}") == 200 ];then
-        curl -#LO "${Download_Link}" --speed-time 20 --speed-limit 102400 -m "${download_timeout}" || {
-            LOG_INFO "Download speed is too low, try ${cdn_download_link}"
-            curl -#LO "${cdn_download_link}"
-        }
+    local sm_mode="${1}"
+    local account_dir="${2}"
+    local count="${3}"
+    if [[ "${sm_mode}" == "false" ]]; then
+        if [ "${enable_hsm}" == "true" ]; then
+            LOG_FATAL "HSM is only supported in sm mode"
+        fi
+        generate_secp256k1_node_account "${account_dir}" "${count}"
     else
-        curl -#LO "${Download_Link}"
+        generate_sm_node_account "${account_dir}" "${count}"
     fi
-    if [[ "$(ls -al . | grep tar.gz | awk '{print $5}')" -lt "1048576" ]];then
-        exit_with_clean "Download fisco-bcos failed, please try again. Or download and extract it manually from ${Download_Link} and use -e option."
-    fi
-    tar -zxf ${package_name} && mv fisco-bcos ${bin_path} && rm ${package_name}
-    chmod a+x ${bin_path}
 }
 
-function version_gt() { test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"; }
-
-check_bin()
+expand_node()
 {
-    echo "Checking fisco-bcos binary..."
-    bin_version=$()
-    if ! ${bin_path} -v | grep -q 'FISCO-BCOS';then
-        exit_with_clean "${bin_path} is wrong. Please correct it and try again."
-    fi
-    bin_version=$(${bin_path} -v | grep -i version | grep -oe "[2-9]*\.[0-9]*\.[0-9]*")
-    if version_gt "${compatibility_version}" "${bin_version}";then
-        exit_with_clean "${bin_version} is less than ${compatibility_version}. Please correct it and try again."
-    fi
-    echo "Binary check passed."
-}
-
-prepare_ca(){
-
-    if [ -z "${CertConfig}" ] || [ ! -e "${CertConfig}" ];then
-        # CertConfig="${output_dir}/cert.cnf"
-        generate_cert_conf ${cert_conf_path}
-    else
-        cp "${CertConfig}" .
-    fi
-    dir_must_not_exists "${output_dir}/chain"
-    if [ -z "$ca_path" ]; then
-        echo "Generating CA key..."
-        gen_chain_cert "${output_dir}/chain" >"${logfile}" 2>&1 || exit_with_clean "openssl error!"
-        mv "${output_dir}/chain" "${output_dir}/cert"
-        ca_path="${output_dir}/cert/"
-    else
-        echo "Use user specified ca key ${ca_key}"
-        mkdir -p "${output_dir}/cert"
-        cp "${ca_key}" "${output_dir}/cert"
-        cp "${ca_crt}" "${output_dir}/cert"
-        [ -f "$ca_path/root.crt" ] && cp "$ca_path/root.crt" "${output_dir}/cert/" && root_crt="${output_dir}/cert/root.crt"
-    fi
-    ca_key="${output_dir}/cert/ca.key"
-    cp ${cert_conf_path} "${output_dir}/cert/"
-    if [ "${use_ip_param}" == "false" ];then
-        for agency_name in ${agency_array[*]};do
-            if [ ! -d "${output_dir}/cert/${agency_name}" ];then
-                gen_agency_cert "${output_dir}/cert" "${output_dir}/cert/${agency_name}" >>"${logfile}" 2>&1
-            fi
-        done
-    else
-        gen_agency_cert "${output_dir}/cert" "${output_dir}/cert/agency" >"${logfile}" 2>&1
+    local sm_mode="${1}"
+    local ca_dir="${2}"
+    local node_dir="${3}"
+    local config_path="${4}"
+    local mtail_ip_param="${5}"
+    local prometheus_dir="${6}"
+    if [ -d "${node_dir}" ];then
+        LOG_FATAL "expand node failed for ${node_dir} already exists!"
     fi
 
-    if [[ -n "${guomi_mode}" ]];then
-        dir_must_not_exists "${output_dir}/gmchain"
-        generate_cert_conf_gm "gmcert.cnf"
-        generate_gmsm2_param "gmsm2.param"
-        if [[ -z "${gmca_path}" ]]; then
-            echo "Generating Guomi CA key..."
-            gen_chain_cert_gm "${output_dir}/gmchain" >"${logfile}" 2>&1 || exit_with_clean "openssl gm error!"
-            mv "${output_dir}/gmchain" "${output_dir}/gmcert"
-            gmca_path="${output_dir}/gmcert/"
-        elif [[ -n "${gmca_path}" ]]; then
-            echo "Use user specified sm_crypto ca key ${gmca_key}"
-            mkdir -p "${output_dir}/gmcert"
-            cp "${gmca_key}" "${output_dir}/gmcert"
-            cp "${gmca_crt}" "${output_dir}/gmcert"
-            [ -f "$gmca_path/gmroot.crt" ] && cp "$gmca_path/gmroot.crt" "${output_dir}/gmcert/" && gmroot_crt="${output_dir}/gmcert/gmroot.crt"
+    if "${monitor_mode}" ; then
+       LOG_INFO "start generate monitor scripts"
+       ip=`echo $mtail_ip_param | awk '{split($0,a,":");print a[1]}'`
+       if [ -z $(echo $ip | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$") ]; then
+            LOG_WARN "Please check IP address: ${ip}, if you use domain name please ignore this."
         fi
-        gmca_key="${output_dir}/gmcert/ca.key"
-
-        if ! cp gmcert.cnf gmsm2.param "${output_dir}/gmcert/";then
-            exit_with_clean "cp gmcert.cnf gmsm2.param failed"
-        fi
-        if [ "${use_ip_param}" == "false" ];then
-            for agency_name in ${agency_array[*]};do
-                if [ ! -d "${output_dir}/gmcert/${agency_name}-gm" ];then
-                    gen_agency_cert_gm "${output_dir}/gmcert" "${output_dir}/gmcert/${agency_name}-gm" >"${logfile}" 2>&1
-                fi
-            done
-        else
-            gen_agency_cert_gm "${output_dir}/gmcert" "${output_dir}/gmcert/agency-gm" >"${logfile}" 2>&1
-        fi
+       num=`echo $mtail_ip_param | awk '{split($0,a,":");print a[2]}'`
+       local port=$((mtail_listen_port + num))
+       connected_mtail_nodes="${ip}:${port}"
+       generate_mtail_scripts "${node_dir}" "${ip}" "${port}" "node${num}"
+       if [ -n "${prometheus_dir}" ];then
+           sed -i  "s/]/,\'${connected_mtail_nodes}\']/g" ${prometheus_dir}
+       fi
+       LOG_INFO "generate monitor scripts success"
     fi
-}
 
-main()
-{
-
-[ -z $use_ip_param ] && LOG_WARN "Please set -l or -f option." && help
-output_dir="${output_dir}"
-cert_conf_path=${output_dir}/cert.cnf
-dir_must_not_exists "${output_dir}"
-mkdir -p "${output_dir}"
-if [ "${use_ip_param}" == "true" ];then
-    ip_array=(${ip_param//,/ })
-elif [ "${use_ip_param}" == "false" ];then
-    if ! parse_ip_config "$ip_file" ;then
-        exit_with_clean "Parse $ip_file error!"
-    fi
-else
-    help
-fi
-
-# if [ -z "${compatibility_version}" ];then
-#     set +e
-#     compatibility_version=$(curl -s https://api.github.com/repos/FISCO-BCOS/FISCO-BCOS/releases | grep "tag_name" | grep "\"v2\.[0-9]*\.[0-9]*\"" | sort -V | tail -n 1 | cut -d \" -f 4 | sed "s/^[vV]//")
-#     set -e
-# fi
-
-# use default version as compatibility_version
-if [ -z "${compatibility_version}" ];then
-    compatibility_version="${default_version}"
-fi
-
-# download fisco-bcos and check it
-if [ -z ${docker_mode} ];then
-    if [[ -z ${bin_path} ]];then
+    file_must_exists "${config_path}/config.ini"
+    file_must_exists "${config_path}/config.genesis"
+    file_must_exists "${config_path}/nodes.json"
+    # check binary
+    parent_path=$(dirname ${node_dir})
+    if [ -z "${docker_mode}" ];then
         download_bin
-    else
-        check_bin
+        if [ ! -f ${binary_path} ];then
+            LOG_FATAL "fisco bcos binary exec ${binary_path} not exist, please input the correct path."
+        fi
     fi
-fi
-
-if [ "${use_ip_param}" == "true" ];then
-    for i in $(seq 0 ${#ip_array[*]});do
-        agency_array[i]="agency"
-        group_array[i]=1
-    done
-fi
-
-# prepare CA
-echo "=============================================================="
-echo "">"${logfile}"
-prepare_ca
-
-echo "=============================================================="
-echo "Generating keys and certificates ..."
-nodeid_list=""
-ip_list=""
-count=0
-server_count=0
-groups=
-groups_count=
-for line in ${ip_array[*]};do
-    ip=${line%:*}
-    num=${line##*:}
-    if [[ $(echo "$ip" | grep -qE "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$") && -z "${use_ipv6}" ]];then
-        LOG_WARN "Please check IP address: ${ip}, if you use domain name please ignore this."
-    fi
-    [ "$num" == "$ip" ] || [ -z "${num}" ] && num=${node_num}
-    echo "Processing IP=${ip} Total=${num} Agency=${agency_array[${server_count}]} Groups=${group_array[server_count]}"
-    [ -z "$(get_value "${ip//[\.:]/_}_count")" ] && set_value "${ip//[\.:]/_}_count" 0
-    sdk_path="${output_dir}/${ip}/sdk"
-    local agency_gm_path="${output_dir}/gmcert/${agency_array[${server_count}]}-gm"
+    mkdir -p "${node_dir}"
+    sdk_path="${parent_path}/sdk"
     if [ ! -d "${sdk_path}" ];then
-        gen_cert "${output_dir}/cert/${agency_array[${server_count}]}" "${sdk_path}" "sdk"
-        mv node.nodeid sdk.publickey
-        cd "${output_dir}"
-        if [ -n "${guomi_mode}" ];then
-            mkdir -p "${sdk_path}/gm"
-            gen_node_cert_with_extensions_gm "${agency_gm_path}" "${sdk_path}/gm" "sdk" sdk v3_req
-            if [ -z "${no_agency}" ];then cat "${agency_gm_path}/gmagency.crt" >> "${sdk_path}/gm/gmsdk.crt";fi
-            cat "${agency_gm_path}/../gmca.crt" >> "${sdk_path}/gm/gmsdk.crt"
-            gen_node_cert_with_extensions_gm "${agency_gm_path}" "${sdk_path}/gm" "sdk" ensdk v3enc_req
-            cp "${output_dir}/gmcert/gmca.crt" "${sdk_path}/gm/"
-            $TASSL_CMD ec -in "$sdk_path/gm/gmsdk.key" -text -noout 2> /dev/null | sed -n '7,11p' | sed 's/://g' | tr "\n" " " | sed 's/ //g' | awk '{print substr($0,3);}'  | cat > "$ndpath/gmsdk.publickey"
-            mv "$sdk_path/gmsdk.publickey" "$sdk_path/gm"
-        fi
+        LOG_INFO "generate sdk cert, path: ${sdk_path} .."
+        generate_sdk_cert "${sm_mode}" "${ca_dir}" "${sdk_path}"
+        LOG_INFO "generate sdk cert success.."
     fi
-    for ((i=0;i<num;++i));do
-        echo "Processing IP=${ip} ID=${i} node's key" >>"${logfile}"
-        local node_count="$(get_value "${ip//[\.:]/_}_count")"
-        local node_dir="${output_dir}/${ip}/node${node_count}"
-        [ -d "${node_dir}" ] && exit_with_clean "${node_dir} exist! Please delete!"
+    start_all_script_path="${parent_path}/start_all.sh"
+    if [ ! -f "${start_all_script_path}" ];then
+         LOG_INFO "generate start_all.sh and stop_all.sh ..."
+         generate_all_node_scripts "${parent_path}"
+         LOG_INFO "generate start_all.sh and stop_all.sh success..."
+    fi
+    LOG_INFO "generate_node_scripts ..."
+    generate_node_scripts "${node_dir}" "${docker_mode}"
+    LOG_INFO "generate_node_scripts success..."
+    # generate cert
+    LOG_INFO "generate_node_cert ..."
+    generate_node_cert "${sm_mode}" "${ca_dir}" "${node_dir}/conf"
+    LOG_INFO "generate_node_cert success..."
+    # generate node account
+    LOG_INFO "generate_node_account ..."
+    generate_node_account "${sm_mode}" "${node_dir}/conf" "${i}"
+    LOG_INFO "generate_node_account success..."
 
-        while :
-        do
-            gen_cert "${output_dir}/cert/${agency_array[${server_count}]}" "${node_dir}" "node"
-            privateKey=$(openssl ec -in "${node_dir}/${conf_path}/node.key" -text 2> /dev/null| sed -n '3,5p' | sed 's/://g'| tr "\n" " "|sed 's/ //g')
-            len=${#privateKey}
-            head2=${privateKey:0:2}
-            #private key should not start with 00
-            if [ "64" != "${len}" ] || [ "00" == "$head2" ];then
-                rm -rf ${node_dir}
-                echo "continue because of length=${len} head=$head2" >>"${logfile}"
-                continue;
-            fi
+    LOG_INFO "copy configurations ..."
+    cp "${config_path}/config.ini" "${node_dir}"
+    cp "${config_path}/config.genesis" "${node_dir}"
+    cp "${config_path}/nodes.json" "${node_dir}"
+    LOG_INFO "copy configurations success..."
+    echo "=============================================================="
+    if [ -z "${docker_mode}" ];then
+        LOG_INFO "${binary_name} Path       : ${binary_path}"
+    else
+        LOG_INFO "docker mode        : ${docker_mode}"
+        LOG_INFO "docker tag     : ${compatibility_version}"
+    fi
+    LOG_INFO "sdk dir         : ${sdk_path}"
+    LOG_INFO "SM Model         : ${sm_mode}"
 
-            if [ -n "$guomi_mode" ]; then
-                gen_node_cert_gm "${agency_gm_path}" "${node_dir}"
-                privateKey=$($TASSL_CMD ec -in "${node_dir}/${gm_conf_path}/gmnode.key" -text 2> /dev/null| sed -n '3,5p' | sed 's/://g'| tr "\n" " "|sed 's/ //g')
-                len=${#privateKey}
-                head2=${privateKey:0:2}
-                #private key should not start with 00
-                if [ "64" != "${len}" ] || [ "00" == "$head2" ];then
-                    rm -rf ${node_dir}
-                    echo "continue gm because of length=${len} head=$head2" >>"${logfile}"
-                    continue;
-                fi
-            fi
-            break;
-        done
-
-        if [ -n "${guomi_mode}" ]; then
-            rm ${node_dir}/${conf_path}/node.nodeid
-            mv ${node_dir}/${conf_path} ${node_dir}/${gm_conf_path}/origin_cert
-            nodeid="$(cat ${node_dir}/${gm_conf_path}/gmnode.nodeid)"
-            #remove original cert files
-            mv ${node_dir}/${gm_conf_path} ${node_dir}/${conf_path}
-        else
-            nodeid="$(cat ${node_dir}/${conf_path}/node.nodeid)"
-        fi
-        if [ -n "${copy_cert}" ];then cp -r "${sdk_path}" "${node_dir}/" ; fi
-        if [ "${use_ip_param}" == "false" ];then
-            node_groups=(${group_array[server_count]//,/ })
-            for j in ${node_groups[@]};do
-                if [ -z "${groups_count[${j}]}" ];then groups_count[${j}]=0;fi
-        groups[${j}]=$"${groups[${j}]}node.${groups_count[${j}]}=${nodeid}
-    "
-                ((++groups_count[j]))
-            done
-        else
-        nodeid_list=$"${nodeid_list}node.${count}=${nodeid}
-    "
-        fi
-        local node_ports=
-        read -r -a node_ports <<< "${port_start[*]}"
-        if [ -n "${ports_array[server_count]}" ];then
-            read -r -a node_ports <<< "${ports_array[server_count]//,/ }"
-            echo "node_ports ${node_ports[*]}" >>"${logfile}"
-            [ "${i}" == "0" ] && { set_value "${ip//[\.:]/_}_port_offset" 0; }
-        fi
-        if [ -n "${use_ipv6}" ];then
-        ip_list="${ip_list}node.${count}=[${ip}]:$(( $(get_value ${ip//[\.:]/_}_port_offset) + node_ports[0] ))
-    "
-        else
-        ip_list="${ip_list}node.${count}=${ip}:$(( $(get_value ${ip//[\.:]/_}_port_offset) + node_ports[0] ))
-    "
-        fi
-        set_value "${ip//[\.:]/_}_count" $(( $(get_value "${ip//[\.:]/_}_count") + 1 ))
-        set_value "${ip//[\.:]/_}_port_offset" $(( $(get_value "${ip//[\.:]/_}_port_offset") + 1 ))
-        ((++count))
-    done
-    ((++server_count))
-done
-
-# clean
-for line in ${ip_array[*]};do
-    ip=${line%:*}
-    set_value "${ip//[\.:]/_}_count" 0
-    set_value "${ip//[\.:]/_}_port_offset" 0
-done
-
-echo "=============================================================="
-echo "Generating configuration files ..."
-cd ${current_dir}
-server_count=0
-for line in ${ip_array[*]};do
-    ip=${line%:*}
-    num=${line##*:}
-    [ "$num" == "$ip" ] || [ -z "${num}" ] && num=${node_num}
-    echo "Processing IP=${ip} Total=${num} Agency=${agency_array[${server_count}]} Groups=${group_array[server_count]}"
-    for ((i=0;i<num;++i));do
-        local node_count="$(get_value "${ip//[\.:]/_}_count")"
-        local node_dir="${output_dir}/${ip}/node${node_count}"
-        echo "Processing IP=${ip} ID=${i} ${node_dir} config files..." >> "${logfile}"
-        generate_config_ini "${node_dir}/config.ini" "${ip}" "${group_array[server_count]}" "${ports_array[server_count]}" ${i}
-        if [ "${use_ip_param}" == "false" ];then
-            node_groups=(${group_array[${server_count}]//,/ })
-            for j in ${node_groups[@]};do
-                generate_group_genesis "$node_dir/${conf_path}/group.${j}.genesis" "${j}" "${groups[${j}]}" "${groups_count[${j}]}"
-                generate_group_ini "$node_dir/${conf_path}/group.${j}.ini"
-            done
-        else
-            generate_group_genesis "$node_dir/${conf_path}/group.1.genesis" "1" "${nodeid_list}" "${count}"
-            generate_group_ini "$node_dir/${conf_path}/group.1.ini"
-        fi
-        generate_node_scripts "${node_dir}"
-        if [[ -n "${deploy_mode}" ]];then
-            if [ -z ${docker_mode} ];then cp "$bin_path" "${node_dir}/fisco-bcos"; fi
-            p2p_port=$(grep listen_port < "${node_dir}"/config.ini | grep -v _listen_port | cut -d = -f 2)
-            mv "${node_dir}" "${output_dir}/${ip}/node_${ip}_${p2p_port}"
-        fi
-        set_value "${ip//[\.:]/_}_count" $(( $(get_value "${ip//[\.:]/_}_count") + 1 ))
-        set_value "${ip//[\.:]/_}_port_offset" $(( $(get_value "${ip//[\.:]/_}_port_offset") + 1 ))
-    done
-    generate_server_scripts "${output_dir}/${ip}"
-    genDownloadConsole "${output_dir}/${ip}"
-    if [[ -z "${deploy_mode}" && -z "${docker_mode}" ]];then cp "$bin_path" "${output_dir}/${ip}/fisco-bcos"; fi
-    if [ -n "$make_tar" ];then cd ${output_dir} && tar zcf "${ip}.tar.gz" "${ip}" && cd ${current_dir};fi
-    ((++server_count))
-done
-rm "${logfile}"
-if [ -f "${output_dir}/${bcos_bin_name}" ];then rm "${output_dir}/${bcos_bin_name}";fi
-if [ "${use_ip_param}" == "false" ];then
-echo "=============================================================="
-    for l in $(seq 0 ${#groups_count[@]});do
-        if [ -n "${groups_count[${l}]}" ];then echo "Group:${l} has ${groups_count[${l}]} nodes";fi
-    done
-fi
-
-if [ -n "${no_agency}" ];then
-# delete agency crt
-    for agency_name in ${agency_array[*]};do
-        if [ -d "${output_dir}/cert/${agency_name}" ];then rm -rf "${output_dir}/cert/${agency_name}";fi
-        if [ -d "${output_dir}/gmcert/${agency_name}-gm" ];then rm -rf "${output_dir}/gmcert/${agency_name}-gm";fi
-    done
-fi
+    LOG_INFO "output dir         : ${output_dir}"
+    LOG_INFO "All completed. Files in ${output_dir}"
 }
 
-check_env
-parse_params $@
-check_and_install_tassl
-main
-print_result
+expand_lighenode()
+{
+    local sm_mode="${1}"
+    local ca_dir="${2}"
+    local lightnode_dir="${3}"
+    local config_path="${4}"
+    local mtail_ip_param="${5}"
+    local prometheus_dir="${6}"
+    if [ -d "${lightnode_dir}" ];then
+        LOG_FATAL "expand node failed for ${lightnode_dir} already exists!"
+    fi
+    file_must_exists "${config_path}/config.ini"
+    file_must_exists "${config_path}/config.genesis"
+    file_must_exists "${config_path}/nodes.json"
+    # check binary,parent_path is ./nodes
+    parent_path=$(dirname ${lightnode_dir})
+    mkdir -p "${lightnode_dir}"
+    if [ "${lightnode_flag}" == "true" ] && [ -f  "${lightnode_binary_path}" ]; then
+        echo "Checking ${lightnode_flag}, lightnode_binary_path is ${lightnode_binary_path}, lightnode_dir is ${lightnode_dir}"
+        chmod u+x ${lightnode_binary_path}
+        cp "${lightnode_binary_path}" ${lightnode_dir}/
+    elif [ "${lightnode_flag}" == "false" ]; then
+        download_lightnode_bin
+        cp "${lightnode_binary_path}" ${lightnode_dir}/
+    fi
+
+    LOG_INFO "generate_lightnode_scripts ..."
+    generate_lightnode_scripts "${lightnode_dir}" "fisco-bcos-lightnode"
+    LOG_INFO "generate_lightnode_scripts success..."
+
+    # generate cert
+    LOG_INFO "generate_lightnode_cert ..."
+    generate_node_cert "${sm_mode}" "${ca_dir}" "${lightnode_dir}/conf"
+    LOG_INFO "generate_lightnode_cert success..."
+    # generate node account
+    LOG_INFO "generate_lightnode_account ..."
+    generate_node_account "${sm_mode}" "${lightnode_dir}/conf" "${i}"
+    LOG_INFO "generate_lightnode_account success..."
+
+    LOG_INFO "copy configurations ..."
+    cp "${config_path}/config.ini" "${lightnode_dir}"
+    cp "${config_path}/config.genesis" "${lightnode_dir}"
+    cp "${config_path}/nodes.json" "${lightnode_dir}"
+    LOG_INFO "copy configurations success..."
+    echo "=============================================================="
+
+    LOG_INFO "SM Model         : ${sm_mode}"
+    LOG_INFO "output dir         : ${output_dir}"
+    LOG_INFO "All completed. Files in ${output_dir}"
+}
+
+deploy_nodes()
+{
+    dir_must_not_exists "${output_dir}"
+    mkdir -p "$output_dir"
+    dir_must_exists "${output_dir}"
+    cert_conf="${output_dir}/cert.cnf"
+    p2p_listen_port=port_start[0]
+    rpc_listen_port=port_start[1]
+    [ -z $use_ip_param ] && help 'ERROR: Please set -l or -f option.'
+    if [ "${use_ip_param}" == "true" ]; then
+        ip_array=(${ip_param//,/ })
+    elif [ "${use_ip_param}" == "false" ]; then
+        if ! parse_ip_config ${ip_file}; then
+            exit_with_clean "Parse ${ip_file} error!"
+        fi
+    else
+        help
+    fi
+    #check the binary
+    if [ -z "${docker_mode}" ];then
+        download_bin
+        if [[ ! -f "$binary_path" ]]; then
+            LOG_FATAL "fisco bcos binary exec ${binary_path} not exist, Must copy binary file ${binary_name} to ${binary_path}"
+        fi
+    fi
+    #check the lightnode binary
+    if [ -f "${lightnode_binary_path}" ] && [ "${download_lightnode_binary}" != "true" ];then
+      LOG_INFO "Use lightnode binary ${lightnode_binary_path}"
+    fi
+    if [ "${download_lightnode_binary}" == "true" ];then
+        download_lightnode_bin
+
+    fi
+    if [ "${lightnode_flag}" == "true" ] && [ ! -f "${lightnode_binary_path}" ] && [ "${download_lightnode_binary}" != "true" ];then
+      LOG_FATAL "please input \"download_binary\" or assign correct lightnode binary path"
+    fi
+
+
+    if "${monitor_mode}" ;then
+        download_monitor_bin
+        if [[ ! -f "$mtail_binary_path" ]]; then
+            LOG_FATAL "mtail binary exec ${mtail_binary_path} not exist, Must copy binary file ${mtail_binary_name} to ${mtail_binary_path}"
+        fi
+    fi
+
+    local i=0
+    node_count=0
+    local count=0
+    connected_nodes=""
+    connected_mtail_nodes=""
+    local monitor_ip=""
+    # Note: must generate the node account firstly
+    ca_dir="${output_dir}"/ca
+    generate_chain_cert "${sm_mode}" "${ca_dir}"
+
+    for line in ${ip_array[*]}; do
+        ip=${line%:*}
+        num=${line#*:}
+        if [ -z $(echo $ip | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$") ]; then
+            LOG_WARN "Please check IP address: ${ip}, if you use domain name please ignore this."
+        fi
+        # echo $num
+        [ "$num" == "$ip" ] || [ -z "${num}" ] && num=${node_num}
+        echo "Processing IP:${ip} Total:${num}"
+        [ -z "$(get_value ${ip//./}_count)" ] && set_value ${ip//./}_count 0
+
+        nodes_dir="${output_dir}/${ip}"
+        # start_all.sh and stop_all.sh
+        generate_all_node_scripts "${nodes_dir}"
+        if [ -z "${docker_mode}" ];then
+            cp "${binary_path}" "${nodes_dir}"
+        fi
+        if "${monitor_mode}" ;then
+            cp $mtail_binary_path "${nodes_dir}"
+        fi
+        ca_cert_dir="${nodes_dir}"/ca
+        mkdir -p ${ca_cert_dir}
+        cp -r ${ca_dir}/* ${ca_cert_dir}
+
+        if [ ! -d "${nodes_dir}/sdk" ];then
+            # generate sdk cert
+            generate_sdk_cert "${sm_mode}" "${ca_dir}" "${nodes_dir}/sdk"
+        fi
+
+        for ((i = 0; i < num; ++i)); do
+            local node_count=$(get_value ${ip//./}_count)
+            node_dir="${output_dir}/${ip}/node${node_count}"
+            mkdir -p "${node_dir}"
+            generate_node_cert "${sm_mode}" "${ca_dir}" "${node_dir}/conf"
+            generate_node_scripts "${node_dir}" "${docker_mode}"
+            if "${monitor_mode}" ;then
+                local port=$((mtail_listen_port + node_count))
+                connected_mtail_nodes=${connected_mtail_nodes}"${ip}:${port}, "
+                if [[ $count == 0 ]]; then
+                    monitor_ip="${ip}"
+                fi
+                generate_mtail_scripts "${node_dir}" "${ip}" "${port}" "node${node_count}"
+            fi
+            local port=$((p2p_listen_port + node_count))
+            connected_nodes=${connected_nodes}"${ip}:${port}, "
+            account_dir="${node_dir}/conf"
+            generate_node_account "${sm_mode}" "${account_dir}" "${count}"
+            set_value ${ip//./}_count $(($(get_value ${ip//./}_count) + 1))
+            ((++count))
+            ((++node_count))
+        done
+    done
+
+    if "${monitor_mode}" ;then
+        monitor_dir="${output_dir}/monitor"
+        generate_monitor_scripts "${monitor_dir}" "${connected_mtail_nodes}" ${monitor_ip}
+    fi
+
+    local i=0
+    local count=0
+    for line in ${ip_array[*]}; do
+        ip=${line%:*}
+        num=${line#*:}
+        if [ -z $(echo $ip | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$") ]; then
+            LOG_WARN "Please check IP address: ${ip}, if you use domain name please ignore this."
+        fi
+        echo "Processing IP to generate config:${ip} Total:${num}"
+        [ "$num" == "$ip" ] || [ -z "${num}" ] && num=${node_num}
+        #set_value ${ip//./}_count 0
+        [ -z "$(get_value ${ip//./}_cf_count)" ] && set_value ${ip//./}_cf_count 0
+        for ((i = 0; i < num; ++i)); do
+            local node_count=$(get_value ${ip//./}_cf_count)
+            node_dir="${output_dir}/${ip}/node${node_count}"
+            local p2p_port=$((p2p_listen_port + node_count))
+            local rpc_port=$((rpc_listen_port + node_count))
+            generate_config "${sm_mode}" "${node_dir}/config.ini" "${listen_ip}" "${p2p_port}" "${listen_ip}" "${rpc_port}"
+            generate_p2p_connected_conf "${node_dir}/${p2p_connected_conf_name}" "${connected_nodes}" "false"
+            if [ ! -z "${node_key_dir}" ]; then
+                # generate nodeids from file
+                generate_genesis_config "${node_dir}/config.genesis" "${nodeid_list_from_path}"
+            else
+                generate_genesis_config "${node_dir}/config.genesis" "${nodeid_list}"
+            fi
+            set_value ${ip//./}_cf_count $(($(get_value ${ip//./}_cf_count) + 1))
+            ((++count))
+        done
+        if [ -n "$make_tar" ];then cd ${output_dir} && tar zcf "${ip}.tar.gz" "${ip}" && cd ${current_dir};fi
+    done
+
+    # Generate lightnode cert
+    if [ -e "${lightnode_binary_path}" ]; then
+        local lightnode_dir="${output_dir}/lightnode"
+        mkdir -p ${lightnode_dir}
+        generate_genesis_config "${lightnode_dir}/config.genesis" "${nodeid_list}"
+
+        generate_node_cert "${sm_mode}" "${ca_dir}" "${lightnode_dir}/conf"
+        generate_lightnode_scripts "${lightnode_dir}" "fisco-bcos-lightnode"
+        local lightnode_account_dir="${lightnode_dir}/conf"
+        generate_node_account "${sm_mode}" "${lightnode_account_dir}" ${count}
+
+        local node_count=$(get_value ${ip//./}_count)
+        local p2p_port=$((p2p_listen_port + node_count))
+        local rpc_port=$((rpc_listen_port + node_count))
+        generate_config "${sm_mode}" "${lightnode_dir}/config.ini" "${listen_ip}" "${p2p_port}" "${listen_ip}" "${rpc_port}"
+        generate_p2p_connected_conf "${lightnode_dir}/${p2p_connected_conf_name}" "${connected_nodes}" "false"
+
+        cp "${lightnode_binary_path}" ${lightnode_dir}/
+        if [ -n "$make_tar" ];then cd ${output_dir} && tar zcf "lightnode.tar.gz" "../${lightnode_dir}" && cd ${current_dir};fi
+    fi
+
+    print_result
+}
+
+generate_template_package()
+{
+    local node_name="${1}"
+    local binary_path="${2}"
+    local genesis_conf_path="${3}"
+    local output_dir="${4}"
+
+    # do not support docker
+    if [ -n "${docker_mode}" ];then
+        LOG_FATAL "Docker mode is not supported on building template install package"
+    fi
+
+    # do not support monitor
+    if "${monitor_mode}" ;then
+        LOG_FATAL "Monitor mode is not support on building template install package"
+    fi
+
+    # check if node.nodid dir exist
+    file_must_exists "${genesis_conf_path}"
+    file_must_exists "${binary_path}"
+    # dir_must_not_exists "${output_dir}"
+
+    mkdir -p "${output_dir}"
+    dir_must_exists "${output_dir}"
+
+    # mkdir node dir
+    node_dir="${output_dir}/${node_name}"
+    mkdir -p "${node_dir}"
+    mkdir -p "${node_dir}/conf"
+
+    p2p_listen_ip="[#P2P_LISTEN_IP]"
+    rpc_listen_ip="[#RPC_LISTEN_IP]"
+
+    p2p_listen_port="[#P2P_LISTEN_PORT]"
+    rpc_listen_port="[#RPC_LISTEN_PORT]"
+
+    # copy binary file
+    cp "${binary_path}" "${node_dir}/../"
+    # copy config.genesis
+    cp "${genesis_conf_path}" "${node_dir}/"
+
+    # generate start_all.sh and stop_all.sh
+    generate_all_node_scripts "${node_dir}/../"
+
+    # generate node start.sh stop.sh
+    generate_node_scripts "${node_dir}"
+
+    local connected_nodes="[#P2P_CONNECTED_NODES]"
+    # generate config for node
+    generate_config "${sm_mode}" "${node_dir}/config.ini" "${p2p_listen_ip}" "${p2p_listen_port}" "${rpc_listen_ip}" "${rpc_listen_port}" "true"
+    generate_p2p_connected_conf "${node_dir}/${p2p_connected_conf_name}" "${connected_nodes}" "true"
+
+    LOG_INFO "Building template intstall package"
+    LOG_INFO "Auth mode            : ${auth_mode}"
+    if ${auth_mode} ; then
+        LOG_INFO "Auth account     : ${auth_admin_account}"
+    fi
+    LOG_INFO "SM model             : ${sm_mode}"
+    LOG_INFO "enable HSM           : ${enable_hsm}"
+    LOG_INFO "All completed. Files in ${output_dir}"
+}
+
+generate_nodeids_from_path()
+{
+    local node_key_dir="${1}"
+    local file_type="${2}"
+    local file_index="${3}"
+    local output_dir="${4}"
+
+    if [ ! -d "${output_dir}" ]; then
+        mkdir -p "${output_dir}"
+    fi
+
+    local node_key_file_list=$(ls "${node_key_dir}" | tr "\n" " ")
+    local node_key_file_array=(${node_key_file_list})
+
+    if [[ ! -f "${node_key_dir}/${node_key_file_array[${file_index}]}" ]]; then
+        LOG_WARN " node key file not exist, ${node_key_dir}/${node_key_file_array[${file_index}]}"
+        continue
+    fi
+    local nodeid=""
+    if [ "${file_type}" == "pem" ]; then
+        ${OPENSSL_CMD} ec -text -noout -in "${node_key_dir}/${node_key_file_array[${file_index}]}" 2>/dev/null | sed -n '7,11p' | tr -d ": \n" | awk '{print substr($0,3);}' | cat >"$node_key_dir"/node.nodeid
+        nodeid=$(cat "${node_key_dir}/node.nodeid")
+        cp -f "${node_key_dir}/${node_key_file_array[${file_index}]}" "${output_dir}/node.pem"
+        rm -f "${node_key_dir}/node.nodeid"
+    elif [ "${file_type}" == "nodeid" ]; then
+        nodeid=$(cat "${nodeid_dir}/${nodeid_file}")
+    else
+        LOG_FATAL "generate_nodeids_from_path function only support pem and nodeid file type, don't support ${file_type} yet"
+    fi
+    nodeid_list_from_path=$"${nodeid_list_from_path}node.${node_index}=${nodeid}: 1
+    "
+}
+
+generate_genesis_config_by_nodeids()
+{
+    local nodeid_dir="${1}"
+    local output_dir="${2}"
+
+    local nodeid_file_list=$(ls "${nodeid_dir}" | tr "\n" " ")
+    local nodeid_file_array=(${nodeid_file_list})
+
+    local total_files_sum="${#nodeid_file_array[*]}"
+    for ((local file_index=0; file_index < total_files_sum; ++file_index)); do
+        generate_nodeids_from_path "${nodeid_file_array}" "nodeid" "${file_index}" "${output_dir}"
+    done
+
+    if [[ -z "${nodeid_list_from_path}" ]]; then
+        LOG_FATAL "generate config.genesis failed, please check if the nodeids directory correct"
+    fi
+
+    generate_genesis_config "${output_dir}/config.genesis" "${generate_nodeids_from_path}"
+}
+
+check_auth_account()
+{
+  if [ -z "${auth_admin_account}" ]; then
+    # get account string to auth_admin_account
+    generate_auth_account
+  fi
+}
+
+generate_auth_account()
+{
+  local account_script="get_account.sh"
+  if ${sm_mode}; then
+    account_script="get_gm_account.sh"
+  fi
+
+  if [ ! -f ${account_script} ]; then
+        local get_account_link="${cdn_link_header}/FISCO-BCOS/tools/${account_script}"
+        LOG_INFO "Downloading ${account_script} from ${get_account_link}..."
+        curl -#LO "${get_account_link}"
+  fi
+  auth_admin_account=$(bash ${account_script} | grep Address | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" | awk '{print $5}')
+  LOG_INFO "Admin account: ${auth_admin_account}"
+  mv accounts* "${ca_dir}"
+
+  if [ "$?" -ne "0" ]; then
+      LOG_INFO "Admin account generate failed, please check ${account_script}."
+      exit 1
+  fi
+}
+
+modify_node_ca_setting(){
+    dir_must_not_exists "${modify_node_path}/conf/multiCaPath"
+    file_must_exists "${multi_ca_path}"
+    mkdir ${modify_node_path}/conf/multiCaPath 2>/dev/null
+    cp ${multi_ca_path} ${modify_node_path}/conf/multiCaPath/${1}.0 2>/dev/null
+    # sed -i "s/; mul_ca_path=multiCaPath/mul_ca_path=multiCaPath/g" ${modify_node_path}/config.ini
+
+    LOG_INFO "Modify node ca setting success"
+}
+
+modify_multiple_ca_node(){
+    check_and_install_tassl
+    subject_hash=`${OPENSSL_CMD} x509 -hash -noout -in ${multi_ca_path} 2>/dev/null`
+    if [[ ! "${multi_ca_path}" || ! "${modify_node_path}" ]];then
+        LOG_FATAL "multi_ca_path and modify_node_path are required!"
+    fi
+    modify_node_ca_setting "${subject_hash}"
+}
+
+main() {
+    check_env
+    check_and_install_tassl
+    parse_params "$@"
+    if [[ "${command}" == "deploy" ]]; then
+        deploy_nodes
+    elif [[ "${command}" == "expand" ]]; then
+        dir_must_exists "${ca_dir}"
+        expand_node "${sm_mode}" "${ca_dir}" "${output_dir}" "${config_path}" "${mtail_ip_param}" "${prometheus_dir}"
+    elif [[ "${command}" == "expand_lightnode" ]]; then
+        dir_must_exists "${ca_dir}"
+        expand_lighenode "${sm_mode}" "${ca_dir}" "${output_dir}" "${config_path}" "${mtail_ip_param}" "${prometheus_dir}"
+    elif [[ "${command}" == "generate-template-package"  ]]; then
+        local node_name="node0"
+        if [[ -n "${genesis_conf_path}" ]]; then
+            dir_must_not_exists "${output_dir}"
+            # config.genesis is set
+            file_must_exists "${genesis_conf_path}"
+            generate_template_package "${node_name}" "${binary_path}" "${genesis_conf_path}" "${output_dir}"
+        elif [[ -n "${node_key_dir}" ]] && [[ -d "${node_key_dir}" ]]; then
+            dir_must_not_exists "${output_dir}"
+            generate_genesis_config_by_nodeids "${node_key_dir}" "${output_dir}/"
+            file_must_exists "${output_dir}/config.genesis"
+            generate_template_package "${node_name}" "${binary_path}" "${output_dir}/config.genesis" "${output_dir}"
+        else
+            echo "bash build_chain.sh generate-template-package -h "
+            echo "  eg:"
+            echo "      bash build_chain.sh -C generate-template-package -e ./fisco-bcos -o ./nodes -G ./config.genesis "
+            echo "      bash build_chain.sh -C generate-template-package -e ./fisco-bcos -o ./nodes -G ./config.genesis -s"
+            echo "      bash build_chain.sh -C generate-template-package -e ./fisco-bcos -o ./nodes -n nodeids -s -R"
+        fi
+    elif [[ "${command}" == "modify" ]]; then
+        modify_multiple_ca_node
+    else
+        LOG_FATAL "Unsupported command ${command}, only support \'deploy\' and \'expand\' now!"
+    fi
+}
+
+main "$@"

@@ -386,7 +386,7 @@ public class DeployController extends BaseController {
     @SaCheckPermission("bcos3:chain:startChain")
     @GetMapping(value = "chain/start")
     public BaseResponse startChain(
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName) {
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain_v3") String chainName) {
         Instant startTime = Instant.now();
         log.info("startChain, chainName:[{}], now:[{}]", chainName, startTime);
         deployService.startChain(chainName, OptionType.DEPLOY_CHAIN);
@@ -403,7 +403,7 @@ public class DeployController extends BaseController {
     @SaCheckPermission("bcos3:chain:stopChain")
     @GetMapping(value = "chain/stop")
     public BaseResponse stopChain(
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName) {
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain_v3") String chainName) {
         Instant startTime = Instant.now();
         log.info("Stop chain, chainName:[{}], now:[{}]", chainName, startTime);
 
@@ -434,7 +434,7 @@ public class DeployController extends BaseController {
     @SaCheckPermission("bcos3:chain:deleteChain")
     @DeleteMapping(value = "delete")
     public BaseResponse deleteChain(
-            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain") String chainName
+            @RequestParam(value = "chainName", required = false, defaultValue = "default_chain_v3") String chainName
     ) throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("Start deleteChain chainName:[{}], startTime:[{}]",

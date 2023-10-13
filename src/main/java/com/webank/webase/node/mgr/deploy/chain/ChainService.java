@@ -314,7 +314,12 @@ public class ChainService {
             chainVersion = chainVersion.substring(1);
             log.info("execBuildChain chainVersion:{}", chainVersion);
         }
-        deployShellService.execBuildChain(encryptType, ipConf, chainName, chainVersion);
+
+        // 搭建air版本区块链，搭建时群组只能有一个
+        List<String> groupIds = new ArrayList<>(ipConfigParseList.get(0).getGroupIdSet());
+//        String groupId = "group" + groupIds.get(0);
+        String groupId = groupIds.get(0);
+        deployShellService.execBuildChain(encryptType, ipConf, chainName, chainVersion, groupId);
 
         try {
             log.info("Init chain front node db data....");
@@ -392,11 +397,13 @@ public class ChainService {
                 NodeConfig nodeConfig = NodeConfig.read(nodeRoot, encryptType);
 
                 // get frontPort
-                DeployNodeInfo targetNode = this.getFrontPort(deployNodeInfoList, ip, nodeConfig.getChannelPort());
+                DeployNodeInfo targetNode = this.getFrontPort(deployNodeInfoList, ip, nodeConfig.getChannelPort(), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort());
                 if (targetNode == null) {
                     throw new NodeMgrException(ConstantCode.DEPLOY_INFO_NOT_MATCH_IP_CONF);
                 }
                 int frontPort = targetNode.getFrontPort();
+
+                log.info("!!!initChainDbData, targetNode is: {}", targetNode);
 
                 // host
 //                TbHost host = newIpHostMap.get(ip);
@@ -435,7 +442,7 @@ public class ChainService {
 
                 // generate front application.yml
                 try {
-                    ThymeleafUtil.newFrontConfig(nodeRoot,encryptType, nodeConfig.getChannelPort(),
+                    ThymeleafUtil.newFrontConfig(nodeRoot,encryptType, nodeConfig.getJsonrpcPort(),
                             frontPort, webaseSignAddr);
                 } catch (IOException e) {
                     throw new NodeMgrException(ConstantCode.GENERATE_FRONT_YML_ERROR);
@@ -505,10 +512,13 @@ public class ChainService {
         return isChainRunning.get();
     }
 
-    public DeployNodeInfo getFrontPort(List<DeployNodeInfo> deployNodeInfoList, String ip, int channelPort) {
+    public DeployNodeInfo getFrontPort(List<DeployNodeInfo> deployNodeInfoList, String ip, int channelPort, int rpcPort, int p2pPort) {
         DeployNodeInfo targetNodeInfo = null;
         for (DeployNodeInfo nodeInfo : deployNodeInfoList) {
-            if (ip.equals(nodeInfo.getIp()) && channelPort == nodeInfo.getChannelPort()) {
+//            if (ip.equals(nodeInfo.getIp()) && channelPort == nodeInfo.getChannelPort()) {
+//                targetNodeInfo = nodeInfo;
+//            }
+            if (ip.equals(nodeInfo.getIp())  && rpcPort == nodeInfo.getRpcPort() && p2pPort == nodeInfo.getP2pPort()) {
                 targetNodeInfo = nodeInfo;
             }
         }

@@ -55,7 +55,7 @@ public class DeployShellService {
      * @param chainVersion ex: 2.7.2 without v
      * @return
      */
-    public void execBuildChain(int encryptType, String[] ipLines, String chainName, String chainVersion) {
+    public void execBuildChain(int encryptType, String[] ipLines, String chainName, String chainVersion, String groupId) {
         Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
                 JsonTools.toJSONString(ipLines), chainName, ipConf.toString());
@@ -76,9 +76,29 @@ public class DeployShellService {
             throw new NodeMgrException(ConstantCode.CHAIN_ROOT_DIR_EXIST);
         }
 
-        // build_chain.sh only support docker on linux
-        // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ] [ -v support_version ]
-        String command = String.format("bash %s -S -f %s -o %s %s %s %s %s",
+//        // build_chain.sh only support docker on linux
+//        // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ] [ -v support_version ]
+//        String command = String.format("bash %s -S -f %s -o %s %s %s %s %s",
+//                // build_chain.sh shell script
+//                constant.getBuildChainShell(),
+//                // ipconf file path
+//                ipConf.toString(),
+//                // output path
+//                chainRoot.toString(),
+//                // port param
+//                //shellPortParam,
+//                // guomi or standard
+//                encryptType == CryptoType.SM_TYPE ? "-g " : "",
+//                // only linux supports docker model
+//                SystemUtils.IS_OS_LINUX ? " -d " : "",
+//                // use binary local
+//                StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
+//                        String.format(" -e %s ", constant.getFiscoBcosBinary()),
+//                String.format(" -v %s ", chainVersion)
+//        );
+
+        // chainid此时没有，写死为1
+        String command = String.format("bash %s -f %s -o %s %s %s %s %s -g %s -I %s",
                 // build_chain.sh shell script
                 constant.getBuildChainShell(),
                 // ipconf file path
@@ -88,13 +108,15 @@ public class DeployShellService {
                 // port param
                 //shellPortParam,
                 // guomi or standard
-                encryptType == CryptoType.SM_TYPE ? "-g " : "",
+                encryptType == CryptoType.SM_TYPE ? "-s " : "",
                 // only linux supports docker model
-                SystemUtils.IS_OS_LINUX ? " -d " : "",
+                SystemUtils.IS_OS_LINUX ? " -D " : "",
                 // use binary local
                 StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
                         String.format(" -e %s ", constant.getFiscoBcosBinary()),
-                String.format(" -v %s ", chainVersion)
+                String.format(" -v %s ", chainVersion),
+                groupId,
+                "chain1"
         );
 
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());

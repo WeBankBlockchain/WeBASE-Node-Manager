@@ -416,12 +416,33 @@ public class FrontService {
         List<TbAgency> tbAgencyList = this.agencyService.selectAgencyListByChainId(chainId);
         log.info("selectFrontListByChainId tbAgencyList:{}", tbAgencyList);
 
-        // select all fronts by all agencies
-        List<TbFront> tbFrontList = tbAgencyList.stream()
-            .map((agency) -> frontMapper.selectByAgencyId(agency.getId()))
-            .filter((front) -> front != null)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
+//        // select all fronts by all agencies
+//        List<TbFront> tbFrontList = tbAgencyList.stream()
+//            .map((agency) -> frontMapper.selectByAgencyId(agency.getId()))
+//            .filter((front) -> front != null)
+//            .flatMap(List::stream)
+//            .collect(Collectors.toList());
+
+        List<TbFront> tbFrontList = null;
+
+        // 处理在启动链的时候，在此处tbfront保存的数据库事务未提交完成，导致获取失败的问题，重试三次获取
+        int flag = 3;
+        while (CollectionUtils.isEmpty(tbFrontList) && flag > 0) {
+            log.info("selectFrontListByChainId, cur flag: {}", flag);
+            if (flag < 3) {
+                try {
+                    Thread.sleep(500);
+                } catch (Exception e) {
+                    log.info("selectFrontListByChainId, sleep fail: {}", e.getMessage());
+                }
+            }
+            tbFrontList = tbAgencyList.stream()
+                    .map((agency) -> frontMapper.selectByAgencyId(agency.getId()))
+                    .filter((front) -> front != null)
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+            flag--;
+        }
 
         if (CollectionUtils.isEmpty(tbFrontList)) {
             log.error("Chain:[{}] has no front.", chainId);
@@ -558,7 +579,7 @@ public class FrontService {
             this.frontGroupMapService.newFrontGroup(front.getFrontId(), groupId, GroupStatus.MAINTAINING);
 
             // generate front application.yml
-            ThymeleafUtil.newFrontConfig(nodeRoot, encryptType, channelPort, frontPort, chain.getWebaseSignAddr());
+            ThymeleafUtil.newFrontConfig(nodeRoot, encryptType, jsonrpcPort, frontPort, chain.getWebaseSignAddr());
         }
         return newFrontList;
     }

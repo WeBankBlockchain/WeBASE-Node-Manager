@@ -4,7 +4,7 @@ spring:
 sdk:
   encryptType: [(${encryptType})]
   #channelPort: [(${channelPort})]
-  useSmSsl: [(${useSMSSL})]
+  useSmSsl: [(${useSmSsl})]
   peers:  [(${peers})]
 server:
   port: [(${frontPort})]

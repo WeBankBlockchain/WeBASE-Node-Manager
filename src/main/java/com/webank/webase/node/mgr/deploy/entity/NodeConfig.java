@@ -156,8 +156,12 @@ public class NodeConfig {
     public static Triple<Integer, Integer, Integer> getNodePorts(Path nodePath) throws IOException {
         Path configIni = PathService.getConfigIniPath(nodePath);
         Ini ini = new Ini(configIni.toFile());
-        int channelPort = Integer.parseInt(ini.get("rpc", "channel_listen_port"));
-        int jsonrpcPort = Integer.parseInt(ini.get("rpc", "jsonrpc_listen_port"));
+        // 3.0版本后没有channel端口了
+//        int channelPort = Integer.parseInt(ini.get("rpc", "channel_listen_port"));
+        int channelPort = 0;
+//        int jsonrpcPort = Integer.parseInt(ini.get("rpc", "jsonrpc_listen_port"));
+//        int p2pPort = Integer.parseInt(ini.get("p2p", "listen_port"));
+        int jsonrpcPort = Integer.parseInt(ini.get("rpc", "listen_port"));
         int p2pPort = Integer.parseInt(ini.get("p2p", "listen_port"));
         return Triple.of(jsonrpcPort, channelPort, p2pPort);
     }
