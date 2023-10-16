@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS tb_warehouse
     description_en      text,
     warehouse_detail    text,
     warehouse_detail_en text,
-    create_time         time DEFAULT NULL,
-    modify_time         time DEFAULT NULL,
+    create_time         timestamp DEFAULT NULL,
+    modify_time         timestamp DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_name)
 );
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS tb_contract_folder
     description_en   text,
     folder_detail    text,
     folder_detail_en text,
-    create_time      time DEFAULT NULL,
-    modify_time      time DEFAULT NULL,
+    create_time      timestamp DEFAULT NULL,
+    modify_time      timestamp DEFAULT NULL,
     warehouse_id     int       NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_id, folder_name)
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS tb_contract_item
     contract_source    text,
     description        text,
     description_en     text,
-    create_time        time DEFAULT NULL,
-    modify_time        time DEFAULT NULL,
+    create_time        timestamp DEFAULT NULL,
+    modify_time        timestamp DEFAULT NULL,
     warehouse_id       int       NOT NULL,
     contract_folder_id int       NOT NULL,
     PRIMARY KEY (id),
