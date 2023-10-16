@@ -149,7 +149,7 @@ public class  ContractService {
         TbContract tbContract = new TbContract();
         BeanUtils.copyProperties(contract, tbContract);
         log.debug("newContract save contract");
-        contractMapper.insert(tbContract);
+        contractMapper.add(tbContract);
         // save contract path
         log.debug("newContract save contract path");
         // if exist, auto not save (ignore)

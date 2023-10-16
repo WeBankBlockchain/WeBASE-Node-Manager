@@ -26,9 +26,16 @@
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.contract.abi.entity.AbiInfo">
-        insert into tb_abi(group_id,account,contract_name,contract_address,contract_abi,contract_bin,
-        create_time,modify_time)
-        VALUES (#{groupId},#{account},#{contractName},#{contractAddress},#{contractAbi},#{contractBin}, now(), now())
+        INSERT INTO tb_abi(group_id, account, contract_name, contract_address, contract_abi, contract_bin, create_time,
+                           modify_time)
+        VALUES (#{groupId}, #{account}, #{contractName}, #{contractAddress}, #{contractAbi}, #{contractBin}, NOW(),
+                NOW())
+        ON CONFLICT (group_id, contract_name, contract_address,abi_id)
+            DO UPDATE
+            SET account      = ${account},
+                contract_abi = ${contract_abi},
+                contract_bin = ${contract_bin},
+                modify_time  = NOW();
     </insert>
 
     <delete id="deleteByAbiId" parameterType="java.lang.Integer">

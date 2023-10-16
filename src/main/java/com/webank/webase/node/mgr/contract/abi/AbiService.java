@@ -16,9 +16,6 @@
 
 package com.webank.webase.node.mgr.contract.abi;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ContractType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -314,19 +311,7 @@ public class AbiService {
         saveAbi.setCreateTime(now);
         saveAbi.setModifyTime(now);
         saveAbi.setAccount(account);
-        // 使用REPLACE来进行自动替换或者新增,瀚高不支持REPLACE.
-        // 遂修改为先查询,有就替换,没有就直接新增
-        AbiInfo one = abiMapper.selectOne(new LambdaQueryWrapper<AbiInfo>()
-                .eq(AbiInfo::getGroupId, groupId)
-                .eq(AbiInfo::getAccount, account)
-                .eq(AbiInfo::getContractAddress, contractAddress)
-        );
-        if (one == null) {
-            abiMapper.insert(saveAbi);
-        } else {
-            saveAbi.setAbiId(one.getAbiId());
-            abiMapper.updateById(saveAbi);
-        }
+        abiMapper.add(saveAbi);
     }
 
     public AbiInfo getAbiInfoByBin(ReqAbiListParam param) {

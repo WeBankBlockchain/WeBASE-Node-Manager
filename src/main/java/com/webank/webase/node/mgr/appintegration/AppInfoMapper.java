@@ -13,7 +13,6 @@
  */
 package com.webank.webase.node.mgr.appintegration;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sun.xml.bind.v2.schemagen.xmlschema.Appinfo;
 import com.webank.webase.node.mgr.appintegration.entity.AppInfoParam;
 import com.webank.webase.node.mgr.appintegration.entity.TbAppInfo;
@@ -25,7 +24,7 @@ import org.springframework.stereotype.Repository;
  * application integration mapper.
  */
 @Repository
-public interface AppInfoMapper extends BaseMapper<TbAppInfo> {
+public interface AppInfoMapper {
 
     /**
      * Add new application data.

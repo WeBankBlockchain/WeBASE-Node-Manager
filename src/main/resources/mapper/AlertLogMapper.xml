@@ -24,9 +24,16 @@
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.alert.log.entity.AlertLog">
-        INSERT INTO tb_alert_log(alert_type,alert_level,alert_content,description,status,
-        create_time,modify_time)
-        VALUES (#{alertType},#{alertLevel},#{alertContent},#{description},#{status}, now(), now())
+        INSERT INTO tb_alert_log(alert_type, alert_level, alert_content, description, status, create_time, modify_time)
+        VALUES (#{alertType}, #{alertLevel}, #{alertContent}, #{description}, #{status}, NOW(), NOW())
+        ON CONFLICT (log_id)
+            DO UPDATE
+            SET alert_type    = #{alertType},
+                alert_level   = #{alertLevel},
+                alert_content = #{alertContent},
+                description   = #{description},
+                status        = #{status},
+                modify_time   = NOW();
     </insert>
 
     <delete id="deleteByLogId" parameterType="java.lang.Integer">
