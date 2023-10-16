@@ -61,7 +61,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableTransactionManagement
 @EnableSwagger2
 @EnableAspectJAutoProxy(exposeProxy = true)
-@MapperScan("com.webank.webase.node.mgr")
+@MapperScan("com.baomidou.mybatisplus.samples.quickstart.mapper")
 public class Application {
 
     public static void main(String[] args) {
