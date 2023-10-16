@@ -325,7 +325,7 @@ public class AbiService {
             abiMapper.insert(saveAbi);
         } else {
             saveAbi.setAbiId(one.getAbiId());
-            abiMapper.update(saveAbi);
+            abiMapper.updateById(saveAbi);
         }
     }
 

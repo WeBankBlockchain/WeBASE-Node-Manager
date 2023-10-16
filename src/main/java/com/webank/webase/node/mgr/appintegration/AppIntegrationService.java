@@ -85,7 +85,8 @@ public class AppIntegrationService {
         tbAppInfo.setAppKey(appKey);
         tbAppInfo.setAppSecret(appSecret);
         tbAppInfo.setAppStatus(AppStatus.UNREGISTER.getValue());
-        Integer affectRow = appInfoMapper.addAppInfo(tbAppInfo);
+        appInfoMapper.insert(tbAppInfo);
+        Integer affectRow = tbAppInfo.getId();
         if (affectRow == 0) {
             log.warn("affect 0 rows of tb_app_info");
             throw new NodeMgrException(ConstantCode.DB_EXCEPTION);

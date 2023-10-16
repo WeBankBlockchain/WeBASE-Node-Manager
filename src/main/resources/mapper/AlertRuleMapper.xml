@@ -46,7 +46,7 @@
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule">
-        REPLACE INTO tb_alert_rule(rule_name,enable,alert_type,alert_level,alert_interval_seconds,
+        INSERT INTO tb_alert_rule(rule_name,enable,alert_type,alert_level,alert_interval_seconds,
         alert_content,content_param_list,description,is_all_user,user_list,
         create_time, modify_time,less_than,less_and_equal,larger_than,larger_and_equal,equal,
         last_alert_time)

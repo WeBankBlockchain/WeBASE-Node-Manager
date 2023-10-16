@@ -16,6 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.rule;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AlertRuleMapper {
+public interface AlertRuleMapper extends BaseMapper<TbAlertRule> {
 
     void add(TbAlertRule tbAlertRule);
 

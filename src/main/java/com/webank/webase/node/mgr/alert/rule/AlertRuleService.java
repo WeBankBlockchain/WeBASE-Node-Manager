@@ -46,7 +46,11 @@ public class AlertRuleService {
         TbAlertRule tbAlertRule = new TbAlertRule();
         try{
             BeanUtils.copyProperties(newRuleParam, tbAlertRule);
-            alertRuleMapper.add(tbAlertRule);
+            if (tbAlertRule.getRuleId() == null) {
+                alertRuleMapper.insert(tbAlertRule);
+            } else {
+                alertRuleMapper.updateById(tbAlertRule);
+            }
             log.debug("end saveAlertRule. ");
         }catch (Exception e) {
             log.error("saveAlertRule error: exception:[]", e);
