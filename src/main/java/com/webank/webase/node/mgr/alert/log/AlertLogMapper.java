@@ -16,6 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.log;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
 import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
 import org.apache.ibatis.annotations.Param;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AlertLogMapper {
+public interface AlertLogMapper extends BaseMapper<AlertLog> {
 
     List<AlertLog> listOfAlertLog(@Param("param") ReqLogListParam param);
 

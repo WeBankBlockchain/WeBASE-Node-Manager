@@ -48,7 +48,11 @@ public class AlertLogService {
         AlertLog alertLog = new AlertLog();
         try{
             BeanUtils.copyProperties(inputParam, alertLog);
-            alertLogMapper.add(alertLog);
+            if(alertLog.getLogId()==null) {
+                alertLogMapper.add(alertLog);
+            }else {
+                alertLogMapper.update(alertLog);
+            }
             log.debug("end saveAlertLog. ");
         }catch (Exception e) {
             log.error("saveAlertLog error exception:[]", e);
