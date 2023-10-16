@@ -400,13 +400,13 @@ public class NodeService {
     public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId, final String groupId){
         // select all fronts by all agencies
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
-        log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}", tbFrontList);
+        log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}, groupId:{}", tbFrontList, groupId);
 
         // filter only not removed node will be added
         List<TbNode> tbNodeList = tbFrontList.stream()
                 .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(), groupId))
                 .filter(Objects::nonNull)
-                .filter((node) -> node.getGroupId() == groupId)
+                .filter((node) -> node.getGroupId().equals(groupId))
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(tbNodeList)) {

@@ -530,21 +530,25 @@ public class DeployService {
             Future<?> task = threadPoolTaskScheduler.submit(() -> {
                 try {
                     // generate ip/agency/sdk cert and scp
-                    log.info("batchAddNode generateHostSDKCertAndScp");
-                    hostService.generateHostSDKCertAndScp(chain.getEncryptType(), chainName, tbHost, agencyName);
+//                    log.info("batchAddNode generateHostSDKCertAndScp");
+//                    hostService.generateHostSDKCertAndScp(chain.getEncryptType(), chainName, tbHost, agencyName);
 
                     // init front config files and db data, including node's cert
-                    log.info("batchAddNode initFrontAndNode");
+                    log.info("batchAddNode initFrontAndNode, call expand_node shell");
                     List<TbFront> newFrontResult = frontService.initFrontAndNode(nodeListOnSameHost, chain,
                         tbHost, agency.getId(), agency.getAgencyName(), groupId, FrontStatusEnum.ADDING);
                     newFrontListStore.addAll(newFrontResult);
                     newFrontIdList.addAll(newFrontResult.stream().map(TbFront::getFrontId).collect(Collectors.toList()));
                     log.info("batchAddNode initFrontAndNode newFrontIdList:{}", newFrontIdList);
 
-                    // generate(actual copy same old group of group1)
-                    // and scp to target new Front
-                    log.info("batchAddNode generateNewNodesGroupConfigsAndScp");
-                    groupService.generateNewNodesGroupConfigsAndScp(chain, groupId, tbHost.getIp(), newFrontResult);
+//                    // generate(actual copy same old group of group1)
+//                    // and scp to target new Front
+//                    log.info("batchAddNode generateNewNodesGroupConfigsAndScp");
+//                    groupService.generateNewNodesGroupConfigsAndScp(chain, groupId, tbHost.getIp(), newFrontResult);
+
+                    // scp node config
+                    frontService.scpNewNodesConfigs(chain, tbHost.getIp(), newFrontResult);
+
                     configSuccessCount.incrementAndGet();
                 } catch (Exception e) {
                     log.error("batchAddNode Exception:[].", e);
@@ -577,15 +581,15 @@ public class DeployService {
             "batchAddNode result, total:[{}], success:[{}]",
             CollectionUtils.size(hostIdAndInfoMap.keySet()), configSuccessCount.get());
 
-        // update after all host config finish
-        // select all node list into config.ini
-        log.info("batchAddNode updateNodeConfigIniByGroupId");
-        try {
-            frontService.updateConfigIniByGroupIdAndNewFront(chain, groupId, newFrontListStore);
-        } catch (IOException e) {
-            log.error("batchAddNode updateNodeConfigIniByGroupId io Exception:[].", e);
-            newFrontIdList.forEach((id -> frontService.updateStatus(id, FrontStatusEnum.ADD_FAILED)));
-        }
+//        // update after all host config finish
+//        // select all node list into config.ini
+//        log.info("batchAddNode updateNodeConfigIniByGroupId");
+//        try {
+//            frontService.updateConfigIniByGroupIdAndNewFront(chain, groupId, newFrontListStore);
+//        } catch (IOException e) {
+//            log.error("batchAddNode updateNodeConfigIniByGroupId io Exception:[].", e);
+//            newFrontIdList.forEach((id -> frontService.updateStatus(id, FrontStatusEnum.ADD_FAILED)));
+//        }
 
         log.info("batchAddNode asyncStartAddedNode");
         // restart one node

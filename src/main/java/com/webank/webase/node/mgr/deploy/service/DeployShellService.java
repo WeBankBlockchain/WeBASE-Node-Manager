@@ -18,6 +18,7 @@ package com.webank.webase.node.mgr.deploy.service;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.tools.cmd.JavaCommandExecutor;
@@ -192,6 +193,30 @@ public class DeployShellService {
         return JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
     }
 
+    public ExecuteResult execExpandNode(byte encryptType, String chainName, String newNodeRoot, String configPath, DeployNodeInfo nodeInfo) {
+        log.info("Exec execExpandNode method for chainName:[{}], node:[{}:{}], configPath:{}, nodeInfo:{}",
+                chainName, encryptType, newNodeRoot, configPath, nodeInfo);
 
+        String ports = nodeInfo.getP2pPort() + "," + nodeInfo.getRpcPort();
+
+        Path caDir = pathService.getCaDir(chainName);
+        log.info("execExpandNode chainRoot:{}", caDir.toAbsolutePath().toString());
+
+        // build_chain.sh only support docker on linux
+        String command = String.format("bash -x -e %s -C expand -c %s -d %s -o %s %s -p %s",
+                // gen_node_cert.sh shell script
+                constant.getBuildChainShell(),
+                // config path(reuse exist config.geneisis and nodes.json)
+                configPath,
+                //ca dir
+                caDir.toAbsolutePath().toString(),
+                // new node dir
+                newNodeRoot,
+                encryptType == CryptoType.SM_TYPE ? "-s " : "",
+                ports
+        );
+
+        return JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
+    }
 
 }

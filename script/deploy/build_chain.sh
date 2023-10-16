@@ -1523,8 +1523,14 @@ generate_config() {
     local rpc_listen_ip="${5}"
     local rpc_listen_port="${6}"
     local disable_ssl="${7}"
+    local is_deploy="${8}"
 
-    check_auth_account
+    if [ "${is_deploy}" == "false" ]; then
+        LOG_INFO "generate_config to expand"
+    else
+        check_auth_account
+    fi
+
     if [ "${sm_mode}" == "false" ]; then
         generate_config_ini "${node_config_path}" "${p2p_listen_ip}" "${p2p_listen_port}" "${rpc_listen_ip}" "${rpc_listen_port}" "${disable_ssl}"
     else
@@ -1729,6 +1735,9 @@ expand_node()
         LOG_FATAL "expand node failed for ${node_dir} already exists!"
     fi
 
+    p2p_listen_port=${port_start[0]}
+    rpc_listen_port=${port_start[1]}
+
     if "${monitor_mode}" ; then
        LOG_INFO "start generate monitor scripts"
        ip=`echo $mtail_ip_param | awk '{split($0,a,":");print a[1]}'`
@@ -1745,7 +1754,7 @@ expand_node()
        LOG_INFO "generate monitor scripts success"
     fi
 
-    file_must_exists "${config_path}/config.ini"
+    # file_must_exists "${config_path}/config.ini"
     file_must_exists "${config_path}/config.genesis"
     file_must_exists "${config_path}/nodes.json"
     # check binary
@@ -1781,8 +1790,13 @@ expand_node()
     generate_node_account "${sm_mode}" "${node_dir}/conf" "${i}"
     LOG_INFO "generate_node_account success..."
 
+    LOG_INFO "generate config ini ..."
+    local disable_ssl_temp="false"
+    local deploy_nodes_temp="false"
+    generate_config "${sm_mode}" "${node_dir}/config.ini" "${listen_ip}" "${p2p_listen_port}" "${listen_ip}" "${rpc_listen_port}" "${disable_ssl_temp}" "${deploy_nodes_temp}"
+
     LOG_INFO "copy configurations ..."
-    cp "${config_path}/config.ini" "${node_dir}"
+    # cp "${config_path}/config.ini" "${node_dir}"
     cp "${config_path}/config.genesis" "${node_dir}"
     cp "${config_path}/nodes.json" "${node_dir}"
     LOG_INFO "copy configurations success..."

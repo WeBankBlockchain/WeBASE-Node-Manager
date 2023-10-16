@@ -515,7 +515,24 @@ public class FrontService {
         log.info("start initFrontAndNode nodeInfoList:{}, host:{}", nodeInfoList, host);
         ProgressTools.setInitChainData();
 
+        int chainId = chain.getId();
         String chainName = chain.getChainName();
+        TbNode oldNode = this.nodeService.getOldestNodeByChainIdAndGroupId(chainId, groupId);
+        TbFront oldFront = null;
+        if (oldNode != null) {
+            oldFront = this.frontMapper.getByNodeId(oldNode.getNodeId());
+        }
+
+        if (oldFront == null) {
+            log.warn("!!!initFrontAndNode failed with oldFront null");
+            throw new NodeMgrException(ConstantCode.ADD_NODE_WITH_UNKNOWN_EXCEPTION_ERROR);
+        }
+
+        log.info("initFrontAndNode, oldFront: {}", oldFront);
+
+        Path oldNodePath = this.pathService.getNodeRoot(chainName, oldFront.getFrontIp(), oldFront.getHostIndex());
+
+//        String chainName = chain.getChainName();
         byte encryptType = chain.getEncryptType();
         // the node dir on remote host
         String rootDirOnHost = host.getRootDir();
@@ -546,9 +563,13 @@ public class FrontService {
                 }
             }
             log.info("start initFrontAndNode gen node cert");
-            // exec gen_node_cert.sh
-            ExecuteResult executeResult = this.deployShellService.execGenNode(encryptType, chainName, agencyName,
-                nodeRoot.toAbsolutePath().toString());
+//            // exec gen_node_cert.sh
+//            ExecuteResult executeResult = this.deployShellService.execGenNode(encryptType, chainName, agencyName,
+//                nodeRoot.toAbsolutePath().toString());
+
+            // exec build_chain.sh
+            ExecuteResult executeResult = this.deployShellService.execExpandNode(encryptType, chainName,
+                    nodeRoot.toAbsolutePath().toString(), oldNodePath.toAbsolutePath().toString(), nodeInfo);
 
             if (executeResult.failed()) {
                 log.error("initFrontAndNode Generate node:[{}:{}] key and crt error.", ip, currentIndex);
@@ -1300,6 +1321,36 @@ public class FrontService {
         String frontIp = tbFront.getFrontIp();
         int frontPort = tbFront.getFrontPort();
         return frontInterface.getIsWasmFromSpecificFront(frontIp, frontPort, groupId);
+    }
+
+    public void scpNewNodesConfigs(TbChain chain, String ip, List<TbFront> newFrontList) {
+        log.info("start scpNewNodesConfigs ip:{},newFrontList:{}", ip, newFrontList);
+        String chainName = chain.getChainName();
+
+
+        for (TbFront newFront : newFrontList) {
+            // local node root
+            Path nodeRoot = this.pathService.getNodeRoot(chainName, ip, newFront.getHostIndex());
+
+
+            // scp node to remote host
+            // NODES_ROOT/[chainName]/[ip]/node[index] as a {@link Path}, a directory.
+            String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
+
+            // get host root dir
+//            TbHost tbHost = tbHostMapper.getByIp(ip);
+            HostDTO tbHost = remoteHostService.getHostByIp(ip);
+            String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
+
+            log.info("generateNewNodesGroupConfigsAndScp Send files from:[{}] to:[{}:{}].", src, ip, dst);
+            ProgressTools.setScpConfig();
+            try {
+                ansibleService.scp(ScpTypeEnum.UP, tbHost, src, dst);
+                log.info("scpNewNodesConfigs scp success.");
+            } catch (Exception e) {
+                log.error("scpNewNodesConfigs Send files from:[{}] to:[{}:{}] error.", src, ip, dst, e);
+            }
+        }
     }
 
 }

@@ -482,4 +482,8 @@ public class PathService {
         }
         log.info("end move file/dir");
     }
+
+    public Path getCaDir(String chainName) {
+        return Paths.get(this.getChainRootString(chainName), "ca");
+    }
 }
