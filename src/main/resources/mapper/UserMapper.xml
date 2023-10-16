@@ -33,9 +33,7 @@
     create_time,modify_time)
     values(#{userName},#{account},#{groupId},#{hasPk},#{userType},#{publicKey},#{address},#{signUserId},#{appId},
     #{description}, NOW(),NOW())
-    <selectKey keyProperty="userId" order="AFTER" resultType="java.lang.Integer">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
+    RETURNING user_id;
   </insert>
 
 

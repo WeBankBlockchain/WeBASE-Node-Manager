@@ -30,8 +30,12 @@
 
 
   <insert id="add">
-    insert ignore into ${tableName}(trans_hash,trans_from,trans_to,block_number,block_timestamp,create_time,modify_time,gas_used,status,extra_data,app_id)
-    values(#{trans.transHash},#{trans.transFrom},#{trans.transTo},#{trans.blockNumber},#{trans.blockTimestamp},NOW(),NOW(),#{trans.gasUsed},#{trans.status},#{trans.extraData},#{trans.appId})
+      INSERT INTO ${tableName} (trans_hash, trans_from, trans_to, block_number, block_timestamp, create_time,
+                                modify_time,
+                                gas_used, status, extra_data, app_id)
+      VALUES (#{trans.transHash}, #{trans.transFrom}, #{trans.transTo}, #{trans.blockNumber}, #{trans.blockTimestamp},
+              NOW(), NOW(), #{trans.gasUsed}, #{trans.status}, #{trans.extraData}, #{trans.appId})
+      ON CONFLICT DO NOTHING;
   </insert>
 
 
@@ -60,7 +64,7 @@
       and block_number = #{param.blockNumber}
     </if>
     <if test="param.flagSortedByBlock != null and param.flagSortedByBlock != ''">
-      order by block_number ${param.flagSortedByBlock}
+      order by block_number, ${param.flagSortedByBlock}
     </if>
     <if test="param.start != null and param.pageSize != null">
       limit #{param.start},#{param.pageSize}
@@ -75,11 +79,13 @@
     </select>
 
   <select id="listOfUnStatTransHashByJob" resultMap="transHashMap">
-        select * from ${tableName}
-        where statistics_flag=1 and MOD(block_number,#{shardingTotalCount}) = #{shardingItem}
-        order by block_number
-        limit 0,10000
-    </select>
+      SELECT *
+      FROM ${tableName}
+      WHERE statistics_flag = 1
+        AND block_number % #{shardingTotalCount} = #{shardingItem}
+      ORDER BY block_number
+      LIMIT 10000 OFFSET 0;
+  </select>
 
   <select id="queryMinMaxBlock" resultType="com.webank.webase.node.mgr.block.entity.MinMaxBlock">
 		select max(block_number) as maxBlockNumber,min(block_number) as minBLockNumber
@@ -87,11 +93,20 @@
 	</select>
 
   <delete id="remove">
-	   DELETE from ${tableName} 
-	   where statistics_flag = 2
-	     and block_number &lt;= (select max(block_number) blockNumber from tb_trans_daily where group_id = #{groupId})
-	   order by block_number
-	   limit ${subTransNum}
+      WITH rows_to_delete AS
+               (SELECT *
+                FROM ${tableName}
+                WHERE statistics_flag = 2
+                  AND block_number &lt;= (SELECT max(block_number)
+                                          FROM tb_trans_daily
+                                          WHERE group_id = #{groupId})
+                ORDER BY block_number
+                LIMIT ${subTransNum})
+      DELETE
+      FROM ${tableName} t
+          USING rows_to_delete r
+      WHERE t.block_number = r.block_number
+        AND t.statistics_flag = r.statistics_flag;
   </delete>
 
   <update id="updateTransStatFlag">

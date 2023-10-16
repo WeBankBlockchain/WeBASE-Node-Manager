@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS tb_group
     PRIMARY KEY (group_id),
     UNIQUE (chain_id, group_id)
 );
-CREATE UNIQUE INDEX unique_chain_id_group_id ON tb_group (chain_id, group_id);
+-- CREATE UNIQUE INDEX unique_chain_id_group_id ON tb_group (chain_id, group_id);
 
 -- ----------------------------
 -- Table structure for tb_front
@@ -66,9 +66,9 @@ CREATE TABLE IF NOT EXISTS tb_front
     UNIQUE (front_ip, front_port),
     UNIQUE (agency_id, front_ip, front_port)
 );
-CREATE UNIQUE INDEX unique_node_id ON tb_front (node_id);
-CREATE UNIQUE INDEX unique_ip_port ON tb_front (front_ip, front_port);
-CREATE UNIQUE INDEX unique_agency_id_host_id_front_port ON tb_front (agency_id, front_ip, front_port);
+-- CREATE UNIQUE INDEX unique_node_id ON tb_front (node_id);
+-- CREATE UNIQUE INDEX unique_ip_port ON tb_front (front_ip, front_port);
+-- CREATE UNIQUE INDEX unique_agency_id_host_id_front_port ON tb_front (agency_id, front_ip, front_port);
 
 -- ----------------------------
 -- Table structure for tb_front_group_map
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS tb_front_group_map
     PRIMARY KEY (map_id),
     UNIQUE (front_id, group_id)
 );
-CREATE UNIQUE INDEX unique_front_group ON tb_front_group_map (front_id, group_id);
+-- CREATE UNIQUE INDEX unique_front_group ON tb_front_group_map (front_id, group_id);
 
 
 -- ----------------------------
@@ -116,12 +116,12 @@ CREATE TABLE IF NOT EXISTS tb_node
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_contract
 (
-    contract_id      bigserial NOT NULL,
-    contract_path    bytea     NOT NULL,
-    contract_name    bytea     NOT NULL,
+    contract_id      bigserial    NOT NULL,
+    contract_path    varchar(128) NOT NULL,
+    contract_name    varchar(128) NOT NULL,
     contract_version varchar(120) DEFAULT NULL,
-    account          bytea        DEFAULT 'admin',
-    group_id         int       NOT NULL,
+    account          varchar(50)  DEFAULT 'admin',
+    group_id         int          NOT NULL,
     contract_source  text,
     contract_abi     text,
     contract_bin     text,
@@ -138,8 +138,7 @@ CREATE TABLE IF NOT EXISTS tb_contract
     PRIMARY KEY (contract_id),
     UNIQUE (group_id, contract_path, contract_name, account)
 );
-CREATE UNIQUE INDEX uk_group_path_name ON tb_contract (group_id, contract_path, contract_name, account);
-
+-- CREATE UNIQUE INDEX uk_group_path_name ON tb_contract (group_id, contract_path, contract_name, account);
 
 
 -- ----------------------------
@@ -181,8 +180,8 @@ CREATE TABLE IF NOT EXISTS tb_trans_daily
 CREATE TABLE IF NOT EXISTS tb_user
 (
     user_id      bigserial    NOT NULL,
-    user_name    bytea        NOT NULL,
-    account      bytea                 DEFAULT 'admin',
+    user_name    varchar(64)  NOT NULL,
+    account      varchar(64)           DEFAULT 'admin',
     group_id     int                   DEFAULT NULL,
     public_key   varchar(250) NOT NULL,
     user_status  smallint     NOT NULL DEFAULT '1',
@@ -199,17 +198,17 @@ CREATE TABLE IF NOT EXISTS tb_user
     UNIQUE (group_id, address),
     UNIQUE (sign_user_id)
 );
-CREATE UNIQUE INDEX unique_name ON tb_user (group_id, user_name, account);
-CREATE UNIQUE INDEX unique_address ON tb_user (group_id, address);
-CREATE INDEX index_address ON tb_user (address);
-CREATE UNIQUE INDEX unique_uuid ON tb_user (sign_user_id);
+-- CREATE UNIQUE INDEX unique_name ON tb_user (group_id, user_name, account);
+-- CREATE UNIQUE INDEX unique_address ON tb_user (group_id, address);
+-- CREATE INDEX index_address ON tb_user (address);
+-- CREATE UNIQUE INDEX unique_uuid ON tb_user (sign_user_id);
 
 -- ----------------------------
 -- Table structure for tb_account_info
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_account_info
 (
-    account         bytea        NOT NULL,
+    account         varchar(50)  NOT NULL,
     account_pwd     varchar(250) NOT NULL,
     role_id         int          NOT NULL,
     login_fail_time int          NOT NULL DEFAULT '0',
@@ -238,8 +237,7 @@ CREATE TABLE IF NOT EXISTS tb_role
     PRIMARY KEY (role_id),
     UNIQUE (role_name)
 );
-CREATE UNIQUE INDEX UK_role_Name ON tb_role (role_name);
-
+-- CREATE UNIQUE INDEX UK_role_Name ON tb_role (role_name);
 
 
 -- ----------------------------
@@ -351,14 +349,14 @@ CREATE TABLE IF NOT EXISTS tb_alert_log
 CREATE TABLE IF NOT EXISTS tb_abi
 (
     abi_id           bigserial    NOT NULL,
-    account          bytea     DEFAULT 'admin',
+    account          varchar(50) DEFAULT 'admin',
     group_id         int          NOT NULL,
     contract_name    varchar(120) NOT NULL,
     contract_address varchar(64)  NOT NULL,
     contract_abi     text         NOT NULL,
     contract_bin     text         NOT NULL,
-    create_time      timestamp DEFAULT NULL,
-    modify_time      timestamp DEFAULT NULL,
+    create_time      timestamp   DEFAULT NULL,
+    modify_time      timestamp   DEFAULT NULL,
     PRIMARY KEY (abi_id),
     UNIQUE (group_id, account, contract_address)
 );
@@ -383,7 +381,7 @@ CREATE TABLE IF NOT EXISTS tb_agency
     PRIMARY KEY (id),
     UNIQUE (chain_id, agency_name)
 );
-CREATE UNIQUE INDEX uniq_chain_id_agency_name ON tb_agency (chain_id, agency_name);
+-- CREATE UNIQUE INDEX uniq_chain_id_agency_name ON tb_agency (chain_id, agency_name);
 -- TODO 此处不支持 USING BTREE
 -- UNIQUE KEY `uniq_chain_id_agency_name` (`chain_id`,`agency_name`) USING BTREE
 
@@ -405,7 +403,7 @@ CREATE TABLE IF NOT EXISTS tb_chain
     PRIMARY KEY (id),
     UNIQUE (chain_name)
 );
-CREATE UNIQUE INDEX uniq_chain_name ON tb_chain (chain_name);
+-- CREATE UNIQUE INDEX uniq_chain_name ON tb_chain (chain_name);
 -- TODO 此处不支持 USING BTREE
 -- UNIQUE KEY `uniq_chain_name` (`chain_name`) USING BTREE
 
@@ -440,7 +438,7 @@ CREATE TABLE IF NOT EXISTS tb_host
     PRIMARY KEY (id),
     UNIQUE (ip)
 );
-CREATE UNIQUE INDEX unique_ip ON tb_host (ip);
+-- CREATE UNIQUE INDEX unique_ip ON tb_host (ip);
 -- TODO 此处不支持 USING BTREE
 -- UNIQUE KEY ` unique_ip ` (` ip `) USING BTREE
 
@@ -463,12 +461,12 @@ CREATE TABLE IF NOT EXISTS tb_govern_vote
 
 CREATE TABLE IF NOT EXISTS tb_contract_path
 (
-    id            bigserial NOT NULL,
-    contract_path bytea     NOT NULL,
-    group_id      int       NOT NULL,
-    account       bytea     DEFAULT 'admin',
-    create_time   timestamp DEFAULT NULL,
-    modify_time   timestamp DEFAULT NULL,
+    id            bigserial    NOT NULL,
+    contract_path varchar(128) NOT NULL,
+    group_id      int          NOT NULL,
+    account       varchar(50) DEFAULT 'admin',
+    create_time   timestamp   DEFAULT NULL,
+    modify_time   timestamp   DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (group_id, contract_path)
 );
@@ -480,18 +478,18 @@ CREATE TABLE IF NOT EXISTS tb_cns
 (
     id               bigserial    NOT NULL,
     group_id         int          NOT NULL,
-    contract_path    bytea     DEFAULT NULL,
-    contract_name    bytea        NOT NULL,
-    cns_name         bytea        NOT NULL,
+    contract_path    varchar(128) DEFAULT NULL,
+    contract_name    varchar(128) NOT NULL,
+    cns_name         varchar(128) NOT NULL,
     version          varchar(120) NOT NULL,
     contract_address varchar(64)  NOT NULL,
     contract_abi     text         NOT NULL,
-    create_time      timestamp DEFAULT NULL,
-    modify_time      timestamp DEFAULT NULL,
+    create_time      timestamp    DEFAULT NULL,
+    modify_time      timestamp    DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (group_id, cns_name, version)
 );
-CREATE UNIQUE INDEX uk_version ON tb_cns (group_id, cns_name, version);
+-- CREATE UNIQUE INDEX uk_version ON tb_cns (group_id, cns_name, version);
 
 
 CREATE TABLE IF NOT EXISTS tb_stat
@@ -508,8 +506,8 @@ CREATE TABLE IF NOT EXISTS tb_stat
     PRIMARY KEY (id),
     UNIQUE (group_id, block_number)
 );
-CREATE UNIQUE INDEX uk_block ON tb_stat (group_id, block_number);
-CREATE INDEX index_group ON tb_stat (group_id);
+-- CREATE UNIQUE INDEX uk_block ON tb_stat (group_id, block_number);
+-- CREATE INDEX index_group ON tb_stat (group_id);
 
 -- ----------------------------
 -- Table structure for tb_external_account 链上外部账户
@@ -522,7 +520,7 @@ CREATE TABLE IF NOT EXISTS tb_external_account
     public_key   varchar(250) DEFAULT NULL,
     sign_user_id varchar(64)  DEFAULT NULL,
     has_pk       int          DEFAULT 1,
-    user_name    bytea        DEFAULT NULL,
+    user_name    varchar(64)  DEFAULT NULL,
     user_status  smallint     DEFAULT '1',
     create_time  timestamp    DEFAULT NULL,
     modify_time  timestamp    DEFAULT NULL,
@@ -553,7 +551,7 @@ CREATE TABLE IF NOT EXISTS tb_external_contract
     contract_bin     text         DEFAULT NULL,
     contract_status  smallint     DEFAULT '1',
     contract_type    smallint     DEFAULT '0',
-    contract_name    bytea        DEFAULT NULL,
+    contract_name    varchar(120) DEFAULT NULL,
     contract_version varchar(120) DEFAULT NULL,
     contract_abi     text,
     bytecode_bin     text,
@@ -589,8 +587,8 @@ CREATE TABLE IF NOT EXISTS tb_app_info
     PRIMARY KEY (id),
     UNIQUE (app_key)
 );
-CREATE UNIQUE INDEX uk_key ON tb_app_info (app_key);
-CREATE INDEX uk_name ON tb_app_info (app_name);
+-- CREATE UNIQUE INDEX uk_key ON tb_app_info (app_key);
+-- CREATE INDEX uk_name ON tb_app_info (app_name);
 
 
 -- ----------------------------
@@ -601,14 +599,14 @@ CREATE TABLE IF NOT EXISTS tb_contract_store
 (
     id               bigserial    NOT NULL,
     app_key          varchar(16)  NOT NULL,
-    contract_name    bytea        NOT NULL,
+    contract_name    varchar(120) NOT NULL,
     contract_version varchar(120) NOT NULL,
     contract_source  text,
     contract_abi     text,
     bytecode_bin     text,
-    account          bytea     DEFAULT 'admin',
-    create_time      timestamp DEFAULT NULL,
-    modify_time      timestamp DEFAULT NULL,
+    account          varchar(50) DEFAULT 'admin',
+    create_time      timestamp   DEFAULT NULL,
+    modify_time      timestamp   DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (app_key, contract_name, contract_version)
 );
@@ -620,10 +618,10 @@ CREATE TABLE IF NOT EXISTS tb_contract_store
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_warehouse
 (
-    id                  bigserial NOT NULL,
-    warehouse_name      bytea     NOT NULL,
-    warehouse_name_en   bytea     NOT NULL,
-    type                int       NOT NULL,
+    id                  bigserial    NOT NULL,
+    warehouse_name      varchar(255) NOT NULL,
+    warehouse_name_en   varchar(255) NOT NULL,
+    type                int          NOT NULL,
     warehouse_icon      text,
     description         text,
     description_en      text,
@@ -639,15 +637,15 @@ CREATE TABLE IF NOT EXISTS tb_warehouse
 
 CREATE TABLE IF NOT EXISTS tb_contract_folder
 (
-    id               bigserial NOT NULL,
-    folder_name      bytea     NOT NULL,
+    id               bigserial    NOT NULL,
+    folder_name      varchar(255) NOT NULL,
     description      text,
     description_en   text,
     folder_detail    text,
     folder_detail_en text,
     create_time      timestamp DEFAULT NULL,
     modify_time      timestamp DEFAULT NULL,
-    warehouse_id     int       NOT NULL,
+    warehouse_id     int          NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_id, folder_name)
 );
@@ -656,15 +654,15 @@ CREATE TABLE IF NOT EXISTS tb_contract_folder
 
 CREATE TABLE IF NOT EXISTS tb_contract_item
 (
-    id                 bigserial NOT NULL,
-    contract_name      bytea     NOT NULL,
+    id                 bigserial    NOT NULL,
+    contract_name      varchar(255) NOT NULL,
     contract_source    text,
     description        text,
     description_en     text,
     create_time        timestamp DEFAULT NULL,
     modify_time        timestamp DEFAULT NULL,
-    warehouse_id       int       NOT NULL,
-    contract_folder_id int       NOT NULL,
+    warehouse_id       int          NOT NULL,
+    contract_folder_id int          NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_id, contract_folder_id, contract_name)
 );

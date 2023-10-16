@@ -20,8 +20,12 @@
 
 
   <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContractPath">
-    REPLACE INTO tb_contract_path(group_id,contract_path,account,create_time,modify_time)
-    VALUES (#{groupId},#{contractPath},#{account}, now(), now())
+      INSERT INTO tb_contract_path (group_id, contract_path, account, create_time, modify_time)
+      VALUES (#{groupId}, #{contractPath}, #{account}, NOW(), NOW())
+      ON CONFLICT (group_id, contract_path) DO UPDATE
+          SET account     = #{account},
+              create_time = NOW(),
+              modify_time = NOW();
   </insert>
 
   <delete id="remove" parameterType="java.lang.Integer">

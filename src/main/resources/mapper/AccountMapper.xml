@@ -27,33 +27,34 @@
   </resultMap>
 
 
-  <sql id="NEW_ROW_COLUMN">
-		(account,account_pwd,role_id,description,email,create_time,modify_time)
-	</sql>
-  <sql id="QUERY_ROW_COLUMN">
-		a.account,a.account_pwd accountPwd,a.role_id roleId,a.login_fail_time loginFailTime,
-		b.role_name roleName,b.role_name_zh roleNameZh,a.account_status accountStatus,
-		a.description,a.email,a.create_time createTime,a.modify_time modifyTime
-	</sql>
-
   <insert id="addAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
     insert into tb_account_info
-    <include refid="NEW_ROW_COLUMN"/>
+    (account,account_pwd,role_id,description,email,create_time,modify_time)
     values(#{account},#{accountPwd},#{roleId},#{description},#{email},NOW(),NOW())
   </insert>
 
   <update id="updateAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
-		update tb_account_info set account_pwd=#{accountPwd},role_id=#{roleId},login_fail_time=#{loginFailTime},
-		account_status=#{accountStatus},description=#{description},email=#{email},modify_time=now()
+		update tb_account_info set account_pwd = #{accountPwd},role_id = #{roleId},login_fail_time = #{loginFailTime},
+		account_status = #{accountStatus},description = #{description},email = #{email},modify_time=now()
 		where account=#{account}
 	</update>
 
   <select id="queryByAccount" resultType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
-    select
-    <include refid="QUERY_ROW_COLUMN"/>
-    from tb_account_info a left join tb_role b on(a.role_id=b.role_id) where BINARY a.account =
-    #{account}
-    limit 1
+      SELECT a.account         AS account,
+             a.account_pwd     AS accountPwd,
+             a.role_id         AS roleId,
+             a.login_fail_time AS loginFailTime,
+             b.role_name       AS roleName,
+             b.role_name_zh    AS roleNameZh,
+             a.account_status  AS accountStatus,
+             a.description     AS description,
+             a.email           AS description,
+             a.create_time     AS createTime,
+             a.modify_time     AS modifyTime
+      FROM tb_account_info a
+               LEFT JOIN tb_role b ON (a.role_id = b.role_id)
+      WHERE a.account = #{account}
+      LIMIT 1;
   </select>
 
   <select id="countOfAccount" resultType="java.lang.Integer">
@@ -73,7 +74,7 @@
       and a.account = #{param.account}
     </if>
     <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
-      order by a.modify_time ${param.flagSortedByTime}
+      order by a.modify_time, ${param.flagSortedByTime}
     </if>
     <if test="param.start != null and param.pageSize != null">
       limit #{param.start},#{param.pageSize}

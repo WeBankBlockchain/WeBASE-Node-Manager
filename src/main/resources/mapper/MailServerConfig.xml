@@ -48,14 +48,35 @@
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig">
-        REPLACE INTO tb_mail_server_config(server_id,server_name,host,port,username,password,
-        protocol,default_encoding,create_time,modify_time,authentication,starttls_enable,
-        starttls_required,socket_factory_port,socket_factory_class,socket_factory_fallback,enable,
-        connection_timeout,timeout,write_timeout)
-        VALUES (#{serverId},#{serverName},#{host},#{port},#{username},#{password},
-        #{protocol},#{defaultEncoding}, now(), now(), #{authentication},#{starttlsEnable},
-        #{starttlsRequired},#{socketFactoryPort},#{socketFactoryClass},#{socketFactoryFallback},
-        #{enable},#{connectionTimeout},#{timeout},#{writeTimeout})
+        INSERT INTO tb_mail_server_config (server_id, server_name, host, port, username, password,
+                                           protocol, default_encoding, create_time, modify_time, authentication,
+                                           starttls_enable,
+                                           starttls_required, socket_factory_port, socket_factory_class,
+                                           socket_factory_fallback,
+                                           enable, connection_timeout, timeout, write_timeout)
+        VALUES (#{serverId}, #{serverName}, #{host}, #{port}, #{username}, #{password},
+                #{protocol}, #{defaultEncoding}, NOW(), NOW(), #{authentication}, #{starttlsEnable},
+                #{starttlsRequired}, #{socketFactoryPort}, #{socketFactoryClass}, #{socketFactoryFallback},
+                #{enable}, #{connectionTimeout}, #{timeout}, #{writeTimeout})
+        ON CONFLICT (server_id) DO UPDATE
+            SET server_name             = #{serverName},
+                host                    = #{host},
+                port                    = #{port},
+                username                = #{username},
+                password                = #{password},
+                protocol                = #{protocol},
+                default_encoding        = #{default_encoding},
+                modify_time             = NOW(),
+                authentication          = #{authentication},
+                starttls_enable         = #{starttls_enable},
+                starttls_required       = #{starttls_required},
+                socket_factory_port     = #{socket_factory_port},
+                socket_factory_class    = #{socket_factory_class},
+                socket_factory_fallback = #{socket_factory_fallback},
+                enable                  = #{enable},
+                connection_timeout      = #{connection_timeout},
+                timeout                 = #{timeout},
+                write_timeout           = #{write_timeout};
     </insert>
 
     <delete id="deleteByServerId" parameterType="java.lang.Integer">

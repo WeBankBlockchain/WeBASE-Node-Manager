@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.appintegration;
 
+import com.sun.xml.bind.v2.schemagen.xmlschema.Appinfo;
 import com.webank.webase.node.mgr.appintegration.entity.AppInfoParam;
 import com.webank.webase.node.mgr.appintegration.entity.TbAppInfo;
 import java.util.List;

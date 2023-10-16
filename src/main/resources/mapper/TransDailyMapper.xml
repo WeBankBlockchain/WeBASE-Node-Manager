@@ -12,18 +12,22 @@
   </resultMap>
 
   <select id="listSeventDayOfTransDaily" resultMap="seventDayOfTransMap">
-		select group_id,trans_day,trans_count from tb_trans_daily where group_id = #{groupId} and trans_day &gt;= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-	</select>
+      SELECT group_id, trans_day, trans_count
+      FROM tb_trans_daily
+      WHERE group_id = #{groupId}
+        AND trans_day >= CURRENT_DATE - INTERVAL '7 days';
+  </select>
 
   <update id="updateTransDaily">
-		update tb_trans_daily set trans_count=#{transCount},block_number=#{latestBlockNumber},modify_time=now()
+		update tb_trans_daily set trans_count = #{transCount},block_number = #{latestBlockNumber},modify_time=now()
 		where group_id=#{groupId} and trans_day=#{transDay} and block_number=#{oldBlockNumber}
 	</update>
 
   <insert id="addTransDailyRow" parameterType="com.webank.webase.node.mgr.transdaily.TbTransDaily">
-		insert ignore into tb_trans_daily(group_id,trans_day,trans_count,block_number,create_time,modify_time)
-		values(#{groupId},#{transDay},#{transCount},#{blockNumber},NOW(),NOW())
-	</insert>
+      INSERT INTO tb_trans_daily(group_id, trans_day, trans_count, block_number, create_time, modify_time)
+      VALUES (#{groupId}, #{transDay}, #{transCount}, #{blockNumber}, NOW(), NOW())
+      ON CONFLICT DO NOTHING;
+  </insert>
 
   <select id="queryMaxBlockByGroup" parameterType="java.lang.Integer"
     resultType="java.math.BigInteger">

@@ -27,8 +27,17 @@
   </resultMap>
 
   <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbCns">
-    REPLACE INTO tb_cns(group_id,contract_path,contract_name,cns_name,version,contract_address,contract_abi,create_time,modify_time)
-    VALUES (#{groupId},#{contractPath},#{contractName},#{cnsName},#{version},#{contractAddress},#{contractAbi}, now(), now())
+      INSERT INTO tb_cns(group_id, contract_path, contract_name, cns_name, version, contract_address, contract_abi,
+                         create_time, modify_time)
+      VALUES (#{groupId}, #{contractPath}, #{contractName}, #{cnsName}, #{version}, #{contractAddress}, #{contractAbi},
+              NOW(), NOW())
+      ON CONFLICT (id, group_id, cns_name, version)
+          DO UPDATE
+          SET contract_name    = #{contract_name},
+              contract_path    = #{contractPath},
+              contract_address = #{contractAddress},
+              contract_abi     = #{contractAbi},
+              modify_time      = NOW();
   </insert>
 
   <select id="countOfCns" parameterType="com.webank.webase.node.mgr.contract.entity.QueryCnsParam"
@@ -66,7 +75,7 @@
       and version = #{version}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
-      order by modify_time ${flagSortedByTime}
+      order by modify_time, ${flagSortedByTime}
     </if>
     <if test="start != null and pageSize != null">
       limit #{start},#{pageSize}

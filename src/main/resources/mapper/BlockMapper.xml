@@ -58,7 +58,7 @@
       and block_number > #{param.minBlockNumber}
     </if>
     <if test="param.flagSortedByBlock != null and param.flagSortedByBlock != ''">
-      order by block_number ${param.flagSortedByBlock}
+      order by block_number, ${param.flagSortedByBlock}
     </if>
 
     <if test="param.start != null and param.pageSize != null">
@@ -82,8 +82,10 @@
   </select>
 
   <delete id="remove">
-    DELETE tb from ${tableName} as tb,(SELECT max(block_number) maxBlock FROM ${tableName}) AS tmp
-    where tb.block_number &lt;= tmp.maxBlock - ${blockRetainMax}
+      DELETE
+      FROM ${tableName} AS tb
+      WHERE tb.block_number &lt;= (SELECT max(block_number)
+                                   FROM ${tableName}) - ${blockRetainMax};
   </delete>
 
   <select id="getBlockByBlockNumber" resultMap="blockMap">

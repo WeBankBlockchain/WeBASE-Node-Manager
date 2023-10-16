@@ -4,10 +4,10 @@
 -- TODO 这里的表DDL中已存在,但是插入的数据dml中不存在
 CREATE TABLE IF NOT EXISTS tb_warehouse
 (
-    id                  bigserial NOT NULL,
-    warehouse_name      bytea     NOT NULL,
-    warehouse_name_en   bytea     NOT NULL,
-    type                int       NOT NULL,
+    id                  bigserial    NOT NULL,
+    warehouse_name      varchar(255) NOT NULL,
+    warehouse_name_en   varchar(255) NOT NULL,
+    type                int          NOT NULL,
     warehouse_icon      text,
     description         text,
     description_en      text,
@@ -22,15 +22,15 @@ CREATE TABLE IF NOT EXISTS tb_warehouse
 
 CREATE TABLE IF NOT EXISTS tb_contract_folder
 (
-    id               bigserial NOT NULL,
-    folder_name      bytea     NOT NULL,
+    id               bigserial    NOT NULL,
+    folder_name      varchar(255) NOT NULL,
     description      text,
     description_en   text,
     folder_detail    text,
     folder_detail_en text,
     create_time      timestamp DEFAULT NULL,
     modify_time      timestamp DEFAULT NULL,
-    warehouse_id     int       NOT NULL,
+    warehouse_id     int          NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_id, folder_name)
 );
@@ -38,15 +38,15 @@ CREATE TABLE IF NOT EXISTS tb_contract_folder
 
 CREATE TABLE IF NOT EXISTS tb_contract_item
 (
-    id                 bigserial NOT NULL,
-    contract_name      bytea     NOT NULL,
+    id                 bigserial    NOT NULL,
+    contract_name      varchar(255) NOT NULL,
     contract_source    text,
     description        text,
     description_en     text,
     create_time        timestamp DEFAULT NULL,
     modify_time        timestamp DEFAULT NULL,
-    warehouse_id       int       NOT NULL,
-    contract_folder_id int       NOT NULL,
+    warehouse_id       int          NOT NULL,
+    contract_folder_id int          NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_id, contract_folder_id, contract_name)
 );

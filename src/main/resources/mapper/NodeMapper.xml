@@ -24,15 +24,10 @@
       property="modifyTime"/>
   </resultMap>
 
-
-  <sql id="ALL_SELECT_COLUMN">
-		node_id,node_name,group_id,node_ip,p2p_port,block_number,pbft_view,node_active,create_time,modify_time
-	</sql>
-
   <insert id="add" parameterType="com.webank.webase.node.mgr.node.entity.TbNode">
-    insert ignore into tb_node
-    (node_id,node_name,group_id,node_ip,p2p_port,description,create_time,modify_time)
-    values(#{nodeId},#{nodeName},#{groupId},#{nodeIp},#{p2pPort},#{description},NOW(),NOW())
+      INSERT INTO tb_node (node_id, node_name, group_id, node_ip, p2p_port, description, create_time, modify_time)
+      VALUES (#{nodeId}, #{nodeName}, #{groupId}, #{nodeIp}, #{p2pPort}, #{description}, NOW(), NOW())
+      ON CONFLICT DO NOTHING;
   </insert>
 
 
@@ -72,7 +67,7 @@
       and a.node_ip = #{nodeIp}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
-      order by a.modify_time ${flagSortedByTime}
+      order by a.modify_time, ${flagSortedByTime}
     </if>
     <if test="start != null and pageSize != null">
       limit #{start},#{pageSize}
@@ -155,12 +150,14 @@
 
 
   <select id="getHighestBlockHeight" resultType="java.lang.Integer">
-    SELECT COALESCE(
-      (select IFNULL(block_number,0) block_number from tb_node
-      where group_id = #{groupId}
-      order by block_number desc
-      limit 1)
-    ,0)
+      SELECT COALESCE(
+                     (SELECT block_number
+                      FROM tb_node
+                      WHERE group_id = #{groupId}
+                      ORDER BY block_number DESC
+                      LIMIT 1),
+                     0
+                 );
   </select>
 
 </mapper>

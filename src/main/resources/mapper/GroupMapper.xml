@@ -40,16 +40,16 @@
                 property="transCount"/>
     </resultMap>
 
-    <sql id="QUERY_ROW_COLUMN">
-        front_id frontId,front_ip frontIp,front_port frontPort,create_time createTime,modify_time modifyTime,chain_id, chain_name
-    </sql>
-
     <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
-        insert into tb_group
-        (group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time,chain_id,chain_name)
-        values(#{groupId},#{groupName},#{nodeCount},#{description},#{groupType},#{groupStatus},
-        #{groupTimestamp},#{nodeIdList},NOW(),NOW(),#{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR})
-        ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
+        INSERT INTO tb_group
+        (group_id, group_name, node_count, description, group_type, group_status, group_timestamp, node_id_list,
+         create_time, modify_time, chain_id, chain_name)
+        values (#{groupId}, #{groupName}, #{nodeCount}, #{description}, #{groupType}, #{groupStatus},
+                #{groupTimestamp}, #{nodeIdList}, NOW(), NOW(), #{chainId,jdbcType=INTEGER},
+                #{chainName,jdbcType=VARCHAR})
+        ON CONFLICT (group_id,chain_id) DO UPDATE
+            SET node_count  = #{nodeCount},
+                modify_time = NOW();
     </insert>
 
     <insert id="insertSelective" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
@@ -128,15 +128,15 @@
     </delete>
 
     <update id="updateStatus">
-        update tb_group set group_status=#{groupStatus},modify_time=NOW() where group_id=#{groupId}
+        update tb_group set group_status = #{groupStatus},modify_time=NOW() where group_id=#{groupId}
     </update>
 
     <update id="updateDescription">
-        update tb_group set description=#{description},modify_time=NOW() where group_id=#{groupId}
+        update tb_group set description = #{description},modify_time=NOW() where group_id=#{groupId}
     </update>
 
     <update id="updateNodeCount">
-        update tb_group set node_count=#{nodeCount},modify_time=NOW() where group_id=#{groupId}
+        update tb_group set node_count = #{nodeCount},modify_time=NOW() where group_id=#{groupId}
     </update>
 
     <select id="getCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">

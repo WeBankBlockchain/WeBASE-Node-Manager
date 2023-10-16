@@ -46,14 +46,32 @@
 
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule">
-        REPLACE INTO tb_alert_rule(rule_name,enable,alert_type,alert_level,alert_interval_seconds,
-        alert_content,content_param_list,description,is_all_user,user_list,
-        create_time, modify_time,less_than,less_and_equal,larger_than,larger_and_equal,equal,
-        last_alert_time)
-        VALUES (#{ruleName},#{enable},#{alertType},#{alertLevel},#{alertIntervalSeconds},
-        #{alertContent},#{contentParamList},#{description},#{isAllUser},#{userList},now(),now(),
-        #{lessThan},#{lessAndEqual},#{largerThan},#{largerAndEqual},#{equal},
-        #{lastAlertTime})
+        INSERT INTO tb_alert_rule(rule_name, enable, alert_type, alert_level, alert_interval_seconds,
+                                  alert_content, content_param_list, description, is_all_user, user_list, create_time,
+                                  modify_time,
+                                  less_than, less_and_equal, larger_than, larger_and_equal, equal, last_alert_time)
+        VALUES (#{ruleName}, #{enable}, #{alertType}, #{alertLevel}, #{alertIntervalSeconds},
+                #{alertContent}, #{contentParamList}, #{description}, #{isAllUser}, #{userList}, NOW(), NOW(),
+                #{lessThan}, #{lessAndEqual}, #{largerThan}, #{largerAndEqual}, #{equal}, #{lastAlertTime})
+        ON CONFLICT (rule_id)
+            DO UPDATE
+            SET rule_name              = #{rule_name},
+                enable                 = #{enable},
+                alert_type             = #{alertType},
+                alert_level            = #{alertLevel},
+                alert_interval_seconds = #{alertIntervalSeconds},
+                alert_content          = #{alertContent},
+                content_param_list     = #{contentParamList},
+                description            = #{description},
+                is_all_user            = #{isAllUser},
+                user_list              = #{userList},
+                modify_time            = NOW(),
+                less_than              = #{lessThan},
+                less_and_equal         = #{lessAndEqual},
+                larger_than            = #{largerThan},
+                larger_and_equal       = #{largerAndEqual},
+                equal                  = #{equal},
+                last_alert_time        = #{lastAlertTime};
     </insert>
 
 

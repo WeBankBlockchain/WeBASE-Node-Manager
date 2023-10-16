@@ -22,9 +22,15 @@
 
 
 	<insert id="add" parameterType="com.webank.webase.node.mgr.method.entity.TbMethod">
-		REPLACE INTO tb_method(method_id,group_id,abi_info,method_type,contract_type,create_time,modify_time)
-		VALUES (#{methodId},#{groupId},#{abiInfo},#{methodType},#{contractType},now(),now())
-	</insert>
+        INSERT INTO tb_method (method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
+        VALUES (#{methodId}, #{groupId}, #{abiInfo}, #{methodType}, #{contractType}, NOW(), NOW())
+        ON CONFLICT (method_id) DO UPDATE
+            SET group_id      = ${group_id},
+                abi_info      = ${abi_info},
+                method_type   = ${method_type},
+                contract_type = ${contract_type},
+                modify_time   = NOW();
+    </insert>
 
 	<select id="getMethodById" resultMap="methodMap">
 		SELECT * FROM tb_method
