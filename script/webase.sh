@@ -21,7 +21,7 @@ DBNAME="webasenodemanager"
 
 
 #connect to database then execute init
-cat webase-sql.list | mysql --user=$DBUSER --password=$PASSWD --host=$IP --database=$DBNAME --port=$PORT --default-character-set=utf8;
+cat webase-sql.list | psql --user=$DBUSER --password=$PASSWD --host=$IP --database=$DBNAME --port=$PORT --default-character-set=utf8;
 
 if [ "$?" == "0" ]; then
     echo -e "init success... \n"

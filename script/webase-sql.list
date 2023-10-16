@@ -1,4 +1,2 @@
-#!/bin/sh
-
-source webase-ddl.sql;
-source webase-dml.sql;
+\i webase-ddl.sql;
+\i webase-dml.sql;
