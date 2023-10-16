@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS tb_app_info
     app_icon     text                  DEFAULT NULL,
     app_desc     varchar(1024)         DEFAULT NULL,
     app_detail   text                  DEFAULT NULL,
-    create_time  time                  DEFAULT NULL,
-    modify_time  time                  DEFAULT NULL,
+    create_time  timestamp             DEFAULT NULL,
+    modify_time  timestamp             DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (app_key)
 );
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS tb_contract_store
     contract_abi     text,
     bytecode_bin     text,
     account          bytea DEFAULT 'admin',
-    create_time      time  DEFAULT NULL,
-    modify_time      time  DEFAULT NULL,
+    create_time      timestamp    DEFAULT NULL,
+    modify_time      timestamp    DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (app_key, contract_name, contract_version)
 );
@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS tb_stat
     block_number   int       DEFAULT '0',
     block_size     int       DEFAULT '0',
     stat_timestamp varchar(64),
-    create_time    time      DEFAULT NULL,
-    modify_time    time      DEFAULT NULL,
+    create_time    timestamp DEFAULT NULL,
+    modify_time    timestamp DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (group_id, block_number)
 );
@@ -80,8 +80,8 @@ CREATE TABLE IF NOT EXISTS tb_external_account
     has_pk       smallint     DEFAULT 1,
     user_name    bytea        DEFAULT NULL,
     user_status  smallint     DEFAULT NULL DEFAULT '1',
-    create_time  time         DEFAULT NULL,
-    modify_time  time         DEFAULT NULL,
+    create_time  timestamp    DEFAULT NULL,
+    modify_time  timestamp    DEFAULT NULL,
     description  varchar(250) DEFAULT NULL,
     app_id       varchar(64)  DEFAULT NULL,
     PRIMARY KEY (id),
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS tb_external_contract
     contract_address varchar(64)  NOT NULL,
     deploy_address   varchar(64)  NOT NULL,
     deploy_tx_hash   varchar(120) NOT NULL,
-    deploy_time      time         NOT NULL,
+    deploy_time      timestamp    NOT NULL,
     contract_bin     text         DEFAULT NULL,
     contract_status  smallint     DEFAULT '1',
     contract_type    smallint     DEFAULT '0',
@@ -113,8 +113,8 @@ CREATE TABLE IF NOT EXISTS tb_external_contract
     contract_version varchar(120) DEFAULT NULL,
     contract_abi     text,
     bytecode_bin     text,
-    create_time      time         DEFAULT NULL,
-    modify_time      time         DEFAULT NULL,
+    create_time      timestamp    DEFAULT NULL,
+    modify_time      timestamp    DEFAULT NULL,
     description      text,
     PRIMARY KEY (id),
     UNIQUE (group_id, contract_address)

@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS tb_group
     group_type      int,
     group_timestamp varchar(64),
     node_id_list    text,
-    create_time     time          DEFAULT NULL,
-    modify_time     time          DEFAULT NULL,
+    create_time     timestamp     DEFAULT NULL,
+    modify_time     timestamp     DEFAULT NULL,
     chain_id        int           DEFAULT '0',
     chain_name      varchar(64)   DEFAULT '',
     PRIMARY KEY (group_id),
@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS tb_front
     front_version   varchar(32)  DEFAULT NULL,
     sign_version    varchar(32)  DEFAULT NULL,
     status          int          DEFAULT 1,
-    create_time     time         NOT NULL,
-    modify_time     time         NOT NULL,
+    create_time     timestamp    NOT NULL,
+    modify_time     timestamp    NOT NULL,
     run_type        smallint     DEFAULT '0',
     agency_id       int          DEFAULT '0',
     agency_name     varchar(64)  DEFAULT '',
@@ -75,13 +75,13 @@ CREATE UNIQUE INDEX unique_agency_id_host_id_front_port ON tb_front (agency_id, 
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tb_front_group_map
 (
-    map_id      bigserial          NOT NULL,
-    front_id    int                NOT NULL,
-    group_id    int                NOT NULL,
-    create_time time     DEFAULT NULL,
-    modify_time time     DEFAULT NULL,
-    status      int      DEFAULT 1 NOT NULL,
-    type        smallint DEFAULT 1,
+    map_id      bigserial           NOT NULL,
+    front_id    int                 NOT NULL,
+    group_id    int                 NOT NULL,
+    create_time timestamp DEFAULT NULL,
+    modify_time timestamp DEFAULT NULL,
+    status      int       DEFAULT 1 NOT NULL,
+    type        smallint  DEFAULT 1,
     PRIMARY KEY (map_id),
     UNIQUE (front_id, group_id)
 );
@@ -104,8 +104,8 @@ CREATE TABLE IF NOT EXISTS tb_node
     description  text                  DEFAULT NULL,
     city         varchar(64)           DEFAULT NULL,
     agency       varchar(250)          DEFAULT NULL,
-    create_time  time                  DEFAULT NULL,
-    modify_time  time                  DEFAULT NULL,
+    create_time  timestamp             DEFAULT NULL,
+    modify_time  timestamp             DEFAULT NULL,
     PRIMARY KEY (node_id, group_id)
 );
 
@@ -127,12 +127,12 @@ CREATE TABLE IF NOT EXISTS tb_contract
     contract_bin     text,
     bytecode_bin     text,
     contract_address varchar(64)  DEFAULT NULL,
-    deploy_time      time         DEFAULT NULL,
+    deploy_time      timestamp    DEFAULT NULL,
     contract_status  smallint     DEFAULT '1',
     contract_type    smallint     DEFAULT '0',
     description      text,
-    create_time      time         DEFAULT NULL,
-    modify_time      time         DEFAULT NULL,
+    create_time      timestamp    DEFAULT NULL,
+    modify_time      timestamp    DEFAULT NULL,
     deploy_address   varchar(64)  DEFAULT NULL,
     deploy_user_name varchar(64)  DEFAULT NULL,
     PRIMARY KEY (contract_id),
@@ -151,9 +151,9 @@ CREATE TABLE IF NOT EXISTS tb_method
     group_id      bigserial NOT NULL,
     abi_info      text,
     method_type   varchar(32),
-    contract_type smallint DEFAULT '0',
-    create_time   time     DEFAULT NULL,
-    modify_time   time     DEFAULT NULL,
+    contract_type smallint  DEFAULT '0',
+    create_time   timestamp DEFAULT NULL,
+    modify_time   timestamp DEFAULT NULL,
     PRIMARY KEY (method_id, group_id)
 );
 
@@ -166,10 +166,10 @@ CREATE TABLE IF NOT EXISTS tb_trans_daily
 (
     group_id     bigserial NOT NULL,
     trans_day    date      NOT NULL,
-    trans_count  int  DEFAULT '0',
-    block_number int  DEFAULT '0',
-    create_time  time DEFAULT NULL,
-    modify_time  time DEFAULT NULL,
+    trans_count  int       DEFAULT '0',
+    block_number int       DEFAULT '0',
+    create_time  timestamp DEFAULT NULL,
+    modify_time  timestamp DEFAULT NULL,
     PRIMARY KEY (group_id, trans_day)
 );
 
@@ -191,8 +191,8 @@ CREATE TABLE IF NOT EXISTS tb_user
     sign_user_id varchar(64)           DEFAULT NULL,
     app_id       varchar(64)           DEFAULT NULL,
     has_pk       smallint              DEFAULT 1,
-    create_time  time                  DEFAULT NULL,
-    modify_time  time                  DEFAULT NULL,
+    create_time  timestamp             DEFAULT NULL,
+    modify_time  timestamp             DEFAULT NULL,
     description  varchar(250)          DEFAULT NULL,
     PRIMARY KEY (user_id),
     UNIQUE (group_id, user_name, account),
@@ -216,8 +216,8 @@ CREATE TABLE IF NOT EXISTS tb_account_info
     account_status  smallint     NOT NULL DEFAULT '1',
     description     text,
     email           varchar(40)           DEFAULT NULL,
-    create_time     time                  DEFAULT NULL,
-    modify_time     time                  DEFAULT NULL,
+    create_time     timestamp             DEFAULT NULL,
+    modify_time     timestamp             DEFAULT NULL,
     PRIMARY KEY (account)
 );
 
@@ -233,8 +233,8 @@ CREATE TABLE IF NOT EXISTS tb_role
     role_name_zh varchar(120) DEFAULT NULL,
     role_status  smallint     DEFAULT '1',
     description  text,
-    create_time  time         DEFAULT NULL,
-    modify_time  time         DEFAULT NULL,
+    create_time  timestamp    DEFAULT NULL,
+    modify_time  timestamp    DEFAULT NULL,
     PRIMARY KEY (role_id),
     UNIQUE (role_name)
 );
@@ -249,8 +249,8 @@ CREATE TABLE IF NOT EXISTS tb_token
 (
     token       varchar(120) NOT NULL PRIMARY KEY,
     value       varchar(50)  NOT NULL,
-    expire_time time DEFAULT NULL,
-    create_time time DEFAULT NULL
+    expire_time timestamp DEFAULT NULL,
+    create_time timestamp DEFAULT NULL
 );
 
 
@@ -266,10 +266,10 @@ CREATE TABLE IF NOT EXISTS tb_cert
     public_key    varchar(150) DEFAULT NULL,
     address       varchar(50)  DEFAULT NULL,
     father        varchar(120) NOT NULL,
-    validity_from time         NOT NULL,
-    validity_to   time         NOT NULL,
-    modify_time   time         DEFAULT NULL,
-    create_time   time         DEFAULT NULL,
+    validity_from timestamp    NOT NULL,
+    validity_to   timestamp    NOT NULL,
+    modify_time   timestamp    DEFAULT NULL,
+    create_time   timestamp    DEFAULT NULL,
     PRIMARY KEY (finger_print)
 );
 
@@ -289,14 +289,14 @@ CREATE TABLE IF NOT EXISTS tb_alert_rule
     description            varchar(50) DEFAULT NULL,
     is_all_user            smallint    DEFAULT 0,
     user_list              text        DEFAULT NULL,
-    create_time            time        DEFAULT NULL,
-    modify_time            time        DEFAULT NULL,
+    create_time            timestamp   DEFAULT NULL,
+    modify_time            timestamp   DEFAULT NULL,
     less_than              varchar(40) DEFAULT NULL,
     less_and_equal         varchar(40) DEFAULT NULL,
     larger_than            varchar(40) DEFAULT NULL,
     larger_and_equal       varchar(40) DEFAULT NULL,
     equal                  varchar(40) DEFAULT NULL,
-    last_alert_time        time        DEFAULT NULL,
+    last_alert_time        timestamp   DEFAULT NULL,
     PRIMARY KEY (rule_id)
 );
 
@@ -313,8 +313,8 @@ CREATE TABLE IF NOT EXISTS tb_mail_server_config
     password                varchar(40)                  NOT NULL,
     protocol                varchar(10)                  NOT NULL,
     default_encoding        varchar(10)  DEFAULT 'UTF-8' NOT NULL,
-    create_time             time         DEFAULT NULL,
-    modify_time             time         DEFAULT NULL,
+    create_time             timestamp    DEFAULT NULL,
+    modify_time             timestamp    DEFAULT NULL,
     authentication          smallint     DEFAULT 1       NOT NULL,
     starttls_enable         smallint     DEFAULT 1       NOT NULL,
     starttls_required       smallint     DEFAULT 0,
@@ -340,8 +340,8 @@ CREATE TABLE IF NOT EXISTS tb_alert_log
     alert_content text      NOT NULL,
     description   text               DEFAULT NULL,
     status        smallint  NOT NULL DEFAULT '0',
-    create_time   time               DEFAULT NULL,
-    modify_time   time               DEFAULT NULL,
+    create_time   timestamp          DEFAULT NULL,
+    modify_time   timestamp          DEFAULT NULL,
     PRIMARY KEY (log_id)
 );
 
@@ -351,14 +351,14 @@ CREATE TABLE IF NOT EXISTS tb_alert_log
 CREATE TABLE IF NOT EXISTS tb_abi
 (
     abi_id           bigserial    NOT NULL,
-    account          bytea DEFAULT 'admin',
+    account          bytea     DEFAULT 'admin',
     group_id         int          NOT NULL,
     contract_name    varchar(120) NOT NULL,
     contract_address varchar(64)  NOT NULL,
     contract_abi     text         NOT NULL,
     contract_bin     text         NOT NULL,
-    create_time      time  DEFAULT NULL,
-    modify_time      time  DEFAULT NULL,
+    create_time      timestamp DEFAULT NULL,
+    modify_time      timestamp DEFAULT NULL,
     PRIMARY KEY (abi_id),
     UNIQUE (group_id, account, contract_address)
 );
@@ -378,8 +378,8 @@ CREATE TABLE IF NOT EXISTS tb_agency
     agency_desc varchar(1024)        DEFAULT '',
     chain_id    int         NOT NULL DEFAULT '0',
     chain_name  varchar(64)          DEFAULT '',
-    create_time time        NOT NULL,
-    modify_time time        NOT NULL,
+    create_time timestamp   NOT NULL,
+    modify_time timestamp   NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (chain_id, agency_name)
 );
@@ -399,8 +399,8 @@ CREATE TABLE IF NOT EXISTS tb_chain
     encrypt_type     smallint     NOT NULL DEFAULT '1',
     chain_status     smallint     NOT NULL DEFAULT '0',
     webase_sign_addr varchar(255) NOT NULL DEFAULT '127.0.0.1:5004',
-    create_time      time         NOT NULL,
-    modify_time      time         NOT NULL,
+    create_time      timestamp    NOT NULL,
+    modify_time      timestamp    NOT NULL,
     run_type         smallint              DEFAULT '0',
     PRIMARY KEY (id),
     UNIQUE (chain_name)
@@ -418,8 +418,8 @@ CREATE TABLE IF NOT EXISTS tb_config
     config_name  varchar(64)  NOT NULL,
     config_type  smallint     NOT NULL DEFAULT '0',
     config_value varchar(512) NOT NULL DEFAULT '',
-    create_time  time         NOT NULL,
-    modify_time  time         NOT NULL,
+    create_time  timestamp    NOT NULL,
+    modify_time  timestamp    NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -435,8 +435,8 @@ CREATE TABLE IF NOT EXISTS tb_host
     root_dir    varchar(255) NOT NULL DEFAULT '/opt/fisco-bcos',
     status      smallint     NOT NULL DEFAULT '0',
     remark      text                  DEFAULT NULL,
-    create_time time         NOT NULL,
-    modify_time time         NOT NULL,
+    create_time timestamp    NOT NULL,
+    modify_time timestamp    NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (ip)
 );
@@ -456,8 +456,8 @@ CREATE TABLE IF NOT EXISTS tb_govern_vote
     type         smallint    NOT NULL,
     to_address   varchar(64) DEFAULT NULL,
     detail       varchar(64) DEFAULT NULL,
-    create_time  time        NOT NULL,
-    modify_time  time        NOT NULL,
+    create_time  timestamp   NOT NULL,
+    modify_time  timestamp   NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -466,9 +466,9 @@ CREATE TABLE IF NOT EXISTS tb_contract_path
     id            bigserial NOT NULL,
     contract_path bytea     NOT NULL,
     group_id      int       NOT NULL,
-    account       bytea DEFAULT 'admin',
-    create_time   time  DEFAULT NULL,
-    modify_time   time  DEFAULT NULL,
+    account       bytea     DEFAULT 'admin',
+    create_time   timestamp DEFAULT NULL,
+    modify_time   timestamp DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (group_id, contract_path)
 );
@@ -480,14 +480,14 @@ CREATE TABLE IF NOT EXISTS tb_cns
 (
     id               bigserial    NOT NULL,
     group_id         int          NOT NULL,
-    contract_path    bytea DEFAULT NULL,
+    contract_path    bytea     DEFAULT NULL,
     contract_name    bytea        NOT NULL,
     cns_name         bytea        NOT NULL,
     version          varchar(120) NOT NULL,
     contract_address varchar(64)  NOT NULL,
     contract_abi     text         NOT NULL,
-    create_time      time  DEFAULT NULL,
-    modify_time      time  DEFAULT NULL,
+    create_time      timestamp DEFAULT NULL,
+    modify_time      timestamp DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (group_id, cns_name, version)
 );
@@ -503,8 +503,8 @@ CREATE TABLE IF NOT EXISTS tb_stat
     block_number   int              DEFAULT '0',
     block_size     int              DEFAULT '0',
     stat_timestamp varchar(64),
-    create_time    time             DEFAULT NULL,
-    modify_time    time             DEFAULT NULL,
+    create_time    timestamp        DEFAULT NULL,
+    modify_time    timestamp        DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (group_id, block_number)
 );
@@ -524,8 +524,8 @@ CREATE TABLE IF NOT EXISTS tb_external_account
     has_pk       int          DEFAULT 1,
     user_name    bytea        DEFAULT NULL,
     user_status  smallint     DEFAULT '1',
-    create_time  time         DEFAULT NULL,
-    modify_time  time         DEFAULT NULL,
+    create_time  timestamp    DEFAULT NULL,
+    modify_time  timestamp    DEFAULT NULL,
     description  varchar(250) DEFAULT NULL,
     app_id       varchar(64)  DEFAULT NULL,
     PRIMARY KEY (id),
@@ -549,7 +549,7 @@ CREATE TABLE IF NOT EXISTS tb_external_contract
     contract_address varchar(64)  NOT NULL,
     deploy_address   varchar(64)  NOT NULL,
     deploy_tx_hash   varchar(120) NOT NULL,
-    deploy_time      time         NOT NULL,
+    deploy_time      timestamp    NOT NULL,
     contract_bin     text         DEFAULT NULL,
     contract_status  smallint     DEFAULT '1',
     contract_type    smallint     DEFAULT '0',
@@ -557,8 +557,8 @@ CREATE TABLE IF NOT EXISTS tb_external_contract
     contract_version varchar(120) DEFAULT NULL,
     contract_abi     text,
     bytecode_bin     text,
-    create_time      time         DEFAULT NULL,
-    modify_time      time         DEFAULT NULL,
+    create_time      timestamp    DEFAULT NULL,
+    modify_time      timestamp    DEFAULT NULL,
     description      text,
     PRIMARY KEY (id),
     UNIQUE (group_id, contract_address)
@@ -584,8 +584,8 @@ CREATE TABLE IF NOT EXISTS tb_app_info
     app_icon     text                  DEFAULT NULL,
     app_desc     varchar(1024)         DEFAULT NULL,
     app_detail   text                  DEFAULT NULL,
-    create_time  time                  DEFAULT NULL,
-    modify_time  time                  DEFAULT NULL,
+    create_time  timestamp             DEFAULT NULL,
+    modify_time  timestamp             DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (app_key)
 );
@@ -606,9 +606,9 @@ CREATE TABLE IF NOT EXISTS tb_contract_store
     contract_source  text,
     contract_abi     text,
     bytecode_bin     text,
-    account          bytea DEFAULT 'admin',
-    create_time      time  DEFAULT NULL,
-    modify_time      time  DEFAULT NULL,
+    account          bytea     DEFAULT 'admin',
+    create_time      timestamp DEFAULT NULL,
+    modify_time      timestamp DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (app_key, contract_name, contract_version)
 );
@@ -629,8 +629,8 @@ CREATE TABLE IF NOT EXISTS tb_warehouse
     description_en      text,
     warehouse_detail    text,
     warehouse_detail_en text,
-    create_time         time DEFAULT NULL,
-    modify_time         time DEFAULT NULL,
+    create_time         timestamp DEFAULT NULL,
+    modify_time         timestamp DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_name)
 );
@@ -645,8 +645,8 @@ CREATE TABLE IF NOT EXISTS tb_contract_folder
     description_en   text,
     folder_detail    text,
     folder_detail_en text,
-    create_time      time DEFAULT NULL,
-    modify_time      time DEFAULT NULL,
+    create_time      timestamp DEFAULT NULL,
+    modify_time      timestamp DEFAULT NULL,
     warehouse_id     int       NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (warehouse_id, folder_name)
@@ -661,8 +661,8 @@ CREATE TABLE IF NOT EXISTS tb_contract_item
     contract_source    text,
     description        text,
     description_en     text,
-    create_time        time DEFAULT NULL,
-    modify_time        time DEFAULT NULL,
+    create_time        timestamp DEFAULT NULL,
+    modify_time        timestamp DEFAULT NULL,
     warehouse_id       int       NOT NULL,
     contract_folder_id int       NOT NULL,
     PRIMARY KEY (id),
