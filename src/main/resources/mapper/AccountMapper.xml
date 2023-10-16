@@ -43,8 +43,8 @@
   </insert>
 
   <update id="updateAccountRow" parameterType="com.webank.webase.node.mgr.account.entity.TbAccountInfo">
-		update tb_account_info set account_pwd=#{accountPwd},role_id=#{roleId},login_fail_time=#{loginFailTime},
-		account_status=#{accountStatus},description=#{description},email=#{email},modify_time=now()
+		update tb_account_info set account_pwd = #{accountPwd},role_id = #{roleId},login_fail_time = #{loginFailTime},
+		account_status = #{accountStatus},description = #{description},email = #{email},modify_time=now()
 		where account=#{account}
 	</update>
 
@@ -73,7 +73,7 @@
       and a.account = #{param.account}
     </if>
     <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
-      order by a.modify_time ${param.flagSortedByTime}
+      order by a.modify_time, ${param.flagSortedByTime}
     </if>
     <if test="param.start != null and param.pageSize != null">
       limit #{param.start},#{param.pageSize}
