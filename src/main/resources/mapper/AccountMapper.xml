@@ -53,7 +53,7 @@
              a.modify_time     AS modifyTime
       FROM tb_account_info a
                LEFT JOIN tb_role b ON (a.role_id = b.role_id)
-      WHERE a.account ILIKE #{account}
+      WHERE a.account = #{account}
       LIMIT 1;
   </select>
 
