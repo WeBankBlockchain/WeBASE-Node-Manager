@@ -115,6 +115,7 @@ public class TransHashService {
      */
     public Integer remove(Integer groupId, Integer subTransNum) {
         String tableName = TableName.TRANS.getTableName(groupId);
+        // 一步不好操作,分为两步,一步查询 一步删除
         Integer affectRow = transHashMapper.remove(tableName, subTransNum, groupId);
         return affectRow;
     }

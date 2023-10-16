@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.contract;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.webank.webase.node.mgr.contract.entity.QueryCnsParam;
 import com.webank.webase.node.mgr.contract.entity.TbCns;
 import java.util.List;
@@ -21,7 +22,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CnsMapper {
+public interface CnsMapper extends BaseMapper<TbCns> {
     
     Integer add(TbCns TbCns);
 

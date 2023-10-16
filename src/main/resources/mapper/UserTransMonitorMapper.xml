@@ -42,20 +42,20 @@
     </insert>
 
   <update id="update">
-        update ${tableName}
-        set trans_count = trans_count + 1,
+        UPDATE ${tableName}
+        SET trans_count = trans_count + 1,
             trans_hashs = #{monitor.transHashs},
             trans_hash_lastest = #{monitor.transHashLastest},
             modify_time = #{monitor.modifyTime}
-        where user_name = #{monitor.userName}
-          and contract_name = #{monitor.contractName}
-          and DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') = DATE_FORMAT(#{monitor.createTime},'%Y-%m-%d %H:%i:%s')
-          and user_type = #{monitor.userType}
-          and contract_address = #{monitor.contractAddress}
-          and interface_name = #{monitor.interfaceName}
-          and trans_type = #{monitor.transType}
-          and trans_unusual_type = #{monitor.transUnusualType}
-    </update>
+        WHERE user_name = #{monitor.userName}
+          AND contract_name = #{monitor.contractName}
+          AND TO_TIMESTAMP(TO_CHAR(create_time, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS') = TO_TIMESTAMP(TO_CHAR(#{monitor.createTime}, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS')
+          AND user_type = #{monitor.userType}
+          AND contract_address = #{monitor.contractAddress}
+          AND interface_name = #{monitor.interfaceName}
+          AND trans_type = #{monitor.transType}
+          AND trans_unusual_type = #{monitor.transUnusualType};
+  </update>
 
   <update id="updateUnusualUser">
         update ${tableName}
@@ -79,7 +79,7 @@
 		from ${tableName}
 		where user_name = #{monitor.userName}
 		  and contract_name = #{monitor.contractName}
-		  and DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') = DATE_FORMAT(#{monitor.createTime},'%Y-%m-%d %H:%i:%s')
+          AND TO_TIMESTAMP(TO_CHAR(create_time, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS') = TO_TIMESTAMP(TO_CHAR(#{monitor.createTime}, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS')
 		  and user_type = #{monitor.userType}
 		  and contract_address = #{monitor.contractAddress}
 		  and interface_name = #{monitor.interfaceName}
@@ -101,41 +101,44 @@
   </select>
 
   <select id="countOfMonitorTrans" parameterType="Map" resultType="java.lang.Integer">
-    select IFNULL(sum(trans_count),0) from ${tableName} where 1=1
-    <if test="userName != null and userName != ''">
-      and user_name = #{userName}
-    </if>
-    <if test="startDate != null and startDate != ''">
-      <![CDATA[ and DATE_FORMAT(modify_time,'%Y-%m-%d') >= STR_TO_DATE(#{startDate},'%Y-%m-%d') ]]>
-    </if>
-    <if test="endDate != null and endDate != ''">
-      <![CDATA[ and DATE_FORMAT(modify_time,'%Y-%m-%d') <= STR_TO_DATE(#{endDate},'%Y-%m-%d') ]]>
-    </if>
-    <if test="interfaceName != null and interfaceName != ''">
-      and interface_name = #{interfaceName}
-    </if>
+      SELECT COALESCE(SUM(trans_count), 0)
+      FROM ${tableName}
+      WHERE 1 = 1
+      <if test="userName != null and userName != ''">
+          AND user_name = #{userName}
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND DATE_TRUNC('day', modify_time) >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND DATE_TRUNC('day', modify_time) &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="interfaceName != null and interfaceName != ''">
+          AND interface_name = #{interfaceName}
+      </if>
+
   </select>
 
   <select id="queryTransCountList" parameterType="Map"
     resultType="com.webank.webase.node.mgr.monitor.entity.PageTransInfo">
-    select
-    trans_count as transCount,
-    modify_time as time
-    from ${tableName}
-    where 1=1
-    <if test="userName != null and userName != ''">
-      and user_name = #{userName}
-    </if>
-    <if test="startDate != null and startDate != ''">
-      <![CDATA[ and DATE_FORMAT(modify_time,'%Y-%m-%d') >= STR_TO_DATE(#{startDate},'%Y-%m-%d') ]]>
-    </if>
-    <if test="endDate != null and endDate != ''">
-      <![CDATA[ and DATE_FORMAT(modify_time,'%Y-%m-%d') <= STR_TO_DATE(#{endDate},'%Y-%m-%d') ]]>
-    </if>
-    <if test="interfaceName != null and interfaceName != ''">
-      and interface_name = #{interfaceName}
-    </if>
-    order by modify_time
+      SELECT
+      trans_count AS transCount,
+      modify_time AS time
+      FROM ${tableName}
+      WHERE 1 = 1
+      <if test="userName != null and userName != ''">
+          AND user_name = #{userName}
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND DATE_TRUNC('day', modify_time) >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND DATE_TRUNC('day', modify_time) &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="interfaceName != null and interfaceName != ''">
+          AND interface_name = #{interfaceName}
+      </if>
+      ORDER BY modify_time;
   </select>
 
   <select id="countOfUnusualUser" resultType="java.lang.Integer">

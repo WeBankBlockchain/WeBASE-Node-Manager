@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.contract;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.tools.JsonTools;
@@ -86,7 +87,16 @@ public class CnsService {
         // save cns
         TbCns tbCns = new TbCns();
         BeanUtils.copyProperties(inputParam, tbCns);
-        cnsMapper.add(tbCns);
+        TbCns one = cnsMapper.selectOne(new LambdaQueryWrapper<TbCns>()
+                .eq(TbCns::getGroupId, tbCns.getGroupId())
+                .eq(TbCns::getCnsName, tbCns.getCnsName())
+                .eq(TbCns::getVersion, tbCns.getVersion()));
+        if (one == null) {
+            cnsMapper.insert(tbCns);
+        } else {
+            tbCns.setId(one.getId());
+            cnsMapper.updateById(tbCns);
+        }
     }
 
     /**

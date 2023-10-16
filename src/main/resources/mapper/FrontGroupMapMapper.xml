@@ -18,10 +18,9 @@
 
     <insert id="add" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
         insert into tb_front_group_map
-        (front_id,group_id,status,type,create_time,modify_time)values(#{frontId},#{groupId},#{status},#{type},NOW(),NOW())
-        <selectKey keyProperty="mapId" order="AFTER" resultType="java.lang.Integer">
-            SELECT LAST_INSERT_ID()
-        </selectKey>
+            (front_id, group_id, status, type, create_time, modify_time)
+        values (#{frontId}, #{groupId}, #{status}, #{type}, NOW(), NOW())
+        RETURNING map_id;
     </insert>
 
     <insert id="insertSelective" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
@@ -56,9 +55,7 @@
             </if>
             NOW(),NOW(),
         </trim>
-        <selectKey keyProperty="mapId" order="AFTER" resultType="java.lang.Integer">
-            SELECT LAST_INSERT_ID()
-        </selectKey>
+        RETURNING map_id;
     </insert>
 
 
@@ -152,8 +149,19 @@
     </delete>
 
     <delete id="removeInvalidMap">
-        delete a.* from tb_front_group_map a
-        where NOT EXISTS(select * from tb_front b where a.front_id=b.front_id order by b.front_id asc)
-        or NOT EXISTS(select * from tb_group c where a.group_id=c.group_id order by c.group_id asc)
+        DELETE
+        FROM tb_front_group_map a
+        WHERE NOT EXISTS(
+                SELECT 1
+                FROM tb_front b
+                WHERE a.front_id = b.front_id
+                ORDER BY b.front_id ASC
+            )
+           OR NOT EXISTS(
+                SELECT 1
+                FROM tb_group c
+                WHERE a.group_id = c.group_id
+                ORDER BY c.group_id ASC
+            );
     </delete>
 </mapper>

@@ -27,9 +27,16 @@
   </resultMap>
 
   <insert id="saveContractStore" parameterType="com.webank.webase.node.mgr.appintegration.contractstore.entity.TbContractStore">
-    INSERT INTO tb_contract_store(app_key,contract_name,contract_version,account,contract_source,contract_abi,bytecode_bin,create_time,modify_time)
-    VALUES(#{appKey},#{contractName},#{contractVersion},#{account},#{contractSource},#{contractAbi},#{bytecodeBin},NOW(),NOW())
-    ON DUPLICATE KEY UPDATE account=#{account},contract_source=#{contractSource},contract_abi=#{contractAbi},bytecode_bin=#{bytecodeBin},modify_time=NOW()
+      INSERT INTO tb_contract_store (app_key, contract_name, contract_version, account, contract_source, contract_abi,
+                                     bytecode_bin, create_time, modify_time)
+      VALUES (#{appKey}, #{contractName}, #{contractVersion}, #{account}, #{contractSource}, #{contractAbi},
+              #{bytecodeBin}, NOW(), NOW())
+      ON CONFLICT (app_key, contract_name, contract_version) DO UPDATE
+          SET account= #{account},
+              contract_source= #{contractSource},
+              contract_abi= #{contractAbi},
+              bytecode_bin= #{bytecodeBin},
+              modify_time=NOW()
   </insert>
 
   <select id="countOfContractStore" parameterType="com.webank.webase.node.mgr.appintegration.contractstore.entity.ContractStoreParam"
@@ -59,7 +66,7 @@
       and contract_version = #{contractVersion}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
-      order by modify_time ${flagSortedByTime}
+      order by modify_time, ${flagSortedByTime}
     </if>
     <if test="start != null and pageSize != null">
       limit #{start},#{pageSize}

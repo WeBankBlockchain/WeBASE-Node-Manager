@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.contract;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.webank.webase.node.mgr.contract.entity.ContractParam;
 import com.webank.webase.node.mgr.contract.entity.TbContract;
 import java.util.List;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Repository;
  * contract data interface.
  */
 @Repository
-public interface ContractMapper {
+public interface ContractMapper extends BaseMapper<TbContract> {
 
     Integer add(TbContract tbContract);
     

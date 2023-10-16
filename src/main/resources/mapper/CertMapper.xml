@@ -28,7 +28,7 @@
 
 
 	<insert id="add" parameterType="com.webank.webase.node.mgr.cert.entity.TbCert">
-		REPLACE INTO tb_cert(finger_print,cert_name,content,cert_type,public_key,address,father,validity_from,validity_to,create_time)
+		INSERT INTO tb_cert(finger_print,cert_name,content,cert_type,public_key,address,father,validity_from,validity_to,create_time)
 		VALUES (#{fingerPrint},#{certName},#{content},#{certType},#{publicKey},#{address},#{father},#{validityFrom},#{validityTo},now())
 	</insert>
 
