@@ -24,11 +24,6 @@
       property="modifyTime"/>
   </resultMap>
 
-
-  <sql id="ALL_SELECT_COLUMN">
-		node_id,node_name,group_id,node_ip,p2p_port,block_number,pbft_view,node_active,create_time,modify_time
-	</sql>
-
   <insert id="add" parameterType="com.webank.webase.node.mgr.node.entity.TbNode">
       INSERT INTO tb_node (node_id, node_name, group_id, node_ip, p2p_port, description, create_time, modify_time)
       VALUES (#{nodeId}, #{nodeName}, #{groupId}, #{nodeIp}, #{p2pPort}, #{description}, NOW(), NOW())

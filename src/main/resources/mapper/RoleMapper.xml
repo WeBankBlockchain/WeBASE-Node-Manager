@@ -19,17 +19,17 @@
       property="modifyTime"/>
   </resultMap>
 
-
-  <sql id="QUERY_ROW_COLUMN">
-		role_id roleId,role_name roleName,role_name_zh roleNameZh,role_status roleStatus,
-		description description,create_time createTime,modify_time modifyTime
-	</sql>
-
   <select id="queryRoleById" resultType="com.webank.webase.node.mgr.account.role.TbRole">
-    select
-    <include refid="QUERY_ROW_COLUMN"/>
-    from tb_role where role_id = #{roleId}
-    limit 1
+      select role_id      AS roleId,
+             role_name    AS roleName,
+             role_name_zh AS roleNameZh,
+             role_status  AS roleStatus,
+             description  AS description,
+             create_time  AS createTime,
+             modify_time  AS modifyTime
+      from tb_role
+      where role_id = #{roleId}
+      limit 1
   </select>
 
   <select id="countOfRole" parameterType="com.webank.webase.node.mgr.account.role.RoleListParam"

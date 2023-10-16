@@ -40,10 +40,6 @@
                 property="transCount"/>
     </resultMap>
 
-    <sql id="QUERY_ROW_COLUMN">
-        front_id frontId,front_ip frontIp,front_port frontPort,create_time createTime,modify_time modifyTime,chain_id, chain_name
-    </sql>
-
     <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
         INSERT INTO tb_group
         (group_id, group_name, node_count, description, group_type, group_status, group_timestamp, node_id_list,
