@@ -16,6 +16,7 @@
 
 package com.webank.webase.node.mgr.contract.abi;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.webank.webase.node.mgr.contract.abi.entity.AbiInfo;
 import com.webank.webase.node.mgr.contract.abi.entity.ReqAbiListParam;
 import com.webank.webase.node.mgr.contract.abi.entity.RspAllContract;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AbiMapper {
+public interface AbiMapper extends BaseMapper<AbiInfo> {
 
 	List<AbiInfo> listOfAbi(ReqAbiListParam param);
 
