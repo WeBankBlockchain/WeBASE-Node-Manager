@@ -67,33 +67,32 @@
           interface_name     varchar(32),
           trans_type         smallint  DEFAULT '0',
           trans_unusual_type smallint  DEFAULT '0',
-          trans_count        int(11) NOT NULL,
+          trans_count        int NOT NULL,
           trans_hashs        varchar(1024),
           trans_hash_lastest varchar(128),
           create_time        timestamp DEFAULT NULL,
           modify_time        timestamp DEFAULT NULL
-      );
-      -- 创建分区表
+      )PARTITION BY RANGE (create_time);
       CREATE TABLE ${tableName}_p1 PARTITION OF ${tableName}
-          FOR VALUES FROM ('2019-07-01') TO ('2020-01-01');
-      CREATE TABLE ${tableName}_p2 PARTITION OF ${tableName}
-          FOR VALUES FROM ('2020-01-01') TO ('2020-07-01');
-      CREATE TABLE ${tableName}_p3 PARTITION OF ${tableName}
-          FOR VALUES FROM ('2020-07-01') TO ('2021-01-01');
-      CREATE TABLE ${tableName}_p4 PARTITION OF ${tableName}
-          FOR VALUES FROM ('2021-01-01') TO ('2021-07-01');
-      CREATE TABLE ${tableName}_p5 PARTITION OF ${tableName}
-          FOR VALUES FROM ('2021-07-01') TO ('2022-01-01');
-      CREATE TABLE ${tableName}_p6 PARTITION OF ${tableName}
-          FOR VALUES FROM ('2022-01-01') TO ('2022-07-01');
-      CREATE TABLE ${tableName}_p7 PARTITION OF ${tableName}
-          FOR VALUES FROM ('2022-07-01') TO ('2023-01-01');
-      CREATE TABLE ${tableName}_p8 PARTITION OF ${tableName}
-          FOR VALUES FROM ('2023-01-01') TO ('2023-07-01');
-      CREATE TABLE ${tableName}_p9 PARTITION OF ${tableName}
           FOR VALUES FROM ('2023-07-01') TO ('2024-01-01');
+      CREATE TABLE ${tableName}_p2 PARTITION OF ${tableName}
+          FOR VALUES FROM ('2024-01-01') TO ('2024-07-01');
+      CREATE TABLE ${tableName}_p3 PARTITION OF ${tableName}
+          FOR VALUES FROM ('2024-07-01') TO ('2025-01-01');
+      CREATE TABLE ${tableName}_p4 PARTITION OF ${tableName}
+          FOR VALUES FROM ('2025-01-01') TO ('2025-07-01');
+      CREATE TABLE ${tableName}_p5 PARTITION OF ${tableName}
+          FOR VALUES FROM ('2025-07-01') TO ('2026-01-01');
+      CREATE TABLE ${tableName}_p6 PARTITION OF ${tableName}
+          FOR VALUES FROM ('2026-01-01') TO ('2026-07-01');
+      CREATE TABLE ${tableName}_p7 PARTITION OF ${tableName}
+          FOR VALUES FROM ('2026-07-01') TO ('2027-01-01');
+      CREATE TABLE ${tableName}_p8 PARTITION OF ${tableName}
+          FOR VALUES FROM ('2027-01-01') TO ('2027-07-01');
+      CREATE TABLE ${tableName}_p9 PARTITION OF ${tableName}
+          FOR VALUES FROM ('2027-07-01') TO ('2028-01-01');
       CREATE TABLE ${tableName}_p99 PARTITION OF ${tableName}
-          FOR VALUES FROM ('2024-01-01') TO (MAXVALUE)
+          FOR VALUES FROM ('2028-01-01') TO (MAXVALUE);
   </update>
 
 </mapper>

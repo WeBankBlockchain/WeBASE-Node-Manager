@@ -120,9 +120,16 @@
             </if>
             NOW(),NOW(),
         </trim>
-        ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
+        ON CONFLICT (group_id,chain_id) DO UPDATE SET
+        group_name = #{groupName},
+        node_count = #{nodeCount},
+        group_type = #{groupType},
+        description = #{description},
+        group_Status = #{groupStatus},
+        chain_id = #{chainId},
+        chain_name = #{chainName},
+        modify_time = NOW();
     </insert>
-
     <delete id="remove" parameterType="java.lang.Integer">
         delete from tb_group where group_id=#{groupId}
     </delete>
