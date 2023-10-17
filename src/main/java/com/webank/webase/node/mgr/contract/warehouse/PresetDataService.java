@@ -72,7 +72,9 @@ public class PresetDataService {
             }
         }
         if (!item2Save.isEmpty()) {
-            warehouseMapper.batchInsert(item2Save);
+            for (TbWarehouse warehouse : item2Save) {
+                warehouseMapper.batchInsert(warehouse);
+            }
         }
         log.info("readAndInitStoreItem save {} items", storeItems.size());
     }
@@ -93,7 +95,9 @@ public class PresetDataService {
             }
         }
         if (!item2Save.isEmpty()) {
-            contractFolderMapper.batchInsert(item2Save);
+            for (TbContractFolder contractFolder : item2Save) {
+                contractFolderMapper.batchInsert(contractFolder);
+            }
         }
         log.info("readAndInitFolderItem save {} items", folderItems.size());
     }
@@ -117,7 +121,9 @@ public class PresetDataService {
             }
         }
         if (!item2Save.isEmpty()) {
-            contractItemMapper.batchInsert(item2Save);
+            for (TbContractItem item : item2Save) {
+                contractItemMapper.batchInsert(item);
+            }
         }
         log.info("readAndInitContractItem save {} items", contractItems.size());
     }

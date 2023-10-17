@@ -46,29 +46,29 @@ public interface FrontGroupMapMapper {
     List<FrontGroup> getList(MapListParam mapListParam);
 
     @Select({
-        "select * from tb_front_group_map where 1=1"
+        "select * from tb_front_group_map"
     })
     List<FrontGroup> getAllList();
 
     @Delete({
-        "delete from tb_front_group_map where map_id=#{mapId}"
+        "delete from tb_front_group_map where map_id = #{mapId}"
     })
     void removeByMapId(@Param("mapId") Integer mapId);
 
     void removeInvalidMap();
 
     @Select({
-        "select * from tb_front_group_map where group_id=#{groupId} order by create_time desc"
+        "select * from tb_front_group_map where group_id = #{groupId} order by create_time desc"
     })
     List<TbFrontGroupMap> selectListByGroupId(@Param("groupId") int groupId);
 
     @Select({
-        "update tb_front_group_map set modify_time = now(),status=#{status} where front_id=#{frontId}"
+        "update tb_front_group_map set modify_time = now(),status = #{status} where front_id = #{frontId}"
     })
     void updateAllGroupsStatus(@Param("frontId") int frontId, @Param("status") int status);
 
     @Select({
-            "update tb_front_group_map set modify_time = now(),status=#{status} where front_id=#{frontId} and group_id=${groupId}"
+            "update tb_front_group_map set modify_time = now(),status = #{status} where front_id = #{frontId} and group_id=${groupId}"
     })
     void updateOneGroupStatus(@Param("frontId") int frontId,@Param("status") int status,@Param("groupId") int groupId);
 }

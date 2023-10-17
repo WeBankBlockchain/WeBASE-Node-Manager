@@ -85,17 +85,17 @@ public interface GroupMapper {
     int deleteByChainId(@Param("chainId") int chainId);
 
     @Select({
-        "select * from tb_group where chain_id=#{chainId}"
+        "select * from tb_group where chain_id = #{chainId}"
     })
     List<TbGroup> selectGroupList(@Param("chainId") int chainId);
 
     @Select({
-            "select * from tb_group where chain_id=#{chainId} and group_id=#{groupId}"
+            "select * from tb_group where chain_id = #{chainId} and group_id= #{groupId}"
     })
     TbGroup getGroupByChainIdAndGroupId(@Param("chainId") int chainId, @Param("groupId") int groupId);
 
     @Update({
-       "update tb_group set group_timestamp=#{timestamp}, node_id_list=#{nodeIdList},modify_time=NOW() where group_id=#{groupId}"
+       "update tb_group set group_timestamp = #{timestamp}, node_id_list = #{nodeIdList},modify_time=NOW() where group_id = #{groupId}"
     })
     int updateTimestampNodeList(@Param("groupId") int groupId, @Param("timestamp") long timestamp, @Param("nodeIdList") String nodeIdList);
 }
