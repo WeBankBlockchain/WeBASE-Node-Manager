@@ -413,16 +413,16 @@ public class DeployService {
         Path nodePath = this.pathService.getNodeRoot(chain.getChainName(), host.getIp(), front.getHostIndex());
         Set<String> groupIdSet = NodeConfig.getGroupIdSet(nodePath, encryptType);
         log.info("deleteNode updateNodeConfigIniByGroupList chain:{}, groupIdSet:{}", chain, groupIdSet);
-        // update related node's config.ini file, e.g. p2p
-        try {
-            log.info("deleteNode updateNodeConfigIniByGroupList chain:{}, groupIdSet:{}", chain, groupIdSet);
-            // update related node's config.ini file, e.g. p2p
-            this.frontService.updateNodeConfigIniByGroupList(chain, groupIdSet);
-        } catch (IOException e) {
-            errorFlag++;
-            log.error("Delete node, update related group:[{}] node's config error ", groupIdSet, e);
-            log.error("Please update related node's group config manually");
-        }
+//        // update related node's config.ini file, e.g. p2p
+//        try {
+//            log.info("deleteNode updateNodeConfigIniByGroupList chain:{}, groupIdSet:{}", chain, groupIdSet);
+//            // update related node's config.ini file, e.g. p2p
+//            this.frontService.updateNodeConfigIniByGroupList(chain, groupIdSet);
+//        } catch (IOException e) {
+//            errorFlag++;
+//            log.error("Delete node, update related group:[{}] node's config error ", groupIdSet, e);
+//            log.error("Please update related node's group config manually");
+//        }
 
         // move node directory to tmp
         try {

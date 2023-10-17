@@ -889,8 +889,10 @@ public class HostService {
             try {
                 // check chain port
                 HostDTO hostDTO = remoteHostService.getHostByIp(nodeInfo.getIp());
+//                ExecuteResult checkPortResult = ansibleService.checkPortArrayInUse(hostDTO,
+//                        nodeInfo.getChannelPort(), nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
                 ExecuteResult checkPortResult = ansibleService.checkPortArrayInUse(hostDTO,
-                        nodeInfo.getChannelPort(), nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
+                         nodeInfo.getP2pPort(), nodeInfo.getFrontPort(), nodeInfo.getRpcPort());
                 // not in use is true
                 if (!checkPortResult.success()) {
                     log.error("Port check on host ip:[{}] not passed:{}!", nodeInfo.getIp(), checkPortResult.getExecuteOut());

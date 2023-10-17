@@ -503,7 +503,7 @@ public class ChainService {
             return true;
         }
         // set default chain status
-        TbChain default_chain = this.tbChainMapper.getByChainName("default_chain");
+        TbChain default_chain = this.tbChainMapper.getByChainName("default_chain_v3");
         if (default_chain != null && default_chain.getChainStatus() == ChainStatusEnum.RUNNING.getId()){
             isChainRunning.set(true);
         }
