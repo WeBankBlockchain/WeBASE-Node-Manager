@@ -433,7 +433,7 @@ public class GroupService {
         // 1.4.3 if observer is removed, observer's nodeId still in groupPeerList
         // 3.0 fisco, light node does not have a node type, todo treated like removed node
         localNodes.stream()
-                .filter(n -> !DataStatus.starting(n.getNodeActive()))
+                .filter(n -> !DataStatus.valid(n.getNodeActive()))
                 .forEach(node -> {
                     // todo check: if front connected to rpc node, and this rpc node connected to observer node,
                     // and if this observer was removed, then nodeInGroup might still contains this observer as an observer but not a removed node

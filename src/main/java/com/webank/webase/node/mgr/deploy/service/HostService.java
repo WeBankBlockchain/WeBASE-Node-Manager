@@ -471,7 +471,7 @@ public class HostService {
      * @param host
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    private void scpHostSdkCert(String chainName, HostDTO host) {
+    public void scpHostSdkCert(String chainName, HostDTO host) {
         log.info("start scpHostSdkCert chainName:{},host:{}", chainName, host);
         String ip = host.getIp();
         // host's sdk path

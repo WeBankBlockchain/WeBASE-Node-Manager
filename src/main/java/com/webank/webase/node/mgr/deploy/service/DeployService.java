@@ -546,6 +546,9 @@ public class DeployService {
 //                    log.info("batchAddNode generateNewNodesGroupConfigsAndScp");
 //                    groupService.generateNewNodesGroupConfigsAndScp(chain, groupId, tbHost.getIp(), newFrontResult);
 
+                    // sdk scp
+                    hostService.scpHostSdkCert(chainName, tbHost);
+
                     // scp node config
                     frontService.scpNewNodesConfigs(chain, tbHost.getIp(), newFrontResult);
 

@@ -60,4 +60,8 @@ public enum DataStatus {
     public static boolean starting(int status){
         return status == STARTING.getValue();
     }
+
+    public static boolean valid(int status){
+        return status == STARTING.getValue() || status == NORMAL.getValue();
+    }
 }
