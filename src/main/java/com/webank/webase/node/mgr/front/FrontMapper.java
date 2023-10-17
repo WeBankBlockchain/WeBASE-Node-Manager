@@ -57,13 +57,12 @@ public interface FrontMapper {
 
 
     @Select({
-            "select  max(host_index) from tb_front",
-            "where host_id = #{hostId,jdbcType=INTEGER}"
+            "select  max(host_index) from tb_front where host_id = #{hostId,jdbcType=INTEGER}"
     })
     Integer getNodeMaxIndex(int hostId);
 
     @Update({
-        "update tb_front set client_version=#{newImageTag},image_tag=#{newImageTag},modify_time=#{modifyTime} where chain_id = #{chainId}"
+        "update tb_front set client_version = #{newImageTag},image_tag = #{newImageTag},modify_time = #{modifyTime} where chain_id = #{chainId}"
     })
     int updateUpgradingByChainId(@Param("chainId") int chainId,
                                  @Param("newImageTag") String newImageTag,
@@ -73,7 +72,7 @@ public interface FrontMapper {
     TbFront getByNodeId(@Param("nodeId") String nodeId);
 
     @Update({
-            "update tb_front set front_version=#{frontVersion},sign_version=#{signVersion},modify_time=NOW() where chain_id = #{chainId}"
+            "update tb_front set front_version = #{frontVersion},sign_version = #{signVersion},modify_time=NOW() where chain_id = #{chainId}"
     })
     int updateVersion(@Param("chainId") int chainId,
                                  @Param("frontVersion") String frontVersion,

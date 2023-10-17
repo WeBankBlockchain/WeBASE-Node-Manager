@@ -34,18 +34,18 @@ public interface NodeMapper {
     /**
      * Add new node data.
      */
-    Integer add(TbNode tbNode);
+    Integer add(@Param("tbNode") TbNode tbNode);
 
     /**
      * Query the number of node according to some conditions.
      */
-    Integer getCount(NodeParam nodeParam);
+    Integer getCount(@Param("nodeParam") NodeParam nodeParam);
 
 
     /**
      * Query node list according to some conditions.
      */
-    List<TbNode> getList(NodeParam nodeParam);
+    List<TbNode> getList(@Param("nodeParam") NodeParam nodeParam);
 
     /**
      * query tb_node by nodeip and p2pport.
@@ -60,7 +60,7 @@ public interface NodeMapper {
      *
      */
     @Select({
-            "select * from tb_node where node_id=#{nodeId,jdbcType=VARCHAR}"
+            "select * from tb_node where node_id = #{nodeId,jdbcType=VARCHAR}"
     } )
     List<TbNode> selectByNodeId(@Param("nodeId") String nodeId);
 
@@ -68,17 +68,17 @@ public interface NodeMapper {
     /**
      * update node info.
      */
-    Integer update(TbNode dbNode);
+    Integer update(@Param("dbNode") TbNode dbNode);
 
     /**
      * update node info of node ip, node agency, node city
      */
-    Integer updateNodeInfo(ReqUpdate reqUpdate);
+    Integer updateNodeInfo(@Param("reqUpdate") ReqUpdate reqUpdate);
 
     /**
      * query node info.
      */
-    TbNode queryNodeInfo(NodeParam nodeParam);
+    TbNode queryNodeInfo(@Param("nodeParam") NodeParam nodeParam);
 
 
     /**
@@ -94,15 +94,12 @@ public interface NodeMapper {
 
 
     @Select({
-            "select * from tb_node where node_id= #{nodeId,jdbcType=VARCHAR} and group_id=#{groupId,jdbcType=INTEGER}"
+            "select * from tb_node where node_id= #{nodeId,jdbcType=VARCHAR} and group_id = #{groupId,jdbcType=INTEGER}"
     })
     TbNode getByNodeIdAndGroupId(@Param("nodeId") String nodeId, @Param("groupId") int groupId);
 
     @Select({
-            " SELECT " +
-            " DISTINCT(node_id), node_ip, p2p_port " +
-            " FROM tb_node  WHERE  group_id IN " +
-                    "( )"
+            " SELECT DISTINCT(node_id), node_ip, p2p_port FROM tb_node  WHERE  group_id IN (${groupId})"
     })
     List<TbNode> select(@Param("groupId") String groupId);
 
@@ -112,7 +109,7 @@ public interface NodeMapper {
     List<Integer> selectGroupIdListOfNode(@Param("nodeId") String nodeId);
 
     @Select({
-            "select * from tb_node where group_id=#{groupId,jdbcType=INTEGER}"
+            "select * from tb_node where group_id = #{groupId,jdbcType=INTEGER}"
     })
     List<TbNode> selectByGroupId(@Param("groupId") int groupId);
 
@@ -123,9 +120,7 @@ public interface NodeMapper {
      */
     int getHighestBlockHeight(@Param("groupId") Integer groupId);
 
-    @Select({"select city,count(distinct(node_id)) from tb_node",
-        "where city is not NULL",
-        "group by city"})
+    @Select({"select city,count(distinct(node_id)) from tb_node where city is not NULL group by city"})
     @Results({
         @Result(column = "city", property = "city", jdbcType = JdbcType.VARCHAR),
         @Result(column = "count(distinct(node_id))", property = "count", jdbcType = JdbcType.INTEGER)
