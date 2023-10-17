@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.external;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.qctc.common.satoken.utils.LoginHelper;
 import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -35,6 +36,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,9 +46,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name="异常用户/合约信息查询")
 @Log4j2
 @RestController
 @RequestMapping(value = "external")
+@SaCheckPermission("bcos3:transAudit:externalContract")
 public class ExternalController extends BaseController {
 
     @Autowired

@@ -16,6 +16,7 @@
 
 package com.webank.webase.node.mgr.contract.abi;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -32,6 +33,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -49,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * abi import controller
  */
+@Tag(name="合约abi接口")
 @Log4j2
 @RestController
 @RequestMapping("abi")
@@ -56,6 +60,7 @@ public class AbiController extends BaseController {
 	@Autowired
 	AbiService abiService;
 
+	@SaCheckPermission("bcos3:contract:List")
 	@GetMapping("/list/{groupId}/{pageNumber}/{pageSize}")
 	public Object listAbi(
 			@PathVariable("groupId") String groupId,
@@ -84,6 +89,7 @@ public class AbiController extends BaseController {
 		return new BasePageResponse(ConstantCode.SUCCESS, resList, count);
 	}
 
+	@SaCheckPermission("bcos3:contract:List")
 	@GetMapping("/list/all/{groupId}/{pageNumber}/{pageSize}")
 	public BasePageResponse listAllContractIncludeAbi(
 			@PathVariable("groupId") String groupId,
@@ -116,6 +122,7 @@ public class AbiController extends BaseController {
 		return new BasePageResponse(ConstantCode.SUCCESS, resList, count);
 	}
 
+	@SaCheckPermission("bcos3:contract:List")
 	@GetMapping("/{abiId}")
 	public Object getAbiById(@PathVariable("abiId") Integer abiId) {
 		Instant startTime = Instant.now();
@@ -127,8 +134,8 @@ public class AbiController extends BaseController {
 		return new BaseResponse(ConstantCode.SUCCESS, res);
 	}
 
+	@SaCheckPermission("bcos3:contract:addAbi")
 	@PostMapping("")
-	// TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 	public Object saveAbi(@Valid @RequestBody ReqImportAbi param, BindingResult result) {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
@@ -144,8 +151,8 @@ public class AbiController extends BaseController {
 	 * @param param abiId is not empty to update
 	 * @return
 	 */
+	@SaCheckPermission("bcos3:contract:updateAbi")
 	@PutMapping("")
-	// TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 	public Object updateAbi(@RequestBody ReqImportAbi param, BindingResult result) {
 		checkBindResult(result);
 		Instant startTime = Instant.now();
@@ -161,8 +168,8 @@ public class AbiController extends BaseController {
 		return new BaseResponse(ConstantCode.SUCCESS, res);
 	}
 
+	@SaCheckPermission("bcos3:contract:deleteAbi")
 	@DeleteMapping("/{abiId}")
-	// TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 	public BaseResponse deleteAbi(@PathVariable("abiId") Integer abiId) {
 		log.debug("start deleteAbi. abiId:{}", abiId);
 		abiService.delete(abiId);

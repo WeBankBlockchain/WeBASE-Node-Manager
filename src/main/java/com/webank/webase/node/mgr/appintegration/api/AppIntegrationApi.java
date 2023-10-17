@@ -47,6 +47,7 @@ import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.tools.PemUtils;
 import com.webank.webase.node.mgr.user.UserService;
 import com.webank.webase.node.mgr.user.entity.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
@@ -63,6 +64,7 @@ import java.util.Optional;
 /**
  * application integration api.
  */
+@Tag(name="第三方应用集成api")
 @Log4j2
 @RestController
 @RequestMapping(value = "api")

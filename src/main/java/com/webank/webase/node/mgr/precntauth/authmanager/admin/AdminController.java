@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.precntauth.authmanager.admin;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -21,6 +22,7 @@ import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclAuth
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclUsrInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqContractStatus;
 import com.webank.webase.node.mgr.precntauth.authmanager.base.BaseService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,10 +39,12 @@ import javax.validation.Valid;
 /***
  * admin as operator
  */
+@Tag(name="权限管理")
 @Log4j2
 //@Api(value = "precntauth/authmanager/admin/", tags = "precntauth authmanager controller")
 @RestController
 @RequestMapping("precntauth/authmanager/admin/")
+@SaCheckPermission("bcos3:sys:newPermission")
 public class AdminController extends BaseController {
 
     @Autowired

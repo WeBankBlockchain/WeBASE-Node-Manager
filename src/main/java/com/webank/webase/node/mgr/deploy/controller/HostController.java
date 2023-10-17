@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.deploy.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.qctc.host.api.RemoteHostService;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
@@ -24,6 +25,7 @@ import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.HostService;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.ValidateUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +42,11 @@ import java.time.Instant;
 /**
  * add host, delete host, init host
  */
+@Tag(name="主机相关接口")
 @Log4j2
 @RestController
 @RequestMapping("host")
+@SaCheckPermission("bcos3:chain:initHost")
 public class HostController extends BaseController {
 //    @Autowired
 //    private TbHostMapper tbHostMapper;
@@ -117,7 +121,6 @@ public class HostController extends BaseController {
      * Deploy by ipconf and tagId.
      */
     @PostMapping(value = "ping")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse pingHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
 

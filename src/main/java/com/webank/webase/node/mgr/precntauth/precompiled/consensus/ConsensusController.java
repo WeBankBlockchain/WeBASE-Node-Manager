@@ -13,12 +13,14 @@
  */
 package com.webank.webase.node.mgr.precntauth.precompiled.consensus;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.precntauth.precompiled.base.PrecompiledUtil;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ReqNodeListInfo;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,9 +33,11 @@ import java.time.Duration;
 import java.time.Instant;
 
 //@Api(value = "precntauth/precompiled/consensus", tags = "precntauth precompiled controller")
+@Tag(name="共识管理")
 @Slf4j
 @RestController
 @RequestMapping(value = "precntauth/precompiled/consensus")
+@SaCheckPermission("bcos3:chain:nodeManage")
 public class ConsensusController {
 
     @Autowired

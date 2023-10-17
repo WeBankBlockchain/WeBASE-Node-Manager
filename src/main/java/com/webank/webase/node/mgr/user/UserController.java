@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.user;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.qctc.common.satoken.utils.LoginHelper;
 import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -28,6 +29,7 @@ import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.tools.PemUtils;
 import com.webank.webase.node.mgr.user.entity.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,7 @@ import java.util.Optional;
 /**
  * Key pair manage
  */
+@Tag(name="链上用户管理")
 @Log4j2
 @RestController
 @RequestMapping("user")
@@ -57,9 +60,9 @@ public class UserController extends BaseController {
     /**
      * add new user info.
      */
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/userInfo")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse addUserInfo(@RequestBody @Valid NewUserInputParam user, 
+    public BaseResponse addUserInfo(@RequestBody @Valid NewUserInputParam user,
              BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         LoginUser curLoginUser = LoginHelper.getLoginUser();
@@ -81,8 +84,8 @@ public class UserController extends BaseController {
     /**
      * bind user info. (add public key user, different from bind private key)
      */
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/bind")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse bindUserInfo(@RequestBody @Valid BindUserInputParam user, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         LoginUser curLoginUser = LoginHelper.getLoginUser();
@@ -103,8 +106,8 @@ public class UserController extends BaseController {
     /**
      * update user info of description
      */
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PutMapping(value = "/userInfo")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse updateUserInfo(@RequestBody @Valid UpdateUserInputParam user,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -128,6 +131,7 @@ public class UserController extends BaseController {
     /**
      * query user info list.
      */
+    @SaCheckPermission("bcos3:privateKeyManagement")
     @GetMapping(value = "/userList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse userList(@PathVariable("groupId") String groupId,
             @PathVariable("pageNumber") Integer pageNumber,
@@ -166,8 +170,8 @@ public class UserController extends BaseController {
         return pageResponse;
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/import")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport, BindingResult result) {
         checkBindResult(result);
         LoginUser curLoginUser = LoginHelper.getLoginUser();
@@ -189,8 +193,8 @@ public class UserController extends BaseController {
         return baseResponse;
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/importPem")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem, BindingResult result) {
         checkBindResult(result);
         LoginUser curLoginUser = LoginHelper.getLoginUser();
@@ -213,8 +217,8 @@ public class UserController extends BaseController {
         return baseResponse;
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/importP12")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
             @RequestParam(required = false, defaultValue = "") String p12Password,
             @RequestParam String groupId, @RequestParam String userName,
@@ -240,8 +244,8 @@ public class UserController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/exportPem")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param) throws NodeMgrException {
         Instant startTime = Instant.now();
         LoginUser curLoginUser = LoginHelper.getLoginUser();
@@ -260,8 +264,8 @@ public class UserController extends BaseController {
             .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/exportP12")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param) throws NodeMgrException {
         LoginUser curLoginUser = LoginHelper.getLoginUser();
         Instant startTime = Instant.now();
@@ -293,8 +297,8 @@ public class UserController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/export/{userId}")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse exportRawUserFromSign(@PathVariable("userId") Integer userId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -307,8 +311,8 @@ public class UserController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, tbUser);
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/bind/privateKey")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse bindPrivateKey(@Valid @RequestBody ReqBindPrivateKey reqBind, BindingResult result) {
         checkBindResult(result);
         LoginUser curLoginUser = LoginHelper.getLoginUser();
@@ -330,8 +334,8 @@ public class UserController extends BaseController {
         return baseResponse;
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/bind/privateKey/pem")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse bindPrivateKeyByPem(@Valid @RequestBody ReqBindPrivateKey reqBindPem, BindingResult result) {
         checkBindResult(result);
         LoginUser curLoginUser = LoginHelper.getLoginUser();
@@ -357,8 +361,8 @@ public class UserController extends BaseController {
         return baseResponse;
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/bind/privateKey/p12")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse bindPrivateKeyByP12(@RequestParam MultipartFile p12File,
         @RequestParam(required = false, defaultValue = "") String p12Password,
         @RequestParam String groupId,
@@ -387,8 +391,8 @@ public class UserController extends BaseController {
     /**
      * update user info of description
      */
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @DeleteMapping(value = "/{groupId}/{address}")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse suspendUser(@PathVariable("groupId") String groupId,
         @PathVariable("address") String address) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);

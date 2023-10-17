@@ -1,10 +1,12 @@
 package com.webank.webase.node.mgr.precntauth.precompiled.cns;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqCnsInfoByName;
 import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqInfoByNameVersion;
 import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqRegisterCnsInfo;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 //@Api(value = "precntauth/precompiled/cns", tags = "precntauth precompiled controller")
+@Tag(name="CNS管理")
+@SaCheckPermission("bcos3:contract:cnsManagement")
 @Slf4j
 @RestController
 @RequestMapping(value = "precntauth/precompiled/cns")

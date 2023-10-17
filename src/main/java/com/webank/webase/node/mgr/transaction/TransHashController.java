@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.transaction;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -31,6 +32,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
@@ -41,9 +44,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Tag(name="交易信息查询管理")
 @Log4j2
 @RestController
 @RequestMapping(value = "transaction")
+@SaCheckPermission("bcos3:home")
 public class TransHashController extends BaseController {
 
     @Autowired

@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.front;
 
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -32,6 +33,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +52,11 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * front controller
  */
+@Tag(name="节点前置")
 @Log4j2
 @RestController
 @RequestMapping("front")
+@SaCheckPermission("bcos3:chain:front")
 public class FrontController extends BaseController {
 
     @Autowired

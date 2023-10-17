@@ -20,6 +20,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +44,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * Alert Type Configuration Controller
  */
+@Tag(name="告警规则管理")
 @Log4j2
 @RestController
 @RequestMapping("alert")
@@ -51,6 +54,7 @@ public class AlertRuleController {
     @Autowired
     AlertRuleService alertRuleService;
 
+    @SaCheckPermission("bcos3:monitor:getAlertRule")
     @GetMapping("/{ruleId}")
     public Object getAlertRuleByRuleId(@PathVariable("ruleId") Integer ruleId) {
         Instant startTime = Instant.now();
@@ -64,6 +68,7 @@ public class AlertRuleController {
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
+    @SaCheckPermission("bcos3:monitor:emailAlarmType")
     @GetMapping("/list")
     public Object listAlertRules() {
         Instant startTime = Instant.now();
@@ -96,8 +101,8 @@ public class AlertRuleController {
 //        return new BaseResponse(ConstantCode.SUCCESS);
 //    }
 
+    @SaCheckPermission("bcos3:monitor:updateAlertRule")
     @PutMapping("")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertRule. startTime:{} AlertRuleParam:{}",
@@ -118,9 +123,8 @@ public class AlertRuleController {
 
     }
 
-
+    @SaCheckPermission("bcos3:monitor:toggleAlertRule")
     @PutMapping("/toggle")
-    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public Object toggleAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start toggleAlertRule. startTime:{} AlertRuleParam:{}",

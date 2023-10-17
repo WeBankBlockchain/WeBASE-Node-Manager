@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.contract.warehouse;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -22,6 +23,8 @@ import com.webank.webase.node.mgr.contract.warehouse.entity.TbWarehouse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,9 +37,11 @@ import org.springframework.web.bind.annotation.RestController;
  * ContractStoreController.
  * @author marsli
  */
+@Tag(name="合约仓库")
 @Slf4j
 @RestController
 @RequestMapping(value = "/warehouse")
+@SaCheckPermission("bcos3:contract:Warehouse")
 public class WarehouseController extends BaseController {
 
     @Autowired

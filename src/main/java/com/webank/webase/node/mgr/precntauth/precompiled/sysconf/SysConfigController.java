@@ -15,12 +15,14 @@
  */
 package com.webank.webase.node.mgr.precntauth.precompiled.sysconf;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.precntauth.precompiled.sysconf.entity.ReqSetSysConfigInfo;
 import com.webank.webase.node.mgr.tools.JsonTools;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
@@ -35,9 +37,11 @@ import java.time.Instant;
  * manage tx_count and gas_limit
  */
 //@Api(value = "precntauth/precompiled/sys", tags = "precntauth precompiled controller")
+@Tag(name="配置管理")
 @Slf4j
 @RestController
 @RequestMapping(value = "precntauth/precompiled/sys")
+@SaCheckPermission("bcos3:sys:configManagement")
 public class SysConfigController extends BaseController {
 
     @Autowired
@@ -47,6 +51,7 @@ public class SysConfigController extends BaseController {
      * get system config list 透传front的BaseResponse
      */
 //    @ApiImplicitParam(name = "groupId", value = "groupId info", required = true)
+
     @GetMapping("config/list")
     public BaseResponse getSysConfigList(@RequestParam(defaultValue = "group") String groupId) {
         Instant startTime = Instant.now();
