@@ -208,7 +208,7 @@
       and contract_path = #{contractPath}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
-      order by modify_time, ${flagSortedByTime}
+      order by modify_time ${flagSortedByTime}
     </if>
     <if test="start != null and pageSize != null">
       limit #{pageSize} OFFSET #{start}

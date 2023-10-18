@@ -74,7 +74,7 @@
       and a.account = #{param.account}
     </if>
     <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
-      order by a.modify_time, ${param.flagSortedByTime}
+      order by a.modify_time ${param.flagSortedByTime}
     </if>
     <if test="param.start != null and param.pageSize != null">
       limit #{param.pageSize} OFFSET #{param.start}

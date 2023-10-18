@@ -32,10 +32,11 @@
   </select>
 
   <insert id="add">
-    insert ignore into ${tableName}
-    (pk_hash,block_number,block_timestamp,trans_count,sealer_index,create_time,modify_time,gas_used)
-    values
-    (#{block.pkHash},#{block.blockNumber},#{block.blockTimestamp},#{block.transCount},#{block.sealerIndex},NOW(),NOW(),#{block.gasUsed})
+      insert into ${tableName}
+      (pk_hash, block_number, block_timestamp, trans_count, sealer_index, create_time, modify_time, gas_used)
+      values (#{block.pkHash}, #{block.blockNumber}, #{block.blockTimestamp}, #{block.transCount}, #{block.sealerIndex},
+              NOW(), NOW(), #{block.gasUsed})
+      ON CONFLICT (pk_hash) DO NOTHING;
   </insert>
 
   <update id="update">
@@ -58,7 +59,7 @@
       and block_number > #{param.minBlockNumber}
     </if>
     <if test="param.flagSortedByBlock != null and param.flagSortedByBlock != ''">
-      order by block_number, ${param.flagSortedByBlock}
+      order by block_number ${param.flagSortedByBlock}
     </if>
 
     <if test="param.start != null and param.pageSize != null">
