@@ -331,7 +331,11 @@ public class FrontService {
         }
         //save front info
         try{
+            log.error("开始插入front FrontService ");
             frontMapper.add(tbFront);
+            log.error("front插入完成 FrontService 插入的数据为{}",tbFront);
+            List<TbFront> list = frontMapper.getAllList();
+            log.error("查询是否插入成功 插入数据长度为{} 插入的集合为{}",list.size(),list);
         } catch (Exception e) {
             log.warn("fail newFront, after save, tbFront:{}, exception:{}",
                 JsonTools.toJSONString(tbFront), e);

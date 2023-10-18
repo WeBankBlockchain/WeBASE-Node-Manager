@@ -35,16 +35,16 @@ public class TbContractFolderSqlProvider {
             sql.VALUES("warehouse_id", "#{warehouseId,jdbcType=INTEGER}");
         }
         if (record.getDescription() != null) {
-            sql.VALUES("description", "#{description,jdbcType=LONGVARCHAR}");
+            sql.VALUES("description", "#{description,jdbcType=TEXT}");
         }
         if (record.getDescriptionEn() != null) {
-            sql.VALUES("description_en", "#{descriptionEn,jdbcType=LONGVARCHAR}");
+            sql.VALUES("description_en", "#{descriptionEn,jdbcType=TEXT}");
         }
         if (record.getFolderDetail() != null) {
-            sql.VALUES("folder_detail", "#{folderDetail,jdbcType=LONGVARCHAR}");
+            sql.VALUES("folder_detail", "#{folderDetail,jdbcType=TEXT}");
         }
         if (record.getFolderDetailEn() != null) {
-            sql.VALUES("folder_detail_en", "#{folderDetailEn,jdbcType=LONGVARCHAR}");
+            sql.VALUES("folder_detail_en", "#{folderDetailEn,jdbcType=TEXT}");
         }
         return sql.toString();
     }
@@ -71,16 +71,16 @@ public class TbContractFolderSqlProvider {
             sql.SET("warehouse_id = #{warehouseId,jdbcType=INTEGER}");
         }
         if (record.getDescription() != null) {
-            sql.SET("description = #{description,jdbcType=LONGVARCHAR}");
+            sql.SET("description = #{description,jdbcType=TEXT}");
         }
         if (record.getDescriptionEn() != null) {
-            sql.SET("description_en = #{descriptionEn,jdbcType=LONGVARCHAR}");
+            sql.SET("description_en = #{descriptionEn,jdbcType=TEXT}");
         }
         if (record.getFolderDetail() != null) {
-            sql.SET("folder_detail = #{folderDetail,jdbcType=LONGVARCHAR}");
+            sql.SET("folder_detail = #{folderDetail,jdbcType=TEXT}");
         }
         if (record.getFolderDetailEn() != null) {
-            sql.SET("folder_detail_en = #{folderDetailEn,jdbcType=LONGVARCHAR}");
+            sql.SET("folder_detail_en = #{folderDetailEn,jdbcType=TEXT}");
         }
         sql.WHERE("id = #{id,jdbcType=INTEGER}");
         return sql.toString();
