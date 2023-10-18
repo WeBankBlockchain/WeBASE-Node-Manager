@@ -17,14 +17,20 @@ package com.webank.webase.node.mgr.statistic;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.deploy.entity.TbConfig;
+import com.webank.webase.node.mgr.deploy.service.ConfigService;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.statistic.entity.ChainStat;
 import com.webank.webase.node.mgr.statistic.mapper.TbStatMapper;
 import com.webank.webase.node.mgr.statistic.result.PerformanceData;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+import com.webank.webase.node.mgr.tools.pagetools.List2Page;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,4 +70,9 @@ public class StatController {
         return response;
     }
 
+    @GetMapping("/chain")
+    public BaseResponse getChainStat() {
+        ChainStat chainStat = statService.getChainStat();
+        return new BaseResponse(ConstantCode.SUCCESS, chainStat);
+    }
 }

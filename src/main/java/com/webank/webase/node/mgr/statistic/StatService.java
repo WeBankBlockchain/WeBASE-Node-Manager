@@ -17,8 +17,14 @@ package com.webank.webase.node.mgr.statistic;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.deploy.entity.TbConfig;
+import com.webank.webase.node.mgr.deploy.service.ConfigService;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.front.frontinterface.entity.RspStatBlock;
+import com.webank.webase.node.mgr.group.GroupService;
+import com.webank.webase.node.mgr.group.entity.GroupGeneral;
+import com.webank.webase.node.mgr.group.entity.TbGroup;
+import com.webank.webase.node.mgr.statistic.entity.ChainStat;
 import com.webank.webase.node.mgr.statistic.entity.TbStat;
 import com.webank.webase.node.mgr.statistic.mapper.TbStatMapper;
 import com.webank.webase.node.mgr.statistic.result.Data;
@@ -33,8 +39,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+
+import com.webank.webase.node.mgr.tools.pagetools.List2Page;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +58,16 @@ public class StatService {
     private FrontInterfaceService frontInterfaceService;
     @Autowired
     private ConstantProperties constants;
+
+    @Autowired
+    private CryptoSuite cryptoSuite;
+
+    @Autowired
+    private ConfigService configService;
+
+    @Lazy
+    @Autowired
+    private GroupService groupService;
 
     // 每出一个块，获得上一个区块的时间戳相差时间，获得出块周期； 获取多条数据，计算平均值
     // 获得一个块的交易数，除以出块周期则是TPS
@@ -336,5 +356,47 @@ public class StatService {
     public boolean checkStatExist(String groupId, int blockNum) {
         TbStat maxStat = tbStatMapper.findByGroupAndBlockNum(groupId, blockNum);
         return maxStat != null;
+    }
+
+    public ChainStat getChainStat() {
+        ChainStat chainStat = new ChainStat();
+
+        // 加密类型
+        int encrypt = cryptoSuite.cryptoTypeConfig;
+
+        // 链版本信息
+        List<TbConfig> chainConfigs = configService.selectConfigList(false, 1);
+
+        chainStat.setEncryptType(encrypt);
+        if (chainConfigs.size() > 0) {
+            chainStat.setVersion(chainConfigs.get(0).getConfigValue());
+        } else {
+            chainStat.setVersion("3.4.0");
+        }
+
+        // 群组和节点信息
+        // get group list include invalid status
+        long count = groupService.countOfGroup(null, null);
+        long nodeCount = 0;
+        long contractCount = 0;
+        long transCount = 0;
+        if (count > 0) {
+            List<TbGroup> groupList = groupService.getGroupList(null);
+            if (groupList != null && groupList.size() > 0) {
+                for (TbGroup group : groupList) {
+                    nodeCount += group.getNodeCount();
+                    transCount += group.getTransCount().longValue();
+                    GroupGeneral groupGeneral = groupService.getGeneralAndUpdateNodeCount(group.getGroupId());
+                    contractCount += groupGeneral.getContractCount();
+                }
+            }
+        }
+
+        chainStat.setGroupCount(count);
+        chainStat.setNodeCount(nodeCount);
+        chainStat.setContractCount(contractCount);
+        chainStat.setTransCount(transCount);
+
+        return chainStat;
     }
 }

@@ -256,7 +256,7 @@ public class GroupService {
      * @param groupId
      * @return
      */
-    private GroupGeneral getGeneralAndUpdateNodeCount(String groupId) {
+    public GroupGeneral getGeneralAndUpdateNodeCount(String groupId) {
         List<String> groupPeers = frontInterface.getGroupPeers(groupId);
         groupMapper.updateNodeCount(groupId, groupPeers.size());
         log.debug("getGeneralAndUpdateNodeCount gId:{} count:{}", groupId, groupPeers.size());
