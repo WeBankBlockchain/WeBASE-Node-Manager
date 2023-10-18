@@ -26,7 +26,7 @@ public class TbStatSqlProvider {
             sql.VALUES("group_id", "#{groupId,jdbcType=INTEGER}");
         }
         if (record.getBlockCycle() != null) {
-            sql.VALUES("block_cycle", "#{blockCycle,jdbcType=DOUBLE PRECISION}");
+            sql.VALUES("block_cycle", "#{blockCycle,jdbcType=DOUBLE}");
         }
         if (record.getTps() != null) {
             sql.VALUES("tps", "#{tps,jdbcType=INTEGER}");
@@ -62,7 +62,7 @@ public class TbStatSqlProvider {
             sql.SET("group_id = #{groupId,jdbcType=INTEGER}");
         }
         if (record.getBlockCycle() != null) {
-            sql.SET("block_cycle = #{blockCycle,jdbcType=DOUBLE PRECISION}");
+            sql.SET("block_cycle = #{blockCycle,jdbcType=DOUBLE}");
         }
         if (record.getTps() != null) {
             sql.SET("tps = #{tps,jdbcType=INTEGER}");

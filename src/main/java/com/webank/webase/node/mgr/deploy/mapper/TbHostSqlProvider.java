@@ -32,10 +32,10 @@ public class TbHostSqlProvider {
         }
 
         if (record.getStatus() != null) {
-            sql.VALUES("status", "#{status,jdbcType=SMALLINT}");
+            sql.VALUES("status", "#{status,jdbcType=TINYINT}");
         }
         if (record.getRemark() != null) {
-            sql.VALUES("remark", "#{remark,jdbcType=SMALLINT}");
+            sql.VALUES("remark", "#{remark,jdbcType=TINYINT}");
         }
 
         if (record.getCreateTime() != null) {
@@ -68,10 +68,10 @@ public class TbHostSqlProvider {
         }
 
         if (record.getStatus() != null) {
-            sql.SET("status = #{status,jdbcType=SMALLINT}");
+            sql.SET("status = #{status,jdbcType=TINYINT}");
         }
         if (record.getRemark() != null) {
-            sql.SET("remark = #{remark,jdbcType=SMALLINT}");
+            sql.SET("remark = #{remark,jdbcType=TINYINT}");
         }
 
         if (record.getCreateTime() != null) {

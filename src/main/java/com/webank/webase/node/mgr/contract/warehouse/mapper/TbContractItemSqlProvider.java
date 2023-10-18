@@ -38,13 +38,13 @@ public class TbContractItemSqlProvider {
             sql.VALUES("contract_folder_id", "#{contractFolderId,jdbcType=INTEGER}");
         }
         if (record.getContractSource() != null) {
-            sql.VALUES("contract_source", "#{contractSource,jdbcType=TEXT}");
+            sql.VALUES("contract_source", "#{contractSource,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescription() != null) {
-            sql.VALUES("description", "#{description,jdbcType=TEXT}");
+            sql.VALUES("description", "#{description,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescriptionEn() != null) {
-            sql.VALUES("description_en", "#{descriptionEn,jdbcType=TEXT}");
+            sql.VALUES("description_en", "#{descriptionEn,jdbcType=LONGVARCHAR}");
         }
         return sql.toString();
     }
@@ -74,13 +74,13 @@ public class TbContractItemSqlProvider {
             sql.SET("contract_folder_id = #{contractFolderId,jdbcType=INTEGER}");
         }
         if (record.getContractSource() != null) {
-            sql.SET("contract_source = #{contractSource,jdbcType=TEXT}");
+            sql.SET("contract_source = #{contractSource,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescription() != null) {
-            sql.SET("description = #{description,jdbcType=TEXT}");
+            sql.SET("description = #{description,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescriptionEn() != null) {
-            sql.SET("description_en = #{descriptionEn,jdbcType=TEXT}");
+            sql.SET("description_en = #{descriptionEn,jdbcType=LONGVARCHAR}");
         }
         sql.WHERE("id = #{id,jdbcType=INTEGER}");
         return sql.toString();

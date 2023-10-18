@@ -41,19 +41,19 @@ public class TbWarehouseSqlProvider {
             sql.VALUES("modify_time", "#{modifyTime,jdbcType=TIMESTAMP}");
         }
         if (record.getWarehouseIcon() != null) {
-            sql.VALUES("warehouse_icon", "#{warehouseIcon,jdbcType=TEXT}");
+            sql.VALUES("warehouse_icon", "#{warehouseIcon,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescription() != null) {
-            sql.VALUES("description", "#{description,jdbcType=TEXT}");
+            sql.VALUES("description", "#{description,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescriptionEn() != null) {
-            sql.VALUES("description_en", "#{descriptionEn,jdbcType=TEXT}");
+            sql.VALUES("description_en", "#{descriptionEn,jdbcType=LONGVARCHAR}");
         }
         if (record.getWarehouseDetail() != null) {
-            sql.VALUES("warehouse_detail", "#{warehouseDetail,jdbcType=TEXT}");
+            sql.VALUES("warehouse_detail", "#{warehouseDetail,jdbcType=LONGVARCHAR}");
         }
         if (record.getWarehouseDetailEn() != null) {
-            sql.VALUES("warehouse_detail_en", "#{warehouseDetailEn,jdbcType=TEXT}");
+            sql.VALUES("warehouse_detail_en", "#{warehouseDetailEn,jdbcType=LONGVARCHAR}");
         }
         return sql.toString();
     }
@@ -83,19 +83,19 @@ public class TbWarehouseSqlProvider {
             sql.SET("modify_time = #{modifyTime,jdbcType=TIMESTAMP}");
         }
         if (record.getWarehouseIcon() != null) {
-            sql.SET("warehouse_icon = #{warehouseIcon,jdbcType=TEXT}");
+            sql.SET("warehouse_icon = #{warehouseIcon,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescription() != null) {
-            sql.SET("description = #{description,jdbcType=TEXT}");
+            sql.SET("description = #{description,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescriptionEn() != null) {
-            sql.SET("description_en = #{descriptionEn,jdbcType=TEXT}");
+            sql.SET("description_en = #{descriptionEn,jdbcType=LONGVARCHAR}");
         }
         if (record.getWarehouseDetail() != null) {
-            sql.SET("warehouse_detail = #{warehouseDetail,jdbcType=TEXT}");
+            sql.SET("warehouse_detail = #{warehouseDetail,jdbcType=LONGVARCHAR}");
         }
         if (record.getWarehouseDetailEn() != null) {
-            sql.SET("warehouse_detail_en = #{warehouseDetailEn,jdbcType=TEXT}");
+            sql.SET("warehouse_detail_en = #{warehouseDetailEn,jdbcType=LONGVARCHAR}");
         }
         sql.WHERE("id = #{id,jdbcType=INTEGER}");
         return sql.toString();

@@ -142,7 +142,7 @@ public class TbExternalContractSqlProvider {
             sql.VALUES("contract_status", "#{contractStatus,jdbcType=INTEGER}");
         }
         if (record.getContractType() != null) {
-            sql.VALUES("contract_type", "#{contractType,jdbcType=SMALLINT}");
+            sql.VALUES("contract_type", "#{contractType,jdbcType=TINYINT}");
         }
         if (record.getContractName() != null) {
             sql.VALUES("contract_name", "#{contractName,jdbcType=VARCHAR}");
@@ -157,16 +157,16 @@ public class TbExternalContractSqlProvider {
             sql.VALUES("modify_time", "#{modifyTime,jdbcType=TIMESTAMP}");
         }
         if (record.getContractBin() != null) {
-            sql.VALUES("contract_bin", "#{contractBin,jdbcType=TEXT}");
+            sql.VALUES("contract_bin", "#{contractBin,jdbcType=LONGVARCHAR}");
         }
         if (record.getContractAbi() != null) {
-            sql.VALUES("contract_abi", "#{contractAbi,jdbcType=TEXT}");
+            sql.VALUES("contract_abi", "#{contractAbi,jdbcType=LONGVARCHAR}");
         }
         if (record.getBytecodeBin() != null) {
-            sql.VALUES("bytecode_bin", "#{bytecodeBin,jdbcType=TEXT}");
+            sql.VALUES("bytecode_bin", "#{bytecodeBin,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescription() != null) {
-            sql.VALUES("description", "#{description,jdbcType=TEXT}");
+            sql.VALUES("description", "#{description,jdbcType=LONGVARCHAR}");
         }
         return sql.toString();
     }
@@ -199,7 +199,7 @@ public class TbExternalContractSqlProvider {
             sql.SET("contract_status = #{contractStatus,jdbcType=INTEGER}");
         }
         if (record.getContractType() != null) {
-            sql.SET("contract_type = #{contractType,jdbcType=SMALLINT}");
+            sql.SET("contract_type = #{contractType,jdbcType=TINYINT}");
         }
         if (record.getContractName() != null) {
             sql.SET("contract_name = #{contractName,jdbcType=VARCHAR}");
@@ -214,16 +214,16 @@ public class TbExternalContractSqlProvider {
             sql.SET("modify_time = #{modifyTime,jdbcType=TIMESTAMP}");
         }
         if (record.getContractBin() != null) {
-            sql.SET("contract_bin = #{contractBin,jdbcType=TEXT}");
+            sql.SET("contract_bin = #{contractBin,jdbcType=LONGVARCHAR}");
         }
         if (record.getContractAbi() != null) {
-            sql.SET("contract_abi = #{contractAbi,jdbcType=TEXT}");
+            sql.SET("contract_abi = #{contractAbi,jdbcType=LONGVARCHAR}");
         }
         if (record.getBytecodeBin() != null) {
-            sql.SET("bytecode_bin = #{bytecodeBin,jdbcType=TEXT}");
+            sql.SET("bytecode_bin = #{bytecodeBin,jdbcType=LONGVARCHAR}");
         }
         if (record.getDescription() != null) {
-            sql.SET("description = #{description,jdbcType=TEXT}");
+            sql.SET("description = #{description,jdbcType=LONGVARCHAR}");
         }
         sql.WHERE("id = #{id,jdbcType=INTEGER}");
         return sql.toString();

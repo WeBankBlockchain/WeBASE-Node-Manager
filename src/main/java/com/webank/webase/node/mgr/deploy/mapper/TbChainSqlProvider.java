@@ -36,14 +36,14 @@ public class TbChainSqlProvider {
         }
         
         if (record.getEncryptType() != null) {
-            sql.VALUES("encrypt_type", "#{encryptType,jdbcType=SMALLINT}");
+            sql.VALUES("encrypt_type", "#{encryptType,jdbcType=TINYINT}");
         }
         
         if (record.getChainStatus() != null) {
-            sql.VALUES("chain_status", "#{chainStatus,jdbcType=SMALLINT}");
+            sql.VALUES("chain_status", "#{chainStatus,jdbcType=TINYINT}");
         }
         if (record.getRunType() != null) {
-            sql.VALUES("run_type", "#{runType,jdbcType=SMALLINT}");
+            sql.VALUES("run_type", "#{runType,jdbcType=TINYINT}");
         }
         if (record.getWebaseSignAddr() != null) {
             sql.VALUES("webase_sign_addr", "#{webaseSignAddr,jdbcType=VARCHAR}");
@@ -83,11 +83,11 @@ public class TbChainSqlProvider {
         }
         
         if (record.getEncryptType() != null) {
-            sql.SET("encrypt_type = #{encryptType,jdbcType=SMALLINT}");
+            sql.SET("encrypt_type = #{encryptType,jdbcType=TINYINT}");
         }
         
         if (record.getChainStatus() != null) {
-            sql.SET("chain_status = #{chainStatus,jdbcType=SMALLINT}");
+            sql.SET("chain_status = #{chainStatus,jdbcType=TINYINT}");
         }
         if (record.getRunType() != null) {
             sql.SET("run_type = #{runType,jdbcType=VARCHAR}");
