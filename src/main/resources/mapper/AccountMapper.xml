@@ -60,7 +60,7 @@
   <select id="countOfAccount" resultType="java.lang.Integer">
     select count(1) from tb_account_info where 1=1
     <if test="account != null and account != ''">
-      and BINARY account = #{account}
+      and account = #{account}
     </if>
   </select>
 
