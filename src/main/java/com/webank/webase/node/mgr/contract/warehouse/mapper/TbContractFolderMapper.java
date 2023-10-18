@@ -70,6 +70,6 @@ public interface TbContractFolderMapper {
      *
      * @mbg.generated
      */
-    @Insert({"insert into tb_contract_folder (id, folder_name, create_time, modify_time,warehouse_id, description,description_en, folder_detail,folder_detail_en) values(#{detail.id, jdbcType=INTEGER}, #{detail.folderName, jdbcType=VARCHAR}, #{detail.createTime, jdbcType=TIMESTAMP}, #{detail.modifyTime, jdbcType=TIMESTAMP}, #{detail.warehouseId, jdbcType=INTEGER}, #{detail.description, jdbcType=TEXT}, #{detail.descriptionEn, jdbcType=TEXT}, #{detail.folderDetail, jdbcType=TEXT}, #{detail.folderDetailEn, jdbcType=TEXT})"})
+    @Insert({"insert into tb_contract_folder (id, folder_name, create_time, modify_time,warehouse_id, description,description_en, folder_detail,folder_detail_en) values(#{detail.id, jdbcType=INTEGER}, #{detail.folderName, jdbcType=VARCHAR}, #{detail.createTime, jdbcType=TIMESTAMP}, #{detail.modifyTime, jdbcType=TIMESTAMP}, #{detail.warehouseId, jdbcType=INTEGER}, #{detail.description, jdbcType=LONGVARCHAR}, #{detail.descriptionEn, jdbcType=LONGVARCHAR}, #{detail.folderDetail, jdbcType=LONGVARCHAR}, #{detail.folderDetailEn, jdbcType=LONGVARCHAR})"})
     int batchInsert(@Param("detail") TbContractFolder detail);
 }

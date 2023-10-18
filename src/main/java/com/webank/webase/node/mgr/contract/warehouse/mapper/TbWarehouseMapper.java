@@ -65,6 +65,6 @@ public interface TbWarehouseMapper {
      * @mbg.generated
      */
     @Options(useGeneratedKeys = false, keyProperty = "id", keyColumn = "id")
-    @Insert({"insert into tb_warehouse (id,warehouse_name, warehouse_name_en,type, create_time,modify_time, warehouse_icon,description, description_en,warehouse_detail, warehouse_detail_en) values(#{detail.id,jdbcType=INTEGER}, #{detail.warehouseName,jdbcType=VARCHAR}, #{detail.warehouseNameEn,jdbcType=VARCHAR}, #{detail.type,jdbcType=INTEGER}, #{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP}, #{detail.warehouseIcon,jdbcType=TEXT}, #{detail.description,jdbcType=TEXT}, #{detail.descriptionEn,jdbcType=TEXT}, #{detail.warehouseDetail,jdbcType=TEXT}, #{detail.warehouseDetailEn,jdbcType=TEXT})" })
+    @Insert({"insert into tb_warehouse (id,warehouse_name, warehouse_name_en,type, create_time,modify_time, warehouse_icon,description, description_en,warehouse_detail, warehouse_detail_en) values(#{detail.id,jdbcType=INTEGER}, #{detail.warehouseName,jdbcType=VARCHAR}, #{detail.warehouseNameEn,jdbcType=VARCHAR}, #{detail.type,jdbcType=INTEGER}, #{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP}, #{detail.warehouseIcon,jdbcType=LONGVARCHAR}, #{detail.description,jdbcType=LONGVARCHAR}, #{detail.descriptionEn,jdbcType=LONGVARCHAR}, #{detail.warehouseDetail,jdbcType=LONGVARCHAR}, #{detail.warehouseDetailEn,jdbcType=LONGVARCHAR})" })
     int batchInsert(@Param("detail") TbWarehouse detail);
 }
