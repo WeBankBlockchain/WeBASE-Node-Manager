@@ -47,7 +47,7 @@
     </if>
     order by id desc
     <if test="start != null and pageSize != null">
-      limit #{start},#{pageSize}
+      limit #{pageSize} OFFSET #{start}
     </if>
   </select>
 

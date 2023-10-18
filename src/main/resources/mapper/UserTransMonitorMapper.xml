@@ -159,7 +159,7 @@
     </if>
     group by user_name
     <if test="start != null and pageSize != null">
-      limit #{start},#{pageSize}
+      limit #{pageSize} OFFSET #{start}
     </if>
   </select>
 
@@ -182,7 +182,7 @@
     </if>
     group by contract_address
     <if test="start != null and pageSize != null">
-      limit #{start},#{pageSize}
+      limit #{pageSize} OFFSET #{start}
     </if>
   </select>
 
