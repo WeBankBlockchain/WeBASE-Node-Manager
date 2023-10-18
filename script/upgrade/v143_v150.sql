@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS tb_app_info
 -- ----------------------------
 -- Table structure for tb_contract_store
 -- ----------------------------
-CREATE SEQUENCE tb_contract_store_id START 300001;
+CREATE SEQUENCE IF NOT EXISTS tb_contract_store_id START 300001;
 CREATE TABLE IF NOT EXISTS tb_contract_store
 (
     id bigint NOT NULL DEFAULT nextval('tb_contract_store_id'),
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS tb_external_account
 -- ----------------------------
 -- Table structure for tb_external_contract 链上外部合约
 -- ----------------------------
-CREATE SEQUENCE tb_external_contract_id START 800001;
+CREATE SEQUENCE IF NOT EXISTS tb_external_contract_id START 800001;
 CREATE TABLE IF NOT EXISTS tb_external_contract
 (
     id               bigint       NOT NULL DEFAULT nextval('tb_external_contract_id'),
