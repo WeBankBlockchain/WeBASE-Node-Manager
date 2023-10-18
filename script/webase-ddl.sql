@@ -35,9 +35,10 @@ CREATE TABLE IF NOT EXISTS tb_group
 -- ----------------------------
 -- Table structure for tb_front
 -- ----------------------------
+CREATE SEQUENCE tb_front_front_id START 1;
 CREATE TABLE IF NOT EXISTS tb_front
 (
-    front_id        bigserial    NOT NULL,
+    front_id        bigint    NOT NULL DEFAULT nextval('tb_front_front_id'),
     node_id         varchar(250) NOT NULL,
     front_ip        varchar(16)  NOT NULL,
     front_port      int          NOT NULL,
@@ -73,9 +74,10 @@ CREATE TABLE IF NOT EXISTS tb_front
 -- ----------------------------
 -- Table structure for tb_front_group_map
 -- ----------------------------
+CREATE SEQUENCE tb_front_group_map_map_id START 600001;
 CREATE TABLE IF NOT EXISTS tb_front_group_map
 (
-    map_id      bigserial           NOT NULL,
+    map_id      bigint           NOT NULL DEFAULT nextval('tb_front_group_map_map_id'),
     front_id    int                 NOT NULL,
     group_id    int                 NOT NULL,
     create_time timestamp DEFAULT NULL,
@@ -114,9 +116,10 @@ CREATE TABLE IF NOT EXISTS tb_node
 -- ----------------------------
 -- Table structure for tb_contract
 -- ----------------------------
+CREATE SEQUENCE tb_contract_contract_id START 200001;
 CREATE TABLE IF NOT EXISTS tb_contract
 (
-    contract_id      bigserial    NOT NULL,
+    contract_id      bigint    NOT NULL DEFAULT nextval('tb_contract_contract_id'),
     contract_path    varchar(128) NOT NULL,
     contract_name    varchar(128) NOT NULL,
     contract_version varchar(120) DEFAULT NULL,
@@ -177,9 +180,10 @@ CREATE TABLE IF NOT EXISTS tb_trans_daily
 -- ----------------------------
 -- Table structure for tb_user
 -- ----------------------------
+CREATE SEQUENCE tb_user_user_id START 700001;
 CREATE TABLE IF NOT EXISTS tb_user
 (
-    user_id      bigserial    NOT NULL,
+    user_id      bigint    NOT NULL DEFAULT nextval('tb_user_user_id'),
     user_name    varchar(64)  NOT NULL,
     account      varchar(64)           DEFAULT 'admin',
     group_id     int                   DEFAULT NULL,
@@ -225,9 +229,10 @@ CREATE TABLE IF NOT EXISTS tb_account_info
 -- ----------------------------
 -- Table structure for tb_role
 -- ----------------------------
+CREATE SEQUENCE tb_role_role_id START 100000;
 CREATE TABLE IF NOT EXISTS tb_role
 (
-    role_id      bigserial NOT NULL,
+    role_id      bigint NOT NULL  DEFAULT nextval('tb_role_role_id'),
     role_name    varchar(120) DEFAULT NULL,
     role_name_zh varchar(120) DEFAULT NULL,
     role_status  smallint     DEFAULT '1',
@@ -512,9 +517,10 @@ CREATE TABLE IF NOT EXISTS tb_stat
 -- ----------------------------
 -- Table structure for tb_external_account 链上外部账户
 -- ----------------------------
+CREATE SEQUENCE tb_external_account_id START 800001;
 CREATE TABLE IF NOT EXISTS tb_external_account
 (
-    id           bigserial NOT NULL,
+    id           bigint NOT NULL DEFAULT nextval('tb_external_account_id'),
     group_id     int          DEFAULT NULL,
     address      varchar(64)  DEFAULT NULL,
     public_key   varchar(250) DEFAULT NULL,
@@ -595,9 +601,10 @@ CREATE TABLE IF NOT EXISTS tb_app_info
 -- Table structure for tb_contract_store
 -- contract from application manage
 -- ----------------------------
+CREATE SEQUENCE tb_contract_store_id START 300001;
 CREATE TABLE IF NOT EXISTS tb_contract_store
 (
-    id               bigserial    NOT NULL,
+    id               bigint    NOT NULL DEFAULT nextval('tb_contract_store_id'),
     app_key          varchar(16)  NOT NULL,
     contract_name    varchar(120) NOT NULL,
     contract_version varchar(120) NOT NULL,
