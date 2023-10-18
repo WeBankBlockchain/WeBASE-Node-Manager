@@ -31,7 +31,7 @@
   </resultMap>
 
 
-  <insert id="add">
+  <insert id="add" useGeneratedKeys="true" keyProperty="frontId">
       insert into tb_front
       (node_id, front_ip, front_port, agency, client_version, support_version,
        front_version, sign_version, status, create_time, modify_time,

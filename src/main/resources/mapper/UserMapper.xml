@@ -27,7 +27,7 @@
       property="modifyTime"/>
   </resultMap>
 
-  <insert id="addUserRow" parameterType="com.webank.webase.node.mgr.user.entity.TbUser">
+  <insert id="addUserRow" useGeneratedKeys="true" keyProperty="userId" parameterType="com.webank.webase.node.mgr.user.entity.TbUser">
     insert into
     tb_user(user_name,account,group_id,has_pk,user_type,public_key,address,sign_user_id,app_id,description,
     create_time,modify_time)
@@ -89,7 +89,7 @@
     </if>
     order by user_id desc
     <if test="start != null and pageSize != null">
-      limit #{start},#{pageSize}
+      limit #{pageSize} OFFSET #{start}
     </if>
   </select>
 

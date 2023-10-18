@@ -55,7 +55,7 @@ public interface TbStatMapper {
      * @mbg.generated
      */
     @InsertProvider(type = TbStatSqlProvider.class, method = "insertSelective")
-    @SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = Integer.class)
+    @SelectKey(statement = "SELECT currval(id)", keyProperty = "id", before = false, resultType = Integer.class)
     int insertSelective(TbStat record);
 
     /**
@@ -85,6 +85,6 @@ public interface TbStatMapper {
      */
     //TODO 无调用 psql不支持<script> 直接注释
     //@Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
-    //@Insert({ "<script>", "insert into tb_stat (group_id, ", "block_cycle, tps, ", "block_number, block_size, ", "stat_timestamp, create_time, ", "modify_time)", "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.groupId,jdbcType=INTEGER}, ", "#{detail.blockCycle,jdbcType=DOUBLE}, #{detail.tps,jdbcType=INTEGER}, ", "#{detail.blockNumber,jdbcType=INTEGER}, #{detail.blockSize,jdbcType=INTEGER}, ", "#{detail.statTimestamp,jdbcType=VARCHAR}, #{detail.createTime,jdbcType=TIMESTAMP}, ", "#{detail.modifyTime,jdbcType=TIMESTAMP})</foreach></script>" })
+    //@Insert({ "<script>", "insert into tb_stat (group_id, ", "block_cycle, tps, ", "block_number, block_size, ", "stat_timestamp, create_time, ", "modify_time)", "values<foreach collection=\"list\" item=\"detail\" index=\"index\" separator=\",\">(#{detail.groupId,jdbcType=INTEGER}, ", "#{detail.blockCycle,jdbcType=DOUBLE PRECISION}, #{detail.tps,jdbcType=INTEGER}, ", "#{detail.blockNumber,jdbcType=INTEGER}, #{detail.blockSize,jdbcType=INTEGER}, ", "#{detail.statTimestamp,jdbcType=VARCHAR}, #{detail.createTime,jdbcType=TIMESTAMP}, ", "#{detail.modifyTime,jdbcType=TIMESTAMP})</foreach></script>" })
     //int batchInsert(java.util.List<TbStat> list);
 }

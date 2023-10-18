@@ -30,9 +30,10 @@ CREATE TABLE IF NOT EXISTS tb_app_info
 -- ----------------------------
 -- Table structure for tb_contract_store
 -- ----------------------------
+CREATE SEQUENCE IF NOT EXISTS tb_contract_store_id START 300001;
 CREATE TABLE IF NOT EXISTS tb_contract_store
 (
-    id               bigserial    NOT NULL,
+    id bigint NOT NULL DEFAULT nextval('tb_contract_store_id'),
     app_key          varchar(16)  NOT NULL,
     contract_name    varchar(120) NOT NULL,
     contract_version varchar(120) NOT NULL,
@@ -98,23 +99,24 @@ CREATE TABLE IF NOT EXISTS tb_external_account
 -- ----------------------------
 -- Table structure for tb_external_contract 链上外部合约
 -- ----------------------------
+CREATE SEQUENCE IF NOT EXISTS tb_external_contract_id START 800001;
 CREATE TABLE IF NOT EXISTS tb_external_contract
 (
-    id               bigserial    NOT NULL,
+    id               bigint       NOT NULL DEFAULT nextval('tb_external_contract_id'),
     group_id         int          NOT NULL,
     contract_address varchar(64)  NOT NULL,
     deploy_address   varchar(64)  NOT NULL,
     deploy_tx_hash   varchar(120) NOT NULL,
     deploy_time      timestamp    NOT NULL,
-    contract_bin     text         DEFAULT NULL,
-    contract_status  smallint     DEFAULT '1',
-    contract_type    smallint     DEFAULT '0',
-    contract_name    varchar(120) DEFAULT NULL,
-    contract_version varchar(120) DEFAULT NULL,
+    contract_bin     text                  DEFAULT NULL,
+    contract_status  smallint              DEFAULT '1',
+    contract_type    smallint              DEFAULT '0',
+    contract_name    varchar(120)          DEFAULT NULL,
+    contract_version varchar(120)          DEFAULT NULL,
     contract_abi     text,
     bytecode_bin     text,
-    create_time      timestamp    DEFAULT NULL,
-    modify_time      timestamp    DEFAULT NULL,
+    create_time      timestamp             DEFAULT NULL,
+    modify_time      timestamp             DEFAULT NULL,
     description      text,
     PRIMARY KEY (id),
     UNIQUE (group_id, contract_address)

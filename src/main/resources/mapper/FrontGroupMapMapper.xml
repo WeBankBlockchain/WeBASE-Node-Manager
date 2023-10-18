@@ -16,14 +16,14 @@
     </resultMap>
 
 
-    <insert id="add" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
+    <insert id="add" useGeneratedKeys="true" keyProperty="mapId" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
         insert into tb_front_group_map
             (front_id, group_id, status, type, create_time, modify_time)
         values (#{frontId}, #{groupId}, #{status}, #{type}, NOW(), NOW())
         RETURNING map_id;
     </insert>
 
-    <insert id="insertSelective" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
+    <insert id="insertSelective" useGeneratedKeys="true" keyProperty="mapId" parameterType="com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap">
         insert into tb_front_group_map
         <trim prefix="(" suffix=")" suffixOverrides="," >
             <if test="groupId != null" >

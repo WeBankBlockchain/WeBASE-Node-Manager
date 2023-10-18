@@ -69,7 +69,7 @@
             order by a.create_time, ${param.flagSortedByTime}
         </if>
         <if test="param.start != null and param.pageSize != null">
-            limit #{param.start},#{param.pageSize}
+            limit #{param.pageSize} OFFSET #{param.start}
         </if>
     </select>
 

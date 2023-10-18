@@ -24,7 +24,7 @@
       property="modifyTime"/>
   </resultMap>
 
-  <insert id="add" parameterType="com.webank.webase.node.mgr.precompiled.permission.governvote.entity.TbGovernVote">
+  <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.webank.webase.node.mgr.precompiled.permission.governvote.entity.TbGovernVote">
       insert into tb_govern_vote(group_id, time_limit, from_address, type, to_address, detail, create_time, modify_time)
       values (#{groupId}, #{timeLimit}, #{fromAddress}, #{type}, #{toAddress}, #{detail}, NOW(), NOW())
       RETURNING id
@@ -47,7 +47,7 @@
     </if>
     order by id desc
     <if test="start != null and pageSize != null">
-      limit #{start},#{pageSize}
+      limit #{pageSize} OFFSET #{start}
     </if>
   </select>
 

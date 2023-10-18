@@ -76,7 +76,7 @@
             order by a.create_time, ${flagSortedByTime}
         </if>
         <if test="start != null and pageSize != null">
-            limit #{start},#{pageSize}
+            limit #{pageSize} OFFSET #{start}
         </if>
     </select>
 
@@ -148,7 +148,7 @@
             order by a.modify_time, ${flagSortedByTime}
         </if>
         <if test="start != null and pageSize != null">
-            limit #{start},#{pageSize}
+            limit #{pageSize} OFFSET #{start}
         </if>
     </select>
 

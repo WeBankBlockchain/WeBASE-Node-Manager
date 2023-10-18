@@ -34,18 +34,18 @@ public interface NodeMapper {
     /**
      * Add new node data.
      */
-    Integer add(@Param("tbNode") TbNode tbNode);
+    Integer add(TbNode tbNode);
 
     /**
      * Query the number of node according to some conditions.
      */
-    Integer getCount(@Param("nodeParam") NodeParam nodeParam);
+    Integer getCount(NodeParam nodeParam);
 
 
     /**
      * Query node list according to some conditions.
      */
-    List<TbNode> getList(@Param("nodeParam") NodeParam nodeParam);
+    List<TbNode> getList(NodeParam nodeParam);
 
     /**
      * query tb_node by nodeip and p2pport.
@@ -68,17 +68,17 @@ public interface NodeMapper {
     /**
      * update node info.
      */
-    Integer update(@Param("dbNode") TbNode dbNode);
+    Integer update(TbNode dbNode);
 
     /**
      * update node info of node ip, node agency, node city
      */
-    Integer updateNodeInfo(@Param("reqUpdate") ReqUpdate reqUpdate);
+    Integer updateNodeInfo(ReqUpdate reqUpdate);
 
     /**
      * query node info.
      */
-    TbNode queryNodeInfo(@Param("nodeParam") NodeParam nodeParam);
+    TbNode queryNodeInfo(NodeParam nodeParam);
 
 
     /**

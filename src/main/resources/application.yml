@@ -20,12 +20,9 @@ mybatis:
 spring:
   datasource:
     driver-class-name: com.highgo.jdbc.Driver
-    url: jdbc:highgo://124.251.110.211:5866/highgo #替换对应IP和地址
+    url: jdbc:highgo://119.45.242.41:5866/webasenodemanager #替换对应IP和地址
     username: "sysdba"
-    password: "Hello@1234"
-    initialSize: 10
-    minIdle: 5
-    maxActive: 30
+    password: "1qaz2wsx!@#$RFV"
   aop:
     proxy-target-class: true
   mvc:
@@ -131,7 +128,7 @@ sdk:
   # 加密类型：0: 非国密;  1: 国密
   ## 可视化部署时，此配置将决定部署国密或非国密链
   ## 国密与非国密链的私钥、合约数据不兼容
-  encryptType: 0
+  encryptType: 1
 
 # executor config for async pulling data from chain
 executor:
