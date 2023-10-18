@@ -68,6 +68,6 @@ public interface TbContractItemMapper {
      * @mbg.generated
      */
     @Options(useGeneratedKeys = false, keyProperty = "id", keyColumn = "id")
-    @Insert({"insert into tb_contract_item (id, contract_name,  create_time, modify_time,warehouse_id, contract_folder_id,contract_source, description,description_en) values(#{detail.id,jdbcType=INTEGER}, #{detail.contractName,jdbcType=VARCHAR}, #{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP}, #{detail.warehouseId,jdbcType=INTEGER}, #{detail.contractFolderId,jdbcType=INTEGER}, #{detail.contractSource,jdbcType=LONGVARCHAT}, #{detail.description,jdbcType=LONGVARCHAT}, #{detail.descriptionEn,jdbcType=LONGVARCHAT})" })
+    @Insert({"insert into tb_contract_item (id, contract_name,  create_time, modify_time,warehouse_id, contract_folder_id,contract_source, description,description_en) values(#{detail.id,jdbcType=INTEGER}, #{detail.contractName,jdbcType=VARCHAR}, #{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP}, #{detail.warehouseId,jdbcType=INTEGER}, #{detail.contractFolderId,jdbcType=INTEGER}, #{detail.contractSource,jdbcType=TEXT}, #{detail.description,jdbcType=TEXT}, #{detail.descriptionEn,jdbcType=TEXT})" })
     int batchInsert(@Param("detail") TbContractItem detail);
 }
