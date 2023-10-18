@@ -52,7 +52,7 @@
   </resultMap>
 
 
-  <insert id="add" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
+  <insert id="add"  useGeneratedKeys="true" keyProperty="contractId" parameterType="com.webank.webase.node.mgr.contract.entity.TbContract">
       insert into tb_contract(group_id, contract_path, contract_version, contract_name, account, contract_source,
                               contract_abi, contract_bin, bytecode_bin, contract_address, description, deploy_time,
                               create_time, modify_time, deploy_address, deploy_user_name)
