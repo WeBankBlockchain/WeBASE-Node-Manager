@@ -51,7 +51,7 @@ public interface TbConfigMapper {
      * @mbg.generated
      */
     @InsertProvider(type=TbConfigSqlProvider.class, method="insertSelective")
-    @SelectKey(statement="SELECT currval(id)", keyProperty="id", before=false, resultType=Integer.class)
+    @SelectKey(statement="SELECT currval('tb_config_id_seq')", keyProperty="id", before=false, resultType=Integer.class)
     int insertSelective(TbConfig record);
 
     /**

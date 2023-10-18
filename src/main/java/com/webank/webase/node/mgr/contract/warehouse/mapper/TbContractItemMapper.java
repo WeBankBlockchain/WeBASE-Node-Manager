@@ -39,7 +39,7 @@ public interface TbContractItemMapper {
      * @mbg.generated
      */
     @InsertProvider(type = TbContractItemSqlProvider.class, method = "insertSelective")
-    @SelectKey(statement = "SELECT currval(id)", keyProperty = "id", before = false, resultType = Integer.class)
+    @SelectKey(statement = "SELECT currval('tb_contract_item_id_seq')", keyProperty = "id", before = false, resultType = Integer.class)
     int insertSelective(TbContractItem record);
 
     /**

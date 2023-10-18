@@ -49,7 +49,7 @@ public interface TbChainMapper {
      * @mbg.generated
      */
     @InsertProvider(type=TbChainSqlProvider.class, method="insertSelective")
-    @SelectKey(statement="SELECT currval(id)", keyProperty="id", before=false, resultType=Integer.class)
+    @SelectKey(statement="SELECT currval('tb_chain_id_seq')", keyProperty="id", before=false, resultType=Integer.class)
     int insertSelective(TbChain record);
 
     /**
