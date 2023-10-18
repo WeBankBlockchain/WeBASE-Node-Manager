@@ -51,7 +51,7 @@ public interface TbAgencyMapper {
      * @mbg.generated
      */
     @InsertProvider(type=TbAgencySqlProvider.class, method="insertSelective")
-    @SelectKey(statement="SELECT currval(id)", keyProperty="id", before=false, resultType=Integer.class)
+    @SelectKey(statement="SELECT currval('tb_agency_id_seq')", keyProperty="id", before=false, resultType=Integer.class)
     int insertSelective(TbAgency record);
 
     /**

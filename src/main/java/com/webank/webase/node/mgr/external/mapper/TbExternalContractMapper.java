@@ -54,7 +54,7 @@ public interface TbExternalContractMapper {
      * @mbg.generated
      */
     @InsertProvider(type = TbExternalContractSqlProvider.class, method = "insertSelective")
-    @SelectKey(statement = "SELECT currval(id)", keyProperty = "id", before = false, resultType = Integer.class)
+    @SelectKey(statement = "SELECT currval('tb_external_contract_id')", keyProperty = "id", before = false, resultType = Integer.class)
     int insertSelective(TbExternalContract record);
 
     /**

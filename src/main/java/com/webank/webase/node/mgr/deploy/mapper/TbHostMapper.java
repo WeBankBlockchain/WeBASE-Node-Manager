@@ -53,7 +53,7 @@ public interface TbHostMapper {
      * @mbg.generated
      */
     @InsertProvider(type=TbHostSqlProvider.class, method="insertSelective")
-    @SelectKey(statement="SELECT currval(id)", keyProperty="id", before=false, resultType=Integer.class)
+    @SelectKey(statement="SELECT currval('tb_host_id_seq')", keyProperty="id", before=false, resultType=Integer.class)
     int insertSelective(TbHost record);
 
     /**

@@ -66,7 +66,7 @@
         select a.* from tb_alert_log a
         where 1=1
         <if test="param.flagSortedByTime != null and param.flagSortedByTime != ''">
-            order by a.create_time, ${param.flagSortedByTime}
+            order by a.create_time ${param.flagSortedByTime}
         </if>
         <if test="param.start != null and param.pageSize != null">
             limit #{param.pageSize} OFFSET #{param.start}

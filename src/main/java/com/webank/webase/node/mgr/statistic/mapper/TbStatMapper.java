@@ -55,7 +55,7 @@ public interface TbStatMapper {
      * @mbg.generated
      */
     @InsertProvider(type = TbStatSqlProvider.class, method = "insertSelective")
-    @SelectKey(statement = "SELECT currval(id)", keyProperty = "id", before = false, resultType = Integer.class)
+    @SelectKey(statement = "SELECT currval('tb_stat_id_seq')", keyProperty = "id", before = false, resultType = Integer.class)
     int insertSelective(TbStat record);
 
     /**

@@ -67,7 +67,7 @@
       and a.node_ip = #{nodeIp}
     </if>
     <if test="flagSortedByTime != null and flagSortedByTime != ''">
-      order by a.modify_time, ${flagSortedByTime}
+      order by a.modify_time ${flagSortedByTime}
     </if>
     <if test="start != null and pageSize != null">
       limit #{pageSize} OFFSET #{start}

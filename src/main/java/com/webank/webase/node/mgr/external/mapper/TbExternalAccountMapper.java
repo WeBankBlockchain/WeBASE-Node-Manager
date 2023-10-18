@@ -51,7 +51,7 @@ public interface TbExternalAccountMapper {
      * @mbg.generated
      */
     @InsertProvider(type = TbExternalAccountSqlProvider.class, method = "insertSelective")
-    @SelectKey(statement = "SELECT currval(id)", keyProperty = "id", before = false, resultType = Integer.class)
+    @SelectKey(statement = "SELECT currval('tb_external_account_id_seq')", keyProperty = "id", before = false, resultType = Integer.class)
     int insertSelective(TbExternalAccount record);
 
     /**
