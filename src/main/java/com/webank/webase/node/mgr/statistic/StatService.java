@@ -42,6 +42,7 @@ import java.util.concurrent.CountDownLatch;
 
 import com.webank.webase.node.mgr.tools.pagetools.List2Page;
 import lombok.extern.log4j.Log4j2;
+import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -68,6 +69,10 @@ public class StatService {
     @Lazy
     @Autowired
     private GroupService groupService;
+
+    @Autowired
+    private FrontInterfaceService frontInterface;
+
 
     // 每出一个块，获得上一个区块的时间戳相差时间，获得出块周期； 获取多条数据，计算平均值
     // 获得一个块的交易数，除以出块周期则是TPS
@@ -385,9 +390,13 @@ public class StatService {
             if (groupList != null && groupList.size() > 0) {
                 for (TbGroup group : groupList) {
                     nodeCount += group.getNodeCount();
-                    transCount += group.getTransCount().longValue();
                     GroupGeneral groupGeneral = groupService.getGeneralAndUpdateNodeCount(group.getGroupId());
                     contractCount += groupGeneral.getContractCount();
+
+                    TotalTransactionCount.TransactionCountInfo transCountInfo = frontInterface.getTotalTransactionCount(group.getGroupId());
+                    if (transCountInfo != null) {
+                        transCount += Long.parseLong(transCountInfo.getTransactionCount());
+                    }
                 }
             }
         }
