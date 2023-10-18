@@ -15,6 +15,8 @@
 package com.webank.webase.node.mgr.precntauth.authmanager.committee;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -56,6 +58,8 @@ public class CommitteeController extends BaseController {
 //    @ApiOperation(value = "update committee governor")
 //    @ApiImplicitParam(name = "reqUpdateGovernorInfo", value = "governor info", required = true
 //        , dataType = "ReqUpdateGovernorInfo")
+
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("governor")
     public Object updateGovernor(
         @Valid @RequestBody ReqUpdateGovernorInfo reqUpdateGovernorInfo, BindingResult result) {
@@ -82,6 +86,7 @@ public class CommitteeController extends BaseController {
 //    @ApiOperation(value = "set committee rate")
 //    @ApiImplicitParam(name = "reqSetRateInfo", value = "rate info", required = true,
 //        dataType = "ReqSetRateInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("rate")
     public Object setRate(@Valid @RequestBody ReqSetRateInfo reqSetRateInfo) {
         if (baseService.queryExecEnvIsWasm(reqSetRateInfo.getGroupId())) {
@@ -99,6 +104,7 @@ public class CommitteeController extends BaseController {
 //    @ApiOperation(value = "set deploy type")
 //    @ApiImplicitParam(name = "reqDeployAuthTypeInfo", value = "DeployAuthTypeInfo", required = true,
 //        dataType = "ReqDeployAuthTypeInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("deploy/type")
     public Object setDeployAuthType(
         @Valid @RequestBody ReqDeployAuthTypeInfo reqDeployAuthTypeInfo) {
@@ -117,6 +123,7 @@ public class CommitteeController extends BaseController {
 //    @ApiOperation(value = "modify deploy user", notes = "openFlag value is true or false")
 //    @ApiImplicitParam(name = "reqUsrDeployInfo", value = "usrDeployAuth info", required = true,
 //        dataType = "ReqUsrDeployInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("usr/deploy")
     public Object modifyDeployUsrAuth(@Valid @RequestBody ReqUsrDeployInfo reqUsrDeployInfo) {
         if (baseService.queryExecEnvIsWasm(reqUsrDeployInfo.getGroupId())) {
@@ -134,6 +141,7 @@ public class CommitteeController extends BaseController {
 //    @ApiOperation(value = "reset the admin of contract")
 //    @ApiImplicitParam(name = "reqResetAdminInfo", value = "resetAdmin info", required = true,
 //        dataType = "ReqResetAdminInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("contract/admin")
     public Object resetAdmin(@Valid @RequestBody ReqResetAdminInfo reqResetAdminInfo) {
         if (baseService.queryExecEnvIsWasm(reqResetAdminInfo.getGroupId())) {
@@ -151,6 +159,7 @@ public class CommitteeController extends BaseController {
 //    @ApiOperation(value = "revoke the proposal")
 //    @ApiImplicitParam(name = "reqRevokeProposalInfo", value = "revokeProposal info", required = true,
 //        dataType = "ReqRevokeProposalInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("proposal/revoke")
     public Object revokeProposal(@Valid @RequestBody ReqRevokeProposalInfo reqRevokeProposalInfo) {
         if (baseService.queryExecEnvIsWasm(reqRevokeProposalInfo.getGroupId())) {
@@ -168,6 +177,7 @@ public class CommitteeController extends BaseController {
 //    @ApiOperation(value = "vote the proposal")
 //    @ApiImplicitParam(name = "reqVoteProposalInfo", value = "voteProposal info", required = true,
 //        dataType = "ReqVoteProposalInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("proposal/vote")
     public Object voteProposal(@Valid @RequestBody ReqVoteProposalInfo reqVoteProposalInfo) {
         if (baseService.queryExecEnvIsWasm(reqVoteProposalInfo.getGroupId())) {

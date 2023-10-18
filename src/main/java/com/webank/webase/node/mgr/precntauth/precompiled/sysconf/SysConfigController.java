@@ -16,6 +16,8 @@
 package com.webank.webase.node.mgr.precntauth.precompiled.sysconf;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -68,6 +70,7 @@ public class SysConfigController extends BaseController {
 //    @ApiOperation(value = "setSysConfigValueByKey", notes = "set system config value by key")
 //    @ApiImplicitParam(name = "reqSetSysConfigInfo", value = "system config info", required = true,
 //        dataType = "ReqSetSysConfigInfo")
+    @Log(title = "BCOS3/系统管理/配置管理", businessType = BusinessType.UPDATE)
     @PostMapping(value = "config")
     public Object setSysConfigByKeyService(
         @RequestBody @Valid ReqSetSysConfigInfo reqSetSysConfigInfo,

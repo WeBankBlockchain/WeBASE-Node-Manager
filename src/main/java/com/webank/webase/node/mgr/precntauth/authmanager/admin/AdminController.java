@@ -15,6 +15,8 @@
 package com.webank.webase.node.mgr.precntauth.authmanager.admin;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -57,6 +59,7 @@ public class AdminController extends BaseController {
      */
 //    @ApiOperation(value = "set contract func acl type")
 //    @ApiImplicitParam(name = "reqAclAuthTypeInfo", value = "aclType info", required = true, dataType = "ReqAclAuthTypeInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("method/auth/type")
     public Object setMethodAuthType(@Valid @RequestBody ReqAclAuthTypeInfo reqAclAuthTypeInfo) {
         if (baseService.queryExecEnvIsWasm(reqAclAuthTypeInfo.getGroupId())) {
@@ -75,6 +78,7 @@ public class AdminController extends BaseController {
      */
 //    @ApiOperation(value = "set contract func usr acl")
 //    @ApiImplicitParam(name = "reqAclUsrInfo", value = "aclUsr info", required = true, dataType = "ReqAclUsrInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("method/auth/set")
     public Object setMethodAuth(@Valid @RequestBody ReqAclUsrInfo reqAclUsrInfo) {
         if (baseService.queryExecEnvIsWasm(reqAclUsrInfo.getGroupId())) {
@@ -92,6 +96,7 @@ public class AdminController extends BaseController {
      */
 //    @ApiOperation(value = "set contract func usr acl")
 //    @ApiImplicitParam(name = "reqContractStatus", value = "status info", required = true, dataType = "ReqContractStatus")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("contract/status/set")
     public Object setContractStatus(@Valid @RequestBody ReqContractStatus reqContractStatus) {
         if (baseService.queryExecEnvIsWasm(reqContractStatus.getGroupId())) {

@@ -15,6 +15,8 @@ package com.webank.webase.node.mgr.front;
 
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -67,6 +69,7 @@ public class FrontController extends BaseController {
     /**
      * refresh front
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @GetMapping("/refresh")
     public BaseResponse refreshFront() {
     	Instant startTime = Instant.now();
@@ -80,6 +83,7 @@ public class FrontController extends BaseController {
     /**
      * add new front
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.INSERT)
     @PostMapping("/new")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse newFront(@RequestBody @Valid FrontInfo frontInfo, BindingResult result) {
@@ -132,6 +136,7 @@ public class FrontController extends BaseController {
     /**
      * delete by frontId
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.DELETE)
     @DeleteMapping(value = "/{frontId}")
     public BaseResponse removeFront(@PathVariable("frontId") Integer frontId) {
         Instant startTime = Instant.now();
@@ -150,6 +155,7 @@ public class FrontController extends BaseController {
     /**
      * query front info list.
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @GetMapping(value = "/refresh/status")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse refreshFrontStatus() throws NodeMgrException {

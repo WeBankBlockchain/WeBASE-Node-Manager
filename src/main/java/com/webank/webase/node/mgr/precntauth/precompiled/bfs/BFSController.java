@@ -1,6 +1,8 @@
 package com.webank.webase.node.mgr.precntauth.precompiled.bfs;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.precntauth.precompiled.bfs.entity.ReqCreateBFSInfo;
@@ -31,6 +33,7 @@ public class BFSController {
    */
 //  @ApiOperation(value = "create bfs path")
 //  @ApiImplicitParam(name = "reqCreateBFSInfo", value = "create bfs path info", required = true, dataType = "ReqCreateBFSInfo")
+  @Log(title = "BCOS3/合约管理/BFS", businessType = BusinessType.INSERT)
   @PostMapping("create")
   public Object createBfsPath(@Valid @RequestBody ReqCreateBFSInfo reqCreateBFSInfo)
       {

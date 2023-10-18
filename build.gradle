@@ -128,6 +128,7 @@ dependencies {
     implementation 'cn.dev33:sa-token-jwt:1.35.0.RC'
     implementation 'cn.dev33:sa-token-dubbo3:1.35.0.RC'
     implementation 'cn.hutool:hutool-extra:5.8.20'
+    implementation 'cn.hutool:hutool-http:5.8.20'
     implementation ('org.redisson:redisson-spring-boot-starter:3.18.0') {
         exclude group: "redisson-spring-data-30"
     }

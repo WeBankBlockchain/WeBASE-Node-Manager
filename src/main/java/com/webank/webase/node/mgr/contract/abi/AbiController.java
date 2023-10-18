@@ -17,6 +17,8 @@
 package com.webank.webase.node.mgr.contract.abi;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -134,6 +136,7 @@ public class AbiController extends BaseController {
 		return new BaseResponse(ConstantCode.SUCCESS, res);
 	}
 
+	@Log(title = "BCOS3/合约管理/合约列表", businessType = BusinessType.INSERT)
 	@SaCheckPermission("bcos3:contract:addAbi")
 	@PostMapping("")
 	public Object saveAbi(@Valid @RequestBody ReqImportAbi param, BindingResult result) {
@@ -151,6 +154,7 @@ public class AbiController extends BaseController {
 	 * @param param abiId is not empty to update
 	 * @return
 	 */
+	@Log(title = "BCOS3/合约管理/合约列表", businessType = BusinessType.UPDATE)
 	@SaCheckPermission("bcos3:contract:updateAbi")
 	@PutMapping("")
 	public Object updateAbi(@RequestBody ReqImportAbi param, BindingResult result) {
@@ -168,6 +172,7 @@ public class AbiController extends BaseController {
 		return new BaseResponse(ConstantCode.SUCCESS, res);
 	}
 
+	@Log(title = "BCOS3/合约管理/合约列表", businessType = BusinessType.DELETE)
 	@SaCheckPermission("bcos3:contract:deleteAbi")
 	@DeleteMapping("/{abiId}")
 	public BaseResponse deleteAbi(@PathVariable("abiId") Integer abiId) {

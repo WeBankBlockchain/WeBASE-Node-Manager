@@ -14,6 +14,8 @@
 package com.webank.webase.node.mgr.contract;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.qctc.common.satoken.utils.LoginHelper;
 import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -58,6 +60,7 @@ public class ContractController extends BaseController {
     /**
      * add new contract info.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/save")
     public BaseResponse saveContract(@RequestBody @Valid Contract contract,
@@ -87,6 +90,7 @@ public class ContractController extends BaseController {
     /**
      * delete contract by id.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.DELETE)
     @SaCheckPermission("bcos3:contract:ide")
     @DeleteMapping(value = "/{groupId}/{contractId}")
     public BaseResponse deleteContract(@PathVariable("groupId") String groupId,
@@ -168,6 +172,7 @@ public class ContractController extends BaseController {
     /**
      * deploy deployInputParam.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/deploy")
     public BaseResponse deployContract(@RequestBody @Valid DeployInputParam deployInputParam,
@@ -191,6 +196,7 @@ public class ContractController extends BaseController {
     /**
      * send transaction.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/transaction")
     public BaseResponse sendTransaction(@RequestBody @Valid TransactionInputParam param,
@@ -280,6 +286,7 @@ public class ContractController extends BaseController {
     /**
      * add contract path
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/contractPath")
     public BaseResponse addContractPath(@Valid @RequestBody ContractPathParam param) {
@@ -328,6 +335,7 @@ public class ContractController extends BaseController {
     /**
      * delete contract by path. only admin batch delete contract
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.DELETE)
     @SaCheckPermission("bcos3:contract:ide")
     @DeleteMapping(value = "/batch/path")
     public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param) {
@@ -370,6 +378,7 @@ public class ContractController extends BaseController {
     /**
      * registerCns.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:contract:cnsManagement")
     @PostMapping(value = "/registerCns")
     public BaseResponse registerCns(@RequestBody @Valid ReqRegisterCns reqRegisterCns,
@@ -441,6 +450,7 @@ public class ContractController extends BaseController {
         return pageResponse;
     }
 
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/copy")
     public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req, BindingResult result) {

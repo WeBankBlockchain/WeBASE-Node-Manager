@@ -16,6 +16,8 @@
 package com.webank.webase.node.mgr.cert;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -125,6 +127,7 @@ public class CertController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @Log(title = "BCOS3/系统管理/证书管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:sys:addCert")
     @PostMapping("")
     public Object addCert(@RequestBody @Valid CertHandle certHandle,
@@ -150,6 +153,7 @@ public class CertController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, count);
     }
 
+    @Log(title = "BCOS3/系统管理/证书管理", businessType = BusinessType.DELETE)
     @SaCheckPermission("bcos3:sys:deleteCert")
     @DeleteMapping(value = "")
     public Object removeCert(@RequestBody @Valid CertHandle certHandle,

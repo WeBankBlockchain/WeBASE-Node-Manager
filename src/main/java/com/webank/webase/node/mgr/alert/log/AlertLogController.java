@@ -17,6 +17,8 @@
 package com.webank.webase.node.mgr.alert.log;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.alert.log.entity.AlertLog;
 import com.webank.webase.node.mgr.alert.log.entity.ReqLogListParam;
@@ -77,6 +79,7 @@ public class AlertLogController {
      * @param param
      * @return
      */
+    @Log(title = "BCOS3/系统监控/告警管理", businessType = BusinessType.UPDATE)
     @SaCheckPermission("bcos3:monitor:updateAlertLog")
     @PutMapping("")
     public Object updateAlertLog(@RequestBody ReqLogParam param) {

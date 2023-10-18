@@ -17,6 +17,8 @@
 package com.webank.webase.node.mgr.alert.mail;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.alert.mail.server.config.MailServerConfigService;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -66,6 +68,7 @@ public class MailController {
      * @param reqMailServerConfigParam
      * @return
      */
+    @Log(title = "BCOS3/系统监控/告警管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:monitor:sendMailTest")
     @PostMapping("/test/{toMailAddress}")
     public Object sendTestMail(@PathVariable("toMailAddress")String toMailAddress,

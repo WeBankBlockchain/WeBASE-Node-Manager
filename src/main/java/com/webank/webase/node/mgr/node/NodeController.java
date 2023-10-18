@@ -14,6 +14,8 @@
 package com.webank.webase.node.mgr.node;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -157,6 +159,7 @@ public class NodeController {
     /**
      * update tb_node info of city, agency, ip etc.
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @SaCheckPermission("bcos3:chain:updateNodeDesc")
     @PutMapping("/description")
     public BaseResponse updateDesc(@Valid @RequestBody ReqUpdate reqUpdate) {

@@ -15,6 +15,8 @@
 package com.webank.webase.node.mgr.appintegration;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.appintegration.entity.AppAddInfo;
 import com.webank.webase.node.mgr.appintegration.entity.AppInfoParam;
 import com.webank.webase.node.mgr.appintegration.entity.TbAppInfo;
@@ -57,6 +59,7 @@ public class AppIntegrationController extends BaseController {
     @Autowired
     private AppIntegrationService appIntegrationService;
 
+    @Log(title = "BCOS3/应用管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:appManagement:newApp")
     @PostMapping("/save")
     public BaseResponse saveApp(@RequestBody @Valid AppAddInfo appAddInfo, BindingResult result) {
@@ -111,6 +114,7 @@ public class AppIntegrationController extends BaseController {
     /**
      * delete by frontId
      */
+    @Log(title = "BCOS3/应用管理", businessType = BusinessType.DELETE)
     @SaCheckPermission("bcos3:appManagement:deleteApp")
     @DeleteMapping("/{id}")
     public BaseResponse deleteApp(@PathVariable("id") Integer id) {

@@ -14,6 +14,8 @@
 package com.webank.webase.node.mgr.method;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -57,6 +59,7 @@ public class MethodController extends BaseController {
     /**
      * add method info.
      */
+    @Log(title = "BCOS3/合约管理/合约方法", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:contract:addMethod")
     @PostMapping(value = "/add")
     public BaseResponse addMethod(@RequestBody @Valid NewMethodInputParam newMethodInputParam,

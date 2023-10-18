@@ -1,6 +1,8 @@
 package com.webank.webase.node.mgr.precntauth.precompiled.cns;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqCnsInfoByName;
@@ -29,6 +31,7 @@ public class CNSController {
 
 //  @ApiOperation(value = "register the cns info")
 //  @ApiImplicitParam(name = "reqCnsInfo", value = "register info", required = true, dataType = "ReqRegisterCnsInfo")
+  @Log(title = "BCOS3/合约管理/CNS", businessType = BusinessType.INSERT)
   @PostMapping("register")
   public Object registerCNS(@Valid @RequestBody ReqRegisterCnsInfo reqCnsInfo)
       {

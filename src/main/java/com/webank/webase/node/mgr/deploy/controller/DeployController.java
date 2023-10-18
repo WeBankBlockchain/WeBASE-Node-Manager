@@ -14,6 +14,8 @@
 package com.webank.webase.node.mgr.deploy.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.qctc.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
@@ -67,6 +69,7 @@ public class DeployController extends BaseController {
      *  c. generate chain config & scp config
      */
 
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:chain:initHost")
     @PostMapping(value = "init")
     public BaseResponse initHostList(@RequestBody @Valid ReqInitHost reqInitHost,
@@ -120,6 +123,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:chain:configChainAndHost")
     @PostMapping(value = "config")
     public BaseResponse configChainAndHost(@RequestBody @Valid ReqConfigChain deploy,
@@ -156,6 +160,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @SaCheckPermission("bcos3:chain:checkPort")
     @PostMapping(value = "checkPort")
     public BaseResponse checkNodePort(@RequestBody @Valid ReqConfigChain checkPort,
@@ -186,6 +191,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.INSERT)
     @SaCheckPermission("bcos3:chain:addNode")
     @PostMapping(value = "node/add")
     public BaseResponse addNode(
@@ -217,6 +223,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @SaCheckPermission("bcos3:chain:startNode")
     @PostMapping(value = "node/start")
     public BaseResponse startNode(
@@ -240,6 +247,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @SaCheckPermission("bcos3:chain:stopNode")
     @PostMapping(value = "node/stop")
     public BaseResponse stopNode(
@@ -262,6 +270,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @SaCheckPermission("bcos3:chain:stopNodeForce")
     @PostMapping(value = "node/stopForce")
     public BaseResponse stopNodeForce(
@@ -284,6 +293,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @SaCheckPermission("bcos3:chain:restartNode")
     @PostMapping(value = "node/restart")
     public BaseResponse restartNode(
@@ -307,6 +317,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.DELETE)
     @SaCheckPermission("bcos3:chain:deleteNode")
     @PostMapping(value = "node/delete")
     public BaseResponse deleteNode(
@@ -329,6 +340,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws IOException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @SaCheckPermission("bcos3:chain:upgradeChain")
     @PostMapping(value = "upgrade")
     public BaseResponse upgradeChain(
@@ -383,6 +395,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws IOException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @SaCheckPermission("bcos3:chain:startChain")
     @GetMapping(value = "chain/start")
     public BaseResponse startChain(
@@ -400,6 +413,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws IOException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @SaCheckPermission("bcos3:chain:stopChain")
     @GetMapping(value = "chain/stop")
     public BaseResponse stopChain(
@@ -417,6 +431,7 @@ public class DeployController extends BaseController {
      * @return
      * @throws IOException
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @SaCheckPermission("bcos3:chain:restartChain")
     @GetMapping(value = "chain/restart")
     public BaseResponse restartChain(@RequestParam(value = "chainName") String chainName,
@@ -431,6 +446,7 @@ public class DeployController extends BaseController {
     /**
      * delete chain by chainName.
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.DELETE)
     @SaCheckPermission("bcos3:chain:deleteChain")
     @DeleteMapping(value = "delete")
     public BaseResponse deleteChain(

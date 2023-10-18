@@ -21,6 +21,8 @@ import java.time.Instant;
 import java.util.List;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -101,6 +103,7 @@ public class AlertRuleController {
 //        return new BaseResponse(ConstantCode.SUCCESS);
 //    }
 
+    @Log(title = "BCOS3/系统监控/告警管理", businessType = BusinessType.UPDATE)
     @SaCheckPermission("bcos3:monitor:updateAlertRule")
     @PutMapping("")
     public Object updateAlertRule(@RequestBody ReqAlertRuleParam param) {
@@ -123,6 +126,7 @@ public class AlertRuleController {
 
     }
 
+    @Log(title = "BCOS3/系统监控/告警管理", businessType = BusinessType.UPDATE)
     @SaCheckPermission("bcos3:monitor:toggleAlertRule")
     @PutMapping("/toggle")
     public Object toggleAlertRule(@RequestBody ReqAlertRuleParam param) {

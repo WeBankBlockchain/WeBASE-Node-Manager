@@ -14,6 +14,8 @@
 package com.webank.webase.node.mgr.precntauth.precompiled.consensus;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -55,6 +57,7 @@ public class ConsensusController {
 
 //    @ApiOperation(value = "manage node type", notes = "addSealer addObserver removeNode")
 //    @ApiImplicitParam(name = "consensusHandle", value = "node consensus info", required = true, dataType = "ConsensusHandle")
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @PostMapping("manage")
     public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle) {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);

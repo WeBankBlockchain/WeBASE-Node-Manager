@@ -14,6 +14,8 @@
 package com.webank.webase.node.mgr.group;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -154,7 +156,7 @@ public class GroupController extends BaseController {
      * @throws NodeMgrException
      **/
      @SaCheckPermission("bcos3:groups:query")
-   @GetMapping({"/all/invalidIncluded/{pageNumber}/{pageSize}",
+     @GetMapping({"/all/invalidIncluded/{pageNumber}/{pageSize}",
             "/all/invalidIncluded"})
     public BasePageResponse getAllGroupIncludeInvalidGroup(@PathVariable(value = "pageNumber",required = false) Integer pageNumber,
                                                            @PathVariable(value = "pageSize", required = false) Integer pageSize) throws NodeMgrException {
@@ -250,6 +252,7 @@ public class GroupController extends BaseController {
     /**
      * delete all group's data(trans, contract, node etc.)
      */
+    @Log(title = "BCOS3/群组管理", businessType = BusinessType.DELETE)
     @SaCheckPermission("bcos3:groups:operate")
     @DeleteMapping("/{groupId}")
     public BaseResponse deleteGroupData(@PathVariable("groupId") String groupId) {
@@ -279,6 +282,7 @@ public class GroupController extends BaseController {
         return baseResponse;
     }
 
+    @Log(title = "BCOS3/群组管理", businessType = BusinessType.UPDATE)
     @SaCheckPermission("bcos3:groups:operate")
     @PutMapping("/description")
     public BaseResponse updateDescription(@RequestBody @Valid ReqUpdateDesc req, BindingResult result)

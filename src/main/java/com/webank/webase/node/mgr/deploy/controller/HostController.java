@@ -14,6 +14,8 @@
 package com.webank.webase.node.mgr.deploy.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.qctc.host.api.RemoteHostService;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
@@ -120,6 +122,7 @@ public class HostController extends BaseController {
     /**
      * Deploy by ipconf and tagId.
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @PostMapping(value = "ping")
     public BaseResponse pingHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -143,6 +146,7 @@ public class HostController extends BaseController {
     /**
      * check mem/cpu and docker dependency
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @PostMapping(value = "check")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse checkHostList(@RequestBody @Valid ReqCheckHost reqCheckHost,
@@ -170,6 +174,7 @@ public class HostController extends BaseController {
     /**
      * check ansible installed
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @PostMapping(value = "ansible")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse checkAnsibleInstalled() throws NodeMgrException {
