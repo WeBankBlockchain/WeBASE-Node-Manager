@@ -24,17 +24,18 @@
 	<insert id="add" parameterType="com.webank.webase.node.mgr.method.entity.TbMethod">
         INSERT INTO tb_method (method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
         VALUES (#{methodId}, #{groupId}, #{abiInfo}, #{methodType}, #{contractType}, NOW(), NOW())
-        ON CONFLICT (method_id) DO UPDATE
-            SET group_id      = ${group_id},
-                abi_info      = ${abi_info},
-                method_type   = ${method_type},
-                contract_type = ${contract_type},
-                modify_time   = NOW();
+        ON CONFLICT ON CONSTRAINT tb_method_pkey DO UPDATE
+            SET group_id      = EXCLUDED.group_id,
+                abi_info      = EXCLUDED.abi_info,
+                method_type   = EXCLUDED.method_type,
+                contract_type = EXCLUDED.contract_type,
+                create_time   = EXCLUDED.create_time,
+                modify_time   = EXCLUDED.modify_time;
     </insert>
 
 	<select id="getMethodById" resultMap="methodMap">
 		SELECT * FROM tb_method
-		WHERE method_id = #{methodId} 
+		WHERE method_id = #{methodId}
 		<if test="groupId != null and groupId != ''">
 	      and group_id = #{groupId}
 	    </if>

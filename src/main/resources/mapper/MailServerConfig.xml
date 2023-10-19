@@ -59,24 +59,24 @@
                 #{starttlsRequired}, #{socketFactoryPort}, #{socketFactoryClass}, #{socketFactoryFallback},
                 #{enable}, #{connectionTimeout}, #{timeout}, #{writeTimeout})
         ON CONFLICT (server_id) DO UPDATE
-            SET server_name             = #{serverName},
-                host                    = #{host},
-                port                    = #{port},
-                username                = #{username},
-                password                = #{password},
-                protocol                = #{protocol},
-                default_encoding        = #{default_encoding},
-                modify_time             = NOW(),
-                authentication          = #{authentication},
-                starttls_enable         = #{starttls_enable},
-                starttls_required       = #{starttls_required},
-                socket_factory_port     = #{socket_factory_port},
-                socket_factory_class    = #{socket_factory_class},
-                socket_factory_fallback = #{socket_factory_fallback},
-                enable                  = #{enable},
-                connection_timeout      = #{connection_timeout},
-                timeout                 = #{timeout},
-                write_timeout           = #{write_timeout};
+            SET server_name             = EXCLUDED.server_name,
+                host                    = EXCLUDED.host,
+                port                    = EXCLUDED.port,
+                username                = EXCLUDED.username,
+                password                = EXCLUDED.password,
+                protocol                = EXCLUDED.protocol,
+                default_encoding        = EXCLUDED.default_encoding,
+                modify_time             = EXCLUDED.modify_time,
+                authentication          = EXCLUDED.authentication,
+                starttls_enable         = EXCLUDED.starttls_enable,
+                starttls_required       = EXCLUDED.starttls_required,
+                socket_factory_port     = EXCLUDED.socket_factory_port,
+                socket_factory_class    = EXCLUDED.socket_factory_class,
+                socket_factory_fallback = EXCLUDED.socket_factory_fallback,
+                enable                  = EXCLUDED.enable,
+                connection_timeout      = EXCLUDED.connection_timeout,
+                timeout                 = EXCLUDED.timeout,
+                write_timeout           = EXCLUDED.write_timeout;
     </insert>
 
     <delete id="deleteByServerId" parameterType="java.lang.Integer">

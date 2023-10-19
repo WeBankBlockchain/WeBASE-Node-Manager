@@ -32,11 +32,11 @@
       VALUES (#{appKey}, #{contractName}, #{contractVersion}, #{account}, #{contractSource}, #{contractAbi},
               #{bytecodeBin}, NOW(), NOW())
       ON CONFLICT (app_key, contract_name, contract_version) DO UPDATE
-          SET account= #{account},
-              contract_source= #{contractSource},
-              contract_abi= #{contractAbi},
-              bytecode_bin= #{bytecodeBin},
-              modify_time=NOW()
+          SET account= EXCLUDED.account,
+              contract_source= EXCLUDED.contract_source,
+              contract_abi= EXCLUDED.contract_abi,
+              bytecode_bin= EXCLUDED.bytecode_bin,
+              modify_time=EXCLUDED.modify_time;
   </insert>
 
   <select id="countOfContractStore" parameterType="com.webank.webase.node.mgr.appintegration.contractstore.entity.ContractStoreParam"

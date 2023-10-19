@@ -73,14 +73,14 @@
               NOW(),
               NOW())
       ON CONFLICT (group_id, contract_name,contract_path,account) DO UPDATE
-          SET contract_version = #{contractVersion},
-              contract_source  = #{contractSource},
-              contract_abi     = #{contractAbi},
-              contract_bin     = #{contractBin},
-              bytecode_bin     = #{bytecodeBin},
-              contract_address = #{contractAddress},
-              contract_status  = #{contractStatus},
-              modify_time      = NOW();
+          SET contract_version = EXCLUDED.contract_version,
+              contract_source  = EXCLUDED.contract_source,
+              contract_abi     = EXCLUDED.contract_abi,
+              contract_bin     = EXCLUDED.contract_bin,
+              bytecode_bin     = EXCLUDED.bytecode_bin,
+              contract_address = EXCLUDED.contract_address,
+              contract_status  = EXCLUDED.contract_status,
+              modify_time      = EXCLUDED.modify_time;
   </insert>
 
   <delete id="remove" parameterType="java.lang.Integer">

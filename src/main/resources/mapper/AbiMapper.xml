@@ -32,10 +32,10 @@
                 NOW())
         ON CONFLICT (group_id, account, contract_address)
             DO UPDATE
-            SET contract_name = #{contractName},
-                contract_abi  = ${contract_abi},
-                contract_bin  = ${contract_bin},
-                modify_time   = NOW();
+            SET contract_name = EXCLUDED.contract_name,
+                contract_abi  = EXCLUDED.contract_abi,
+                contract_bin  = EXCLUDED.contract_bin,
+                modify_time   = EXCLUDED.modify_time;
     </insert>
 
     <delete id="deleteByAbiId" parameterType="java.lang.Integer">

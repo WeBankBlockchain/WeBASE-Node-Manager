@@ -33,11 +33,11 @@
               NOW(), NOW())
       ON CONFLICT (group_id, cns_name, version)
           DO UPDATE
-          SET contract_name    = #{contract_name},
-              contract_path    = #{contractPath},
-              contract_address = #{contractAddress},
-              contract_abi     = #{contractAbi},
-              modify_time      = NOW();
+          SET contract_name    = EXCLUDED.contract_name,
+              contract_path    = EXCLUDED.contract_path,
+              contract_address = EXCLUDED.contract_address,
+              contract_abi     = EXCLUDED.contract_abi,
+              modify_time      = EXCLUDED.modify_time;
   </insert>
 
   <select id="countOfCns" parameterType="com.webank.webase.node.mgr.contract.entity.QueryCnsParam"
