@@ -48,8 +48,8 @@
                 #{groupTimestamp}, #{nodeIdList}, NOW(), NOW(), #{chainId,jdbcType=INTEGER},
                 #{chainName,jdbcType=VARCHAR})
         ON CONFLICT (group_id,chain_id) DO UPDATE
-            SET node_count  = #{nodeCount},
-                modify_time = NOW();
+            SET node_count  = EXCLUDED.node_count,
+                modify_time = EXCLUDED.modify_time;
     </insert>
 
     <insert id="insertSelective" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">

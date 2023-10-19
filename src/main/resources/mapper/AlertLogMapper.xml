@@ -28,12 +28,12 @@
         VALUES (#{alertType}, #{alertLevel}, #{alertContent}, #{description}, #{status}, NOW(), NOW())
         ON CONFLICT (log_id)
             DO UPDATE
-            SET alert_type    = #{alertType},
-                alert_level   = #{alertLevel},
-                alert_content = #{alertContent},
-                description   = #{description},
-                status        = #{status},
-                modify_time   = NOW();
+            SET alert_type    = EXCLUDED.alert_type,
+                alert_level   = EXCLUDED.alert_level,
+                alert_content = EXCLUDED.alert_content,
+                description   = EXCLUDED.description,
+                status        = EXCLUDED.status,
+                modify_time   = EXCLUDED.modify_time;
     </insert>
 
     <delete id="deleteByLogId" parameterType="java.lang.Integer">
