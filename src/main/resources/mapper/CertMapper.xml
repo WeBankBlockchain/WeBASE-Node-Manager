@@ -28,8 +28,20 @@
 
 
 	<insert id="add" parameterType="com.webank.webase.node.mgr.cert.entity.TbCert">
-		INSERT INTO tb_cert(finger_print,cert_name,content,cert_type,public_key,address,father,validity_from,validity_to,create_time)
-		VALUES (#{fingerPrint},#{certName},#{content},#{certType},#{publicKey},#{address},#{father},#{validityFrom},#{validityTo},now())
+        INSERT INTO tb_cert(finger_print, cert_name, content, cert_type, public_key, address, father, validity_from,
+                            validity_to, create_time)
+        VALUES (#{fingerPrint}, #{certName}, #{content}, #{certType}, #{publicKey}, #{address}, #{father},
+                #{validityFrom}, #{validityTo}, now())
+        ON CONFLICT ON CONSTRAINT tb_cert_pkey DO UPDATE
+            SET cert_name     = EXCLUDED.cert_name,
+                content       = EXCLUDED.content,
+                cert_type     = EXCLUDED.cert_type,
+                public_key    = EXCLUDED.public_key,
+                address       = EXCLUDED.address,
+                father        = EXCLUDED.father,
+                validity_from = EXCLUDED.validity_from,
+                validity_to   = EXCLUDED.validity_to,
+                create_time   = EXCLUDED.create_time;
 	</insert>
 
 	<select id="queryCertByFingerPrint" parameterType="java.lang.String" resultMap="certMap">
