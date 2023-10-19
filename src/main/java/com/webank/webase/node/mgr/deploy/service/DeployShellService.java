@@ -27,11 +27,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+
+import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,6 +50,10 @@ public class DeployShellService {
     private ConstantProperties constant;
     @Autowired
     private PathService pathService;
+
+    @Lazy
+    @Autowired
+    private UserService userService;
 
 
     /**
@@ -101,7 +109,15 @@ public class DeployShellService {
         String formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -I %s";
         if (enableAuth == 1) {
             formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -A -I %s";
+
+            // 如果之前建完链，删除过链，则admin_auth存在，不再新生成授权管理员
+            TbUser admin = userService.queryUser(null, null, "admin_auth", null, null);
+            if (null != admin && admin.getAddress() != null && admin.getAddress().length() > 0) {
+                String adminAddr = admin.getAddress();
+                formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -I %s -a " + adminAddr;
+            }
         }
+
         // chainid此时没有，写死为1
         String command = String.format(formatString,
                 // build_chain.sh shell script
