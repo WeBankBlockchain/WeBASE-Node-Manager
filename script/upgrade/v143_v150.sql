@@ -140,43 +140,43 @@ VALUES ('WeId-temp', 'app00001', 1, 'https://weidentity.readthedocs.io/zh_CN/lat
 INSERT INTO tb_method ( method_id, group_id, abi_info, method_type, contract_type, create_time
                       , modify_time)
 VALUES ('0xf23f63c9', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"string\"}],\"name\":\"openTable\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"","type":"string"}],"name":"openTable","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method ( method_id, group_id, abi_info, method_type, contract_type, create_time
                       , modify_time)
 VALUES ('0x96ec37c4', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"grantWrite\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"user","type":"address"}],"name":"grantWrite","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method ( method_id, group_id, abi_info, method_type, contract_type, create_time
                       , modify_time)
 VALUES ('0x99c26010', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"revokeWrite\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"user","type":"address"}],"name":"revokeWrite","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method ( method_id, group_id, abi_info, method_type, contract_type, create_time
                       , modify_time)
 VALUES ('0x3a67288f', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"userAddr\",\"type\":\"address\"}],\"name\":\"revokeManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"userAddr","type":"address"}],"name":"revokeManager","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- guomi
 INSERT INTO tb_method ( method_id, group_id, abi_info, method_type, contract_type, create_time
                       , modify_time)
 VALUES ('0x59a48b65', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"string\"}],\"name\":\"openTable\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"","type":"string"}],"name":"openTable","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method ( method_id, group_id, abi_info, method_type, contract_type, create_time
                       , modify_time)
 VALUES ('0xd010d23c', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"grantWrite\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"user","type":"address"}],"name":"grantWrite","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method ( method_id, group_id, abi_info, method_type, contract_type, create_time
                       , modify_time)
 VALUES ('0xdf12fe78', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"revokeWrite\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"user","type":"address"}],"name":"revokeWrite","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method ( method_id, group_id, abi_info, method_type, contract_type, create_time
                       , modify_time)
 VALUES ('0x00c77684', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"userAddr\",\"type\":\"address\"}],\"name\":\"revokeManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"userAddr","type":"address"}],"name":"revokeManager","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 
 -- 修改表 --

@@ -22,167 +22,165 @@ VALUES ('developer', '开发者', now(), now());
 -- (system config info 0x1000) setValueByKey
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xbd291aef', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"value\",\"type\":\"string\"}],\"name\":\"setValueByKey\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"key","type":"string"},{"name":"value","type":"string"}],"name":"setValueByKey","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- (table factory 0x1001) createTable openTable
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x56004b6a', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"valueField\",\"type\":\"string\"}],\"name\":\"createTable\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"tableName","type":"string"},{"name":"key","type":"string"},{"name":"valueField","type":"string"}],"name":"createTable","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 
 -- TODO 与v143-v150中重复
 -- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 -- VALUES ('0xf23f63c9', 0,
---         '{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"string\"}],\"name\":\"openTable\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+--         '{"constant":true,"inputs":[{"name":"","type":"string"}],"name":"openTable","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}',
 --         'function', 1, now(), now());
 -- (crud info 0x1002) update select remove insert(same as cns's insert)
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x2dca76c1', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"entry\",\"type\":\"string\"},{\"name\":\"condition\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"update\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"tableName","type":"string"},{"name":"key","type":"string"},{"name":"entry","type":"string"},{"name":"condition","type":"string"},{"name":"optional","type":"string"}],"name":"update","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x983c6c4f', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"condition\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"select\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"tableName","type":"string"},{"name":"key","type":"string"},{"name":"condition","type":"string"},{"name":"optional","type":"string"}],"name":"select","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xa72a1e65', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"condition\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"tableName","type":"string"},{"name":"key","type":"string"},{"name":"condition","type":"string"},{"name":"optional","type":"string"}],"name":"remove","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xa216464b', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"},{\"name\":\"abi\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"addr","type":"string"},{"name":"abi","type":"string"}],"name":"insert","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- (consensus info node manage 0x1003) addObserver addSealer remove
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x2800efc0', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"nodeID\",\"type\":\"string\"}],\"name\":\"addObserver\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"nodeID","type":"string"}],"name":"addObserver","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x89152d1f', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"nodeID\",\"type\":\"string\"}],\"name\":\"addSealer\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"nodeID","type":"string"}],"name":"addSealer","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x80599e4b', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"nodeID\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"nodeID","type":"string"}],"name":"remove","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- (cns info 0x1004) selectByName selectByNameAndVersion // insert(ignored, same as crud's insert method: insert(string,string,string,string)
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x819a3d62', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"}],\"name\":\"selectByName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"name","type":"string"}],"name":"selectByName","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x897f0251', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"}],\"name\":\"selectByNameAndVersion\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"name","type":"string"},{"name":"version","type":"string"}],"name":"selectByNameAndVersion","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
--- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time) VALUES ('0xa216464b', 0, '{\"constant\":false,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"},{\"name\":\"abi\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}', 'function', 1, now(), now());
+-- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time) VALUES ('0xa216464b', 0, '{"constant":false,"inputs":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"addr","type":"string"},{"name":"abi","type":"string"}],"name":"insert","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}', 'function', 1, now(), now());
 -- (permission manage 0x1005) insert queryByName remove grantWrite revokeWrite
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
-VALUES ('0x06e63ff8', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
-        'function', 1, now(), now());
+VALUES ('0x06e63ff8', 0,'{"constant":false,"inputs":[{"name":"table_name","type":"string"},{"name":"addr","type":"string"}],"name":"insert","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}','function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x20586031', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"}],\"name\":\"queryByName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"table_name","type":"string"}],"name":"queryByName","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x44590a7e', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"table_name","type":"string"},{"name":"addr","type":"string"}],"name":"remove","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 
 -- TODO 与v143-v150中重复
 -- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 -- VALUES ('0x96ec37c4', 0,
---         '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"grantWrite\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+--         '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"user","type":"address"}],"name":"grantWrite","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
 --         'function', 1, now(), now());
 
 -- TODO 与v143-v150中重复
 -- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 -- VALUES ('0x99c26010', 0,
---         '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"revokeWrite\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+--         '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"user","type":"address"}],"name":"revokeWrite","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
 --         'function', 1, now(), now());
 -- (contract life cycle 0x1007)
 -- getStatus unfreeze freeze grantManager queryManager revokeManager
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x30ccebb5', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"getStatus\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"getStatus","outputs":[{"name":"","type":"uint256"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x45c8b1a6', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"unfreeze\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"addr","type":"address"}],"name":"unfreeze","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x8d1fdf2f', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"freeze\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"addr","type":"address"}],"name":"freeze","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xa721fb43', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"userAddr\",\"type\":\"address\"}],\"name\":\"grantManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"userAddr","type":"address"}],"name":"grantManager","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xbc92a700', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"queryManager\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"queryManager","outputs":[{"name":"","type":"uint256"},{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 
 -- TODO 与v143-v150中重复
 -- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 -- VALUES ('0x3a67288f', 0,
---         '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"userAddr\",\"type\":\"address\"}],\"name\":\"revokeManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+--         '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"userAddr","type":"address"}],"name":"revokeManager","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
 --         'function', 1, now(), now());
 -- (chain governance 0x1008)
 -- listOperators updateCommitteeMemberWeight queryThreshold queryCommitteeMemberWeight grantCommitteeMember
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x039a93ca', 0,
-        '{\"constant\":true,\"inputs\":[],\"name\":\"listOperators\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[],"name":"listOperators","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x246c3376', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"weight\",\"type\":\"int256\"}],\"name\":\"updateCommitteeMemberWeight\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"},{"name":"weight","type":"int256"}],"name":"updateCommitteeMemberWeight","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x281af27d', 0,
-        '{\"constant\":true,\"inputs\":[],\"name\":\"queryThreshold\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[],"name":"queryThreshold","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x6c147119', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"queryCommitteeMemberWeight\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"},{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"user","type":"address"}],"name":"queryCommitteeMemberWeight","outputs":[{"name":"","type":"bool"},{"name":"","type":"int256"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x6f8f521f', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"grantCommitteeMember\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"}],"name":"grantCommitteeMember","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- unfreezeAccount listCommitteeMembers updateThreshold revokeCommitteeMember grantOperator
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x788649ea', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"unfreezeAccount\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"account","type":"address"}],"name":"unfreezeAccount","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x885a3a72', 0,
-        '{\"constant\":true,\"inputs\":[],\"name\":\"listCommitteeMembers\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[],"name":"listCommitteeMembers","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x97b00861', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"threshold\",\"type\":\"int256\"}],\"name\":\"updateThreshold\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"threshold","type":"int256"}],"name":"updateThreshold","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xcafb4d1b', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"revokeCommitteeMember\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"}],"name":"revokeCommitteeMember","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xe348da13', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"grantOperator\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"}],"name":"grantOperator","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- freezeAccount revokeOperator getAccountStatus
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xf26c159f', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"freezeAccount\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"account","type":"address"}],"name":"freezeAccount","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xfad8b32a', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"revokeOperator\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"}],"name":"revokeOperator","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xfd4fa05a', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"getAccountStatus\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"account","type":"address"}],"name":"getAccountStatus","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 
 -- ----------------------------
@@ -191,167 +189,167 @@ VALUES ('0xfd4fa05a', 0,
 -- (system config info 0x1000) setValueByKey
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x0749b518', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"value\",\"type\":\"string\"}],\"name\":\"setValueByKey\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"key","type":"string"},{"name":"value","type":"string"}],"name":"setValueByKey","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- (table factory 0x1001) createTable openTable
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xc92a7801', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"valueField\",\"type\":\"string\"}],\"name\":\"createTable\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"tableName","type":"string"},{"name":"key","type":"string"},{"name":"valueField","type":"string"}],"name":"createTable","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 
 -- TODO 与v143-v150中重复
 -- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 -- VALUES ('0x59a48b65', 0,
---         '{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"string\"}],\"name\":\"openTable\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+--         '{"constant":true,"inputs":[{"name":"","type":"string"}],"name":"openTable","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}',
 --         'function', 1, now(), now());
 -- (crud info 0x1002) update select remove insert(same as cns's insert)
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x10bd675b', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"entry\",\"type\":\"string\"},{\"name\":\"condition\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"update\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"tableName","type":"string"},{"name":"key","type":"string"},{"name":"entry","type":"string"},{"name":"condition","type":"string"},{"name":"optional","type":"string"}],"name":"update","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x7388111f', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"condition\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"select\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"tableName","type":"string"},{"name":"key","type":"string"},{"name":"condition","type":"string"},{"name":"optional","type":"string"}],"name":"select","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x81b81824', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"condition\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"tableName","type":"string"},{"name":"key","type":"string"},{"name":"condition","type":"string"},{"name":"optional","type":"string"}],"name":"remove","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xb8eaa08d', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"},{\"name\":\"abi\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"addr","type":"string"},{"name":"abi","type":"string"}],"name":"insert","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- (consensus info node manage 0x1003) addObserver addSealer remove
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x25e85d16', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"nodeID\",\"type\":\"string\"}],\"name\":\"addObserver\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"nodeID","type":"string"}],"name":"addObserver","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xdf434acc', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"nodeID\",\"type\":\"string\"}],\"name\":\"addSealer\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"nodeID","type":"string"}],"name":"addSealer","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x86b733f9', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"nodeID\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"nodeID","type":"string"}],"name":"remove","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- (cns info 0x1004) selectByName selectByNameAndVersion // insert(ignored, same as crud's insert method: insert(string,string,string,string)
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x078af4af', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"}],\"name\":\"selectByName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"name","type":"string"}],"name":"selectByName","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xec72a422', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"}],\"name\":\"selectByNameAndVersion\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"name","type":"string"},{"name":"version","type":"string"}],"name":"selectByNameAndVersion","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
--- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time) VALUES ('0xb8eaa08d', 0, '{\"constant\":false,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"},{\"name\":\"abi\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}', 'function', 1, now(), now());
+-- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time) VALUES ('0xb8eaa08d', 0, '{"constant":false,"inputs":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"addr","type":"string"},{"name":"abi","type":"string"}],"name":"insert","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}', 'function', 1, now(), now());
 -- (permission manage 0x1005) insert queryByName remove grantWrite revokeWrite
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xce0a9fb9', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"table_name","type":"string"},{"name":"addr","type":"string"}],"name":"insert","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xbbec3f91', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"}],\"name\":\"queryByName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"table_name","type":"string"}],"name":"queryByName","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x85d23afc', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"table_name","type":"string"},{"name":"addr","type":"string"}],"name":"remove","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 
 -- TODO 与v143-v150中重复
 -- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 -- VALUES ('0xd010d23c', 0,
---         '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"grantWrite\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+--         '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"user","type":"address"}],"name":"grantWrite","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
 --         'function', 1, now(), now());
 
 -- TODO 与v143-v150中重复
 -- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 -- VALUES ('0xdf12fe78', 0,
---         '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"revokeWrite\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+--         '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"user","type":"address"}],"name":"revokeWrite","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
 --         'function', 1, now(), now());
 -- (contract life cycle 0x1007)
 -- getStatus unfreeze freeze grantManager queryManager revokeManager
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xbca14431', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"getStatus\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"getStatus","outputs":[{"name":"","type":"uint256"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x61cb24c3', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"unfreeze\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"addr","type":"address"}],"name":"unfreeze","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xf12c66df', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"freeze\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"addr","type":"address"}],"name":"freeze","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x27c46414', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"userAddr\",\"type\":\"address\"}],\"name\":\"grantManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"userAddr","type":"address"}],"name":"grantManager","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xa450e730', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"queryManager\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"queryManager","outputs":[{"name":"","type":"uint256"},{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 
 -- TODO 与v143-v150中重复
 -- INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 -- VALUES ('0x00c77684', 0,
---         '{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"userAddr\",\"type\":\"address\"}],\"name\":\"revokeManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+--         '{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"userAddr","type":"address"}],"name":"revokeManager","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
 --         'function', 1, now(), now());
 -- (chain governance 0x1008)
 -- listOperators updateCommitteeMemberWeight queryThreshold queryCommitteeMemberWeight grantCommitteeMember
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xb90059a3', 0,
-        '{\"constant\":true,\"inputs\":[],\"name\":\"listOperators\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[],"name":"listOperators","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x95e96f8f', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"weight\",\"type\":\"int256\"}],\"name\":\"updateCommitteeMemberWeight\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"},{"name":"weight","type":"int256"}],"name":"updateCommitteeMemberWeight","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x35365efb', 0,
-        '{\"constant\":true,\"inputs\":[],\"name\":\"queryThreshold\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[],"name":"queryThreshold","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xc784c982', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"queryCommitteeMemberWeight\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"},{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"user","type":"address"}],"name":"queryCommitteeMemberWeight","outputs":[{"name":"","type":"bool"},{"name":"","type":"int256"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xcbff0346', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"grantCommitteeMember\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"}],"name":"grantCommitteeMember","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- unfreezeAccount listCommitteeMembers updateThreshold revokeCommitteeMember grantOperator
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x2312386d', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"unfreezeAccount\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"account","type":"address"}],"name":"unfreezeAccount","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x77cb0994', 0,
-        '{\"constant\":true,\"inputs\":[],\"name\":\"listCommitteeMembers\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[],"name":"listCommitteeMembers","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x931af204', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"threshold\",\"type\":\"int256\"}],\"name\":\"updateThreshold\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"threshold","type":"int256"}],"name":"updateThreshold","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x681362f3', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"revokeCommitteeMember\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"}],"name":"revokeCommitteeMember","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xd1db6540', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"grantOperator\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"}],"name":"grantOperator","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 -- freezeAccount revokeOperator getAccountStatus
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0x563e46a5', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"freezeAccount\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"account","type":"address"}],"name":"freezeAccount","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xc9ab2069', 0,
-        '{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"revokeOperator\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}',
+        '{"constant":false,"inputs":[{"name":"user","type":"address"}],"name":"revokeOperator","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"}',
         'function', 1, now(), now());
 INSERT INTO tb_method(method_id, group_id, abi_info, method_type, contract_type, create_time, modify_time)
 VALUES ('0xa41e61cc', 0,
-        '{\"constant\":true,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"getAccountStatus\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}',
+        '{"constant":true,"inputs":[{"name":"account","type":"address"}],"name":"getAccountStatus","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}',
         'function', 1, now(), now());
 
 
@@ -368,14 +366,14 @@ VALUES ('节点异常告警/Node Exception', 0, 1, 1, 3600,
 INSERT INTO tb_alert_rule(rule_name, enable, alert_type, alert_level, alert_interval_seconds, alert_content,
                           content_param_list, create_time, modify_time)
 VALUES ('审计异常告警/Audit Exception', 0, 2, 1, 3600,
-        '审计异常：{auditType}，请到“交易审计”页面查看具体信息 / Audit alert: {auditTypeEn}，please check out in \"Transaction Audit\"',
-        '[\"{auditType}\", \"{auditTypeEn}\"]', now(), now());
+        '审计异常：{auditType}，请到“交易审计”页面查看具体信息 / Audit alert: {auditTypeEn}，please check out in "Transaction Audit"',
+        '["{auditType}", "{auditTypeEn}"]', now(), now());
 -- add cert alert rule template
 INSERT INTO tb_alert_rule(rule_name, enable, alert_type, alert_level, alert_interval_seconds, alert_content,
                           content_param_list, create_time, modify_time)
 VALUES ('证书有效期告警/Cert Validity Exception', 0, 3, 1, 3600,
-        '证书将在{time}过期，请到“证书管理”页面查看具体信息 / Cert validity exception：invalid at {timeEn}，please check out in \"Cert Management\"',
-        '[\"{time}\", \"{timeEn}\"]', now(), now());
+        '证书将在{time}过期，请到“证书管理”页面查看具体信息 / Cert validity exception：invalid at {timeEn}，please check out in "Cert Management"',
+        '["{time}", "{timeEn}"]', now(), now());
 
 
 -- ----------------------------
