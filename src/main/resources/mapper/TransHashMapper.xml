@@ -35,7 +35,7 @@
                                 gas_used, status, extra_data, app_id)
       VALUES (#{trans.transHash}, #{trans.transFrom}, #{trans.transTo}, #{trans.blockNumber}, #{trans.blockTimestamp},
               NOW(), NOW(), #{trans.gasUsed}, #{trans.status}, #{trans.extraData}, #{trans.appId})
-      ON CONFLICT (trans_hash) DO NOTHING;
+      ON CONFLICT DO NOTHING;
   </insert>
 
 

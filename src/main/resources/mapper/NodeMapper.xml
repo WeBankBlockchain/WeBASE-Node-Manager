@@ -27,7 +27,7 @@
   <insert id="add" parameterType="com.webank.webase.node.mgr.node.entity.TbNode">
       INSERT INTO tb_node (node_id, node_name, group_id, node_ip, p2p_port, description, create_time, modify_time)
       VALUES (#{nodeId}, #{nodeName}, #{groupId}, #{nodeIp}, #{p2pPort}, #{description}, NOW(), NOW())
-      ON CONFLICT (node_id) DO NOTHING;
+      ON CONFLICT DO NOTHING;
   </insert>
 
 
