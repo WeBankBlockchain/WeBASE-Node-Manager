@@ -289,7 +289,7 @@ public class ChainService {
      */
     @Transactional
     public boolean generateConfigLocalAndInitDb(String chainName, List<DeployNodeInfo> deployNodeInfoList,
-        String[] ipConf, String imageTag, int encryptType, String webaseSignAddr, String agencyName) {
+        String[] ipConf, String imageTag, int encryptType, String webaseSignAddr, String agencyName, int enableAuth) {
         log.info("Check chainName exists....");
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain != null) {
@@ -319,7 +319,7 @@ public class ChainService {
         List<String> groupIds = new ArrayList<>(ipConfigParseList.get(0).getGroupIdSet());
 //        String groupId = "group" + groupIds.get(0);
         String groupId = groupIds.get(0);
-        deployShellService.execBuildChain(encryptType, ipConf, chainName, chainVersion, groupId);
+        deployShellService.execBuildChain(encryptType, ipConf, chainName, chainVersion, groupId, enableAuth);
 
         try {
             log.info("Init chain front node db data....");

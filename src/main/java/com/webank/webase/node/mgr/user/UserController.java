@@ -14,6 +14,7 @@
 package com.webank.webase.node.mgr.user;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.core.utils.BeanCopyUtils;
 import com.qctc.common.log.annotation.Log;
 import com.qctc.common.log.enums.BusinessType;
 import com.qctc.common.satoken.utils.LoginHelper;
@@ -26,6 +27,7 @@ import com.webank.webase.node.mgr.base.enums.CheckUserExist;
 import com.webank.webase.node.mgr.base.enums.GlobalRoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
+import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
@@ -42,6 +44,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -58,6 +64,9 @@ public class UserController extends BaseController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PathService pathService;
 
     /**
      * add new user info.
@@ -215,6 +224,72 @@ public class UserController extends BaseController {
         }
         // import
         reqImportPem.setAccount(curLoginUser.getUsername());
+        TbUser userRow = userService.importPem(reqImportPem, CheckUserExist.TURE.getValue());
+        baseResponse.setData(userRow);
+
+        log.info("end importPemPrivateKey useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.IMPORT)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
+    @PostMapping("/initImportAuthAdmin")
+    public BaseResponse initImportAuthAdmin(@Valid @RequestBody ReqInitAuthAdmin reqInitAuthAdmin, BindingResult result) {
+        checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start importPemPrivateKey startTime:{},currentAccount:{}",
+                startTime.toEpochMilli(), curLoginUser);
+
+        Path caDir = pathService.getCaDir(reqInitAuthAdmin.getChainName());
+
+        // 读取ca目录下生成的权限管理管理员的账户
+        String folderPath = "";
+
+        if (reqInitAuthAdmin.getEncryptType() == 0) {
+            folderPath = caDir.resolve("accounts").toAbsolutePath().toString();
+        } else{
+            folderPath = caDir.resolve("accounts_gm").toAbsolutePath().toString();
+        }
+
+        log.info("initImportAuthAdmin, folderPath: {}", folderPath);
+
+        File folder = new File(folderPath);
+        String pemContent = "";
+
+        if (folder.isDirectory()) {
+            File[] files = folder.listFiles((file) -> file.getName().endsWith(".pem") && !file.getName().endsWith(".public.pem"));
+
+            if (files != null) {
+                for (File file : files) {
+                    try {
+                        byte[] fileContentBytes = Files.readAllBytes(file.toPath());
+                        pemContent = new String(fileContentBytes, StandardCharsets.UTF_8);
+                        break; // 读到一个符合条件的文件后退出循环
+                    } catch (Exception e) {
+                        throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
+                    }
+                }
+            }
+        }
+
+//        log.info("initImportAuthAdmin, pemContent: {}", pemContent);
+        if (!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
+            throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
+        }
+
+        reqInitAuthAdmin.setPemContent(pemContent);
+
+        // import
+        reqInitAuthAdmin.setAccount(curLoginUser.getUsername());
+
+        ReqImportPem reqImportPem = new ReqImportPem();
+        BeanCopyUtils.copy(reqInitAuthAdmin, reqImportPem);
+
+//        log.info("initImportAuthAdmin, reqImportPem:{}", reqImportPem);
         TbUser userRow = userService.importPem(reqImportPem, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 

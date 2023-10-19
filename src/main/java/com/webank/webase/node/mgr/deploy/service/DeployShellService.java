@@ -56,7 +56,7 @@ public class DeployShellService {
      * @param chainVersion ex: 2.7.2 without v
      * @return
      */
-    public void execBuildChain(int encryptType, String[] ipLines, String chainName, String chainVersion, String groupId) {
+    public void execBuildChain(int encryptType, String[] ipLines, String chainName, String chainVersion, String groupId, int enableAuth) {
         Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
                 JsonTools.toJSONString(ipLines), chainName, ipConf.toString());
@@ -98,8 +98,12 @@ public class DeployShellService {
 //                String.format(" -v %s ", chainVersion)
 //        );
 
+        String formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -I %s";
+        if (enableAuth == 1) {
+            formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -A -I %s";
+        }
         // chainid此时没有，写死为1
-        String command = String.format("bash %s -f %s -o %s %s %s %s %s -g %s -I %s",
+        String command = String.format(formatString,
                 // build_chain.sh shell script
                 constant.getBuildChainShell(),
                 // ipconf file path

@@ -138,7 +138,7 @@ public class DeployController extends BaseController {
             // generate node config and return shell execution log
             deployService.configChainAndScp(deploy.getChainName(), deploy.getDeployNodeInfoList(),
                     deploy.getIpconf(), deploy.getImageTag(), deploy.getEncryptType(),
-                    deploy.getWebaseSignAddr(), deploy.getAgencyName());
+                    deploy.getWebaseSignAddr(), deploy.getAgencyName(), deploy.getEnableAuth());
             log.info("End configChainAndHost:[{}], usedTime:[{}]", JsonTools.toJSONString(deploy), Duration
                 .between(startTime, Instant.now()).toMillis());
             return new BaseResponse(ConstantCode.SUCCESS);

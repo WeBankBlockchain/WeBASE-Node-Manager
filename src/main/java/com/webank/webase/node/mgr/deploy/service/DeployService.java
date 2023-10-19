@@ -92,7 +92,7 @@ public class DeployService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void configChainAndScp(String chainName, List<DeployNodeInfo> deployNodeInfoList, String[] ipConf,
-        String imageTag, int encrtypType, String webaseSignAddr, String agencyName)
+        String imageTag, int encrtypType, String webaseSignAddr, String agencyName, int enableAuth)
         throws InterruptedException {
         // convert to host id list by distinct id
         List<Integer> hostIdList = deployNodeInfoList.stream().map(DeployNodeInfo::getHostId).collect(
@@ -111,7 +111,7 @@ public class DeployService {
         log.info("configChainAndScp configChain and init db data");
         // config locally(chain, front, group, front_group_map, agency etc.)
         boolean configSuccess = this.configChain(chainName, deployNodeInfoList, ipConf, imageTag, encrtypType,
-            webaseSignAddr, agencyName);
+            webaseSignAddr, agencyName, enableAuth);
         if (!configSuccess) {
             log.error("configChainAndScp fail to config chain and init db data");
             chainService.updateStatus(chainName, ChainStatusEnum.START_FAIL);
@@ -148,7 +148,7 @@ public class DeployService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean configChain(String chainName, List<DeployNodeInfo> deployNodeInfoList, String[] ipConf, String imageTag,
-        int encryptType, String webaseSignAddr, String agencyName) throws NodeMgrException {
+        int encryptType, String webaseSignAddr, String agencyName, int enableAuth) throws NodeMgrException {
         log.info("start configChain chainName:{},ipConf:{}", chainName, ipConf);
 
         if (StringUtils.isBlank(chainName)) {
@@ -176,7 +176,7 @@ public class DeployService {
         // generate config files(chain's config&cert) gen front's yml
         // and insert data to db （chain update as initialized
         boolean genSuccess = chainService.generateConfigLocalAndInitDb(chainName, deployNodeInfoList, ipConf,
-            imageTag, encryptType, webaseSignAddr, agencyName);
+            imageTag, encryptType, webaseSignAddr, agencyName, enableAuth);
         return genSuccess;
     }
 

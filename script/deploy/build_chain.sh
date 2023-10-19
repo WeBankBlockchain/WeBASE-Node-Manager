@@ -556,6 +556,7 @@ Usage:
     -d <CA cert path>                   [Required when expand node] When expanding the node, specify the path where the CA certificate and private key are located
     -D <docker mode>                    Default off. If set -D, build with docker
     -a <Auth account>                   [Optional] when Auth mode Specify the admin account address.
+    -A <Auth mode>                      [Optional] Enable Auth mode.
     -w <WASM mode>                      [Optional] Whether to use the wasm virtual machine engine, default is false
     -R <Serial_mode>                    [Optional] Whether to use serial execute,default is true
     -k <key page size>                  [Optional] key page size, default is 10240
@@ -586,7 +587,7 @@ EOF
 }
 
 parse_params() {
-    while getopts "f:l:C:c:o:e:t:p:d:g:G:L:v:i:I:M:k:zwDshHmn:R:a:N:u:" option; do
+    while getopts "f:l:C:c:o:e:t:p:d:g:G:L:v:i:I:M:k:zwDshHmAn:R:a:N:u:" option; do
         case $option in
         f)  ip_file=$OPTARG
             use_ip_param="false"
@@ -658,6 +659,7 @@ parse_params() {
           auth_admin_account="${OPTARG}"
           auth_mode="true"
         ;;
+        A) auth_mode="true";;
         v) compatibility_version="${OPTARG}";;
         z) make_tar="true";;
         N)
@@ -1613,8 +1615,8 @@ generate_genesis_config() {
 
 [version]
     ; compatible version, can be dynamically upgraded through setSystemConfig
-    ; the default is 3.2.0
-    compatibility_version=3.2.0
+    ; the default is 3.4.0
+    compatibility_version=3.4.0
 [tx]
     ; transaction gas limit
     gas_limit=3000000000
