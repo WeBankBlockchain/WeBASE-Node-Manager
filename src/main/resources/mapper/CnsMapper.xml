@@ -31,7 +31,7 @@
                          create_time, modify_time)
       VALUES (#{groupId}, #{contractPath}, #{contractName}, #{cnsName}, #{version}, #{contractAddress}, #{contractAbi},
               NOW(), NOW())
-      ON CONFLICT (id, group_id, cns_name, version)
+      ON CONFLICT (group_id, cns_name, version)
           DO UPDATE
           SET contract_name    = #{contract_name},
               contract_path    = #{contractPath},

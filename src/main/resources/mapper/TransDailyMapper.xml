@@ -26,7 +26,7 @@
   <insert id="addTransDailyRow" parameterType="com.webank.webase.node.mgr.transdaily.TbTransDaily">
       INSERT INTO tb_trans_daily(group_id, trans_day, trans_count, block_number, create_time, modify_time)
       VALUES (#{groupId}, #{transDay}, #{transCount}, #{blockNumber}, NOW(), NOW())
-      ON CONFLICT DO NOTHING;
+      ON CONFLICT (group_id,trans_day) DO NOTHING;
   </insert>
 
   <select id="queryMaxBlockByGroup" parameterType="java.lang.Integer"
