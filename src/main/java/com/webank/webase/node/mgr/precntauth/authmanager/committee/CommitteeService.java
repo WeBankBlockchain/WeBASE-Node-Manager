@@ -23,6 +23,7 @@ import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqUpd
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqUsrDeployInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqVoteProposalInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.vote.GovernVoteService;
+import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.user.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,6 +132,24 @@ public class CommitteeService {
         String frontRsp = frontRestTools.postForEntity(
             reqVoteProposalInfo.getGroupId(), FrontRestTools.RPC_AUTHMANAGER_COMMITTEE_PRO_VOTE,
             reqVoteProposalInfo, String.class);
+        return frontRsp;
+    }
+
+
+    /**
+     * @description 设置节点为观察、共识、游离节点以及设置节点权重的提案
+     * @param consensusHandle
+     * @return java.lang.Object
+     * @author 2023/10/25
+     * @date zhangyang 10:46:23
+     */
+    public Object consensusMgrProposal(ConsensusHandle consensusHandle) {
+        String signUserId = userService.getSignUserIdByAddress(consensusHandle.getGroupId(),
+                consensusHandle.getFromAddress());
+        consensusHandle.setSignUserId(signUserId);
+        String frontRsp = frontRestTools.postForEntity(
+                consensusHandle.getGroupId(), FrontRestTools.RPC_AUTHMANAGER_COMMITTEE_CONSENSUS,
+                consensusHandle, String.class);
         return frontRsp;
     }
 }

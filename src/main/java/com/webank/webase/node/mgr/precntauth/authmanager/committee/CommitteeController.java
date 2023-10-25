@@ -22,6 +22,8 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.precntauth.authmanager.base.BaseService;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.*;
+import com.webank.webase.node.mgr.precntauth.precompiled.base.PrecompiledUtil;
+import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
@@ -187,5 +189,17 @@ public class CommitteeController extends BaseController {
             return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
         }
         return committeeService.voteProposal(reqVoteProposalInfo);
+    }
+
+    @Log(title = "BCOS3/节点管理/权限管理", businessType = BusinessType.UPDATE)
+    @PostMapping("proposal/consensus")
+    public Object nodeManageProposal(@Valid @RequestBody ConsensusHandle consensusHandle) {
+        log.info("start nodeManageProposal. consensusHandle:{}", consensusHandle);
+//        String nodeType = consensusHandle.getNodeType();
+        String nodeId = consensusHandle.getNodeId();
+        if (!PrecompiledUtil.checkNodeId(nodeId)) {
+            return ConstantCode.INVALID_NODE_ID;
+        }
+        return committeeService.consensusMgrProposal(consensusHandle);
     }
 }

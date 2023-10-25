@@ -156,6 +156,7 @@ public class FrontRestTools {
     public static final String RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE = "precntauth/authmanager/committee/deploy/type";
     public static final String RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN = "precntauth/authmanager/committee/contract/admin";
     public static final String RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY = "precntauth/authmanager/committee/usr/deploy";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_CONSENSUS = "precntauth/authmanager/committee/proposal/consensus";
     // 3) admin
     public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET = "precntauth/authmanager/admin/method/auth/set";
     public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE = "precntauth/authmanager/admin/method/auth/type";
@@ -196,7 +197,7 @@ public class FrontRestTools {
             RPC_AUTHMANAGER_COMMITTEE_RATE,
             RPC_AUTHMANAGER_COMMITTEE_PRO_VOTE, RPC_AUTHMANAGER_COMMITTEE_PRO_REVOKE,
             RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE,
-            RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN, RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY,
+            RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN, RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY, RPC_AUTHMANAGER_COMMITTEE_CONSENSUS,
             RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET, RPC_AUTHMANAGER_ADMIN_CONTRACT_STATUS_SET,
             RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE, RPC_PRECOM_SYS_CONFIG_LIST,
             RPC_PRECOM_SYS_CONFIG,
