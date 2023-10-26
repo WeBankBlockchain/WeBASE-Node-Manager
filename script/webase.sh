@@ -13,11 +13,11 @@ if [[ ! $IP || ! $PORT ]] ; then
 fi
 
 #dbUser
-DBUSER="defaultAccount"
+DBUSER="sysdba"
 #dbPass
-PASSWD="defaultPassword"
+PASSWD="1qaz2wsx!@#$RFV"
 #dbName
-DBNAME="webasenodemanager"
+DBNAME="wm"
 
 
 #connect to database then execute init

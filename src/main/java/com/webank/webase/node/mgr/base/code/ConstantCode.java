@@ -335,7 +335,11 @@ public class ConstantCode {
     public static final RetCode USER_NOT_LOGGED_IN = RetCode.mark(302000, "user not logged in");
     public static final RetCode ACCESS_DENIED = RetCode.mark(302001, "access denied");
 
+    public static final RetCode FAILED_TO_GET_QH_TOKEN = RetCode.mark(302002, "failed to get qh token");
+
     /* param exception */
     public static final RetCode PARAM_EXCEPTION = RetCode.mark(402000, "param exception");
+
+
 
 }
