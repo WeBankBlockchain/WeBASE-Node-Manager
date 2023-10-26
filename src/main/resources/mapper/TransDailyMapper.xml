@@ -10,7 +10,7 @@
     <result column="trans_count" javaType="java.lang.Integer" jdbcType="INTEGER"
       property="transCount"/>
   </resultMap>
-
+	<!-- 达梦数据库的时间间隔函数使用上， DATE_SUB(CURDATE(), INTERVAL '7' DAY) ，不能直接传7, 仅支持 '7',MYSQL两种都支持   -->
   <select id="listSeventDayOfTransDaily" resultMap="seventDayOfTransMap">
 		select group_id,trans_day,trans_count from tb_trans_daily where group_id = #{groupId} and trans_day &gt;= DATE_SUB(CURDATE(), INTERVAL '7' DAY)
 	</select>
