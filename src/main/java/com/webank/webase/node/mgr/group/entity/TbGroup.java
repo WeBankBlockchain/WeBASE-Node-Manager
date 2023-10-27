@@ -68,6 +68,7 @@ public class TbGroup {
         this.groupType = groupType.getValue();
         this.groupStatus = groupStatus.getValue();
         this.chainId = chainId;
+        this.chainName = chainName;
         this.encryptType = encryptType;
     }
 

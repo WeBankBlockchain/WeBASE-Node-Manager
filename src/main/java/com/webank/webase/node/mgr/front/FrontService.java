@@ -1176,14 +1176,14 @@ public class FrontService {
      * check if chain already running
      */
     @Transactional
-    public void refreshFrontStatus() {
+    public void refreshFrontStatus(String chainName) {
         // get all front
         List<TbFront> frontList = frontMapper.getAllList();
         if (frontList == null || frontList.size() == 0) {
             log.info("refreshFrontStatus jump over, front not found.");
             return;
         }
-        if (!chainService.runTask()) {
+        if (!chainService.runTask(chainName)) {
             log.info("refreshFrontStatus jump over, chain not running yet.");
             return;
         }

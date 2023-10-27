@@ -1,6 +1,7 @@
 package com.webank.webase.node.mgr.deploy.mapper;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -97,4 +98,16 @@ public interface TbChainMapper {
         "#{detail.createTime,jdbcType=TIMESTAMP}, #{detail.modifyTime,jdbcType=TIMESTAMP})</foreach></script>"
     })
     int batchInsert(java.util.List<TbChain> list);
+
+    @Select({
+            "select",
+            TbChainSqlProvider.ALL_COLUMN_FIELDS,
+            "from tb_chain"
+    })
+    List<TbChain> getChainList();
+
+    @Select({
+            "select count(id) from tb_chain where chain_status=3",
+    })
+    int getRunningChainCount();
 }

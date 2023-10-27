@@ -593,12 +593,12 @@ public class GroupService {
      */
     private void checkGroupGenesisSameWithEach() {
         log.info("start checkGroupGenesisSameWithEach.");
-        // get all front
-        List<TbFront> frontList = frontService.getFrontList(new FrontParam());
-        if (frontList == null || frontList.size() == 0) {
-            log.warn("checkGroupGenesisSameWithEach not found any front.");
-            return;
-        }
+//        // get all front
+//        List<TbFront> frontList = frontService.getFrontList(new FrontParam());
+//        if (frontList == null || frontList.size() == 0) {
+//            log.warn("checkGroupGenesisSameWithEach not found any front.");
+//            return;
+//        }
         List<TbGroup> allGroupList = getGroupList(null);
         if (allGroupList.isEmpty()) {
             log.warn("checkGroupGenesisSameWithEach not found any group of front.");
@@ -608,6 +608,14 @@ public class GroupService {
         for (TbGroup tbGroup : allGroupList) {
             String groupId = tbGroup.getGroupId();
             String lastBlockHash = "";
+            // get all front
+            FrontParam frontParam = new FrontParam();
+            frontParam.setGroupId(groupId);
+            List<TbFront> frontList = frontService.getFrontList(new FrontParam());
+            if (frontList == null || frontList.size() == 0) {
+                log.warn("checkGroupGenesisSameWithEach not found any front.");
+                return;
+            }
             for (TbFront front : frontList) {
                 if( ! FrontStatusEnum.isRunning(front.getStatus()) ){
                     log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());

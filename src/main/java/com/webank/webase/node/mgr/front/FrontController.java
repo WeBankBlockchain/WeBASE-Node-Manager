@@ -158,11 +158,11 @@ public class FrontController extends BaseController {
     @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @GetMapping(value = "/refresh/status")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse refreshFrontStatus() throws NodeMgrException {
+    public BaseResponse refreshFrontStatus(@RequestParam(value = "chainName", required = false, defaultValue = "default_chain_v3") String chainName) throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start refreshFrontStatus startTime:{} ", startTime.toEpochMilli());
 
-        frontService.refreshFrontStatus();
+        frontService.refreshFrontStatus(chainName);
 
         log.info("end queryFrontList useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);

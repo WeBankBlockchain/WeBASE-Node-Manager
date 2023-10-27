@@ -404,6 +404,7 @@ public class ChainService {
                 int frontPort = targetNode.getFrontPort();
 
                 log.info("!!!initChainDbData, targetNode is: {}", targetNode);
+                log.info("!!!initChainDbData, nodeConfig is: {}", nodeConfig);
 
                 // host
 //                TbHost host = newIpHostMap.get(ip);
@@ -496,20 +497,47 @@ public class ChainService {
      *  if chain running, return true
      * @return
      */
-    public boolean runTask(){
+//    public boolean runTask(){
+//        // 0, original deploy chain first; 1, deploy chain visually
+//        if (constant.getDeployType() == 0 ) {
+//            log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(), isChainRunning.get());
+//            return true;
+//        }
+//        // set default chain status
+//        TbChain default_chain = this.tbChainMapper.getByChainName("default_chain_v3");
+//        if (default_chain != null && default_chain.getChainStatus() == ChainStatusEnum.RUNNING.getId()){
+//            isChainRunning.set(true);
+//        }
+//
+//        log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
+//        return isChainRunning.get();
+//    }
+
+     public boolean runTask(){
         // 0, original deploy chain first; 1, deploy chain visually
         if (constant.getDeployType() == 0 ) {
             log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(), isChainRunning.get());
             return true;
         }
         // set default chain status
-        TbChain default_chain = this.tbChainMapper.getByChainName("default_chain_v3");
-        if (default_chain != null && default_chain.getChainStatus() == ChainStatusEnum.RUNNING.getId()){
+        int runningChainCount = this.tbChainMapper.getRunningChainCount();
+        if (runningChainCount > 0){
             isChainRunning.set(true);
         }
 
         log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
         return isChainRunning.get();
+    }
+
+    public boolean runTask(String chainName){
+        // 0, original deploy chain first; 1, deploy chain visually
+        if (constant.getDeployType() == 0 ) {
+            log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(), isChainRunning.get());
+            return true;
+        }
+        // set default chain status
+        TbChain chain = this.tbChainMapper.getByChainName(chainName);
+        return chain != null && chain.getChainStatus() == ChainStatusEnum.RUNNING.getId();
     }
 
     public DeployNodeInfo getFrontPort(List<DeployNodeInfo> deployNodeInfoList, String ip, int channelPort, int rpcPort, int p2pPort) {
