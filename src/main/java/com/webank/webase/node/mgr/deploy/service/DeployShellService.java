@@ -137,7 +137,7 @@ public class DeployShellService {
                         String.format(" -e %s ", constant.getFiscoBcosBinary()),
                 String.format(" -v %s ", chainVersion),
                 groupId,
-                "chain1"
+                "chain" + groupId
         );
 
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());

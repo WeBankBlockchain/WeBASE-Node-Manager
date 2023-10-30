@@ -611,7 +611,7 @@ public class GroupService {
             // get all front
             FrontParam frontParam = new FrontParam();
             frontParam.setGroupId(groupId);
-            List<TbFront> frontList = frontService.getFrontList(new FrontParam());
+            List<TbFront> frontList = frontService.getFrontList(frontParam);
             if (frontList == null || frontList.size() == 0) {
                 log.warn("checkGroupGenesisSameWithEach not found any front.");
                 return;
@@ -734,7 +734,7 @@ public class GroupService {
                 log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
                 continue;
             }
-            // query roup list from chain
+            // query group list from chain
             List<String> groupListOnChain;
             try {
                 groupListOnChain = frontInterface.getGroupListFromSpecificFront(front.getFrontIp(), front.getFrontPort());
@@ -746,10 +746,11 @@ public class GroupService {
             groupListLocal.forEach(group -> {
                 String groupId = group.getGroupId();
                 // only check local group id
-                if (!groupListOnChain.contains(groupId)) {
+                // 支持多链，只有front的链id和group的链id一致才新建更新
+                if (!groupListOnChain.contains(groupId) && group.getChainId().equals(front.getChainId())) {
                     log.info("update front_group_map by local data front:{}, groupId:{} ",
                             front, groupId);
-                    // case: group2 in font1, not in front2, but local has group2, so add front1_group2_map but not front2_group2_map
+                    // case: group2 in front1, not in front2, but local has group2, so add front1_group2_map but not front2_group2_map
                     frontGroupMapService.newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
                 }
             });
