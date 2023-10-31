@@ -20,8 +20,8 @@
         <SizeBasedTriggeringPolicy size="100 MB"/>
       </Policies>
       <DefaultRolloverStrategy max="15">
-        <Delete basePath="${logPath}" maxDepth="2">
-          <IfFileName glob="*/WeBASE-Node-Manager.log.*.log.gz" />
+        <Delete basePath="${logPath}" maxDepth="1">
+          <IfFileName glob="WeBASE-Node-Manager.log.*" />
           <IfLastModified age="5d" />
         </Delete>
       </DefaultRolloverStrategy>
@@ -38,8 +38,8 @@
         <SizeBasedTriggeringPolicy size="100 MB"/>
       </Policies>
       <DefaultRolloverStrategy max="15">
-        <Delete basePath="${logPath}" maxDepth="2">
-          <IfFileName glob="*/WeBASE-Node-Manager-error.log.*.log.gz" />
+        <Delete basePath="${logPath}" maxDepth="1">
+          <IfFileName glob="WeBASE-Node-Manager-error.log.*" />
           <IfLastModified age="5d" />
         </Delete>
       </DefaultRolloverStrategy>
