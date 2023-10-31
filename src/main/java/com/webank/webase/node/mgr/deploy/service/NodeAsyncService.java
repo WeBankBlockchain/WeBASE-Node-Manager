@@ -87,6 +87,7 @@ public class NodeAsyncService {
             chainService.updateStatus(chainId, startSuccess ? success : failed);
             if (startSuccess) {
                 log.info("if started, refresh front group map");
+                CertTools.isPullFrontCertsDone = false;
                 groupService.resetGroupList();
             }
         }, Instant.now().plusMillis(1L));
