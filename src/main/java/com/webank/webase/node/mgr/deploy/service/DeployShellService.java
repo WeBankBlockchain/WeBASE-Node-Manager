@@ -111,7 +111,7 @@ public class DeployShellService {
             formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -A -I %s";
 
             // 如果之前建完链，删除过链，则admin_auth存在，不再新生成授权管理员
-            TbUser admin = userService.queryUser(null, null, "admin_auth", null, null);
+            TbUser admin = userService.queryUser(null, null, "admin_auth" + groupId, null, null);
             if (null != admin && admin.getAddress() != null && admin.getAddress().length() > 0) {
                 String adminAddr = admin.getAddress();
                 formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -I %s -a " + adminAddr;
