@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 //@Api(value = "auth/base/", tags = "check auth controller")
 @RestController
 @RequestMapping("auth/base/")
-@SaCheckPermission("bcos3:sys:newPermission")
+//@SaCheckPermission("bcos3:sys:newPermission")
 public class BaseAuthController {
     @Autowired
     private BaseService baseService;

@@ -39,7 +39,6 @@ import java.time.Instant;
 @Slf4j
 @RestController
 @RequestMapping(value = "precntauth/precompiled/consensus")
-@SaCheckPermission("bcos3:chain:nodeManage")
 public class ConsensusController {
 
     @Autowired
@@ -59,6 +58,7 @@ public class ConsensusController {
 //    @ApiImplicitParam(name = "consensusHandle", value = "node consensus info", required = true, dataType = "ConsensusHandle")
     @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @PostMapping("manage")
+    @SaCheckPermission("bcos3:chain:nodeManage")
     public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle) {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();
