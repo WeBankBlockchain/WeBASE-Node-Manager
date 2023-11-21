@@ -70,7 +70,7 @@ public class AuditMonitorTask {
         log.info("start checkUserAndContractForAlert startTime:{}", startTime.toEpochMilli());
         //check last alert time, if within interval, not send
         TbAlertRule alertRule = alertRuleService.queryByRuleId(AlertRuleType.AUDIT_ALERT.getValue());
-        if(AlertRuleTools.isWithinAlertIntervalByNow(alertRule)) {
+        if((alertRule==null)||(AlertRuleTools.isWithinAlertIntervalByNow(alertRule))) {
             log.debug("end checkUserAndContractForAlert non-sending mail" +
                     " for beyond alert interval:{}", alertRule);
             return;
