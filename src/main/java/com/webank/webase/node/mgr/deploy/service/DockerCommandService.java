@@ -103,7 +103,7 @@ public class DockerCommandService {
             log.info("pullImage from docker hub");
             String dockerPullCommand = String.format("docker pull %s", imageFullName);
             // kill exists docker pull process
-            ExecuteResult result = ansibleService.execDocker(hostDTO, dockerPullCommand);
+            ExecuteResult result = ansibleService.execDockerPull(hostDTO, dockerPullCommand);
             if (result.failed()) {
                 throw new NodeMgrException(ConstantCode.ANSIBLE_PULL_DOCKER_HUB_ERROR.attach(result.getExecuteOut()));
             }

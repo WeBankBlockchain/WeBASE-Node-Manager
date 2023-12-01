@@ -286,6 +286,13 @@ public class AnsibleService {
         return result;
     }
 
+    public ExecuteResult execDockerPull(HostDTO hostDTO, String dockerCommand) {
+        log.info("execDocker ip:{},dockerCommad:{}", hostDTO.getIp(), dockerCommand);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m command -a \"%s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), dockerCommand);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
+        return result;
+    }
+
     /**
      * mv dir on remote
      */
