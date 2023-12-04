@@ -387,15 +387,20 @@ public class StatService {
         long transCount = 0;
         if (count > 0) {
             List<TbGroup> groupList = groupService.getGroupList(null);
-            if (groupList != null && groupList.size() > 0) {
+            if (groupList != null && !groupList.isEmpty()) {
                 for (TbGroup group : groupList) {
-                    nodeCount += group.getNodeCount();
-                    GroupGeneral groupGeneral = groupService.getGeneralAndUpdateNodeCount(group.getGroupId());
-                    contractCount += groupGeneral.getContractCount();
+                    // 此处捕获异常，因为如果某条链停止后，会抛出异常，导致接口返回错误，此处处理为不抛出异常，只是不统计对应链的节点等数目
+                    try {
+                        nodeCount += group.getNodeCount();
+                        GroupGeneral groupGeneral = groupService.getGeneralAndUpdateNodeCount(group.getGroupId());
+                        contractCount += groupGeneral.getContractCount();
 
-                    TotalTransactionCount.TransactionCountInfo transCountInfo = frontInterface.getTotalTransactionCount(group.getGroupId());
-                    if (transCountInfo != null) {
-                        transCount += Long.parseLong(transCountInfo.getTransactionCount());
+                        TotalTransactionCount.TransactionCountInfo transCountInfo = frontInterface.getTotalTransactionCount(group.getGroupId());
+                        if (transCountInfo != null) {
+                            transCount += Long.parseLong(transCountInfo.getTransactionCount());
+                        }
+                    } catch (Exception e) {
+                        log.warn("getChainStat, err: {}, and continue next chain", e.getMessage());
                     }
                 }
             }
