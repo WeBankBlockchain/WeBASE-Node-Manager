@@ -27,6 +27,10 @@
         <result column="chain_id" jdbcType="INTEGER" property="chainId" />
         <result column="chain_name" jdbcType="VARCHAR" property="chainName" />
         <result column="encrypt_type" jdbcType="INTEGER" property="encryptType" />
+        <result column="user_id" javaType="java.math.BigInteger" jdbcType="INTEGER"
+                property="userId"/>
+        <result column="dept_id" javaType="java.math.BigInteger" jdbcType="INTEGER"
+                property="deptId"/>
     </resultMap>
 
 
@@ -42,14 +46,14 @@
     </resultMap>
 
     <sql id="QUERY_ROW_COLUMN">
-        front_id frontId,front_ip frontIp,front_port frontPort,create_time createTime,modify_time modifyTime,chain_id, chain_name
+        front_id frontId,front_ip frontIp,front_port frontPort,create_time createTime,modify_time modifyTime,chain_id, chain_name, user_id, dept_id
     </sql>
 
     <insert id="save" parameterType="com.webank.webase.node.mgr.group.entity.TbGroup">
         insert into tb_group
-        (group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time,chain_id,chain_name,encrypt_type)
+        (group_id,group_name,node_count,description,group_type,group_status,group_timestamp,node_id_list,create_time,modify_time,chain_id,chain_name,encrypt_type,user_id,dept_id)
         values(#{groupId},#{groupName},#{nodeCount},#{description},#{groupType},#{groupStatus},p
-        #{groupTimestamp},#{nodeIdList},NOW(),NOW(),#{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR}, #{encryptType,jdbcType=INTEGER})
+        #{groupTimestamp},#{nodeIdList},NOW(),NOW(),#{chainId,jdbcType=INTEGER}, #{chainName,jdbcType=VARCHAR}, #{encryptType,jdbcType=INTEGER}, #{userId}, #{deptId})
         ON DUPLICATE KEY UPDATE node_count=#{nodeCount},modify_time=NOW()
     </insert>
 
@@ -89,6 +93,12 @@
             <if test="encryptType != null" >
                 encrypt_type,
             </if>
+            <if test="userId != null" >
+                user_id,
+            </if>
+            <if test="deptId != null" >
+                dept_id,
+            </if>
             create_time,modify_time,
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides="," >
@@ -124,6 +134,12 @@
             </if>
             <if test="encryptType != null" >
                 #{encryptType},
+            </if>
+            <if test="userId != null" >
+                #{userId},
+            </if>
+            <if test="deptId != null" >
+                #{deptId},
             </if>
             NOW(),NOW(),
         </trim>

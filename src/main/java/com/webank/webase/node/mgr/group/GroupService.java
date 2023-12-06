@@ -13,8 +13,10 @@
  */
 package com.webank.webase.node.mgr.group;
 
+import com.qctc.common.satoken.utils.LoginHelper;
 import com.qctc.host.api.RemoteHostService;
 import com.qctc.host.api.model.HostDTO;
+import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -66,6 +68,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import com.qctc.common.mybatis.helper.DataPermissionHelper;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -224,8 +227,7 @@ public class GroupService {
         log.debug("start queryLatestStatisticalTrans");
         try {
             // query list
-            List<StatisticalGroupTransInfo> listStatisticalTrans = groupMapper
-                    .queryLatestStatisticalTrans();
+            List<StatisticalGroupTransInfo> listStatisticalTrans = DataPermissionHelper.ignore(() -> groupMapper.queryLatestStatisticalTrans());
             log.debug("end queryLatestStatisticalTrans listStatisticalTrans:{}",
                     JsonTools.toJSONString(listStatisticalTrans));
             return listStatisticalTrans;
@@ -860,10 +862,13 @@ public class GroupService {
         if (groupId.isEmpty()) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
+
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+
         //save group id
         TbGroup tbGroup = new TbGroup(groupId, groupId,
             nodeCount, groupDesc, groupType, groupStatus,
-            chainId, chainName, encryptType);
+            chainId, chainName, encryptType, BigInteger.valueOf(curLoginUser.getUserId()), BigInteger.valueOf(curLoginUser.getDeptId()));
         groupMapper.insertSelective(tbGroup);
 
         //create table by group id
@@ -880,10 +885,12 @@ public class GroupService {
             return null;
         }
         // save group id
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         String groupName = "group" + groupId;
         TbGroup tbGroup =
                 new TbGroup(groupId, groupName, nodeCount, description,
-                        groupType, groupStatus,chainId, chainName, encryptType);
+                        groupType, groupStatus,chainId, chainName, encryptType,
+                        BigInteger.valueOf(curLoginUser.getUserId()), BigInteger.valueOf(curLoginUser.getDeptId()));
         tbGroup.setGroupTimestamp(timestamp.toString(10));
         tbGroup.setNodeIdList(JsonTools.toJSONString(nodeIdList));
         log.debug("saveGroup tbGroup:{}", tbGroup);

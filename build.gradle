@@ -138,6 +138,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-javadoc:1.6.15'
 
     implementation 'org.apache.dubbo:dubbo-spring-boot-starter:3.1.8'
+    implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.3.1'
     /* end: 微服务框架集成 */
 
     compileOnly lombok

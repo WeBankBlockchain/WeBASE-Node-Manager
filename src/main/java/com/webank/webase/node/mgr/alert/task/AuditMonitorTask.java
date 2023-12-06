@@ -16,6 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
+import com.qctc.common.mybatis.helper.DataPermissionHelper;
 import com.webank.webase.node.mgr.alert.mail.MailService;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;
@@ -75,7 +76,7 @@ public class AuditMonitorTask {
                     " for beyond alert interval:{}", alertRule);
             return;
         }
-        List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
+        List<TbGroup> groupList = DataPermissionHelper.ignore(() -> groupService.getGroupList(DataStatus.NORMAL.getValue()));
         if (groupList == null || groupList.size() == 0) {
             log.warn("checkUserAndContractForAlert jump over: not found any group");
             return;
