@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.deploy.entity;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
@@ -37,9 +38,10 @@ public class TbChain {
                                 byte encryptType,
                                 ChainStatusEnum status,
                                RunTypeEnum runTypeEnum,
-                               String webaseSignAddr
+                               String webaseSignAddr,
+                               BigInteger userId, BigInteger deptId
 
-    ){
+    ) {
         Date now = new Date();
         TbChain chain  = new TbChain();
         chain.setChainName(chainName);
@@ -51,6 +53,8 @@ public class TbChain {
         chain.setModifyTime(now);
         chain.setRunType(runTypeEnum.getId());
         chain.setWebaseSignAddr(webaseSignAddr);
+        chain.setUserId(userId);
+        chain.setDeptId(deptId);
         return chain;
     }
 
@@ -143,4 +147,7 @@ public class TbChain {
      * @mbg.generated
      */
     private Date modifyTime;
+
+    private BigInteger userId = BigInteger.ZERO;
+    private BigInteger deptId = BigInteger.ZERO;
 }

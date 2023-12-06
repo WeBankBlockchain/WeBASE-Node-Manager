@@ -392,11 +392,22 @@ public class DeployController extends BaseController {
     @GetMapping(value = "chain/list")
     public BaseResponse getChainList() {
         Instant startTime = Instant.now();
-        log.info("Start getChainlist chainName:[{}], now:[{}]", startTime);
+        log.info("Start getChainlist, now:[{}]", startTime);
 
         List<TbChain> chainList = this.tbChainMapper.getChainList();
         log.info("end getChainlist. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS, chainList);
+    }
+
+    @SaCheckPermission("bcos3:chains")
+    @GetMapping(value = "chain/count")
+    public BaseResponse getChainCount() {
+        Instant startTime = Instant.now();
+        log.info("Start getChainCount now:[{}]", startTime);
+
+        int chainCount = this.tbChainMapper.countChain();
+        log.info("end getChainCount. useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return new BaseResponse(ConstantCode.SUCCESS, chainCount);
     }
 
     /**

@@ -13,8 +13,12 @@
  */
 package com.webank.webase.node.mgr.deploy.chain;
 
+import com.qctc.common.mybatis.annotation.DataPermission;
+import com.qctc.common.mybatis.helper.DataPermissionHelper;
+import com.qctc.common.satoken.utils.LoginHelper;
 import com.qctc.host.api.RemoteHostService;
 import com.qctc.host.api.model.HostDTO;
+import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -46,6 +50,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -155,8 +160,8 @@ public class ChainService {
 
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbChain insert(String chainName, String chainDesc, String version, byte encryptType, ChainStatusEnum status, RunTypeEnum runTypeEnum, String webaseSignAddr ) throws NodeMgrException {
-        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, runTypeEnum, webaseSignAddr);
+    public TbChain insert(String chainName, String chainDesc, String version, byte encryptType, ChainStatusEnum status, RunTypeEnum runTypeEnum, String webaseSignAddr, Long userId, Long deptId) throws NodeMgrException {
+        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, runTypeEnum, webaseSignAddr, BigInteger.valueOf(userId), BigInteger.valueOf(deptId));
 
         if (tbChainMapper.insertSelective(chain) != 1 || chain.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_CHAIN_ERROR);
@@ -168,7 +173,7 @@ public class ChainService {
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int chainId, ChainStatusEnum newStatus) {
         log.info("Update chain:[{}] status to:[{}]",chainId, newStatus.toString());
-        int count =  this.tbChainMapper.updateChainStatus(chainId, new Date(), newStatus.getId());
+        int count = DataPermissionHelper.ignore(() -> this.tbChainMapper.updateChainStatus(chainId, new Date(), newStatus.getId()));
         return count == 1;
     }
 
@@ -177,7 +182,7 @@ public class ChainService {
     public boolean updateStatus(String chainName, ChainStatusEnum newStatus) {
         log.info("Update chain:[{}] status to:[{}]",chainName, newStatus.toString());
         TbChain chain = tbChainMapper.getByChainName(chainName);
-        int count =  this.tbChainMapper.updateChainStatus(chain.getId(), new Date(), newStatus.getId());
+        int count = DataPermissionHelper.ignore(() -> this.tbChainMapper.updateChainStatus(chain.getId(), new Date(), newStatus.getId()));
         return count == 1;
     }
 
@@ -187,11 +192,14 @@ public class ChainService {
         log.info("Upgrade chain:[{}] from version:[{}] to version:[{}].",
                 chain.getChainName(), chain.getVersion(), newTagVersion);
 
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         TbChain newChain = new TbChain();
         newChain.setId(chain.getId());
         newChain.setVersion(newTagVersion);
         newChain.setModifyTime(new Date());
         newChain.setChainStatus(ChainStatusEnum.UPGRADING.getId());
+        newChain.setUserId(BigInteger.valueOf(curLoginUser.getUserId()));
+        newChain.setDeptId(BigInteger.valueOf(curLoginUser.getDeptId()));
         int count = this.tbChainMapper.updateByPrimaryKeySelective(newChain);
 
         if(count != 1){
@@ -323,9 +331,10 @@ public class ChainService {
 
         try {
             log.info("Init chain front node db data....");
+            LoginUser curLoginUser = LoginHelper.getLoginUser();
             // save chain data in db, generate front's yml
             ((ChainService) AopContext.currentProxy()).initChainDbData(chainName, deployNodeInfoList,
-                ipConfigParseList, webaseSignAddr, imageTag, (byte)encryptType, agencyName);
+                ipConfigParseList, webaseSignAddr, imageTag, (byte)encryptType, agencyName, curLoginUser.getUserId(), curLoginUser.getDeptId());
         } catch (Exception e) {
             log.error("Init chain:[{}] data error. remove generated files:[{}]",
                     chainName, this.pathService.getChainRoot(chainName), e);
@@ -352,14 +361,14 @@ public class ChainService {
      */
     @Transactional
     public void initChainDbData(String chainName,  List<DeployNodeInfo> deployNodeInfoList, List<IpConfigParse> ipConfigParseList,
-                                String webaseSignAddr, String imageTag, byte encryptType, String agencyName){
+                                String webaseSignAddr, String imageTag, byte encryptType, String agencyName, Long userId, Long deptId){
         log.info("start initChainDbData chainName:{}, ipConfigParseList:{}",
             chainName, ipConfigParseList);
         ProgressTools.setInitChainData();
         // insert chain
         final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
             imageTag, encryptType, ChainStatusEnum.INITIALIZED,
-                RunTypeEnum.DOCKER, webaseSignAddr);
+                RunTypeEnum.DOCKER, webaseSignAddr, userId, deptId);
 
         // all host ips
         Map<String, HostDTO> newIpHostMap = new HashMap<>();
