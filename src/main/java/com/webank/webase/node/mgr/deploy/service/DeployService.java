@@ -168,8 +168,11 @@ public class DeployService {
             throw new NodeMgrException(ConstantCode.WEBASE_SIGN_NOT_LOCALHOST_ERROR);
         }
         // check WeBASE Sign accessible
-        if (StringUtils.isBlank(webaseSignAddr)
-                || ! NetUtils.checkAddress(webaseSignAddr, 2000) ) {
+//        if (StringUtils.isBlank(webaseSignAddr)
+//                || ! NetUtils.checkAddress(webaseSignAddr, 2000) ) {
+//            throw new NodeMgrException(ConstantCode.WEBASE_SIGN_CONFIG_ERROR);
+//        }
+        if (StringUtils.isBlank(webaseSignAddr)) {
             throw new NodeMgrException(ConstantCode.WEBASE_SIGN_CONFIG_ERROR);
         }
 
