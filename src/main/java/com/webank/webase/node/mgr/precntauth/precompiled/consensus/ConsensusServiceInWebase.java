@@ -66,6 +66,16 @@ public class ConsensusServiceInWebase {
     return frontRsp;
   }
 
+  public String setWeight(ConsensusHandle consensusHandle) {
+      String signUserId = userService.getSignUserIdByAddress(consensusHandle.getGroupId(),
+              consensusHandle.getFromAddress());
+      consensusHandle.setSignUserId(signUserId);
+      String frontRsp = frontRestTools.postForEntity(
+              consensusHandle.getGroupId(), FrontRestTools.RPC_PRECOM_CONSENSUS_MGR,
+              consensusHandle, String.class);
+      return frontRsp;
+  }
+
 
   public String addObserver(ConsensusHandle consensusHandle) {
     String signUserId = userService.getSignUserIdByAddress(consensusHandle.getGroupId(),

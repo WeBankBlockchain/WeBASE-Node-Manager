@@ -73,6 +73,8 @@ public class ConsensusController {
                 return addObserver(consensusHandle);
             case PrecompiledUtil.NODE_TYPE_REMOVE:
                 return removeNode(consensusHandle);
+            case PrecompiledUtil.NODE_TYPE_WEIGHT:
+                return setWeight(consensusHandle);
             default:
                 log.debug("end nodeManageControl invalid node type");
                 return ConstantCode.INVALID_NODE_TYPE;
@@ -91,6 +93,22 @@ public class ConsensusController {
             return res;
         } catch (Exception e) {
             log.error("addSealer exception:[]", e);
+            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
+        }
+    }
+
+    public Object setWeight(ConsensusHandle consensusHandle) {
+        Instant startTime = Instant.now();
+        if (consensusHandle.getWeight() == null) {
+            throw new NodeMgrException(ConstantCode.ADD_SEALER_WEIGHT_CANNOT_NULL);
+        }
+        try {
+            Object res = consensusService.setWeight(consensusHandle);
+            log.info("end setWeight useTime:{} res:{}",
+                    Duration.between(startTime, Instant.now()).toMillis(), res);
+            return res;
+        } catch (Exception e) {
+            log.error("setWeight exception:[]", e);
             return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }
