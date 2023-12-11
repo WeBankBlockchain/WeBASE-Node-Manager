@@ -13,12 +13,15 @@
  */
 package com.webank.webase.node.mgr.deploy.chain;
 
+import cn.hutool.core.util.HexUtil;
 import com.qctc.common.mybatis.annotation.DataPermission;
 import com.qctc.common.mybatis.helper.DataPermissionHelper;
 import com.qctc.common.satoken.utils.LoginHelper;
 import com.qctc.host.api.RemoteHostService;
 import com.qctc.host.api.model.HostDTO;
 import com.qctc.system.api.model.LoginUser;
+import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.SpringBeanUtils;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -38,6 +41,7 @@ import com.webank.webase.node.mgr.node.NodeService;
 import com.webank.webase.node.mgr.tools.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.aop.framework.AopContext;
@@ -51,12 +55,14 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.webank.webase.node.mgr.front.frontinterface.FrontRestTools.URI_CHAIN;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * chain monitor
@@ -160,8 +166,8 @@ public class ChainService {
 
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbChain insert(String chainName, String chainDesc, String version, byte encryptType, ChainStatusEnum status, RunTypeEnum runTypeEnum, String webaseSignAddr, Long userId, Long deptId) throws NodeMgrException {
-        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, runTypeEnum, webaseSignAddr, BigInteger.valueOf(userId), BigInteger.valueOf(deptId));
+    public TbChain insert(String chainName, String chainId, String chainDesc, String version, byte encryptType, ChainStatusEnum status, RunTypeEnum runTypeEnum, String webaseSignAddr, Long userId, Long deptId) throws NodeMgrException {
+        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, runTypeEnum, webaseSignAddr, BigInteger.valueOf(userId), BigInteger.valueOf(deptId), chainId);
 
         if (tbChainMapper.insertSelective(chain) != 1 || chain.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_CHAIN_ERROR);
@@ -269,7 +275,7 @@ public class ChainService {
 
         log.info("Delete chain:[{}] config files", chainName);
         try {
-            this.pathService.deleteChain(chainName);
+            this.pathService.deleteChain(chainName, chain.getChainId());
         } catch (IOException e) {
             errorFlag++;
             log.error("Delete chain config files error:[]", e);
@@ -327,19 +333,20 @@ public class ChainService {
         List<String> groupIds = new ArrayList<>(ipConfigParseList.get(0).getGroupIdSet());
 //        String groupId = "group" + groupIds.get(0);
         String groupId = groupIds.get(0);
+        String chainId = "chain" + groupId;
         deployShellService.execBuildChain(encryptType, ipConf, chainName, chainVersion, groupId, enableAuth);
 
         try {
             log.info("Init chain front node db data....");
             LoginUser curLoginUser = LoginHelper.getLoginUser();
             // save chain data in db, generate front's yml
-            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName, deployNodeInfoList,
+            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName, chainId, deployNodeInfoList,
                 ipConfigParseList, webaseSignAddr, imageTag, (byte)encryptType, agencyName, curLoginUser.getUserId(), curLoginUser.getDeptId());
         } catch (Exception e) {
             log.error("Init chain:[{}] data error. remove generated files:[{}]",
                     chainName, this.pathService.getChainRoot(chainName), e);
             try {
-                this.pathService.deleteChain(chainName);
+                this.pathService.deleteChain(chainName, chainId);
             } catch (IOException ex) {
                 log.error("Delete chain directory error when init chain data throws an exception.", e);
                 throw new NodeMgrException(ConstantCode.DELETE_CHAIN_ERROR);
@@ -360,13 +367,13 @@ public class ChainService {
      * @param encryptType
      */
     @Transactional
-    public void initChainDbData(String chainName,  List<DeployNodeInfo> deployNodeInfoList, List<IpConfigParse> ipConfigParseList,
+    public void initChainDbData(String chainName, String chainId,  List<DeployNodeInfo> deployNodeInfoList, List<IpConfigParse> ipConfigParseList,
                                 String webaseSignAddr, String imageTag, byte encryptType, String agencyName, Long userId, Long deptId){
         log.info("start initChainDbData chainName:{}, ipConfigParseList:{}",
             chainName, ipConfigParseList);
         ProgressTools.setInitChainData();
         // insert chain
-        final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
+        final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainId, chainName,
             imageTag, encryptType, ChainStatusEnum.INITIALIZED,
                 RunTypeEnum.DOCKER, webaseSignAddr, userId, deptId);
 
@@ -560,5 +567,30 @@ public class ChainService {
             }
         }
         return targetNodeInfo;
+    }
+
+    // 获取链文件夹路径，如果chainName包含中文，那么使用传进来的非空并且不包含中文的chainId，如果chainId为空，则从chain数据表库中获取chainId
+    // 如果最终获取的都为空，那么将chainName转换为hex
+    public static String getChainDirName(String chainName, String chainId) {
+         String chainDirName = null;
+         if (CleanPathUtil.containsChinese(chainName)) {
+             if (!StringUtils.isBlank(chainId) && !CleanPathUtil.containsChinese(chainId)) {
+                 chainDirName = chainId;
+             } else {
+                 TbChainMapper tbChainMapper1 = SpringBeanUtils.getApplicationContext().getBean(TbChainMapper.class);
+                 TbChain tbChain = tbChainMapper1.getByChainName(chainName);
+                 if (null != tbChain) {
+                     chainDirName = tbChain.getChainId();
+                 }
+             }
+         } else {
+             chainDirName = chainName;
+         }
+         
+         if (StringUtils.isBlank(chainDirName)) {
+             chainDirName = HexUtil.encodeHexStr(chainName, UTF_8);
+         }
+
+         return chainDirName;
     }
 }

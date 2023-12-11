@@ -18,6 +18,7 @@ package com.webank.webase.node.mgr.deploy.service;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
@@ -55,6 +56,10 @@ public class DeployShellService {
     @Autowired
     private UserService userService;
 
+    @Lazy
+    @Autowired
+    private ChainService chainService;
+
 
     /**
      * build_chain.sh
@@ -65,6 +70,9 @@ public class DeployShellService {
      * @return
      */
     public void execBuildChain(int encryptType, String[] ipLines, String chainName, String chainVersion, String groupId, int enableAuth) {
+        String chainId = "chain" + groupId;
+        chainName = chainService.getChainDirName(chainName, chainId);
+
         Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
                 JsonTools.toJSONString(ipLines), chainName, ipConf.toString());
@@ -137,7 +145,7 @@ public class DeployShellService {
                         String.format(" -e %s ", constant.getFiscoBcosBinary()),
                 String.format(" -v %s ", chainVersion),
                 groupId,
-                "chain" + groupId
+                chainId
         );
 
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());

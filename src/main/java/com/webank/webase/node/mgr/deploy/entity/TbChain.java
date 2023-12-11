@@ -39,7 +39,7 @@ public class TbChain {
                                 ChainStatusEnum status,
                                RunTypeEnum runTypeEnum,
                                String webaseSignAddr,
-                               BigInteger userId, BigInteger deptId
+                               BigInteger userId, BigInteger deptId, String chainId
 
     ) {
         Date now = new Date();
@@ -55,6 +55,7 @@ public class TbChain {
         chain.setWebaseSignAddr(webaseSignAddr);
         chain.setUserId(userId);
         chain.setDeptId(deptId);
+        chain.setChainId(chainId);
         return chain;
     }
 
@@ -150,4 +151,6 @@ public class TbChain {
 
     private BigInteger userId = BigInteger.ZERO;
     private BigInteger deptId = BigInteger.ZERO;
+
+    private String chainId;
 }

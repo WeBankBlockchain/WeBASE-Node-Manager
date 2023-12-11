@@ -21,6 +21,7 @@ import com.webank.webase.node.mgr.base.enums.DockerImageTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.config.properties.VersionProperties;
+import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
 import java.io.File;
 import lombok.extern.log4j.Log4j2;
@@ -51,6 +52,7 @@ public class DockerCommandService {
      * @return delete all {@link File#separator} and blank of node path on host.
      */
     public static String getContainerName(String rootDirOnHost, String chainName, int hostIndex) {
+        chainName = ChainService.getChainDirName(chainName, "");
         return String.format("%s%snode%s",
             rootDirOnHost.replaceAll(File.separator, "").replaceAll(" ", ""), chainName, hostIndex);
     }
