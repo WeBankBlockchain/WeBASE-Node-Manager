@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.precntauth.authmanager.committee;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precntauth.authmanager.base.BaseService;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqDeployAuthTypeInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqResetAdminInfo;
@@ -34,6 +35,7 @@ import java.time.Instant;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,6 +63,7 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqUpdateGovernorInfo", value = "governor info", required = true
         , dataType = "ReqUpdateGovernorInfo")
     @PostMapping("governor")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateGovernor(
         @Valid @RequestBody ReqUpdateGovernorInfo reqUpdateGovernorInfo, BindingResult result) {
         if (baseService.queryExecEnvIsWasm(reqUpdateGovernorInfo.getGroupId())) {
@@ -87,6 +90,7 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqSetRateInfo", value = "rate info", required = true,
         dataType = "ReqSetRateInfo")
     @PostMapping("rate")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object setRate(@Valid @RequestBody ReqSetRateInfo reqSetRateInfo) {
         if (baseService.queryExecEnvIsWasm(reqSetRateInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
@@ -104,6 +108,7 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqDeployAuthTypeInfo", value = "DeployAuthTypeInfo", required = true,
         dataType = "ReqDeployAuthTypeInfo")
     @PostMapping("deploy/type")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object setDeployAuthType(
         @Valid @RequestBody ReqDeployAuthTypeInfo reqDeployAuthTypeInfo) {
         if (baseService.queryExecEnvIsWasm(reqDeployAuthTypeInfo.getGroupId())) {
@@ -122,6 +127,7 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqUsrDeployInfo", value = "usrDeployAuth info", required = true,
         dataType = "ReqUsrDeployInfo")
     @PostMapping("usr/deploy")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object modifyDeployUsrAuth(@Valid @RequestBody ReqUsrDeployInfo reqUsrDeployInfo) {
         if (baseService.queryExecEnvIsWasm(reqUsrDeployInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
@@ -139,6 +145,7 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqResetAdminInfo", value = "resetAdmin info", required = true,
         dataType = "ReqResetAdminInfo")
     @PostMapping("contract/admin")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object resetAdmin(@Valid @RequestBody ReqResetAdminInfo reqResetAdminInfo) {
         if (baseService.queryExecEnvIsWasm(reqResetAdminInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
@@ -156,6 +163,7 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqRevokeProposalInfo", value = "revokeProposal info", required = true,
         dataType = "ReqRevokeProposalInfo")
     @PostMapping("proposal/revoke")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object revokeProposal(@Valid @RequestBody ReqRevokeProposalInfo reqRevokeProposalInfo) {
         if (baseService.queryExecEnvIsWasm(reqRevokeProposalInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
@@ -173,6 +181,7 @@ public class CommitteeController extends BaseController {
     @ApiImplicitParam(name = "reqVoteProposalInfo", value = "voteProposal info", required = true,
         dataType = "ReqVoteProposalInfo")
     @PostMapping("proposal/vote")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object voteProposal(@Valid @RequestBody ReqVoteProposalInfo reqVoteProposalInfo) {
         if (baseService.queryExecEnvIsWasm(reqVoteProposalInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);

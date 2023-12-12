@@ -17,6 +17,7 @@ import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.node.entity.NodeParam;
 import com.webank.webase.node.mgr.node.entity.ReqUpdate;
 import com.webank.webase.node.mgr.node.entity.RspCity;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -151,6 +153,7 @@ public class NodeController {
      * update tb_node info of city, agency, ip etc.
      */
     @PutMapping("/description")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateDesc(@Valid @RequestBody ReqUpdate reqUpdate) {
         Instant startTime = Instant.now();
         log.info("updateDesc startTime:{},reqUpdate:{}",

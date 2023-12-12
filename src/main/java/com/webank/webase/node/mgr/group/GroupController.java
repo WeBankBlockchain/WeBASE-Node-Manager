@@ -241,6 +241,7 @@ public class GroupController extends BaseController {
      * delete all group's data(trans, contract, node etc.)
      */
     @DeleteMapping("/{groupId}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deleteGroupData(@PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);

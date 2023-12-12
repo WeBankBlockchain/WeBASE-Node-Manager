@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.precntauth.authmanager.admin;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclAuthTypeInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqAclUsrInfo;
 import com.webank.webase.node.mgr.precntauth.authmanager.admin.entity.ReqContractStatus;
@@ -27,6 +28,7 @@ import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,6 +58,7 @@ public class AdminController extends BaseController {
     @ApiOperation(value = "set contract func acl type")
     @ApiImplicitParam(name = "reqAclAuthTypeInfo", value = "aclType info", required = true, dataType = "ReqAclAuthTypeInfo")
     @PostMapping("method/auth/type")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public Object setMethodAuthType(@Valid @RequestBody ReqAclAuthTypeInfo reqAclAuthTypeInfo) {
         if (baseService.queryExecEnvIsWasm(reqAclAuthTypeInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
@@ -74,6 +77,7 @@ public class AdminController extends BaseController {
     @ApiOperation(value = "set contract func usr acl")
     @ApiImplicitParam(name = "reqAclUsrInfo", value = "aclUsr info", required = true, dataType = "ReqAclUsrInfo")
     @PostMapping("method/auth/set")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public Object setMethodAuth(@Valid @RequestBody ReqAclUsrInfo reqAclUsrInfo) {
         if (baseService.queryExecEnvIsWasm(reqAclUsrInfo.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
@@ -91,6 +95,7 @@ public class AdminController extends BaseController {
     @ApiOperation(value = "set contract func usr acl")
     @ApiImplicitParam(name = "reqContractStatus", value = "status info", required = true, dataType = "ReqContractStatus")
     @PostMapping("contract/status/set")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public Object setContractStatus(@Valid @RequestBody ReqContractStatus reqContractStatus) {
         if (baseService.queryExecEnvIsWasm(reqContractStatus.getGroupId())) {
             return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
