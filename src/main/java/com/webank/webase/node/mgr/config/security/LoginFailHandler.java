@@ -35,7 +35,7 @@ public class LoginFailHandler implements AuthenticationFailureHandler {
             AuthenticationException ex) throws IOException {
         log.info("login fail", ex);
         String errorMsg = ex.getMessage();
-        RetCode retCode = ConstantCode.PASSWORD_ERROR; // default password fail
+        RetCode retCode = ConstantCode.ACCOUNT_OR_PASSWORD_ERROR; // default password fail
         if (errorMsg.contains("code")) {
             retCode = JsonTools.toJavaObject(errorMsg, RetCode.class);
         }

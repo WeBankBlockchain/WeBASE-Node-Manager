@@ -92,7 +92,7 @@ public class ConstantCode {
 
     public static final RetCode INVALID_ACCOUNT_NAME = RetCode.mark(202029, "invalid account name");
 
-    public static final RetCode PASSWORD_ERROR = RetCode.mark(202030, "password error");
+    public static final RetCode ACCOUNT_OR_PASSWORD_ERROR = RetCode.mark(202030, "account name or password error");
 
     public static final RetCode ROLE_ID_EMPTY = RetCode.mark(202031, "role id cannot be empty");
 
@@ -169,7 +169,7 @@ public class ConstantCode {
     public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(202122, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
     public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(202123, "Pem file content error");
     public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(202124, "p12's password cannot be chinese");
-    public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(202125, "p12's password not match");
+    public static final RetCode P12_ACCOUNT_OR_PASSWORD_ERROR = RetCode.mark(202125, "p12's password not match");
     public static final RetCode P12_FILE_ERROR = RetCode.mark(202126, "P12 file content error");
 
     /* dynamic group manage */
