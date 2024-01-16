@@ -2,6 +2,7 @@ package com.webank.webase.node.mgr.precntauth.precompiled.cns;
 
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqCnsInfoByName;
 import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqInfoByNameVersion;
 import com.webank.webase.node.mgr.precntauth.precompiled.cns.entity.ReqRegisterCnsInfo;
@@ -12,6 +13,7 @@ import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,7 @@ public class CNSController {
   @ApiOperation(value = "register the cns info")
   @ApiImplicitParam(name = "reqCnsInfo", value = "register info", required = true, dataType = "ReqRegisterCnsInfo")
   @PostMapping("register")
+  @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
   public Object registerCNS(@Valid @RequestBody ReqRegisterCnsInfo reqCnsInfo)
       {
     return new BaseResponse(ConstantCode.SUCCESS, cnsServiceInWebase.registerCNS(reqCnsInfo));
@@ -54,6 +57,7 @@ public class CNSController {
   @ApiOperation(value = "query the address info by name version")
   @ApiImplicitParam(name = "reqAddressInfoByNameVersion", value = "name and version info", required = true, dataType = "ReqInfoByNameVersion")
   @PostMapping("reqAddressInfoByNameVersion")
+  @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
   public Object queryAddressByNameVersion(
       @Valid @RequestBody ReqInfoByNameVersion reqAddressInfoByNameVersion)
       {

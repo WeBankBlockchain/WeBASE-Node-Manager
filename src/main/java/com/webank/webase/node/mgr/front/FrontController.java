@@ -128,6 +128,7 @@ public class FrontController extends BaseController {
      * delete by frontId
      */
     @DeleteMapping(value = "/{frontId}")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse removeFront(@PathVariable("frontId") Integer frontId) {
         Instant startTime = Instant.now();
         log.info("start removeFront startTime:{} frontId:{}",
