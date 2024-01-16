@@ -186,7 +186,12 @@ public class FrontService {
         //check valid ip
         checkNotSupportIp(frontIp);
         //check front ip and port
-        NodeMgrTools.checkServerConnect(frontIp, frontPort);
+        try {
+            NodeMgrTools.checkServerConnect(frontIp, frontPort);
+        } catch (Exception ex) {
+            log.error("wrong ip port of front error: ", ex);
+            throw new NodeMgrException(ConstantCode.REQUEST_FRONT_FAIL);
+        }
         //query group list
         List<String> groupIdList = null;
         try {

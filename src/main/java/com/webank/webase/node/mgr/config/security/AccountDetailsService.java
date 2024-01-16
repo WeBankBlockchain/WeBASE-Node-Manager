@@ -59,11 +59,11 @@ public class AccountDetailsService implements UserDetailsService {
             if (e instanceof NodeMgrException) {
                 throw new UsernameNotFoundException(JsonTools.toJSONString(((NodeMgrException) e).getRetCode()));
             } else {
-                throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.DB_EXCEPTION));
+                throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.ACCOUNT_OR_PASSWORD_ERROR));
             }
         }
         if (null == accountRow) {
-            throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.INVALID_ACCOUNT_NAME));
+            throw new UsernameNotFoundException(JsonTools.toJSONString(ConstantCode.ACCOUNT_OR_PASSWORD_ERROR));
         }
 
         // add role

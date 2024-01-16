@@ -90,7 +90,7 @@ public class AccountService {
         // check pwd
         if (StringUtils.isBlank(passwordStr)) {
             log.info("fail login. passwordStr is null");
-            throw new NodeMgrException(ConstantCode.PASSWORD_ERROR);
+            throw new NodeMgrException(ConstantCode.ACCOUNT_OR_PASSWORD_ERROR);
         }
         // encode by bCryptPasswordEncoder
         TbAccountInfo accountRow = this.queryByAccount(accountStr);
@@ -102,7 +102,7 @@ public class AccountService {
             log.info("fail login. pwd error,loginFailTime:{}", loginFailTime);
             accountRow.setLoginFailTime(loginFailTime);
             this.updateAccountRowEncrypted(accountRow);
-            throw new NodeMgrException(ConstantCode.PASSWORD_ERROR);
+            throw new NodeMgrException(ConstantCode.ACCOUNT_OR_PASSWORD_ERROR);
         }
 
         return accountRow;
@@ -260,7 +260,7 @@ public class AccountService {
 
         // check old password
         if (!passwordEncoder.matches(oldAccountPwd, targetRow.getAccountPwd())) {
-            throw new NodeMgrException(ConstantCode.PASSWORD_ERROR);
+            throw new NodeMgrException(ConstantCode.ACCOUNT_OR_PASSWORD_ERROR);
         }
 
         // update password

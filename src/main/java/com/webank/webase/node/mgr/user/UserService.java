@@ -639,7 +639,7 @@ public class UserService {
         } catch (LoadKeyStoreException e) {
             log.error("importKeyStoreFromP12 error:[]", e);
             if (e.getMessage().contains("password")) {
-                throw new NodeMgrException(ConstantCode.P12_PASSWORD_ERROR);
+                throw new NodeMgrException(ConstantCode.P12_ACCOUNT_OR_PASSWORD_ERROR);
             }
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
@@ -694,7 +694,7 @@ public class UserService {
             p12Password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
         } catch (Exception e) {
             log.error("decode password error:[]", e);
-            throw new NodeMgrException(ConstantCode.P12_PASSWORD_ERROR);
+            throw new NodeMgrException(ConstantCode.P12_ACCOUNT_OR_PASSWORD_ERROR);
         }
         // check user signUserId and account
         TbUser user = userMapper.getBySignUserId(signUserId);

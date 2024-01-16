@@ -16,6 +16,7 @@ package com.webank.webase.node.mgr.precntauth.precompiled.consensus;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precntauth.precompiled.base.PrecompiledUtil;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ReqNodeListInfo;
@@ -27,6 +28,7 @@ import java.time.Instant;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,6 +56,7 @@ public class ConsensusController {
     @ApiOperation(value = "manage node type", notes = "addSealer addObserver removeNode")
     @ApiImplicitParam(name = "consensusHandle", value = "node consensus info", required = true, dataType = "ConsensusHandle")
     @PostMapping("manage")
+    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle) {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();
