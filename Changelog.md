@@ -1,3 +1,17 @@
+### v3.1.1(2024-01-19)
+
+**Fix**
+- 修复预编译合约中报错权限不足的bug
+- 统一登录和请求节点前置的错误提示
+
+**兼容性**
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Web v3.1.1及以上版本
+- WeBASE-Front v3.1.1
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
+
+
 ### v3.1.0(2023-07-20)
 
 **Add**
@@ -8,7 +22,7 @@
 
 **兼容性**
 - 支持FISCO-BCOS v3.0.0 及以上版本
-- WeBASE-Web v3.0.2及以上版本
+- WeBASE-Web v3.1.0及以上版本
 - WeBASE-Front v3.1.0
 - WeBASE-APP-SDK v1.5.6级以上版本
 
