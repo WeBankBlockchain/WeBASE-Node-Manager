@@ -17,7 +17,7 @@
 package com.webank.webase.node.mgr.base.enums;
 
 public enum AlertRuleType {
-    NODE_ALERT(1), AUDIT_ALERT(2), CERT_ALERT(3);
+    NODE_ALERT(1), AUDIT_ALERT(2), CERT_ALERT(3), CPU_ALERT(4), MEM_ALERT(5);
 
     private int value;
 

@@ -261,7 +261,10 @@ INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`ale
 INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`create_time`,`modify_time`) VALUES ('审计异常告警/Audit Exception', 0, 2, 1, 3600, '审计异常：{auditType}，请到“交易审计”页面查看具体信息 / Audit alert: {auditTypeEn}，please check out in \"Transaction Audit\"', '[\"{auditType}\", \"{auditTypeEn}\"]', now(), now());
 -- add cert alert rule template
 INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`create_time`,`modify_time`) VALUES ('证书有效期告警/Cert Validity Exception', 0, 3, 1, 3600, '证书将在{time}过期，请到“证书管理”页面查看具体信息 / Cert validity exception：invalid at {timeEn}，please check out in \"Cert Management\"', '[\"{time}\", \"{timeEn}\"]', now(), now());
-
+-- add cpu alert rule template
+INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`create_time`,`modify_time`,`larger_than`) VALUES ('CPU负载告警/CPU Load Exception', 0, 1, 1, 3600, '节点({nodeIp})：CPU负载({usage})持续超过{threshold}，请到“节点管理”页面增加资源配置 / Node({nodeIp}) CPU load({usage}): consistently exceeds {threshold}, please check out in \"Node Management\"', '[\"{nodeIp}\", \"{usage}\", \"{threshold}\"]', now(), now(), '90');
+-- add memory alert rule template
+INSERT INTO `tb_alert_rule`(`rule_name`,`enable`,`alert_type`,`alert_level`,`alert_interval_seconds`,`alert_content`,`content_param_list`,`create_time`,`modify_time`,`larger_than`) VALUES ('内存负载告警/Memory Load Exception', 0, 1, 1, 3600, '节点({nodeIp})：内存负载({usage})持续超过{threshold}，请到“节点管理”页面增加资源配置 / Node({nodeIp}) Memory load({usage}): consistently exceeds {threshold}, please check out in \"Node Management\"', '[\"{nodeIp}\", \"{usage}\", \"{threshold}\"]', now(), now(), '90');
 -- ----------------------------
 -- 6、init tb_mail_server_config
 -- ----------------------------

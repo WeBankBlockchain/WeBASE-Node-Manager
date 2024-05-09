@@ -166,5 +166,21 @@ public class DockerCommandService {
         }
     }
 
+    public String stats(HostDTO hostDTO, String containerName) {
+        log.info("stats ip:{}, containerName:{}", hostDTO.getIp(), containerName);
+         /*
+         boolean containerExist = ansibleService.checkContainerExists(hostDTO, containerName);
+         if (!containerExist) {
+             log.info("stats container jump over, not found container");
+             return null;
+         }
+         */
+        String dockerRmCommand = String.format("docker stats --no-stream --format json --no-trunc %s ", containerName);
+        ExecuteResult result = ansibleService.execDocker(hostDTO, dockerRmCommand);
+        if (result.failed()) {
+            return null;
+        }
+        return result.getExecuteOut();
+    }
 }
 
