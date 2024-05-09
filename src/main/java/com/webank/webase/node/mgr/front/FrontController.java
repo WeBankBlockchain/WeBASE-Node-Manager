@@ -22,34 +22,19 @@ import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.front.entity.*;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.front.frontinterface.entity.ReqSdkConfig;
 import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.front.entity.FrontInfo;
-import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
-import com.webank.webase.node.mgr.front.entity.FrontParam;
-import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.tools.NetUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import javax.validation.Valid;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupInfo.GroupInfo;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * front controller
@@ -99,6 +84,23 @@ public class FrontController extends BaseController {
         return baseResponse;
     }
 
+    /**
+     * 修改节点资源（CPU和内存）
+     */
+    @Log(title = "BCOS2/修改节点资源", businessType = BusinessType.UPDATE)
+    @PostMapping("/setResource")
+    public BaseResponse setResource(@RequestBody @Valid FrontRes frontRes, BindingResult result) {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start setResource startTime:{} FrontRes:{}",
+                startTime.toEpochMilli(), JsonTools.toJSONString(frontRes));
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        int res = frontService.setResource(frontRes);
+        baseResponse.setData(res);
+        log.info("end setResource useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
 
     /**
      * query front info list.

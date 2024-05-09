@@ -433,7 +433,8 @@ public class ChainService {
                         RunTypeEnum.DOCKER , hostDTO.getId(), nodeConfig.getHostIndex(), imageTag,
                         DockerCommandService.getContainerName(hostDTO.getRootDir(), chainName,
                         nodeConfig.getHostIndex()), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
-                        nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
+                        nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED,
+                        targetNode.getCpus(), targetNode.getMemory());
                 this.frontService.insert(front);
 
                 // insert node and front group mapping

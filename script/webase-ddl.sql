@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS tb_front (
   channel_port int(6) DEFAULT '20200' COMMENT 'channel 端口',
   chain_id int(10) unsigned DEFAULT '0' COMMENT '所属链 ID',
   chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
+  cpus tinyint unsigned DEFAULT '0' COMMENT 'cpu核数',
+  memory tinyint unsigned DEFAULT '0' COMMENT '内存大小GB',
   PRIMARY KEY (`front_id`),
   UNIQUE KEY `unique_node_id` (`node_id`),
   UNIQUE KEY `unique_ip_port` (`front_ip`,`front_port`),

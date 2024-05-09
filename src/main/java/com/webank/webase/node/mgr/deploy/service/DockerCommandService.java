@@ -126,7 +126,7 @@ public class DockerCommandService {
     }
 
 
-    public void run(HostDTO hostDTO, String imageTag, String containerName, String chainRootOnHost, int nodeIndex) {
+    public void run(HostDTO hostDTO, String imageTag, String containerName, String chainRootOnHost, int nodeIndex, int cpus, int memory) {
         log.info("stop ip:{}, imageTag:{},containerName:{},chainRootOnHost:{},nodeIndex:{}",
                 hostDTO.getIp(), imageTag, containerName, chainRootOnHost, nodeIndex);
         String fullImageName = getImageRepositoryTag(constant.getDockerRepository(), constant.getDockerRegistryMirror(), imageTag);
@@ -137,13 +137,16 @@ public class DockerCommandService {
         String sdk = String.format("%s/sdk", chainRootOnHost);
         String front_log = String.format("%s/front-log", nodeRootOnHost);
 
-        String dockerCreateCommand = String.format("docker run -d --rm --name %s " +
+        if (cpus < 1) cpus = 1;
+        if (memory < 1) memory = 1;
+
+        String dockerCreateCommand = String.format("docker run -d --rm --name %s --cpus=%s -m %sGB " +
                 "-v %s:/data " +
                 "-v %s:/front/conf/application-docker.yml " +
                 "-v %s:/data/sdk " +
                 "-v %s:/front/log " +
                 "-e SPRING_PROFILES_ACTIVE=docker " +
-                "--network=host -w=/data %s ", containerName , nodeRootOnHost, yml, sdk, front_log, fullImageName);
+                "--network=host -w=/data %s ", containerName, cpus, memory, nodeRootOnHost, yml, sdk, front_log, fullImageName);
         log.info("Host:[{}] run container:[{}].", hostDTO.getIp(), containerName);
         // SshTools.execDocker(ip,dockerCreateCommand,sshUser,sshPort,constant.getPrivateKey());
         ansibleService.execDocker(hostDTO, dockerCreateCommand);

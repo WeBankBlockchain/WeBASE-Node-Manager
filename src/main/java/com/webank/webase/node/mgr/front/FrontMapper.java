@@ -83,4 +83,11 @@ public interface FrontMapper {
             "select count(front_id) from tb_front where host_id = #{hostId}"
     })
     int countByHostId(@Param("hostId") int hostId);
+
+    @Update({
+            "update tb_front set cpus=#{cpus},memory=#{memory},modify_time=NOW() where front_id = #{frontId}"
+    })
+    int updateResource(@Param("frontId") int frontId,
+                       @Param("cpus") int cpus,
+                       @Param("memory") int memory);
 }
