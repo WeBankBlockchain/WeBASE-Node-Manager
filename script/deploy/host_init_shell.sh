@@ -37,18 +37,18 @@ function UpdateDNS() {
 #UpdateDNS
 
 # GNU/Linux操作系统
-if [[ $(command -v apt) ]]; then
+#if [[ $(command -v apt) ]]; then
     # Debian/Ubuntu
-    sudo apt -y update && sudo dpkg --configure -a
-elif [[ $(command -v yum) ]]; then
+    #sudo apt -y update && sudo dpkg --configure -a
+#elif [[ $(command -v yum) ]]; then
     # RHEL/CentOS
-    install epel-release epel-release
-fi
+    #install epel-release epel-release
+#fi
 
 # install rsync for synchronizing node files
-install wget wget
-install curl curl
-install netstat netstat
+#install wget wget
+#install curl curl
+#install netstat netstat
 #install vim vim
 #install rsync rsync
 #install nslookup bind-utils
