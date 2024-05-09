@@ -329,7 +329,7 @@ public class GroupService {
      * @param allGroupSet to record all group from each front
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    private void saveDataOfGroup(List<TbFront> frontList, Set<String> allGroupSet) {
+    public void saveDataOfGroup(List<TbFront> frontList, Set<String> allGroupSet) {
         log.info("saveDataOfGroup frontList:{}", frontList);
         for (TbFront front : frontList) {
             String frontIp = front.getFrontIp();
@@ -364,7 +364,7 @@ public class GroupService {
                 TbGroup checkGroupExist = getGroupById(groupId);
                 if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
                     Integer encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort, groupId);
-                    saveGroup(groupId, groupPeerList.size(), "synchronous",
+                    saveGroup2(groupId, groupPeerList.size(), "synchronous",
                             GroupType.SYNC, GroupStatus.NORMAL,
                         front.getChainId(), front.getChainName(), encryptType);
                 }
@@ -869,6 +869,26 @@ public class GroupService {
         TbGroup tbGroup = new TbGroup(groupId, groupId,
             nodeCount, groupDesc, groupType, groupStatus,
             chainId, chainName, encryptType, BigInteger.valueOf(curLoginUser.getUserId()), BigInteger.valueOf(curLoginUser.getDeptId()));
+        groupMapper.insertSelective(tbGroup);
+
+        //create table by group id
+        tableService.newTableByGroupId(groupId);
+        return tbGroup;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbGroup saveGroup2(String groupId, int nodeCount, String groupDesc, GroupType groupType,
+                             GroupStatus groupStatus, Integer chainId, String chainName, Integer encryptType) {
+        log.info("saveGroup groupId:{},groupStatus:{},encryptType:{}",
+                groupId, groupStatus, encryptType);
+        if (groupId.isEmpty()) {
+            throw new NodeMgrException(INSERT_GROUP_ERROR);
+        }
+
+        //save group id
+        TbGroup tbGroup = new TbGroup(groupId, groupId,
+                nodeCount, groupDesc, groupType, groupStatus,
+                chainId, chainName, encryptType, BigInteger.ZERO, BigInteger.ZERO);
         groupMapper.insertSelective(tbGroup);
 
         //create table by group id
