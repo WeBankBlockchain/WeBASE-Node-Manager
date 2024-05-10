@@ -36,8 +36,8 @@ __root=$(realpath -s "${__root}")
 
 
 ########################### properties config ##########################
-image_organization=webasepro
-image_name="webase-node-mgr"
+image_organization=registry.cn-beijing.aliyuncs.com/qchain
+image_name="webase-node-mgr3"
 docker_push="no"
 latest_tag=latest
 new_tag=
@@ -97,6 +97,8 @@ cd "${__root}" && chmod +x ./gradlew && ./gradlew clean build -x test
 
 ## docker build
 cd "${__root}"/dist
+
+cp ../docker/openssl-1.1.1q.tar.gz ./
 
 docker build -t ${image_repository}:${new_tag} -f "${__root}"/docker/build/Dockerfile .
 docker tag "${image_repository}:${new_tag}" "${image_repository}:${latest_tag}"
