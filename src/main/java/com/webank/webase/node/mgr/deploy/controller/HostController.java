@@ -122,7 +122,7 @@ public class HostController extends BaseController {
     /**
      * Deploy by ipconf and tagId.
      */
-    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
+    //@Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @PostMapping(value = "ping")
     public BaseResponse pingHost(@RequestBody @Valid ReqAddHost reqAddHost, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -146,7 +146,7 @@ public class HostController extends BaseController {
     /**
      * check mem/cpu and docker dependency
      */
-    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
+    //@Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @PostMapping(value = "check")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse checkHostList(@RequestBody @Valid ReqCheckHost reqCheckHost,
@@ -174,7 +174,7 @@ public class HostController extends BaseController {
     /**
      * check ansible installed
      */
-    @Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
+    //@Log(title = "BCOS3/节点管理", businessType = BusinessType.OTHER)
     @PostMapping(value = "ansible")
     // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse checkAnsibleInstalled() throws NodeMgrException {
