@@ -13,15 +13,12 @@
  */
 package com.webank.webase.node.mgr.group;
 
-import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
-
+import com.qctc.common.satoken.utils.LoginHelper;
+import com.qctc.host.api.RemoteHostService;
+import com.qctc.host.api.model.HostDTO;
+import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
-import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
+import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.block.entity.TbBlock;
@@ -32,8 +29,6 @@ import com.webank.webase.node.mgr.contract.abi.AbiService;
 import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.entity.TbHost;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.deploy.service.AnsibleService;
 import com.webank.webase.node.mgr.deploy.service.DeployShellService;
 import com.webank.webase.node.mgr.deploy.service.PathService;
@@ -60,6 +55,21 @@ import com.webank.webase.node.mgr.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.ProgressTools;
 import com.webank.webase.node.mgr.transdaily.TransDailyService;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import com.qctc.common.mybatis.helper.DataPermissionHelper;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -72,17 +82,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.CollectionUtils;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
-import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
-import org.springframework.aop.framework.AopContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
+import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_GROUP_ERROR;
 
 /**
  * services for group data.
@@ -93,8 +94,8 @@ public class GroupService {
 
     @Autowired
     private GroupMapper groupMapper;
-    @Autowired
-    private TbHostMapper tbHostMapper;
+//    @Autowired
+//    private TbHostMapper tbHostMapper;
     @Autowired
     private FrontMapper frontMapper;
 
@@ -114,8 +115,12 @@ public class GroupService {
     private ContractService contractService;
     @Autowired
     private MethodService methodService;
+
+    @Lazy
     @Autowired
     private TransDailyService transDailyService;
+
+    @Lazy
     @Autowired
     private BlockService blockService;
     @Autowired
@@ -124,12 +129,16 @@ public class GroupService {
     private PathService pathService;
     @Autowired
     private ConstantProperties constantProperties;
+
+    @Lazy
     @Autowired
     private AbiService abiService;
     @Autowired
     private CnsService cnsService;
     @Autowired
     private ExtAccountService extAccountService;
+
+    @Lazy
     @Autowired
     private ExtContractService extContractService;
     @Autowired
@@ -138,6 +147,9 @@ public class GroupService {
 
     @Autowired private ChainService chainService;
     @Autowired private AnsibleService ansibleService;
+
+    @DubboReference
+    private RemoteHostService remoteHostService;
 
     public static final String RUNNING_GROUP = "RUNNING";
     public static final String OPERATE_START_GROUP = "start";
@@ -215,8 +227,7 @@ public class GroupService {
         log.debug("start queryLatestStatisticalTrans");
         try {
             // query list
-            List<StatisticalGroupTransInfo> listStatisticalTrans = groupMapper
-                    .queryLatestStatisticalTrans();
+            List<StatisticalGroupTransInfo> listStatisticalTrans = DataPermissionHelper.ignore(() -> groupMapper.queryLatestStatisticalTrans());
             log.debug("end queryLatestStatisticalTrans listStatisticalTrans:{}",
                     JsonTools.toJSONString(listStatisticalTrans));
             return listStatisticalTrans;
@@ -247,7 +258,7 @@ public class GroupService {
      * @param groupId
      * @return
      */
-    private GroupGeneral getGeneralAndUpdateNodeCount(String groupId) {
+    public GroupGeneral getGeneralAndUpdateNodeCount(String groupId) {
         List<String> groupPeers = frontInterface.getGroupPeers(groupId);
         groupMapper.updateNodeCount(groupId, groupPeers.size());
         log.debug("getGeneralAndUpdateNodeCount gId:{} count:{}", groupId, groupPeers.size());
@@ -318,7 +329,7 @@ public class GroupService {
      * @param allGroupSet to record all group from each front
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    private void saveDataOfGroup(List<TbFront> frontList, Set<String> allGroupSet) {
+    public void saveDataOfGroup(List<TbFront> frontList, Set<String> allGroupSet) {
         log.info("saveDataOfGroup frontList:{}", frontList);
         for (TbFront front : frontList) {
             String frontIp = front.getFrontIp();
@@ -353,7 +364,7 @@ public class GroupService {
                 TbGroup checkGroupExist = getGroupById(groupId);
                 if (Objects.isNull(checkGroupExist) || groupPeerList.size() != checkGroupExist.getNodeCount()) {
                     Integer encryptType = frontInterface.getEncryptTypeFromSpecificFront(frontIp, frontPort, groupId);
-                    saveGroup(groupId, groupPeerList.size(), "synchronous",
+                    saveGroup2(groupId, groupPeerList.size(), "synchronous",
                             GroupType.SYNC, GroupStatus.NORMAL,
                         front.getChainId(), front.getChainName(), encryptType);
                 }
@@ -424,7 +435,7 @@ public class GroupService {
         // 1.4.3 if observer is removed, observer's nodeId still in groupPeerList
         // 3.0 fisco, light node does not have a node type, todo treated like removed node
         localNodes.stream()
-                .filter(n -> !DataStatus.starting(n.getNodeActive()))
+                .filter(n -> !DataStatus.valid(n.getNodeActive()))
                 .forEach(node -> {
                     // todo check: if front connected to rpc node, and this rpc node connected to observer node,
                     // and if this observer was removed, then nodeInGroup might still contains this observer as an observer but not a removed node
@@ -584,12 +595,12 @@ public class GroupService {
      */
     private void checkGroupGenesisSameWithEach() {
         log.info("start checkGroupGenesisSameWithEach.");
-        // get all front
-        List<TbFront> frontList = frontService.getFrontList(new FrontParam());
-        if (frontList == null || frontList.size() == 0) {
-            log.warn("checkGroupGenesisSameWithEach not found any front.");
-            return;
-        }
+//        // get all front
+//        List<TbFront> frontList = frontService.getFrontList(new FrontParam());
+//        if (frontList == null || frontList.size() == 0) {
+//            log.warn("checkGroupGenesisSameWithEach not found any front.");
+//            return;
+//        }
         List<TbGroup> allGroupList = getGroupList(null);
         if (allGroupList.isEmpty()) {
             log.warn("checkGroupGenesisSameWithEach not found any group of front.");
@@ -599,6 +610,14 @@ public class GroupService {
         for (TbGroup tbGroup : allGroupList) {
             String groupId = tbGroup.getGroupId();
             String lastBlockHash = "";
+            // get all front
+            FrontParam frontParam = new FrontParam();
+            frontParam.setGroupId(groupId);
+            List<TbFront> frontList = frontService.getFrontList(frontParam);
+            if (frontList == null || frontList.size() == 0) {
+                log.warn("checkGroupGenesisSameWithEach not found any front.");
+                return;
+            }
             for (TbFront front : frontList) {
                 if( ! FrontStatusEnum.isRunning(front.getStatus()) ){
                     log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
@@ -717,7 +736,7 @@ public class GroupService {
                 log.warn("Front:[{}:{}] is not running.",front.getFrontIp(),front.getHostIndex());
                 continue;
             }
-            // query roup list from chain
+            // query group list from chain
             List<String> groupListOnChain;
             try {
                 groupListOnChain = frontInterface.getGroupListFromSpecificFront(front.getFrontIp(), front.getFrontPort());
@@ -729,10 +748,11 @@ public class GroupService {
             groupListLocal.forEach(group -> {
                 String groupId = group.getGroupId();
                 // only check local group id
-                if (!groupListOnChain.contains(groupId)) {
+                // 支持多链，只有front的链id和group的链id一致才新建更新
+                if (!groupListOnChain.contains(groupId) && group.getChainId().equals(front.getChainId())) {
                     log.info("update front_group_map by local data front:{}, groupId:{} ",
                             front, groupId);
-                    // case: group2 in font1, not in front2, but local has group2, so add front1_group2_map but not front2_group2_map
+                    // case: group2 in front1, not in front2, but local has group2, so add front1_group2_map but not front2_group2_map
                     frontGroupMapService.newFrontGroupWithStatus(front.getFrontId(), groupId, GroupStatus.MAINTAINING.getValue());
                 }
             });
@@ -842,10 +862,33 @@ public class GroupService {
         if (groupId.isEmpty()) {
             throw new NodeMgrException(INSERT_GROUP_ERROR);
         }
+
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+
         //save group id
         TbGroup tbGroup = new TbGroup(groupId, groupId,
             nodeCount, groupDesc, groupType, groupStatus,
-            chainId, chainName, encryptType);
+            chainId, chainName, encryptType, BigInteger.valueOf(curLoginUser.getUserId()), BigInteger.valueOf(curLoginUser.getDeptId()));
+        groupMapper.insertSelective(tbGroup);
+
+        //create table by group id
+        tableService.newTableByGroupId(groupId);
+        return tbGroup;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public TbGroup saveGroup2(String groupId, int nodeCount, String groupDesc, GroupType groupType,
+                             GroupStatus groupStatus, Integer chainId, String chainName, Integer encryptType) {
+        log.info("saveGroup groupId:{},groupStatus:{},encryptType:{}",
+                groupId, groupStatus, encryptType);
+        if (groupId.isEmpty()) {
+            throw new NodeMgrException(INSERT_GROUP_ERROR);
+        }
+
+        //save group id
+        TbGroup tbGroup = new TbGroup(groupId, groupId,
+                nodeCount, groupDesc, groupType, groupStatus,
+                chainId, chainName, encryptType, BigInteger.ZERO, BigInteger.ZERO);
         groupMapper.insertSelective(tbGroup);
 
         //create table by group id
@@ -862,10 +905,12 @@ public class GroupService {
             return null;
         }
         // save group id
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         String groupName = "group" + groupId;
         TbGroup tbGroup =
                 new TbGroup(groupId, groupName, nodeCount, description,
-                        groupType, groupStatus,chainId, chainName, encryptType);
+                        groupType, groupStatus,chainId, chainName, encryptType,
+                        BigInteger.valueOf(curLoginUser.getUserId()), BigInteger.valueOf(curLoginUser.getDeptId()));
         tbGroup.setGroupTimestamp(timestamp.toString(10));
         tbGroup.setNodeIdList(JsonTools.toJSONString(nodeIdList));
         log.debug("saveGroup tbGroup:{}", tbGroup);
@@ -979,7 +1024,8 @@ public class GroupService {
         }
         String chainName = tbFront.getChainName();
         int nodeIndex = tbFront.getHostIndex();
-        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+//        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+        HostDTO tbHost = remoteHostService.getHostById(tbFront.getHostId());
 
         // scp group config files from remote to local
         // path pattern: /host.getRootDir/chain_name
@@ -996,8 +1042,8 @@ public class GroupService {
         // ex: (node-mgr local) ./NODES_ROOT/chain1/127.0.0.1/node0/conf/group.1001.*
         String localDst = String.format("%s/conf/", localNodePath, generateGroupId);
         // copy group config files to local node's conf dir
-        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupConfSource, localDst);
-        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupGenesisSource, localDst);
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost, remoteGroupConfSource, localDst);
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost, remoteGroupGenesisSource, localDst);
     }
 
 
@@ -1009,7 +1055,8 @@ public class GroupService {
         }
         String chainName = tbFront.getChainName();
         int nodeIndex = tbFront.getHostIndex();
-        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+//        TbHost tbHost = tbHostMapper.selectByPrimaryKey(tbFront.getHostId());
+        HostDTO tbHost = remoteHostService.getHostById(tbFront.getHostId());
         // scp group status files from remote to local
         // path pattern: /host.getRootDir/chain_name
         // ex: (in the remote host) /opt/fisco/chain1
@@ -1031,7 +1078,7 @@ public class GroupService {
             }
         }
         // copy group status file to local node's conf dir
-        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost.getIp(), remoteGroupStatusSource, localDst.toAbsolutePath().toString());
+        ansibleService.scp(ScpTypeEnum.DOWNLOAD, tbHost, remoteGroupStatusSource, localDst.toAbsolutePath().toString());
     }
 
 //    private void pullGroupFile(String groupId,TbFront tbFront){
@@ -1088,13 +1135,14 @@ public class GroupService {
             // NODES_ROOT/[chainName]/[ip]/node[index] as a {@link Path}, a directory.
             String src = String.format("%s", nodeRoot.toAbsolutePath().toString());
             // get host root dir
-            TbHost tbHost = tbHostMapper.getByIp(ip);
+//            TbHost tbHost = tbHostMapper.getByIp(ip);
+            HostDTO tbHost = remoteHostService.getHostByIp(ip);
             String dst = PathService.getChainRootOnHost(tbHost.getRootDir(), chainName);
 
             log.info("generateNewNodesGroupConfigsAndScp Send files from:[{}] to:[{}:{}].", src, ip, dst);
             ProgressTools.setScpConfig();
             try {
-                ansibleService.scp(ScpTypeEnum.UP, ip, src, dst);
+                ansibleService.scp(ScpTypeEnum.UP, tbHost, src, dst);
                 log.info("generateNewNodesGroupConfigsAndScp scp success.");
             } catch (Exception e) {
                 log.error("generateNewNodesGroupConfigsAndScp Send files from:[{}] to:[{}:{}] error.", src, ip, dst, e);

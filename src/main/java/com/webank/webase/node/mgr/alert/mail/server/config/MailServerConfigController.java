@@ -16,6 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.mail.server.config;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.TbMailServerConfig;
@@ -24,10 +25,12 @@ import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import java.util.Base64;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -38,6 +41,7 @@ import java.util.List;
 /**
  * MailServerConfig Controller
  */
+@Tag(name="邮件告警配置管理")
 @Log4j2
 @RestController
 @RequestMapping("mailServer")
@@ -46,6 +50,7 @@ public class MailServerConfigController {
     @Autowired
     MailServerConfigService mailServerConfigService;
 
+    @SaCheckPermission("bcos3:monitor:getMailConfig")
     @GetMapping("config/{serverId}")
     public Object getServerConfig(@PathVariable("serverId") Integer serverId) {
         Instant startTime = Instant.now();
@@ -59,6 +64,7 @@ public class MailServerConfigController {
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
+    @SaCheckPermission("bcos3:monitor:emailAlarm")
     @GetMapping("/config/list")
     public Object listServerConfig() {
         Instant startTime = Instant.now();
@@ -85,8 +91,8 @@ public class MailServerConfigController {
      * @param param
      * @return
      */
+    @SaCheckPermission("bcos3:monitor:updateMailConfig")
     @PutMapping("/config")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateMailServerConfig(@RequestBody ReqMailServerConfigParam param) {
         Instant startTime = Instant.now();
         log.info("start updateMailServerConfig. startTime:{} ReqMailServerConfigParam:{}",
@@ -125,7 +131,7 @@ public class MailServerConfigController {
      * @return
      */
 //    @PostMapping("config")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public Object saveMailServerConfig(@RequestBody ReqMailServerConfigParam param) {
 //        Instant startTime = Instant.now();
 //        log.info("start saveMailServerConfig. startTime:{} ReqMailServerConfigParam:{}",
@@ -146,7 +152,7 @@ public class MailServerConfigController {
      * @Duplicated delete mail server config, no need to delete
      */
 //    @DeleteMapping("/config/{serverId}")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public Object deleteByServerId(@PathVariable("serverId") Integer serverId) {
 //        Instant startTime = Instant.now();
 //        log.info("start deleteByServerId. startTime:{} serverId:{}",

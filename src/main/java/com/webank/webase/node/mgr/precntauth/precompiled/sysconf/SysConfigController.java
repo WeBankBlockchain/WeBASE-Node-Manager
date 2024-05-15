@@ -15,38 +15,35 @@
  */
 package com.webank.webase.node.mgr.precntauth.precompiled.sysconf;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precntauth.precompiled.sysconf.entity.ReqSetSysConfigInfo;
 import com.webank.webase.node.mgr.tools.JsonTools;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import java.time.Duration;
-import java.time.Instant;
-import javax.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * System config controller
  * manage tx_count and gas_limit
  */
-@Api(value = "precntauth/precompiled/sys", tags = "precntauth precompiled controller")
+//@Api(value = "precntauth/precompiled/sys", tags = "precntauth precompiled controller")
+@Tag(name="配置管理")
 @Slf4j
 @RestController
 @RequestMapping(value = "precntauth/precompiled/sys")
+@SaCheckPermission("bcos3:sys:configManagement")
 public class SysConfigController extends BaseController {
 
     @Autowired
@@ -55,7 +52,8 @@ public class SysConfigController extends BaseController {
     /**
      * get system config list 透传front的BaseResponse
      */
-    @ApiImplicitParam(name = "groupId", value = "groupId info", required = true)
+//    @ApiImplicitParam(name = "groupId", value = "groupId info", required = true)
+
     @GetMapping("config/list")
     public BaseResponse getSysConfigList(@RequestParam(defaultValue = "group") String groupId) {
         Instant startTime = Instant.now();
@@ -69,11 +67,11 @@ public class SysConfigController extends BaseController {
     /**
      * set system config by key.
      */
-    @ApiOperation(value = "setSysConfigValueByKey", notes = "set system config value by key")
-    @ApiImplicitParam(name = "reqSetSysConfigInfo", value = "system config info", required = true,
-        dataType = "ReqSetSysConfigInfo")
+//    @ApiOperation(value = "setSysConfigValueByKey", notes = "set system config value by key")
+//    @ApiImplicitParam(name = "reqSetSysConfigInfo", value = "system config info", required = true,
+//        dataType = "ReqSetSysConfigInfo")
+    @Log(title = "BCOS3/系统管理/配置管理", businessType = BusinessType.UPDATE)
     @PostMapping(value = "config")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object setSysConfigByKeyService(
         @RequestBody @Valid ReqSetSysConfigInfo reqSetSysConfigInfo,
         BindingResult result) throws NodeMgrException {
@@ -85,6 +83,8 @@ public class SysConfigController extends BaseController {
         Object res = SysConfigServiceInWebase.setSysConfigByKeyService(reqSetSysConfigInfo);
         log.info("end setSysConfigByKeyService useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(res));
+
+//        return new BaseResponse(ConstantCode.SUCCESS, res);
         return res;
     }
 

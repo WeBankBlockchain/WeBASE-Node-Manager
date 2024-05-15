@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.deploy.chain;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -22,6 +23,8 @@ import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * chain monitor info controller
  */
+@Tag(name="区块链节点监控")
 @Log4j2
 @RestController
 @RequestMapping(value = "chain")
@@ -43,6 +47,7 @@ public class ChainController {
     @Autowired
     private ChainService chainService;
 
+    @SaCheckPermission("bcos3:monitor:nodeMetric")
     @GetMapping(value = "/monitorInfo/{frontId}")
     public BaseResponse getChainMoinntorInfo(@PathVariable("frontId") Integer frontId,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime beginDate,

@@ -13,44 +13,38 @@
  */
 package com.webank.webase.node.mgr.contract;
 
-import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
-import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
+import com.qctc.common.satoken.utils.LoginHelper;
+import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import com.webank.webase.node.mgr.base.enums.RoleType;
+import com.webank.webase.node.mgr.base.enums.GlobalRoleType;
 import com.webank.webase.node.mgr.base.enums.SqlSortType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.contract.entity.*;
-import com.webank.webase.node.mgr.external.entity.TbExternalContract;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.user.entity.TbUser;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import javax.validation.Valid;
-
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.v3.codec.datatypes.Address;
 import org.fisco.bcos.sdk.v3.utils.AddressUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+@Tag(name="合约管理")
 @Log4j2
 @RestController
 @RequestMapping("contract")
@@ -66,10 +60,11 @@ public class ContractController extends BaseController {
     /**
      * add new contract info.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/save")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse saveContract(@RequestBody @Valid Contract contract,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
+             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
@@ -80,7 +75,7 @@ public class ContractController extends BaseController {
             contract.setContractPath("/");
         }
         // add contract row
-        contract.setAccount(currentAccountInfo.getAccount());
+        contract.setAccount(LoginHelper.getUsername());
         TbContract tbContract = contractService.saveContract(contract);
 
         baseResponse.setData(tbContract);
@@ -95,8 +90,9 @@ public class ContractController extends BaseController {
     /**
      * delete contract by id.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.DELETE)
+    @SaCheckPermission("bcos3:contract:ide")
     @DeleteMapping(value = "/{groupId}/{contractId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse deleteContract(@PathVariable("groupId") String groupId,
             @PathVariable("contractId") Integer contractId) throws NodeMgrException, Exception {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -116,19 +112,23 @@ public class ContractController extends BaseController {
     /**
      * query contract info list.
      */
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/contractList")
-    public BasePageResponse queryContractList(@RequestBody QueryContractParam inputParam, 
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
+    public BasePageResponse queryContractList(@RequestBody QueryContractParam inputParam) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start contractList. startTime:{} inputParam:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(inputParam));
 
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+
         // param
         ContractParam queryParam = new ContractParam();
         BeanUtils.copyProperties(inputParam, queryParam);
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
-                ? currentAccountInfo.getAccount() : null;
+        //        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
+//                ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue())
+                ? curLoginUser.getUsername() : null;
         queryParam.setAccount(account);
 
         int count = contractService.countOfContract(queryParam);
@@ -152,6 +152,7 @@ public class ContractController extends BaseController {
     /**
      * query by contract id.
      */
+    @SaCheckPermission("bcos3:contract:ide")
     @GetMapping(value = "/{contractId}")
     public BaseResponse queryContract(@PathVariable("contractId") Integer contractId) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -171,8 +172,9 @@ public class ContractController extends BaseController {
     /**
      * deploy deployInputParam.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/deploy")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse deployContract(@RequestBody @Valid DeployInputParam deployInputParam,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -194,8 +196,9 @@ public class ContractController extends BaseController {
     /**
      * send transaction.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/transaction")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse sendTransaction(@RequestBody @Valid TransactionInputParam param,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -230,6 +233,7 @@ public class ContractController extends BaseController {
     /**
      * get by partOfBytecodeBin.
      */
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/findByPartOfBytecodeBin")
     public BaseResponse getByPartOfByecodebin(@RequestBody @Valid QueryByBinParam queryParam,
             BindingResult result) {
@@ -250,6 +254,7 @@ public class ContractController extends BaseController {
     /**
      * query contract info list by groupId without abi/bin
      */
+    @SaCheckPermission("bcos3:contract:ide")
     @GetMapping(value = "/contractList/all/light")
     public BasePageResponse queryContractListNoAbi(@RequestParam String groupId,
             @RequestParam Integer contractStatus) throws NodeMgrException {
@@ -281,10 +286,10 @@ public class ContractController extends BaseController {
     /**
      * add contract path
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/contractPath")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse addContractPath(@Valid @RequestBody ContractPathParam param,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+    public BaseResponse addContractPath(@Valid @RequestBody ContractPathParam param) {
         BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addContractPath. startTime:{} param:{}", startTime.toEpochMilli(), param);
@@ -293,7 +298,7 @@ public class ContractController extends BaseController {
         if ("".equals(contractPath)) {
             contractPath = "/";
         }
-        int result = contractPathService.save(param.getGroupId(), contractPath, currentAccountInfo.getAccount(), false);
+        int result = contractPathService.save(param.getGroupId(), contractPath, LoginHelper.getUsername(), false);
         response.setData(result);
 
         log.info("end addContractPath. useTime:{} add result:{}",
@@ -305,15 +310,18 @@ public class ContractController extends BaseController {
     /**
      * query contract info list.
      */
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/contractPath/list/{groupId}")
-    public BasePageResponse queryContractPathList(@PathVariable("groupId") String groupId,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+    public BasePageResponse queryContractPathList(@PathVariable("groupId") String groupId) {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start queryContractPathList. startTime:{} groupId:{}", startTime.toEpochMilli(),
                 groupId);
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
-                ? currentAccountInfo.getAccount() : null;
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+//        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue()
+//                ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue())
+                ? curLoginUser.getUsername() : null;
         List<TbContractPath> result = contractService.queryContractPathList(groupId, account);
         pageResponse.setData(result);
         pageResponse.setTotalCount(result.size());
@@ -327,16 +335,16 @@ public class ContractController extends BaseController {
     /**
      * delete contract by path. only admin batch delete contract
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.DELETE)
+    @SaCheckPermission("bcos3:contract:ide")
     @DeleteMapping(value = "/batch/path")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+    public BaseResponse deleteContractByPath(@Valid @RequestBody ContractPathParam param) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start deleteContractByPath startTime:{} ContractPathParam:{}",
                 startTime.toEpochMilli(), param);
         
-        contractService.deleteByContractPath(param, currentAccountInfo);
+        contractService.deleteByContractPath(param, LoginHelper.getLoginUser());
 
         log.info("end deleteContractByPath useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
@@ -346,16 +354,18 @@ public class ContractController extends BaseController {
     /**
      * query contract info list by multi path
      */
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/contractList/multiPath")
-    public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) throws NodeMgrException {
+    public BasePageResponse listContractByMultiPath(@RequestBody ReqListContract inputParam) throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start listContractByMultiPath. startTime:{} inputParam:{}",
                 startTime.toEpochMilli(), JsonTools.toJSONString(inputParam));
 
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId()
-                .intValue() ? currentAccountInfo.getAccount() : null;
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+//        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId()
+//                .intValue() ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue()) ? curLoginUser.getUsername() : null;
         inputParam.setAccount(account);
         List<TbContract> contractList = contractService.queryContractListMultiPath(inputParam);
         pageResponse.setTotalCount(contractList.size());
@@ -368,8 +378,9 @@ public class ContractController extends BaseController {
     /**
      * registerCns.
      */
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:contract:cnsManagement")
     @PostMapping(value = "/registerCns")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse registerCns(@RequestBody @Valid ReqRegisterCns reqRegisterCns,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -388,6 +399,7 @@ public class ContractController extends BaseController {
     /**
      * query cns info
      */
+    @SaCheckPermission("bcos3:contract:cnsManagement")
     @PostMapping(value = "/findCns")
     public BaseResponse findCnsByAddress(@RequestBody @Valid ReqQueryCns reqQueryCns,
             BindingResult result) throws NodeMgrException {
@@ -407,6 +419,7 @@ public class ContractController extends BaseController {
     /**
      * query cns info list
      */
+    @SaCheckPermission("bcos3:contract:cnsManagement")
     @PostMapping(value = "/findCnsList")
     public BasePageResponse findCnsList(@RequestBody @Valid ReqQueryCnsList inputParam,
             BindingResult result) throws NodeMgrException {
@@ -437,15 +450,15 @@ public class ContractController extends BaseController {
         return pageResponse;
     }
 
+    @Log(title = "BCOS3/合约管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/copy")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req, BindingResult result) {
         Instant startTime = Instant.now();
         log.info("copyContracts start. startTime:{}  req:{}", startTime.toEpochMilli(),
                 JsonTools.toJSONString(req));
         checkBindResult(result);
-        req.setAccount(currentAccountInfo.getAccount());
+        req.setAccount(LoginHelper.getUsername());
         contractService.copyContracts(req);
         log.info("end copyContracts. useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
@@ -458,8 +471,8 @@ public class ContractController extends BaseController {
      * get deploy address or permission admin user address list
      * which has private key in webase
      */
+    @SaCheckPermission("bcos3:contract:ide")
     @GetMapping("listManager/{groupId}/{contractAddress}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse queryContractManagerList(@PathVariable("groupId") String groupId,
         @PathVariable("contractAddress") String contractAddress) {
         Instant startTime = Instant.now();
@@ -477,7 +490,8 @@ public class ContractController extends BaseController {
     /**
      * query list of contract only contain groupId and contractAddress and contractName
      */
-    @ApiOperation(value = "check", notes = "check cargo liquid env")
+//    @ApiOperation(value = "check", notes = "check cargo liquid env")
+    @SaCheckPermission("bcos3:contract:ide")
     @GetMapping(value = "/liquid/check/{frontId}")
     public BaseResponse checkLiquidEnv(@PathVariable("frontId") Integer frontId) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -495,8 +509,8 @@ public class ContractController extends BaseController {
     /**
      * compile liquid
      */
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/liquid/compile")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse compileLiquid(@RequestBody @Valid ReqCompileLiquid param,
                                        BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -517,8 +531,8 @@ public class ContractController extends BaseController {
     /**
      * compile liquid
      */
+    @SaCheckPermission("bcos3:contract:ide")
     @PostMapping(value = "/liquid/compile/check")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse checkCompileLiquid(@RequestBody @Valid ReqCompileLiquid param,
                                       BindingResult result) throws NodeMgrException {
         checkBindResult(result);

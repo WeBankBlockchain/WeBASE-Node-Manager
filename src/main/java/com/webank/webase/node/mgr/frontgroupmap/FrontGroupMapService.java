@@ -13,11 +13,7 @@
  */
 package com.webank.webase.node.mgr.frontgroupmap;
 
-import static com.webank.webase.node.mgr.group.GroupService.OPERATE_STATUS_GROUP;
-import static com.webank.webase.node.mgr.group.GroupService.RUNNING_GROUP;
-
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.front.FrontMapper;
@@ -25,17 +21,18 @@ import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.entity.FrontGroup;
 import com.webank.webase.node.mgr.frontgroupmap.entity.MapListParam;
 import com.webank.webase.node.mgr.frontgroupmap.entity.TbFrontGroupMap;
-import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
 import com.webank.webase.node.mgr.group.GroupMapper;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
-import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Log4j2
 @Service
@@ -43,13 +40,16 @@ public class FrontGroupMapService {
 
     @Autowired
     private FrontGroupMapMapper frontGroupMapMapper;
-    @Autowired
-    private FrontInterfaceService frontInterface;
+//    @Autowired
+//    private FrontInterfaceService frontInterface;
+
+    @Lazy
     @Autowired
     private FrontGroupMapCache frontGroupMapCache;
     /**
      * to check map sealer or observer
      */
+    @Lazy
     @Autowired
     private NodeService nodeService;
     @Autowired

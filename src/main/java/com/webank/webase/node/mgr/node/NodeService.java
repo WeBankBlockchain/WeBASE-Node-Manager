@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import com.qctc.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ConsensusType;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
@@ -45,6 +46,7 @@ import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -398,13 +400,13 @@ public class NodeService {
     public List<TbNode> selectNodeListByChainIdAndGroupId(Integer chainId, final String groupId){
         // select all fronts by all agencies
         List<TbFront> tbFrontList = this.frontService.selectFrontListByChainId(chainId);
-        log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}", tbFrontList);
+        log.info("selectNodeListByChainIdAndGroupId tbFrontList:{}, groupId:{}", tbFrontList, groupId);
 
         // filter only not removed node will be added
         List<TbNode> tbNodeList = tbFrontList.stream()
                 .map((front) -> nodeMapper.getByNodeIdAndGroupId(front.getNodeId(), groupId))
                 .filter(Objects::nonNull)
-                .filter((node) -> node.getGroupId() == groupId)
+                .filter((node) -> node.getGroupId().equals(groupId))
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(tbNodeList)) {
@@ -474,10 +476,10 @@ public class NodeService {
      * mv one node on host
      * @related with hostService mvHostChainDirByIdList(batch mv)
      */
-    public void mvNodeOnRemoteHost(String ip, String rooDirOnHost, String chainName, int hostIndex, String nodeId) {
+    public void mvNodeOnRemoteHost(HostDTO hostDTO, String rooDirOnHost, String chainName, int hostIndex, String nodeId) {
         // create /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss as a parent
         String chainDeleteRootOnHost = PathService.getChainDeletedRootOnHost(rooDirOnHost, chainName);
-        ansibleService.execCreateDir(ip, chainDeleteRootOnHost);
+        ansibleService.execCreateDir(hostDTO, chainDeleteRootOnHost);
 
         // e.g. /opt/fisco/default_chain
         String chainRootOnHost = PathService.getChainRootOnHost(rooDirOnHost, chainName);
@@ -488,7 +490,7 @@ public class NodeService {
         String dst_nodeDeletedRootOnHost =
                 PathService.getNodeDeletedRootOnHost(chainDeleteRootOnHost, nodeId);
         // move
-        ansibleService.mvDirOnRemote(ip, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
+        ansibleService.mvDirOnRemote(hostDTO, src_nodeRootOnHost, dst_nodeDeletedRootOnHost);
     }
 
     /**

@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.front.frontinterface;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
@@ -155,6 +156,7 @@ public class FrontRestTools {
     public static final String RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE = "precntauth/authmanager/committee/deploy/type";
     public static final String RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN = "precntauth/authmanager/committee/contract/admin";
     public static final String RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY = "precntauth/authmanager/committee/usr/deploy";
+    public static final String RPC_AUTHMANAGER_COMMITTEE_CONSENSUS = "precntauth/authmanager/committee/proposal/consensus";
     // 3) admin
     public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET = "precntauth/authmanager/admin/method/auth/set";
     public static final String RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE = "precntauth/authmanager/admin/method/auth/type";
@@ -195,7 +197,7 @@ public class FrontRestTools {
             RPC_AUTHMANAGER_COMMITTEE_RATE,
             RPC_AUTHMANAGER_COMMITTEE_PRO_VOTE, RPC_AUTHMANAGER_COMMITTEE_PRO_REVOKE,
             RPC_AUTHMANAGER_COMMITTEE_DEPLOY_TYPE,
-            RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN, RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY,
+            RPC_AUTHMANAGER_COMMITTEE_CNT_ADMIN, RPC_AUTHMANAGER_COMMITTEE_USR_DEPLOY, RPC_AUTHMANAGER_COMMITTEE_CONSENSUS,
             RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_SET, RPC_AUTHMANAGER_ADMIN_CONTRACT_STATUS_SET,
             RPC_AUTHMANAGER_ADMIN_METHOD_AUTH_TYPE, RPC_PRECOM_SYS_CONFIG_LIST,
             RPC_PRECOM_SYS_CONFIG,
@@ -231,6 +233,10 @@ public class FrontRestTools {
     private static final int NODE_IS_DOWN = -1;
 
     private static Map<String, FailInfo> failRequestMap = new HashMap<>();
+
+    // sa-token
+    private static String tokenKey;
+    private static String tokenValue;
 
 
     /**
@@ -367,6 +373,25 @@ public class FrontRestTools {
     public static HttpEntity buildHttpEntity(Object param) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+
+        try {
+            // sa-token的token鉴权字段，用于front调用sign
+            String tokenKey = StpUtil.getTokenName();
+            String tokenValue = StpUtil.getTokenValueNotCut();
+
+            if (!StringUtils.isEmpty(tokenValue)) {
+                FrontRestTools.tokenKey = tokenKey;
+                FrontRestTools.tokenValue = tokenValue;
+            }
+        } catch (Exception e) {
+            log.info("get token key or value err, ignore, err msg:{}", e.getMessage());
+        }
+
+        if (!StringUtils.isEmpty(FrontRestTools.tokenValue)) {
+            headers.add("tokenKey", FrontRestTools.tokenKey);
+            headers.add("tokenValue", FrontRestTools.tokenValue);
+        }
+
         String paramStr = null;
         if (Objects.nonNull(param)) {
             paramStr = JsonTools.toJSONString(param);

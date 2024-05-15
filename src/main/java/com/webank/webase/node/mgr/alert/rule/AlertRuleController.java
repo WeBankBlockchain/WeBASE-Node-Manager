@@ -20,8 +20,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -42,6 +46,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * Alert Type Configuration Controller
  */
+@Tag(name="告警规则管理")
 @Log4j2
 @RestController
 @RequestMapping("alert")
@@ -51,6 +56,7 @@ public class AlertRuleController {
     @Autowired
     AlertRuleService alertRuleService;
 
+    @SaCheckPermission("bcos3:monitor:getAlertRule")
     @GetMapping("/{ruleId}")
     public Object getAlertRuleByRuleId(@PathVariable("ruleId") Integer ruleId) {
         Instant startTime = Instant.now();
@@ -64,6 +70,7 @@ public class AlertRuleController {
         return new BaseResponse(ConstantCode.SUCCESS, res);
     }
 
+    @SaCheckPermission("bcos3:monitor:emailAlarmType")
     @GetMapping("/list")
     public Object listAlertRules() {
         Instant startTime = Instant.now();
@@ -80,7 +87,7 @@ public class AlertRuleController {
     }
 
 //    @PostMapping("")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public Object saveAlertRule(@RequestBody @Valid AlertRuleParam param) {
 //        Instant startTime = Instant.now();
 //        log.info("start saveAlertRule. startTime:{} AlertRuleParam:{}",
@@ -96,8 +103,9 @@ public class AlertRuleController {
 //        return new BaseResponse(ConstantCode.SUCCESS);
 //    }
 
+    @Log(title = "BCOS3/系统监控/告警管理", businessType = BusinessType.UPDATE)
+    @SaCheckPermission("bcos3:monitor:updateAlertRule")
     @PutMapping("")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start updateAlertRule. startTime:{} AlertRuleParam:{}",
@@ -118,9 +126,9 @@ public class AlertRuleController {
 
     }
 
-
+    @Log(title = "BCOS3/系统监控/告警管理", businessType = BusinessType.UPDATE)
+    @SaCheckPermission("bcos3:monitor:toggleAlertRule")
     @PutMapping("/toggle")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object toggleAlertRule(@RequestBody ReqAlertRuleParam param) {
         Instant startTime = Instant.now();
         log.info("start toggleAlertRule. startTime:{} AlertRuleParam:{}",
@@ -150,7 +158,7 @@ public class AlertRuleController {
      * @Duplicated no need to delete alert_rule for default rules only need updating
      */
 //    @DeleteMapping("/{ruleId}")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
 //    public Object deleteAlertRuleByRuleId(@PathVariable("ruleId") Integer ruleId) {
 //        Instant startTime = Instant.now();
 //        log.info("start deleteAlertRuleByRuleId. startTime:{} ruleId:{}",

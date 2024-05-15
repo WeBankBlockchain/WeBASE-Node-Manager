@@ -71,13 +71,17 @@ public class TbFront {
     private Integer chainId;
     private String chainName;
 
+    private Integer cpus;
+    private Integer memory;
+
     public static TbFront init(
         String nodeId, String ip, int port,
         int agencyId,String agencyName, String clientVersion,
         RunTypeEnum runTypeEnum, int hostId, int hostIndex,
         String imageTag, String containerName , int jsonrpcPort,
         int p2pPort, int channelPort, int chainId,
-        String chainName, FrontStatusEnum frontStatusEnum){
+        String chainName, FrontStatusEnum frontStatusEnum,
+        int cpus, int memory){
 
         String frontClientVersion = StringUtils.removeStart(clientVersion, "v");
 
@@ -104,6 +108,8 @@ public class TbFront {
         front.setChainId(chainId);
         front.setChainName(chainName);
         front.setStatus(frontStatusEnum.getId());
+        front.setCpus(cpus);
+        front.setMemory(memory);
 
         return front;
     }

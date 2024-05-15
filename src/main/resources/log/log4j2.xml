@@ -17,9 +17,14 @@
       <Policies>
         <TimeBasedTriggeringPolicy/>
         <!-- 日志文件大小 -->
-        <SizeBasedTriggeringPolicy size="200 MB"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
       </Policies>
-      <DefaultRolloverStrategy max="24"/>
+      <DefaultRolloverStrategy max="15">
+        <Delete basePath="${logPath}" maxDepth="1">
+          <IfFileName glob="WeBASE-Node-Manager.log.*" />
+          <IfLastModified age="5d" />
+        </Delete>
+      </DefaultRolloverStrategy>
     </RollingFile>
 
     <RollingFile fileName="${logPath}/WeBASE-Node-Manager-error.log" filePattern="${logPath}/WeBASE-Node-Manager-error.log.%d{yyyy-MM-dd}.%i.log.gz"
@@ -30,9 +35,14 @@
         onMismatch="DENY"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
-        <SizeBasedTriggeringPolicy size="200 MB"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
       </Policies>
-      <DefaultRolloverStrategy max="24"/>
+      <DefaultRolloverStrategy max="15">
+        <Delete basePath="${logPath}" maxDepth="1">
+          <IfFileName glob="WeBASE-Node-Manager-error.log.*" />
+          <IfLastModified age="5d" />
+        </Delete>
+      </DefaultRolloverStrategy>
     </RollingFile>
 
     <Async bufferSize="512" name="asyncErrorLog">

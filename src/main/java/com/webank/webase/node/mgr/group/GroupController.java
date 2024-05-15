@@ -13,6 +13,9 @@
  */
 package com.webank.webase.node.mgr.group;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
@@ -34,9 +37,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +54,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for processing group information.
  */
+@Tag(name="群组管理")
 @Log4j2
 @RestController
 @RequestMapping("group")
@@ -66,6 +72,7 @@ public class GroupController extends BaseController {
     /**
      * return encrypt type to web 0 is standard, 1 is guomi.
      */
+    @SaCheckPermission("bcos3:groups:query")
     @GetMapping("/encrypt/{groupId}")
     public BaseResponse getEncryptType(@PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();
@@ -83,6 +90,7 @@ public class GroupController extends BaseController {
     /**
      * get group general.
      */
+    @SaCheckPermission("bcos3:groups:query")
     @GetMapping("/general/{groupId}")
     public BaseResponse getGroupGeneral(@PathVariable("groupId") String groupId)
             throws NodeMgrException {
@@ -116,6 +124,7 @@ public class GroupController extends BaseController {
     /**
      * query all normal group without invalid group(suspend, removed)
      */
+    @SaCheckPermission("bcos3:groups:query")
     @GetMapping("/all")
     public BasePageResponse getAllGroup() throws NodeMgrException {
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
@@ -146,7 +155,8 @@ public class GroupController extends BaseController {
      * @return
      * @throws NodeMgrException
      **/
-   @GetMapping({"/all/invalidIncluded/{pageNumber}/{pageSize}",
+     @SaCheckPermission("bcos3:groups:query")
+     @GetMapping({"/all/invalidIncluded/{pageNumber}/{pageSize}",
             "/all/invalidIncluded"})
     public BasePageResponse getAllGroupIncludeInvalidGroup(@PathVariable(value = "pageNumber",required = false) Integer pageNumber,
                                                            @PathVariable(value = "pageSize", required = false) Integer pageSize) throws NodeMgrException {
@@ -176,7 +186,7 @@ public class GroupController extends BaseController {
         return pageResponse;
     }
 
-
+    @SaCheckPermission("bcos3:groups:query")
     @GetMapping("/all/{groupStatus}")
     public BaseResponse getAllGroupOfStatus(@PathVariable("groupStatus") Integer groupStatus) throws NodeMgrException {
         if (groupStatus > GroupStatus.CONFLICT_LOCAL_DATA.getValue()
@@ -206,6 +216,7 @@ public class GroupController extends BaseController {
     /**
      * get trans daily.
      */
+    @SaCheckPermission("bcos3:groups:query")
     @GetMapping("/transDaily/{groupId}")
     public BaseResponse getTransDaily(@PathVariable("groupId") String groupId) throws Exception {
         BaseResponse pageResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -225,6 +236,7 @@ public class GroupController extends BaseController {
     /**
      * update group.
      */
+    @SaCheckPermission("bcos3:groups:operate")
     @GetMapping("/update")
     public BaseResponse updateGroup() throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -240,8 +252,10 @@ public class GroupController extends BaseController {
     /**
      * delete all group's data(trans, contract, node etc.)
      */
+    @Log(title = "BCOS3/群组管理", businessType = BusinessType.DELETE)
+    @SaCheckPermission("bcos3:groups:operate")
     @DeleteMapping("/{groupId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse deleteGroupData(@PathVariable("groupId") String groupId) {
         Instant startTime = Instant.now();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
@@ -253,6 +267,7 @@ public class GroupController extends BaseController {
         return baseResponse;
     }
 
+    @SaCheckPermission("bcos3:groups:query")
     @GetMapping("/detail/{groupId}")
     public BaseResponse getGroupDetail(@PathVariable("groupId") String groupId)
         throws NodeMgrException {
@@ -268,8 +283,9 @@ public class GroupController extends BaseController {
         return baseResponse;
     }
 
+    @Log(title = "BCOS3/群组管理", businessType = BusinessType.UPDATE)
+    @SaCheckPermission("bcos3:groups:operate")
     @PutMapping("/description")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateDescription(@RequestBody @Valid ReqUpdateDesc req, BindingResult result)
         throws NodeMgrException {
         checkBindResult(result);

@@ -13,6 +13,9 @@
  */
 package com.webank.webase.node.mgr.node;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -28,6 +31,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for node data.
  */
+@Tag(name="节点信息管理")
 @Log4j2
 @RestController
 @RequestMapping("node")
@@ -53,6 +59,7 @@ public class NodeController {
     /**
      * query node info list.
      */
+    @SaCheckPermission("bcos3:chain:front")
     @GetMapping(value = "/nodeList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse queryNodeList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
@@ -98,6 +105,7 @@ public class NodeController {
     /**
      * get node info.
      */
+    @SaCheckPermission("bcos3:chain:front")
     @GetMapping(value = "/nodeInfo/{groupId}")
     public BaseResponse getNodeInfo(@PathVariable("groupId") String groupId)
         throws NodeMgrException {
@@ -124,6 +132,7 @@ public class NodeController {
     /**
      * get node info detail
      */
+    @SaCheckPermission("bcos3:chain:front")
     @GetMapping(value = "/nodeInfo/{groupId}/{nodeId}")
     public BaseResponse getNodeInfo(@PathVariable("groupId") String groupId,
         @PathVariable("nodeId") String nodeId)
@@ -152,6 +161,8 @@ public class NodeController {
     /**
      * update tb_node info of city, agency, ip etc.
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
+    @SaCheckPermission("bcos3:chain:updateNodeDesc")
     @PutMapping("/description")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse updateDesc(@Valid @RequestBody ReqUpdate reqUpdate) {
@@ -172,6 +183,7 @@ public class NodeController {
     /**
      * get node id list
      */
+    @SaCheckPermission("bcos3:chain:front")
     @GetMapping("/city/list")
     public BaseResponse getCityList() {
         Instant startTime = Instant.now();

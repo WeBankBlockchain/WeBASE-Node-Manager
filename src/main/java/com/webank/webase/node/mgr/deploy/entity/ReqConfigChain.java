@@ -50,5 +50,10 @@ public class ReqConfigChain {
      * init host info list
      */
     private List<DeployNodeInfo> deployNodeInfoList;
+
+    /**
+     * 0: disable, 1: enable
+     */
+    private int enableAuth;
 }
 

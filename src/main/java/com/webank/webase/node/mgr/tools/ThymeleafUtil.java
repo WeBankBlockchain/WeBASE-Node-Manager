@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -154,18 +155,28 @@ public class ThymeleafUtil {
      * /NODES_ROOT/IP/NODE[index]/application.yml
      * @param nodeRoot
      * @param encryptType
-     * @param channelPort
+     * @param rpcPort
      * @param frontPort
      * @param webaseSignAddr
      * @throws IOException
      */
-    public static void newFrontConfig(Path nodeRoot, byte encryptType, int channelPort,
+    public static void newFrontConfig(Path nodeRoot, byte encryptType, int rpcPort,
                                        int frontPort, String webaseSignAddr) throws IOException {
         log.info("newFrontConfig nodeRoot:{},frontPort:{}", nodeRoot, frontPort);
+//        String applicationYml = ThymeleafUtil.generate(
+//                ThymeleafUtil.FRONT_APLLICATION_YML,
+//                Pair.of("encryptType", encryptType),
+//                Pair.of("channelPort", channelPort),
+//                Pair.of("frontPort", frontPort),
+//                Pair.of("webaseSignAddr", webaseSignAddr)
+//        );
+        String peer = "127.0.0.1:" + rpcPort;
+        String[] peers = new String[]{peer};
         String applicationYml = ThymeleafUtil.generate(
                 ThymeleafUtil.FRONT_APLLICATION_YML,
                 Pair.of("encryptType", encryptType),
-                Pair.of("channelPort", channelPort),
+                Pair.of("useSmSsl", encryptType == 1 ? true :  false),
+                Pair.of("peers", Arrays.toString(peers)),
                 Pair.of("frontPort", frontPort),
                 Pair.of("webaseSignAddr", webaseSignAddr)
         );

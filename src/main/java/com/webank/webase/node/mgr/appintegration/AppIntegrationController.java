@@ -14,6 +14,9 @@
 
 package com.webank.webase.node.mgr.appintegration;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.appintegration.entity.AppAddInfo;
 import com.webank.webase.node.mgr.appintegration.entity.AppInfoParam;
 import com.webank.webase.node.mgr.appintegration.entity.TbAppInfo;
@@ -29,9 +32,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * application integration controller.
  */
+@Tag(name="应用管理")
 @Log4j2
 @RestController
 @RequestMapping(value = "app")
@@ -53,8 +59,9 @@ public class AppIntegrationController extends BaseController {
     @Autowired
     private AppIntegrationService appIntegrationService;
 
+    @Log(title = "BCOS3/应用管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:appManagement:newApp")
     @PostMapping("/save")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse saveApp(@RequestBody @Valid AppAddInfo appAddInfo, BindingResult result) {
         checkBindResult(result);
         Instant startTime = Instant.now();
@@ -72,6 +79,7 @@ public class AppIntegrationController extends BaseController {
     /**
      * get app info list
      */
+    @SaCheckPermission("bcos3:appManagement")
     @GetMapping(value = "/list")
     public BasePageResponse queryAppList(@RequestParam(required = false) Integer appType,
             @RequestParam(required = false) String appName,
@@ -106,6 +114,8 @@ public class AppIntegrationController extends BaseController {
     /**
      * delete by frontId
      */
+    @Log(title = "BCOS3/应用管理", businessType = BusinessType.DELETE)
+    @SaCheckPermission("bcos3:appManagement:deleteApp")
     @DeleteMapping("/{id}")
     public BaseResponse deleteApp(@PathVariable("id") Integer id) {
         Instant startTime = Instant.now();

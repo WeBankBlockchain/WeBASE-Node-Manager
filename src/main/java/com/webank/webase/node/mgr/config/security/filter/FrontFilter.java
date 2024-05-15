@@ -65,19 +65,21 @@ public class FrontFilter implements Filter {
         throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String uri = HttpRequestTools.getUri(httpRequest);
-        if (isIgnore(uri)) {
-            log.debug("FrontFilter ignore:{}", uri);
-            filterChain.doFilter(request, response);
-        } else {
-            List<FrontGroup> list = frontGroupMapCache.getAllMap();
-            if (CollectionUtils.isEmpty(list)) {
-                log.warn("fail FrontFilter. not fount any front.");
-                RetCode retCode = ConstantCode.FRONT_LIST_NOT_FOUNT;
-                String messageStr = retCode.getCode() + "_" + retCode.getMessage();
-                throw new RuntimeException(messageStr);
-            }
-            filterChain.doFilter(request, response);
-        }
+//        if (isIgnore(uri)) {
+//            log.debug("FrontFilter ignore:{}", uri);
+//            filterChain.doFilter(request, response);
+//        } else {
+//            List<FrontGroup> list = frontGroupMapCache.getAllMap();
+//            if (CollectionUtils.isEmpty(list)) {
+//                log.warn("fail FrontFilter. not fount any front.");
+//                RetCode retCode = ConstantCode.FRONT_LIST_NOT_FOUNT;
+//                String messageStr = retCode.getCode() + "_" + retCode.getMessage();
+//                throw new RuntimeException(messageStr);
+//            }
+//            filterChain.doFilter(request, response);
+//        }
+
+        filterChain.doFilter(request, response);
     }
 
     /**

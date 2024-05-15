@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
+import com.qctc.common.mybatis.helper.DataPermissionHelper;
 import com.webank.webase.node.mgr.base.enums.GroupStatus;
 import com.webank.webase.node.mgr.block.BlockService;
 import com.webank.webase.node.mgr.group.GroupService;
@@ -50,7 +51,7 @@ public class PullBlockTransTask {
     public synchronized void pullBlockStart() {
         Instant startTime = Instant.now();
         log.debug("start pullBLock startTime:{}", startTime.toEpochMilli());
-        List<TbGroup> groupList = groupService.getGroupList(GroupStatus.NORMAL.getValue());
+        List<TbGroup> groupList = DataPermissionHelper.ignore(() -> groupService.getGroupList(GroupStatus.NORMAL.getValue()));
         if (groupList == null || groupList.size() == 0) {
             log.warn("pullBlock jump over: not found any group");
             return;

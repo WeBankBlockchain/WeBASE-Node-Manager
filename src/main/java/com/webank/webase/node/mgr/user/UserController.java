@@ -13,57 +13,50 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import com.webank.webase.node.mgr.base.annotation.CurrentAccount;
-import com.webank.webase.node.mgr.base.annotation.entity.CurrentAccountInfo;
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.core.utils.BeanCopyUtils;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
+import com.qctc.common.satoken.utils.LoginHelper;
+import com.qctc.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.enums.CheckUserExist;
-import com.webank.webase.node.mgr.base.enums.RoleType;
+import com.webank.webase.node.mgr.base.enums.GlobalRoleType;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
+import com.webank.webase.node.mgr.deploy.service.PathService;
 import com.webank.webase.node.mgr.tools.HttpRequestTools;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.NodeMgrTools;
 import com.webank.webase.node.mgr.tools.PemUtils;
-import com.webank.webase.node.mgr.cert.entity.FileContentHandle;
-import com.webank.webase.node.mgr.user.entity.BindUserInputParam;
-import com.webank.webase.node.mgr.user.entity.KeyPair;
-import com.webank.webase.node.mgr.user.entity.NewUserInputParam;
-import com.webank.webase.node.mgr.user.entity.ReqBindPrivateKey;
-import com.webank.webase.node.mgr.user.entity.ReqExport;
-import com.webank.webase.node.mgr.user.entity.ReqImportPem;
-import com.webank.webase.node.mgr.user.entity.ReqImportPrivateKey;
-import com.webank.webase.node.mgr.user.entity.TbUser;
-import com.webank.webase.node.mgr.user.entity.UpdateUserInputParam;
-import com.webank.webase.node.mgr.user.entity.UserParam;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import javax.validation.Valid;
+import com.webank.webase.node.mgr.user.entity.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Key pair manage
  */
+@Tag(name="链上用户管理")
 @Log4j2
 @RestController
 @RequestMapping("user")
@@ -72,21 +65,26 @@ public class UserController extends BaseController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PathService pathService;
+
     /**
      * add new user info.
      */
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/userInfo")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse addUserInfo(@RequestBody @Valid NewUserInputParam user, 
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
+    public BaseResponse addUserInfo(@RequestBody @Valid NewUserInputParam user,
+             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start addUserInfo startTime:{},currentAccount:{},NewUserInputParam:{}",
-            startTime.toEpochMilli(), currentAccountInfo, user);
+            startTime.toEpochMilli(), curLoginUser, user);
         // add user row
         TbUser userRow = userService.addUserInfoLocal(user.getGroupId(), user.getUserName(),
-                currentAccountInfo.getAccount(), user.getDescription(), user.getUserType(), null);
+                curLoginUser.getUsername(), user.getDescription(), user.getUserType(), null);
         baseResponse.setData(userRow);
 
         log.info("end addUserInfo useTime:{} result:{}",
@@ -98,17 +96,18 @@ public class UserController extends BaseController {
     /**
      * bind user info. (add public key user, different from bind private key)
      */
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/bind")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse bindUserInfo(@RequestBody @Valid BindUserInputParam user,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) throws NodeMgrException {
+    public BaseResponse bindUserInfo(@RequestBody @Valid BindUserInputParam user, BindingResult result) throws NodeMgrException {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindUserInfo startTime:{},currentAccount:{},BindUserInputParam:{}",
-            startTime.toEpochMilli(), currentAccountInfo, user);
+            startTime.toEpochMilli(), curLoginUser, user);
         // query user row
-        TbUser userRow = userService.bindUserInfo(user, currentAccountInfo.getAccount(), CheckUserExist.TURE.getValue());
+        TbUser userRow = userService.bindUserInfo(user, curLoginUser.getUsername(), CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end bindUserInfo useTime:{} result:{}",
@@ -120,8 +119,9 @@ public class UserController extends BaseController {
     /**
      * update user info of description
      */
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.UPDATE)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PutMapping(value = "/userInfo")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse updateUserInfo(@RequestBody @Valid UpdateUserInputParam user,
             BindingResult result) throws NodeMgrException {
         checkBindResult(result);
@@ -145,20 +145,21 @@ public class UserController extends BaseController {
     /**
      * query user info list.
      */
+    @SaCheckPermission("bcos3:privateKeyManagement")
     @GetMapping(value = "/userList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse userList(@PathVariable("groupId") String groupId,
             @PathVariable("pageNumber") Integer pageNumber,
             @PathVariable("pageSize") Integer pageSize,
-            @RequestParam(value = "userParam", required = false) String commParam,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo)
+            @RequestParam(value = "userParam", required = false) String commParam)
             throws NodeMgrException {
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BasePageResponse pageResponse = new BasePageResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start userList startTime:{},currentAccountInfo:{} groupId:{} pageNumber:{} pageSize:{} commParam:{}",
-                startTime.toEpochMilli(), currentAccountInfo, groupId, pageNumber, pageSize, commParam);
+                startTime.toEpochMilli(), curLoginUser, groupId, pageNumber, pageSize, commParam);
 
-        String account = RoleType.DEVELOPER.getValue().intValue() == currentAccountInfo.getRoleId().intValue() 
-                ? currentAccountInfo.getAccount() : null;
+        String account = curLoginUser.getRolePermission().contains(GlobalRoleType.DEVELOPER.getValue())
+                ? curLoginUser.getUsername() : null;
         UserParam param = new UserParam();
         param.setGroupId(groupId);
         param.setAccount(account);
@@ -183,20 +184,21 @@ public class UserController extends BaseController {
         return pageResponse;
     }
 
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.IMPORT)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/import")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse importPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse importPrivateKey(@Valid @RequestBody ReqImportPrivateKey reqImport, BindingResult result) {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start importPrivateKey startTime:{},currentAccount:{},reqImport:{}",
-            startTime.toEpochMilli(), currentAccountInfo, reqImport);
+            startTime.toEpochMilli(), curLoginUser, reqImport);
         // encoded by web in base64
         String privateKeyEncoded = reqImport.getPrivateKey();
         // add user row
         TbUser userRow = userService.addUserInfoLocal(reqImport.getGroupId(), reqImport.getUserName(),
-                currentAccountInfo.getAccount(), reqImport.getDescription(), reqImport.getUserType(),
+                curLoginUser.getUsername(), reqImport.getDescription(), reqImport.getUserType(),
                 privateKeyEncoded);
         baseResponse.setData(userRow);
 
@@ -206,21 +208,22 @@ public class UserController extends BaseController {
         return baseResponse;
     }
 
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.IMPORT)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/importPem")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem, BindingResult result) {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start importPemPrivateKey startTime:{},currentAccount:{}",
-            startTime.toEpochMilli(), currentAccountInfo);
+            startTime.toEpochMilli(), curLoginUser);
         String pemContent = reqImportPem.getPemContent();
         if (!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
             throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
         }
         // import
-        reqImportPem.setAccount(currentAccountInfo.getAccount());
+        reqImportPem.setAccount(curLoginUser.getUsername());
         TbUser userRow = userService.importPem(reqImportPem, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
@@ -230,17 +233,84 @@ public class UserController extends BaseController {
         return baseResponse;
     }
 
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.IMPORT)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
+    @PostMapping("/initImportAuthAdmin")
+    public BaseResponse initImportAuthAdmin(@Valid @RequestBody ReqInitAuthAdmin reqInitAuthAdmin, BindingResult result) {
+        checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        Instant startTime = Instant.now();
+        log.info("start importPemPrivateKey startTime:{},currentAccount:{}",
+                startTime.toEpochMilli(), curLoginUser);
+
+        Path caDir = pathService.getCaDir(reqInitAuthAdmin.getChainName());
+
+        // 读取ca目录下生成的权限管理管理员的账户
+        String folderPath = "";
+
+        if (reqInitAuthAdmin.getEncryptType() == 0) {
+            folderPath = caDir.resolve("accounts").toAbsolutePath().toString();
+        } else{
+            folderPath = caDir.resolve("accounts_gm").toAbsolutePath().toString();
+        }
+
+        log.info("initImportAuthAdmin, folderPath: {}", folderPath);
+
+        File folder = new File(folderPath);
+        String pemContent = "";
+
+        if (folder.isDirectory()) {
+            File[] files = folder.listFiles((file) -> file.getName().endsWith(".pem") && !file.getName().endsWith(".public.pem"));
+
+            if (files != null) {
+                for (File file : files) {
+                    try {
+                        byte[] fileContentBytes = Files.readAllBytes(file.toPath());
+                        pemContent = new String(fileContentBytes, StandardCharsets.UTF_8);
+                        break; // 读到一个符合条件的文件后退出循环
+                    } catch (Exception e) {
+                        throw new NodeMgrException(ConstantCode.SYSTEM_EXCEPTION);
+                    }
+                }
+            }
+        }
+
+//        log.info("initImportAuthAdmin, pemContent: {}", pemContent);
+        if (!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
+            throw new NodeMgrException(ConstantCode.PEM_FORMAT_ERROR);
+        }
+
+        reqInitAuthAdmin.setPemContent(pemContent);
+
+        // import
+        reqInitAuthAdmin.setAccount(curLoginUser.getUsername());
+
+        ReqImportPem reqImportPem = new ReqImportPem();
+        BeanCopyUtils.copy(reqInitAuthAdmin, reqImportPem);
+
+//        log.info("initImportAuthAdmin, reqImportPem:{}", reqImportPem);
+        TbUser userRow = userService.importPem(reqImportPem, CheckUserExist.TURE.getValue());
+        baseResponse.setData(userRow);
+
+        log.info("end importPemPrivateKey useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(),
+                JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
+
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.IMPORT)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/importP12")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse importP12PrivateKey(@RequestParam MultipartFile p12File,
             @RequestParam(required = false, defaultValue = "") String p12Password,
             @RequestParam String groupId, @RequestParam String userName,
-            @RequestParam(required = false) String description,
-            @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+            @RequestParam(required = false) String description) {
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start importP12PrivateKey startTime:{},currentAccount:{}",
-            startTime.toEpochMilli(), currentAccountInfo);
+            startTime.toEpochMilli(), curLoginUser);
         if (!NodeMgrTools.notContainsChinese(p12Password)) {
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
@@ -248,7 +318,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
         TbUser userRow = userService.importKeyStoreFromP12(p12File, p12Password, groupId, userName,
-                currentAccountInfo.getAccount(), description, CheckUserExist.TURE.getValue());
+                curLoginUser.getUsername(), description, CheckUserExist.TURE.getValue());
         baseResponse.setData(userRow);
 
         log.info("end importPemPrivateKey useTime:{} result:{}",
@@ -257,18 +327,18 @@ public class UserController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS);
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/exportPem")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param,
-        @CurrentAccount CurrentAccountInfo currentAccount) throws NodeMgrException {
+    public ResponseEntity<InputStreamResource> exportPemUserFromSign(@RequestBody ReqExport param) throws NodeMgrException {
         Instant startTime = Instant.now();
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         log.info("start exportPemUserFromSign startTime:{} param:{},currentAccount:{}",
-            startTime.toEpochMilli(), param, currentAccount);
+            startTime.toEpochMilli(), param, curLoginUser);
         String groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
-        String account = currentAccount.getAccount();
-        Integer roleId = currentAccount.getRoleId();
-        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId, account, roleId);
+//        String account = currentAccount.getAccount();
+//        Integer roleId = currentAccount.getRoleId();
+        FileContentHandle fileContentHandle = userService.exportPemFromSign(groupId, signUserId, curLoginUser);
 
         log.info("end exportPemUserFromSign useTime:{} fileContentHandle:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
@@ -277,13 +347,13 @@ public class UserController extends BaseController {
             .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/exportP12")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param,
-        @CurrentAccount CurrentAccountInfo currentAccount) throws NodeMgrException {
+    public ResponseEntity<InputStreamResource> exportP12UserFromSign(@RequestBody ReqExport param) throws NodeMgrException {
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         Instant startTime = Instant.now();
         log.info("start exportP12UserFromSign startTime:{} param:{},currentAccount:{}",
-            startTime.toEpochMilli(), param, currentAccount);
+            startTime.toEpochMilli(), param, curLoginUser);
         String groupId = param.getGroupId();
         String signUserId = param.getSignUserId();
         String p12PasswordEncoded = param.getP12Password();
@@ -291,10 +361,10 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
         // account info
-        String account = currentAccount.getAccount();
-        Integer roleId = currentAccount.getRoleId();
+//        String account = currentAccount.getAccount();
+//        Integer roleId = currentAccount.getRoleId();
         FileContentHandle fileContentHandle = userService.exportP12FromSign(groupId, signUserId,
-            p12PasswordEncoded, account, roleId);
+            p12PasswordEncoded, curLoginUser);
 
         log.info("end exportP12UserFromSign useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(),
@@ -310,8 +380,8 @@ public class UserController extends BaseController {
      * @return
      * @throws NodeMgrException
      */
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping(value = "/export/{userId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse exportRawUserFromSign(@PathVariable("userId") Integer userId)
         throws NodeMgrException {
         Instant startTime = Instant.now();
@@ -324,21 +394,22 @@ public class UserController extends BaseController {
         return new BaseResponse(ConstantCode.SUCCESS, tbUser);
     }
 
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.UPDATE)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/bind/privateKey")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse bindPrivateKey(@Valid @RequestBody ReqBindPrivateKey reqBind,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse bindPrivateKey(@Valid @RequestBody ReqBindPrivateKey reqBind, BindingResult result) {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindPrivateKey startTime:{} userId:{},currentAccount:{}",
-            startTime.toEpochMilli(), reqBind.getUserId(), currentAccountInfo);
+            startTime.toEpochMilli(), reqBind.getUserId(), curLoginUser);
 
         if (StringUtils.isBlank(reqBind.getPrivateKey())) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
         }
         // add user row
-        TbUser tbUser = userService.updateUser(reqBind, currentAccountInfo);
+        TbUser tbUser = userService.updateUser(reqBind, curLoginUser);
         baseResponse.setData(tbUser);
 
         log.info("end bindPrivateKey useTime:{} result:{}",
@@ -347,15 +418,16 @@ public class UserController extends BaseController {
         return baseResponse;
     }
 
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.UPDATE)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/bind/privateKey/pem")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse bindPrivateKeyByPem(@Valid @RequestBody ReqBindPrivateKey reqBindPem,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo, BindingResult result) {
+    public BaseResponse bindPrivateKeyByPem(@Valid @RequestBody ReqBindPrivateKey reqBindPem, BindingResult result) {
         checkBindResult(result);
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindPrivateKeyByPem startTime:{} userId:{},currentAccount:{}",
-            startTime.toEpochMilli(), reqBindPem.getUserId(), currentAccountInfo);
+            startTime.toEpochMilli(), reqBindPem.getUserId(), curLoginUser);
         String pemContent = reqBindPem.getPemContent();
         if (StringUtils.isBlank(pemContent)) {
             throw new NodeMgrException(ConstantCode.PARAM_EXCEPTION);
@@ -365,7 +437,7 @@ public class UserController extends BaseController {
         }
         // add user row
         TbUser tbUser = userService.updateUserByPem(reqBindPem.getGroupId(), reqBindPem.getUserId(),
-            pemContent, currentAccountInfo);
+            pemContent);
         baseResponse.setData(tbUser);
 
         log.info("end bindPrivateKey useTime:{} result:{}",
@@ -374,17 +446,18 @@ public class UserController extends BaseController {
         return baseResponse;
     }
 
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.UPDATE)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @PostMapping("/bind/privateKey/p12")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse bindPrivateKeyByP12(@RequestParam MultipartFile p12File,
         @RequestParam(required = false, defaultValue = "") String p12Password,
         @RequestParam String groupId,
-        @RequestParam Integer userId,
-        @CurrentAccount CurrentAccountInfo currentAccountInfo) {
+        @RequestParam Integer userId) {
+        LoginUser curLoginUser= LoginHelper.getLoginUser();
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         Instant startTime = Instant.now();
         log.info("start bindPrivateKeyByP12 startTime:{},currentAccount:{}",
-            startTime.toEpochMilli(), currentAccountInfo);
+            startTime.toEpochMilli(), curLoginUser);
         if (!NodeMgrTools.notContainsChinese(p12Password)) {
             throw new NodeMgrException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
@@ -392,8 +465,7 @@ public class UserController extends BaseController {
             throw new NodeMgrException(ConstantCode.P12_FILE_ERROR);
         }
         // add user row
-        TbUser tbUser = userService.updateUserByP12(groupId, userId, p12File, p12Password,
-            currentAccountInfo);
+        TbUser tbUser = userService.updateUserByP12(groupId, userId, p12File, p12Password);
         baseResponse.setData(tbUser);
 
         log.info("end bindPrivateKey useTime:{} result:{}",
@@ -405,8 +477,9 @@ public class UserController extends BaseController {
     /**
      * update user info of description
      */
+    @Log(title = "BCOS3/私钥管理", businessType = BusinessType.UPDATE)
+    @SaCheckPermission("bcos3:privateKeyManagement:userOperate")
     @DeleteMapping(value = "/{groupId}/{address}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse suspendUser(@PathVariable("groupId") String groupId,
         @PathVariable("address") String address) throws NodeMgrException {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);

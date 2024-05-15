@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS tb_group (
     chain_id int(10) unsigned DEFAULT '0' COMMENT '所属链 ID',
     chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
     encrypt_type tinyint(8) unsigned NOT NULL DEFAULT '0' COMMENT '加密类型：0，标密；1，国密；默认 0 ',
+    user_id bigint DEFAULT NULL COMMENT '用户id',
+    dept_id bigint DEFAULT NULL COMMENT '部门id',
     PRIMARY KEY (group_id),
     UNIQUE KEY `unique_chain_id_group_id` (`chain_id`,`group_id`)
 ) COMMENT='群组信息表' ENGINE=InnoDB CHARSET=utf8;
@@ -51,6 +53,8 @@ CREATE TABLE IF NOT EXISTS tb_front (
   channel_port int(6) DEFAULT '20200' COMMENT 'channel 端口',
   chain_id int(10) unsigned DEFAULT '0' COMMENT '所属链 ID',
   chain_name varchar(64) DEFAULT '' COMMENT '所属链名称，冗余字段',
+  cpus tinyint unsigned DEFAULT '0' COMMENT 'cpu核数',
+  memory tinyint unsigned DEFAULT '0' COMMENT '内存大小GB',
   PRIMARY KEY (`front_id`),
   UNIQUE KEY `unique_node_id` (`node_id`),
   UNIQUE KEY `unique_ip_port` (`front_ip`,`front_port`),
@@ -374,6 +378,9 @@ CREATE TABLE IF NOT EXISTS `tb_chain` (
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `modify_time` datetime NOT NULL COMMENT '最近一次更新时间',
   `run_type` tinyint(8) unsigned DEFAULT '0' COMMENT '运行方式：0，命令行；1，Docker',
+  `user_id` bigint DEFAULT NULL COMMENT '用户id',
+  `dept_id` bigint DEFAULT NULL COMMENT '部门id',
+  `chain_id` varchar(64) DEFAULT NULL COMMENT '实际部署的链id',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_chain_name` (`chain_name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='链信息表';

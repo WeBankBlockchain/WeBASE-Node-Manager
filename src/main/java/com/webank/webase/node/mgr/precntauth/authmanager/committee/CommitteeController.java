@@ -14,25 +14,19 @@
 
 package com.webank.webase.node.mgr.precntauth.authmanager.committee;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precntauth.authmanager.base.BaseService;
-import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqDeployAuthTypeInfo;
-import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqResetAdminInfo;
-import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqRevokeProposalInfo;
-import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqSetRateInfo;
-import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqUpdateGovernorInfo;
-import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqUsrDeployInfo;
-import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.ReqVoteProposalInfo;
+import com.webank.webase.node.mgr.precntauth.authmanager.committee.entity.*;
+import com.webank.webase.node.mgr.precntauth.precompiled.base.PrecompiledUtil;
+import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.tools.JsonTools;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import java.time.Duration;
-import java.time.Instant;
-import javax.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,11 +36,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+import java.time.Duration;
+import java.time.Instant;
+
 /**
  * authmanager committee manage above FISCO-BCOS v3.0
  */
+@Tag(name="权限管理")
+@SaCheckPermission("bcos3:sys:newPermission")
 @Log4j2
-@Api(value = "precntauth/authmanager/committee/", tags = "precntauth authmanager controller")
+//@Api(value = "precntauth/authmanager/committee/", tags = "precntauth authmanager controller")
 @RestController
 @RequestMapping(value = "precntauth/authmanager/committee/")
 public class CommitteeController extends BaseController {
@@ -59,9 +59,11 @@ public class CommitteeController extends BaseController {
     /**
      * 更新(新增、删除)治理委员信息(weight设置为0表示删除)
      */
-    @ApiOperation(value = "update committee governor")
-    @ApiImplicitParam(name = "reqUpdateGovernorInfo", value = "governor info", required = true
-        , dataType = "ReqUpdateGovernorInfo")
+//    @ApiOperation(value = "update committee governor")
+//    @ApiImplicitParam(name = "reqUpdateGovernorInfo", value = "governor info", required = true
+//        , dataType = "ReqUpdateGovernorInfo")
+
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("governor")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object updateGovernor(
@@ -86,9 +88,10 @@ public class CommitteeController extends BaseController {
     /**
      * 设置治理阈值rate
      */
-    @ApiOperation(value = "set committee rate")
-    @ApiImplicitParam(name = "reqSetRateInfo", value = "rate info", required = true,
-        dataType = "ReqSetRateInfo")
+//    @ApiOperation(value = "set committee rate")
+//    @ApiImplicitParam(name = "reqSetRateInfo", value = "rate info", required = true,
+//        dataType = "ReqSetRateInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("rate")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object setRate(@Valid @RequestBody ReqSetRateInfo reqSetRateInfo) {
@@ -104,9 +107,10 @@ public class CommitteeController extends BaseController {
     /**
      * 设置全局部署类型  (white_list和black_list两种策略.type为1时为白名单，type为2时为黑名单)
      */
-    @ApiOperation(value = "set deploy type")
-    @ApiImplicitParam(name = "reqDeployAuthTypeInfo", value = "DeployAuthTypeInfo", required = true,
-        dataType = "ReqDeployAuthTypeInfo")
+//    @ApiOperation(value = "set deploy type")
+//    @ApiImplicitParam(name = "reqDeployAuthTypeInfo", value = "DeployAuthTypeInfo", required = true,
+//        dataType = "ReqDeployAuthTypeInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("deploy/type")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object setDeployAuthType(
@@ -123,9 +127,10 @@ public class CommitteeController extends BaseController {
     /**
      * 修改用户部署权限
      */
-    @ApiOperation(value = "modify deploy user", notes = "openFlag value is true or false")
-    @ApiImplicitParam(name = "reqUsrDeployInfo", value = "usrDeployAuth info", required = true,
-        dataType = "ReqUsrDeployInfo")
+//    @ApiOperation(value = "modify deploy user", notes = "openFlag value is true or false")
+//    @ApiImplicitParam(name = "reqUsrDeployInfo", value = "usrDeployAuth info", required = true,
+//        dataType = "ReqUsrDeployInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("usr/deploy")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object modifyDeployUsrAuth(@Valid @RequestBody ReqUsrDeployInfo reqUsrDeployInfo) {
@@ -141,9 +146,10 @@ public class CommitteeController extends BaseController {
     /**
      * 重设合约管理员
      */
-    @ApiOperation(value = "reset the admin of contract")
-    @ApiImplicitParam(name = "reqResetAdminInfo", value = "resetAdmin info", required = true,
-        dataType = "ReqResetAdminInfo")
+//    @ApiOperation(value = "reset the admin of contract")
+//    @ApiImplicitParam(name = "reqResetAdminInfo", value = "resetAdmin info", required = true,
+//        dataType = "ReqResetAdminInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("contract/admin")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object resetAdmin(@Valid @RequestBody ReqResetAdminInfo reqResetAdminInfo) {
@@ -159,9 +165,10 @@ public class CommitteeController extends BaseController {
     /**
      * 撤销某提案
      */
-    @ApiOperation(value = "revoke the proposal")
-    @ApiImplicitParam(name = "reqRevokeProposalInfo", value = "revokeProposal info", required = true,
-        dataType = "ReqRevokeProposalInfo")
+//    @ApiOperation(value = "revoke the proposal")
+//    @ApiImplicitParam(name = "reqRevokeProposalInfo", value = "revokeProposal info", required = true,
+//        dataType = "ReqRevokeProposalInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("proposal/revoke")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object revokeProposal(@Valid @RequestBody ReqRevokeProposalInfo reqRevokeProposalInfo) {
@@ -177,9 +184,10 @@ public class CommitteeController extends BaseController {
     /**
      * 对某提案进行投票
      */
-    @ApiOperation(value = "vote the proposal")
-    @ApiImplicitParam(name = "reqVoteProposalInfo", value = "voteProposal info", required = true,
-        dataType = "ReqVoteProposalInfo")
+//    @ApiOperation(value = "vote the proposal")
+//    @ApiImplicitParam(name = "reqVoteProposalInfo", value = "voteProposal info", required = true,
+//        dataType = "ReqVoteProposalInfo")
+    @Log(title = "BCOS3/系统管理/权限管理", businessType = BusinessType.UPDATE)
     @PostMapping("proposal/vote")
     @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object voteProposal(@Valid @RequestBody ReqVoteProposalInfo reqVoteProposalInfo) {
@@ -190,5 +198,17 @@ public class CommitteeController extends BaseController {
             return new BaseResponse(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
         }
         return committeeService.voteProposal(reqVoteProposalInfo);
+    }
+
+    @Log(title = "BCOS3/节点管理/权限管理", businessType = BusinessType.UPDATE)
+    @PostMapping("proposal/consensus")
+    public Object nodeManageProposal(@Valid @RequestBody ConsensusHandle consensusHandle) {
+        log.info("start nodeManageProposal. consensusHandle:{}", consensusHandle);
+//        String nodeType = consensusHandle.getNodeType();
+        String nodeId = consensusHandle.getNodeId();
+        if (!PrecompiledUtil.checkNodeId(nodeId)) {
+            return ConstantCode.INVALID_NODE_ID;
+        }
+        return committeeService.consensusMgrProposal(consensusHandle);
     }
 }

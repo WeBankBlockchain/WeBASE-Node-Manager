@@ -13,6 +13,9 @@
  */
 package com.webank.webase.node.mgr.precntauth.precompiled.consensus;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.qctc.common.log.annotation.Log;
+import com.qctc.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -20,12 +23,7 @@ import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.precntauth.precompiled.base.PrecompiledUtil;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ConsensusHandle;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.entity.ReqNodeListInfo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import java.time.Duration;
-import java.time.Instant;
-import javax.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,7 +32,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(value = "precntauth/precompiled/consensus", tags = "precntauth precompiled controller")
+import javax.validation.Valid;
+import java.time.Duration;
+import java.time.Instant;
+
+//@Api(value = "precntauth/precompiled/consensus", tags = "precntauth precompiled controller")
+@Tag(name="共识管理")
 @Slf4j
 @RestController
 @RequestMapping(value = "precntauth/precompiled/consensus")
@@ -46,17 +49,18 @@ public class ConsensusController {
     /**
      * Consensus
      */
-    @ApiOperation(value = "query consensus node list")
-    @ApiImplicitParam(name = "reqNodeListInfo", value = "node consensus list", required = true, dataType = "ReqNodeListInfo")
+//    @ApiOperation(value = "query consensus node list")
+//    @ApiImplicitParam(name = "reqNodeListInfo", value = "node consensus list", required = true, dataType = "ReqNodeListInfo")
     @PostMapping("list")
     public Object getNodeList(@Valid @RequestBody ReqNodeListInfo reqNodeListInfo) {
         return consensusService.getNodeList(reqNodeListInfo);
     }
 
-    @ApiOperation(value = "manage node type", notes = "addSealer addObserver removeNode")
-    @ApiImplicitParam(name = "consensusHandle", value = "node consensus info", required = true, dataType = "ConsensusHandle")
+//    @ApiOperation(value = "manage node type", notes = "addSealer addObserver removeNode")
+//    @ApiImplicitParam(name = "consensusHandle", value = "node consensus info", required = true, dataType = "ConsensusHandle")
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @PostMapping("manage")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    @SaCheckPermission("bcos3:chain:nodeManage")
     public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle) {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();
@@ -71,6 +75,8 @@ public class ConsensusController {
                 return addObserver(consensusHandle);
             case PrecompiledUtil.NODE_TYPE_REMOVE:
                 return removeNode(consensusHandle);
+            case PrecompiledUtil.NODE_TYPE_WEIGHT:
+                return setWeight(consensusHandle);
             default:
                 log.debug("end nodeManageControl invalid node type");
                 return ConstantCode.INVALID_NODE_TYPE;
@@ -89,6 +95,22 @@ public class ConsensusController {
             return res;
         } catch (Exception e) {
             log.error("addSealer exception:[]", e);
+            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
+        }
+    }
+
+    public Object setWeight(ConsensusHandle consensusHandle) {
+        Instant startTime = Instant.now();
+        if (consensusHandle.getWeight() == null) {
+            throw new NodeMgrException(ConstantCode.ADD_SEALER_WEIGHT_CANNOT_NULL);
+        }
+        try {
+            Object res = consensusService.setWeight(consensusHandle);
+            log.info("end setWeight useTime:{} res:{}",
+                    Duration.between(startTime, Instant.now()).toMillis(), res);
+            return res;
+        } catch (Exception e) {
+            log.error("setWeight exception:[]", e);
             return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }

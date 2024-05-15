@@ -13,19 +13,19 @@
  */
 package com.webank.webase.node.mgr.base.exception;
 
-import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.code.RetCode;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
-import java.util.Optional;
+import com.webank.webase.node.mgr.tools.JsonTools;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.util.Optional;
 
 /**
  * catch an handler exception.
@@ -85,16 +85,16 @@ public class ExceptionsHandler {
     /**
      * catch：AccessDeniedException.
      */
-    @ResponseBody
-    @ExceptionHandler(value = AccessDeniedException.class)
-    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public BaseResponse accessDeniedExceptionHandler(AccessDeniedException exception)
-        throws Exception {
-        log.error("catch accessDenied exception:[]", exception);
-        BaseResponse bre = new BaseResponse(ConstantCode.ACCESS_DENIED);
-        log.warn("accessDenied exception return:{}", JsonTools.toJSONString(bre));
-        return bre;
-    }
+//    @ResponseBody
+//    @ExceptionHandler(value = AccessDeniedException.class)
+//    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+//    public BaseResponse accessDeniedExceptionHandler(AccessDeniedException exception)
+//        throws Exception {
+//        log.error("catch accessDenied exception:[]", exception);
+//        BaseResponse bre = new BaseResponse(ConstantCode.ACCESS_DENIED);
+//        log.warn("accessDenied exception return:{}", JsonTools.toJSONString(bre));
+//        return bre;
+//    }
 
     /**
      * catch：RuntimeException.

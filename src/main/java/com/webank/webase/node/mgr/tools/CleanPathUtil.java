@@ -67,4 +67,7 @@ public class CleanPathUtil {
                 return ' ';
         }
     }
+    public static boolean containsChinese(String str) {
+        return str.matches(".*[\u4e00-\u9fa5]+.*");
+    }
 }

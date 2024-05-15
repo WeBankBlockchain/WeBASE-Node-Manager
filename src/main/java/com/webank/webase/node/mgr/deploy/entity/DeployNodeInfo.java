@@ -35,5 +35,9 @@ public class DeployNodeInfo {
     private int p2pPort;
     @Positive
     private int rpcPort;
+    @Positive
+    private int cpus;
+    @Positive
+    private int memory;
 
 }
