@@ -21,7 +21,7 @@ spring:
   cloud:
     nacos:
       # nacos 服务地址
-      server-addr: nacos:8848
+      server-addr: 192.168.12.180:8848
       discovery:
         # 注册组
         group: DEFAULT_GROUP

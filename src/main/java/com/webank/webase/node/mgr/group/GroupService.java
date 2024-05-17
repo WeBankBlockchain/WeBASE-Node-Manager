@@ -13,10 +13,10 @@
  */
 package com.webank.webase.node.mgr.group;
 
-import com.qctc.common.satoken.utils.LoginHelper;
-import com.qctc.host.api.RemoteHostService;
-import com.qctc.host.api.model.HostDTO;
-import com.qctc.system.api.model.LoginUser;
+import com.webank.common.satoken.utils.LoginHelper;
+import com.webank.host.api.RemoteHostService;
+import com.webank.host.api.model.HostDTO;
+import com.webank.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -68,7 +68,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import com.qctc.common.mybatis.helper.DataPermissionHelper;
+import com.webank.common.mybatis.helper.DataPermissionHelper;
 
 import java.io.IOException;
 import java.math.BigInteger;

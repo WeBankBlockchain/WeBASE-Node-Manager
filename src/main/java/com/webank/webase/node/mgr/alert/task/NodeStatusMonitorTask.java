@@ -16,7 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
-import com.qctc.common.mybatis.helper.DataPermissionHelper;
+import com.webank.common.mybatis.helper.DataPermissionHelper;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.ConsensusServiceInWebase;
 import java.time.Duration;
 import java.time.Instant;

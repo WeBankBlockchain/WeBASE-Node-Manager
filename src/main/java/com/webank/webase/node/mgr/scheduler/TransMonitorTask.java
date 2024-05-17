@@ -13,7 +13,7 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
-import com.qctc.common.mybatis.helper.DataPermissionHelper;
+import com.webank.common.mybatis.helper.DataPermissionHelper;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;

@@ -16,8 +16,8 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
-import com.qctc.host.api.RemoteHostService;
-import com.qctc.host.api.model.HostDTO;
+import com.webank.host.api.RemoteHostService;
+import com.webank.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.alert.mail.MailService;
 import com.webank.webase.node.mgr.alert.rule.AlertRuleService;
 import com.webank.webase.node.mgr.alert.rule.entity.TbAlertRule;

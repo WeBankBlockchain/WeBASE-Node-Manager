@@ -1,7 +1,7 @@
 package com.webank.webase.node.mgr.tools;
 
-import com.qctc.system.api.RemoteUserService;
-import com.qctc.system.api.model.LoginUser;
+import com.webank.system.api.RemoteUserService;
+import com.webank.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import org.apache.commons.lang3.StringUtils;

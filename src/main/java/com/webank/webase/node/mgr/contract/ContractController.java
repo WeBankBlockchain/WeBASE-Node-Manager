@@ -14,10 +14,10 @@
 package com.webank.webase.node.mgr.contract;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.qctc.common.log.annotation.Log;
-import com.qctc.common.log.enums.BusinessType;
-import com.qctc.common.satoken.utils.LoginHelper;
-import com.qctc.system.api.model.LoginUser;
+import com.webank.common.log.annotation.Log;
+import com.webank.common.log.enums.BusinessType;
+import com.webank.common.satoken.utils.LoginHelper;
+import com.webank.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;

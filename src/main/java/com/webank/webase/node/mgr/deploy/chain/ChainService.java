@@ -14,12 +14,12 @@
 package com.webank.webase.node.mgr.deploy.chain;
 
 import cn.hutool.core.util.HexUtil;
-import com.qctc.common.mybatis.annotation.DataPermission;
-import com.qctc.common.mybatis.helper.DataPermissionHelper;
-import com.qctc.common.satoken.utils.LoginHelper;
-import com.qctc.host.api.RemoteHostService;
-import com.qctc.host.api.model.HostDTO;
-import com.qctc.system.api.model.LoginUser;
+import com.webank.common.mybatis.annotation.DataPermission;
+import com.webank.common.mybatis.helper.DataPermissionHelper;
+import com.webank.common.satoken.utils.LoginHelper;
+import com.webank.host.api.RemoteHostService;
+import com.webank.host.api.model.HostDTO;
+import com.webank.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.Application;
 import com.webank.webase.node.mgr.SpringBeanUtils;
 import com.webank.webase.node.mgr.base.code.ConstantCode;

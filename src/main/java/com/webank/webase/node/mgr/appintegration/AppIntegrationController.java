@@ -15,8 +15,8 @@
 package com.webank.webase.node.mgr.appintegration;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.qctc.common.log.annotation.Log;
-import com.qctc.common.log.enums.BusinessType;
+import com.webank.common.log.annotation.Log;
+import com.webank.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.appintegration.entity.AppAddInfo;
 import com.webank.webase.node.mgr.appintegration.entity.AppInfoParam;
 import com.webank.webase.node.mgr.appintegration.entity.TbAppInfo;

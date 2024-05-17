@@ -15,8 +15,8 @@
 package com.webank.webase.node.mgr.precntauth.authmanager.committee.vote;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.qctc.common.log.annotation.Log;
-import com.qctc.common.log.enums.BusinessType;
+import com.webank.common.log.annotation.Log;
+import com.webank.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;

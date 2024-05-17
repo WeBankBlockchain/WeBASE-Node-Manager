@@ -14,7 +14,7 @@
 package com.webank.webase.node.mgr.scheduler;
 
 
-import com.qctc.common.mybatis.helper.DataPermissionHelper;
+import com.webank.common.mybatis.helper.DataPermissionHelper;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import com.webank.webase.node.mgr.group.GroupService;
 import java.util.concurrent.atomic.LongAdder;

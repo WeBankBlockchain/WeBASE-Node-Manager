@@ -3,8 +3,8 @@ package com.webank.webase.node.mgr.deploy.mapper;
 import java.util.Date;
 import java.util.List;
 
-import com.qctc.common.mybatis.annotation.DataColumn;
-import com.qctc.common.mybatis.annotation.DataPermission;
+import com.webank.common.mybatis.annotation.DataColumn;
+import com.webank.common.mybatis.annotation.DataPermission;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;

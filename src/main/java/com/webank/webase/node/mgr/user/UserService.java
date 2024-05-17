@@ -13,8 +13,8 @@
  */
 package com.webank.webase.node.mgr.user;
 
-import com.qctc.common.satoken.utils.LoginHelper;
-import com.qctc.system.api.model.LoginUser;
+import com.webank.common.satoken.utils.LoginHelper;
+import com.webank.system.api.model.LoginUser;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;

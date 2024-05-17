@@ -18,8 +18,8 @@ package com.webank.webase.node.mgr.deploy.service;
 import static com.webank.webase.node.mgr.tools.IPUtil.LOCAL_IP_127;
 import static com.webank.webase.node.mgr.tools.IPUtil.LOCAL_IP_host;
 
-import com.qctc.host.api.RemoteHostService;
-import com.qctc.host.api.model.HostDTO;
+import com.webank.host.api.RemoteHostService;
+import com.webank.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.HostStatusEnum;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;

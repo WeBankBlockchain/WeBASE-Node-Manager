@@ -21,8 +21,8 @@ import java.time.Instant;
 import java.util.List;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.qctc.common.log.annotation.Log;
-import com.qctc.common.log.enums.BusinessType;
+import com.webank.common.log.annotation.Log;
+import com.webank.common.log.enums.BusinessType;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 

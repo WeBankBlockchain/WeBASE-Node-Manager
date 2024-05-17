@@ -17,8 +17,8 @@
 package com.webank.webase.node.mgr.alert.mail;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.qctc.common.log.annotation.Log;
-import com.qctc.common.log.enums.BusinessType;
+import com.webank.common.log.annotation.Log;
+import com.webank.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.alert.mail.server.config.MailServerConfigService;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.base.code.ConstantCode;

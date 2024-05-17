@@ -15,8 +15,8 @@ package com.webank.webase.node.mgr.group;
 
 import java.util.List;
 
-import com.qctc.common.mybatis.annotation.DataColumn;
-import com.qctc.common.mybatis.annotation.DataPermission;
+import com.webank.common.mybatis.annotation.DataColumn;
+import com.webank.common.mybatis.annotation.DataPermission;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
