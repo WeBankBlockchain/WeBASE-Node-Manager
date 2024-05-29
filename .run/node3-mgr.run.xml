@@ -2,7 +2,7 @@
   <configuration default="false" name="node3-mgr" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
     <deployment type="dockerfile">
       <settings>
-        <option name="imageTag" value="webasepro/webase-node-mgr3:v3.1.1" />
+        <option name="imageTag" value="webasepro/webase-node-mgr-micro:v3.1.1" />
         <option name="containerName" value="" />
         <option name="contextFolderPath" value="dist" />
         <option name="sourceFilePath" value="docker/build/Dockerfile" />

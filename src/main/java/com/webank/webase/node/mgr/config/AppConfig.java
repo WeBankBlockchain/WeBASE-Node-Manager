@@ -74,7 +74,7 @@ public class AppConfig implements InitializingBean {
     }
 
     private void writeSSHKey(String sshKey) throws Exception {
-        log.info("!!!!!writeSSHKey");
+//        log.info("!!!!!writeSSHKey");
         String filePath = System.getProperty("user.home") + "/.ssh/id_rsa";
         File file = new File(filePath);
         FileWriter fileWriter = new FileWriter(file);
