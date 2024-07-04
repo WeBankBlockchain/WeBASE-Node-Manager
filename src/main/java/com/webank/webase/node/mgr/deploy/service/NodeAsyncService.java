@@ -14,23 +14,33 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
+import com.webank.host.api.RemoteHostService;
+import com.webank.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
 import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
 import com.webank.webase.node.mgr.base.enums.OptionType;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.tools.CertTools;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.ProgressTools;
 import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.entity.TbHost;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
 import com.webank.webase.node.mgr.front.FrontMapper;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.node.NodeService;
+import com.webank.webase.node.mgr.tools.CertTools;
+import com.webank.webase.node.mgr.tools.JsonTools;
+import com.webank.webase.node.mgr.tools.ProgressTools;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.logging.log4j.Level;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Component;
+
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -41,21 +51,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.Level;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Component;
 
 @Log4j2
 @Component
 public class NodeAsyncService {
 
     @Autowired private FrontMapper frontMapper;
-    @Autowired private TbHostMapper tbHostMapper;
+//    @Autowired private TbHostMapper tbHostMapper;
     @Autowired private TbChainMapper tbChainMapper;
 
     @Autowired private FrontService frontService;
@@ -67,6 +69,9 @@ public class NodeAsyncService {
 
     @Qualifier(value = "deployAsyncScheduler")
     @Autowired private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
+    @DubboReference
+    private RemoteHostService remoteHostService;
 
 
     /**
@@ -82,6 +87,7 @@ public class NodeAsyncService {
             chainService.updateStatus(chainId, startSuccess ? success : failed);
             if (startSuccess) {
                 log.info("if started, refresh front group map");
+                CertTools.isPullFrontCertsDone = false;
                 groupService.resetGroupList();
             }
         }, Instant.now().plusMillis(1L));
@@ -249,7 +255,8 @@ public class NodeAsyncService {
             threadPoolTaskScheduler.submit(() -> {
                 List<TbFront> frontListToRestart = hostFrontListMap.get(tbHostId);
                 //
-                TbHost tbHost = this.tbHostMapper.selectByPrimaryKey(tbHostId);
+//                TbHost tbHost = this.tbHostMapper.selectByPrimaryKey(tbHostId);
+                HostDTO tbHost = remoteHostService.getHostById(tbHostId);
                 try {
                     for (TbFront front : CollectionUtils.emptyIfNull(frontListToRestart)) {
                         log.info("Start front:[{}:{}:{}].", front.getFrontIp(), front.getHostIndex(), front.getNodeId());

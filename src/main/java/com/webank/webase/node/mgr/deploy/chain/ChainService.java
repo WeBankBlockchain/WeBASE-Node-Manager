@@ -13,61 +13,37 @@
  */
 package com.webank.webase.node.mgr.deploy.chain;
 
-import static com.webank.webase.node.mgr.front.frontinterface.FrontRestTools.URI_CHAIN;
-
+import cn.hutool.core.util.HexUtil;
+import com.webank.common.mybatis.annotation.DataPermission;
+import com.webank.common.mybatis.helper.DataPermissionHelper;
+import com.webank.common.satoken.utils.LoginHelper;
+import com.webank.host.api.RemoteHostService;
+import com.webank.host.api.model.HostDTO;
+import com.webank.system.api.model.LoginUser;
+import com.webank.webase.node.mgr.Application;
+import com.webank.webase.node.mgr.SpringBeanUtils;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.enums.ChainStatusEnum;
-import com.webank.webase.node.mgr.base.enums.DataStatus;
-import com.webank.webase.node.mgr.base.enums.FrontStatusEnum;
-import com.webank.webase.node.mgr.base.enums.GroupStatus;
-import com.webank.webase.node.mgr.base.enums.GroupType;
-import com.webank.webase.node.mgr.base.enums.OptionType;
-import com.webank.webase.node.mgr.base.enums.RunTypeEnum;
+import com.webank.webase.node.mgr.base.enums.*;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
-import com.webank.webase.node.mgr.tools.CertTools;
-import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.tools.NodeMgrTools;
-import com.webank.webase.node.mgr.tools.NumberUtil;
-import com.webank.webase.node.mgr.tools.ProgressTools;
-import com.webank.webase.node.mgr.tools.ThymeleafUtil;
 import com.webank.webase.node.mgr.cert.CertService;
-import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
-import com.webank.webase.node.mgr.deploy.entity.IpConfigParse;
-import com.webank.webase.node.mgr.deploy.entity.NodeConfig;
-import com.webank.webase.node.mgr.deploy.entity.TbAgency;
-import com.webank.webase.node.mgr.deploy.entity.TbChain;
-import com.webank.webase.node.mgr.deploy.entity.TbHost;
+import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.deploy.entity.*;
 import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbChainMapper;
 import com.webank.webase.node.mgr.deploy.mapper.TbConfigMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.deploy.service.AgencyService;
-import com.webank.webase.node.mgr.deploy.service.AnsibleService;
-import com.webank.webase.node.mgr.deploy.service.ConfigService;
-import com.webank.webase.node.mgr.deploy.service.DeployShellService;
-import com.webank.webase.node.mgr.deploy.service.DockerCommandService;
-import com.webank.webase.node.mgr.deploy.service.HostService;
-import com.webank.webase.node.mgr.deploy.service.NodeAsyncService;
-import com.webank.webase.node.mgr.deploy.service.PathService;
+import com.webank.webase.node.mgr.deploy.service.*;
 import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
 import com.webank.webase.node.mgr.frontgroupmap.FrontGroupMapService;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
 import com.webank.webase.node.mgr.node.NodeService;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.webank.webase.node.mgr.tools.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -76,6 +52,17 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.webank.webase.node.mgr.front.frontinterface.FrontRestTools.URI_CHAIN;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * chain monitor
@@ -88,7 +75,10 @@ public class ChainService {
     @Autowired private TbChainMapper tbChainMapper;
     @Autowired private TbConfigMapper tbConfigMapper;
     @Autowired private TbAgencyMapper tbAgencyMapper;
-    @Autowired private TbHostMapper tbHostMapper;
+//    @Autowired private TbHostMapper tbHostMapper;
+
+    @DubboReference
+    private RemoteHostService remoteHostService;
 
     @Autowired
     private ConstantProperties cproperties;
@@ -107,6 +97,8 @@ public class ChainService {
     private PathService pathService;
     @Autowired
     private DeployShellService deployShellService;
+
+    @Lazy
     @Autowired
     private HostService hostService;
     @Autowired
@@ -116,6 +108,8 @@ public class ChainService {
     private FrontGroupMapService frontGroupMapService;
     @Autowired
     private ConstantProperties constant;
+
+    @Lazy
     @Autowired
     private NodeAsyncService nodeAsyncService;
     @Autowired
@@ -172,8 +166,8 @@ public class ChainService {
 
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public TbChain insert(String chainName, String chainDesc, String version, byte encryptType, ChainStatusEnum status, RunTypeEnum runTypeEnum, String webaseSignAddr ) throws NodeMgrException {
-        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, runTypeEnum, webaseSignAddr);
+    public TbChain insert(String chainName, String chainId, String chainDesc, String version, byte encryptType, ChainStatusEnum status, RunTypeEnum runTypeEnum, String webaseSignAddr, Long userId, Long deptId) throws NodeMgrException {
+        TbChain chain = TbChain.init(chainName, chainDesc, version, encryptType, status, runTypeEnum, webaseSignAddr, BigInteger.valueOf(userId), BigInteger.valueOf(deptId), chainId);
 
         if (tbChainMapper.insertSelective(chain) != 1 || chain.getId() <= 0) {
             throw new NodeMgrException(ConstantCode.INSERT_CHAIN_ERROR);
@@ -185,7 +179,7 @@ public class ChainService {
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateStatus(int chainId, ChainStatusEnum newStatus) {
         log.info("Update chain:[{}] status to:[{}]",chainId, newStatus.toString());
-        int count =  this.tbChainMapper.updateChainStatus(chainId, new Date(), newStatus.getId());
+        int count = DataPermissionHelper.ignore(() -> this.tbChainMapper.updateChainStatus(chainId, new Date(), newStatus.getId()));
         return count == 1;
     }
 
@@ -194,7 +188,7 @@ public class ChainService {
     public boolean updateStatus(String chainName, ChainStatusEnum newStatus) {
         log.info("Update chain:[{}] status to:[{}]",chainName, newStatus.toString());
         TbChain chain = tbChainMapper.getByChainName(chainName);
-        int count =  this.tbChainMapper.updateChainStatus(chain.getId(), new Date(), newStatus.getId());
+        int count = DataPermissionHelper.ignore(() -> this.tbChainMapper.updateChainStatus(chain.getId(), new Date(), newStatus.getId()));
         return count == 1;
     }
 
@@ -204,11 +198,14 @@ public class ChainService {
         log.info("Upgrade chain:[{}] from version:[{}] to version:[{}].",
                 chain.getChainName(), chain.getVersion(), newTagVersion);
 
+        LoginUser curLoginUser = LoginHelper.getLoginUser();
         TbChain newChain = new TbChain();
         newChain.setId(chain.getId());
         newChain.setVersion(newTagVersion);
         newChain.setModifyTime(new Date());
         newChain.setChainStatus(ChainStatusEnum.UPGRADING.getId());
+        newChain.setUserId(BigInteger.valueOf(curLoginUser.getUserId()));
+        newChain.setDeptId(BigInteger.valueOf(curLoginUser.getDeptId()));
         int count = this.tbChainMapper.updateByPrimaryKeySelective(newChain);
 
         if(count != 1){
@@ -231,18 +228,18 @@ public class ChainService {
      * @param rootDirOnHost
      * @param chainName
      */
-    public void mvChainOnRemote(String ip, String rootDirOnHost, String chainName){
-        log.info("mvChainOnRemote ip:{}, rootDirHost:{},chainName:{}", ip, rootDirOnHost, chainName);
+    public void mvChainOnRemote(HostDTO hostDTO, String chainName){
+        log.info("mvChainOnRemote ip:{}, rootDirHost:{},chainName:{}", hostDTO.getIp(), hostDTO.getRootDir(), chainName);
         // create /opt/fisco/deleted-tmp/ as a parent dir
-        String deleteRootOnHost = PathService.getDeletedRootOnHost(rootDirOnHost);
-        ansibleService.execCreateDir(ip, deleteRootOnHost);
+        String deleteRootOnHost = PathService.getDeletedRootOnHost(hostDTO.getRootDir());
+        ansibleService.execCreateDir(hostDTO, deleteRootOnHost);
 
         // like /opt/fisco/default_chain
-        String src_chainRootOnHost = PathService.getChainRootOnHost(rootDirOnHost, chainName);
+        String src_chainRootOnHost = PathService.getChainRootOnHost(hostDTO.getRootDir(), chainName);
         // move to /opt/fisco/deleted-tmp/default_chain-yyyyMMdd_HHmmss
-        String dst_chainDeletedRootOnHost = PathService.getChainDeletedRootOnHost(rootDirOnHost, chainName);
+        String dst_chainDeletedRootOnHost = PathService.getChainDeletedRootOnHost(hostDTO.getRootDir(), chainName);
 
-        ansibleService.mvDirOnRemote(ip, src_chainRootOnHost, dst_chainDeletedRootOnHost);
+        ansibleService.mvDirOnRemote(hostDTO, src_chainRootOnHost, dst_chainDeletedRootOnHost);
         log.info("end mvChainOnRemote");
 
     }
@@ -278,7 +275,7 @@ public class ChainService {
 
         log.info("Delete chain:[{}] config files", chainName);
         try {
-            this.pathService.deleteChain(chainName);
+            this.pathService.deleteChain(chainName, chain.getChainId());
         } catch (IOException e) {
             errorFlag++;
             log.error("Delete chain config files error:[]", e);
@@ -306,7 +303,7 @@ public class ChainService {
      */
     @Transactional
     public boolean generateConfigLocalAndInitDb(String chainName, List<DeployNodeInfo> deployNodeInfoList,
-        String[] ipConf, String imageTag, int encryptType, String webaseSignAddr, String agencyName) {
+        String[] ipConf, String imageTag, int encryptType, String webaseSignAddr, String agencyName, int enableAuth) {
         log.info("Check chainName exists....");
         TbChain chain = tbChainMapper.getByChainName(chainName);
         if (chain != null) {
@@ -331,18 +328,25 @@ public class ChainService {
             chainVersion = chainVersion.substring(1);
             log.info("execBuildChain chainVersion:{}", chainVersion);
         }
-        deployShellService.execBuildChain(encryptType, ipConf, chainName, chainVersion);
+
+        // 搭建air版本区块链，搭建时群组只能有一个
+        List<String> groupIds = new ArrayList<>(ipConfigParseList.get(0).getGroupIdSet());
+//        String groupId = "group" + groupIds.get(0);
+        String groupId = groupIds.get(0);
+        String chainId = "chain" + groupId;
+        deployShellService.execBuildChain(encryptType, ipConf, chainName, chainVersion, groupId, enableAuth);
 
         try {
             log.info("Init chain front node db data....");
+            LoginUser curLoginUser = LoginHelper.getLoginUser();
             // save chain data in db, generate front's yml
-            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName, deployNodeInfoList,
-                ipConfigParseList, webaseSignAddr, imageTag, (byte)encryptType, agencyName);
+            ((ChainService) AopContext.currentProxy()).initChainDbData(chainName, chainId, deployNodeInfoList,
+                ipConfigParseList, webaseSignAddr, imageTag, (byte)encryptType, agencyName, curLoginUser.getUserId(), curLoginUser.getDeptId());
         } catch (Exception e) {
             log.error("Init chain:[{}] data error. remove generated files:[{}]",
                     chainName, this.pathService.getChainRoot(chainName), e);
             try {
-                this.pathService.deleteChain(chainName);
+                this.pathService.deleteChain(chainName, chainId);
             } catch (IOException ex) {
                 log.error("Delete chain directory error when init chain data throws an exception.", e);
                 throw new NodeMgrException(ConstantCode.DELETE_CHAIN_ERROR);
@@ -363,18 +367,18 @@ public class ChainService {
      * @param encryptType
      */
     @Transactional
-    public void initChainDbData(String chainName,  List<DeployNodeInfo> deployNodeInfoList, List<IpConfigParse> ipConfigParseList,
-                                String webaseSignAddr, String imageTag, byte encryptType, String agencyName){
+    public void initChainDbData(String chainName, String chainId,  List<DeployNodeInfo> deployNodeInfoList, List<IpConfigParse> ipConfigParseList,
+                                String webaseSignAddr, String imageTag, byte encryptType, String agencyName, Long userId, Long deptId){
         log.info("start initChainDbData chainName:{}, ipConfigParseList:{}",
             chainName, ipConfigParseList);
         ProgressTools.setInitChainData();
         // insert chain
-        final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainName,
+        final TbChain newChain = ((ChainService) AopContext.currentProxy()).insert(chainName, chainId, chainName,
             imageTag, encryptType, ChainStatusEnum.INITIALIZED,
-                RunTypeEnum.DOCKER, webaseSignAddr);
+                RunTypeEnum.DOCKER, webaseSignAddr, userId, deptId);
 
         // all host ips
-        Map<String, TbHost> newIpHostMap = new HashMap<>();
+        Map<String, HostDTO> newIpHostMap = new HashMap<>();
 
         // insert agency, host , group
         ipConfigParseList.forEach((config) -> {
@@ -382,7 +386,9 @@ public class ChainService {
             TbAgency agency = this.agencyService.insertIfNew(agencyName, newChain.getId(), chainName);
 
             // insert host if new
-            TbHost host = tbHostMapper.getByIp(config.getIp());
+//            TbHost host = tbHostMapper.getByIp(config.getIp());
+
+            HostDTO hostDTO = remoteHostService.getHostByIp(config.getIp());
 
             // insert group if new
             config.getGroupIdSet().forEach((groupId) -> {
@@ -390,7 +396,7 @@ public class ChainService {
                         GroupStatus.MAINTAINING, newChain.getId(), newChain.getChainName());
             });
 
-            newIpHostMap.putIfAbsent(config.getIp(), host);
+            newIpHostMap.putIfAbsent(config.getIp(), hostDTO);
         });
 
         // insert nodes for all hosts. there may be multiple nodes on a host.
@@ -407,23 +413,28 @@ public class ChainService {
                 NodeConfig nodeConfig = NodeConfig.read(nodeRoot, encryptType);
 
                 // get frontPort
-                DeployNodeInfo targetNode = this.getFrontPort(deployNodeInfoList, ip, nodeConfig.getChannelPort());
+                DeployNodeInfo targetNode = this.getFrontPort(deployNodeInfoList, ip, nodeConfig.getChannelPort(), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort());
                 if (targetNode == null) {
                     throw new NodeMgrException(ConstantCode.DEPLOY_INFO_NOT_MATCH_IP_CONF);
                 }
                 int frontPort = targetNode.getFrontPort();
 
+                log.info("!!!initChainDbData, targetNode is: {}", targetNode);
+                log.info("!!!initChainDbData, nodeConfig is: {}", nodeConfig);
+
                 // host
-                TbHost host = newIpHostMap.get(ip);
+//                TbHost host = newIpHostMap.get(ip);
+                HostDTO hostDTO = newIpHostMap.get(ip);
                 // agency
                 TbAgency agency = this.tbAgencyMapper.getByChainIdAndAgencyName(newChain.getId(), agencyName);
                 // insert front
                 TbFront front = TbFront.init(nodeConfig.getNodeId(), ip, frontPort,
                         agency.getId(), agency.getAgencyName(), imageTag,
-                        RunTypeEnum.DOCKER , host.getId(), nodeConfig.getHostIndex(), imageTag,
-                        DockerCommandService.getContainerName(host.getRootDir(), chainName,
+                        RunTypeEnum.DOCKER , hostDTO.getId(), nodeConfig.getHostIndex(), imageTag,
+                        DockerCommandService.getContainerName(hostDTO.getRootDir(), chainName,
                         nodeConfig.getHostIndex()), nodeConfig.getJsonrpcPort(), nodeConfig.getP2pPort(),
-                        nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED);
+                        nodeConfig.getChannelPort(), newChain.getId(), newChain.getChainName(), FrontStatusEnum.INITIALIZED,
+                        targetNode.getCpus(), targetNode.getMemory());
                 this.frontService.insert(front);
 
                 // insert node and front group mapping
@@ -449,7 +460,7 @@ public class ChainService {
 
                 // generate front application.yml
                 try {
-                    ThymeleafUtil.newFrontConfig(nodeRoot,encryptType, nodeConfig.getChannelPort(),
+                    ThymeleafUtil.newFrontConfig(nodeRoot,encryptType, nodeConfig.getJsonrpcPort(),
                             frontPort, webaseSignAddr);
                 } catch (IOException e) {
                     throw new NodeMgrException(ConstantCode.GENERATE_FRONT_YML_ERROR);
@@ -503,15 +514,31 @@ public class ChainService {
      *  if chain running, return true
      * @return
      */
-    public boolean runTask(){
+//    public boolean runTask(){
+//        // 0, original deploy chain first; 1, deploy chain visually
+//        if (constant.getDeployType() == 0 ) {
+//            log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(), isChainRunning.get());
+//            return true;
+//        }
+//        // set default chain status
+//        TbChain default_chain = this.tbChainMapper.getByChainName("default_chain_v3");
+//        if (default_chain != null && default_chain.getChainStatus() == ChainStatusEnum.RUNNING.getId()){
+//            isChainRunning.set(true);
+//        }
+//
+//        log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(),isChainRunning.get());
+//        return isChainRunning.get();
+//    }
+
+     public boolean runTask(){
         // 0, original deploy chain first; 1, deploy chain visually
         if (constant.getDeployType() == 0 ) {
             log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(), isChainRunning.get());
             return true;
         }
         // set default chain status
-        TbChain default_chain = this.tbChainMapper.getByChainName("default_chain");
-        if (default_chain != null && default_chain.getChainStatus() == ChainStatusEnum.RUNNING.getId()){
+        int runningChainCount = this.tbChainMapper.getRunningChainCount();
+        if (runningChainCount > 0){
             isChainRunning.set(true);
         }
 
@@ -519,13 +546,52 @@ public class ChainService {
         return isChainRunning.get();
     }
 
-    public DeployNodeInfo getFrontPort(List<DeployNodeInfo> deployNodeInfoList, String ip, int channelPort) {
+    public boolean runTask(String chainName){
+        // 0, original deploy chain first; 1, deploy chain visually
+        if (constant.getDeployType() == 0 ) {
+            log.info("Run task:[DeployType:{}, isChainRunning:{}]", constant.getDeployType(), isChainRunning.get());
+            return true;
+        }
+        // set default chain status
+        TbChain chain = this.tbChainMapper.getByChainName(chainName);
+        return chain != null && chain.getChainStatus() == ChainStatusEnum.RUNNING.getId();
+    }
+
+    public DeployNodeInfo getFrontPort(List<DeployNodeInfo> deployNodeInfoList, String ip, int channelPort, int rpcPort, int p2pPort) {
         DeployNodeInfo targetNodeInfo = null;
         for (DeployNodeInfo nodeInfo : deployNodeInfoList) {
-            if (ip.equals(nodeInfo.getIp()) && channelPort == nodeInfo.getChannelPort()) {
+//            if (ip.equals(nodeInfo.getIp()) && channelPort == nodeInfo.getChannelPort()) {
+//                targetNodeInfo = nodeInfo;
+//            }
+            if (ip.equals(nodeInfo.getIp())  && rpcPort == nodeInfo.getRpcPort() && p2pPort == nodeInfo.getP2pPort()) {
                 targetNodeInfo = nodeInfo;
             }
         }
         return targetNodeInfo;
+    }
+
+    // 获取链文件夹路径，如果chainName包含中文，那么使用传进来的非空并且不包含中文的chainId，如果chainId为空，则从chain数据表库中获取chainId
+    // 如果最终获取的都为空，那么将chainName转换为hex
+    public static String getChainDirName(String chainName, String chainId) {
+         String chainDirName = null;
+         if (CleanPathUtil.containsChinese(chainName)) {
+             if (!StringUtils.isBlank(chainId) && !CleanPathUtil.containsChinese(chainId)) {
+                 chainDirName = chainId;
+             } else {
+                 TbChainMapper tbChainMapper1 = SpringBeanUtils.getApplicationContext().getBean(TbChainMapper.class);
+                 TbChain tbChain = tbChainMapper1.getByChainName(chainName);
+                 if (null != tbChain) {
+                     chainDirName = tbChain.getChainId();
+                 }
+             }
+         } else {
+             chainDirName = chainName;
+         }
+         
+         if (StringUtils.isBlank(chainDirName)) {
+             chainDirName = HexUtil.encodeHexStr(chainName, UTF_8);
+         }
+
+         return chainDirName;
     }
 }

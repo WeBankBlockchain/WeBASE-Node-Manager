@@ -14,44 +14,36 @@
 package com.webank.webase.node.mgr.front;
 
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.webank.common.log.annotation.Log;
+import com.webank.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.front.entity.*;
 import com.webank.webase.node.mgr.front.frontinterface.FrontInterfaceService;
-import com.webank.webase.node.mgr.front.frontinterface.entity.ReqSdkConfig;
 import com.webank.webase.node.mgr.tools.JsonTools;
-import com.webank.webase.node.mgr.front.entity.FrontInfo;
-import com.webank.webase.node.mgr.front.entity.FrontNodeConfig;
-import com.webank.webase.node.mgr.front.entity.FrontParam;
-import com.webank.webase.node.mgr.front.entity.TbFront;
-import com.webank.webase.node.mgr.tools.NetUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import javax.validation.Valid;
-import lombok.extern.log4j.Log4j2;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupInfo.GroupInfo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * front controller
  */
+@Tag(name="节点前置")
 @Log4j2
 @RestController
 @RequestMapping("front")
+@SaCheckPermission("bcos3:chain:front")
 public class FrontController extends BaseController {
 
     @Autowired
@@ -62,6 +54,7 @@ public class FrontController extends BaseController {
     /**
      * refresh front
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @GetMapping("/refresh")
     public BaseResponse refreshFront() {
     	Instant startTime = Instant.now();
@@ -75,8 +68,9 @@ public class FrontController extends BaseController {
     /**
      * add new front
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.INSERT)
     @PostMapping("/new")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse newFront(@RequestBody @Valid FrontInfo frontInfo, BindingResult result) {
         checkBindResult(result);
         Instant startTime = Instant.now();
@@ -90,6 +84,23 @@ public class FrontController extends BaseController {
         return baseResponse;
     }
 
+    /**
+     * 修改节点资源（CPU和内存）
+     */
+    @Log(title = "BCOS2/修改节点资源", businessType = BusinessType.UPDATE)
+    @PostMapping("/setResource")
+    public BaseResponse setResource(@RequestBody @Valid FrontRes frontRes, BindingResult result) {
+        checkBindResult(result);
+        Instant startTime = Instant.now();
+        log.info("start setResource startTime:{} FrontRes:{}",
+                startTime.toEpochMilli(), JsonTools.toJSONString(frontRes));
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        int res = frontService.setResource(frontRes);
+        baseResponse.setData(res);
+        log.info("end setResource useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JsonTools.toJSONString(baseResponse));
+        return baseResponse;
+    }
 
     /**
      * query front info list.
@@ -127,8 +138,9 @@ public class FrontController extends BaseController {
     /**
      * delete by frontId
      */
+    @Log(title = "BCOS3/节点管理", businessType = BusinessType.DELETE)
     @DeleteMapping(value = "/{frontId}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
+//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public BaseResponse removeFront(@PathVariable("frontId") Integer frontId) {
         Instant startTime = Instant.now();
         log.info("start removeFront startTime:{} frontId:{}",
@@ -146,13 +158,13 @@ public class FrontController extends BaseController {
     /**
      * query front info list.
      */
+//    @Log(title = "BCOS3/节点管理", businessType = BusinessType.UPDATE)
     @GetMapping(value = "/refresh/status")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
-    public BaseResponse refreshFrontStatus() throws NodeMgrException {
+    public BaseResponse refreshFrontStatus(@RequestParam(value = "chainName", required = false, defaultValue = "default_chain_v3") String chainName) throws NodeMgrException {
         Instant startTime = Instant.now();
         log.info("start refreshFrontStatus startTime:{} ", startTime.toEpochMilli());
 
-        frontService.refreshFrontStatus();
+        frontService.refreshFrontStatus(chainName);
 
         log.info("end queryFrontList useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.SUCCESS);
@@ -162,7 +174,7 @@ public class FrontController extends BaseController {
      * get front's node config
      */
     @GetMapping(value = "/nodeConfig")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse getFrontNodeConfig(@RequestParam("frontId") int frontId) {
         Instant startTime = Instant.now();
         log.info("start getFrontNodeConfig startTime:{} ", startTime.toEpochMilli());
@@ -173,7 +185,7 @@ public class FrontController extends BaseController {
     }
 
     @GetMapping(value = "/groupInfo")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse getGroupInfo(@RequestParam("frontId") int frontId,
         @RequestParam("groupId") String groupId) {
         Instant startTime = Instant.now();
@@ -188,7 +200,7 @@ public class FrontController extends BaseController {
 
 
 //    @GetMapping(value = "/bcosSDK")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 //    public BaseResponse getFrontBcosSDKInfo(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort,
 //        @RequestBody ReqSdkConfig param) {
 //        Instant startTime = Instant.now();
@@ -202,7 +214,7 @@ public class FrontController extends BaseController {
 //    }
 //
 //    @GetMapping(value = "/bcosSDK/config")
-//    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+//    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 //    public BaseResponse configFrontBcosSDKInfo(@RequestParam("frontIp") String frontIp, @RequestParam("frontPort") Integer frontPort,
 //        @RequestBody ReqSdkConfig param) {
 //        Instant startTime = Instant.now();

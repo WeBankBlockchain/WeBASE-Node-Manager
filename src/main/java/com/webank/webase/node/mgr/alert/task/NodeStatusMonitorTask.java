@@ -16,6 +16,7 @@
 
 package com.webank.webase.node.mgr.alert.task;
 
+import com.webank.common.mybatis.helper.DataPermissionHelper;
 import com.webank.webase.node.mgr.precntauth.precompiled.consensus.ConsensusServiceInWebase;
 import java.time.Duration;
 import java.time.Instant;
@@ -78,7 +79,7 @@ public class NodeStatusMonitorTask {
             return;
         }
 
-        List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
+        List<TbGroup> groupList = DataPermissionHelper.ignore(() -> groupService.getGroupList(DataStatus.NORMAL.getValue()));
         if (groupList == null || groupList.size() == 0) {
             log.warn("checkNodeStatusForAlert jump over: not found any group");
             return;

@@ -14,6 +14,9 @@
 
 package com.webank.webase.node.mgr.contract.scaffold;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.webank.common.log.annotation.Log;
+import com.webank.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.controller.BaseController;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -27,10 +30,12 @@ import com.webank.webase.node.mgr.tools.ValidateUtil;
 import java.time.Duration;
 import java.time.Instant;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,15 +46,18 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @author marsli
  */
+@Tag(name="合约脚手架")
 @Log4j2
 @RestController
 @RequestMapping(value = "scaffold")
+@SaCheckPermission("bcos3:contract:ide")
 public class ScaffoldController extends BaseController {
     @Autowired
     private ScaffoldService scaffoldService;
 
+    @Log(title = "BCOS3/合约管理/合约IDE", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
+    // TODO:  使用sa-token鉴权(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
     public BaseResponse exportProjectApi(@Valid @RequestBody ReqProject param) {
         Instant startTime = Instant.now();
         log.info("start exportProjectApi param:{} groupId:{}", startTime.toEpochMilli(),

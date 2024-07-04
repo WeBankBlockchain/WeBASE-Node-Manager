@@ -16,6 +16,9 @@
 
 package com.webank.webase.node.mgr.alert.mail;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.webank.common.log.annotation.Log;
+import com.webank.common.log.enums.BusinessType;
 import com.webank.webase.node.mgr.alert.mail.server.config.MailServerConfigService;
 import com.webank.webase.node.mgr.alert.mail.server.config.entity.ReqMailServerConfigParam;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
@@ -24,9 +27,11 @@ import com.webank.webase.node.mgr.base.enums.EnableStatus;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
 import java.util.Base64;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.TemplateEngine;
@@ -41,6 +46,7 @@ import java.util.Date;
  * main function is to test mail server config
  * using mailServerConfigService and mailService
  */
+@Tag(name="邮件服务测试")
 @Log4j2
 @RestController
 @RequestMapping("/alert/mail")
@@ -62,8 +68,9 @@ public class MailController {
      * @param reqMailServerConfigParam
      * @return
      */
+    @Log(title = "BCOS3/系统监控/告警管理", businessType = BusinessType.INSERT)
+    @SaCheckPermission("bcos3:monitor:sendMailTest")
     @PostMapping("/test/{toMailAddress}")
-    @PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN)
     public Object sendTestMail(@PathVariable("toMailAddress")String toMailAddress,
                                   @RequestBody ReqMailServerConfigParam reqMailServerConfigParam) {
         Instant startTime = Instant.now();

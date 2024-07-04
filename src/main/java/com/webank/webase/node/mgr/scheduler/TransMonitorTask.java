@@ -13,6 +13,7 @@
  */
 package com.webank.webase.node.mgr.scheduler;
 
+import com.webank.common.mybatis.helper.DataPermissionHelper;
 import com.webank.webase.node.mgr.base.enums.DataStatus;
 import com.webank.webase.node.mgr.group.GroupService;
 import com.webank.webase.node.mgr.group.entity.TbGroup;
@@ -59,7 +60,7 @@ public class TransMonitorTask {
         Instant startTime = Instant.now();
         log.debug("=== start monitor. startTime:{}", startTime.toEpochMilli());
         //get group list
-        List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
+        List<TbGroup> groupList = DataPermissionHelper.ignore(() -> groupService.getGroupList(DataStatus.NORMAL.getValue()));
         if (groupList == null || groupList.size() == 0) {
             log.warn("monitor jump over, not found any group");
             return;
@@ -87,7 +88,7 @@ public class TransMonitorTask {
         Instant startTime = Instant.now();
         log.debug("=== start blockStat. startTime:{}", startTime.toEpochMilli());
         //get group list
-        List<TbGroup> groupList = groupService.getGroupList(DataStatus.NORMAL.getValue());
+        List<TbGroup> groupList = DataPermissionHelper.ignore(() -> groupService.getGroupList(DataStatus.NORMAL.getValue()));
         if (groupList == null || groupList.size() == 0) {
             log.warn("blockStat jump over, not found any group");
             return;

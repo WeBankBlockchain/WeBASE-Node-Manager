@@ -16,6 +16,7 @@
 
 package com.webank.webase.node.mgr.event;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -28,9 +29,11 @@ import com.webank.webase.node.mgr.event.entity.ReqEventLogList;
 import com.webank.webase.node.mgr.event.entity.RspContractInfo;
 import java.io.IOException;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +50,7 @@ import java.util.List;
  * event register info controller
  * @author marsli
  */
+@Tag(name="订阅事件")
 @Log4j2
 @RestController
 @RequestMapping("event")
@@ -58,6 +62,7 @@ public class EventController {
 	/**
 	 * get new block event register info
 	 */
+	@SaCheckPermission("bcos3:subscribeEvent:blockEvent")
 	@GetMapping(value = {"newBlockEvent/list/{groupId}/{pageNumber}/{pageSize}"})
 	public BasePageResponse getNewBlockEventInfo(@PathVariable("groupId") String groupId,
 												 @PathVariable("pageNumber") Integer pageNumber,
@@ -78,6 +83,8 @@ public class EventController {
 	/**
 	 * get contract event register info
 	 */
+	@SaCheckPermission("bcos3:subscribeEvent:blockEvent")
+
 	@GetMapping(value = {"contractEvent/list/{groupId}/{pageNumber}/{pageSize}"})
 	public BasePageResponse getContractEventInfo(@PathVariable("groupId") String groupId,
 												 @PathVariable("pageNumber") Integer pageNumber,
@@ -98,8 +105,8 @@ public class EventController {
 	/**
 	 * sync get event logs list
 	 */
+	@SaCheckPermission("bcos3:subscribeEvent:blockEvent")
 	@PostMapping("/eventLogs/list")
-	@PreAuthorize(ConstantProperties.HAS_ROLE_ADMIN_OR_DEVELOPER)
 	public BasePageResponse queryEventLogList(@RequestBody @Valid ReqEventLogList param) {
 		Instant startTime = Instant.now();
 		log.info("start queryEventLogList startTime:{} param:{}",
@@ -113,6 +120,7 @@ public class EventController {
 	/**
 	 * query list of contract only contain groupId and contractAddress and contractName
 	 */
+	@SaCheckPermission("bcos3:subscribeEvent:blockEvent")
 	@GetMapping("/contractInfo/{groupId}/{type}/{contractAddress}")
 	public BaseResponse findByAddress( @PathVariable String groupId,
 		@PathVariable String type, @PathVariable String contractAddress) {
@@ -126,6 +134,7 @@ public class EventController {
 	/**
 	 * query list of (deployed)contract only contain groupId and contractAddress and contractName
 	 */
+	@SaCheckPermission("bcos3:subscribeEvent:blockEvent")
 	@GetMapping("/listAddress/{groupId}")
 	public BaseResponse listAbi(@PathVariable String groupId) throws IOException {
 		BaseResponse response = new BaseResponse(ConstantCode.SUCCESS);

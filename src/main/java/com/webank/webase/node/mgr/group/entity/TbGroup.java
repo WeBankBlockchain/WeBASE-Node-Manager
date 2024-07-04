@@ -58,9 +58,13 @@ public class TbGroup {
     private Integer chainId;
     private String chainName;
 
+    private BigInteger userId = BigInteger.ZERO;
+    private BigInteger deptId = BigInteger.ZERO;
+
 
     public TbGroup(String groupId, String groupName, Integer nodeCount, String description,
-        GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName, Integer encryptType){
+        GroupType groupType, GroupStatus groupStatus, Integer chainId, String chainName, Integer encryptType,
+                   BigInteger userId, BigInteger deptId) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.nodeCount = nodeCount;
@@ -68,7 +72,10 @@ public class TbGroup {
         this.groupType = groupType.getValue();
         this.groupStatus = groupStatus.getValue();
         this.chainId = chainId;
+        this.chainName = chainName;
         this.encryptType = encryptType;
+        this.userId = userId;
+        this.deptId = deptId;
     }
 
 }

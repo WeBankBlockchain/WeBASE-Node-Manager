@@ -17,6 +17,7 @@ package com.webank.webase.node.mgr.deploy.service;
 
 import static com.webank.webase.node.mgr.tools.DateUtil.YYYYMMDD_HHMMSS;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.deploy.chain.ChainService;
 import com.webank.webase.node.mgr.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.tools.DateUtil;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,9 +36,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.ini4j.Ini;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  */
@@ -54,6 +61,7 @@ public class PathService {
      * @return              NODES_ROOT/[chainName]_ipconf, a file, not a directory.
      */
     public Path getIpConfig(String chainName) {
+        chainName = ChainService.getChainDirName(chainName, "");
         return Paths.get(constant.getNodesRootDir(), CleanPathUtil.cleanString(String.format("%s_ipconf", chainName)));
     }
 
@@ -74,6 +82,7 @@ public class PathService {
      * @return              NODES_ROOT/[chainName]/ as a {@link Path}, a directory.
      */
     public Path getChainRoot(String chainName) {
+        chainName = ChainService.getChainDirName(chainName, "");
         return Paths.get(constant.getNodesRootDir(), CleanPathUtil.cleanString(String.format("%s_nodes", chainName)));
     }
 
@@ -98,6 +107,7 @@ public class PathService {
      * @return              NODES_ROOT_TMP/[chainName]-yyyyMMdd_HHmmss, a directory.
      */
     public Path getChainDeletedRoot(String chainName) throws IOException {
+        chainName = ChainService.getChainDirName(chainName, "");
         return Paths.get(CleanPathUtil.cleanString(String.format("%s/%s-%s",
                 this.getLocalDeleteRoot(), chainName, DateUtil.formatNow(YYYYMMDD_HHMMSS))));
     }
@@ -108,6 +118,7 @@ public class PathService {
      * @return
      */
     public Path getIpConfDeleted(String chainName,Path chainDeletedRoot) {
+        chainName = ChainService.getChainDirName(chainName, "");
         return chainDeletedRoot.resolve(String.format("%s_ipconf", chainName));
     }
 
@@ -246,6 +257,15 @@ public class PathService {
     /**
      *
      * @param nodePath
+     * @return              NODES_ROOT/[chainName]/[ip]/node[index]/config.genesis as a {@link Path}, a file.
+     */
+    public static Path getConfigGenesisPath( Path nodePath ) {
+        return nodePath.resolve("config.genesis");
+    }
+
+    /**
+     *
+     * @param nodePath
      * @return
      */
     public static Path getGroupGenesisPath(Path nodePath,String groupId) {
@@ -259,6 +279,7 @@ public class PathService {
     public static String getChainRootOnHost(
             String rootDirOnHost,
             String chainName) {
+        chainName = ChainService.getChainDirName(chainName, "");
         return String.format("%s/%s", rootDirOnHost, chainName);
     }
 
@@ -281,6 +302,7 @@ public class PathService {
     public static String getChainDeletedRootOnHost(
             String rootDirOnHost,
             String chainName) {
+        chainName = ChainService.getChainDirName(chainName, "");
         return String.format("%s/%s-%s",
                 getDeletedRootOnHost(rootDirOnHost), chainName, DateUtil.formatNow(YYYYMMDD_HHMMSS));
     }
@@ -320,7 +342,8 @@ public class PathService {
      * @throws IOException
      */
     public static String getNodeId(Path nodePath, byte encryptType) throws IOException {
-        String nodeIdFile = encryptType == CryptoType.ECDSA_TYPE ? "node.nodeid" : "gmnode.nodeid";
+//        String nodeIdFile = encryptType == CryptoType.ECDSA_TYPE ? "node.nodeid" : "gmnode.nodeid";
+        String nodeIdFile = "node.nodeid";
 
         List<String> lines = Files.readAllLines(nodePath.resolve("conf/").resolve(nodeIdFile));
         if (CollectionUtils.isEmpty(lines)) {
@@ -340,18 +363,37 @@ public class PathService {
      * @return
      * @throws IOException
      */
+//    public static Set<String> getNodeGroupIdSet(Path nodePath) {
+//        Set<String> result = null;
+//        try (Stream<Path> walk = Files.walk(nodePath.resolve("conf"), 1)) {
+////            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
+////                    .map((path) -> Integer.parseInt(path.getFileName().toString()
+////                            .replaceAll("group\\.", "").replaceAll("\\.genesis", "")))
+////                    .collect(Collectors.toSet());
+//            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
+//                .map((path) -> path.getFileName().toString().replaceAll("group\\.", "")
+//                    .replaceAll("\\.genesis", ""))
+//                .collect(Collectors.toSet());
+//        } catch (IOException e) {
+//            log.error("getNodeGroupIdSet error:{}", e);
+//        }
+//        return result;
+//    }
+
     public static Set<String> getNodeGroupIdSet(Path nodePath) {
         Set<String> result = null;
-        try (Stream<Path> walk = Files.walk(nodePath.resolve("conf"), 1)) {
-//            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
-//                    .map((path) -> Integer.parseInt(path.getFileName().toString()
-//                            .replaceAll("group\\.", "").replaceAll("\\.genesis", "")))
-//                    .collect(Collectors.toSet());
-            result = walk.filter(path -> path.getFileName().toString().matches("^group\\.\\d+\\.genesis$"))
-                .map((path) -> path.getFileName().toString().replaceAll("group\\.", "")
-                    .replaceAll("\\.genesis", ""))
-                .collect(Collectors.toSet());
-        } catch (IOException e) {
+        try {
+            Path configGenesis = PathService.getConfigGenesisPath(nodePath);
+            Ini ini = new Ini(configGenesis.toFile());
+            String groupId = ini.get("chain", "group_id");
+
+//            if (null != groupId && groupId.length() > 0) {
+//                result = new HashSet<>();
+//                result.add(groupId.substring("group".length()));
+//            }
+            result = new HashSet<>();
+            result.add(groupId);
+        } catch (Exception e) {
             log.error("getNodeGroupIdSet error:{}", e);
         }
         return result;
@@ -392,7 +434,8 @@ public class PathService {
      * @param chainName
      * @return
      */
-    public void deleteChain(String chainName) throws IOException {
+    public void deleteChain(String chainName, String chainId) throws IOException {
+        chainName = ChainService.getChainDirName(chainName, chainId);
         log.info("deleteChain mv chain to tmp dir:{}", chainName);
         // mv NODES_ROOT/[chainName]/ to NODES_ROOT_TMP/[chainName]-yyyyMMdd_HHmmss
         Path src_chainRoot = this.getChainRoot(chainName);
@@ -414,6 +457,7 @@ public class PathService {
      */
     public void deleteNode(String chainName, String ip, int hostIndex, String nodeId ) throws IOException {
         // mv NODES_ROOT/[chainName]/[ip]/node[hostIndex] to NODES_ROOT_TMP/[chainName]-yyyyMMdd_HHmmss/ip/[nodeId]
+        chainName = ChainService.getChainDirName(chainName, "");
         Path src_nodeRoot = this.getNodeRoot(chainName, ip, hostIndex);
         Path dst_nodeDeleteRoot = this.getNodeDeletedRoot(chainName, ip, nodeId);
         move(src_nodeRoot, dst_nodeDeleteRoot);
@@ -426,6 +470,7 @@ public class PathService {
      */
     public void deleteAgency(String chainName, String agencyName) throws IOException {
         // mv NODES_ROOT/[chainName]/[ip]/node[hostIndex] to NODES_ROOT_TMP/[chainName]-yyyyMMdd_HHmmss/ip/[nodeId]
+        chainName = ChainService.getChainDirName(chainName, "");
         Path src_agencyRoot = this.getAgencyRoot(chainName,agencyName);
         Path dst_agencyDeleteRoot = this.getAgencyDeleteRoot(chainName, agencyName);
         move(src_agencyRoot,dst_agencyDeleteRoot);
@@ -447,5 +492,9 @@ public class PathService {
             }
         }
         log.info("end move file/dir");
+    }
+
+    public Path getCaDir(String chainName) {
+        return Paths.get(this.getChainRootString(chainName), "ca");
     }
 }

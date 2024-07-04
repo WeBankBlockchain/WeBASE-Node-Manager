@@ -18,6 +18,8 @@ package com.webank.webase.node.mgr.deploy.service;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
 import com.webank.webase.node.mgr.config.properties.ConstantProperties;
+import com.webank.webase.node.mgr.deploy.chain.ChainService;
+import com.webank.webase.node.mgr.deploy.entity.DeployNodeInfo;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.tools.cmd.JavaCommandExecutor;
@@ -26,11 +28,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+
+import com.webank.webase.node.mgr.user.UserService;
+import com.webank.webase.node.mgr.user.entity.TbUser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,6 +52,14 @@ public class DeployShellService {
     @Autowired
     private PathService pathService;
 
+    @Lazy
+    @Autowired
+    private UserService userService;
+
+    @Lazy
+    @Autowired
+    private ChainService chainService;
+
 
     /**
      * build_chain.sh
@@ -55,7 +69,10 @@ public class DeployShellService {
      * @param chainVersion ex: 2.7.2 without v
      * @return
      */
-    public void execBuildChain(int encryptType, String[] ipLines, String chainName, String chainVersion) {
+    public void execBuildChain(int encryptType, String[] ipLines, String chainName, String chainVersion, String groupId, int enableAuth) {
+        String chainId = "chain" + groupId;
+        chainName = chainService.getChainDirName(chainName, chainId);
+
         Path ipConf = pathService.getIpConfig(chainName);
         log.info("Exec execBuildChain method for [{}], chainName:[{}], ipConfig:[{}]",
                 JsonTools.toJSONString(ipLines), chainName, ipConf.toString());
@@ -76,9 +93,41 @@ public class DeployShellService {
             throw new NodeMgrException(ConstantCode.CHAIN_ROOT_DIR_EXIST);
         }
 
-        // build_chain.sh only support docker on linux
-        // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ] [ -v support_version ]
-        String command = String.format("bash %s -S -f %s -o %s %s %s %s %s",
+//        // build_chain.sh only support docker on linux
+//        // command e.g : build_chain.sh -f ipconf -o outputDir [ -p ports_start ] [ -g ] [ -d ] [ -e exec_binary ] [ -v support_version ]
+//        String command = String.format("bash %s -S -f %s -o %s %s %s %s %s",
+//                // build_chain.sh shell script
+//                constant.getBuildChainShell(),
+//                // ipconf file path
+//                ipConf.toString(),
+//                // output path
+//                chainRoot.toString(),
+//                // port param
+//                //shellPortParam,
+//                // guomi or standard
+//                encryptType == CryptoType.SM_TYPE ? "-g " : "",
+//                // only linux supports docker model
+//                SystemUtils.IS_OS_LINUX ? " -d " : "",
+//                // use binary local
+//                StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
+//                        String.format(" -e %s ", constant.getFiscoBcosBinary()),
+//                String.format(" -v %s ", chainVersion)
+//        );
+
+        String formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -I %s";
+        if (enableAuth == 1) {
+            formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -A -I %s";
+
+            // 如果之前建完链，删除过链，则admin_auth存在，不再新生成授权管理员
+            TbUser admin = userService.queryUser(null, null, "admin_auth" + groupId, null, null);
+            if (null != admin && admin.getAddress() != null && admin.getAddress().length() > 0) {
+                String adminAddr = admin.getAddress();
+                formatString = "bash %s -f %s -o %s %s %s %s %s -g %s -I %s -a " + adminAddr;
+            }
+        }
+
+        // chainid此时没有，写死为1
+        String command = String.format(formatString,
                 // build_chain.sh shell script
                 constant.getBuildChainShell(),
                 // ipconf file path
@@ -88,13 +137,15 @@ public class DeployShellService {
                 // port param
                 //shellPortParam,
                 // guomi or standard
-                encryptType == CryptoType.SM_TYPE ? "-g " : "",
+                encryptType == CryptoType.SM_TYPE ? "-s " : "",
                 // only linux supports docker model
-                SystemUtils.IS_OS_LINUX ? " -d " : "",
+                SystemUtils.IS_OS_LINUX ? " -D " : "",
                 // use binary local
                 StringUtils.isBlank(constant.getFiscoBcosBinary()) ? "" :
                         String.format(" -e %s ", constant.getFiscoBcosBinary()),
-                String.format(" -v %s ", chainVersion)
+                String.format(" -v %s ", chainVersion),
+                groupId,
+                chainId
         );
 
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
@@ -170,6 +221,30 @@ public class DeployShellService {
         return JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
     }
 
+    public ExecuteResult execExpandNode(byte encryptType, String chainName, String newNodeRoot, String configPath, DeployNodeInfo nodeInfo) {
+        log.info("Exec execExpandNode method for chainName:[{}], node:[{}:{}], configPath:{}, nodeInfo:{}",
+                chainName, encryptType, newNodeRoot, configPath, nodeInfo);
 
+        String ports = nodeInfo.getP2pPort() + "," + nodeInfo.getRpcPort();
+
+        Path caDir = pathService.getCaDir(chainName);
+        log.info("execExpandNode chainRoot:{}", caDir.toAbsolutePath().toString());
+
+        // build_chain.sh only support docker on linux
+        String command = String.format("bash -x -e %s -C expand -c %s -d %s -o %s %s -p %s",
+                // gen_node_cert.sh shell script
+                constant.getBuildChainShell(),
+                // config path(reuse exist config.geneisis and nodes.json)
+                configPath,
+                //ca dir
+                caDir.toAbsolutePath().toString(),
+                // new node dir
+                newNodeRoot,
+                encryptType == CryptoType.SM_TYPE ? "-s " : "",
+                ports
+        );
+
+        return JavaCommandExecutor.executeCommand(command, constant.getExecBuildChainTimeout());
+    }
 
 }

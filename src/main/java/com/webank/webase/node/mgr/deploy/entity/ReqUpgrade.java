@@ -27,7 +27,7 @@ public class ReqUpgrade {
 
 
     @NotBlank
-    String chainName = "default_chain";
+    String chainName = "default_chain_v3";
 
 }
 

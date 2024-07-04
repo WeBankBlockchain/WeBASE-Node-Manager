@@ -15,6 +15,7 @@
  */
 package com.webank.webase.node.mgr.monitor;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.webank.webase.node.mgr.tools.JsonTools;
 import com.webank.webase.node.mgr.base.entity.BasePageResponse;
 import com.webank.webase.node.mgr.base.entity.BaseResponse;
@@ -26,6 +27,8 @@ import com.webank.webase.node.mgr.monitor.entity.UnusualUserInfo;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name="交易审计管理")
 @Log4j2
 @RestController
 @RequestMapping("monitor")
@@ -45,6 +49,7 @@ public class MonitorController {
     /**
      * monitor user list.
      */
+    @SaCheckPermission("bcos3:transAudit:userTrans")
     @GetMapping(value = "/userList/{groupId}")
     public BaseResponse monitorUserList(@PathVariable("groupId") String groupId)
         throws NodeMgrException {
@@ -64,6 +69,7 @@ public class MonitorController {
     /**
      * monitor interface list.
      */
+    @SaCheckPermission("bcos3:transAudit:userTrans")
     @GetMapping(value = "/interfaceList/{groupId}")
     public BaseResponse monitorInterfaceList(@PathVariable("groupId") String groupId,
         @RequestParam(value = "userName") String userName) throws NodeMgrException {
@@ -84,6 +90,7 @@ public class MonitorController {
     /**
      * monitor trans list.
      */
+    @SaCheckPermission("bcos3:transAudit:userTrans")
     @GetMapping(value = "/transList/{groupId}")
     public BaseResponse monitorTransList(@PathVariable("groupId") String groupId,
         @RequestParam(value = "userName", required = false) String userName,
@@ -109,6 +116,7 @@ public class MonitorController {
     /**
      * unusual user list.
      */
+    @SaCheckPermission("bcos3:transAudit:unusualUser")
     @GetMapping(value = "/unusualUserList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse unusualUserList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,
@@ -139,6 +147,7 @@ public class MonitorController {
     /**
      * unusual contract list.
      */
+    @SaCheckPermission("bcos3:transAudit:unusualContract")
     @GetMapping(value = "/unusualContractList/{groupId}/{pageNumber}/{pageSize}")
     public BasePageResponse unusualContractList(@PathVariable("groupId") String groupId,
         @PathVariable("pageNumber") Integer pageNumber,

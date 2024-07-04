@@ -24,6 +24,9 @@ public class PrecompiledUtil {
   public static final String NODE_TYPE_OBSERVER = "observer";
   public static final String NODE_TYPE_REMOVE = "remove";
 
+  // 修改共识节点权重
+  public static final String NODE_TYPE_WEIGHT = "weight";
+
   public static final int TxGasLimitMin = 10000;
   public static final int TxGasLimitMax = 2147483647;
 

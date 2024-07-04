@@ -15,17 +15,16 @@
  */
 package com.webank.webase.node.mgr.deploy.service;
 
-import static com.webank.webase.node.mgr.base.code.ConstantCode.AGENCY_NAME_CONFIG_ERROR;
-import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_AGENCY_ERROR;
-
+import com.webank.webase.node.mgr.base.code.ConstantCode;
+import com.webank.webase.node.mgr.base.exception.NodeMgrException;
+import com.webank.webase.node.mgr.deploy.entity.TbAgency;
+import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
 import com.webank.webase.node.mgr.front.FrontMapper;
+import com.webank.webase.node.mgr.front.FrontService;
 import com.webank.webase.node.mgr.front.entity.TbFront;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.webank.webase.node.mgr.tools.ValidateUtil;
+import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.springframework.aop.framework.AopContext;
@@ -34,16 +33,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.webank.webase.node.mgr.base.code.ConstantCode;
-import com.webank.webase.node.mgr.base.exception.NodeMgrException;
-import com.webank.webase.node.mgr.tools.ValidateUtil;
-import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
-import com.webank.webase.node.mgr.deploy.entity.TbAgency;
-import com.webank.webase.node.mgr.deploy.mapper.TbAgencyMapper;
-import com.webank.webase.node.mgr.deploy.mapper.TbHostMapper;
-import com.webank.webase.node.mgr.front.FrontService;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
-import lombok.extern.log4j.Log4j2;
+import static com.webank.webase.node.mgr.base.code.ConstantCode.AGENCY_NAME_CONFIG_ERROR;
+import static com.webank.webase.node.mgr.base.code.ConstantCode.INSERT_AGENCY_ERROR;
 
 /**
  *
@@ -54,7 +51,7 @@ import lombok.extern.log4j.Log4j2;
 public class AgencyService {
 
     @Autowired private TbAgencyMapper tbAgencyMapper;
-    @Autowired private TbHostMapper tbHostMapper;
+//    @Autowired private TbHostMapper tbHostMapper;
     @Autowired private FrontMapper frontMapper;
 
     @Autowired private DeployShellService deployShellService;

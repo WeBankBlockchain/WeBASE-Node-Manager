@@ -14,6 +14,7 @@
 
 package com.webank.webase.node.mgr.deploy.service;
 
+import com.webank.host.api.model.HostDTO;
 import com.webank.webase.node.mgr.base.code.ConstantCode;
 import com.webank.webase.node.mgr.base.enums.ScpTypeEnum;
 import com.webank.webase.node.mgr.base.exception.NodeMgrException;
@@ -22,17 +23,18 @@ import com.webank.webase.node.mgr.tools.CleanPathUtil;
 import com.webank.webase.node.mgr.tools.IPUtil;
 import com.webank.webase.node.mgr.tools.cmd.ExecuteResult;
 import com.webank.webase.node.mgr.tools.cmd.JavaCommandExecutor;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 
 @Component
 @Log4j2
@@ -63,8 +65,8 @@ public class AnsibleService {
     /**
      * ansible exec command
      */
-    public void exec(String ip, String command) {
-        String ansibleCommand = String.format("ansible %s -m command -a \"%s\"", ip, command);
+    public void exec(HostDTO hostDTO, String command) {
+        String ansibleCommand = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m command -a \"%s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), command);
         ExecuteResult result = JavaCommandExecutor.executeCommand(ansibleCommand, constant.getExecShellTimeout());
         if (result.failed()) {
             throw new NodeMgrException(ConstantCode.ANSIBLE_COMMON_COMMAND_ERROR.attach(result.getExecuteOut()));
@@ -76,12 +78,12 @@ public class AnsibleService {
      * @case1: ip configured in ansible, output not empty. ex: 127.0.0.1 | SUCCESS => xxxxx
      * @case2: if ip not in ansible's host, output is empty. ex: Exec command success: code:[0], OUTPUT:[]
      */
-    public void execPing(String ip) {
+    public void execPing(HostDTO hostDTO) {
         // ansible webase(ip) -m ping
-        String command = String.format("ansible %s -m ping", ip);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m ping", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort());
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         // if success
-        if (result.getExecuteOut().contains(ip)) {
+        if (result.getExecuteOut().contains(hostDTO.getIp())) {
             log.info("execPing success output:{}", result.getExecuteOut());
             return;
         } else {
@@ -94,8 +96,8 @@ public class AnsibleService {
      * copy, fetch, file(dir
      * scp: copy from local to remote, fetch from remote to local
      */
-    public void scp(ScpTypeEnum typeEnum, String ip, String src, String dst) {
-        log.info("scp typeEnum:{},ip:{},src:{},dst:{}", typeEnum, ip, src, dst);
+    public void scp(ScpTypeEnum typeEnum, HostDTO hostDTO, String src, String dst) {
+        log.info("scp typeEnum:{},ip:{},src:{},dst:{}", typeEnum, hostDTO.getIp(), src, dst);
         Instant startTime = Instant.now();
         log.info("scp startTime:{}", startTime.toEpochMilli());
         boolean isSrcDirectory = Files.isDirectory(Paths.get(CleanPathUtil.cleanString(src)));
@@ -107,14 +109,14 @@ public class AnsibleService {
             if (isSrcFile) {
                 // if src is file, create parent directory of dst on remote
                 String parentOnRemote = Paths.get(CleanPathUtil.cleanString(dst)).getParent().toAbsolutePath().toString();
-                this.execCreateDir(ip, parentOnRemote);
+                this.execCreateDir(hostDTO, parentOnRemote);
             }
             if (isSrcDirectory) {
                 // if src is directory, create dst on remote
-                this.execCreateDir(ip, dst);
+                this.execCreateDir(hostDTO, dst);
             }
             // synchronized cost less time
-            command = String.format("ansible %s -m synchronize -a \"src=%s dest=%s\"", ip, src, dst);
+            command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m synchronize -a \"src=%s dest=%s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), src, dst);
             log.info("exec scp copy command: [{}]", command);
             ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
             log.info("scp usedTime:{}", Duration.between(startTime, Instant.now()).toMillis());
@@ -129,7 +131,7 @@ public class AnsibleService {
                 throw new NodeMgrException(ConstantCode.ANSIBLE_FETCH_NOT_DIR);
             }
             // use synchronize, mode=pull
-            command = String.format("ansible %s -m synchronize -a \"mode=pull src=%s dest=%s\"", ip, src, dst);
+            command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m synchronize -a \"mode=pull src=%s dest=%s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), src, dst);
             log.info("exec scp copy command: [{}]", command);
             ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
             log.info("scp usedTime:{}", Duration.between(startTime, Instant.now()).toMillis());
@@ -144,9 +146,9 @@ public class AnsibleService {
      * @param ip
      * @return
      */
-    public void execHostCheckShell(String ip, int nodeCount) {
-        log.info("execHostCheckShell ip:{},nodeCount:{}", ip, nodeCount);
-        String command = String.format("ansible %s -m script -a \"%s -C %d\"", ip, constant.getHostCheckShell(), nodeCount);
+    public void execHostCheckShell(HostDTO hostDTO, int nodeCount) {
+        log.info("execHostCheckShell ip:{},nodeCount:{}", hostDTO.getIp(), nodeCount);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m script -a \"%s -C %d\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), constant.getHostCheckShell(), nodeCount);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
             if (result.getExecuteOut().contains(FREE_MEMORY_FLAG)) {
@@ -159,9 +161,9 @@ public class AnsibleService {
     /**
      * @param ip
      */
-    public void execDockerCheckShell(String ip) {
-        log.info("execDockerCheckShell ip:{}", ip);
-        String command = String.format("ansible %s -m script -a \"%s\"", ip, constant.getDockerCheckShell());
+    public void execDockerCheckShell(HostDTO hostDTO) {
+        log.info("execDockerCheckShell ip:{}", hostDTO.getIp());
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m script -a \"%s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), constant.getDockerCheckShell());
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
             throw new NodeMgrException(ConstantCode.EXEC_DOCKER_CHECK_SCRIPT_ERROR.attach(result.getExecuteOut()));
@@ -176,14 +178,14 @@ public class AnsibleService {
      * param ip        Required.
      * param chainRoot chain root on host, default is /opt/fisco/{chain_name}.
      */
-    public void execHostInit(String ip, String chainRoot) {
-        this.execHostInitScript(ip);
-        this.execCreateDir(ip, chainRoot);
+    public void execHostInit(HostDTO hostDTO, String chainRoot) {
+        this.execHostInitScript(hostDTO);
+        this.execCreateDir(hostDTO, chainRoot);
     }
 
-    public void execHostInitScript(String ip) {
-        log.info("execHostInitScript ip:{}", ip);
-        String command = String.format("ansible %s -m script -a \"%s\"", ip, constant.getHostInitShell());
+    public void execHostInitScript(HostDTO hostDTO) {
+        log.info("execHostInitScript ip:{}", hostDTO.getIp());
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m script -a \"%s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), constant.getHostInitShell());
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         if (result.failed()) {
             throw new NodeMgrException(ConstantCode.ANSIBLE_PING_NOT_REACH.attach(result.getExecuteOut()));
@@ -196,11 +198,11 @@ public class AnsibleService {
      * @param dir absolute path
      * @return
      */
-    public ExecuteResult execCreateDir(String ip, String dir) {
-        log.info("execCreateDir ip:{},dir:{}", ip, dir);
+    public ExecuteResult execCreateDir(HostDTO hostDTO, String dir) {
+        log.info("execCreateDir ip:{},dir:{}", hostDTO.getIp(), dir);
         // not use sudo to make dir, check access
         String mkdirCommand = String.format("mkdir -p %s", dir);
-        String command = String.format("ansible %s -m command -a \"%s\"", ip, mkdirCommand);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m command -a \"%s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), mkdirCommand);
         return JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
     }
 
@@ -212,11 +214,11 @@ public class AnsibleService {
      * @param imageFullName
      * @return
      */
-    public boolean checkImageExists(String ip, String imageFullName) {
-        log.info("checkImageExists ip:{},imageFullName:{}", ip, imageFullName);
+    public boolean checkImageExists(HostDTO hostDTO, String imageFullName) {
+        log.info("checkImageExists ip:{},imageFullName:{}", hostDTO.getIp(), imageFullName);
 
-        String command = String.format("ansible %s -m script -a \"%s -i %s\"", ip,
-            constant.getAnsibleImageCheckShell(), imageFullName);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m script -a \"%s -i %s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(),
+                constant.getAnsibleImageCheckShell(), imageFullName);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecDockerCheckTimeout());
         if (result.failed()) {
             // NOT FOUND IMAGE
@@ -232,11 +234,11 @@ public class AnsibleService {
         return true;
     }
 
-    public boolean checkContainerExists(String ip, String containerName) {
-        log.info("checkContainerExists ip:{},containerName:{}", ip, containerName);
+    public boolean checkContainerExists(HostDTO hostDTO, String containerName) {
+        log.info("checkContainerExists ip:{},containerName:{}", hostDTO.getIp(), containerName);
 
         // docker ps | grep "${containerName}"
-        String command = String.format("ansible %s -m script -a \"%s -c %s\"", ip, constant.getAnsibleContainerCheckShell(), containerName);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m script -a \"%s -c %s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), constant.getAnsibleContainerCheckShell(), containerName);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecDockerCheckTimeout());
         if (result.failed()) {
             // NOT FOUND CONTAINER
@@ -259,16 +261,16 @@ public class AnsibleService {
      * @param webaseVersion
      * @return
      */
-    public void execPullDockerCdnShell(String ip, String outputDir, String imageTag, String webaseVersion) {
-        log.info("execPullDockerCdnShell ip:{},outputDir:{},imageTag:{},webaseVersion:{}", ip, outputDir, imageTag, webaseVersion);
+    public void execPullDockerCdnShell(HostDTO hostDTO, String outputDir, String imageTag, String webaseVersion) {
+        log.info("execPullDockerCdnShell ip:{},outputDir:{},imageTag:{},webaseVersion:{}", hostDTO.getIp(), outputDir, imageTag, webaseVersion);
         Instant startTime = Instant.now();
         log.info("execPullDockerCdnShell startTime:{}", startTime.toEpochMilli());
-        boolean imageExist = this.checkImageExists(ip, imageTag);
+        boolean imageExist = this.checkImageExists(hostDTO, imageTag);
         if (imageExist) {
             log.info("image of {} already exist, jump over pull", imageTag);
             return;
         }
-        String command = String.format("ansible %s -m script -a \"%s -d %s -v %s\"", ip, constant.getDockerPullCdnShell(), outputDir, webaseVersion);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m script -a \"%s -d %s -v %s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), constant.getDockerPullCdnShell(), outputDir, webaseVersion);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         log.info("execPullDockerCdnShell usedTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         if (result.failed()) {
@@ -277,21 +279,28 @@ public class AnsibleService {
     }
 
 
-    public ExecuteResult execDocker(String ip, String dockerCommand) {
-        log.info("execDocker ip:{},dockerCommad:{}", ip, dockerCommand);
-        String command = String.format("ansible %s -m command -a \"%s\"", ip, dockerCommand);
+    public ExecuteResult execDocker(HostDTO hostDTO, String dockerCommand) {
+        log.info("execDocker ip:{},dockerCommad:{}", hostDTO.getIp(), dockerCommand);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m command -a \"%s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), dockerCommand);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getDockerRestartPeriodTime());
+        return result;
+    }
+
+    public ExecuteResult execDockerPull(HostDTO hostDTO, String dockerCommand) {
+        log.info("execDocker ip:{},dockerCommad:{}", hostDTO.getIp(), dockerCommand);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m command -a \"%s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), dockerCommand);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecHostInitTimeout());
         return result;
     }
 
     /**
      * mv dir on remote
      */
-    public void mvDirOnRemote(String ip, String src, String dst){
-        if (StringUtils.isNoneBlank(ip, src, dst)) {
+    public void mvDirOnRemote(HostDTO hostDTO, String src, String dst){
+        if (StringUtils.isNoneBlank(hostDTO.getIp(), src, dst)) {
             String rmCommand = String.format("mv -fv %s %s", src, dst);
-            log.info("Remove config on remote host:[{}], command:[{}].", ip, rmCommand);
-            this.exec(ip, rmCommand);
+            log.info("Remove config on remote host:[{}], command:[{}].", hostDTO.getIp(), rmCommand);
+            this.exec(hostDTO, rmCommand);
         }
     }
 
@@ -301,8 +310,8 @@ public class AnsibleService {
      * @param ports
      * @return
      */
-    public ExecuteResult checkPortArrayInUse(String ip, int ... ports) {
-        log.info("checkPortArrayInUse ip:{},ports:{}", ip, ports);
+    public ExecuteResult checkPortArrayInUse(HostDTO hostDTO, int ... ports) {
+        log.info("checkPortArrayInUse ip:{},ports:{}", hostDTO.getIp(), ports);
         if (ArrayUtils.isEmpty(ports)){
             return new ExecuteResult(0, "ports input is empty");
         }
@@ -314,7 +323,7 @@ public class AnsibleService {
             }
             portArray.append(",").append(port);
         }
-        String command = String.format("ansible %s -m script -a \"%s -p %s\"", ip, constant.getHostCheckPortShell(), portArray);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m script -a \"%s -p %s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), constant.getHostCheckPortShell(), portArray);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         return result;
     }
@@ -326,13 +335,13 @@ public class AnsibleService {
      * @param portArray
      * @return Pair of <true, port> true: not in use, false: in use
      */
-    public Pair<Boolean, Integer> checkPorts(String ip, int ... portArray) {
+    public Pair<Boolean, Integer> checkPorts(HostDTO hostDTO, int ... portArray) {
         if (ArrayUtils.isEmpty(portArray)){
             return Pair.of(true,0);
         }
 
         for (int port : portArray) {
-            boolean notInUse = checkPortInUse(ip, port);
+            boolean notInUse = checkPortInUse(hostDTO, port);
             // if false, in use
             if (!notInUse){
                 return Pair.of(false, port);
@@ -347,36 +356,36 @@ public class AnsibleService {
      * @param port
      * @return Pair of <true, port> true: not in use, false: in use
      */
-    private boolean checkPortInUse(String ip, int port) {
-        log.info("checkPortInUse ip:{},port:{}", ip, port);
-        String command = String.format("ansible %s -m script -a \"%s -p %s\"", ip, constant.getHostCheckPortShell(), port);
+    private boolean checkPortInUse(HostDTO hostDTO, int port) {
+        log.info("checkPortInUse ip:{},port:{}", hostDTO.getIp(), port);
+        String command = String.format("ansible all -i %s, -u %s -e ansible_ssh_port=%d --connection=ssh -m script -a \"%s -p %s\"", hostDTO.getIp(), hostDTO.getUser(), hostDTO.getPort(), constant.getHostCheckPortShell(), port);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
         return result.success();
     }
 
-    /**
-     * exec on 127.0.0.1
-     * check 127.0.0.1 if same with other host ip
-     * @param ipList ip to check same with local ip 127.0.0.1
-     * @return true-success, false-failed
-     */
-    public boolean checkLocalIp(List<String> ipList) {
-        log.info("checkLoopIp ipArray:{}", ipList);
-        if (ipList == null || ipList.isEmpty()){
-            return true;
-        }
-        StringBuilder ipStrArray = new StringBuilder();
-        for (String ip : ipList) {
-            if (ipStrArray.length() == 0) {
-                ipStrArray.append(ip);
-                continue;
-            }
-            ipStrArray.append(",").append(ip);
-        }
-        // ansible 127.0.0.1 -m script hostCheckIpShell
-        String command = String.format("ansible %s -m script -a \"%s -p %s\"", IPUtil.LOCAL_IP_127,
-            constant.getHostCheckIpShell(), ipStrArray);
-        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
-        return result.success();
-    }
+//    /**
+//     * exec on 127.0.0.1
+//     * check 127.0.0.1 if same with other host ip
+//     * @param ipList ip to check same with local ip 127.0.0.1
+//     * @return true-success, false-failed
+//     */
+//    public boolean checkLocalIp(List<String> ipList) {
+//        log.info("checkLoopIp ipArray:{}", ipList);
+//        if (ipList == null || ipList.isEmpty()){
+//            return true;
+//        }
+//        StringBuilder ipStrArray = new StringBuilder();
+//        for (String ip : ipList) {
+//            if (ipStrArray.length() == 0) {
+//                ipStrArray.append(ip);
+//                continue;
+//            }
+//            ipStrArray.append(",").append(ip);
+//        }
+//        // ansible 127.0.0.1 -m script hostCheckIpShell
+//        String command = String.format("ansible %s -m script -a \"%s -p %s\"", IPUtil.LOCAL_IP_127,
+//            constant.getHostCheckIpShell(), ipStrArray);
+//        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constant.getExecShellTimeout());
+//        return result.success();
+//    }
 }
