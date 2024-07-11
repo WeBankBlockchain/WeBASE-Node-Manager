@@ -91,7 +91,7 @@ List scaffold = [
 
 List swagger = [
     'io.springfox:springfox-swagger2:2.8.0',
-    'io.springfox:springfox-swagger-ui:2.8.0'
+    'io.springfox:springfox-swagger-ui:2.10.0'
 ]
 
 List commons = [
@@ -115,7 +115,7 @@ dependencies {
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
     compile 'org.yaml:snakeyaml:2.0'
     compile 'org.apache.commons:commons-text:1.10.0'
-    compile 'org.springframework.security:spring-security-core:5.7.10'
+    compile 'org.springframework.security:spring-security-core:5.7.12'
 
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
