@@ -95,7 +95,6 @@ List swagger = [
 ]
 
 List commons = [
-    "org.apache.commons:commons-lang3:3.8.1",
     'org.apache.commons:commons-collections4:4.4',
     'org.apache.commons:commons-configuration2:2.8.0',
     'org.apache.commons:commons-compress:1.21',
