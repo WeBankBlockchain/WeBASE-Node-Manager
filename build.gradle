@@ -37,7 +37,7 @@ repositories {
     mavenLocal()
 }
 
-def springboot_version="2.7.10"
+def springboot_version="2.7.18"
 List springboot = [
      "org.springframework.boot:spring-boot-starter-web:$springboot_version",
      "org.springframework.boot:spring-boot-starter-security:$springboot_version",
@@ -98,12 +98,14 @@ List commons = [
     "org.apache.commons:commons-lang3:3.8.1",
     'org.apache.commons:commons-collections4:4.4',
     'org.apache.commons:commons-configuration2:2.8.0',
-    'org.apache.commons:commons-compress:1.21'
+    'org.apache.commons:commons-compress:1.21',
+    'org.apache.commons:commons-text:1.10.0'
+
 ]
 
 dependencies {
     compile springboot,jaxb,jackson,log4j,scaffold,swagger,commons
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0') {
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.7.0') {
         exclude group: "org.slf4j"
     }
     runtime "mysql:mysql-connector-java:8.0.28"
@@ -114,8 +116,8 @@ dependencies {
     compile 'com.google.guava:guava:30.0-jre'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
     compile 'org.yaml:snakeyaml:2.0'
-    compile 'org.apache.commons:commons-text:1.10.0'
     compile 'org.springframework.security:spring-security-core:5.7.12'
+    compile "org.springframework:spring-web:5.3.34"
 
     compile 'com.jcraft:jsch:0.1.55'
     compile 'org.ini4j:ini4j:0.5.4'
