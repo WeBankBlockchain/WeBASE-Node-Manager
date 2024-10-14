@@ -17,6 +17,7 @@ package node.mgr.test.security;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import node.mgr.test.base.TestBase;
 import org.fisco.bcos.sdk.v3.utils.Hex;
 import org.junit.Test;
@@ -31,12 +32,33 @@ public class PasswordEncoderTest extends TestBase {
     private PasswordEncoder bcPasswordEncoder;
 
     @Test
-    public void test() {
+    public void testSha() {
         String rawPwd = "Abcd1234";
         String shaPwd2 = getSHA256Str(rawPwd); // sha256
+
         String dbPwd = "$2a$10$F/aEB1iEx/FvVh0fMn6L/uyy.PkpTy8Kd9EdbqLGo7Bw7eCivpq.m";
         boolean res2 = bcPasswordEncoder.matches(shaPwd2, dbPwd);
         System.out.println("res2-" + res2);
+
+        System.out.println("shaPwd2: " + shaPwd2);
+        String encryptedPwd = bcPasswordEncoder.encode(shaPwd2);
+        System.out.println("encryptedPwd: " + encryptedPwd);
+        boolean matches = bcPasswordEncoder.matches(shaPwd2, encryptedPwd);
+        System.out.println("matches: " + matches);
+
+    }
+
+    @Test
+    public void testBase64() {
+        String rawPwd = "Abcd1234";
+        String base64Pwd = new String(Base64.getEncoder().encode(rawPwd.getBytes()));
+
+        System.out.println("base64Pwd: " + base64Pwd);
+        String encryptedPwd = bcPasswordEncoder.encode(base64Pwd);
+        System.out.println("encryptedPwd: " + encryptedPwd);
+        boolean matches = bcPasswordEncoder.matches(base64Pwd, encryptedPwd);
+        System.out.println("matches: " + matches);
+
     }
 
     public static String getSHA256Str(String str){
